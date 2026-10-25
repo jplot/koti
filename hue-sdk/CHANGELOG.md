@@ -22,5 +22,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Real-time events through `Hue::Sdk.events`, with automatic reconnection and resumption from
   the last event received.
 - Entertainment streaming over DTLS 1.2 with a pre-shared key (`require 'hue/sdk/entertainment'`,
-  with the `ffi` gem), through the libssl Ruby's OpenSSL extension is linked with.
+  with the `ffi` gem), through the libssl Ruby's OpenSSL extension is linked with; the lights of
+  the area are put back as they were when streaming ends.
 - RBS signatures for the whole public API.

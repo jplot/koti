@@ -19,7 +19,8 @@ module Hue
       # Streaming for the instances of {Models::EntertainmentConfiguration}.
       module Streaming
         # Starts the configuration, yields a session to send frames, then stops
-        # the configuration, even when the block raises.
+        # the configuration and puts its lights back as they were (on or off,
+        # brightness, color), even when the block raises.
         #
         # @example Turn the first channel red for two seconds
         #   Hue::Sdk.EntertainmentConfiguration(id).stream do |session|
@@ -37,13 +38,53 @@ module Hue
         def stream
           config = Sdk.config
           key = config.client_key or raise AuthenticationError, 'client_key is not configured: pairing returns it'
+          lights = snapshot
           update(action: 'start')
           started = true
           socket = DtlsSocket.open(host: config.host.to_s, identity: config.application_key.to_s, psk: [key].pack('H*'))
           yield Session.new(socket, id)
         ensure
+          finish(socket, lights) if started
+        end
+
+        private
+
+        # The bridge does not restore the lights when streaming stops: on
+        # 2026-10-25 a lamp that was off stayed on, full red, the last frame.
+        #
+        # @return [Hash{String=>Hash}] per light id, the body that puts it back
+        # @api private
+        def snapshot
+          ids = self['light_services'].map { it['rid'] }
+          Sdk.Light.list.select { ids.include?(it.id) }.to_h { [it.id, restoration(it.data)] }
+        end
+
+        # @param light [Hash{String=>Object}] a light resource
+        # @return [Hash{Symbol=>Hash}] update body restoring it
+        # @api private
+        def restoration(light)
+          return { on: { on: false } } unless light.dig('on', 'on')
+
+          state = { on: { on: true }, dimming: light['dimming']&.slice('brightness') }
+          if light.dig('color_temperature', 'mirek_valid')
+            state[:color_temperature] = light['color_temperature'].slice('mirek')
+          else
+            state[:color] = light['color']&.slice('xy')
+          end
+          state.compact
+        end
+
+        # Restores the lights after the stop: before it, the bridge would still
+        # drive them from the stream.
+        #
+        # @param socket [DtlsSocket, nil]
+        # @param lights [Hash{String=>Hash}] from {#snapshot}
+        # @return [void]
+        # @api private
+        def finish(socket, lights)
           socket&.close
-          update(action: 'stop') if started
+          update(action: 'stop')
+          lights.each { |light, state| Sdk.Light(light).update(**state) }
         end
       end
     end

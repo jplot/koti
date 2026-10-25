@@ -68,6 +68,10 @@ module Miele
 
       def dop2?: () -> bool
 
+      def programs: () -> Hash[Integer, Symbol]
+
+      def program_table: () -> Symbol?
+
       def oven_programs: () -> Hash[Integer, Symbol]
 
       def device_class: () -> Integer?

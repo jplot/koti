@@ -70,9 +70,10 @@ module Miele
       def program_id = raw['ProgramID']
 
       # @return [Symbol] name from {Catalog::DOP2_OVEN_PROGRAMS} on a DOP2 oven, from the
-      #   {Catalog::DOP1_OVEN_TABLES} table of a Dop1 oven, or +:unknown+
+      #   {Catalog::DOP1_OVEN_TABLES} table of a Dop1 oven, from {Catalog::PROGRAMS} on other
+      #   appliances the Miele app names programs of, or +:unknown+
       # @api public
-      def program = oven_programs.fetch(program_id, :unknown)
+      def program = programs.fetch(program_id, :unknown)
 
       # @return [Symbol] phase from the table of the device type's family, or +:unknown+
       # @api public
@@ -141,6 +142,21 @@ module Miele
 
       # @return [Boolean]
       def dop2? = Catalog::DOP2_PROTOCOL_VERSIONS.include?(protocol_version)
+
+      # @return [Hash{Integer=>Symbol}] program names of this appliance, empty when the Miele app names none
+      def programs
+        table = program_table
+        table ? Catalog::PROGRAMS.fetch(table) : oven_programs
+      end
+
+      # @return [Symbol, nil] {Catalog::PROGRAMS} table of this appliance
+      def program_table
+        return Catalog::PROGRAM_TABLES[device_type] unless Catalog::DISHWASHER_TYPES.include?(device_type)
+
+        if dop2? then :dishwasher_dop2
+        elsif protocol_version == Catalog::DOP1_PROTOCOL_VERSION then :dishwasher_dop1
+        end
+      end
 
       # @return [Hash{Integer=>Symbol}] program names of this oven, empty for other appliances
       def oven_programs

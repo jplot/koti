@@ -26,6 +26,8 @@ module Miele
 
         def open: () -> void
 
+        def enroll: (Appliance appliance, String callback_host, Integer port) -> void
+
         def close: () -> void
 
         def withdraw: (Appliance appliance) -> void

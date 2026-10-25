@@ -14,7 +14,10 @@ module Miele
         # @param hosts [Array<String>] addresses of the appliances to enroll
         # @param mdns_address [String] mDNS group to announce this host on
         # @param mdns_port [Integer]
+        # @raise [ArgumentError] without any host
         def initialize(hosts:, mdns_address: '224.0.0.251', mdns_port: 5353)
+          raise ArgumentError, 'no appliance to listen to' if hosts.empty?
+
           @appliances = hosts.map { Sdk.appliance(it) }
           @mdns_address = mdns_address
           @mdns_port = mdns_port
@@ -56,9 +59,16 @@ module Miele
           advertiser = @advertiser = Advertiser.new(fab: @fab, host:, port: server.port, address: @mdns_address,
                                                     mdns_port: @mdns_port)
           advertiser.start
-          @appliances.each do |appliance|
-            Enrollment.enroll(appliance, our_fab: @fab, callback_host: advertiser.hostname, port: server.port)
-          end
+          @appliances.each { enroll(it, advertiser.hostname, server.port) }
+        end
+
+        # One appliance out of reach must not deprive the others of their events.
+        #
+        # @return [void]
+        def enroll(appliance, callback_host, port)
+          Enrollment.enroll(appliance, our_fab: @fab, callback_host:, port:)
+        rescue Error => e
+          warn "miele-sdk: no events from #{appliance.host}: #{e.message}"
         end
 
         # @return [void]

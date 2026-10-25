@@ -77,6 +77,17 @@ RSpec.describe Miele::Sdk::Events::Listener do
     pusher.join
   end
 
+  it 'refuses an empty list of appliances' do
+    expect { described_class.new(hosts: []) }.to raise_error(ArgumentError, /no appliance/)
+  end
+
+  it 'keeps streaming when an appliance cannot be enrolled', :aggregate_failures do
+    pusher = push_state
+    both = described_class.new(hosts: ['127.0.0.1', '::1'], mdns_address: '127.0.0.1', mdns_port: 0)
+    expect { expect(both.each.first.fab).to eq(fab) }.to output(/no events from ::1/).to_stderr
+    pusher.join
+  end
+
   it 'returns a lazy enumerator without a block' do
     expect([listener.each, Miele::Sdk.events(hosts: ['127.0.0.1'])]).to all(be_a(Enumerator::Lazy))
   end

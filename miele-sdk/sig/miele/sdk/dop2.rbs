@@ -33,6 +33,8 @@ module Miele
 
         @offset: Integer
 
+        @end: Integer
+
         def initialize: (String bytes) -> void
 
         def leaf: () -> Leaf

@@ -47,12 +47,16 @@ module Miele
         def initialize(bytes)
           @bytes = bytes.b
           @offset = 0
+          @end = @bytes.bytesize
         end
 
+        # Bodies come padded with spaces: the leaf ends at its declared length.
+        #
         # @return [Leaf]
         # @raise [DecodeError]
         def leaf
-          _length, unit, attribute, idx1, idx2, count = Array.new(6) { read('n', 2) }
+          @end = [2 + read('n', 2), @end].min
+          unit, attribute, idx1, idx2, count = Array.new(5) { read('n', 2) }
           Leaf.new(unit:, attribute:, idx1:, idx2:, fields: fields(count))
         end
 
@@ -97,7 +101,7 @@ module Miele
         # @return [Object]
         # @raise [DecodeError] if the leaf ends before the value
         def read(directive, size)
-          raise DecodeError, "DOP2 leaf truncated at byte #{@offset}" if @offset + size > @bytes.bytesize
+          raise DecodeError, "DOP2 leaf truncated at byte #{@offset}" if @offset + size > @end
 
           @bytes.unpack1(directive, offset: @offset).tap { @offset += size }
         end

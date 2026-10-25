@@ -37,6 +37,12 @@ RSpec.describe Miele::Sdk::Dop2 do
       .to raise_error(described_class::DecodeError, /truncated/)
   end
 
+  it 'stops at the declared length instead of reading the padding' do
+    bytes = leaf_bytes(tlv(1, 0x08, [70_000].pack('N')))
+    cut = [bytes.unpack1('n') - 2].pack('n') + bytes.byteslice(2..-3)
+    expect { described_class.decode("#{cut}    ") }.to raise_error(described_class::DecodeError, /truncated/)
+  end
+
   it 'encodes the scalar fields it decodes' do
     leaf = described_class::Leaf.new(unit: 2, attribute: 1586, idx1: 0, idx2: 0,
                                      fields: { 1 => field[:e8, 4], 2 => field[:i32, -7], 3 => field[:bool, false] })

@@ -219,7 +219,8 @@ anything is sent.
 - Program names, in the default English of the Miele app 4.19.0, kept in
   `lib/miele/sdk/catalog/programs.tsv`: its DOP2 oven menus, its seven Dop1 oven tables, its
   dishwasher tables (DOP2 and Dop1), dish warmer labels, the drinks of a coffee system's standard
-  profile and its nine washing machine and tumble dryer tables, each with the rule picking it.
+  profile and its nine washing machine and tumble dryer tables, each with the rule picking it. Its
+  "Poit of herbal tea" reads `:pot_of_herbal_tea`.
 - The local protocol (signing, DOP2 layout, Dop1 objects, power sequence, SuperVision):
   [ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan), building on the work of
   [MieleRESTServer](https://github.com/akappner/MieleRESTServer).

@@ -78,12 +78,20 @@ class FakeBridge
     socket.accept
     while (request = read_request(socket))
       @mutex.synchronize { @requests << request }
-      write_response(socket, *@handler.call(request))
+      respond(socket, request)
     end
   rescue IOError, SystemCallError, OpenSSL::SSL::SSLError
     nil
   ensure
     socket.close unless socket.closed?
+  end
+
+  # A handler answering [status, headers, body, :cut] announces one byte more than it sends, then
+  # drops TCP without TLS close_notify.
+  def respond(socket, request)
+    status, headers, body, cut = @handler.call(request)
+    write_response(socket, status, headers, body, extra: cut ? 1 : 0)
+    socket.io.close if cut
   end
 
   def read_request(socket)
@@ -98,8 +106,8 @@ class FakeBridge
     Request.new(verb:, path:, headers:, body:)
   end
 
-  def write_response(socket, status, headers, body)
-    lines = ["HTTP/1.1 #{status} Fake", "Content-Length: #{body.to_s.bytesize}"]
+  def write_response(socket, status, headers, body, extra: 0)
+    lines = ["HTTP/1.1 #{status} Fake", "Content-Length: #{body.to_s.bytesize + extra}"]
     lines.concat(headers.map { |name, value| "#{name}: #{value}" })
     socket.write("#{lines.join("\r\n")}\r\n\r\n#{body}")
   end

@@ -50,6 +50,14 @@ RSpec.describe Hue::Sdk::Connection do
     expect { described_class.request(:get, '/') }.to raise_error(Hue::Sdk::ConnectionError, /127\.0\.0\.1:/)
   end
 
+  context 'when the bridge drops the connection without closing TLS' do
+    let(:bridge) { FakeBridge.start { [200, {}, 'partial', :cut] } }
+
+    it 'raises ConnectionError, not TLSError' do
+      expect { described_class.request(:get, '/') }.to raise_error(Hue::Sdk::ConnectionError, /127\.0\.0\.1:/)
+    end
+  end
+
   it 'reopens a keep-alive connection after the bridge was unreachable', :aggregate_failures do
     described_class.request(:get, '/')
     bridge.down!

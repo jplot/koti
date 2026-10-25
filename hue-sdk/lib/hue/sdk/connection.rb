@@ -54,14 +54,20 @@ module Hue
         end
       end
 
+      # OpenSSL also raises SSLError when the bridge drops a connection without
+      # close_notify, as it does to an event stream idle for 5 minutes: only a
+      # failed verification means the peer is not the configured bridge.
+      #
       # @yieldreturn [Object] the result of the exchange with the bridge
       # @return [Object] what the block returns
       # @raise [TLSError] if the bridge certificate is not trusted
-      # @raise [ConnectionError] if the bridge cannot be reached
+      # @raise [ConnectionError] if the bridge cannot be reached or drops the connection
       # @api private
       def transport
         yield
       rescue OpenSSL::SSL::SSLError => e
+        raise ConnectionError, "#{endpoint}: #{e.message}" unless e.message.include?('certificate verify failed')
+
         raise TLSError, "#{endpoint}: bridge #{Sdk.config.bridge_id} not verified (#{e.message})"
       rescue *NETWORK_ERRORS => e
         raise ConnectionError, "#{endpoint}: #{e.message}"

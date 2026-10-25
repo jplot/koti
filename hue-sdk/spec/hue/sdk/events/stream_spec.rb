@@ -67,6 +67,15 @@ RSpec.describe Hue::Sdk::Events::Stream do
     expect(bridge.requests).to be_empty
   end
 
+  context 'when the bridge drops the stream without closing TLS' do
+    def answer(_request) = [200, { 'Content-Type' => 'text/event-stream' }, message, :cut]
+
+    it 'reconnects', :aggregate_failures do
+      expect(take_events(3).map(&:resource_id)).to eq(%w[l1 l2 l1])
+      expect(delays).to eq([1])
+    end
+  end
+
   context 'when the bridge rejects the application key' do
     def answer(_request) = [403, { 'Content-Type' => 'application/json' }, '{"errors":[],"data":[]}']
 

@@ -69,11 +69,13 @@ module Miele
       # @api public
       def program_id = raw['ProgramID']
 
-      # @return [Symbol] name from {Catalog::DOP2_OVEN_PROGRAMS} on a DOP2 oven, from the
-      #   {Catalog::DOP1_OVEN_TABLES} table of a Dop1 oven, from {Catalog::PROGRAMS} on other
-      #   appliances the Miele app names programs of, or +:unknown+
+      # @return [Symbol] name from the {Catalog::PROGRAMS} table the Miele app reads for this
+      #   appliance, or +:unknown+
       # @api public
-      def program = programs.fetch(program_id, :unknown)
+      def program
+        table = program_table or return :unknown
+        Catalog::PROGRAMS.fetch(table).fetch(program_id, :unknown)
+      end
 
       # @return [Symbol] phase from the table of the device type's family, or +:unknown+
       # @api public
@@ -143,20 +145,38 @@ module Miele
       # @return [Boolean]
       def dop2? = Catalog::DOP2_PROTOCOL_VERSIONS.include?(protocol_version)
 
-      # @return [Hash{Integer=>Symbol}] program names of this appliance, empty when the Miele app names none
-      def programs
-        table = program_table
-        table ? Catalog::PROGRAMS.fetch(table) : oven_programs
+      # @return [Boolean]
+      def dop1? = protocol_version == Catalog::DOP1_PROTOCOL_VERSION
+
+      # @return [Symbol, nil] {Catalog::PROGRAMS} table of this appliance, nil when the Miele app names none
+      def program_table
+        return Catalog::PROGRAM_TABLES[device_type] if Catalog::PROGRAM_TABLES.key?(device_type)
+        return unless protocol_version
+
+        kind = Catalog::LAUNDRY_TYPES[device_type]
+        return laundry_table(kind) if kind
+        return oven_table if Catalog::OVEN_TYPES.include?(device_type)
+
+        dishwasher_table if Catalog::DISHWASHER_TYPES.include?(device_type)
       end
 
-      # @return [Symbol, nil] {Catalog::PROGRAMS} table of this appliance
-      def program_table
-        kind = Catalog::LAUNDRY_TYPES[device_type]
-        return kind.end_with?('tumble_dryer') ? dryer_table(kind) : washer_table(kind) if kind && protocol_version
-        return Catalog::PROGRAM_TABLES[device_type] unless Catalog::DISHWASHER_TYPES.include?(device_type)
+      # @param kind [Symbol] one of {Catalog::LAUNDRY_TYPES}' values
+      # @return [Symbol]
+      def laundry_table(kind) = kind.end_with?('tumble_dryer') ? dryer_table(kind) : washer_table(kind)
 
+      # @return [Symbol, nil]
+      def oven_table
+        return :oven_dop2 if dop2?
+        return unless dop1?
+
+        tables = Catalog::DOP1_OVEN_TABLES[device_type] or return
+        tables[device_class] || tables[nil]
+      end
+
+      # @return [Symbol, nil]
+      def dishwasher_table
         if dop2? then :dishwasher_dop2
-        elsif protocol_version == Catalog::DOP1_PROTOCOL_VERSION then :dishwasher_dop1
+        elsif dop1? then :dishwasher_dop1
         end
       end
 
@@ -183,16 +203,6 @@ module Miele
 
       # @return [Boolean] whether this is a W1, W3 or W5 model on DOP2
       def w2_discovery? = dop2? && tech_type.to_s.match?(/\AW\s*[135]/i)
-
-      # @return [Hash{Integer=>Symbol}] program names of this oven, empty for other appliances
-      def oven_programs
-        return Catalog::DOP2_OVEN_DEVICE_TYPES.include?(device_type) ? Catalog::DOP2_OVEN_PROGRAMS : {} if dop2?
-        return {} unless protocol_version == Catalog::DOP1_PROTOCOL_VERSION
-
-        tables = Catalog::DOP1_OVEN_TABLES[device_type] or return {}
-        table = tables[device_class] || tables[nil] or return {}
-        Catalog::DOP1_OVEN_PROGRAMS.fetch(table)
-      end
 
       # @return [Integer, nil] device class the Miele app reads from the +TechType+
       def device_class

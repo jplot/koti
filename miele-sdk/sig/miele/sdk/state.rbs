@@ -68,17 +68,21 @@ module Miele
 
       def dop2?: () -> bool
 
-      def programs: () -> Hash[Integer, Symbol]
+      def dop1?: () -> bool
 
       def program_table: () -> Symbol?
+
+      def laundry_table: (Symbol kind) -> Symbol
+
+      def oven_table: () -> Symbol?
+
+      def dishwasher_table: () -> Symbol?
 
       def dryer_table: (Symbol kind) -> Symbol
 
       def washer_table: (Symbol kind) -> Symbol
 
       def w2_discovery?: () -> bool
-
-      def oven_programs: () -> Hash[Integer, Symbol]
 
       def device_class: () -> Integer?
     end

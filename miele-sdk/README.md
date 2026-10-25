@@ -185,8 +185,9 @@ sit on a network of their own (an IoT VLAN), allow TCP from that network to this
 several network interfaces.
 
 Enrollment and withdrawal have run against real appliances, leaving their subscriptions as they
-were. Pushes from a real hood have been received, verified and decoded; no oven or hob push has
-been decoded yet.
+were. Pushes from a real hood and a real hob, which has no `SuperVision`, have been received,
+verified and decoded. A real oven accepted the same subscriptions and never pushed, not even while
+heating; follow such an appliance by reading its `state` at intervals.
 
 ## Errors
 

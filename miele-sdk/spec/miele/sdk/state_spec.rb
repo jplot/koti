@@ -74,6 +74,10 @@ RSpec.describe Miele::Sdk::State do
     expect([24_004, 24_036].map { name.call(:coffee_system, it, 4) }).to eq(%i[cappuccino unknown])
   end
 
+  it 'names the pot of herbal tea without the typo of the Miele app' do
+    expect(described_class.new({ 'ProgramID' => 24_025 }, :coffee_system).program).to eq(:pot_of_herbal_tea)
+  end
+
   context 'with laundry appliances' do
     def name(type, id, version, tech_type = 'WWG660')
       described_class.new({ 'ProgramID' => id }, type, protocol_version: version, tech_type:).program

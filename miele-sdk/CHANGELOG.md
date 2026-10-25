@@ -25,6 +25,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - DOP2 leaves: decoding of every field type, encoding of scalar fields, reading and writing.
 - Hood commands over Dop1: fan level, fan run-on time, main light and settings.
 - Pushed events through `Miele::Sdk.events`: mDNS announcement as a household peer, a signed
-  HTTP endpoint, enrollment of each appliance and withdrawal when the block ends. No push from a
-  real appliance has been received yet.
+  HTTP endpoint, enrollment of each appliance and withdrawal when the block ends. Pushes from a
+  real hood have been received; none from an oven or a hob yet.
 - RBS signatures for the whole public API.

@@ -77,10 +77,11 @@ oven = Miele::Sdk.appliance('192.0.2.20')
 oven.fab           # => "000123456789", the fabrication number
 oven.device_type   # => :oven_microwave
 oven.ident         # => {"DeviceType" => 13, "ProtocolVersion" => 4, "DeviceIdentLabel" => {…}, …}
+oven.protocol_version  # => 4: DOP2 (3 or 4), or Dop1 (2)
 
 state = oven.state
 state.status               # => :running
-state.program_type         # => :own_program
+state.program_type         # => :normal_operation, numbered by the protocol version
 state.program_phase        # => :heating_up_phase
 state.remaining_time       # => 5400, in seconds
 state.temperatures         # => [180.5, nil, nil], in °C, nil where nothing is measured
@@ -210,7 +211,8 @@ anything is sent.
 - Device types, statuses and program types: the Miele 3rd Party API documentation
   ([capabilities by device](https://developer.miele.com/docs/third-party-api/API_V1.1.x_capabilities_by_device.pdf)
   and its 2022 OpenAPI description). Statuses 144, 145 and 147, and 148 on hoods, take the names
-  the Miele app 4.19.0 gives them.
+  the Miele app 4.19.0 gives them; the app also gives the program types of DOP2 appliances, the
+  last two of Dop1 ones, and the phases of hoods. The other phases come from Home Assistant core.
 - The local protocol (signing, DOP2 layout, Dop1 objects, power sequence, SuperVision):
   [ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan), building on the work of
   [MieleRESTServer](https://github.com/akappner/MieleRESTServer).

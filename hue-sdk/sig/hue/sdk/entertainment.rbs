@@ -1,0 +1,23 @@
+module Hue
+  module Sdk
+    module Entertainment
+      interface _Configuration
+        def id: () -> String
+
+        def update: (**untyped attributes) -> self
+      end
+
+      module Streaming : _Configuration
+        def stream: () { (Session) -> void } -> void
+      end
+    end
+
+    module Models
+      class EntertainmentConfiguration < Base
+        class Instance < Base::Instance
+          include ::Hue::Sdk::Entertainment::Streaming
+        end
+      end
+    end
+  end
+end

@@ -8,7 +8,8 @@ network, without any cloud service.
 
 ## Requirements
 
-- Ruby 4.0 or later; no runtime dependency outside the standard library.
+- Ruby 4.0 or later; no runtime dependency outside the standard library, except the `ffi` gem
+  for Entertainment streaming.
 - A Hue bridge speaking CLIP v2: Hue Bridge (v2) or Hue Bridge Pro.
 
 ## Installation
@@ -186,6 +187,34 @@ The stream reconnects by itself when it breaks — the bridge closes an idle str
 5 minutes — waiting 1, 2, 4, 8, 16 then 30 seconds, and resumes from the last event received.
 A rejected application key raises `Hue::Sdk::AuthenticationError` instead of reconnecting.
 The block may call the bridge: the stream has a connection of its own.
+
+## Entertainment streaming
+
+Streaming drives the lights of an entertainment configuration (an entertainment area set up in
+the Hue app) at up to 50 frames per second, over DTLS 1.2 with a pre-shared key: the application
+key is the identity, the client key the secret.
+
+```ruby
+# Gemfile: gem 'ffi'
+require 'hue/sdk/entertainment'
+
+Hue::Sdk.configure { |config| config.client_key = ENV.fetch('HUE_CLIENT_KEY') }
+
+Hue::Sdk.EntertainmentConfiguration('5c3e…').stream do |session|
+  100.times do
+    session.write({ 0 => [1.0, 0.0, 0.0], 1 => [0.0, 0.0, 1.0] })   # red, green, blue per channel
+    sleep 0.02
+  end
+end
+```
+
+`stream` starts the configuration, yields a session, then closes the connection and stops the
+configuration, even when the block raises. A frame sets up to 20 channels, each value in
+0.0..1.0; `color_space: :xy` takes x, y and brightness instead of red, green and blue.
+
+Ruby's OpenSSL extension has no DTLS, so the SDK binds through `ffi` the libssl that extension
+is linked with, wherever it is installed. Set `HUE_SDK_LIBSSL` to the path of another libssl
+(OpenSSL 3 or 4) to use that one instead.
 
 ## Errors
 

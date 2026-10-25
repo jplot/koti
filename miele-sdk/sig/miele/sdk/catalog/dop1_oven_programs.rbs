@@ -1,0 +1,9 @@
+module Miele
+  module Sdk
+    module Catalog
+      DOP1_OVEN_PROGRAMS: Hash[Symbol, Hash[Integer, Symbol]]
+
+      DOP1_OVEN_TABLES: Hash[Symbol, Hash[Integer?, Symbol]]
+    end
+  end
+end

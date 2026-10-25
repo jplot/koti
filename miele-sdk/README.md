@@ -78,12 +78,13 @@ oven.fab           # => "000123456789", the fabrication number
 oven.device_type   # => :oven_microwave
 oven.ident         # => {"DeviceType" => 13, "ProtocolVersion" => 4, "DeviceIdentLabel" => {…}, …}
 oven.protocol_version  # => 4: DOP2 (3 or 4), or Dop1 (2)
+oven.tech_type     # => "H7164BP", the model
 
 state = oven.state
 state.status               # => :running
 state.program_type         # => :normal_operation, numbered by the protocol version
 state.program_id           # => 13
-state.program              # => :fan_plus, named on DOP2 ovens only
+state.program              # => :fan_plus, named on ovens only
 state.program_phase        # => :heating_up_phase
 state.remaining_time       # => 5400, in seconds
 state.temperatures         # => [180.5, nil, nil], in °C, nil where nothing is measured
@@ -216,7 +217,9 @@ anything is sent.
   the Miele app 4.19.0 gives them; the app also gives the program types of DOP2 appliances, the
   last two of Dop1 ones, and the phases of hoods. The other phases come from Home Assistant core.
 - Oven program names: the oven menus of the Miele app 4.19.0 and their default English labels,
-  2,244 programs kept in `lib/miele/sdk/catalog/oven_programs.tsv`.
+  2,244 programs kept in `lib/miele/sdk/catalog/oven_programs.tsv`; for Dop1 ovens, the app's
+  seven program tables and the rule picking one, 4,143 programs kept in
+  `lib/miele/sdk/catalog/dop1_oven_programs.tsv`.
 - The local protocol (signing, DOP2 layout, Dop1 objects, power sequence, SuperVision):
   [ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan), building on the work of
   [MieleRESTServer](https://github.com/akappner/MieleRESTServer).

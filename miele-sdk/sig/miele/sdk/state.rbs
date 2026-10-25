@@ -23,7 +23,10 @@ module Miele
 
       attr_reader protocol_version: Integer?
 
-      def initialize: (Hash[String, untyped] raw, Symbol device_type, ?protocol_version: Integer?) -> void
+      attr_reader tech_type: String?
+
+      def initialize: (Hash[String, untyped] raw, Symbol device_type, ?protocol_version: Integer?,
+                       ?tech_type: String?) -> void
 
       def status: () -> Symbol
 
@@ -64,6 +67,10 @@ module Miele
       def celsius: (String key) -> Array[Float?]
 
       def dop2?: () -> bool
+
+      def oven_programs: () -> Hash[Integer, Symbol]
+
+      def device_class: () -> Integer?
     end
   end
 end

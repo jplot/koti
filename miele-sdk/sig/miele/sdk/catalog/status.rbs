@@ -2,6 +2,8 @@ module Miele
   module Sdk
     module Catalog
       STATUS: Hash[Integer, Symbol]
+
+      DEVICE_STATUS: Hash[Symbol, Hash[Integer, Symbol]]
     end
   end
 end

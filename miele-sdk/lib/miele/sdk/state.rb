@@ -44,9 +44,9 @@ module Miele
         @device_type = device_type
       end
 
-      # @return [Symbol] one of {Catalog::STATUS}, or +:unknown+
+      # @return [Symbol] one of {Catalog::STATUS} or of the device type's {Catalog::DEVICE_STATUS}, or +:unknown+
       # @api public
-      def status = Catalog::STATUS.fetch(raw['Status'], :unknown)
+      def status = Catalog::STATUS[raw['Status']] || Catalog::DEVICE_STATUS.dig(device_type, raw['Status']) || :unknown
 
       # @return [Symbol] one of {Catalog::PROGRAM_TYPES}, or +:unknown+
       # @api public

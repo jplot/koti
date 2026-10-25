@@ -1,0 +1,11 @@
+module Miele
+  module Sdk
+    module Catalog
+      PROGRAMS: Hash[Symbol, Hash[Integer, Symbol]]
+
+      DISHWASHER_TYPES: Array[Symbol]
+
+      PROGRAM_TABLES: Hash[Symbol, Symbol]
+    end
+  end
+end

@@ -66,7 +66,15 @@ RSpec.describe Miele::Sdk::State do
     expect([1, nil].map { dop1.call(:steam_oven_combination, 1, it && 'DGC6300') }).to eq(%i[combi_mode fan_plus])
   end
 
-  it 'leaves the program unknown outside ovens' do
+  it 'names the programs of dishwashers, dish warmers and coffee systems', :aggregate_failures do
+    name = ->(type, id, version) { described_class.new({ 'ProgramID' => id }, type, protocol_version: version).program }
+    expect([4, 2].map { name.call(:dishwasher, 3, it) }).to eq(%i[eco eco])
+    expect([4, 2].map { name.call(:dishwasher, 4, it) }).to eq(%i[unknown quick_wash])
+    expect(name.call(:dish_warmer, 1, 2)).to eq(:warming_cups_glasses)
+    expect([24_004, 24_036].map { name.call(:coffee_system, it, 4) }).to eq(%i[cappuccino unknown])
+  end
+
+  it 'leaves the program unknown where the Miele app names none' do
     programs = [2, 4].map { described_class.new({ 'ProgramID' => 13 }, :hood, protocol_version: it).program }
     expect(programs).to eq(%i[unknown unknown])
   end

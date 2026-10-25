@@ -1,9 +1,0 @@
-module Miele
-  module Sdk
-    module Catalog
-      OVEN_PROGRAMS: Hash[Integer, Symbol]
-
-      OVEN_DEVICE_TYPES: Array[Symbol]
-    end
-  end
-end

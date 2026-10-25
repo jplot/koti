@@ -220,9 +220,10 @@ anything is sent.
   2,244 programs kept in `lib/miele/sdk/catalog/dop2_oven_programs.tsv`; for Dop1 ovens, the app's
   seven program tables and the rule picking one, 4,143 programs kept in
   `lib/miele/sdk/catalog/dop1_oven_programs.tsv`.
-- Dishwasher, dish warmer and coffee program names: the Miele app 4.19.0's dishwasher tables
-  (DOP2 and Dop1), dish warmer labels and the drinks of a coffee system's standard profile, in its
-  default English, kept in `lib/miele/sdk/catalog/programs.tsv`.
+- Dishwasher, dish warmer, coffee and laundry program names: the Miele app 4.19.0's dishwasher
+  tables (DOP2 and Dop1), dish warmer labels, the drinks of a coffee system's standard profile, and
+  its nine washing machine and tumble dryer tables with the rule picking one, in its default
+  English, kept in `lib/miele/sdk/catalog/programs.tsv`.
 - The local protocol (signing, DOP2 layout, Dop1 objects, power sequence, SuperVision):
   [ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan), building on the work of
   [MieleRESTServer](https://github.com/akappner/MieleRESTServer).

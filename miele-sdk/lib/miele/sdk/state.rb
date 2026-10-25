@@ -151,12 +151,38 @@ module Miele
 
       # @return [Symbol, nil] {Catalog::PROGRAMS} table of this appliance
       def program_table
+        kind = Catalog::LAUNDRY_TYPES[device_type]
+        return kind.end_with?('tumble_dryer') ? dryer_table(kind) : washer_table(kind) if kind && protocol_version
         return Catalog::PROGRAM_TABLES[device_type] unless Catalog::DISHWASHER_TYPES.include?(device_type)
 
         if dop2? then :dishwasher_dop2
         elsif protocol_version == Catalog::DOP1_PROTOCOL_VERSION then :dishwasher_dop1
         end
       end
+
+      # Checked in the order of the Miele app's ProgramIdToNameLocalizationHelper.GetProgramIdLocalized.
+      #
+      # @param kind [Symbol] one of {Catalog::LAUNDRY_TYPES}' values
+      # @return [Symbol]
+      def dryer_table(kind)
+        return :laundry_smartbiz_td if kind == :tumble_dryer && tech_type.to_s.match?(/PDR/i)
+        return :laundry_semi_professional_td if kind == :semi_professional_tumble_dryer
+
+        dop2? ? :laundry_dop2_td : :laundry_legacy_td
+      end
+
+      # @param kind [Symbol] one of {Catalog::LAUNDRY_TYPES}' values
+      # @return [Symbol]
+      def washer_table(kind)
+        return :laundry_smartbiz_wm if kind == :washing_machine && tech_type.to_s.match?(/PWM/i)
+        return :laundry_semi_professional_wm if kind == :semi_professional_washing_machine
+        return :laundry_w2_discovery if kind == :washing_machine && w2_discovery?
+
+        dop2? ? :laundry_dop2_wm : :laundry_legacy_wm
+      end
+
+      # @return [Boolean] whether this is a W1, W3 or W5 model on DOP2
+      def w2_discovery? = dop2? && tech_type.to_s.match?(/\AW\s*[135]/i)
 
       # @return [Hash{Integer=>Symbol}] program names of this oven, empty for other appliances
       def oven_programs

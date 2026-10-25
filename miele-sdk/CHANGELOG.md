@@ -20,7 +20,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   from Miele's documentation.
 - `State` with named statuses, program types and program phases, times in seconds, temperatures
   in °C, door, failure, remote control, light, hood fan level and hob plates, and the program
-  names of ovens, dishwashers, dish warmers and coffee systems.
+  names of ovens, dishwashers, dish warmers, coffee systems, washing machines and tumble dryers.
 - State commands: start, stop, pause, light, wake, and power through DOP2 with the wake-and-retry
   sequence of sleeping appliances. Commands and writes have not run against a real appliance yet.
 - DOP2 leaves: decoding of every field type, encoding of scalar fields, reading and writing.

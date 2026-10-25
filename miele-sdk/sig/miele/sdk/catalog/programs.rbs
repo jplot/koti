@@ -5,6 +5,8 @@ module Miele
 
       DISHWASHER_TYPES: Array[Symbol]
 
+      LAUNDRY_TYPES: Hash[Symbol, Symbol]
+
       PROGRAM_TABLES: Hash[Symbol, Symbol]
     end
   end

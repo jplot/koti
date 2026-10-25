@@ -72,8 +72,9 @@ RSpec.describe Miele::Sdk::State do
       expect(state.status).to eq(:ready)
     end
 
-    it 'maps a phase without a published table to :unknown' do
-      expect(state.program_phase).to eq(:unknown)
+    it 'names its phase from the hood table' do
+      phases = [4608, 4613].map { described_class.new({ 'ProgramPhase' => it }, device_type).program_phase }
+      expect(phases).to eq(%i[not_running delayed_shutdown])
     end
   end
 
@@ -89,6 +90,10 @@ RSpec.describe Miele::Sdk::State do
                                                     elapsed_minutes: 3, timer_seconds: 720)
       expect(state.plates.last).to have_attributes(step: 0, remaining_heat: 2)
       expect(state.remote_control?).to be(false)
+    end
+
+    it 'maps a phase without a published table to :unknown' do
+      expect(described_class.new({ 'ProgramPhase' => 4608 }, device_type).program_phase).to eq(:unknown)
     end
   end
 end

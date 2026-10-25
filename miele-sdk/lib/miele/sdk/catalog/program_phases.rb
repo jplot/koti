@@ -12,11 +12,13 @@ module Miele
         dishwasher_professional: :dishwasher, oven: :oven, dialog_oven: :oven, oven_microwave: :oven_microwave,
         steam_oven: :steam_oven, steam_oven_combination: :steam_oven_combination,
         steam_oven_mk2: :steam_oven_combination, steam_oven_microwave_combination: :steam_oven_microwave_combination,
-        microwave: :microwave, coffee_system: :coffee_system, robot_vacuum: :robot_vacuum, dish_warmer: :dish_warmer
+        microwave: :microwave, coffee_system: :coffee_system, robot_vacuum: :robot_vacuum, dish_warmer: :dish_warmer,
+        hood: :hood
       }.freeze
 
       # +ProgramPhase+ codes by phase table. Miele publishes no phase list:
-      # these come from Home Assistant core (homeassistant/components/miele/const.py).
+      # these come from Home Assistant core (homeassistant/components/miele/const.py),
+      # and the hood's from the Miele app (4.19.0).
       PROGRAM_PHASES = {
         washing_machine: {
           not_running: [0, 256, 65_535], pre_wash: [257, 259], soak: [258], main_wash: [260, 11_004],
@@ -90,6 +92,10 @@ module Miele
         steam_oven_microwave_combination: {
           not_running: [0, 65_535], heating: [3329], process_running: [3330, 7938, 7942], process_finished: [3334],
           energy_save: [3340], steam_reduction: [3863], waiting_for_start: [7939], heating_up_phase: [7940]
+        },
+        hood: {
+          not_running: [4608], ventilation: [4609], delayed_shutdown: [4613], interval_ventilation: [4614],
+          scenting: [4615], fan_cleaning: [4618]
         }
       }.freeze
     end

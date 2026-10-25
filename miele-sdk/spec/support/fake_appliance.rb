@@ -15,12 +15,13 @@ class FakeAppliance
 
   attr_reader :port
 
-  def self.start(answer_key: GROUP_KEY, &handler)
-    new(answer_key:, handler: handler || ->(_request) { [200, {}, '{}'] }).tap(&:start)
+  def self.start(answer_key: GROUP_KEY, unsigned: false, &handler)
+    new(answer_key:, unsigned:, handler: handler || ->(_request) { [200, {}, '{}'] }).tap(&:start)
   end
 
-  def initialize(answer_key:, handler:)
+  def initialize(answer_key:, unsigned:, handler:)
     @answer_key = [answer_key].pack('H*')
+    @unsigned = unsigned
     @handler = handler
     @requests = []
     @mutex = Mutex.new
@@ -80,7 +81,7 @@ class FakeAppliance
   def write_response(socket, status, headers, plaintext)
     date = Time.now.httpdate
     lines = ["HTTP/1.1 #{status} Fake", "Date: #{date}", "Content-Type: #{CONTENT_TYPE}"]
-    body = plaintext.empty? ? '' : sign_and_encrypt(lines, status, date, plaintext)
+    body = plaintext.empty? || @unsigned ? plaintext : sign_and_encrypt(lines, status, date, plaintext)
     lines << "Content-Length: #{body.bytesize}"
     lines.concat(headers.map { |name, value| "#{name}: #{value}" })
     socket.write("#{lines.join("\r\n")}\r\n\r\n#{body}")

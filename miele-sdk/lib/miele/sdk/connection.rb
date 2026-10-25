@@ -128,6 +128,8 @@ module Miele
       # @api private
       def decrypt(response, status, body, key)
         signature = [response['X-Signature'].to_s.split(':', 2).last.to_s].pack('H*')
+        raise SignatureError, 'response not signed by the household key' unless signature.bytesize == 32
+
         plaintext = Crypto.decrypt(key:, signature:, ciphertext: body)
         lines = [status, response['Content-Type'], response['Date']]
         return plaintext if OpenSSL.secure_compare(Crypto.signature(key:, lines:, body: plaintext), signature)

@@ -32,6 +32,14 @@ RSpec.describe Miele::Sdk::Connection do
     end
   end
 
+  context 'when the answer carries no signature' do
+    let(:appliance) { FakeAppliance.start(unsigned: true) { answer } }
+
+    it 'raises SignatureError' do
+      expect { call(:get, '/Devices/') }.to raise_error(Miele::Sdk::SignatureError, /not signed/)
+    end
+  end
+
   context 'when the appliance answers 403' do
     let(:answer) { [403, {}, ''] }
 

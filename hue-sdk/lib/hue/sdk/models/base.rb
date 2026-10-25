@@ -62,7 +62,7 @@ module Hue
           # @param data [Hash{String=>Object}]
           # @return [Hash{String=>Object}] data without the deprecated fields of the model
           # @api private
-          def visible(data) = data.except(*self.class.model.hidden_fields)
+          def visible(data) = self.class.model.strip(data)
         end
 
         class << self
@@ -70,11 +70,28 @@ module Hue
           # @api public
           attr_reader :type
 
-          # @return [Array<String>] deprecated fields removed from the data
+          # @return [Array<String>] deprecated fields removed from the data, nested ones as +attribute.field+
           # @api private
           def hidden_fields = @hidden_fields || []
 
+          # @param data [Hash{String=>Object}] a resource, or the changes of an event
+          # @return [Hash{String=>Object}] +data+ without the deprecated fields of the model
+          # @api private
+          def strip(data) = hidden_fields.reduce(data) { |visible, path| without(visible, *path.split('.')) }
+
           private
+
+          # @param data [Hash{String=>Object}]
+          # @param key [String]
+          # @param nested [Array<String>] the rest of the path under +key+
+          # @return [Hash{String=>Object}] a copy of +data+ without the field at the path
+          # @api private
+          def without(data, key, *nested)
+            return data.except(key) if nested.empty?
+            return data unless data[key].is_a?(Hash)
+
+            data.merge(key => without(data[key], *nested))
+          end
 
           # Binds the model to a resource type and registers it.
           #
@@ -97,7 +114,7 @@ module Hue
             self::Instance.include(Operations::Delete) if names.include?(:delete)
           end
 
-          # @param fields [Array<String>] fields superseded by newer ones
+          # @param fields [Array<String>] fields superseded by newer ones, nested ones as +attribute.field+
           # @return [void]
           # @api private
           def deprecated(*fields)

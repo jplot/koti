@@ -18,7 +18,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Pairing with the link button, returning the application key and the client key.
 - A model and an entry point for each of the 45 resource types of the Bridge Pro firmware,
   offering only the operations the bridge accepts, with `owner`, `children` and `services`
-  associations.
+  associations; deprecated fields are left out.
 - Real-time events through `Hue::Sdk.events`, with automatic reconnection sending the id of the
   last event received.
 - Entertainment streaming over DTLS 1.2 with a pre-shared key (`require 'hue/sdk/entertainment'`,

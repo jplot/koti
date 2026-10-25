@@ -7,6 +7,7 @@ module Hue
       class RelativeRotary < Base
         resource_type 'relative_rotary'
         operations :update
+        deprecated 'relative_rotary.last_event'
       end
     end
   end

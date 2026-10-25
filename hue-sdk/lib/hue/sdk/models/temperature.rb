@@ -7,6 +7,7 @@ module Hue
       class Temperature < Base
         resource_type 'temperature'
         operations :update
+        deprecated 'temperature.temperature', 'temperature.temperature_valid'
       end
     end
   end

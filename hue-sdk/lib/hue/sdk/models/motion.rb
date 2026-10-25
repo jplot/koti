@@ -7,6 +7,7 @@ module Hue
       class Motion < Base
         resource_type 'motion'
         operations :update
+        deprecated 'motion.motion', 'motion.motion_valid'
       end
     end
   end

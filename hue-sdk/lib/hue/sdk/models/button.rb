@@ -7,6 +7,7 @@ module Hue
       class Button < Base
         resource_type 'button'
         operations :update
+        deprecated 'button.last_event'
       end
     end
   end

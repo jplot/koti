@@ -44,7 +44,11 @@ module Hue
 
         def self.hidden_fields: () -> Array[String]
 
+        def self.strip: (Hash[String, untyped] data) -> Hash[String, untyped]
+
         private
+
+        def self.without: (Hash[String, untyped] data, String key, *String nested) -> Hash[String, untyped]
 
         def self.resource_type: (String type) -> void
 

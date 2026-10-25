@@ -80,7 +80,7 @@ Each resource type has an entry point named after it. Without an id it returns t
 with one, a single resource whose data loads on first access.
 
 ```ruby
-Hue::Sdk.Light.list.each { |light| puts "#{light['metadata']['name']}: #{light['on']['on']}" }
+Hue::Sdk.Light.list.each { |light| puts "#{light.owner['metadata']['name']}: #{light['on']['on']}" }
 
 light = Hue::Sdk.Light('3f1a…')
 light.data        # the whole resource
@@ -88,8 +88,10 @@ light['dimming']  # one attribute
 ```
 
 `Hue::Sdk.resource(type, id = nil)` does the same from a type name. A type this version does not
-know yet gets a read-only generic model instead of an error. Deprecated fields (`effects` on a
-light, `device_mode` on a device) are left out of `data`.
+know yet gets a read-only generic model instead of an error. Deprecated fields are left out of
+`data` and of event changes: `effects` on a light, `device_mode` on a device, and the sensor
+values superseded by a report (`motion.motion` by `motion.motion_report`, `button.last_event` by
+`button.button_report`, and likewise for light level, temperature, bell and rotary).
 
 ## Writing
 
@@ -204,7 +206,7 @@ Hue::Sdk.configure { |config| config.client_key = ENV.fetch('HUE_CLIENT_KEY') }
 
 Hue::Sdk.EntertainmentConfiguration('5c3e…').stream do |session|
   100.times do
-    session.write({ 0 => [1.0, 0.0, 0.0], 1 => [0.0, 0.0, 1.0] })   # red, green, blue per channel
+    session.write({ 0 => [1.0, 0.0, 0.0], 1 => [0.0, 0.0, 1.0] })   # channel 0 red, channel 1 blue
     sleep 0.02
   end
 end

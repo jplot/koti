@@ -9,6 +9,11 @@ RSpec.describe Hue::Sdk::Models::Base do
       'PUT /clip/v2/resource/light/l1' => { errors: [], data: [{ rid: 'l1', rtype: 'light' }] },
       'POST /clip/v2/resource/room' => { errors: [], data: [{ rid: 'r9', rtype: 'room' }] },
       'DELETE /clip/v2/resource/scene/s1' => { errors: [], data: [{ rid: 's1', rtype: 'scene' }] },
+      'GET /clip/v2/resource/motion/m1' => {
+        errors: [],
+        data: [{ id: 'm1', type: 'motion',
+                 motion: { motion: true, motion_valid: true, motion_report: { motion: true } } }]
+      },
       'GET /clip/v2/resource/device/d1' => {
         errors: [],
         data: [{ id: 'd1', type: 'device', services: [{ rid: 'l1', rtype: 'light' }, { rid: 'x1', rtype: 'future' }] }]
@@ -70,5 +75,9 @@ RSpec.describe Hue::Sdk::Models::Base do
 
   it 'hides deprecated fields' do
     expect(Hue::Sdk.Light('l1').data).not_to have_key('effects')
+  end
+
+  it 'hides deprecated fields nested in an attribute' do
+    expect(Hue::Sdk.Motion('m1')['motion']).to eq('motion_report' => { 'motion' => true })
   end
 end

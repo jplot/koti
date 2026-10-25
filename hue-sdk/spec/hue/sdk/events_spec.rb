@@ -24,4 +24,15 @@ RSpec.describe Hue::Sdk::Events do
   it 'resolves the resource of an event' do
     expect(Hue::Sdk.events.first.resource).to be_a(Hue::Sdk::Models::Light::Instance).and(have_attributes(id: 'l1'))
   end
+
+  context 'when a change carries a deprecated field' do
+    let(:bridge) do
+      message = light_update_message(effects: { status: 'no' })
+      FakeBridge.start { [200, { 'Content-Type' => 'text/event-stream' }, message] }
+    end
+
+    it 'leaves it out of the changes' do
+      expect(Hue::Sdk.events.first.changes).to eq('on' => { 'on' => true })
+    end
+  end
 end

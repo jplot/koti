@@ -176,7 +176,7 @@ module Hue
             created_at = Time.iso8601(container['creationtime'])
             container['data'].map do |resource|
               Event.new(id:, kind:, created_at:, resource_type: resource['type'], resource_id: resource['id'],
-                        changes: resource.except('id', 'type'))
+                        changes: Models.lookup(resource['type']).strip(resource.except('id', 'type')))
             end
           end
         end

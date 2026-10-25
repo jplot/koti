@@ -1,0 +1,19 @@
+module Hue
+  module Sdk
+    module Models
+      module Operations
+        module Create : Base
+          def create: (**untyped attributes) -> Base::Instance
+        end
+
+        module Update : Base::Instance
+          def update: (**untyped attributes) -> self
+        end
+
+        module Delete : Base::Instance
+          def delete: () -> true
+        end
+      end
+    end
+  end
+end

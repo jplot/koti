@@ -1,0 +1,18 @@
+module Hue
+  module Sdk
+    def self.Device: (?nil id) -> Models::Device
+                   | (String id) -> Models::Device::Instance
+
+    def self.DevicePower: (?nil id) -> Models::DevicePower
+                        | (String id) -> Models::DevicePower::Instance
+
+    def self.Light: (?nil id) -> Models::Light
+                  | (String id) -> Models::Light::Instance
+
+    def self.Room: (?nil id) -> Models::Room
+                 | (String id) -> Models::Room::Instance
+
+    def self.Scene: (?nil id) -> Models::Scene
+                  | (String id) -> Models::Scene::Instance
+  end
+end

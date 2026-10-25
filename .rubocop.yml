@@ -19,3 +19,8 @@ RSpec/ExampleLength:
 # `#: Type` is the RBS inline type assertion read by Steep.
 Layout/LeadingCommentSpace:
   AllowRBSInlineAnnotation: true
+
+# `delete` is a command; its `true` confirms the bridge accepted the deletion.
+Naming/PredicateMethod:
+  AllowedMethods:
+    - delete

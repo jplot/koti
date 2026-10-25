@@ -3,16 +3,28 @@
 require 'openssl'
 require 'socket'
 require 'tempfile'
+require_relative 'test_certificates'
 
 # HTTPS server standing in for a Hue bridge. Its certificates are minted per
 # instance by a test CA, so the SDK's CA pinning and CN check run for real.
 class FakeBridge
+  include TestCertificates
+
   Request = Data.define(:verb, :path, :headers, :body)
 
   attr_reader :port, :ca_file
 
   def self.start(bridge_id: 'ECB5FAFFFE000001', foreign_ca: false, &handler)
     new(bridge_id:, foreign_ca:, handler: handler || ->(_request) { [200, {}, 'ok'] }).tap(&:start)
+  end
+
+  # Answers "VERB /path" from +routes+ (a payload, or [status, payload]) and 404 otherwise.
+  def self.serving(routes)
+    start do |request|
+      status, payload = routes.fetch("#{request.verb} #{request.path}") { [404, { errors: [], data: [] }] }
+                              .then { |route| route.is_a?(Array) ? route : [200, route] }
+      [status, { 'Content-Type' => 'application/json' }, JSON.generate(payload)]
+    end
   end
 
   def initialize(bridge_id:, foreign_ca:, handler:)
@@ -97,29 +109,5 @@ class FakeBridge
       context.cert = @leaf
       context.key = @leaf_key
     end
-  end
-
-  def certificate_authority
-    key = OpenSSL::PKey::EC.generate('prime256v1')
-    [certificate('/C=NL/O=Philips Hue/CN=root-bridge', key, nil, key), key]
-  end
-
-  def certificate(subject, key, issuer_cert, issuer_key)
-    name = OpenSSL::X509::Name.parse(subject)
-    cert = OpenSSL::X509::Certificate.new
-    cert.version = 2
-    cert.serial = rand(1 << 64)
-    cert.subject = name
-    cert.issuer = issuer_cert&.subject || name
-    cert.public_key = key
-    sign(cert, issuer_cert, issuer_key)
-  end
-
-  def sign(cert, issuer_cert, issuer_key)
-    cert.not_before = Time.now - 60
-    cert.not_after = Time.now + 3600
-    extensions = OpenSSL::X509::ExtensionFactory.new(issuer_cert || cert, cert)
-    cert.add_extension(extensions.create_extension('basicConstraints', issuer_cert ? 'CA:FALSE' : 'CA:TRUE', true))
-    cert.sign(issuer_key, OpenSSL::Digest.new('SHA256'))
   end
 end

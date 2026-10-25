@@ -5,5 +5,12 @@ module Hue
     def self.discover: (?timeout: Integer | Float, ?address: String, ?port: Integer) -> Array[Discovery::Bridge]
 
     def self.pair: (?app_name: String, ?instance_name: String) -> Pairing::Credentials
+
+    def self.resource: (String type, ?nil id) -> Models::Base
+                     | (String type, String id) -> Models::Base::Instance
+
+    private
+
+    def self.entry: (Symbol name, String type) -> void
   end
 end

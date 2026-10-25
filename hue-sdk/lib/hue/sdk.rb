@@ -7,6 +7,7 @@ require_relative 'sdk/connection'
 require_relative 'sdk/client'
 require_relative 'sdk/discovery'
 require_relative 'sdk/pairing'
+require_relative 'sdk/models'
 
 # Namespace of the koti SDKs for the Philips Hue ecosystem.
 module Hue
@@ -39,5 +40,38 @@ module Hue
     # @raise [LinkButtonNotPressedError] if the link button was not pressed in the last 30 seconds
     # @api public
     def self.pair(app_name: 'hue-sdk', instance_name: Socket.gethostname) = Pairing.pair(app_name:, instance_name:)
+
+    # Returns the collection of a resource type, or one resource.
+    #
+    # @param type [String] CLIP v2 resource type (+light+, +room+…)
+    # @param id [String, nil] resource id, or +nil+ for the collection
+    # @return [Models::Base, Models::Base::Instance]
+    # @api public
+    def self.resource(type, id = nil)
+      model = Models.lookup(type)
+      id ? model::Instance.new(id) : model.new
+    end
+
+    # Defines the entry point of a resource type.
+    #
+    # @!macro [attach] resource_entry
+    #   @!method $1(id = nil)
+    #   @!scope class
+    #   Returns the +$2+ collection, or one +$2+ resource when +id+ is given.
+    #   @param id [String, nil] resource id
+    #   @return [Models::$1, Models::$1::Instance]
+    #   @api public
+    # @param name [Symbol] entry point name
+    # @param type [String] CLIP v2 resource type
+    # @return [void]
+    # @api private
+    def self.entry(name, type) = define_singleton_method(name) { |id = nil| resource(type, id) }
+    private_class_method :entry
+
+    entry :Device, 'device'
+    entry :DevicePower, 'device_power'
+    entry :Light, 'light'
+    entry :Room, 'room'
+    entry :Scene, 'scene'
   end
 end

@@ -1,0 +1,9 @@
+module Hue
+  module Sdk
+    module Models
+      REGISTRY: Hash[String, singleton(Base)]
+
+      def self.lookup: (String type) -> singleton(Base)
+    end
+  end
+end

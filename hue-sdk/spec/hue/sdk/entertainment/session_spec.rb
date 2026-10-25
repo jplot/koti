@@ -4,14 +4,19 @@ require 'hue/sdk/entertainment'
 
 RSpec.describe Hue::Sdk::Entertainment::Session do
   let(:id) { '1a8d99cc-967b-44f2-9202-43f976c0fa6b' }
+  let(:unreachable) { [] }
   let(:bridge) do
     done = { data: [], errors: [] }
     area = "/clip/v2/resource/entertainment_configuration/#{id}"
     services = %w[l1 l2 l3].map { { rid: it, rtype: 'light' } }
+    restores = %w[l1 l2 l3].to_h do |light|
+      ["PUT /clip/v2/resource/light/#{light}",
+       unreachable.include?(light) ? [207, { data: [], errors: [{ description: 'device unreachable' }] }] : done]
+    end
     FakeBridge.serving(
       "GET #{area}" => { data: [{ id:, light_services: services }], errors: [] },
       'GET /clip/v2/resource/light' => { data: lights, errors: [] },
-      "PUT #{area}" => done, **%w[l1 l2 l3].to_h { ["PUT /clip/v2/resource/light/#{it}", done] }
+      "PUT #{area}" => done, **restores
     )
   end
   let(:socket) { instance_double(Hue::Sdk::Entertainment::DtlsSocket, write: 59, close: nil) }
@@ -59,6 +64,15 @@ RSpec.describe Hue::Sdk::Entertainment::Session do
   it 'puts the lights of the area back as they were, after stopping' do
     configuration.stream { nil }
     expect(writes.drop(2)).to eq(restored)
+  end
+
+  context 'when a light cannot be restored' do
+    let(:unreachable) { %w[l2] }
+
+    it 'restores the other lights, then raises', :aggregate_failures do
+      expect { configuration.stream { nil } }.to raise_error(Hue::Sdk::ResponseError, /device unreachable/)
+      expect(writes.map(&:first)).to eq([id, id, 'l1', 'l2', 'l3'])
+    end
   end
 
   it 'opens the DTLS socket with the application key and the client key' do

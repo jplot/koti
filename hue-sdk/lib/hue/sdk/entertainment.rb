@@ -80,11 +80,26 @@ module Hue
         # @param socket [DtlsSocket, nil]
         # @param lights [Hash{String=>Hash}] from {#snapshot}
         # @return [void]
+        # @raise [ResponseError] the first light that could not be restored, once all were tried
         # @api private
         def finish(socket, lights)
           socket&.close
           update(action: 'stop')
-          lights.each { |light, state| Sdk.Light(light).update(**state) }
+          failures = lights.filter_map { |light, state| restore(light, state) }
+          raise failures.first unless failures.empty?
+        end
+
+        # A lamp cut off at the wall answers 207: the lamps after it must still be restored.
+        #
+        # @param light [String] light id
+        # @param state [Hash{Symbol=>Hash}] update body from {#restoration}
+        # @return [ResponseError, nil] the failure, if any
+        # @api private
+        def restore(light, state)
+          Sdk.Light(light).update(**state)
+          nil
+        rescue ResponseError => e
+          e
         end
       end
     end

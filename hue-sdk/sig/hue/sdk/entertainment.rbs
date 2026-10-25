@@ -19,6 +19,8 @@ module Hue
         def restoration: (Hash[String, untyped] light) -> Hash[Symbol, untyped]
 
         def finish: (DtlsSocket? socket, Hash[String, Hash[Symbol, untyped]] lights) -> void
+
+        def restore: (String light, Hash[Symbol, untyped] state) -> ResponseError?
       end
     end
 

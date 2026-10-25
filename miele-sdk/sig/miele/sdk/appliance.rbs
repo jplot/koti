@@ -1,15 +1,23 @@
 module Miele
   module Sdk
     class Appliance
+      interface _Sleeper
+        def call: (Integer seconds) -> untyped
+      end
+
       type resource = Hash[String, untyped]
+
+      USER_REQUEST: String
 
       @fab: String?
 
       @device_type: Symbol?
 
+      @sleeper: _Sleeper
+
       attr_reader host: String
 
-      def initialize: (String host) -> void
+      def initialize: (String host, ?sleeper: _Sleeper) -> void
 
       def fab: () -> String
 
@@ -45,6 +53,14 @@ module Miele
 
       def wake: () -> void
 
+      def power_on: () -> void
+
+      def power_off: () -> void
+
+      def dop2: (Integer unit, Integer attribute, ?idx1: Integer, ?idx2: Integer) -> Dop2::Leaf
+
+      def write_dop2: (Dop2::Leaf leaf) -> void
+
       def get: (String path) -> resource
 
       private
@@ -54,6 +70,12 @@ module Miele
       def command: (Hash[Symbol, Integer] body) -> Connection::Response
 
       def change: (Hash[Symbol, Integer] body) -> void
+
+      def dop2_path: (Integer unit, Integer attribute, Integer idx1, Integer idx2) -> String
+
+      def power: (Integer state, Integer opcode) -> void
+
+      def rouse: () -> void
     end
   end
 end

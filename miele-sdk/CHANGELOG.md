@@ -21,9 +21,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `State` with named statuses, program types and program phases, times in seconds, temperatures
   in °C, door, failure, remote control, light, hood fan level and hob plates.
 - State commands: start, stop, pause, light, wake, and power through DOP2 with the wake-and-retry
-  sequence of sleeping appliances.
+  sequence of sleeping appliances. Commands and writes have not run against a real appliance yet.
 - DOP2 leaves: decoding of every field type, encoding of scalar fields, reading and writing.
 - Hood commands over Dop1: fan level, fan run-on time, main light and settings.
 - Pushed events through `Miele::Sdk.events`: mDNS announcement as a household peer, a signed
-  HTTP endpoint, enrollment of each appliance and withdrawal when the block ends.
+  HTTP endpoint, enrollment of each appliance and withdrawal when the block ends. No push from a
+  real appliance has been received yet.
 - RBS signatures for the whole public API.

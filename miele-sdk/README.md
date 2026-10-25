@@ -132,8 +132,9 @@ oven.write_dop2(Miele::Sdk::Dop2::Leaf.new(unit: 2, attribute: 1586, idx1: 0, id
 ```
 
 Fields decode to booleans, signed and unsigned integers of 8 to 64 bits, strings, arrays and
-structs; only scalar fields can be written. Not every Wi-Fi module serves DOP2: EK057 and EK039W
-modules answer 404 to every leaf, so `power_on` raises `Miele::Sdk::NotFoundError` on them.
+structs; only scalar fields can be written, and a value outside its field's range raises
+`ArgumentError`. Not every Wi-Fi module serves DOP2: EK057 and EK039W modules answer 404 to every
+leaf, so `power_on` raises `Miele::Sdk::NotFoundError` on them.
 
 ## Hoods (Dop1)
 
@@ -165,15 +166,27 @@ end
 `listener_port`, and asks each appliance to push its changes to it: it declares this host in the
 appliance's `SuperVision` and subscribes to `/State/`, `/State/Light/`, `/State/Status/` and
 `/Ident/`. It then blocks and yields a `Miele::Sdk::Events::Event` (`fab`, `resource`, `content`)
-per change, on the calling thread. Without a block it returns a lazy enumerator.
+per change, on the calling thread. Without a block it returns a lazy enumerator: iterate it with
+`each`, `first` or `take`, since an external `next` never reaches the end of the stream and leaves
+the subscriptions in place.
 
 When the block breaks or raises, the subscriptions are deleted and `SuperVision` stops showing
 this host; the peer entry itself stays listed. An appliance that cannot be reached at that point
 keeps its subscriptions, with a warning on stderr; the next run deletes them, since
-`listener_fab` does not change. Every push must be signed with the household key, or it is refused.
+`listener_fab` does not change. An appliance that cannot be enrolled is skipped, with a warning.
 
-The appliances must reach `listener_port` on this host: open it in the firewall, and set
-`advertise_address` when the host has several network interfaces.
+Every push must be signed with the household key, or it is refused; a refused request that claims
+the household's GroupID is reported on stderr. The date a push carries is not checked: a push
+captured on the network can be sent again.
+
+The appliances must reach `listener_port` on this host and resolve its name over mDNS. When they
+sit on a network of their own (an IoT VLAN), allow TCP from that network to this host's
+`listener_port` and relay mDNS between the two networks. Set `advertise_address` when the host has
+several network interfaces.
+
+Enrollment and withdrawal have run against real appliances, leaving their subscriptions as they
+were. No push has reached this SDK from a real appliance yet: in that run the appliances sat on
+another network, which did not let them connect back.
 
 ## Errors
 
@@ -184,11 +197,12 @@ The appliances must reach `listener_port` on this host: open it in the firewall,
 | `Miele::Sdk::SignatureError` | an answer is not signed or encrypted with the household key |
 | `Miele::Sdk::AuthenticationError` | the appliance refuses a read: the key does not match its own |
 | `Miele::Sdk::ResponseError` | the appliance answers with an error status; carries `status` |
-| `Miele::Sdk::NotFoundError` | the appliance does not serve that resource (a `ResponseError`) |
+| `Miele::Sdk::NotFoundError` | the appliance does not serve that resource, or the GroupID is not its own (a `ResponseError`) |
 | `Miele::Sdk::RemoteControlDisabledError` | the appliance refuses a command (a `ResponseError`) |
 | `Miele::Sdk::Dop2::DecodeError` | a DOP2 leaf has an unknown type or ends too early |
 
-All of them but `ArgumentError` inherit from `Miele::Sdk::Error`.
+All of them inherit from `Miele::Sdk::Error`. A value out of range raises `ArgumentError` before
+anything is sent.
 
 ## Sources
 
@@ -201,7 +215,9 @@ All of them but `ArgumentError` inherit from `Miele::Sdk::Error`.
 - Program phases, the professional appliances and the second steam oven generation:
   [Home Assistant](https://github.com/home-assistant/core/tree/dev/homeassistant/components/miele).
 
-Behaviour was checked read-only against appliances with EK057 and EK039W Wi-Fi modules.
+Reading was checked against appliances with EK057 and EK039W Wi-Fi modules. Commands, DOP2 and
+Dop1 writes have not run against a real appliance yet: they follow ha-miele-at-lan, which tested
+them on its own appliances.
 
 ## Development
 

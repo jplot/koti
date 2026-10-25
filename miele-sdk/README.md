@@ -185,8 +185,8 @@ sit on a network of their own (an IoT VLAN), allow TCP from that network to this
 several network interfaces.
 
 Enrollment and withdrawal have run against real appliances, leaving their subscriptions as they
-were. No push has reached this SDK from a real appliance yet: in that run the appliances sat on
-another network, which did not let them connect back.
+were. Pushes from a real hood have been received, verified and decoded; no oven or hob push has
+been decoded yet.
 
 ## Errors
 

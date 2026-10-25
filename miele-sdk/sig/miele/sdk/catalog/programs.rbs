@@ -3,6 +3,10 @@ module Miele
     module Catalog
       PROGRAMS: Hash[Symbol, Hash[Integer, Symbol]]
 
+      OVEN_TYPES: Array[Symbol]
+
+      DOP1_OVEN_TABLES: Hash[Symbol, Hash[Integer?, Symbol]]
+
       DISHWASHER_TYPES: Array[Symbol]
 
       LAUNDRY_TYPES: Hash[Symbol, Symbol]

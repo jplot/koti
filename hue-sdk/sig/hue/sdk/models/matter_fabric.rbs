@@ -4,6 +4,7 @@ module Hue
       class MatterFabric < Base
         class Instance < Base::Instance
           include Operations::Update
+          include Operations::Delete
         end
       end
     end

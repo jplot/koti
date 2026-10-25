@@ -6,6 +6,9 @@ module Hue
     def self.BehaviorScript: (?nil id) -> Models::BehaviorScript
                            | (String id) -> Models::BehaviorScript::Instance
 
+    def self.BehaviorScriptFormula: (?nil id) -> Models::BehaviorScriptFormula
+                                  | (String id) -> Models::BehaviorScriptFormula::Instance
+
     def self.BellButton: (?nil id) -> Models::BellButton
                        | (String id) -> Models::BellButton::Instance
 
@@ -20,6 +23,9 @@ module Hue
 
     def self.CameraMotion: (?nil id) -> Models::CameraMotion
                          | (String id) -> Models::CameraMotion::Instance
+
+    def self.Clip: (?nil id) -> Models::Clip
+                 | (String id) -> Models::Clip::Instance
 
     def self.Contact: (?nil id) -> Models::Contact
                     | (String id) -> Models::Contact::Instance
@@ -80,6 +86,9 @@ module Hue
 
     def self.MotionAreaConfiguration: (?nil id) -> Models::MotionAreaConfiguration
                                     | (String id) -> Models::MotionAreaConfiguration::Instance
+
+    def self.PowerOutputConfiguration: (?nil id) -> Models::PowerOutputConfiguration
+                                     | (String id) -> Models::PowerOutputConfiguration::Instance
 
     def self.RelativeRotary: (?nil id) -> Models::RelativeRotary
                            | (String id) -> Models::RelativeRotary::Instance

@@ -6,7 +6,7 @@ module Hue
       # Configuration of a MotionAware motion area (Bridge Pro).
       class MotionAreaConfiguration < Base
         resource_type 'motion_area_configuration'
-        operations :update
+        operations :create, :update, :delete
       end
     end
   end

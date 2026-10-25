@@ -6,7 +6,7 @@ module Hue
       # An automation configured on the bridge (timer, wake-up, presence mimicking), instance of a behavior script.
       class BehaviorInstance < Base
         resource_type 'behavior_instance'
-        operations :update
+        operations :create, :update, :delete
       end
     end
   end

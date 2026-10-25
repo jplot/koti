@@ -2,8 +2,11 @@ module Hue
   module Sdk
     module Models
       class EntertainmentConfiguration < Base
+        include Operations::Create
+
         class Instance < Base::Instance
           include Operations::Update
+          include Operations::Delete
         end
       end
     end

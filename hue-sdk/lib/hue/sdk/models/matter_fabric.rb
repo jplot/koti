@@ -6,7 +6,7 @@ module Hue
       # A Matter fabric (controller ecosystem) the bridge is shared with.
       class MatterFabric < Base
         resource_type 'matter_fabric'
-        operations :update
+        operations :update, :delete
       end
     end
   end

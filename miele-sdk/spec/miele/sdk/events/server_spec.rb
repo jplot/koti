@@ -39,6 +39,14 @@ RSpec.describe Miele::Sdk::Events::Server do
     expect(response['Location']).to match(%r{\Ahttp://127\.0\.0\.1/Subscriptions/\d+/\z})
   end
 
+  it 'numbers subscription slots from 1 to 63, as appliances do' do
+    slots = %w[/State/ /State/Light/ /State/Status/ /Ident/].map do |resource|
+      body = JSON.generate(Resource: "/Devices/000000004321#{resource}")
+      send_to_server('POST', '/Subscriptions', body)['Location'][%r{/Subscriptions/(\d+)/}, 1].to_i
+    end
+    expect(slots).to all(be_between(1, 63))
+  end
+
   it 'gives a resource the same subscription slot each time' do
     body = JSON.generate(Resource: '/Ident/')
     locations = Array.new(2) { send_to_server('POST', '/Subscriptions', body)['Location'] }

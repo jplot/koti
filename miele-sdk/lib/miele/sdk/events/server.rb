@@ -104,11 +104,12 @@ module Miele
         end
 
         # The slot comes from the resource rather than a counter, so that
-        # connection threads share no state and a renewed subscription keeps its slot.
+        # connection threads share no state and a renewed subscription keeps its
+        # slot; appliances number theirs from 1 to 63.
         #
         # @return [void]
         def subscribe(socket, request, plaintext)
-          slot = Zlib.crc32(JSON.parse(plaintext)['Resource'].to_s)
+          slot = (Zlib.crc32(JSON.parse(plaintext)['Resource'].to_s) % 63) + 1
           reply(socket, 201, location: "http://#{request.headers['host']}/Subscriptions/#{slot}/")
         end
 

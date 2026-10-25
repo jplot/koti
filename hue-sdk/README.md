@@ -260,4 +260,4 @@ HUE_LIVE=1 HUE_HOST=192.0.2.10 HUE_BRIDGE_ID=ECB5FAFFFE000001 HUE_APPLICATION_KE
 
 ## License
 
-Mozilla Public License 2.0, see [LICENSE](../LICENSE).
+Mozilla Public License 2.0, see [LICENSE](LICENSE).

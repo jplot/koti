@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.files = IO.popen(%w[git ls-files -z --cached --others --exclude-standard], chdir: __dir__, err: IO::NULL) do |ls|
     ls.readlines("\x0", chomp: true).select do |file|
-      file.start_with?('lib/', 'sig/') || %w[README.md CHANGELOG.md].include?(file)
+      file.start_with?('lib/', 'sig/') || %w[README.md CHANGELOG.md LICENSE].include?(file)
     end
   end
   spec.require_paths = ['lib']

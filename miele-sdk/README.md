@@ -209,7 +209,8 @@ anything is sent.
 
 - Device types, statuses and program types: the Miele 3rd Party API documentation
   ([capabilities by device](https://developer.miele.com/docs/third-party-api/API_V1.1.x_capabilities_by_device.pdf)
-  and its 2022 OpenAPI description).
+  and its 2022 OpenAPI description). Statuses 144, 145 and 147, and 148 on hoods, take the names
+  the Miele app 4.19.0 gives them.
 - The local protocol (signing, DOP2 layout, Dop1 objects, power sequence, SuperVision):
   [ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan), building on the work of
   [MieleRESTServer](https://github.com/akappner/MieleRESTServer).

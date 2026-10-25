@@ -13,6 +13,10 @@ ecosystem, each published as its own gem and working on the local network.
 These projects are not affiliated with, endorsed by or sponsored by Signify, Miele,
 Groupe Atlantic or Google.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## License
 
 Mozilla Public License 2.0, see [LICENSE](LICENSE).

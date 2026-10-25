@@ -3,5 +3,7 @@ module Miele
     extend Configuration
 
     def self.discover: (?timeout: Integer | Float, ?address: String, ?port: Integer) -> Array[Discovery::Appliance]
+
+    def self.appliance: (String host) -> Appliance
   end
 end

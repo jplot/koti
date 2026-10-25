@@ -1,0 +1,39 @@
+module Miele
+  module Sdk
+    class Appliance
+      type resource = Hash[String, untyped]
+
+      @fab: String?
+
+      attr_reader host: String
+
+      def initialize: (String host) -> void
+
+      def fab: () -> String
+
+      def ident: () -> resource
+
+      def settings: () -> resource
+
+      def service: () -> resource
+
+      def update: () -> resource
+
+      def supervision: () -> resource
+
+      def info: () -> resource
+
+      def host_info: () -> resource
+
+      def software_update: () -> resource
+
+      def device_type: () -> Symbol
+
+      def get: (String path) -> resource
+
+      private
+
+      def device: (String resource) -> resource
+    end
+  end
+end

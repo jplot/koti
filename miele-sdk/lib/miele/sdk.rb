@@ -6,6 +6,8 @@ require_relative 'sdk/configuration'
 require_relative 'sdk/crypto'
 require_relative 'sdk/connection'
 require_relative 'sdk/discovery'
+require_relative 'sdk/catalog/device_types'
+require_relative 'sdk/appliance'
 
 # Namespace of the koti SDKs for the Miele ecosystem.
 module Miele
@@ -28,5 +30,10 @@ module Miele
     # @return [Array<Discovery::Appliance>]
     # @api public
     def self.discover(timeout: 4, address: '224.0.0.251', port: 5353) = Discovery.discover(timeout:, address:, port:)
+
+    # @param host [String] address or +.local+ name of the appliance
+    # @return [Appliance]
+    # @api public
+    def self.appliance(host) = Appliance.new(host)
   end
 end

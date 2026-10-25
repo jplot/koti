@@ -74,6 +74,26 @@ RSpec.describe Miele::Sdk::State do
     expect([24_004, 24_036].map { name.call(:coffee_system, it, 4) }).to eq(%i[cappuccino unknown])
   end
 
+  context 'with laundry appliances' do
+    def name(type, id, version, tech_type = 'WWG660')
+      described_class.new({ 'ProgramID' => id }, type, protocol_version: version, tech_type:).program
+    end
+
+    it 'names a washing machine program from the table the Miele app picks for the model', :aggregate_failures do
+      expect([name(:washing_machine, 2, 4), name(:washing_machine, 2, 2)]).to eq(%i[normal cotton])
+      expect(name(:washing_machine, 2, 4, 'PWM507')).to eq(:coloured_items)
+      expect(name(:washing_machine_professional, 2, 4)).to eq(:cotton)
+      expect([name(:washing_machine, 31, 4, 'W1'), name(:washing_machine, 31, 4)]).to eq(%i[automatic automatic_plus])
+      expect(name(:washing_machine, 31, 2, 'W1')).to eq(:automatic_plus)
+    end
+
+    it 'names a tumble dryer program from the table the Miele app picks for the model', :aggregate_failures do
+      expect([name(:tumble_dryer, 4, 4), name(:tumble_dryer, 4, 4, 'PDR910')]).to eq(%i[woollens_handcare woollens])
+      expect(name(:tumble_dryer_semi_professional, 4, 4)).to eq(:woollens)
+      expect([name(:tumble_dryer, 10, 4), name(:tumble_dryer, 10, 2)]).to eq(%i[pre_ironing gentle_smoothing])
+    end
+  end
+
   it 'leaves the program unknown where the Miele app names none' do
     programs = [2, 4].map { described_class.new({ 'ProgramID' => 13 }, :hood, protocol_version: it).program }
     expect(programs).to eq(%i[unknown unknown])

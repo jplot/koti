@@ -72,6 +72,12 @@ module Miele
 
       def program_table: () -> Symbol?
 
+      def dryer_table: (Symbol kind) -> Symbol
+
+      def washer_table: (Symbol kind) -> Symbol
+
+      def w2_discovery?: () -> bool
+
       def oven_programs: () -> Hash[Integer, Symbol]
 
       def device_class: () -> Integer?

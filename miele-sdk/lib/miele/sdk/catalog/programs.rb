@@ -16,6 +16,16 @@ module Miele
       # Dishwasher device types, which read {PROGRAMS} by protocol.
       DISHWASHER_TYPES = %i[dishwasher dishwasher_semi_professional dishwasher_professional].freeze
 
+      # Laundry device types as the Miele app groups them to pick a {PROGRAMS}
+      # table: professional models read the semi-professional tables.
+      LAUNDRY_TYPES = {
+        washing_machine: :washing_machine, tumble_dryer: :tumble_dryer, washer_dryer: :washer_dryer,
+        washing_machine_semi_professional: :semi_professional_washing_machine,
+        washing_machine_professional: :semi_professional_washing_machine,
+        tumble_dryer_semi_professional: :semi_professional_tumble_dryer,
+        tumble_dryer_professional: :semi_professional_tumble_dryer
+      }.freeze
+
       # {PROGRAMS} table of the other device types the Miele app names programs of.
       PROGRAM_TABLES = { dish_warmer: :dish_warmer, coffee_system: :coffee }.freeze
     end

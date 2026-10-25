@@ -12,7 +12,6 @@ module SdkHelpers
     end
   end
 
-  # Sends a request signed and encrypted as an appliance does, to a local events server.
   def deliver(port, verb, path, body = '', group_key: FakeAppliance::GROUP_KEY)
     request = Net::HTTP.const_get(verb.capitalize).new(path)
     Miele::Sdk::Connection.sign(request, '127.0.0.1', body.empty? ? '' : Miele::Sdk::Crypto.pad(body),

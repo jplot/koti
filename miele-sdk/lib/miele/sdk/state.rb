@@ -57,8 +57,19 @@ module Miele
       #   appliance, or +:unknown+
       # @api public
       def program_type
-        dop2 = Catalog::DOP2_PROTOCOL_VERSIONS.include?(protocol_version)
-        (dop2 ? Catalog::DOP2_PROGRAM_TYPES : Catalog::PROGRAM_TYPES).fetch(raw['ProgramType'], :unknown)
+        (dop2? ? Catalog::DOP2_PROGRAM_TYPES : Catalog::PROGRAM_TYPES).fetch(raw['ProgramType'], :unknown)
+      end
+
+      # @return [Integer, nil] +ProgramID+ of the selected program
+      # @api public
+      def program_id = raw['ProgramID']
+
+      # @return [Symbol] name from {Catalog::OVEN_PROGRAMS} on a DOP2 oven, or +:unknown+
+      # @api public
+      def program
+        return :unknown unless dop2? && Catalog::OVEN_DEVICE_TYPES.include?(device_type)
+
+        Catalog::OVEN_PROGRAMS.fetch(program_id, :unknown)
       end
 
       # @return [Symbol] phase from the table of the device type's family, or +:unknown+
@@ -125,6 +136,9 @@ module Miele
       # @param key [String] a field of hundredths of a degree
       # @return [Array<Float, nil>]
       def celsius(key) = raw.fetch(key, []).map { it / 100.0 unless it == ABSENT }
+
+      # @return [Boolean]
+      def dop2? = Catalog::DOP2_PROTOCOL_VERSIONS.include?(protocol_version)
     end
   end
 end

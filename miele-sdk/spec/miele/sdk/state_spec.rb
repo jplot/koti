@@ -51,6 +51,19 @@ RSpec.describe Miele::Sdk::State do
     expect(types).to eq(%i[normal_operation customer_service_program helper_program])
   end
 
+  it 'names the program of a DOP2 oven the way the Miele app does', :aggregate_failures do
+    oven = ->(id) { described_class.new({ 'ProgramID' => id }, device_type, protocol_version: 4) }
+    expect(oven.call(13)).to have_attributes(program_id: 13, program: :fan_plus)
+    expect(oven.call(430).program).to eq(:sirloin_joint_roast_rare)
+  end
+
+  it 'leaves the program unknown on a Dop1 oven and outside ovens' do
+    programs = [[device_type, 2], [:hood, 4]].map do |type, version|
+      described_class.new({ 'ProgramID' => 13 }, type, protocol_version: version).program
+    end
+    expect(programs).to eq(%i[unknown unknown])
+  end
+
   it 'converts temperatures to Celsius and keeps absent ones as nil' do
     expect([state.temperatures, state.target_temperatures]).to eq([[180.5, nil, nil], [180.0, nil, nil]])
   end

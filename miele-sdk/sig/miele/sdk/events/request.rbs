@@ -1,0 +1,29 @@
+module Miele
+  module Sdk
+    module Events
+      class Request
+        attr_reader verb: String
+
+        attr_reader path: String
+
+        attr_reader headers: Hash[String, String]
+
+        attr_reader body: String
+
+        def self.read: (TCPSocket socket) -> Request?
+
+        def self.read_headers: (TCPSocket socket) -> Hash[String, String]
+
+        def initialize: (verb: String, path: String, headers: Hash[String, String], body: String) -> void
+
+        def plaintext: () -> String?
+
+        private
+
+        def claimed_signature: () -> String?
+
+        def signed_lines: () -> Array[String]
+      end
+    end
+  end
+end

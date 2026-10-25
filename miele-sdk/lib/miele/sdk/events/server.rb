@@ -1,0 +1,124 @@
+# frozen_string_literal: true
+
+require 'json'
+require 'socket'
+require 'time'
+require 'zlib'
+
+module Miele
+  module Sdk
+    module Events
+      # HTTP endpoint the appliances push their changes to once they know this
+      # host as a peer. Every request must be signed by the household key.
+      class Server
+        CONTENT_TYPE = 'application/vnd.miele.v1+json; charset=utf-8'
+        private_constant :CONTENT_TYPE
+
+        REASONS = { 200 => 'OK', 201 => 'Created', 204 => 'No Content', 403 => 'Forbidden' }.freeze
+        private_constant :REASONS
+
+        SUPERVISION = %r{\A/Devices/\d+/SuperVision/(?<peer>\d+)(?<resource>/.*)\z}
+        private_constant :SUPERVISION
+
+        # @param port [Integer] port to listen on, 0 for any
+        # @param fab [String] fabrication number this host takes in the household
+        # @yieldparam event [Event] each change an appliance pushes, from the thread of its
+        #   connection: several pushes run the block at once
+        def initialize(port:, fab:, &on_event)
+          @port = port
+          @fab = fab
+          @on_event = on_event
+        end
+
+        # @return [Integer] port the server listens on
+        # @api public
+        def port = @server.addr[1]
+
+        # @return [void]
+        # @api public
+        def start
+          @server = TCPServer.new('0.0.0.0', @port) # steep:ignore UnexpectedPositionalArgument
+          @acceptor = Thread.new { accept_loop }
+        end
+
+        # @return [void]
+        # @api public
+        def stop
+          @server&.close
+          @acceptor&.kill
+        end
+
+        private
+
+        # @return [void]
+        def accept_loop
+          loop { Thread.new(@server.accept) { serve(it) } }
+        rescue IOError
+          nil
+        end
+
+        # @param socket [TCPSocket]
+        # @return [void]
+        def serve(socket)
+          request = Request.read(socket) or return
+          plaintext = request.plaintext or return reply(socket, 403)
+
+          route(socket, request, plaintext)
+        rescue SystemCallError, IOError
+          nil
+        ensure
+          socket.close
+        end
+
+        # @return [void]
+        def route(socket, request, plaintext)
+          case [request.verb, request.path]
+          in ['POST', %r{\A/Subscriptions/?\z}] then subscribe(socket, request, plaintext)
+          in ['POST', SUPERVISION] then push(socket, request.path, plaintext)
+          in ['GET', String => path] then reply(socket, *Identity.resource(path, @fab))
+          else reply(socket, 204)
+          end
+        end
+
+        # The slot comes from the resource rather than a counter, so that
+        # connection threads share no state and a renewed subscription keeps its slot.
+        #
+        # @return [void]
+        def subscribe(socket, request, plaintext)
+          slot = Zlib.crc32(JSON.parse(plaintext)['Resource'].to_s)
+          reply(socket, 201, location: "http://#{request.headers['host']}/Subscriptions/#{slot}/")
+        end
+
+        # @return [void]
+        def push(socket, path, plaintext)
+          reply(socket, 204)
+          match = SUPERVISION.match(path) #: MatchData
+          content = JSON.parse(plaintext)['Content'].to_h
+          @on_event.call(Event.new(fab: match[:peer], resource: match[:resource], content:))
+        end
+
+        # @param socket [TCPSocket]
+        # @param status [Integer]
+        # @param body [String] plaintext, sent signed and encrypted
+        # @param location [String, nil] +Location+ header
+        # @return [void]
+        def reply(socket, status, body = '', location: nil)
+          date = Time.now.httpdate
+          payload, signature = body.empty? ? ['', nil] : seal(status, date, body)
+          head = { 'Date' => date, 'Content-Type' => CONTENT_TYPE, 'Content-Length' => payload.bytesize.to_s,
+                   'Connection' => 'close', 'X-Signature' => signature, 'Location' => location }.compact
+          socket.write("HTTP/1.1 #{status} #{REASONS.fetch(status)}\r\n",
+                       *head.map { |name, value| "#{name}: #{value}\r\n" }, "\r\n", payload)
+        end
+
+        # @return [Array(String, String)] ciphertext and its +X-Signature+ header
+        def seal(status, date, body)
+          group_id, key = Connection.credentials
+          padded = Crypto.pad(body)
+          signature = Crypto.signature(key:, lines: [status, CONTENT_TYPE, date], body: padded)
+          [Crypto.encrypt(key:, signature:, plaintext: padded), Crypto.authorization(group_id:, signature:)]
+        end
+      end
+    end
+  end
+end

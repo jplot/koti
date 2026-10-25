@@ -1,0 +1,15 @@
+module Miele
+  module Sdk
+    module Events
+      DEVICE_TYPE: Integer
+
+      class Event < Data
+        attr_reader fab: String
+        attr_reader resource: String
+        attr_reader content: Hash[String, untyped]
+
+        def self.new: (fab: String, resource: String, content: Hash[String, untyped]) -> Event
+      end
+    end
+  end
+end

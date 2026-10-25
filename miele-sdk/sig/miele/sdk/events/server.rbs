@@ -1,0 +1,47 @@
+module Miele
+  module Sdk
+    module Events
+      class Server
+        CONTENT_TYPE: String
+
+        REASONS: Hash[Integer, String]
+
+        SUPERVISION: Regexp
+
+        @port: Integer
+
+        @fab: String
+
+        @on_event: ^(Event) -> void
+
+        @server: TCPServer
+
+        @acceptor: Thread?
+
+        def initialize: (port: Integer, fab: String) { (Event) -> void } -> void
+
+        def port: () -> Integer
+
+        def start: () -> void
+
+        def stop: () -> void
+
+        private
+
+        def accept_loop: () -> void
+
+        def serve: (TCPSocket socket) -> void
+
+        def route: (TCPSocket socket, Request request, String plaintext) -> void
+
+        def subscribe: (TCPSocket socket, Request request, String plaintext) -> void
+
+        def push: (TCPSocket socket, String path, String plaintext) -> void
+
+        def reply: (TCPSocket socket, Integer status, ?String body, ?location: String?) -> void
+
+        def seal: (Integer status, String date, String body) -> [String, String]
+      end
+    end
+  end
+end

@@ -1,0 +1,15 @@
+module Miele
+  module Sdk
+    module Events
+      module Identity
+        STATE: Hash[Symbol, untyped]
+
+        def self?.resource: (String path, String fab) -> ([Integer, String] | [Integer])
+
+        def self?.routes: (String fab) -> Hash[Regexp, Hash[untyped, untyped]]
+
+        def self?.ident: (String fab) -> Hash[Symbol, untyped]
+      end
+    end
+  end
+end

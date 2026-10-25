@@ -1,0 +1,58 @@
+module Miele
+  module Sdk
+    module Events
+      class Advertiser
+        type record = [String, Integer, Resolv::DNS::Resource]
+
+        SERVICE: String
+
+        TTL: Integer
+
+        IN: singleton(Resolv::DNS::Resource::IN)
+
+        @fab: String
+
+        @host: String
+
+        @port: Integer
+
+        @address: String
+
+        @mdns_port: Integer
+
+        @socket: UDPSocket
+
+        @thread: Thread?
+
+        @records: Array[record]?
+
+        def initialize: (fab: String, host: String, port: Integer, ?address: String, ?mdns_port: Integer) -> void
+
+        def instance: () -> String
+
+        def hostname: () -> String
+
+        def port: () -> Integer
+
+        def start: () -> void
+
+        def stop: () -> void
+
+        private
+
+        def serve: () -> void
+
+        def answer: (String packet, Integer source_port) -> String?
+
+        def matching: (String name, Class type) -> Array[record]
+
+        def records: () -> Array[record]
+
+        def properties: () -> Array[String]
+
+        def response: (Integer id, Array[record] answers, ?Array[record] additional,
+                       ?Array[[Resolv::DNS::Name, singleton(Resolv::DNS::Query)]] questions) -> String
+      end
+    end
+  end
+end

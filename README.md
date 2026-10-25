@@ -6,7 +6,7 @@ ecosystem, each published as its own gem and working on the local network.
 | Gem | Ecosystem | Status |
 |---|---|---|
 | [`hue-sdk`](hue-sdk) | Philips Hue (CLIP API v2) | In progress |
-| `miele-sdk` | Miele@home | Planned |
+| [`miele-sdk`](miele-sdk) | Miele@home (local DOP2) | In progress |
 | `sauter-sdk` | Sauter / Atlantic Cozytouch | Planned |
 | `google-home-sdk` | Google Nest / Google Home | Planned |
 

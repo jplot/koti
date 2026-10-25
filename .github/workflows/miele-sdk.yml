@@ -1,0 +1,32 @@
+name: miele-sdk
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'miele-sdk/**'
+      - '.rubocop.yml'
+      - '.github/workflows/miele-sdk.yml'
+  pull_request:
+    paths:
+      - 'miele-sdk/**'
+      - '.rubocop.yml'
+      - '.github/workflows/miele-sdk.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: miele-sdk
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+          working-directory: miele-sdk
+      - run: bundle exec rake

@@ -1,0 +1,5 @@
+module Miele
+  module Sdk
+    VERSION: String
+  end
+end

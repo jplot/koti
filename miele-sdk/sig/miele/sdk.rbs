@@ -1,0 +1,5 @@
+module Miele
+  module Sdk
+    extend Configuration
+  end
+end

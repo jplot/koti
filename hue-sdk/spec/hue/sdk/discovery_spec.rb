@@ -40,9 +40,12 @@ RSpec.describe Hue::Sdk::Discovery do
   context 'with a responder on the network' do
     let(:responder) { UDPSocket.new.tap { |socket| socket.bind('127.0.0.1', 0) } }
     let(:questions) { Queue.new }
+    let(:lost_queries) { 0 }
 
     before do
+      lost = lost_queries
       Thread.new do
+        lost.times { responder.recvfrom(512) }
         query, from = responder.recvfrom(512)
         questions << dns::Message.decode(query).question.map { |name, type| [name.to_s, type] }
         2.times { responder.send(answer, 0, from[3], from[1]) }
@@ -55,6 +58,14 @@ RSpec.describe Hue::Sdk::Discovery do
       found = Hue::Sdk.discover(address: '127.0.0.1', port: responder.addr[1], timeout: 0.5)
       expect(found).to eq([bridge])
       expect(questions.pop).to eq([['_hue._tcp.local', dns::Resource::IN::PTR]])
+    end
+
+    context 'when the first query is lost' do
+      let(:lost_queries) { 1 }
+
+      it 'asks again one second later' do
+        expect(Hue::Sdk.discover(address: '127.0.0.1', port: responder.addr[1], timeout: 1.5)).to eq([bridge])
+      end
     end
   end
 

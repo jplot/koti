@@ -38,8 +38,7 @@ module Hue
       # @api public
       def discover(timeout:, address:, port:)
         socket = UDPSocket.new
-        socket.send(query, 0, address, port)
-        listen(socket, timeout).uniq(&:bridge_id)
+        listen(socket, timeout) { socket.send(query, 0, address, port) }.uniq(&:bridge_id)
       ensure
         socket&.close
       end
@@ -66,16 +65,30 @@ module Hue
 
       # @param socket [UDPSocket]
       # @param timeout [Numeric]
+      # @yield sends the query, at each of {ask_times}
       # @return [Array<Bridge>]
       # @api private
       def listen(socket, timeout)
-        deadline = now + timeout
+        start = now
+        asks = ask_times(timeout)
         found = [] #: Array[Bridge]
-        while (left = deadline - now).positive? && socket.wait_readable(left)
+        while (elapsed = now - start) < timeout
+          yield asks.shift if asks.fetch(0, timeout) <= elapsed
+          next unless socket.wait_readable([asks.fetch(0, timeout) - elapsed, 0].max)
+
           found.concat(parse(socket.recvfrom(9000).first))
         end
         found
       end
+
+      # Wi-Fi does not retransmit multicast (1 discovery in 16 found nothing on
+      # a real network): the query is repeated, each gap twice the previous one
+      # (RFC 6762, section 5.2).
+      #
+      # @param timeout [Numeric]
+      # @return [Array<Integer>] seconds after the start at which the query is sent: 0, 1, 3, 7…
+      # @api private
+      def ask_times(timeout) = Array.new(timeout.ceil) { (1 << it) - 1 }.select { it < timeout }
 
       # @return [Float] monotonic clock, in seconds
       # @api private

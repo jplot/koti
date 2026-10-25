@@ -22,7 +22,9 @@ module Hue
 
       def self?.query: () -> String
 
-      def self?.listen: (UDPSocket socket, Integer | Float timeout) -> Array[Bridge]
+      def self?.listen: (UDPSocket socket, Integer | Float timeout) { (Integer?) -> void } -> Array[Bridge]
+
+      def self?.ask_times: (Integer | Float timeout) -> Array[Integer]
 
       def self?.bridges: (Array[record] records) -> Array[Bridge]
 

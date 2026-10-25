@@ -217,7 +217,7 @@ anything is sent.
   the Miele app 4.19.0 gives them; the app also gives the program types of DOP2 appliances, the
   last two of Dop1 ones, and the phases of hoods. The other phases come from Home Assistant core.
 - Oven program names: the oven menus of the Miele app 4.19.0 and their default English labels,
-  2,244 programs kept in `lib/miele/sdk/catalog/oven_programs.tsv`; for Dop1 ovens, the app's
+  2,244 programs kept in `lib/miele/sdk/catalog/dop2_oven_programs.tsv`; for Dop1 ovens, the app's
   seven program tables and the rule picking one, 4,143 programs kept in
   `lib/miele/sdk/catalog/dop1_oven_programs.tsv`.
 - The local protocol (signing, DOP2 layout, Dop1 objects, power sequence, SuperVision):

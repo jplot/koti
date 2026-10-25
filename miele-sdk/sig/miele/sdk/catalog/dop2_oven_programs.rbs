@@ -1,0 +1,9 @@
+module Miele
+  module Sdk
+    module Catalog
+      DOP2_OVEN_PROGRAMS: Hash[Integer, Symbol]
+
+      DOP2_OVEN_DEVICE_TYPES: Array[Symbol]
+    end
+  end
+end

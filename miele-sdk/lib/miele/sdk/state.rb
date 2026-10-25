@@ -69,7 +69,7 @@ module Miele
       # @api public
       def program_id = raw['ProgramID']
 
-      # @return [Symbol] name from {Catalog::OVEN_PROGRAMS} on a DOP2 oven, from the
+      # @return [Symbol] name from {Catalog::DOP2_OVEN_PROGRAMS} on a DOP2 oven, from the
       #   {Catalog::DOP1_OVEN_TABLES} table of a Dop1 oven, or +:unknown+
       # @api public
       def program = oven_programs.fetch(program_id, :unknown)
@@ -144,7 +144,7 @@ module Miele
 
       # @return [Hash{Integer=>Symbol}] program names of this oven, empty for other appliances
       def oven_programs
-        return Catalog::OVEN_DEVICE_TYPES.include?(device_type) ? Catalog::OVEN_PROGRAMS : {} if dop2?
+        return Catalog::DOP2_OVEN_DEVICE_TYPES.include?(device_type) ? Catalog::DOP2_OVEN_PROGRAMS : {} if dop2?
         return {} unless protocol_version == Catalog::DOP1_PROTOCOL_VERSION
 
         tables = Catalog::DOP1_OVEN_TABLES[device_type] or return {}

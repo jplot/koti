@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'singleton'
+require 'socket'
+require 'zlib'
 
 module Miele
   module Sdk
@@ -35,6 +37,13 @@ module Miele
         #   (default: the local address that routes to them)
         attr_accessor :advertise_address
 
+        # Stable from one run to the next, so that appliances recognize this host and
+        # a run cut short leaves subscriptions the next one withdraws.
+        #
+        # @return [String] fabrication number this host takes in the household: +000999+ then six
+        #   digits from the host name
+        attr_accessor :listener_fab
+
         # Initializes the settings with their defaults.
         #
         # @api private
@@ -43,6 +52,7 @@ module Miele
           @open_timeout = 5
           @read_timeout = 10
           @listener_port = 18_082
+          @listener_fab = format('000999%06d', Zlib.crc32(Socket.gethostname) % 1_000_000)
         end
       end
 

@@ -1,0 +1,37 @@
+module Miele
+  module Sdk
+    module Events
+      class Listener
+        @appliances: Array[Appliance]
+
+        @mdns_address: String
+
+        @mdns_port: Integer
+
+        @fab: String
+
+        @events: Thread::Queue[Event]
+
+        @server: Server?
+
+        @advertiser: Advertiser?
+
+        def initialize: (hosts: Array[String], ?mdns_address: String, ?mdns_port: Integer) -> void
+
+        def each: () ?{ (Event) -> void } -> untyped
+
+        private
+
+        def stream: () { (Event) -> void } -> void
+
+        def open: () -> void
+
+        def close: () -> void
+
+        def withdraw: (Appliance appliance) -> void
+
+        def local_address: () -> String
+      end
+    end
+  end
+end

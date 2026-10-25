@@ -17,6 +17,8 @@ require_relative 'sdk/events/event'
 require_relative 'sdk/events/advertiser'
 require_relative 'sdk/events/identity'
 require_relative 'sdk/events/request'
+require_relative 'sdk/events/enrollment'
+require_relative 'sdk/events/listener'
 require_relative 'sdk/events/server'
 require_relative 'sdk/appliance'
 
@@ -46,5 +48,13 @@ module Miele
     # @return [Appliance]
     # @api public
     def self.appliance(host) = Appliance.new(host)
+
+    # Streams the changes the appliances push, until the block breaks or raises.
+    #
+    # @param hosts [Array<String>] addresses of the appliances to listen to
+    # @yieldparam event [Events::Event]
+    # @return [Enumerator::Lazy<Events::Event>, Object] the events without a block
+    # @api public
+    def self.events(hosts:, &) = Events::Listener.new(hosts:).each(&)
   end
 end

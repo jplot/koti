@@ -12,6 +12,7 @@ module Miele
         attr_accessor read_timeout: Integer | Float
         attr_accessor listener_port: Integer
         attr_accessor advertise_address: String?
+        attr_accessor listener_fab: String
 
         def initialize: () -> void
       end

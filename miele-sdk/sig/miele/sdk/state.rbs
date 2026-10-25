@@ -29,6 +29,10 @@ module Miele
 
       def program_type: () -> Symbol
 
+      def program_id: () -> Integer?
+
+      def program: () -> Symbol
+
       def program_phase: () -> Symbol
 
       def remaining_time: () -> Integer?
@@ -58,6 +62,8 @@ module Miele
       def seconds: (String key) -> Integer?
 
       def celsius: (String key) -> Array[Float?]
+
+      def dop2?: () -> bool
     end
   end
 end

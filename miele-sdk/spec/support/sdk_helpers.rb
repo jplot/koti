@@ -17,7 +17,7 @@ module SdkHelpers
     request = Net::HTTP.const_get(verb.capitalize).new(path)
     Miele::Sdk::Connection.sign(request, '127.0.0.1', body.empty? ? '' : Miele::Sdk::Crypto.pad(body),
                                 [FakeAppliance::GROUP_ID].pack('H*'), [group_key].pack('H*'))
-    Net::HTTP.start('127.0.0.1', port) { it.request(request) }
+    Net::HTTP.start('127.0.0.1', port, read_timeout: 5) { it.request(request) }
   end
 end
 

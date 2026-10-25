@@ -27,8 +27,9 @@ RSpec.describe Miele::Sdk::Events::Server do
     expect(events.pop(timeout: 1)).to eq(event)
   end
 
-  it 'drops a push whose signature is wrong', :aggregate_failures do
-    expect(send_to_server('POST', supervision('000111222333'), push, group_key: 'AB' * 64).code).to eq('403')
+  it 'drops a push whose signature is wrong and says so', :aggregate_failures do
+    expect { send_to_server('POST', supervision('000111222333'), push, group_key: 'AB' * 64) }
+      .to output(/refused a request from 127\.0\.0\.1 \(Host: 127\.0\.0\.1\)/).to_stderr
     expect(events.pop(timeout: 0.2)).to be_nil
   end
 

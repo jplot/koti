@@ -2,6 +2,15 @@ module Miele
   module Sdk
     module Events
       class Request
+        class Malformed < StandardError
+        end
+
+        LINE_LIMIT: Integer
+
+        HEADER_LIMIT: Integer
+
+        BODY_LIMIT: Integer
+
         attr_reader verb: String
 
         attr_reader path: String
@@ -12,11 +21,15 @@ module Miele
 
         def self.read: (TCPSocket socket) -> Request?
 
+        def self.read_line: (TCPSocket socket) -> String?
+
         def self.read_headers: (TCPSocket socket) -> Hash[String, String]
 
         def initialize: (verb: String, path: String, headers: Hash[String, String], body: String) -> void
 
         def plaintext: () -> String?
+
+        def household?: () -> bool
 
         private
 

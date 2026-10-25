@@ -16,7 +16,7 @@ module Miele
 
         @server: TCPServer
 
-        @acceptor: Thread?
+        @connections: ThreadGroup
 
         def initialize: (port: Integer, fab: String) { (Event) -> void } -> void
 
@@ -33,6 +33,8 @@ module Miele
         def serve: (TCPSocket socket) -> void
 
         def route: (TCPSocket socket, Request request, String plaintext) -> void
+
+        def refuse: (TCPSocket socket, Request request) -> void
 
         def subscribe: (TCPSocket socket, Request request, String plaintext) -> void
 

@@ -7,6 +7,15 @@ module Miele
     module Events
       # A request an appliance sends to the {Server}, as read from its connection.
       class Request
+        # A request beyond the limits below, answered 400.
+        class Malformed < StandardError; end
+
+        # Pushes are a few hundred bytes of JSON: anything far larger is not an appliance.
+        LINE_LIMIT = 8192
+        HEADER_LIMIT = 100
+        BODY_LIMIT = 65_536
+        private_constant :LINE_LIMIT, :HEADER_LIMIT, :BODY_LIMIT
+
         # @return [String] HTTP method
         attr_reader :verb
 
@@ -21,22 +30,41 @@ module Miele
 
         # @param socket [TCPSocket]
         # @return [Request, nil] nil when the peer closed the connection without a request
+        # @raise [Malformed] if a line, the headers or the body exceed their limits
         # @api private
         def self.read(socket)
-          verb, path = socket.gets("\r\n").to_s.split
+          verb, path = read_line(socket)&.split
           return unless verb && path
 
           headers = read_headers(socket)
-          new(verb:, path:, headers:, body: socket.read(headers.fetch('content-length', '0').to_i).to_s)
+          length = Integer(headers.fetch('content-length', '0'), exception: false)
+          raise Malformed, "Content-Length #{headers['content-length']}" unless length&.between?(0, BODY_LIMIT)
+
+          new(verb:, path:, headers:, body: socket.read(length).to_s)
         end
 
         # @param socket [TCPSocket]
+        # @return [String, nil] the line without its CRLF, nil at the end of the stream
+        # @raise [Malformed]
+        # @api private
+        def self.read_line(socket)
+          line = socket.gets("\r\n", LINE_LIMIT) or return
+          raise Malformed, 'line too long' unless line.end_with?("\r\n")
+
+          line.chomp("\r\n")
+        end
+        private_class_method :read_line
+
+        # @param socket [TCPSocket]
         # @return [Hash{String=>String}] by lowercase name
+        # @raise [Malformed]
         # @api private
         def self.read_headers(socket)
           headers = {} #: Hash[String, String]
-          while (line = socket.gets("\r\n")) && line != "\r\n"
-            name, value = line.chomp("\r\n").split(': ', 2)
+          while (line = read_line(socket)) && !line.empty?
+            raise Malformed, 'too many headers' if headers.size == HEADER_LIMIT
+
+            name, value = line.split(': ', 2)
             headers[name.to_s.downcase] = value.to_s
           end
           headers
@@ -65,12 +93,19 @@ module Miele
           nil
         end
 
+        # @return [Boolean] whether the request claims the household's GroupID
+        # @api private
+        def household?
+          group_id = headers['authorization'].to_s.delete_prefix('MieleH256 ').split(':', 2).first.to_s
+          [group_id].pack('H*') == Connection.credentials.first
+        end
+
         private
 
-        # @return [String, nil] the signature, nil unless the request claims the household's GroupID
+        # @return [String, nil] the signature, nil unless the request claims the household and carries one
         def claimed_signature
-          group_id, signature = headers['authorization'].to_s.delete_prefix('MieleH256 ').split(':', 2)
-          [signature].pack('H*') if signature && [group_id].pack('H*') == Connection.credentials.first
+          signature = [headers['authorization'].to_s.split(':', 2).last.to_s].pack('H*')
+          signature if household? && signature.bytesize == 32
         end
 
         # @return [Array<String>] method, host and path, Content-Type, Accept and Date

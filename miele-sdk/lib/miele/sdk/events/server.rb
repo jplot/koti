@@ -14,7 +14,8 @@ module Miele
         CONTENT_TYPE = 'application/vnd.miele.v1+json; charset=utf-8'
         private_constant :CONTENT_TYPE
 
-        REASONS = { 200 => 'OK', 201 => 'Created', 204 => 'No Content', 403 => 'Forbidden' }.freeze
+        REASONS = { 200 => 'OK', 201 => 'Created', 204 => 'No Content', 400 => 'Bad Request',
+                    403 => 'Forbidden' }.freeze
         private_constant :REASONS
 
         SUPERVISION = %r{\A/Devices/\d+/SuperVision/(?<peer>\d+)(?<resource>/.*)\z}
@@ -28,6 +29,7 @@ module Miele
           @port = port
           @fab = fab
           @on_event = on_event
+          @connections = ThreadGroup.new
         end
 
         # @return [Integer] port the server listens on
@@ -38,21 +40,27 @@ module Miele
         # @api public
         def start
           @server = TCPServer.new('0.0.0.0', @port) # steep:ignore UnexpectedPositionalArgument
-          @acceptor = Thread.new { accept_loop }
+          @connections.add(Thread.new { accept_loop })
         end
 
         # @return [void]
         # @api public
         def stop
           @server&.close
-          @acceptor&.kill
+          @connections.list.each(&:kill)
         end
 
         private
 
+        # Connection threads inherit the acceptor's group, which {#stop} ends.
+        #
         # @return [void]
         def accept_loop
-          loop { Thread.new(@server.accept) { serve(it) } }
+          loop do
+            Thread.new(@server.accept) { serve(it) }
+          rescue SystemCallError
+            sleep 0.1 # out of file descriptors (EMFILE): wait for connections to close
+          end
         rescue IOError
           nil
         end
@@ -60,10 +68,13 @@ module Miele
         # @param socket [TCPSocket]
         # @return [void]
         def serve(socket)
+          socket.timeout = Sdk.config.read_timeout
           request = Request.read(socket) or return
-          plaintext = request.plaintext or return reply(socket, 403)
+          plaintext = request.plaintext or return refuse(socket, request)
 
           route(socket, request, plaintext)
+        rescue Request::Malformed
+          reply(socket, 400)
         rescue SystemCallError, IOError
           nil
         ensure
@@ -78,6 +89,18 @@ module Miele
           in ['GET', String => path] then reply(socket, *Identity.resource(path, @fab))
           else reply(socket, 204)
           end
+        end
+
+        # A household request that fails the check is forged, or signed in a way
+        # this SDK does not expect: the warning tells the two apart.
+        #
+        # @return [void]
+        def refuse(socket, request)
+          if request.household?
+            warn "miele-sdk: refused a request from #{socket.remote_address.ip_address} " \
+                 "(Host: #{request.headers['host']}): its signature does not match the household key"
+          end
+          reply(socket, 403)
         end
 
         # The slot comes from the resource rather than a counter, so that

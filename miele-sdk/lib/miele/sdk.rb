@@ -3,6 +3,7 @@
 require_relative 'sdk/version'
 require_relative 'sdk/errors'
 require_relative 'sdk/configuration'
+require_relative 'sdk/crypto'
 
 # Namespace of the koti SDKs for the Miele ecosystem.
 module Miele

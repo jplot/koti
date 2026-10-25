@@ -132,6 +132,47 @@ module Miele
         Connection.request(host, :put, path, body: Dop2.encode(leaf).ljust(32, ' '))
       end
 
+      # Sends a Dop1 request, which hoods in +ProtocolVersion+ 2 answer instead of DOP2.
+      #
+      # @param request [String] built by {Dop1}
+      # @return [String] the hood's answer: +{"Response": hex}+ to a read
+      # @api public
+      def dop1(request)
+        Connection.request(host, :post, "/Devices/#{fab}/DOP/", body: JSON.generate(Request: request)).body
+      end
+
+      # @param level [Integer] 0 (off) to 3, 4 (boost) or 5 (interval)
+      # @raise [ArgumentError] if the level is out of range
+      # @api public
+      def fan_level=(level)
+        tolerating_no_op { dop1(Dop1.fan_level(level)) }
+      end
+
+      # @param minutes [Integer] 0, 5 or 15
+      # @raise [ArgumentError] for any other duration
+      # @api public
+      def fan_run_on_time=(minutes)
+        tolerating_no_op { dop1(Dop1.fan_run_on_time(minutes)) }
+      end
+
+      # @param on [Boolean]
+      # @api public
+      def main_light=(on)
+        tolerating_no_op { dop1(Dop1.main_light(on)) }
+      end
+
+      # @param pf_id [Integer] programming function id (40010: grease filter, 40011: charcoal filter)
+      # @return [Integer, nil] nil when the hood does not expose that setting
+      # @api public
+      def setting(pf_id) = Dop1.setting_value(JSON.parse(dop1(Dop1.setting(pf_id))).fetch('Response'), pf_id)
+
+      # @param pf_id [Integer] programming function id
+      # @param value [Integer] unsigned 32-bit value
+      # @return [void]
+      # @raise [ArgumentError] if the id or the value is out of range
+      # @api public
+      def write_setting(pf_id, value) = tolerating_no_op { dop1(Dop1.write_setting(pf_id, value)) }
+
       # Reads any JSON resource.
       #
       # @param path [String] absolute path
@@ -151,13 +192,17 @@ module Miele
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
       def command(body) = Connection.request(host, :put, "/Devices/#{fab}/State", body: JSON.generate(body))
 
+      # @param body [Hash{Symbol=>Integer}]
+      # @return [void]
+      def change(body) = tolerating_no_op { command(body) }
+
       # The appliance answers 400 to a write that changes nothing, such as
       # switching on a light already on.
       #
-      # @param body [Hash{Symbol=>Integer}]
+      # @yield the write
       # @return [void]
-      def change(body)
-        command(body)
+      def tolerating_no_op
+        yield
       rescue ResponseError => e
         raise unless e.status == 400
       end

@@ -12,6 +12,7 @@ require_relative 'sdk/catalog/program_types'
 require_relative 'sdk/catalog/program_phases'
 require_relative 'sdk/state'
 require_relative 'sdk/dop2'
+require_relative 'sdk/dop1'
 require_relative 'sdk/appliance'
 
 # Namespace of the koti SDKs for the Miele ecosystem.

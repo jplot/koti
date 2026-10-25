@@ -61,6 +61,18 @@ module Miele
 
       def write_dop2: (Dop2::Leaf leaf) -> void
 
+      def dop1: (String request) -> String
+
+      def fan_level=: (Integer level) -> void
+
+      def fan_run_on_time=: (Integer minutes) -> void
+
+      def main_light=: (bool on) -> void
+
+      def setting: (Integer pf_id) -> Integer?
+
+      def write_setting: (Integer pf_id, Integer value) -> void
+
       def get: (String path) -> resource
 
       private
@@ -70,6 +82,8 @@ module Miele
       def command: (Hash[Symbol, Integer] body) -> Connection::Response
 
       def change: (Hash[Symbol, Integer] body) -> void
+
+      def tolerating_no_op: () { () -> untyped } -> void
 
       def dop2_path: (Integer unit, Integer attribute, Integer idx1, Integer idx2) -> String
 

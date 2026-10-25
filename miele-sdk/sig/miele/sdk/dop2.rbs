@@ -57,6 +57,10 @@ module Miele
       def self?.encode: (Leaf leaf) -> String
 
       def self?.encode_field: (Integer index, Field field) -> String
+
+      def self?.scalar_value: (Field field, Integer size) -> Integer
+
+      def self?.range: (Symbol type, Integer size) -> Range[Integer]
     end
   end
 end

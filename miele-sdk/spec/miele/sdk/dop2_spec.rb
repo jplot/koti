@@ -49,6 +49,13 @@ RSpec.describe Miele::Sdk::Dop2 do
     expect(described_class.decode(described_class.encode(leaf))).to eq(leaf)
   end
 
+  it 'refuses a value outside the range of its field', :aggregate_failures do
+    [field[:u8, 300], field[:i8, -129]].each do |wide|
+      leaf = described_class::Leaf.new(unit: 2, attribute: 1586, idx1: 0, idx2: 0, fields: { 1 => wide })
+      expect { described_class.encode(leaf) }.to raise_error(ArgumentError, /does not fit/)
+    end
+  end
+
   it 'refuses to encode a composite field' do
     leaf = described_class::Leaf.new(unit: 2, attribute: 1586, idx1: 0, idx2: 0, fields: { 1 => field[:string, 'x'] })
     expect { described_class.encode(leaf) }.to raise_error(ArgumentError, /string/)

@@ -131,12 +131,32 @@ module Miele
       # @return [String]
       # @api private
       def encode_field(index, field)
-        code, (_, directive) = SCALARS.find { |_, (type)| type == field.type }
+        code, (_, directive, size) = SCALARS.find { |_, (type)| type == field.type }
         raise ArgumentError, "cannot encode a #{field.type} field" unless code
 
+        [index, code, scalar_value(field, size.to_i)].pack("nC#{directive}")
+      end
+
+      # @param field [Field] a scalar field
+      # @param size [Integer] bytes of the value
+      # @return [Integer]
+      # @raise [ArgumentError] if the value does not fit the field
+      # @api private
+      def scalar_value(field, size)
         value = field.value
-        value = value ? 1 : 0 if field.type == :bool
-        [index, code, value].pack("nC#{directive}")
+        return value ? 1 : 0 if field.type == :bool
+        raise ArgumentError, "#{value} does not fit a #{field.type} field" unless range(field.type, size).cover?(value)
+
+        value
+      end
+
+      # @param type [Symbol] +:i8+ to +:i64+ are signed
+      # @param size [Integer] bytes
+      # @return [Range<Integer>] values a scalar of that type holds
+      # @api private
+      def range(type, size)
+        bits = size * 8
+        type.start_with?('i') ? (-(1 << (bits - 1))...(1 << (bits - 1))) : (0...(1 << bits))
       end
     end
   end

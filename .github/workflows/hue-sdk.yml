@@ -1,0 +1,32 @@
+name: hue-sdk
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'hue-sdk/**'
+      - '.rubocop.yml'
+      - '.github/workflows/hue-sdk.yml'
+  pull_request:
+    paths:
+      - 'hue-sdk/**'
+      - '.rubocop.yml'
+      - '.github/workflows/hue-sdk.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hue-sdk
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+          working-directory: hue-sdk
+      - run: bundle exec rake

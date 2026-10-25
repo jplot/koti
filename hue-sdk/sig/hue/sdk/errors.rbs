@@ -1,0 +1,6 @@
+module Hue
+  module Sdk
+    class Error < StandardError
+    end
+  end
+end

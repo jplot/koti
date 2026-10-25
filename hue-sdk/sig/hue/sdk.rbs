@@ -1,0 +1,5 @@
+module Hue
+  module Sdk
+    extend Configuration
+  end
+end

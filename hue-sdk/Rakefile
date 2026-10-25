@@ -1,0 +1,30 @@
+# frozen_string_literal: true
+
+require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
+
+RSpec::Core::RakeTask.new(:spec)
+RuboCop::RakeTask.new
+
+namespace :yard do
+  desc 'Fail unless every public object is documented'
+  task :undocumented do
+    output = `yard stats --list-undoc`
+    puts output
+    abort 'YARD: undocumented objects found' unless output.include?('100.00% documented')
+  end
+end
+
+namespace :rbs do
+  desc 'Validate the RBS signatures in sig/'
+  task :validate do
+    sh 'rbs -r singleton -I sig validate'
+  end
+end
+
+desc 'Type-check lib/ against sig/'
+task :steep do
+  sh 'steep check'
+end
+
+task default: %i[rubocop spec yard:undocumented rbs:validate steep]

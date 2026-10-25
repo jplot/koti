@@ -1,0 +1,13 @@
+plugins:
+  - rubocop-rspec
+  - rubocop-rake
+
+AllCops:
+  TargetRubyVersion: 4.0
+  NewCops: enable
+  SuggestExtensions: false
+
+# The gem entry point is named after the gem so `Bundler.require` loads it.
+Naming/FileName:
+  Exclude:
+    - '*/lib/*-sdk.rb'

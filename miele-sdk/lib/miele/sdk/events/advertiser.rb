@@ -80,7 +80,7 @@ module Miele
         # @param source_port [Integer]
         # @return [String, nil] the encoded answer, nil when the query asks for nothing of ours
         def answer(packet, source_port)
-          query = Resolv::DNS::Message.decode(packet)
+          query = Resolv::DNS::Message.decode(Discovery.unflush(packet))
           return if query.qr == 1
 
           matches = query.question.flat_map { |name, type| matching(name.to_s, type) }

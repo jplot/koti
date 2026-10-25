@@ -83,17 +83,18 @@ module Miele
       end
 
       # Multicast answers set the top bit of a record's class to flush caches
-      # (RFC 6762, section 10.2); Resolv then decodes SRV, TXT and A records as
-      # generic ones. Every Miele answer carries it.
+      # (RFC 6762, section 10.2), and queries set it on a question to ask for a
+      # unicast answer (section 5.4); Resolv then decodes them as generic
+      # records. Every Miele answer carries it.
       #
       # @param packet [String] raw DNS message
-      # @return [String] the message with the cache-flush bit of every record cleared
+      # @return [String] the message with the top bit of every class cleared
       # @raise [Resolv::DNS::DecodeError] if the message is truncated
       # @api private
       def unflush(packet)
         bytes = packet.b
         questions, *records = bytes.unpack('@4n4').map(&:to_i)
-        offset = questions.to_i.times.reduce(12) { |at, _| skip_name(bytes, at) + 4 }
+        offset = questions.to_i.times.reduce(12) { |at, _| unflush_class(bytes, skip_name(bytes, at)) + 2 }
         records.sum.times { offset = unflush_record(bytes, offset) }
         bytes
       end
@@ -107,8 +108,20 @@ module Miele
         offset = skip_name(bytes, offset)
         raise Resolv::DNS::DecodeError, 'truncated record' if offset + 10 > bytes.bytesize
 
-        bytes.setbyte(offset + 2, bytes.getbyte(offset + 2).to_i & 0x7F)
+        unflush_class(bytes, offset)
         offset + 10 + bytes.unpack1('n', offset: offset + 8).to_i
+      end
+
+      # @param bytes [String] message being unflushed in place
+      # @param offset [Integer] start of a type, followed by its class
+      # @return [Integer] offset of the class
+      # @raise [Resolv::DNS::DecodeError] if the class runs past the message
+      # @api private
+      def unflush_class(bytes, offset)
+        raise Resolv::DNS::DecodeError, 'truncated class' if offset + 4 > bytes.bytesize
+
+        bytes.setbyte(offset + 2, bytes.getbyte(offset + 2).to_i & 0x7F)
+        offset + 2
       end
 
       # @param bytes [String]

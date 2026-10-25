@@ -33,6 +33,8 @@ module Miele
 
       def self?.unflush_record: (String bytes, Integer offset) -> Integer
 
+      def self?.unflush_class: (String bytes, Integer offset) -> Integer
+
       def self?.skip_name: (String bytes, Integer offset) -> Integer
 
       def self?.listen: (UDPSocket socket, Integer | Float timeout) { (Integer?) -> void } -> Array[Appliance]

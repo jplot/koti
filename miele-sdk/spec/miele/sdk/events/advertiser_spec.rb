@@ -19,10 +19,12 @@ RSpec.describe Miele::Sdk::Events::Advertiser do
     client.close
   end
 
-  def ask(name, type)
+  def ask(name, type, unicast_response: false)
     message = Resolv::DNS::Message.new(7)
     message.add_question(name, type)
-    client.send(message.encode, 0, '127.0.0.1', advertiser.port)
+    packet = message.encode
+    packet.setbyte(-2, packet.getbyte(-2) | 0x80) if unicast_response
+    client.send(packet, 0, '127.0.0.1', advertiser.port)
     client.recvfrom(9000).first if client.wait_readable(1)
   end
 
@@ -38,6 +40,10 @@ RSpec.describe Miele::Sdk::Events::Advertiser do
     answer = Resolv::DNS::Message.decode(ask(advertiser.hostname, Resolv::DNS::Resource::IN::A))
     expect([answer.id, answer.question.map { it.first.to_s }]).to eq([7, [advertiser.hostname]])
     expect(answer.answer.map { it.last.address.to_s }).to eq(['192.0.2.50'])
+  end
+
+  it 'answers a query asking for a unicast response (QU bit)' do
+    expect(ask(advertiser.hostname, Resolv::DNS::Resource::IN::A, unicast_response: true)).not_to be_nil
   end
 
   it 'names its host after its fabrication number' do

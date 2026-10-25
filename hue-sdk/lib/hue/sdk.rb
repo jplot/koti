@@ -4,6 +4,7 @@ require_relative 'sdk/version'
 require_relative 'sdk/errors'
 require_relative 'sdk/configuration'
 require_relative 'sdk/connection'
+require_relative 'sdk/client'
 
 # Namespace of the koti SDKs for the Philips Hue ecosystem.
 module Hue

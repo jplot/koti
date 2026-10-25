@@ -13,6 +13,8 @@ Dir[File.join(__dir__, 'support/**/*.rb')].each { require it }
 
 RSpec.configure do |config|
   config.disable_monkey_patching!
+  config.order = :random
+  Kernel.srand config.seed
   config.expect_with(:rspec) { |expectations| expectations.syntax = :expect }
   config.filter_run_excluding :live unless ENV['HUE_LIVE'] == '1'
 end

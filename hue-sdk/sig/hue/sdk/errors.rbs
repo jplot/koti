@@ -8,5 +8,21 @@ module Hue
 
     class TLSError < Error
     end
+
+    class AuthenticationError < Error
+    end
+
+    class ResponseError < Error
+      attr_reader status: Integer
+      attr_reader errors: Array[String]
+
+      def initialize: (Integer status, Array[String] errors) -> void
+    end
+
+    class NotFoundError < ResponseError
+    end
+
+    class RateLimitError < ResponseError
+    end
   end
 end

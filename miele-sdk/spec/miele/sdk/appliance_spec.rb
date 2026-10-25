@@ -50,6 +50,13 @@ RSpec.describe Miele::Sdk::Appliance do
     expect([appliance.state.status, appliance.state.program_phase]).to eq(%i[off heating_up_phase])
   end
 
+  it 'reads program types by the protocol version of its ident', :aggregate_failures do
+    ident['ProtocolVersion'] = 4
+    resources["/Devices/#{fab}/State"] = { 'ProgramType' => 1 }
+    expect(appliance.protocol_version).to eq(4)
+    expect(appliance.state.program_type).to eq(:normal_operation)
+  end
+
   context 'when sending commands' do
     def sent = fake.requests.select { it.verb == 'PUT' }.map { [it.path, JSON.parse(it.body)] }
 

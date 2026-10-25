@@ -41,6 +41,16 @@ RSpec.describe Miele::Sdk::State do
     expect([state.program_type, state.program_phase]).to eq(%i[own_program heating_up_phase])
   end
 
+  it 'numbers program types from 1 on DOP2 appliances, as the Miele app reads them' do
+    types = [1, 2, 6].map { described_class.new({ 'ProgramType' => it }, :oven, protocol_version: 4).program_type }
+    expect(types).to eq(%i[normal_operation own_program helper_program])
+  end
+
+  it 'numbers program types from 0 on Dop1 appliances, up to the helper program' do
+    types = [0, 4, 5].map { described_class.new({ 'ProgramType' => it }, :hood, protocol_version: 2).program_type }
+    expect(types).to eq(%i[normal_operation customer_service_program helper_program])
+  end
+
   it 'converts temperatures to Celsius and keeps absent ones as nil' do
     expect([state.temperatures, state.target_temperatures]).to eq([[180.5, nil, nil], [180.0, nil, nil]])
   end
@@ -62,8 +72,9 @@ RSpec.describe Miele::Sdk::State do
       expect(state.status).to eq(:ready)
     end
 
-    it 'maps a phase without a published table to :unknown' do
-      expect(state.program_phase).to eq(:unknown)
+    it 'names its phase from the hood table' do
+      phases = [4608, 4613].map { described_class.new({ 'ProgramPhase' => it }, device_type).program_phase }
+      expect(phases).to eq(%i[not_running delayed_shutdown])
     end
   end
 
@@ -79,6 +90,10 @@ RSpec.describe Miele::Sdk::State do
                                                     elapsed_minutes: 3, timer_seconds: 720)
       expect(state.plates.last).to have_attributes(step: 0, remaining_heat: 2)
       expect(state.remote_control?).to be(false)
+    end
+
+    it 'maps a phase without a published table to :unknown' do
+      expect(described_class.new({ 'ProgramPhase' => 4608 }, device_type).program_phase).to eq(:unknown)
     end
   end
 end

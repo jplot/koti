@@ -2,6 +2,10 @@ module Miele
   module Sdk
     module Catalog
       PROGRAM_TYPES: Hash[Integer, Symbol]
+
+      DOP2_PROGRAM_TYPES: Hash[Integer, Symbol]
+
+      DOP2_PROTOCOL_VERSIONS: Array[Integer]
     end
   end
 end

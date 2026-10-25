@@ -21,7 +21,9 @@ module Miele
 
       attr_reader device_type: Symbol
 
-      def initialize: (Hash[String, untyped] raw, Symbol device_type) -> void
+      attr_reader protocol_version: Integer?
+
+      def initialize: (Hash[String, untyped] raw, Symbol device_type, ?protocol_version: Integer?) -> void
 
       def status: () -> Symbol
 

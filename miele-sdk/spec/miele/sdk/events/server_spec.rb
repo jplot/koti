@@ -21,10 +21,32 @@ RSpec.describe Miele::Sdk::Events::Server do
 
   def supervision(peer) = "/Devices/000000004321/SuperVision/#{peer}/State/"
 
+  def signed_post(path, body)
+    Net::HTTP::Post.new(path).tap do |request|
+      Miele::Sdk::Connection.sign(request, '127.0.0.1', Miele::Sdk::Crypto.pad(body),
+                                  [FakeAppliance::GROUP_ID].pack('H*'), [FakeAppliance::GROUP_KEY].pack('H*'))
+    end
+  end
+
+  def deliver_without_spaces(path, body)
+    request = signed_post(path, body)
+    headers = request.each_capitalized.map { |name, value| "#{name}:#{value}\r\n" }.join
+    socket = TCPSocket.new('127.0.0.1', server.port)
+    socket.write("POST #{path} HTTP/1.1\r\n#{headers}Content-Length:#{request.body.bytesize}\r\n\r\n#{request.body}")
+    socket.read if socket.wait_readable(2)
+  ensure
+    socket&.close
+  end
+
   it 'emits a pushed state change', :aggregate_failures do
     expect(send_to_server('POST', supervision('000111222333'), push).code).to eq('204')
     event = Miele::Sdk::Events::Event.new(fab: '000111222333', resource: '/State/', content: { 'Status' => 5 })
     expect(events.pop(timeout: 1)).to eq(event)
+  end
+
+  it 'emits a push whose headers have no space after the colon, as appliances send them', :aggregate_failures do
+    expect(deliver_without_spaces(supervision('000111222333'), push)).to start_with('HTTP/1.1 204')
+    expect(events.pop(timeout: 1)&.fab).to eq('000111222333')
   end
 
   it 'drops a push whose signature is wrong and says so', :aggregate_failures do

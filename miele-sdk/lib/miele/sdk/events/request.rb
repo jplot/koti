@@ -64,8 +64,9 @@ module Miele
           while (line = read_line(socket)) && !line.empty?
             raise Malformed, 'too many headers' if headers.size == HEADER_LIMIT
 
-            name, value = line.split(': ', 2)
-            headers[name.to_s.downcase] = value.to_s
+            # Appliances send +Content-Length:608+, without a space after the colon.
+            name, value = line.split(':', 2)
+            headers[name.to_s.downcase] = value.to_s.strip
           end
           headers
         end

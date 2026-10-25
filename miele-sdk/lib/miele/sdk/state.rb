@@ -40,13 +40,18 @@ module Miele
       # @return [Integer, nil] +ProtocolVersion+ of the appliance, which selects the program type table
       attr_reader :protocol_version
 
+      # @return [String, nil] +TechType+ of the appliance, which selects a Dop1 oven's program table
+      attr_reader :tech_type
+
       # @param raw [Hash{String=>Object}] the +State+ resource
       # @param device_type [Symbol] one of {Catalog::DEVICE_TYPES}
       # @param protocol_version [Integer, nil] +ProtocolVersion+ of the appliance's +Ident+
-      def initialize(raw, device_type, protocol_version: nil)
+      # @param tech_type [String, nil] +TechType+ of the appliance's +Ident+ device label
+      def initialize(raw, device_type, protocol_version: nil, tech_type: nil)
         @raw = raw
         @device_type = device_type
         @protocol_version = protocol_version
+        @tech_type = tech_type
       end
 
       # @return [Symbol] one of {Catalog::STATUS} or of the device type's {Catalog::DEVICE_STATUS}, or +:unknown+
@@ -64,13 +69,10 @@ module Miele
       # @api public
       def program_id = raw['ProgramID']
 
-      # @return [Symbol] name from {Catalog::OVEN_PROGRAMS} on a DOP2 oven, or +:unknown+
+      # @return [Symbol] name from {Catalog::OVEN_PROGRAMS} on a DOP2 oven, from the
+      #   {Catalog::DOP1_OVEN_TABLES} table of a Dop1 oven, or +:unknown+
       # @api public
-      def program
-        return :unknown unless dop2? && Catalog::OVEN_DEVICE_TYPES.include?(device_type)
-
-        Catalog::OVEN_PROGRAMS.fetch(program_id, :unknown)
-      end
+      def program = oven_programs.fetch(program_id, :unknown)
 
       # @return [Symbol] phase from the table of the device type's family, or +:unknown+
       # @api public
@@ -139,6 +141,22 @@ module Miele
 
       # @return [Boolean]
       def dop2? = Catalog::DOP2_PROTOCOL_VERSIONS.include?(protocol_version)
+
+      # @return [Hash{Integer=>Symbol}] program names of this oven, empty for other appliances
+      def oven_programs
+        return Catalog::OVEN_DEVICE_TYPES.include?(device_type) ? Catalog::OVEN_PROGRAMS : {} if dop2?
+        return {} unless protocol_version == Catalog::DOP1_PROTOCOL_VERSION
+
+        tables = Catalog::DOP1_OVEN_TABLES[device_type] or return {}
+        table = tables[device_class] || tables[nil] or return {}
+        Catalog::DOP1_OVEN_PROGRAMS.fetch(table)
+      end
+
+      # @return [Integer, nil] device class the Miele app reads from the +TechType+
+      def device_class
+        digit = tech_type.to_s[/\A\D+\d(\d)\d\d/, 1] or return
+        (digit.to_i + 1) / 2
+      end
     end
   end
 end

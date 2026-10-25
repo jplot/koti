@@ -20,6 +20,9 @@ module Miele
 
       # +ProtocolVersion+ of DOP2 appliances, over M-Bus (3) or HDR (4).
       DOP2_PROTOCOL_VERSIONS = [3, 4].freeze
+
+      # +ProtocolVersion+ of Dop1 appliances.
+      DOP1_PROTOCOL_VERSION = 2
     end
   end
 end

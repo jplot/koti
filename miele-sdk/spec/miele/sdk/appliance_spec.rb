@@ -57,6 +57,14 @@ RSpec.describe Miele::Sdk::Appliance do
     expect(appliance.state.program_type).to eq(:normal_operation)
   end
 
+  it 'names a Dop1 program from the table of its tech type', :aggregate_failures do
+    ident.merge!('DeviceType' => 12, 'ProtocolVersion' => 2)
+    ident['DeviceIdentLabel']['TechType'] = 'H2160B'
+    resources["/Devices/#{fab}/State"] = { 'ProgramID' => 5 }
+    expect(appliance.tech_type).to eq('H2160B')
+    expect(appliance.state.program).to eq(:fan_plus)
+  end
+
   context 'when sending commands' do
     def sent = fake.requests.select { it.verb == 'PUT' }.map { [it.path, JSON.parse(it.body)] }
 

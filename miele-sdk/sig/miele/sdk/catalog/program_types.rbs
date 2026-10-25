@@ -6,6 +6,8 @@ module Miele
       DOP2_PROGRAM_TYPES: Hash[Integer, Symbol]
 
       DOP2_PROTOCOL_VERSIONS: Array[Integer]
+
+      DOP1_PROTOCOL_VERSION: Integer
     end
   end
 end

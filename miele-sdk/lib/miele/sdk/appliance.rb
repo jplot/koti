@@ -70,9 +70,13 @@ module Miele
       # @api public
       def protocol_version = @protocol_version ||= ident['ProtocolVersion']
 
+      # @return [String, nil] +TechType+ of {#ident}'s device label, the model name
+      # @api public
+      def tech_type = @tech_type ||= ident.dig('DeviceIdentLabel', 'TechType')
+
       # @return [State]
       # @api public
-      def state = State.new(device('State'), device_type, protocol_version:)
+      def state = State.new(device('State'), device_type, protocol_version:, tech_type:)
 
       # @return [void]
       # @raise [ResponseError] if the appliance refuses (400)

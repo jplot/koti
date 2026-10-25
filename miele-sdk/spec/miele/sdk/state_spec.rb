@@ -57,10 +57,17 @@ RSpec.describe Miele::Sdk::State do
     expect(oven.call(430).program).to eq(:sirloin_joint_roast_rare)
   end
 
-  it 'leaves the program unknown on a Dop1 oven and outside ovens' do
-    programs = [[device_type, 2], [:hood, 4]].map do |type, version|
-      described_class.new({ 'ProgramID' => 13 }, type, protocol_version: version).program
+  it 'names the program of a Dop1 oven from the table the Miele app picks for it', :aggregate_failures do
+    dop1 = lambda do |type, id, tech_type = nil|
+      described_class.new({ 'ProgramID' => id }, type, protocol_version: 2, tech_type:).program
     end
+    expect(dop1.call(device_type, 4)).to eq(:fan_plus)
+    expect([dop1.call(:oven, 5, 'H2160B'), dop1.call(:oven, 5, 'H2560B')]).to eq(%i[fan_plus economy_grill])
+    expect([1, nil].map { dop1.call(:steam_oven_combination, 1, it && 'DGC6300') }).to eq(%i[combi_mode fan_plus])
+  end
+
+  it 'leaves the program unknown outside ovens' do
+    programs = [2, 4].map { described_class.new({ 'ProgramID' => 13 }, :hood, protocol_version: it).program }
     expect(programs).to eq(%i[unknown unknown])
   end
 

@@ -3,8 +3,11 @@
 require 'simplecov'
 SimpleCov.start do
   skip '/spec/'
-  minimum_coverage 95
-  coverage(:line) { minimum 70, per: :file }
+  # A live run (5 examples against a real bridge) covers 92 % on its own and would fail the thresholds.
+  unless ENV['HUE_LIVE'] == '1'
+    minimum_coverage 95
+    coverage(:line) { minimum 70, per: :file }
+  end
 end
 
 require 'hue/sdk'

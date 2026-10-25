@@ -6,6 +6,7 @@ require_relative 'sdk/configuration'
 require_relative 'sdk/connection'
 require_relative 'sdk/client'
 require_relative 'sdk/discovery'
+require_relative 'sdk/pairing'
 
 # Namespace of the koti SDKs for the Philips Hue ecosystem.
 module Hue
@@ -29,5 +30,14 @@ module Hue
     # @return [Array<Discovery::Bridge>]
     # @api public
     def self.discover(timeout: 3, address: '224.0.0.251', port: 5353) = Discovery.discover(timeout:, address:, port:)
+
+    # Registers an application on the bridge; press its link button first.
+    #
+    # @param app_name [String] application name, at most 20 characters (default: +hue-sdk+)
+    # @param instance_name [String] device name, truncated to 19 characters (default: the hostname)
+    # @return [Pairing::Credentials]
+    # @raise [LinkButtonNotPressedError] if the link button was not pressed in the last 30 seconds
+    # @api public
+    def self.pair(app_name: 'hue-sdk', instance_name: Socket.gethostname) = Pairing.pair(app_name:, instance_name:)
   end
 end

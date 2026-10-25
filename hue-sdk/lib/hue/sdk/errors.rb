@@ -15,6 +15,9 @@ module Hue
     # The application key is missing, unknown to the bridge or revoked.
     class AuthenticationError < Error; end
 
+    # The link button of the bridge was not pressed before pairing.
+    class LinkButtonNotPressedError < Error; end
+
     # The bridge answered with an error status.
     class ResponseError < Error
       # @return [Integer] HTTP status returned by the bridge

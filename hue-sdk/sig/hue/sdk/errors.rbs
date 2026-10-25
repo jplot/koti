@@ -12,6 +12,9 @@ module Hue
     class AuthenticationError < Error
     end
 
+    class LinkButtonNotPressedError < Error
+    end
+
     class ResponseError < Error
       attr_reader status: Integer
       attr_reader errors: Array[String]

@@ -3,5 +3,7 @@ module Hue
     extend Configuration
 
     def self.discover: (?timeout: Integer | Float, ?address: String, ?port: Integer) -> Array[Discovery::Bridge]
+
+    def self.pair: (?app_name: String, ?instance_name: String) -> Pairing::Credentials
   end
 end

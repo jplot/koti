@@ -1,0 +1,20 @@
+module Hue
+  module Sdk
+    module Pairing
+      class Credentials < Data
+        attr_reader application_key: String
+        attr_reader client_key: String
+
+        def self.new: (application_key: String, client_key: String) -> Credentials
+      end
+
+      LINK_BUTTON_NOT_PRESSED: Integer
+
+      def self?.pair: (app_name: String, instance_name: String) -> Credentials
+
+      def self?.credentials: (Net::HTTPResponse response) -> Credentials
+
+      def self?.refuse: (Integer status, Hash[String, untyped] error) -> bot
+    end
+  end
+end

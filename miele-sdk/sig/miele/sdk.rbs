@@ -1,5 +1,7 @@
 module Miele
   module Sdk
     extend Configuration
+
+    def self.discover: (?timeout: Integer | Float, ?address: String, ?port: Integer) -> Array[Discovery::Appliance]
   end
 end

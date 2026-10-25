@@ -5,6 +5,7 @@ require_relative 'sdk/errors'
 require_relative 'sdk/configuration'
 require_relative 'sdk/crypto'
 require_relative 'sdk/connection'
+require_relative 'sdk/discovery'
 
 # Namespace of the koti SDKs for the Miele ecosystem.
 module Miele
@@ -18,5 +19,14 @@ module Miele
   #   end
   module Sdk
     extend Configuration
+
+    # Finds Miele@home appliances on the local network.
+    #
+    # @param timeout [Numeric] seconds to listen (default: 4, time for queries at 0, 1 and 3 seconds)
+    # @param address [String] where to send the mDNS query (default: the mDNS multicast group)
+    # @param port [Integer] destination port of the query (default: 5353)
+    # @return [Array<Discovery::Appliance>]
+    # @api public
+    def self.discover(timeout: 4, address: '224.0.0.251', port: 5353) = Discovery.discover(timeout:, address:, port:)
   end
 end

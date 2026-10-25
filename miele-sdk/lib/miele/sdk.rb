@@ -7,6 +7,10 @@ require_relative 'sdk/crypto'
 require_relative 'sdk/connection'
 require_relative 'sdk/discovery'
 require_relative 'sdk/catalog/device_types'
+require_relative 'sdk/catalog/status'
+require_relative 'sdk/catalog/program_types'
+require_relative 'sdk/catalog/program_phases'
+require_relative 'sdk/state'
 require_relative 'sdk/appliance'
 
 # Namespace of the koti SDKs for the Miele ecosystem.

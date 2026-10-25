@@ -1,0 +1,7 @@
+module Miele
+  module Sdk
+    module Catalog
+      STATUS: Hash[Integer, Symbol]
+    end
+  end
+end

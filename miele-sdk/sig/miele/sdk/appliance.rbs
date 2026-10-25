@@ -5,6 +5,8 @@ module Miele
 
       @fab: String?
 
+      @device_type: Symbol?
+
       attr_reader host: String
 
       def initialize: (String host) -> void
@@ -29,11 +31,29 @@ module Miele
 
       def device_type: () -> Symbol
 
+      def state: () -> State
+
+      def start: () -> void
+
+      def stop: () -> void
+
+      def pause: () -> void
+
+      def light_on: () -> void
+
+      def light_off: () -> void
+
+      def wake: () -> void
+
       def get: (String path) -> resource
 
       private
 
       def device: (String resource) -> resource
+
+      def command: (Hash[Symbol, Integer] body) -> Connection::Response
+
+      def change: (Hash[Symbol, Integer] body) -> void
     end
   end
 end

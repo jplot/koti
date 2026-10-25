@@ -6,7 +6,12 @@ RSpec.describe Miele::Sdk::Appliance do
   let(:fab) { '000123456789' }
   let(:ident) { { 'DeviceType' => 13, 'DeviceIdentLabel' => { 'FabNumber' => fab } } }
   let(:resources) { { '/Devices/' => { fab => { 'href' => "#{fab}/" } }, "/Devices/#{fab}/Ident" => ident } }
-  let(:fake) { FakeAppliance.start { |request| [200, {}, JSON.generate(resources.fetch(request.path, {}))] } }
+  let(:command_answer) { [200, {}, ''] }
+  let(:fake) do
+    FakeAppliance.start do |request|
+      request.verb == 'PUT' ? command_answer : [200, {}, JSON.generate(resources.fetch(request.path, {}))]
+    end
+  end
 
   before { connect_to(fake) }
 
@@ -37,6 +42,46 @@ RSpec.describe Miele::Sdk::Appliance do
 
     it 'maps an unknown device type to :unknown' do
       expect(appliance.device_type).to eq(:unknown)
+    end
+  end
+
+  it 'reads its state' do
+    resources["/Devices/#{fab}/State"] = { 'Status' => 1, 'ProgramPhase' => 3329 }
+    expect([appliance.state.status, appliance.state.program_phase]).to eq(%i[off heating_up_phase])
+  end
+
+  context 'when sending commands' do
+    def sent = fake.requests.select { it.verb == 'PUT' }.map { [it.path, JSON.parse(it.body)] }
+
+    it 'sends the light command' do
+      appliance.light_on
+      expect(sent).to eq([["/Devices/#{fab}/State", { 'Light' => 1 }]])
+    end
+
+    it 'sends each state command' do
+      %i[start stop pause light_off wake].each { appliance.public_send(it) }
+      expect(sent.map(&:last)).to eq([{ 'ProcessAction' => 1 }, { 'ProcessAction' => 2 }, { 'ProcessAction' => 3 },
+                                      { 'Light' => 2 }, { 'DeviceAction' => 2 }])
+    end
+
+    context 'when the appliance answers 400' do
+      let(:command_answer) { [400, {}, ''] }
+
+      it 'treats a 400 answer to a command as done' do
+        expect { appliance.light_on }.not_to raise_error
+      end
+
+      it 'raises ResponseError when it refuses a process action' do
+        expect { appliance.start }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+      end
+    end
+
+    context 'when remote control is off' do
+      let(:command_answer) { [403, {}, ''] }
+
+      it 'raises RemoteControlDisabledError when remote control is off' do
+        expect { appliance.light_on }.to raise_error(Miele::Sdk::RemoteControlDisabledError)
+      end
     end
   end
 end

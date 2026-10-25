@@ -58,7 +58,40 @@ module Miele
 
       # @return [Symbol] +DeviceType+ of {#ident} named by {Catalog::DEVICE_TYPES}, or +:unknown+
       # @api public
-      def device_type = Catalog::DEVICE_TYPES.fetch(ident['DeviceType'], :unknown)
+      def device_type = @device_type ||= Catalog::DEVICE_TYPES.fetch(ident['DeviceType'], :unknown)
+
+      # @return [State]
+      # @api public
+      def state = State.new(device('State'), device_type)
+
+      # @return [void]
+      # @raise [ResponseError] if the appliance refuses (400)
+      # @api public
+      def start = command(ProcessAction: 1)
+
+      # @return [void]
+      # @raise [ResponseError] if the appliance refuses (400)
+      # @api public
+      def stop = command(ProcessAction: 2)
+
+      # @return [void]
+      # @raise [ResponseError] if the appliance refuses (400)
+      # @api public
+      def pause = command(ProcessAction: 3)
+
+      # @return [void]
+      # @api public
+      def light_on = change(Light: 1)
+
+      # @return [void]
+      # @api public
+      def light_off = change(Light: 2)
+
+      # Wakes the appliance from standby.
+      #
+      # @return [void]
+      # @api public
+      def wake = change(DeviceAction: 2)
 
       # Reads any JSON resource.
       #
@@ -73,6 +106,22 @@ module Miele
       # @param resource [String]
       # @return [Hash{String=>Object}]
       def device(resource) = get("/Devices/#{fab}/#{resource}")
+
+      # @param body [Hash{Symbol=>Integer}]
+      # @return [Connection::Response]
+      # @raise [RemoteControlDisabledError] if the appliance refuses commands
+      def command(body) = Connection.request(host, :put, "/Devices/#{fab}/State", body: JSON.generate(body))
+
+      # The appliance answers 400 to a write that changes nothing, such as
+      # switching on a light already on.
+      #
+      # @param body [Hash{Symbol=>Integer}]
+      # @return [void]
+      def change(body)
+        command(body)
+      rescue ResponseError => e
+        raise unless e.status == 400
+      end
     end
   end
 end

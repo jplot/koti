@@ -1,0 +1,64 @@
+module Hue
+  module Sdk
+    class Event < Data
+      attr_reader id: String
+      attr_reader kind: Symbol
+      attr_reader created_at: Time
+      attr_reader resource_type: String
+      attr_reader resource_id: String
+      attr_reader changes: Hash[String, untyped]
+
+      def self.new: (id: String, kind: Symbol, created_at: Time, resource_type: String, resource_id: String,
+                     changes: Hash[String, untyped]) -> Event
+
+      def resource: () -> Models::Base::Instance
+    end
+
+    module Events
+      class Parser
+        type message = { id: String?, data: String }
+
+        @buffer: String
+        @data: Array[String]
+        @id: String?
+
+        def initialize: () -> void
+
+        def feed: (String chunk) { (message) -> void } -> void
+
+        private
+
+        def dispatch: () { (message) -> void } -> void
+      end
+
+      interface _Sleeper
+        def call: (Integer seconds) -> untyped
+      end
+
+      class Stream
+        PATH: String
+        MAX_DELAY: Integer
+
+        @sleeper: _Sleeper
+        @last_id: String?
+        @delay: Integer
+
+        def initialize: (?sleeper: _Sleeper) -> void
+
+        def each: () { (Event) -> void } -> void
+
+        private
+
+        def follow: (String key) { (Event) -> void } -> void
+
+        def headers: (String key) -> Hash[String, String]
+
+        def wait: () -> void
+
+        def events: (String data) -> Array[Event]
+
+        def refuse: (Net::HTTPResponse response) -> bot
+      end
+    end
+  end
+end

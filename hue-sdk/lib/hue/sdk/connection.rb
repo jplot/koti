@@ -29,7 +29,38 @@ module Hue
       def request(method, path, body: nil, headers: {})
         request = REQUESTS.fetch(method).new(path, headers)
         request.body = body
-        http.request(request)
+        transport { http.request(request) }
+      end
+
+      # Opens a long-lived request and passes its body on as it arrives. The
+      # stream gets a connection of its own: a request sent from the block on
+      # the thread's connection would read the rest of the stream as its answer.
+      #
+      # @param path [String] absolute path on the bridge
+      # @param headers [Hash{String=>String}] request headers
+      # @yieldparam chunk [String] body bytes, cut anywhere, when the bridge answers 200
+      # @return [Net::HTTPResponse] once the bridge ends the response
+      # @raise [TLSError] if the bridge certificate is not trusted
+      # @raise [ConnectionError] if the bridge cannot be reached or the stream breaks
+      # @api public
+      def stream(path, headers: {}, &)
+        transport do
+          http = establish(Sdk.config.event_read_timeout)
+          http.request(Net::HTTP::Get.new(path, headers)) do |response|
+            response.read_body(&) if response.is_a?(Net::HTTPOK)
+          end
+        ensure
+          http&.finish if http&.started?
+        end
+      end
+
+      # @yieldreturn [Object] the result of the exchange with the bridge
+      # @return [Object] what the block returns
+      # @raise [TLSError] if the bridge certificate is not trusted
+      # @raise [ConnectionError] if the bridge cannot be reached
+      # @api private
+      def transport
+        yield
       rescue OpenSSL::SSL::SSLError => e
         raise TLSError, "#{endpoint}: bridge #{Sdk.config.bridge_id} not verified (#{e.message})"
       rescue *NETWORK_ERRORS => e
@@ -47,15 +78,16 @@ module Hue
       # @api private
       def connection_key = Sdk.config.then { |config| [config.host, config.port, config.bridge_id, config.ca_file] }
 
+      # @param read_timeout [Numeric] seconds to wait for data
       # @return [Net::HTTP]
       # @api private
-      def establish
+      def establish(read_timeout = Sdk.config.read_timeout)
         config = Sdk.config
         host = config.host or raise ConnectionError, 'host is not configured'
         http = Net::HTTP.new(host, config.port)
         pin(http, config)
         http.open_timeout = config.open_timeout
-        http.read_timeout = config.read_timeout
+        http.read_timeout = read_timeout
         http.start
       end
 

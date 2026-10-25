@@ -3,5 +3,5 @@
 target :lib do
   signature 'sig'
   check 'lib'
-  library 'singleton', 'net-http', 'openssl', 'socket', 'json', 'resolv'
+  library 'singleton', 'net-http', 'openssl', 'socket', 'json', 'resolv', 'time'
 end

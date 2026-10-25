@@ -8,6 +8,7 @@ require_relative 'sdk/client'
 require_relative 'sdk/discovery'
 require_relative 'sdk/pairing'
 require_relative 'sdk/models'
+require_relative 'sdk/events'
 
 # Namespace of the koti SDKs for the Philips Hue ecosystem.
 module Hue
@@ -40,6 +41,20 @@ module Hue
     # @raise [LinkButtonNotPressedError] if the link button was not pressed in the last 30 seconds
     # @api public
     def self.pair(app_name: 'hue-sdk', instance_name: Socket.gethostname) = Pairing.pair(app_name:, instance_name:)
+
+    # Follows what changes on the bridge, reconnecting when the stream breaks.
+    #
+    # @example Print every light switched on or off
+    #   Hue::Sdk.events { |event| puts event.resource_id if event.changes.key?('on') }
+    #
+    # @yieldparam event [Event]
+    # @return [Enumerator::Lazy<Event>] without a block; with one, blocks until the block breaks
+    # @raise (see Events::Stream#each)
+    # @api public
+    def self.events(&block)
+      stream = Events::Stream.new
+      block ? stream.each(&block) : stream.to_enum.lazy
+    end
 
     # Returns the collection of a resource type, or one resource.
     #

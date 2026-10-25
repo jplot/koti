@@ -2,5 +2,29 @@ module Miele
   module Sdk
     class Error < StandardError
     end
+
+    class ConfigurationError < Error
+    end
+
+    class ConnectionError < Error
+    end
+
+    class SignatureError < Error
+    end
+
+    class AuthenticationError < Error
+    end
+
+    class ResponseError < Error
+      attr_reader status: Integer
+
+      def initialize: (Integer status, ?String message) -> void
+    end
+
+    class NotFoundError < ResponseError
+    end
+
+    class RemoteControlDisabledError < ResponseError
+    end
   end
 end

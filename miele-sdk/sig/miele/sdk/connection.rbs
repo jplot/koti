@@ -1,0 +1,37 @@
+module Miele
+  module Sdk
+    module Connection
+      ACCEPT: String
+
+      CONTENT_TYPE: String
+
+      REQUESTS: Hash[Symbol, singleton(Net::HTTPRequest)]
+
+      NETWORK_ERRORS: Array[singleton(Exception)]
+
+      class Response < Data
+        attr_reader status: Integer
+        attr_reader body: String
+
+        def self.new: (status: Integer, body: String) -> Response
+      end
+
+      def self?.request: (String host, Symbol method, String path, ?body: String?) -> Response
+
+      def self?.credentials: () -> [String, String]
+
+      def self?.sign: (Net::HTTPRequest request, String host, String plaintext, String group_id, String key) -> Net::HTTPRequest
+
+      def self?.encrypt: (Net::HTTPRequest request, String content_type, String key, String signature,
+                          String plaintext) -> Net::HTTPRequest
+
+      def self?.exchange: (String host, Net::HTTPRequest request) -> Net::HTTPResponse
+
+      def self?.answer: (Net::HTTPResponse response, Symbol method, String key) -> Response
+
+      def self?.decrypt: (Net::HTTPResponse response, Integer status, String body, String key) -> String
+
+      def self?.refuse: (Integer status, Symbol method) -> bot
+    end
+  end
+end

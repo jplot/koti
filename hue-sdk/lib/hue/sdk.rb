@@ -5,6 +5,7 @@ require_relative 'sdk/errors'
 require_relative 'sdk/configuration'
 require_relative 'sdk/connection'
 require_relative 'sdk/client'
+require_relative 'sdk/discovery'
 
 # Namespace of the koti SDKs for the Philips Hue ecosystem.
 module Hue
@@ -19,5 +20,14 @@ module Hue
   #   end
   module Sdk
     extend Configuration
+
+    # Finds Hue bridges on the local network.
+    #
+    # @param timeout [Numeric] seconds to listen for answers (default: 3)
+    # @param address [String] where to send the mDNS query (default: the mDNS multicast group)
+    # @param port [Integer] destination port of the query (default: 5353)
+    # @return [Array<Discovery::Bridge>]
+    # @api public
+    def self.discover(timeout: 3, address: '224.0.0.251', port: 5353) = Discovery.discover(timeout:, address:, port:)
   end
 end

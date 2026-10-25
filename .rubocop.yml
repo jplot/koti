@@ -15,3 +15,7 @@ Naming/FileName:
 # Specs drive real sockets (fake bridge, threads): setup, act and assert stay inline.
 RSpec/ExampleLength:
   Max: 8
+
+# `#: Type` is the RBS inline type assertion read by Steep.
+Layout/LeadingCommentSpace:
+  AllowRBSInlineAnnotation: true

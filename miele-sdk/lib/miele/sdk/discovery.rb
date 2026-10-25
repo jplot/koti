@@ -93,6 +93,8 @@ module Miele
       # @api private
       def unflush(packet)
         bytes = packet.b
+        raise Resolv::DNS::DecodeError, 'shorter than a DNS header' if bytes.bytesize < 12
+
         questions, *records = bytes.unpack('@4n4').map(&:to_i)
         offset = questions.to_i.times.reduce(12) { |at, _| unflush_class(bytes, skip_name(bytes, at)) + 2 }
         records.sum.times { offset = unflush_record(bytes, offset) }
@@ -207,7 +209,7 @@ module Miele
       # @return [Hash{String=>String}] +key=value+ pairs of the instance TXT record
       # @api private
       def properties(records, instance)
-        record(records, instance, Resolv::DNS::Resource::IN::TXT)&.strings.to_a.to_h { it.split('=', 2) }
+        record(records, instance, Resolv::DNS::Resource::IN::TXT)&.strings.to_a.to_h { it.partition('=').values_at(0, 2) }
       end
 
       # @return [Resolv::DNS::Resource, nil] first record of that type for that name

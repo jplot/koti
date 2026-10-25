@@ -55,6 +55,18 @@ RSpec.describe Miele::Sdk::Discovery do
     expect(described_class.parse('not a dns message')).to eq([])
   end
 
+  it 'ignores a packet shorter than a DNS header' do
+    expect(described_class.parse("\x00\x01")).to eq([])
+  end
+
+  it 'reads a TXT entry that has no value' do
+    message = Resolv::DNS::Message.decode(answer)
+    message.additional.map! do |name, ttl, data|
+      [name, ttl, data.is_a?(dns::Resource::IN::TXT) ? dns::Resource::IN::TXT.new('flag', *data.strings) : data]
+    end
+    expect(described_class.parse(message.encode)).to eq([appliance])
+  end
+
   context 'with a responder on the network' do
     let(:responder) { UDPSocket.new.tap { |socket| socket.bind('127.0.0.1', 0) } }
     let(:questions) { Queue.new }

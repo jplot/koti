@@ -44,7 +44,7 @@ RSpec.describe Hue::Sdk::Models do
     expect(firmware_types - described_class::REGISTRY.keys).to be_empty
   end
 
-  it 'allows the operations the official app performs', :aggregate_failures do
+  it 'allows the operations confirmed for these types', :aggregate_failures do
     app_operations.each do |type, operations|
       collection = Hue::Sdk.resource(type)
       resource = Hue::Sdk.resource(type, 'id')

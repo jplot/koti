@@ -240,8 +240,8 @@ All of them inherit from `Hue::Sdk::Error`.
 The resource types and the operations each one accepts were cross-checked between the types a
 Bridge Pro firmware lists in its own `clip` resource, the
 [openhue](https://github.com/openhue/openhue-api) OpenAPI description,
-[aiohue](https://github.com/home-assistant-libs/aiohue),
-[Q42.HueApi](https://github.com/michielpost/Q42.HueApi) and the official Hue app 6.3.2.
+[aiohue](https://github.com/home-assistant-libs/aiohue) and
+[Q42.HueApi](https://github.com/michielpost/Q42.HueApi).
 
 ## Development
 

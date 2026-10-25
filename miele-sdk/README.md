@@ -216,14 +216,10 @@ anything is sent.
   and its 2022 OpenAPI description). Statuses 144, 145 and 147, and 148 on hoods, take the names
   the Miele app 4.19.0 gives them; the app also gives the program types of DOP2 appliances, the
   last two of Dop1 ones, and the phases of hoods. The other phases come from Home Assistant core.
-- Oven program names: the oven menus of the Miele app 4.19.0 and their default English labels,
-  2,244 programs kept in `lib/miele/sdk/catalog/dop2_oven_programs.tsv`; for Dop1 ovens, the app's
-  seven program tables and the rule picking one, 4,143 programs kept in
-  `lib/miele/sdk/catalog/dop1_oven_programs.tsv`.
-- Dishwasher, dish warmer, coffee and laundry program names: the Miele app 4.19.0's dishwasher
-  tables (DOP2 and Dop1), dish warmer labels, the drinks of a coffee system's standard profile, and
-  its nine washing machine and tumble dryer tables with the rule picking one, in its default
-  English, kept in `lib/miele/sdk/catalog/programs.tsv`.
+- Program names, in the default English of the Miele app 4.19.0, kept in
+  `lib/miele/sdk/catalog/programs.tsv`: its DOP2 oven menus, its seven Dop1 oven tables, its
+  dishwasher tables (DOP2 and Dop1), dish warmer labels, the drinks of a coffee system's standard
+  profile and its nine washing machine and tumble dryer tables, each with the rule picking it.
 - The local protocol (signing, DOP2 layout, Dop1 objects, power sequence, SuperVision):
   [ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan), building on the work of
   [MieleRESTServer](https://github.com/akappner/MieleRESTServer).

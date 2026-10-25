@@ -11,3 +11,7 @@ AllCops:
 Naming/FileName:
   Exclude:
     - '*/lib/*-sdk.rb'
+
+# Specs drive real sockets (fake bridge, threads): setup, act and assert stay inline.
+RSpec/ExampleLength:
+  Max: 8

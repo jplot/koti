@@ -2,5 +2,11 @@ module Hue
   module Sdk
     class Error < StandardError
     end
+
+    class ConnectionError < Error
+    end
+
+    class TLSError < Error
+    end
   end
 end

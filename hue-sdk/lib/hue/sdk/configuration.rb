@@ -9,6 +9,9 @@ module Hue
     # Extended by {Hue::Sdk} to expose {#config} and {#configure} at the
     # module level.
     module Configuration
+      # Hue root CA (+CN=root-bridge+) that signs every bridge certificate.
+      DEFAULT_CA_FILE = File.expand_path('certificates/root-bridge.pem', File.dirname(__FILE__))
+
       # Singleton holding the settings of the one bridge the SDK talks to.
       class Settings
         include Singleton
@@ -24,6 +27,10 @@ module Hue
 
         # @return [String, nil] application key sent as +hue-application-key+
         attr_accessor :application_key
+
+        # @return [String] PEM file of the CA the bridge certificate must chain to
+        #   (default: the Hue root CA embedded in the gem)
+        attr_accessor :ca_file
 
         # @return [String, nil] client key (hex) used as the entertainment PSK
         attr_accessor :client_key
@@ -45,6 +52,7 @@ module Hue
           @open_timeout = 5
           @read_timeout = 10
           @event_read_timeout = 300
+          @ca_file = DEFAULT_CA_FILE
         end
       end
 

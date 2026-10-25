@@ -1,0 +1,7 @@
+module Miele
+  module Sdk
+    module Catalog
+      PROGRAM_TYPES: Hash[Integer, Symbol]
+    end
+  end
+end

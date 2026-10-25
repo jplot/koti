@@ -1,0 +1,7 @@
+module Miele
+  module Sdk
+    module Catalog
+      DEVICE_TYPES: Hash[Integer, Symbol]
+    end
+  end
+end

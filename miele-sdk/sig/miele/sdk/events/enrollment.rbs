@@ -1,0 +1,15 @@
+module Miele
+  module Sdk
+    module Events
+      module Enrollment
+        RESOURCES: Array[String]
+
+        def self?.enroll: (Appliance appliance, our_fab: String, callback_host: String, port: Integer) -> void
+
+        def self?.withdraw: (Appliance appliance, our_fab: String) -> void
+
+        def self?.supervise: (Appliance appliance, String our_fab, bool on) -> void
+      end
+    end
+  end
+end

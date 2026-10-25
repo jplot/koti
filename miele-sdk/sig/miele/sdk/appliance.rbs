@@ -1,0 +1,95 @@
+module Miele
+  module Sdk
+    class Appliance
+      interface _Sleeper
+        def call: (Integer seconds) -> untyped
+      end
+
+      type resource = Hash[String, untyped]
+
+      USER_REQUEST: String
+
+      @fab: String?
+
+      @device_type: Symbol?
+
+      @sleeper: _Sleeper
+
+      attr_reader host: String
+
+      def initialize: (String host, ?sleeper: _Sleeper) -> void
+
+      def fab: () -> String
+
+      def ident: () -> resource
+
+      def settings: () -> resource
+
+      def service: () -> resource
+
+      def update: () -> resource
+
+      def supervision: () -> resource
+
+      def info: () -> resource
+
+      def host_info: () -> resource
+
+      def software_update: () -> resource
+
+      def device_type: () -> Symbol
+
+      def state: () -> State
+
+      def start: () -> void
+
+      def stop: () -> void
+
+      def pause: () -> void
+
+      def light_on: () -> void
+
+      def light_off: () -> void
+
+      def wake: () -> void
+
+      def power_on: () -> void
+
+      def power_off: () -> void
+
+      def dop2: (Integer unit, Integer attribute, ?idx1: Integer, ?idx2: Integer) -> Dop2::Leaf
+
+      def write_dop2: (Dop2::Leaf leaf) -> void
+
+      def dop1: (String request) -> String
+
+      def fan_level=: (Integer level) -> void
+
+      def fan_run_on_time=: (Integer minutes) -> void
+
+      def main_light=: (bool on) -> void
+
+      def setting: (Integer pf_id) -> Integer?
+
+      def write_setting: (Integer pf_id, Integer value) -> void
+
+      def get: (String path) -> resource
+
+      private
+
+      def device: (String resource) -> resource
+
+      def command: (Hash[Symbol, Integer] body) -> Connection::Response
+
+      def change: (Hash[Symbol, Integer] body) -> void
+
+      def tolerating_no_op: () { () -> untyped } -> void
+
+      def dop2_path: (Integer unit, Integer attribute, Integer idx1, Integer idx2) -> String
+
+      def power: (Integer state, Integer opcode) -> void
+
+      def rouse: () -> void
+    end
+  end
+end

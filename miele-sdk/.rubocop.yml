@@ -1,0 +1,6 @@
+inherit_from: ../.rubocop.yml
+
+# Fixtures are child-process scripts that hand their port to the spec over stdout.
+RSpec/Output:
+  Exclude:
+    - 'spec/fixtures/**/*'

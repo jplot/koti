@@ -1,0 +1,61 @@
+module Miele
+  module Sdk
+    class State
+      class Plate < Data
+        attr_reader step: Integer?
+        attr_reader remaining_heat: Integer?
+        attr_reader remaining_minutes: Integer?
+        attr_reader elapsed_minutes: Integer?
+        attr_reader timer_seconds: Integer?
+
+        def self.new: (*Integer? values) -> Plate
+      end
+
+      PLATE_KEYS: Array[String]
+
+      ABSENT: Integer
+
+      LIGHT: Hash[Integer, Symbol]
+
+      attr_reader raw: Hash[String, untyped]
+
+      attr_reader device_type: Symbol
+
+      def initialize: (Hash[String, untyped] raw, Symbol device_type) -> void
+
+      def status: () -> Symbol
+
+      def program_type: () -> Symbol
+
+      def program_phase: () -> Symbol
+
+      def remaining_time: () -> Integer?
+
+      def elapsed_time: () -> Integer?
+
+      def start_time: () -> Integer?
+
+      def temperatures: () -> Array[Float?]
+
+      def target_temperatures: () -> Array[Float?]
+
+      def door_open?: () -> bool
+
+      def failure?: () -> bool
+
+      def remote_control?: () -> bool
+
+      def light: () -> Symbol?
+
+      def ventilation_step: () -> Integer?
+
+      def plates: () -> Array[Plate]
+
+      private
+
+      def seconds: (String key) -> Integer?
+
+      def celsius: (String key) -> Array[Float?]
+    end
+  end
+end

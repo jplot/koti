@@ -1,0 +1,66 @@
+module Miele
+  module Sdk
+    module Dop2
+      class DecodeError < Error
+      end
+
+      class Leaf < Data
+        attr_reader unit: Integer
+        attr_reader attribute: Integer
+        attr_reader idx1: Integer
+        attr_reader idx2: Integer
+        attr_reader fields: Hash[Integer, Field]
+
+        def self.new: (unit: Integer, attribute: Integer, idx1: Integer, idx2: Integer, fields: Hash[Integer, Field]) -> Leaf
+      end
+
+      class Field < Data
+        attr_reader type: Symbol
+        attr_reader value: untyped
+
+        def self.new: (type: Symbol, value: untyped) -> Field
+                    | (Symbol type, untyped value) -> Field
+
+        def self.[]: (Symbol type, untyped value) -> Field
+      end
+
+      SCALARS: Hash[Integer, [Symbol, String, Integer]]
+
+      COMPOSITES: Hash[Integer, Symbol]
+
+      class Reader
+        @bytes: String
+
+        @offset: Integer
+
+        @end: Integer
+
+        def initialize: (String bytes) -> void
+
+        def leaf: () -> Leaf
+
+        private
+
+        def fields: (Integer count) -> Hash[Integer, Field]
+
+        def field: () -> Field
+
+        def scalar: (Integer code) -> Field
+
+        def composite: (Symbol type) -> untyped
+
+        def read: (String directive, Integer size) -> untyped
+      end
+
+      def self?.decode: (String bytes) -> Leaf
+
+      def self?.encode: (Leaf leaf) -> String
+
+      def self?.encode_field: (Integer index, Field field) -> String
+
+      def self?.scalar_value: (Field field, Integer size) -> Integer
+
+      def self?.range: (Symbol type, Integer size) -> Range[Integer]
+    end
+  end
+end

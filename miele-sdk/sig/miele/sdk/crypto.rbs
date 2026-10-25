@@ -1,0 +1,25 @@
+module Miele
+  module Sdk
+    module Crypto
+      BLOCK: Integer
+
+      JSON_MINIMUM: Integer
+
+      def self?.pad: (String body) -> String
+
+      def self?.signature: (key: String, lines: Array[_ToS], body: String) -> String
+
+      def self?.encrypt: (key: String, signature: String, plaintext: String) -> String
+
+      def self?.decrypt: (key: String, signature: String, ciphertext: String) -> String
+
+      def self?.authorization: (group_id: String, signature: String) -> String
+
+      def self?.hex: (String bytes) -> String
+
+      def self?.cipher: (Symbol mode, String key, String signature) -> OpenSSL::Cipher
+
+      def self?.run: (OpenSSL::Cipher cipher, String data) -> String
+    end
+  end
+end

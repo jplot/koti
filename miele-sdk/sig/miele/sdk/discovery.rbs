@@ -1,0 +1,59 @@
+module Miele
+  module Sdk
+    module Discovery
+      class Appliance < Data
+        attr_reader name: String
+        attr_reader host: String
+        attr_reader port: Integer
+        attr_reader device_type: Integer
+        attr_reader group_id: String
+        attr_reader connection: Integer
+        attr_reader pairing: bool
+
+        def self.new: (name: String, host: String, port: Integer, device_type: Integer, group_id: String, connection: Integer,
+                      pairing: bool) -> Appliance
+      end
+
+      # Resolv decodes each record type into its own class: payloads stay untyped.
+      type record = [Resolv::DNS::Name, Integer, untyped]
+
+      SERVICE: String
+
+      MULTICAST: IPAddr
+
+      def self?.discover: (timeout: Integer | Float, address: String, port: Integer, ?listen_port: Integer) -> Array[Appliance]
+
+      def self?.parse: (String packet) -> Array[Appliance]
+
+      def self?.query: () -> String
+
+      def self?.query_socket: (String address, Integer listen_port) -> UDPSocket
+
+      def self?.unflush: (String packet) -> String
+
+      def self?.unflush_record: (String bytes, Integer offset) -> Integer
+
+      def self?.unflush_class: (String bytes, Integer offset) -> Integer
+
+      def self?.skip_name: (String bytes, Integer offset) -> Integer
+
+      def self?.listen: (UDPSocket socket, Integer | Float timeout) { (Integer?) -> void } -> Array[Appliance]
+
+      def self?.ask_times: (Integer | Float timeout) -> Array[Integer]
+
+      def self?.appliances: (Array[record] records) -> Array[Appliance]
+
+      def self?.now: () -> Float
+
+      def self?.properties: (Array[record] records, Resolv::DNS::Name instance) -> Hash[String, String]
+
+      def self?.host: (Array[record] records, untyped srv) -> String
+
+      def self?.pointer?: (Resolv::DNS::Name name, untyped data) -> bool
+
+      def self?.appliance: (Resolv::DNS::Name instance, Array[record] records) -> Appliance?
+
+      def self?.record: (Array[record] records, Resolv::DNS::Name name, singleton(Resolv::DNS::Resource) type) -> untyped
+    end
+  end
+end

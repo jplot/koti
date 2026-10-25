@@ -1,0 +1,9 @@
+module Miele
+  module Sdk
+    module Catalog
+      PHASE_FAMILIES: Hash[Symbol, Symbol]
+
+      PROGRAM_PHASES: Hash[Symbol, Hash[Symbol, Array[Integer]]]
+    end
+  end
+end

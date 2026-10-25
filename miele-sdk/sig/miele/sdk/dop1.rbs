@@ -1,0 +1,27 @@
+module Miele
+  module Sdk
+    module Dop1
+      READ: String
+
+      WRITE: String
+
+      RUN_ON_TIMES: Array[Integer]
+
+      def self?.request: (object_id: String, type: String, section: String) -> String
+
+      def self?.fan_level: (Integer level) -> String
+
+      def self?.fan_run_on_time: (Integer minutes) -> String
+
+      def self?.main_light: (bool on) -> String
+
+      def self?.setting: (Integer pf_id) -> String
+
+      def self?.write_setting: (Integer pf_id, Integer value) -> String
+
+      def self?.setting_value: (String response, Integer pf_id) -> Integer?
+
+      def self?.unsigned: (Integer value, Integer bits) -> Integer
+    end
+  end
+end

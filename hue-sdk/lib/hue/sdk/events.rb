@@ -74,6 +74,22 @@ module Hue
         MAX_DELAY = 30
         private_constant :PATH, :MAX_DELAY
 
+        # Carries what the caller's block raised out of Connection.stream, which
+        # would take an Errno from the caller's own code for a network failure
+        # and reconnect, losing the event.
+        class BlockFailure < StandardError
+          # @return [Exception] what the block raised
+          attr_reader :error
+
+          # @param error [Exception]
+          # @api private
+          def initialize(error)
+            @error = error
+            super(error.message)
+          end
+        end
+        private_constant :BlockFailure
+
         # @param sleeper [#call] waits the given number of seconds before a reconnection
         # @api public
         def initialize(sleeper: method(:sleep))
@@ -84,7 +100,7 @@ module Hue
 
         # Blocks and yields every event. After a network failure or the end of
         # the stream, reconnects after 1, 2, 4, 8, 16 then 30 seconds, back to
-        # 1 second once a message arrives.
+        # 1 second as soon as the bridge answers.
         #
         # @yieldparam event [Event]
         # @return [void]
@@ -92,6 +108,7 @@ module Hue
         # @raise [ConnectionError] if no host is configured
         # @raise [TLSError] if the bridge certificate is not trusted
         # @raise [ResponseError] if the bridge answers with another error status
+        # @raise [StandardError] whatever the block raises, without reconnecting
         # @api public
         def each(&)
           key = Sdk.config.application_key or raise AuthenticationError, 'application_key is not configured'
@@ -102,6 +119,8 @@ module Hue
           rescue ConnectionError
             wait
           end
+        rescue BlockFailure => e
+          raise e.error, cause: e.error.cause
         end
 
         private
@@ -113,13 +132,24 @@ module Hue
         def follow(key, &)
           parser = Parser.new
           response = Connection.stream(PATH, headers: headers(key)) do |chunk|
-            parser.feed(chunk) do |message|
-              @delay = 1
-              @last_id = message[:id]
-              events(message[:data]).each(&)
-            end
+            @delay = 1
+            parser.feed(chunk) { |message| deliver(message, &) }
           end
           refuse(response) unless response.is_a?(Net::HTTPOK)
+        end
+
+        # @param message [Hash{Symbol=>String}] +id+ and +data+ of one message
+        # @yieldparam event [Event]
+        # @return [void]
+        # @raise [BlockFailure] wrapping what the block raised
+        # @api private
+        def deliver(message)
+          events(message[:data]).each do |event|
+            yield event
+          rescue StandardError => e
+            raise BlockFailure, e
+          end
+          @last_id = message[:id]
         end
 
         # @param key [String] application key

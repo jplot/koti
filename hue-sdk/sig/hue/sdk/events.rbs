@@ -43,6 +43,12 @@ module Hue
         @last_id: String?
         @delay: Integer
 
+        class BlockFailure < StandardError
+          attr_reader error: Exception
+
+          def initialize: (Exception error) -> void
+        end
+
         def initialize: (?sleeper: _Sleeper) -> void
 
         def each: () { (Event) -> void } -> void
@@ -50,6 +56,8 @@ module Hue
         private
 
         def follow: (String key) { (Event) -> void } -> void
+
+        def deliver: (Parser::message message) { (Event) -> void } -> void
 
         def headers: (String key) -> Hash[String, String]
 

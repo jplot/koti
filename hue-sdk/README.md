@@ -183,10 +183,12 @@ end
 `created_at`, `resource_type`, `resource_id`, `changes`, and `resource` to load it). Without a
 block it returns a lazy enumerator.
 
-The stream reconnects by itself when it breaks — the bridge closes an idle stream after
-5 minutes — waiting 1, 2, 4, 8, 16 then 30 seconds, and resumes from the last event received.
-A rejected application key raises `Hue::Sdk::AuthenticationError` instead of reconnecting.
-The block may call the bridge: the stream has a connection of its own.
+The stream reconnects by itself: 1 second after the bridge closes it, as it does after 5 idle
+minutes, and after 1, 2, 4, 8, 16 then 30 seconds while the bridge cannot be reached. It sends
+the id of the last event received (`Last-Event-ID`) when it reconnects. A rejected application
+key raises `Hue::Sdk::AuthenticationError` instead of reconnecting, and an exception raised by
+the block ends the stream and reaches the caller. The block may call the bridge: the stream has
+a connection of its own.
 
 ## Entertainment streaming
 

@@ -55,6 +55,21 @@ RSpec.describe Hue::Sdk::Events::Stream do
     expect(delays).to eq([1] * 7)
   end
 
+  it 'lets an error raised by the block reach the caller without reconnecting', :aggregate_failures do
+    expect { stream.each { File.read('/nonexistent') } }.to raise_error(Errno::ENOENT)
+    expect(bridge.requests.size).to eq(1)
+    expect(delays).to be_empty
+  end
+
+  context 'when the bridge ends an idle stream' do
+    def answer(_request) = [200, { 'Content-Type' => 'text/event-stream' }, ": hi\n\n"]
+
+    it 'waits 1 second before each reconnection' do
+      catch(:stop) { stream.each { nil } }
+      expect(delays).to eq([1] * 7)
+    end
+  end
+
   it 'fails at once when the host is not configured', :aggregate_failures do
     Hue::Sdk.config.host = nil
     expect { stream.each { nil } }.to raise_error(Hue::Sdk::ConnectionError, /host is not configured/)

@@ -103,9 +103,15 @@ module Miele
 
       private
 
-      # @param key [String] a +[hours, minutes]+ field
+      # Most appliances send +[hours, minutes]+; ha-miele-at-lan reports some sending plain minutes.
+      #
+      # @param key [String]
       # @return [Integer, nil]
-      def seconds(key) = raw[key]&.then { |(hours, minutes)| ((hours * 60) + minutes) * 60 }
+      def seconds(key)
+        value = raw[key]
+        minutes = value.is_a?(Array) ? (value.fetch(0) * 60) + value.fetch(1) : value
+        minutes * 60 if minutes
+      end
 
       # @param key [String] a field of hundredths of a degree
       # @return [Array<Float, nil>]

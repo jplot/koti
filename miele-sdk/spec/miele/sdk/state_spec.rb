@@ -19,6 +19,11 @@ RSpec.describe Miele::Sdk::State do
     expect(state.remaining_time).to eq(5400)
   end
 
+  it 'reads a time sent as plain minutes' do
+    raw['RemainingTime'] = 90
+    expect(state.remaining_time).to eq(5400)
+  end
+
   it 'converts elapsed and start times to seconds' do
     expect([state.elapsed_time, state.start_time]).to eq([300, 7200])
   end

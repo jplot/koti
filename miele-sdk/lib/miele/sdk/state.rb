@@ -37,20 +37,29 @@ module Miele
       # @return [Symbol] device type, which selects the phase table
       attr_reader :device_type
 
+      # @return [Integer, nil] +ProtocolVersion+ of the appliance, which selects the program type table
+      attr_reader :protocol_version
+
       # @param raw [Hash{String=>Object}] the +State+ resource
       # @param device_type [Symbol] one of {Catalog::DEVICE_TYPES}
-      def initialize(raw, device_type)
+      # @param protocol_version [Integer, nil] +ProtocolVersion+ of the appliance's +Ident+
+      def initialize(raw, device_type, protocol_version: nil)
         @raw = raw
         @device_type = device_type
+        @protocol_version = protocol_version
       end
 
       # @return [Symbol] one of {Catalog::STATUS} or of the device type's {Catalog::DEVICE_STATUS}, or +:unknown+
       # @api public
       def status = Catalog::STATUS[raw['Status']] || Catalog::DEVICE_STATUS.dig(device_type, raw['Status']) || :unknown
 
-      # @return [Symbol] one of {Catalog::PROGRAM_TYPES}, or +:unknown+
+      # @return [Symbol] one of {Catalog::PROGRAM_TYPES}, or of {Catalog::DOP2_PROGRAM_TYPES} on a DOP2
+      #   appliance, or +:unknown+
       # @api public
-      def program_type = Catalog::PROGRAM_TYPES.fetch(raw['ProgramType'], :unknown)
+      def program_type
+        dop2 = Catalog::DOP2_PROTOCOL_VERSIONS.include?(protocol_version)
+        (dop2 ? Catalog::DOP2_PROGRAM_TYPES : Catalog::PROGRAM_TYPES).fetch(raw['ProgramType'], :unknown)
+      end
 
       # @return [Symbol] phase from the table of the device type's family, or +:unknown+
       # @api public

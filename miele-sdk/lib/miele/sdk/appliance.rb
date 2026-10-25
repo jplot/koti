@@ -66,9 +66,13 @@ module Miele
       # @api public
       def device_type = @device_type ||= Catalog::DEVICE_TYPES.fetch(ident['DeviceType'], :unknown)
 
+      # @return [Integer, nil] +ProtocolVersion+ of {#ident}: 2 on Dop1 appliances, 3 or 4 on DOP2 ones
+      # @api public
+      def protocol_version = @protocol_version ||= ident['ProtocolVersion']
+
       # @return [State]
       # @api public
-      def state = State.new(device('State'), device_type)
+      def state = State.new(device('State'), device_type, protocol_version:)
 
       # @return [void]
       # @raise [ResponseError] if the appliance refuses (400)

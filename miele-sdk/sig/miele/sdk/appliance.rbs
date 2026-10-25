@@ -13,6 +13,8 @@ module Miele
 
       @device_type: Symbol?
 
+      @protocol_version: Integer?
+
       @sleeper: _Sleeper
 
       attr_reader host: String
@@ -38,6 +40,8 @@ module Miele
       def software_update: () -> resource
 
       def device_type: () -> Symbol
+
+      def protocol_version: () -> Integer?
 
       def state: () -> State
 

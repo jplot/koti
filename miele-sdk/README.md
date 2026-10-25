@@ -84,7 +84,7 @@ state = oven.state
 state.status               # => :running
 state.program_type         # => :normal_operation, numbered by the protocol version
 state.program_id           # => 13
-state.program              # => :fan_plus, named on ovens only
+state.program              # => :fan_plus, where the Miele app names programs
 state.program_phase        # => :heating_up_phase
 state.remaining_time       # => 5400, in seconds
 state.temperatures         # => [180.5, nil, nil], in °C, nil where nothing is measured
@@ -220,6 +220,9 @@ anything is sent.
   2,244 programs kept in `lib/miele/sdk/catalog/dop2_oven_programs.tsv`; for Dop1 ovens, the app's
   seven program tables and the rule picking one, 4,143 programs kept in
   `lib/miele/sdk/catalog/dop1_oven_programs.tsv`.
+- Dishwasher, dish warmer and coffee program names: the Miele app 4.19.0's dishwasher tables
+  (DOP2 and Dop1), dish warmer labels and the drinks of a coffee system's standard profile, in its
+  default English, kept in `lib/miele/sdk/catalog/programs.tsv`.
 - The local protocol (signing, DOP2 layout, Dop1 objects, power sequence, SuperVision):
   [ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan), building on the work of
   [MieleRESTServer](https://github.com/akappner/MieleRESTServer).

@@ -1,0 +1,28 @@
+module Hue
+  module Sdk
+    module Configuration
+      DEFAULT_CA_FILE: String
+
+      class Settings
+        include Singleton
+        def self.instance: () -> Settings
+
+        attr_accessor host: String?
+        attr_accessor port: Integer
+        attr_accessor bridge_id: String?
+        attr_accessor application_key: String?
+        attr_accessor ca_file: String
+        attr_accessor client_key: String?
+        attr_accessor open_timeout: Integer | Float
+        attr_accessor read_timeout: Integer | Float
+        attr_accessor event_read_timeout: Integer | Float
+
+        def initialize: () -> void
+      end
+
+      def config: () -> Settings
+
+      def configure: () { (Settings) -> void } -> void
+    end
+  end
+end

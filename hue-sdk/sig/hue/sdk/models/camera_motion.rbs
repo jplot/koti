@@ -1,0 +1,11 @@
+module Hue
+  module Sdk
+    module Models
+      class CameraMotion < Base
+        class Instance < Base::Instance
+          include Operations::Update
+        end
+      end
+    end
+  end
+end

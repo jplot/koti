@@ -1,0 +1,138 @@
+module Hue
+  module Sdk
+    def self.BehaviorInstance: (?nil id) -> Models::BehaviorInstance
+                             | (String id) -> Models::BehaviorInstance::Instance
+
+    def self.BehaviorScript: (?nil id) -> Models::BehaviorScript
+                           | (String id) -> Models::BehaviorScript::Instance
+
+    def self.BehaviorScriptFormula: (?nil id) -> Models::BehaviorScriptFormula
+                                  | (String id) -> Models::BehaviorScriptFormula::Instance
+
+    def self.BellButton: (?nil id) -> Models::BellButton
+                       | (String id) -> Models::BellButton::Instance
+
+    def self.Bridge: (?nil id) -> Models::Bridge
+                   | (String id) -> Models::Bridge::Instance
+
+    def self.BridgeHome: (?nil id) -> Models::BridgeHome
+                       | (String id) -> Models::BridgeHome::Instance
+
+    def self.Button: (?nil id) -> Models::Button
+                   | (String id) -> Models::Button::Instance
+
+    def self.CameraMotion: (?nil id) -> Models::CameraMotion
+                         | (String id) -> Models::CameraMotion::Instance
+
+    def self.Clip: (?nil id) -> Models::Clip
+                 | (String id) -> Models::Clip::Instance
+
+    def self.Contact: (?nil id) -> Models::Contact
+                    | (String id) -> Models::Contact::Instance
+
+    def self.ConvenienceAreaMotion: (?nil id) -> Models::ConvenienceAreaMotion
+                                  | (String id) -> Models::ConvenienceAreaMotion::Instance
+
+    def self.Device: (?nil id) -> Models::Device
+                   | (String id) -> Models::Device::Instance
+
+    def self.DevicePower: (?nil id) -> Models::DevicePower
+                        | (String id) -> Models::DevicePower::Instance
+
+    def self.DeviceSoftwareUpdate: (?nil id) -> Models::DeviceSoftwareUpdate
+                                 | (String id) -> Models::DeviceSoftwareUpdate::Instance
+
+    def self.Entertainment: (?nil id) -> Models::Entertainment
+                          | (String id) -> Models::Entertainment::Instance
+
+    def self.EntertainmentConfiguration: (?nil id) -> Models::EntertainmentConfiguration
+                                       | (String id) -> Models::EntertainmentConfiguration::Instance
+
+    def self.GeofenceClient: (?nil id) -> Models::GeofenceClient
+                           | (String id) -> Models::GeofenceClient::Instance
+
+    def self.Geolocation: (?nil id) -> Models::Geolocation
+                        | (String id) -> Models::Geolocation::Instance
+
+    def self.GroupedLight: (?nil id) -> Models::GroupedLight
+                         | (String id) -> Models::GroupedLight::Instance
+
+    def self.GroupedLightLevel: (?nil id) -> Models::GroupedLightLevel
+                              | (String id) -> Models::GroupedLightLevel::Instance
+
+    def self.GroupedMotion: (?nil id) -> Models::GroupedMotion
+                          | (String id) -> Models::GroupedMotion::Instance
+
+    def self.Homekit: (?nil id) -> Models::Homekit
+                    | (String id) -> Models::Homekit::Instance
+
+    def self.Light: (?nil id) -> Models::Light
+                  | (String id) -> Models::Light::Instance
+
+    def self.LightLevel: (?nil id) -> Models::LightLevel
+                       | (String id) -> Models::LightLevel::Instance
+
+    def self.Matter: (?nil id) -> Models::Matter
+                   | (String id) -> Models::Matter::Instance
+
+    def self.MatterFabric: (?nil id) -> Models::MatterFabric
+                         | (String id) -> Models::MatterFabric::Instance
+
+    def self.Motion: (?nil id) -> Models::Motion
+                   | (String id) -> Models::Motion::Instance
+
+    def self.MotionAreaCandidate: (?nil id) -> Models::MotionAreaCandidate
+                                | (String id) -> Models::MotionAreaCandidate::Instance
+
+    def self.MotionAreaConfiguration: (?nil id) -> Models::MotionAreaConfiguration
+                                    | (String id) -> Models::MotionAreaConfiguration::Instance
+
+    def self.PowerOutputConfiguration: (?nil id) -> Models::PowerOutputConfiguration
+                                     | (String id) -> Models::PowerOutputConfiguration::Instance
+
+    def self.RelativeRotary: (?nil id) -> Models::RelativeRotary
+                           | (String id) -> Models::RelativeRotary::Instance
+
+    def self.Room: (?nil id) -> Models::Room
+                 | (String id) -> Models::Room::Instance
+
+    def self.Scene: (?nil id) -> Models::Scene
+                  | (String id) -> Models::Scene::Instance
+
+    def self.SecurityAreaMotion: (?nil id) -> Models::SecurityAreaMotion
+                               | (String id) -> Models::SecurityAreaMotion::Instance
+
+    def self.ServiceGroup: (?nil id) -> Models::ServiceGroup
+                         | (String id) -> Models::ServiceGroup::Instance
+
+    def self.SmartScene: (?nil id) -> Models::SmartScene
+                       | (String id) -> Models::SmartScene::Instance
+
+    def self.Speaker: (?nil id) -> Models::Speaker
+                    | (String id) -> Models::Speaker::Instance
+
+    def self.SwitchInputConfiguration: (?nil id) -> Models::SwitchInputConfiguration
+                                     | (String id) -> Models::SwitchInputConfiguration::Instance
+
+    def self.Tamper: (?nil id) -> Models::Tamper
+                   | (String id) -> Models::Tamper::Instance
+
+    def self.Temperature: (?nil id) -> Models::Temperature
+                        | (String id) -> Models::Temperature::Instance
+
+    def self.WifiConnectivity: (?nil id) -> Models::WifiConnectivity
+                             | (String id) -> Models::WifiConnectivity::Instance
+
+    def self.ZgpConnectivity: (?nil id) -> Models::ZgpConnectivity
+                            | (String id) -> Models::ZgpConnectivity::Instance
+
+    def self.ZigbeeConnectivity: (?nil id) -> Models::ZigbeeConnectivity
+                               | (String id) -> Models::ZigbeeConnectivity::Instance
+
+    def self.ZigbeeDeviceDiscovery: (?nil id) -> Models::ZigbeeDeviceDiscovery
+                                  | (String id) -> Models::ZigbeeDeviceDiscovery::Instance
+
+    def self.Zone: (?nil id) -> Models::Zone
+                 | (String id) -> Models::Zone::Instance
+  end
+end

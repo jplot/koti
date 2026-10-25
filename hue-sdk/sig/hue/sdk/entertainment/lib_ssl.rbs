@@ -1,0 +1,33 @@
+module Hue
+  module Sdk
+    module Entertainment
+      module LibSSL
+        def self.DTLS_client_method: () -> untyped
+
+        def self.SSL_CTX_new: (untyped method) -> untyped
+
+        def self.SSL_CTX_set_cipher_list: (untyped context, String ciphers) -> Integer
+
+        def self.SSL_CTX_set_psk_client_callback: (untyped context, untyped callback) -> void
+
+        def self.SSL_CTX_free: (untyped context) -> void
+
+        def self.SSL_new: (untyped context) -> untyped
+
+        def self.SSL_set_fd: (untyped ssl, Integer fd) -> Integer
+
+        def self.SSL_connect: (untyped ssl) -> Integer
+
+        def self.SSL_write: (untyped ssl, String data, Integer size) -> Integer
+
+        def self.SSL_get_error: (untyped ssl, Integer result) -> Integer
+
+        def self.SSL_shutdown: (untyped ssl) -> Integer
+
+        def self.SSL_free: (untyped ssl) -> void
+
+        def self.psk_callback: (String identity, String psk) -> untyped
+      end
+    end
+  end
+end

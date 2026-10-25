@@ -1,0 +1,16 @@
+module Hue
+  module Sdk
+    module Models
+      class Resource < Base
+        class Instance < Base::Instance
+        end
+
+        self.@generic: Hash[String, singleton(Resource)]
+
+        def self.for: (String type) -> singleton(Resource)
+
+        def self.anonymous: (String type) -> singleton(Resource)
+      end
+    end
+  end
+end

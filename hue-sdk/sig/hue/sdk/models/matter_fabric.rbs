@@ -1,0 +1,12 @@
+module Hue
+  module Sdk
+    module Models
+      class MatterFabric < Base
+        class Instance < Base::Instance
+          include Operations::Update
+          include Operations::Delete
+        end
+      end
+    end
+  end
+end

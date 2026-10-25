@@ -1,0 +1,16 @@
+module Hue
+  module Sdk
+    module Entertainment
+      module Message
+        COLOR_SPACES: Hash[Symbol, Integer]
+
+        MAX_CHANNELS: Integer
+
+        def self?.encode: (configuration_id: String, sequence: Integer, channels: Hash[Integer, Array[Float]],
+                           ?color_space: Symbol) -> String
+
+        def self?.header: (String configuration_id, Integer sequence, Integer size, Symbol color_space) -> String
+      end
+    end
+  end
+end

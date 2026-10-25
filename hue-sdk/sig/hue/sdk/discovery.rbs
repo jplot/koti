@@ -1,0 +1,44 @@
+module Hue
+  module Sdk
+    module Discovery
+      class Bridge < Data
+        attr_reader name: String
+        attr_reader host: String
+        attr_reader port: Integer
+        attr_reader bridge_id: String
+        attr_reader model_id: String
+
+        def self.new: (name: String, host: String, port: Integer, bridge_id: String, model_id: String) -> Bridge
+      end
+
+      # Resolv decodes each record type into its own class: payloads stay untyped.
+      type record = [Resolv::DNS::Name, Integer, untyped]
+
+      SERVICE: String
+
+      def self?.discover: (timeout: Integer | Float, address: String, port: Integer) -> Array[Bridge]
+
+      def self?.parse: (String packet) -> Array[Bridge]
+
+      def self?.query: () -> String
+
+      def self?.listen: (UDPSocket socket, Integer | Float timeout) { (Integer?) -> void } -> Array[Bridge]
+
+      def self?.ask_times: (Integer | Float timeout) -> Array[Integer]
+
+      def self?.bridges: (Array[record] records) -> Array[Bridge]
+
+      def self?.now: () -> Float
+
+      def self?.properties: (Array[record] records, Resolv::DNS::Name instance) -> Hash[String, String]
+
+      def self?.host: (Array[record] records, untyped srv) -> String
+
+      def self?.pointer?: (Resolv::DNS::Name name, untyped data) -> bool
+
+      def self?.bridge: (Resolv::DNS::Name instance, Array[record] records) -> Bridge?
+
+      def self?.record: (Array[record] records, Resolv::DNS::Name name, singleton(Resolv::DNS::Resource) type) -> untyped
+    end
+  end
+end

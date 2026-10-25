@@ -1,0 +1,15 @@
+module Hue
+  module Sdk
+    module Entertainment
+      class Session
+        @socket: DtlsSocket
+        @configuration_id: String
+        @sequence: Integer
+
+        def initialize: (DtlsSocket socket, String configuration_id) -> void
+
+        def write: (Hash[Integer, Array[Float]] channels, ?color_space: Symbol) -> void
+      end
+    end
+  end
+end

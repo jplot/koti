@@ -1,0 +1,27 @@
+module Hue
+  module Sdk
+    module Connection
+      NETWORK_ERRORS: Array[singleton(Exception)]
+
+      REQUESTS: Hash[Symbol, singleton(Net::HTTPRequest)]
+
+      def self?.request: (Symbol method, String path, ?body: String?, ?headers: Hash[String, String]) -> Net::HTTPResponse
+
+      def self?.stream: (String path, ?headers: Hash[String, String]) { (String chunk) -> void } -> Net::HTTPResponse
+
+      def self?.http: () -> Net::HTTP
+
+      def self?.connection_key: () -> [String?, Integer, String?, String]
+
+      def self?.transport: [T] () { () -> T } -> T
+
+      def self?.establish: (?Integer | Float read_timeout) -> Net::HTTP
+
+      def self?.pin: (Net::HTTP http, Configuration::Settings config) -> void
+
+      def self?.identity_check: (String? bridge_id) -> ^(bool, OpenSSL::X509::StoreContext) -> bool
+
+      def self?.endpoint: () -> String
+    end
+  end
+end

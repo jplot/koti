@@ -1,0 +1,37 @@
+module Hue
+  module Sdk
+    class Client
+      include Singleton
+
+      type data = Array[Hash[String, untyped]]
+
+      ERRORS: Hash[Integer, singleton(ResponseError)]
+
+      def self.instance: () -> Client
+
+      def self.get: (String path) -> data
+
+      def self.post: (String path, body: Hash[Symbol | String, untyped]) -> data
+
+      def self.put: (String path, body: Hash[Symbol | String, untyped]) -> data
+
+      def self.delete: (String path) -> data
+
+      def get: (String path) -> data
+
+      def post: (String path, body: Hash[Symbol | String, untyped]) -> data
+
+      def put: (String path, body: Hash[Symbol | String, untyped]) -> data
+
+      def delete: (String path) -> data
+
+      private
+
+      def call: (Symbol method, String path, ?Hash[Symbol | String, untyped]? body) -> data
+
+      def unwrap: (Net::HTTPResponse response) -> data
+
+      def parse: (String? body) -> Hash[String, untyped]
+    end
+  end
+end

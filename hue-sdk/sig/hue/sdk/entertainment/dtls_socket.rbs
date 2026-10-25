@@ -1,0 +1,31 @@
+module Hue
+  module Sdk
+    module Entertainment
+      class DtlsSocket
+        CIPHER: String
+
+        HANDSHAKE_TIMEOUT: Integer
+
+        @endpoint: String
+        @socket: UDPSocket
+        @callback: untyped
+        @context: untyped
+        @ssl: untyped
+
+        def self.open: (host: String, identity: String, psk: String, ?port: Integer) -> DtlsSocket
+
+        def initialize: (String host, Integer port, String identity, String psk) -> void
+
+        def handshake: () -> void
+
+        def write: (String data) -> Integer
+
+        def close: () -> void
+
+        private
+
+        def blocking_socket: (String host, Integer port) -> UDPSocket
+      end
+    end
+  end
+end

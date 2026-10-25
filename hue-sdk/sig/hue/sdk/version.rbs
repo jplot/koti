@@ -1,0 +1,5 @@
+module Hue
+  module Sdk
+    VERSION: String
+  end
+end

@@ -1,0 +1,71 @@
+module Hue
+  module Sdk
+    module Models
+      class Base
+        class Instance
+          type data = Hash[String, untyped]
+
+          self.@model: singleton(Base)
+
+          def self.model: () -> singleton(Base)
+
+          def self.model=: (singleton(Base) model) -> singleton(Base)
+
+          @data: data?
+
+          attr_reader id: String
+
+          def initialize: (String id, ?data: data?) -> void
+
+          def data: () -> data
+
+          def []: (String | Symbol key) -> untyped
+
+          def owner: () -> Instance?
+
+          def children: () -> Array[Instance]
+
+          def services: () -> Array[Instance]
+
+          private
+
+          def path: () -> String
+
+          def reference: (Hash[String, String] target) -> Instance
+
+          def visible: (data data) -> data
+        end
+
+        self.@type: String
+
+        self.@hidden_fields: Array[String]?
+
+        def self.type: () -> String
+
+        def self.hidden_fields: () -> Array[String]
+
+        def self.strip: (Hash[String, untyped] data) -> Hash[String, untyped]
+
+        private
+
+        def self.without: (Hash[String, untyped] data, String key, *String nested) -> Hash[String, untyped]
+
+        def self.resource_type: (String type) -> void
+
+        def self.operations: (*Symbol names) -> void
+
+        def self.deprecated: (*String fields) -> void
+
+        def self.inherited: (singleton(Base) model) -> void
+
+        public
+
+        def list: () -> Array[Instance]
+
+        private
+
+        def path: () -> String
+      end
+    end
+  end
+end

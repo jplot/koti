@@ -1,0 +1,26 @@
+plugins:
+  - rubocop-rspec
+  - rubocop-rake
+
+AllCops:
+  TargetRubyVersion: 4.0
+  NewCops: enable
+  SuggestExtensions: false
+
+# The gem entry point is named after the gem so `Bundler.require` loads it.
+Naming/FileName:
+  Exclude:
+    - '*/lib/*-sdk.rb'
+
+# Specs drive real sockets (fake bridge, threads): setup, act and assert stay inline.
+RSpec/ExampleLength:
+  Max: 8
+
+# `#: Type` is the RBS inline type assertion read by Steep.
+Layout/LeadingCommentSpace:
+  AllowRBSInlineAnnotation: true
+
+# `delete` is a command; its `true` confirms the bridge accepted the deletion.
+Naming/PredicateMethod:
+  AllowedMethods:
+    - delete

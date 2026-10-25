@@ -1,0 +1,9 @@
+*.gem
+.bundle/
+.yardoc/
+.steep/
+coverage/
+doc/
+Gemfile.lock
+.env
+apks/

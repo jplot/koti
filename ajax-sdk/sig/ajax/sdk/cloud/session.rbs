@@ -1,0 +1,39 @@
+module Ajax
+  module Sdk
+    module Cloud
+      class Session
+        GATEWAY: String
+        PASSWORD: String
+        TOTP: String
+        ROLE: Symbol
+        REASONS: Array[Symbol]
+
+        @client: Client
+        @settings: Configuration::Settings
+        @token: String?
+        @user_id: String?
+        @mutex: Thread::Mutex
+
+        def initialize: (Client client, Configuration::Settings settings) -> void
+        def inspect: () -> String
+        def ensure_login: () -> void
+        def login: () -> void
+        def metadata: () -> Hash[String, String]
+
+        private
+
+        def sign_in_flow: () -> void
+        def require_credentials: () -> void
+        def two_factor: (untyped request_id) -> void
+        def sign_in: (String path, Hash[Symbol, untyped] request) -> Hash[Symbol, untyped]?
+        def login_with_totp: (untyped request_id, ?retried: bool) -> void
+        def accept: (Hash[Symbol, untyped] success) -> nil
+        def password_request: () -> Hash[Symbol, untyped]
+        def totp_request: (untyped request_id, bool retried) -> Hash[Symbol, untyped]
+        def password_hash: () -> String
+        def reason: (Hash[Symbol, untyped] failure) -> Symbol
+        def app_metadata: () -> Hash[String, String]
+      end
+    end
+  end
+end

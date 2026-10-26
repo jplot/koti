@@ -1,0 +1,32 @@
+name: ajax-sdk
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ajax-sdk/**'
+      - '.rubocop.yml'
+      - '.github/workflows/ajax-sdk.yml'
+  pull_request:
+    paths:
+      - 'ajax-sdk/**'
+      - '.rubocop.yml'
+      - '.github/workflows/ajax-sdk.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ajax-sdk
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+          working-directory: ajax-sdk
+      - run: bundle exec rake

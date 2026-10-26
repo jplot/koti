@@ -1,0 +1,31 @@
+module Ajax
+  module Sdk
+    module Cloud
+      class Rpc < Data
+        attr_reader path: String
+        attr_reader type: Symbol
+        attr_reader request: String
+        attr_reader response: String
+
+        def self.new: (path: String, type: Symbol, request: String, response: String) -> Rpc
+      end
+
+      module Schemas
+        DIRECTORY: String
+        LOCK: Thread::Mutex
+
+        @pool: untyped
+        @rpcs: Hash[String, Rpc]?
+
+        def self?.pool: () -> untyped
+        def self?.message: (String full_name) -> untyped
+        def self?.rpc: (String path) -> Rpc
+        def self?.rpcs: () -> Hash[String, Rpc]
+        def self?.load_pool: () -> untyped
+        def self?.add_file: (untyped pool, untyped file) -> bool
+        def self?.descriptor_bytes: () -> String
+        def self?.load_rpcs: () -> Hash[String, Rpc]
+      end
+    end
+  end
+end

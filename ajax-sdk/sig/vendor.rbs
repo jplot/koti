@@ -1,0 +1,48 @@
+# Minimal, untyped signatures for the parts of the grpc and google-protobuf gems the SDK uses.
+# Neither gem ships RBS, so these stubs only let Steep resolve the constants and methods.
+
+module GRPC
+  class ClientStub
+    def initialize: (String target, untyped credentials, ?timeout: untyped) -> void
+    def request_response: (*untyped) ?{ (*untyped) -> void } -> untyped
+    def server_streamer: (*untyped) ?{ (*untyped) -> void } -> untyped
+    def client_streamer: (*untyped) ?{ (*untyped) -> void } -> untyped
+    def bidi_streamer: (*untyped) ?{ (*untyped) -> void } -> untyped
+  end
+
+  module Core
+    class ChannelCredentials
+      def initialize: (?String?) -> void
+    end
+  end
+
+  class BadStatus < StandardError
+  end
+
+  class Unauthenticated < BadStatus
+  end
+end
+
+module Google
+  module Protobuf
+    class DescriptorPool
+      def self.new: () -> DescriptorPool
+      def self.generated_pool: () -> DescriptorPool
+      def add_serialized_file: (String) -> untyped
+      def lookup: (String) -> untyped
+    end
+
+    class FileDescriptorSet
+      def self.decode: (String) -> untyped
+      def file: () -> untyped
+    end
+  end
+end
+
+module ROTP
+  class TOTP
+    def initialize: (String, **untyped) -> void
+    def at: (Time | Integer) -> String
+    def now: () -> String
+  end
+end

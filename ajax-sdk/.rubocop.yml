@@ -1,0 +1,6 @@
+inherit_from: ../.rubocop.yml
+
+# ajax-sdk targets Ruby 3.4: grpc and google-protobuf ship precompiled binaries only up to 3.4,
+# while the rest of koti stays on 4.0.
+AllCops:
+  TargetRubyVersion: 3.4

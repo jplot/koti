@@ -44,7 +44,9 @@ cloud.notifications(space.id, limit: 20) # => [{ … }, …] most recent first
 ```
 
 Spaces come back as {Ajax::Sdk::Cloud::Space} values; devices and notifications come back as plain
-Hashes decoded from the gateway, with the whole payload under each entry.
+Hashes decoded from the gateway, with the whole payload under each entry. `spaces` reads every page.
+A read the gateway refuses raises `Ajax::Sdk::Cloud::ReadError`, whose `reason` names why (for example
+`:bad_request`).
 
 ## Commanding
 
@@ -72,11 +74,22 @@ cloud.call("/systems.ajax.api.mobile.v2.space.SpaceService/findUserSpacesWithPag
 `#call` picks the call kind (unary, server stream, …) from the table; `#unary`, `#server_stream`,
 `#client_stream` and `#bidi` are the direct accessors. Responses are Hashes.
 
+A stream yields each message to the block, or returns an Enumerator without one; leaving it early
+(`break`, `first`) closes the call. Streams have no deadline, every other call waits at most
+`config.read_timeout` seconds (30 by default).
+
+```ruby
+path = '/systems.ajax.api.ecosystem.v3.mobilegwsvc.service.stream_light_devices.StreamLightDevicesService/execute'
+cloud.server_stream(path, { space_id: space.id }) { |message| … }
+cloud.server_stream(path, { space_id: space.id }).first
+```
+
 ## Errors
 
 - `Cloud::AuthenticationError(reason)` — the login was refused (`:invalid_credentials`,
   `:account_locked`, `:invalid_totp`, …).
 - `Cloud::CommandError(reason)` — the hub refused a command.
+- `Cloud::ReadError(reason)` — the gateway refused a read.
 - `Cloud::ReadOnlyError` — a command was blocked because the client is read-only.
 - `Cloud::UnknownMethodError` / `Cloud::UnknownMessageError` — an unknown path or message name.
 

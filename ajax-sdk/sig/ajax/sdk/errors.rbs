@@ -24,6 +24,14 @@ module Ajax
         def initialize: (Symbol reason, ?String? message) -> void
       end
 
+      class ReadError < Error
+        @reason: Symbol
+
+        attr_reader reason: Symbol
+
+        def initialize: (Symbol reason, ?String? message) -> void
+      end
+
       class CommandError < Error
         @reason: Symbol
 

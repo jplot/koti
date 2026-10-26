@@ -43,7 +43,7 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
 
   it 'reads the first devices snapshot' do
     snapshot = { success: { snapshot: { light_device_items: [{ hub_device: {} }, { smart_lock: {} }] } } }
-    allow(host).to receive(:server_stream).and_yield(snapshot)
+    allow(host).to receive(:server_stream).and_return([snapshot].each)
 
     expect(host.devices('s1').size).to eq(2)
   end

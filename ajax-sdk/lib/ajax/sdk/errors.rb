@@ -31,6 +31,19 @@ module Ajax
       # A state-changing command was blocked because the client is configured read-only.
       class ReadOnlyError < Error; end
 
+      # A read (spaces, devices, …) was refused by the gateway. +reason+ is a symbol such as +:bad_request+.
+      class ReadError < Error
+        # @return [Symbol] the machine-readable reason
+        attr_reader :reason
+
+        # @param reason [Symbol]
+        # @param message [String]
+        def initialize(reason, message = nil)
+          @reason = reason
+          super(message || reason.to_s)
+        end
+      end
+
       # A command (arm, disarm, …) was refused by the hub. +reason+ is a symbol such as +:hub_offline+.
       class CommandError < Error
         # @return [Symbol] the machine-readable reason

@@ -8,6 +8,11 @@ module Ajax
     # A setting is missing or malformed.
     class ConfigurationError < Error; end
 
+    module Sia
+      # A received frame is not valid DC-09: wrong CRC or length, unreadable, or not opened by the key.
+      class FrameError < Error; end
+    end
+
     module Cloud
       # A gRPC path is not in the shipped method table.
       class UnknownMethodError < Error; end

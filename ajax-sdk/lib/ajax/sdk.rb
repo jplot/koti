@@ -6,6 +6,7 @@ require_relative 'sdk/configuration'
 require_relative 'sdk/cloud/schemas'
 require_relative 'sdk/cloud/session'
 require_relative 'sdk/cloud/client'
+require_relative 'sdk/sia'
 
 # Namespace of the koti SDKs for the Ajax ecosystem.
 module Ajax

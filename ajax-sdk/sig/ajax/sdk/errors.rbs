@@ -6,6 +6,11 @@ module Ajax
     class ConfigurationError < Error
     end
 
+    module Sia
+      class FrameError < Error
+      end
+    end
+
     module Cloud
       class UnknownMethodError < Error
       end

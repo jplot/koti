@@ -1,0 +1,7 @@
+module Ajax
+  module Sdk
+    module Sia
+      def self.crc: (String text) -> Integer
+    end
+  end
+end

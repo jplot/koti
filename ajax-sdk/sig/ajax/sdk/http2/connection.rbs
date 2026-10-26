@@ -1,0 +1,64 @@
+module Ajax
+  module Sdk
+    module Http2
+      class Connection
+        include Frames
+
+        DEFAULT_MAX_FRAME: Integer
+        DEFAULT_WINDOW: Integer
+        SETTING_INITIAL_WINDOW: Integer
+        SETTING_MAX_FRAME: Integer
+        CANCEL: Integer
+
+        @io: untyped
+        @streams: Hash[Integer, Stream]
+        @streams_mutex: Thread::Mutex
+        @flow_mutex: Thread::Mutex
+        @flow_cv: Thread::ConditionVariable
+        @write_mutex: Thread::Mutex
+        @encoder: Hpack::Encoder
+        @decoder: Hpack::Decoder
+        @max_frame_size: Integer
+        @conn_send_window: Integer
+        @peer_initial_window: Integer
+        @recv_consumed: Integer
+        @next_id: Integer
+        @closed: StandardError?
+        @settings: Thread::Queue
+        @reader: Thread
+
+        attr_reader max_frame_size: Integer
+
+        def self.open: (host: String, port: Integer, ?ca_file: String?, ?open_timeout: Integer) -> Connection
+        def self.connect: (String host, Integer port, String? ca_file, Integer open_timeout) -> untyped
+        def initialize: (untyped io) -> void
+        def request: (Array[[String, String]] headers, ?end_stream: bool) -> Stream
+        def close: () -> void
+        def reserve: (Stream stream, Integer want) -> Integer
+        def send_data: (Integer id, String data, end_stream: bool) -> void
+        def window_update: (Integer id, Integer increment) -> void
+        def cancel: (Integer id) -> void
+
+        private
+
+        def handshake: () -> void
+        def write_frame: (Frame frame) -> void
+        def read_loop: () -> void
+        def handle: (Frame frame) -> void
+        def on_settings: (Frame frame) -> void
+        def apply_setting: (Integer id, Integer value) -> void
+        def grow_windows: (Integer value) -> void
+        def on_ping: (Frame frame) -> void
+        def on_goaway: (Frame frame) -> void
+        def on_window_update: (Frame frame) -> void
+        def on_headers: (Frame frame) -> void
+        def on_data: (Frame frame) -> void
+        def on_rst: (Frame frame) -> void
+        def replenish_connection: (Integer count) -> void
+        def lookup: (Integer id) -> Stream?
+        def forget: (Integer id) -> void
+        def shutdown: (StandardError error) -> void
+      end
+    end
+  end
+end

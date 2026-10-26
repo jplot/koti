@@ -10,6 +10,9 @@ require_relative 'sdk/protobuf/descriptor'
 require_relative 'sdk/cloud/schemas'
 require_relative 'sdk/http2/huffman'
 require_relative 'sdk/http2/hpack'
+require_relative 'sdk/http2/frame'
+require_relative 'sdk/http2/stream'
+require_relative 'sdk/http2/connection'
 
 # Namespace of the koti SDKs for the Ajax ecosystem.
 module Ajax

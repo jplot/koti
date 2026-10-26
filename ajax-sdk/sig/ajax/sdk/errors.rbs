@@ -6,6 +6,9 @@ module Ajax
     class ConfigurationError < Error
     end
 
+    class ConnectionError < Error
+    end
+
     module Protobuf
       class DecodeError < Error
       end
@@ -18,6 +21,12 @@ module Ajax
 
     module Http2
       class CompressionError < Error
+      end
+
+      class ConnectionClosed < ConnectionError
+      end
+
+      class ProtocolError < Error
       end
     end
   end

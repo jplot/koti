@@ -1,0 +1,33 @@
+module Ajax
+  module Sdk
+    module Http2
+      PREFACE: String
+
+      module Frames
+        DATA: Integer
+        HEADERS: Integer
+        RST_STREAM: Integer
+        SETTINGS: Integer
+        PING: Integer
+        GOAWAY: Integer
+        WINDOW_UPDATE: Integer
+        CONTINUATION: Integer
+        END_STREAM: Integer
+        ACK: Integer
+        END_HEADERS: Integer
+      end
+
+      class Frame < Data
+        attr_reader type: Integer
+        attr_reader flags: Integer
+        attr_reader stream_id: Integer
+        attr_reader payload: String
+
+        def self.new: (type: Integer, flags: Integer, stream_id: Integer, payload: String) -> Frame
+        def self.read: (untyped io) -> Frame
+        def flag?: (Integer flag) -> bool
+        def to_s: () -> String
+      end
+    end
+  end
+end

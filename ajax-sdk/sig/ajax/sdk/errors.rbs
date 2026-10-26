@@ -10,5 +10,10 @@ module Ajax
       class DecodeError < Error
       end
     end
+
+    module Cloud
+      class UnknownMethodError < Error
+      end
+    end
   end
 end

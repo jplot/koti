@@ -11,7 +11,8 @@ module Ajax
       # Talks to the Ajax mobile gateway over gRPC. It resolves a path to its request and response
       # messages through {Schemas}, sends the call of the right kind, and attaches the app and session
       # metadata the gateway expects. One {Session} rides along: the client logs in lazily and, on an
-      # +UNAUTHENTICATED+ answer, logs in again and retries the call once.
+      # +UNAUTHENTICATED+ answer, logs in again and retries the call once (a stream, only before its
+      # first message).
       #
       # Responses come back as plain Hashes: google-protobuf's field readers misbehave on messages
       # decoded against a private descriptor pool, but +to_h+ is reliable, so every response is turned
@@ -42,7 +43,8 @@ module Ajax
         #
         # @param path [String] a gRPC path, +/<service>/<method>+
         # @param request [Hash] the request message as a Hash
-        # @return [Hash, nil] the response Hash, or nil for a streaming call read through its block
+        # @return [Hash, Enumerator, nil] the response Hash; for a stream, an Enumerator, or nil when
+        #   read through the block
         def call(path, request = {}, &)
           public_send(Schemas.rpc(path).type, path, request, &)
         end
@@ -53,10 +55,14 @@ module Ajax
           authenticating { |md| invoke(:request_response, path, message(path, request), md) }
         end
 
+        # Leaving the stream before its end, through +break+ or an Enumerator's +first+, cancels the call.
+        #
         # @yieldparam message [Hash] each response message
-        # @return [void]
+        # @return [Enumerator, nil] an Enumerator of the messages when no block is given
         def server_stream(path, request = {}, &)
-          authenticating { |md| invoke(:server_streamer, path, message(path, request), md, &) }
+          return enum_for(:server_stream, path, request) unless block_given?
+
+          stream(:server_streamer, path, message(path, request), &)
         end
 
         # @param requests [Array<Hash>] the request messages
@@ -67,11 +73,12 @@ module Ajax
         end
 
         # @yieldparam message [Hash] each response message
-        # @return [void]
+        # @return [Enumerator, nil] an Enumerator of the messages when no block is given
         def bidi(path, requests, &)
           refuse_write(path)
-          messages = requests.map { |request| message(path, request) }
-          authenticating { |md| invoke(:bidi_streamer, path, messages, md, &) }
+          return enum_for(:bidi, path, requests) unless block_given?
+
+          stream(:bidi_streamer, path, requests.map { |request| message(path, request) }, &)
         end
 
         # Sends a unary call without the login retry, so {Session} can log in without recursing.
@@ -92,8 +99,7 @@ module Ajax
 
         def stub
           @mutex.synchronize do
-            @stub ||= GRPC::ClientStub.new("#{@settings.grpc_host}:#{@settings.grpc_port}", credentials,
-                                           timeout: @settings.read_timeout)
+            @stub ||= GRPC::ClientStub.new("#{@settings.grpc_host}:#{@settings.grpc_port}", credentials)
           end
         end
 
@@ -102,13 +108,27 @@ module Ajax
           GRPC::Core::ChannelCredentials.new(ca && File.read(ca))
         end
 
-        def invoke(kind, path, request, metadata, &block)
-          marshal = Schemas.message(Schemas.rpc(path).request).method(:encode)
-          decode = Schemas.message(Schemas.rpc(path).response).method(:decode)
-          relay = block && ->(bytes) { block.call(decode.call(bytes).to_h) }
-          result = stub.public_send(kind, path, request, marshal, IDENTITY, metadata:, &relay)
-          relay ? nil : decode.call(result).to_h
+        def invoke(kind, path, request, metadata)
+          deadline = Time.now + @settings.read_timeout
+          decode(path, stub.public_send(kind, path, request, encoder(path), IDENTITY, metadata:, deadline:))
         end
+
+        # Logs in again only before the first message: a retry after it would replay what was yielded.
+        def stream(kind, path, request, &block)
+          fresh = true
+          relay = lambda do |bytes|
+            fresh = false
+            block.call(decode(path, bytes))
+          end
+          authenticating(-> { fresh }) do |metadata|
+            stub.public_send(kind, path, request, encoder(path), IDENTITY, metadata:, &relay)
+            nil
+          end
+        end
+
+        def encoder(path) = Schemas.message(Schemas.rpc(path).request).method(:encode)
+
+        def decode(path, bytes) = Schemas.message(Schemas.rpc(path).response).decode(bytes).to_h
 
         def message(path, request)
           klass = Schemas.message(Schemas.rpc(path).request)
@@ -121,10 +141,12 @@ module Ajax
           raise ReadOnlyError, "#{path} refused: the client is read-only"
         end
 
-        def authenticating
+        def authenticating(retriable = -> { true })
           @session.ensure_login
           yield(@session.metadata)
         rescue GRPC::Unauthenticated
+          raise unless retriable.call
+
           @session.login
           yield(@session.metadata)
         end

@@ -1,0 +1,36 @@
+module Ajax
+  module Sdk
+    module Configuration
+      class Settings
+        include Singleton
+        def self.instance: () -> Settings
+
+        attr_accessor email: String?
+        attr_accessor password: String?
+        attr_accessor password_sha256: String?
+        attr_accessor totp_secret: String?
+        attr_accessor session_token: String?
+        attr_accessor user_id: String?
+        attr_accessor grpc_host: String
+        attr_accessor grpc_port: Integer
+        attr_accessor ca_file: String?
+        attr_accessor client_version: String
+        attr_accessor client_device_id: String
+        attr_accessor client_device_model: String
+        attr_accessor open_timeout: Integer | Float
+        attr_accessor read_timeout: Integer | Float
+        attr_accessor sia_host: String
+        attr_accessor sia_port: Integer
+        attr_accessor sia_account: String?
+        attr_accessor sia_key: String?
+        attr_accessor sia_timeband: [Integer, Integer]
+
+        def initialize: () -> void
+      end
+
+      def config: () -> Settings
+
+      def configure: () { (Settings) -> void } -> void
+    end
+  end
+end

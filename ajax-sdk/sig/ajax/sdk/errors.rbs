@@ -1,0 +1,9 @@
+module Ajax
+  module Sdk
+    class Error < StandardError
+    end
+
+    class ConfigurationError < Error
+    end
+  end
+end

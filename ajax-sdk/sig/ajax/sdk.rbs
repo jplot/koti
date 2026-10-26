@@ -1,0 +1,5 @@
+module Ajax
+  module Sdk
+    extend Configuration
+  end
+end

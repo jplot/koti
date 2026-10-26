@@ -60,9 +60,6 @@ module Ajax
         # @return [Boolean] whether commands are refused (default: false)
         attr_accessor :read_only
 
-        # @return [Numeric] seconds to wait for a connection (default: 5)
-        attr_accessor :open_timeout
-
         # @return [Numeric] seconds to wait for an answer (default: 30)
         attr_accessor :read_timeout
 
@@ -85,14 +82,13 @@ module Ajax
         # Initializes the settings with their defaults.
         #
         # @api private
-        def initialize # rubocop:disable Metrics/MethodLength -- sets every default
+        def initialize
           @grpc_host = 'mobile-gw.prod.ajax.systems'
           @grpc_port = 443
           @client_version = '3.59'
           @client_device_id = "#{Digest::SHA256.hexdigest(Socket.gethostname)[0, 16]}_Ajax"
           @client_device_model = 'koti ajax-sdk'
           @read_only = false
-          @open_timeout = 5
           @read_timeout = 30
           @sia_host = '0.0.0.0'
           @sia_port = 18_083

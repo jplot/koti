@@ -19,7 +19,6 @@ module Ajax
         attr_accessor client_version: String
         attr_accessor client_device_id: String
         attr_accessor client_device_model: String
-        attr_accessor open_timeout: Integer | Float
         attr_accessor read_timeout: Integer | Float
         attr_accessor sia_host: String
         attr_accessor sia_port: Integer

@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '4.0'
+          ruby-version: '3.4'
           bundler-cache: true
           working-directory: ajax-sdk
       - run: bundle exec rake

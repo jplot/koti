@@ -1,0 +1,21 @@
+module Ajax
+  module Sdk
+    module Sia
+      class Event < Data
+        CONTENT: Regexp
+
+        attr_reader account: String
+        attr_reader code: String?
+        attr_reader label: String?
+        attr_reader zone: String?
+        attr_reader user: String?
+        attr_reader time: Time?
+        attr_reader text: String?
+        attr_reader raw: Message
+
+        def self.new: (account: String, code: String?, label: String?, zone: String?, user: String?, time: Time?, text: String?, raw: Message) -> Event
+        def self.from: (Message message) -> Event
+      end
+    end
+  end
+end

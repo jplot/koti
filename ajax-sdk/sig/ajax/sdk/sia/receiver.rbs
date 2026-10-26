@@ -1,0 +1,32 @@
+module Ajax
+  module Sdk
+    module Sia
+      class Receiver
+        LIMIT: Integer
+
+        @host: String
+        @port: Integer
+        @account: String
+        @cipher: Cipher?
+        @timeband: [Integer, Integer]
+        @handler: ^(Event) -> void
+        @clients: Hash[TCPSocket, Thread]
+        @mutex: Thread::Mutex
+        @server: TCPServer
+        @acceptor: Thread
+
+        def initialize: (host: String, port: Integer, account: String, key: String?, timeband: [Integer, Integer]) { (Event) -> void } -> void
+        def start: () -> self
+        def port: () -> Integer
+        def stop: () -> void
+
+        private
+
+        def accept_loop: () -> nil
+        def serve: (TCPSocket socket) -> nil
+        def answer: (String frame) -> [String?, Event?]
+        def timely?: (Time? time) -> bool
+      end
+    end
+  end
+end

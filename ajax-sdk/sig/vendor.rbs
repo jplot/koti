@@ -46,3 +46,9 @@ module ROTP
     def now: () -> String
   end
 end
+
+# The stdlib signature (?String host, Integer port) puts an optional parameter first, which Steep
+# rejects for TCPServer.new(host, port).
+class TCPServer
+  def initialize: (String host, Integer port) -> void | ...
+end

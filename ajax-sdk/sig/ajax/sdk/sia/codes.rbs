@@ -1,0 +1,11 @@
+module Ajax
+  module Sdk
+    module Sia
+      module Codes
+        LABELS: Hash[String, String]
+
+        def self.label: (String code) -> String?
+      end
+    end
+  end
+end

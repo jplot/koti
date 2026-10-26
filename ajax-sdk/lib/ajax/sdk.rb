@@ -21,5 +21,28 @@ module Ajax
   #   end
   module Sdk
     extend Configuration
+
+    # Runs a {Sia::Receiver} with the configured +sia_*+ settings and yields each event it accepts; the
+    # receiver stops when the block exits. Without a block, returns a lazy Enumerator of the events.
+    #
+    # @yieldparam event [Sia::Event]
+    # @return [Enumerator::Lazy, nil]
+    # @raise [ConfigurationError] when +sia_account+ is not set
+    def self.sia_events
+      return enum_for(:sia_events).lazy unless block_given?
+
+      events = Queue.new
+      receiver = sia_receiver { events << it }.start
+      loop { yield events.pop }
+    ensure
+      receiver&.stop
+    end
+
+    def self.sia_receiver(&)
+      account = config.sia_account or raise ConfigurationError, 'set sia_account'
+      Sia::Receiver.new(host: config.sia_host, port: config.sia_port, account:, key: config.sia_key,
+                        timeband: config.sia_timeband, &)
+    end
+    private_class_method :sia_receiver
   end
 end

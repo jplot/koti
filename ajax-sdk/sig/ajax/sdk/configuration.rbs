@@ -24,13 +24,18 @@ module Ajax
         attr_accessor sia_account: String?
         attr_accessor sia_key: String?
         attr_accessor sia_timeband: [Integer, Integer]
+        attr_accessor read_only: bool
 
         def initialize: () -> void
       end
 
+      @cloud: Cloud::Client?
+
       def config: () -> Settings
 
       def configure: () { (Settings) -> void } -> void
+
+      def cloud: () -> Cloud::Client
     end
   end
 end

@@ -54,6 +54,12 @@ module Ajax
         # @return [String] device model announced to the cloud (default: koti ajax-sdk)
         attr_accessor :client_device_model
 
+        # When true, every state-changing command (arm, disarm, …) raises before anything is sent.
+        # It guards the live specs, which must never change a real alarm's state.
+        #
+        # @return [Boolean] whether commands are refused (default: false)
+        attr_accessor :read_only
+
         # @return [Numeric] seconds to wait for a connection (default: 5)
         attr_accessor :open_timeout
 
@@ -79,12 +85,13 @@ module Ajax
         # Initializes the settings with their defaults.
         #
         # @api private
-        def initialize
+        def initialize # rubocop:disable Metrics/MethodLength -- sets every default
           @grpc_host = 'mobile-gw.prod.ajax.systems'
           @grpc_port = 443
           @client_version = '3.59'
           @client_device_id = "#{Digest::SHA256.hexdigest(Socket.gethostname)[0, 16]}_Ajax"
           @client_device_model = 'koti ajax-sdk'
+          @read_only = false
           @open_timeout = 5
           @read_timeout = 30
           @sia_host = '0.0.0.0'
@@ -105,6 +112,12 @@ module Ajax
       # @return [void]
       # @api public
       def configure = yield(config)
+
+      # Returns the cloud client, built once from the current settings.
+      #
+      # @return [Cloud::Client]
+      # @api public
+      def cloud = @cloud ||= Cloud::Client.new
     end
   end
 end

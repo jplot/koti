@@ -14,14 +14,15 @@ module Ajax
         DIRECTORY: String
         LOCK: Thread::Mutex
 
-        @registry: Protobuf::Registry?
+        @pool: untyped
         @rpcs: Hash[String, Rpc]?
 
-        def self?.registry: () -> Protobuf::Registry
-        def self?.message: (String full_name) -> Protobuf::Message
-        def self?.enum: (String full_name) -> Protobuf::Enum
+        def self?.pool: () -> untyped
+        def self?.message: (String full_name) -> untyped
         def self?.rpc: (String path) -> Rpc
         def self?.rpcs: () -> Hash[String, Rpc]
+        def self?.load_pool: () -> untyped
+        def self?.add_file: (untyped pool, untyped file) -> bool
         def self?.descriptor_bytes: () -> String
         def self?.load_rpcs: () -> Hash[String, Rpc]
       end

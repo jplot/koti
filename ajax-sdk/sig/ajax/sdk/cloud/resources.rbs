@@ -1,0 +1,46 @@
+module Ajax
+  module Sdk
+    module Cloud
+      class Space < Data
+        attr_reader id: String?
+        attr_reader hub_id: String?
+        attr_reader name: String?
+        attr_reader security_state: Symbol
+        attr_reader online: bool
+        attr_reader raw: Hash[Symbol, untyped]
+
+        def self.new: (id: String?, hub_id: String?, name: String?, security_state: Symbol, online: bool, raw: Hash[Symbol, untyped]) -> Space
+        def self.from: (Hash[Symbol, untyped] raw) -> Space
+      end
+
+      module Resources
+        V2: String
+        GW: String
+        SECURITY: String
+        DEVICES: String
+        NOTIFICATIONS: String
+
+        def spaces: () -> Array[Space]
+        def space: (String id) -> Space?
+        def devices: (String space_id) -> Array[Hash[Symbol, untyped]]
+        def notifications: (String space_id, ?limit: Integer) -> Array[Hash[Symbol, untyped]]
+        def arm: (String space_id, ?ignore_alarms: bool) -> void
+        def disarm: (String space_id) -> void
+        def arm_night: (String space_id, ?ignore_alarms: bool) -> void
+        def disarm_night: (String space_id) -> void
+
+        # Provided by Client, used here.
+        def call: (String path, ?Hash[Symbol, untyped] request) ?{ (Hash[Symbol, untyped]) -> void } -> untyped
+        def server_stream: (String path, ?Hash[Symbol, untyped] request) ?{ (Hash[Symbol, untyped]) -> void } -> void
+        def read_only?: () -> bool
+
+        private
+
+        def command: (String path, String space_id, ?ignore_alarms: bool?) -> void
+        def refusal: (Hash[Symbol, untyped]? failure) -> Symbol
+        def space_locator: (String space_id) -> Hash[Symbol, untyped]
+        def first_message: (String path, Hash[Symbol, untyped] request) -> Hash[Symbol, untyped]
+      end
+    end
+  end
+end

@@ -8,28 +8,41 @@ module Ajax
     # A setting is missing or malformed.
     class ConfigurationError < Error; end
 
-    # A network connection failed or dropped.
-    class ConnectionError < Error; end
-
-    module Protobuf
-      # A buffer could not be decoded against its schema.
-      class DecodeError < Error; end
-    end
-
     module Cloud
       # A gRPC path is not in the shipped method table.
       class UnknownMethodError < Error; end
-    end
 
-    module Http2
-      # An HPACK header block or Huffman string is malformed.
-      class CompressionError < Error; end
+      # A message name is not in the shipped schemas.
+      class UnknownMessageError < Error; end
 
-      # The connection closed while a stream was open.
-      class ConnectionClosed < ConnectionError; end
+      # The account could not be logged in. +reason+ is a symbol such as +:invalid_credentials+.
+      class AuthenticationError < Error
+        # @return [Symbol] the machine-readable reason
+        attr_reader :reason
 
-      # The peer broke the HTTP/2 protocol.
-      class ProtocolError < Error; end
+        # @param reason [Symbol]
+        # @param message [String]
+        def initialize(reason, message = nil)
+          @reason = reason
+          super(message || reason.to_s)
+        end
+      end
+
+      # A state-changing command was blocked because the client is configured read-only.
+      class ReadOnlyError < Error; end
+
+      # A command (arm, disarm, …) was refused by the hub. +reason+ is a symbol such as +:hub_offline+.
+      class CommandError < Error
+        # @return [Symbol] the machine-readable reason
+        attr_reader :reason
+
+        # @param reason [Symbol]
+        # @param message [String]
+        def initialize(reason, message = nil)
+          @reason = reason
+          super(message || reason.to_s)
+        end
+      end
     end
   end
 end

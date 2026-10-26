@@ -3,18 +3,9 @@
 require_relative 'sdk/version'
 require_relative 'sdk/errors'
 require_relative 'sdk/configuration'
-require_relative 'sdk/protobuf/wire'
-require_relative 'sdk/protobuf/schema'
-require_relative 'sdk/protobuf/codec'
-require_relative 'sdk/protobuf/descriptor'
 require_relative 'sdk/cloud/schemas'
-require_relative 'sdk/http2/huffman'
-require_relative 'sdk/http2/hpack'
-require_relative 'sdk/http2/frame'
-require_relative 'sdk/http2/stream'
-require_relative 'sdk/http2/connection'
-require_relative 'sdk/grpc/status'
-require_relative 'sdk/grpc/call'
+require_relative 'sdk/cloud/session'
+require_relative 'sdk/cloud/client'
 
 # Namespace of the koti SDKs for the Ajax ecosystem.
 module Ajax

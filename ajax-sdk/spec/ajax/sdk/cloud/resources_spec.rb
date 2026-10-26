@@ -41,11 +41,33 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
     expect { host.disarm('s1') }.to raise_error(Ajax::Sdk::Cloud::CommandError, /hub_offline/)
   end
 
+  it 'reads every page of spaces', :aggregate_failures do
+    allow(host).to receive(:call).and_return(
+      { success: { spaces: [{ id: 's1' }], pagination: { forward_exclusive_pagination_token: 't2' } } },
+      { success: { spaces: [{ id: 's2' }], pagination: { forward_exclusive_pagination_token: '' } } }
+    )
+
+    expect(host.spaces.map(&:id)).to eq(%w[s1 s2])
+    expect(host).to have_received(:call).with(anything, { pagination: { forward_exclusive_pagination_token: 't2' } })
+  end
+
+  it 'raises ReadError when the gateway refuses a read' do
+    allow(host).to receive(:call).and_return({ failure: { bad_request: {} } })
+
+    expect { host.spaces }.to raise_error(Ajax::Sdk::Cloud::ReadError, /bad_request/)
+  end
+
   it 'reads the first devices snapshot' do
     snapshot = { success: { snapshot: { light_device_items: [{ hub_device: {} }, { smart_lock: {} }] } } }
     allow(host).to receive(:server_stream).and_return([snapshot].each)
 
     expect(host.devices('s1').size).to eq(2)
+  end
+
+  it 'raises ReadError when the devices stream answers a failure' do
+    allow(host).to receive(:server_stream).and_return([{ failure: { space_not_found: {} } }].each)
+
+    expect { host.devices('s1') }.to raise_error(Ajax::Sdk::Cloud::ReadError, /space_not_found/)
   end
 
   it 'reads notifications of a space' do

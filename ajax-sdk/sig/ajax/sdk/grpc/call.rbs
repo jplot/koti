@@ -1,0 +1,52 @@
+module Ajax
+  module Sdk
+    module Grpc
+      class MessageReader
+        @buffer: String
+
+        def initialize: () -> void
+        def push: (String data) -> Array[String]
+      end
+
+      class BidiCall
+        @channel: Channel
+        @path: String
+        @stream: Http2::Stream
+
+        def initialize: (Channel channel, String path, Http2::Stream stream) -> void
+        def send: (Hash[Symbol, untyped] request) -> BidiCall
+        def close_send: () -> void
+        def each: () { (Hash[Symbol, untyped]) -> void } -> void
+      end
+
+      class Channel
+        USER_AGENT: String
+
+        @connection: Http2::Connection
+        @authority: String
+        @codec: Protobuf::Codec
+        @registry: untyped
+        @response_headers: Array[[String, String]]?
+
+        attr_reader response_headers: Array[[String, String]]?
+
+        def initialize: (Http2::Connection connection, authority: String, codec: Protobuf::Codec, registry: untyped) -> void
+        def unary: (String path, Hash[Symbol, untyped] request, ?metadata: Array[[String, String]], ?deadline: (Integer | Float)?) -> Hash[Symbol, untyped]?
+        def server_stream: (String path, Hash[Symbol, untyped] request, ?metadata: Array[[String, String]]) { (Hash[Symbol, untyped]) -> void } -> void
+        def client_stream: (String path, Array[Hash[Symbol, untyped]] requests, ?metadata: Array[[String, String]]) -> Hash[Symbol, untyped]?
+        def bidi: (String path, ?metadata: Array[[String, String]]) { (BidiCall) -> void } -> void
+        def frame: (String path, Hash[Symbol, untyped] request) -> String
+        def consume: (String path, Http2::Stream stream) { (Hash[Symbol, untyped]) -> void } -> void
+
+        private
+
+        def read_events: (Http2::Stream stream, MessageReader reader, String path) { (Hash[Symbol, untyped]) -> void } -> Array[[String, String]]?
+        def first: (String path, Http2::Stream stream) -> Hash[Symbol, untyped]?
+        def start: (String path, Array[[String, String]] metadata, (Integer | Float)? deadline) -> Http2::Stream
+        def headers: (String path, Array[[String, String]] metadata, (Integer | Float)? deadline) -> Array[[String, String]]
+        def pseudo: (String path) -> Array[[String, String]]
+        def decode: (String path, String bytes) -> Hash[Symbol, untyped]
+      end
+    end
+  end
+end

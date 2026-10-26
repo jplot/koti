@@ -13,6 +13,8 @@ require_relative 'sdk/http2/hpack'
 require_relative 'sdk/http2/frame'
 require_relative 'sdk/http2/stream'
 require_relative 'sdk/http2/connection'
+require_relative 'sdk/grpc/status'
+require_relative 'sdk/grpc/call'
 
 # Namespace of the koti SDKs for the Ajax ecosystem.
 module Ajax

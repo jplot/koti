@@ -84,11 +84,21 @@ module Ajax
           answer[:failure]
         end
 
-        def login_with_totp(request_id, retried: false)
-          failure = sign_in(TOTP, totp_request(request_id, retried)) or return
-          return login_with_totp(request_id, retried: true) if failure[:invalid_totp] && !retried
+        def login_with_totp(request_id, sent = nil)
+          code = totp_code(sent)
+          failure = sign_in(TOTP, totp_request(request_id, code)) or return
+          return login_with_totp(request_id, code) if failure[:invalid_totp] && sent.nil?
 
           raise AuthenticationError.new(reason(failure), 'two-factor login refused')
+        end
+
+        # A refused code that has since expired gives way to the current one; one still current gives
+        # way to the next window's, for a gateway whose clock runs ahead.
+        def totp_code(sent)
+          totp = ROTP::TOTP.new(@settings.totp_secret.to_s)
+          now = Time.now
+          code = totp.at(now)
+          code == sent ? totp.at(now + 30) : code
         end
 
         def accept(success)
@@ -101,10 +111,7 @@ module Ajax
           { email: @settings.email, password_sha256_hash: password_hash, user_role: ROLE }
         end
 
-        def totp_request(request_id, retried)
-          code = ROTP::TOTP.new(@settings.totp_secret.to_s).at(Time.now + (retried ? 30 : 0))
-          { email: @settings.email, user_role: ROLE, request_id:, totp: code }
-        end
+        def totp_request(request_id, totp) = { email: @settings.email, user_role: ROLE, request_id:, totp: }
 
         def password_hash
           @settings.password_sha256 || Digest::SHA256.hexdigest(@settings.password.to_s)

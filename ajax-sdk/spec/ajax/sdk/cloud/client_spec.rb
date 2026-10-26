@@ -9,6 +9,7 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
                                                         user_id: 'uid')
   end
   let(:grpc) { instance_double(GRPC::ClientStub) }
+  let(:stream_options) { [] }
   let(:spaces) { '/systems.ajax.api.mobile.v2.space.SpaceService/findUserSpacesWithPagination' }
   let(:devices) do
     '/systems.ajax.api.ecosystem.v3.mobilegwsvc.service' \
@@ -16,13 +17,20 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
   end
 
   before do
-    allow(client).to receive(:stub).and_return(grpc) # rubocop:disable RSpec/SubjectStub -- inject a gRPC double
+    allow(GRPC::ClientStub).to receive(:new).and_return(grpc)
     allow(client.session).to receive_messages(ensure_login: nil, login: nil, metadata: {})
   end
 
   def empty_response(path)
     klass = Ajax::Sdk::Cloud::Schemas.message(Ajax::Sdk::Cloud::Schemas.rpc(path).response)
     klass.encode(klass.new)
+  end
+
+  def streaming(*answers)
+    allow(grpc).to receive(:server_streamer) do |*, **options, &relay|
+      stream_options << options
+      answers.each { |answer| answer.is_a?(Exception) ? raise(answer) : relay.call(answer) }
+    end
   end
 
   it 'makes a unary call and returns a Hash' do
@@ -32,12 +40,41 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
   end
 
   it 'yields each message of a server stream' do
-    allow(grpc).to receive(:server_streamer).and_yield(empty_response(devices))
+    streaming(empty_response(devices))
     collected = []
 
     client.call(devices, { space_id: 's1' }) { |message| collected << message }
 
     expect(collected.size).to eq(1)
+  end
+
+  it 'returns an Enumerator from a stream called without a block' do
+    streaming(empty_response(devices))
+
+    expect(client.server_stream(devices, { space_id: 's1' }).first).to be_a(Hash)
+  end
+
+  it 'raises rather than replay a stream whose session expires after a message', :aggregate_failures do
+    streaming(empty_response(devices), GRPC::Unauthenticated.new('expired'))
+    collected = []
+
+    expect { client.server_stream(devices, { space_id: 's1' }) { |message| collected << message } }
+      .to raise_error(GRPC::Unauthenticated)
+    expect(collected.size).to eq(1)
+    expect(client.session).not_to have_received(:login)
+  end
+
+  it 'gives unary calls a deadline and leaves streams without one', :aggregate_failures do
+    unary_options = []
+    allow(grpc).to receive(:request_response) { |*, **options| (unary_options << options) && empty_response(spaces) }
+    streaming(empty_response(devices))
+
+    client.call(spaces)
+    client.call(devices, { space_id: 's1' }) { |_message| nil }
+
+    expect(GRPC::ClientStub).to have_received(:new).with('gw:443', anything)
+    expect(unary_options.first[:deadline]).to be_within(1).of(Time.now + 30)
+    expect(stream_options.first).not_to have_key(:deadline)
   end
 
   it 'refuses a command sent through the generic call when read-only' do

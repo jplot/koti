@@ -17,9 +17,11 @@ module Ajax
         def inspect: () -> String
         def call: (String path, ?Hash[Symbol, untyped] request) ?{ (Hash[Symbol, untyped]) -> void } -> untyped
         def unary: (String path, ?Hash[Symbol, untyped] request) -> Hash[Symbol, untyped]
-        def server_stream: (String path, ?Hash[Symbol, untyped] request) ?{ (Hash[Symbol, untyped]) -> void } -> void
+        def server_stream: (String path, ?Hash[Symbol, untyped] request) -> Enumerator[Hash[Symbol, untyped], nil]
+                         | (String path, ?Hash[Symbol, untyped] request) { (Hash[Symbol, untyped]) -> void } -> nil
         def client_stream: (String path, Array[Hash[Symbol, untyped]] requests) -> Hash[Symbol, untyped]
-        def bidi: (String path, Array[Hash[Symbol, untyped]] requests) ?{ (Hash[Symbol, untyped]) -> void } -> void
+        def bidi: (String path, Array[Hash[Symbol, untyped]] requests) -> Enumerator[Hash[Symbol, untyped], nil]
+                | (String path, Array[Hash[Symbol, untyped]] requests) { (Hash[Symbol, untyped]) -> void } -> nil
         def authenticate: (String path, Hash[Symbol, untyped] request, Hash[String, String] metadata) -> Hash[Symbol, untyped]
         def metadata: () -> Hash[String, String]
         def read_only?: () -> bool
@@ -28,10 +30,13 @@ module Ajax
 
         def stub: () -> untyped
         def credentials: () -> untyped
-        def invoke: (Symbol kind, String path, untyped request, Hash[String, String] metadata) ?{ (Hash[Symbol, untyped]) -> void } -> untyped
+        def invoke: (Symbol kind, String path, untyped request, Hash[String, String] metadata) -> Hash[Symbol, untyped]
+        def stream: (Symbol kind, String path, untyped request) { (Hash[Symbol, untyped]) -> void } -> nil
+        def encoder: (String path) -> Method
+        def decode: (String path, String bytes) -> Hash[Symbol, untyped]
         def message: (String path, untyped request) -> untyped
         def refuse_write: (String path) -> void
-        def authenticating: () { (Hash[String, String]) -> untyped } -> untyped
+        def authenticating: [T] (?^() -> bool retriable) { (Hash[String, String]) -> T } -> T
       end
     end
   end

@@ -17,6 +17,7 @@ module Ajax
         V2: String
         GW: String
         SECURITY: String
+        SPACES: String
         DEVICES: String
         NOTIFICATIONS: String
 
@@ -31,7 +32,7 @@ module Ajax
 
         # Provided by Client, used here.
         def call: (String path, ?Hash[Symbol, untyped] request) ?{ (Hash[Symbol, untyped]) -> void } -> untyped
-        def server_stream: (String path, ?Hash[Symbol, untyped] request) ?{ (Hash[Symbol, untyped]) -> void } -> void
+        def server_stream: (String path, ?Hash[Symbol, untyped] request) -> Enumerator[Hash[Symbol, untyped], nil]
         def read_only?: () -> bool
 
         private
@@ -39,7 +40,7 @@ module Ajax
         def command: (String path, String space_id, ?ignore_alarms: bool?) -> void
         def refusal: (Hash[Symbol, untyped]? failure) -> Symbol
         def space_locator: (String space_id) -> Hash[Symbol, untyped]
-        def first_message: (String path, Hash[Symbol, untyped] request) -> Hash[Symbol, untyped]
+        def success!: (Hash[Symbol, untyped] answer) -> Hash[Symbol, untyped]
       end
     end
   end

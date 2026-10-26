@@ -21,14 +21,24 @@ module Ajax
         V2 = 'systems.ajax.api.mobile.v2'
         GW = 'systems.ajax.api.ecosystem.v3.mobilegwsvc.service'
         SECURITY = "/#{V2}.space.security.SpaceSecurityService".freeze
+        SPACES = "/#{V2}.space.SpaceService/findUserSpacesWithPagination".freeze
         DEVICES = "/#{GW}.stream_light_devices.StreamLightDevicesService/execute".freeze
         NOTIFICATIONS = "/#{V2}.notification.NotificationLogService/findNotifications".freeze
-        private_constant :V2, :GW, :SECURITY, :DEVICES, :NOTIFICATIONS
+        private_constant :V2, :GW, :SECURITY, :SPACES, :DEVICES, :NOTIFICATIONS
 
-        # @return [Array<Space>] every space of the account
+        # @return [Array<Space>] every space of the account, across every page
+        # @raise [ReadError] when the gateway refuses the read
         def spaces
-          answer = call("/#{V2}.space.SpaceService/findUserSpacesWithPagination")
-          (answer.dig(:success, :spaces) || []).map { |raw| Space.from(raw) }
+          found = [] #: Array[Hash[Symbol, untyped]]
+          request = {} #: Hash[Symbol, untyped]
+          loop do
+            page = success!(call(SPACES, request))
+            found.concat(page[:spaces] || [])
+            token = page.dig(:pagination, :forward_exclusive_pagination_token).to_s
+            return found.map { |raw| Space.from(raw) } if token.empty?
+
+            request = { pagination: { forward_exclusive_pagination_token: token } }
+          end
         end
 
         # @param id [String] a space id
@@ -36,16 +46,18 @@ module Ajax
         def space(id) = spaces.find { |candidate| candidate.id == id }
 
         # @return [Array<Hash>] the devices of +space_id+ with their status, as a first snapshot
+        # @raise [ReadError] when the gateway refuses the read
         def devices(space_id)
-          snapshot = first_message(DEVICES, { space_id: })
-          snapshot.dig(:success, :snapshot, :light_device_items) || []
+          snapshot = success!(server_stream(DEVICES, { space_id: }).first || {})
+          snapshot.dig(:snapshot, :light_device_items) || []
         end
 
         # @param space_id [String]
         # @param limit [Integer] how many to read back
         # @return [Array<Hash>] recent notifications of the space, most recent first
+        # @raise [ReadError] when the gateway refuses the read
         def notifications(space_id, limit: 50)
-          call(NOTIFICATIONS, { filter: { origin: { space_id: } }, limit: }).dig(:success, :notifications) || []
+          success!(call(NOTIFICATIONS, { filter: { origin: { space_id: } }, limit: }))[:notifications] || []
         end
 
         # @return [void] arm the space
@@ -77,12 +89,7 @@ module Ajax
 
         def space_locator(space_id) = { space_locator: { space_id: } }
 
-        def first_message(path, request)
-          catch(:first) do
-            server_stream(path, request) { |message| throw(:first, message) }
-            {} #: Hash[Symbol, untyped]
-          end
-        end
+        def success!(answer) = answer[:success] || raise(ReadError, refusal(answer[:failure]))
       end
     end
   end

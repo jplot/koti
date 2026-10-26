@@ -84,6 +84,27 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     expect(session.inspect).to eq('#<Ajax::Sdk::Cloud::Session logged_in=true>')
   end
 
+  def totp_codes_sent(first, retry_at)
+    answers = [{ failure: { two_fa_required: { request_id: 'r' } } }, { failure: { invalid_totp: {} } }, success]
+    sent = []
+    allow(client).to receive(:authenticate) { |_path, request, _metadata| (sent << request[:totp]) && answers.shift }
+    allow(Time).to receive(:now).and_return(first, retry_at)
+    session.login
+    sent.compact
+  end
+
+  it 'retries with the current code when the first one expired in transit' do
+    sent = totp_codes_sent(Time.at(1_700_000_010), Time.at(1_700_000_040))
+
+    expect(sent.last).to eq(ROTP::TOTP.new('JBSWY3DPEHPK3PXP').at(Time.at(1_700_000_040)))
+  end
+
+  it 'retries with the next window when the first code is still current' do
+    sent = totp_codes_sent(Time.at(1_700_000_010), Time.at(1_700_000_015))
+
+    expect(sent.last).to eq(ROTP::TOTP.new('JBSWY3DPEHPK3PXP').at(Time.at(1_700_000_045)))
+  end
+
   it 'gives up after a second invalid_totp', :aggregate_failures do
     allow(client).to receive(:authenticate).and_return(
       { failure: { two_fa_required: { request_id: 'r' } } }, { failure: { invalid_totp: {} } },

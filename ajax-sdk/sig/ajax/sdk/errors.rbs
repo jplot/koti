@@ -15,5 +15,10 @@ module Ajax
       class UnknownMethodError < Error
       end
     end
+
+    module Http2
+      class CompressionError < Error
+      end
+    end
   end
 end

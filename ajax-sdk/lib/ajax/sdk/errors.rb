@@ -17,5 +17,10 @@ module Ajax
       # A gRPC path is not in the shipped method table.
       class UnknownMethodError < Error; end
     end
+
+    module Http2
+      # An HPACK header block or Huffman string is malformed.
+      class CompressionError < Error; end
+    end
   end
 end

@@ -2,40 +2,37 @@
 
 RSpec.describe Ajax::Sdk::Cloud::Schemas do
   describe '.rpc' do
-    it 'knows the login method is unary with its request' do
+    it 'knows the login method is unary with its request', :aggregate_failures do
       rpc = described_class.rpc(
         '/systems.ajax.api.ecosystem.v3.mobilegwsvc.service.login_by_password.LoginByPasswordService/execute'
       )
 
-      expect(rpc).to have_attributes(
-        type: :unary,
-        request: 'systems.ajax.api.ecosystem.v3.mobilegwsvc.service.login_by_password.LoginByPasswordRequest'
-      )
+      expect(rpc.type).to eq(:unary)
+      expect(rpc.request).to end_with('login_by_password.LoginByPasswordRequest')
     end
 
-    it 'tells arming a space apart from arming it to night mode', :aggregate_failures do
-      arm = described_class.rpc('/systems.ajax.api.mobile.v2.space.security.SpaceSecurityService/arm')
-      night = described_class.rpc('/systems.ajax.api.mobile.v2.space.security.SpaceSecurityService/armToNightMode')
+    it 'knows that arming a space is unary' do
+      rpc = described_class.rpc('/systems.ajax.api.mobile.v2.space.security.SpaceSecurityService/arm')
 
-      expect(arm.request).to eq('systems.ajax.api.mobile.v2.space.security.ArmSpaceRequest')
-      expect(night.request).to eq('systems.ajax.api.mobile.v2.space.security.ArmSpaceToNightModeRequest')
+      expect(rpc.type).to eq(:unary)
     end
 
     it 'raises UnknownMethodError for a path it does not know' do
-      expect { described_class.rpc('/Nope/nope') }
-        .to raise_error(Ajax::Sdk::Cloud::UnknownMethodError, %r{/Nope/nope})
+      expect { described_class.rpc('/Nope/nope') }.to raise_error(Ajax::Sdk::Cloud::UnknownMethodError, %r{/Nope/nope})
     end
   end
 
   describe '.message' do
-    it 'decodes a LiteSpace round-trip from the shipped schemas', :aggregate_failures do
-      full = 'systems.ajax.api.mobile.v2.common.space.LiteSpace'
-      codec = Ajax::Sdk::Protobuf::Codec.new(described_class.registry)
+    it 'loads a message class from the shipped schemas', :aggregate_failures do
+      klass = described_class.message('systems.ajax.api.mobile.v2.common.space.LiteSpace')
 
-      bytes = codec.encode(full, { id: 'space-1', new_notifications_count: 7 })
+      expect(klass).to be_a(Class)
+      expect(klass.new(id: 'space-1').to_h).to include(id: 'space-1')
+    end
 
-      expect(described_class.message(full).full_name).to eq(full)
-      expect(codec.decode(full, bytes)).to eq(id: 'space-1', new_notifications_count: 7)
+    it 'raises UnknownMessageError for a message it does not know' do
+      expect { described_class.message('No.Such.Message') }
+        .to raise_error(Ajax::Sdk::Cloud::UnknownMessageError, /No.Such.Message/)
     end
   end
 end

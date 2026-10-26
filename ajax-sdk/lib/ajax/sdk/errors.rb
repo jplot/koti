@@ -7,5 +7,10 @@ module Ajax
 
     # A setting is missing or malformed.
     class ConfigurationError < Error; end
+
+    module Protobuf
+      # A buffer could not be decoded against its schema.
+      class DecodeError < Error; end
+    end
   end
 end

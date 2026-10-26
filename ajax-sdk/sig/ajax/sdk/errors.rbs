@@ -5,5 +5,10 @@ module Ajax
 
     class ConfigurationError < Error
     end
+
+    module Protobuf
+      class DecodeError < Error
+      end
+    end
   end
 end

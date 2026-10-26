@@ -3,6 +3,10 @@
 require_relative 'sdk/version'
 require_relative 'sdk/errors'
 require_relative 'sdk/configuration'
+require_relative 'sdk/protobuf/wire'
+require_relative 'sdk/protobuf/schema'
+require_relative 'sdk/protobuf/codec'
+require_relative 'sdk/protobuf/descriptor'
 
 # Namespace of the koti SDKs for the Ajax ecosystem.
 module Ajax

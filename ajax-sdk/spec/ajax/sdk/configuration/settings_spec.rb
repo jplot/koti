@@ -16,4 +16,17 @@ RSpec.describe Ajax::Sdk::Configuration::Settings do
     Ajax::Sdk.configure { |config| config.email = 'koti@example.com' }
     expect(Ajax::Sdk.config.email).to eq('koti@example.com')
   end
+
+  it 'redacts the secrets in inspect', :aggregate_failures do
+    Ajax::Sdk.configure do |config|
+      config.password_sha256 = 'secret-hash'
+      config.totp_secret = 'secret-totp'
+      config.session_token = 'secret-token'
+    end
+
+    text = Ajax::Sdk.config.inspect
+
+    expect(text).to include('secrets redacted')
+    expect(text).not_to include('secret-hash', 'secret-totp', 'secret-token')
+  end
 end

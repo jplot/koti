@@ -53,6 +53,37 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     end
   end
 
+  it 'raises ConfigurationError rather than send a login with no password' do
+    allow(settings).to receive_messages(password_sha256: nil, password: nil)
+
+    expect { session.login }.to raise_error(Ajax::Sdk::ConfigurationError)
+  end
+
+  it 'raises when two-factor is required but no secret is configured', :aggregate_failures do
+    allow(settings).to receive(:totp_secret).and_return(nil)
+    allow(client).to receive(:authenticate).and_return({ failure: { two_fa_required: { request_id: 'r' } } })
+
+    expect { session.login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
+      expect(error.reason).to eq(:two_fa_required)
+    end
+  end
+
+  it 'logs in once when several threads reach ensure_login together' do
+    calls = 0
+    allow(client).to receive(:authenticate) { sleep(0.01) && (calls += 1) && success }
+
+    Array.new(6) { Thread.new { session.ensure_login } }.each(&:join)
+
+    expect(calls).to eq(1)
+  end
+
+  it 'never prints the token or secrets in inspect' do
+    allow(client).to receive(:authenticate).and_return(success)
+    session.login
+
+    expect(session.inspect).to eq('#<Ajax::Sdk::Cloud::Session logged_in=true>')
+  end
+
   it 'gives up after a second invalid_totp', :aggregate_failures do
     allow(client).to receive(:authenticate).and_return(
       { failure: { two_fa_required: { request_id: 'r' } } }, { failure: { invalid_totp: {} } },

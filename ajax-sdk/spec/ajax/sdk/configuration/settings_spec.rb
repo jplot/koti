@@ -29,4 +29,10 @@ RSpec.describe Ajax::Sdk::Configuration::Settings do
     expect(text).to include('secrets redacted')
     expect(text).not_to include('secret-hash', 'secret-totp', 'secret-token')
   end
+
+  it 'redacts the SIA key in inspect' do
+    Ajax::Sdk.configure { |config| config.sia_key = 'secret-sia-key-1' }
+
+    expect(Ajax::Sdk.config.inspect).not_to include('secret-sia-key-1')
+  end
 end

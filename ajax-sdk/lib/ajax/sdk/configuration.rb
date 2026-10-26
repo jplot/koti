@@ -95,8 +95,8 @@ module Ajax
           @sia_timeband = [40, 20]
         end
 
-        # Hidden secrets: the password, its hash, the TOTP secret and the session token.
-        SECRETS = %i[@password @password_sha256 @totp_secret @session_token].freeze
+        # Hidden secrets: the password, its hash, the TOTP secret, the session token and the SIA key.
+        SECRETS = %i[@password @password_sha256 @totp_secret @session_token @sia_key].freeze
 
         # @return [String] the settings with every secret redacted
         def inspect

@@ -12,14 +12,19 @@ module Ajax
         @settings: Configuration::Settings
         @token: String?
         @user_id: String?
+        @mutex: Thread::Mutex
 
         def initialize: (Client client, Configuration::Settings settings) -> void
+        def inspect: () -> String
         def ensure_login: () -> void
         def login: () -> void
         def metadata: () -> Hash[String, String]
 
         private
 
+        def sign_in_flow: () -> void
+        def require_credentials: () -> void
+        def two_factor: (untyped request_id) -> void
         def sign_in: (String path, Hash[Symbol, untyped] request) -> Hash[Symbol, untyped]?
         def login_with_totp: (untyped request_id, ?retried: bool) -> void
         def accept: (Hash[Symbol, untyped] success) -> nil

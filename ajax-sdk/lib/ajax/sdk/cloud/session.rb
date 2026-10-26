@@ -25,11 +25,15 @@ module Ajax
           @settings = settings
           @token = settings.session_token
           @user_id = settings.user_id
+          @mutex = Mutex.new
         end
 
-        # @return [void] log in only if there is no session yet
+        # @return [String] a description that never prints the token or the account's secrets
+        def inspect = "#<#{self.class.name} logged_in=#{!@token.nil?}>"
+
+        # @return [void] log in only if there is no session yet; concurrent callers log in once
         def ensure_login
-          login unless @token && @user_id
+          @mutex.synchronize { sign_in_flow unless @token && @user_id }
         end
 
         # Signs in with the password hash, then with the TOTP code when two-factor is required.
@@ -37,10 +41,7 @@ module Ajax
         # @return [void]
         # @raise [AuthenticationError] when the gateway refuses the login
         def login
-          failure = sign_in(PASSWORD, password_request) or return
-          return login_with_totp(failure.dig(:two_fa_required, :request_id)) if failure[:two_fa_required]
-
-          raise AuthenticationError.new(reason(failure), "login refused, #{failure[:attempts_left]} attempts left")
+          @mutex.synchronize { sign_in_flow }
         end
 
         # @return [Hash{String=>String}] the app metadata, plus the session metadata once logged in
@@ -53,6 +54,27 @@ module Ajax
         end
 
         private
+
+        def sign_in_flow
+          require_credentials
+          failure = sign_in(PASSWORD, password_request) or return
+          return two_factor(failure.dig(:two_fa_required, :request_id)) if failure[:two_fa_required]
+
+          raise AuthenticationError.new(reason(failure), "login refused, #{failure[:attempts_left]} attempts left")
+        end
+
+        def require_credentials
+          return unless @settings.password_sha256.nil? && @settings.password.nil?
+
+          raise ConfigurationError, 'set password or password_sha256'
+        end
+
+        # Raises rather than send an empty TOTP that only burns a login attempt.
+        def two_factor(request_id)
+          raise AuthenticationError.new(:two_fa_required, 'no totp_secret set') if @settings.totp_secret.nil?
+
+          login_with_totp(request_id)
+        end
 
         # @return [Hash, nil] the failure Hash, or nil once the session is accepted
         def sign_in(path, request)

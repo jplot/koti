@@ -3,7 +3,9 @@ module Ajax
     module Configuration
       class Settings
         include Singleton
+        SECRETS: Array[Symbol]
         def self.instance: () -> Settings
+        def inspect: () -> String
 
         attr_accessor email: String?
         attr_accessor password: String?
@@ -28,6 +30,8 @@ module Ajax
 
         def initialize: () -> void
       end
+
+      CLOUD_LOCK: Thread::Mutex
 
       @cloud: Cloud::Client?
 

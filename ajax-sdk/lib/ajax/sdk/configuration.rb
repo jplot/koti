@@ -98,7 +98,20 @@ module Ajax
           @sia_port = 18_083
           @sia_timeband = [40, 20]
         end
+
+        # Hidden secrets: the password, its hash, the TOTP secret and the session token.
+        SECRETS = %i[@password @password_sha256 @totp_secret @session_token].freeze
+
+        # @return [String] the settings with every secret redacted
+        def inspect
+          shown = instance_variables.reject { |name| SECRETS.include?(name) }
+                                    .map { |name| "#{name}=#{instance_variable_get(name).inspect}" }
+          "#<#{self.class.name} #{shown.join(', ')}, secrets redacted>"
+        end
       end
+
+      # @api private
+      CLOUD_LOCK = Mutex.new
 
       # Returns the singleton settings.
       #
@@ -117,7 +130,7 @@ module Ajax
       #
       # @return [Cloud::Client]
       # @api public
-      def cloud = @cloud ||= Cloud::Client.new
+      def cloud = CLOUD_LOCK.synchronize { @cloud ||= Cloud::Client.new }
     end
   end
 end

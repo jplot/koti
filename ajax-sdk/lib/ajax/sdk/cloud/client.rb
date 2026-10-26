@@ -20,16 +20,23 @@ module Ajax
         include Resources
 
         IDENTITY = ->(bytes) { bytes }
-        private_constant :IDENTITY
+        # Unary methods that only read; under read-only, every other unary, client-stream or bidi call
+        # is refused. Server streams are reads, so they are always allowed.
+        READS = %w[findUserSpacesWithPagination findNotifications].freeze
+        private_constant :IDENTITY, :READS
 
         # @param settings [Configuration::Settings] the account and endpoint settings
         def initialize(settings = Ajax::Sdk.config)
           @settings = settings
           @session = Session.new(self, settings)
+          @mutex = Mutex.new
         end
 
         # @return [Session] the login session
         attr_reader :session
+
+        # @return [String] a description that never prints the account's secrets
+        def inspect = "#<#{self.class.name} gateway=#{@settings.grpc_host}>"
 
         # Sends +request+ (a Hash) on +path+, choosing the call kind from the method table.
         #
@@ -42,6 +49,7 @@ module Ajax
 
         # @return [Hash] the single response message
         def unary(path, request = {})
+          refuse_write(path)
           authenticating { |md| invoke(:request_response, path, message(path, request), md) }
         end
 
@@ -54,12 +62,14 @@ module Ajax
         # @param requests [Array<Hash>] the request messages
         # @return [Hash] the single response message
         def client_stream(path, requests)
+          refuse_write(path)
           authenticating { |md| invoke(:client_streamer, path, requests.map { |request| message(path, request) }, md) }
         end
 
         # @yieldparam message [Hash] each response message
         # @return [void]
         def bidi(path, requests, &)
+          refuse_write(path)
           messages = requests.map { |request| message(path, request) }
           authenticating { |md| invoke(:bidi_streamer, path, messages, md, &) }
         end
@@ -81,8 +91,10 @@ module Ajax
         private
 
         def stub
-          @stub ||= GRPC::ClientStub.new("#{@settings.grpc_host}:#{@settings.grpc_port}", credentials,
-                                         timeout: @settings.read_timeout)
+          @mutex.synchronize do
+            @stub ||= GRPC::ClientStub.new("#{@settings.grpc_host}:#{@settings.grpc_port}", credentials,
+                                           timeout: @settings.read_timeout)
+          end
         end
 
         def credentials
@@ -101,6 +113,12 @@ module Ajax
         def message(path, request)
           klass = Schemas.message(Schemas.rpc(path).request)
           request.is_a?(klass) ? request : klass.new(request)
+        end
+
+        def refuse_write(path)
+          return unless read_only? && READS.none? { |method| path.end_with?("/#{method}") }
+
+          raise ReadOnlyError, "#{path} refused: the client is read-only"
         end
 
         def authenticating

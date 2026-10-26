@@ -5,13 +5,16 @@ module Ajax
         include Resources
 
         IDENTITY: ^(String) -> String
+        READS: Array[String]
 
         @settings: Configuration::Settings
         @session: Session
         @stub: untyped
+        @mutex: Thread::Mutex
 
         def initialize: (?Configuration::Settings settings) -> void
         def session: () -> Session
+        def inspect: () -> String
         def call: (String path, ?Hash[Symbol, untyped] request) ?{ (Hash[Symbol, untyped]) -> void } -> untyped
         def unary: (String path, ?Hash[Symbol, untyped] request) -> Hash[Symbol, untyped]
         def server_stream: (String path, ?Hash[Symbol, untyped] request) ?{ (Hash[Symbol, untyped]) -> void } -> void
@@ -27,6 +30,7 @@ module Ajax
         def credentials: () -> untyped
         def invoke: (Symbol kind, String path, untyped request, Hash[String, String] metadata) ?{ (Hash[Symbol, untyped]) -> void } -> untyped
         def message: (String path, untyped request) -> untyped
+        def refuse_write: (String path) -> void
         def authenticating: () { (Hash[String, String]) -> untyped } -> untyped
       end
     end

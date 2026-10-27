@@ -100,6 +100,10 @@ RSpec.describe Hue::Sdk::Models::Base do
     expect(Hue::Sdk.Light('l1').attributes.on).to eq(Hue::Sdk::Schema::OnFeature.new(on: true))
   end
 
+  it 'reads a hidden deprecated field of the typed value as nil' do
+    expect(Hue::Sdk.Light('l1').attributes.effects).to be_nil
+  end
+
   it 'gives no typed value to an unknown resource type' do
     expect(Hue::Sdk.Device('d1').services.last).not_to respond_to(:attributes)
   end

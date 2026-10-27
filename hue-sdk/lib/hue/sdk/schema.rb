@@ -81,6 +81,11 @@ module Hue
         # @return [Hash{Symbol=>Object}] the value as a JSON body, without its nil members
         # @api public
         def to_body = to_h.compact.transform_values { Value.dump(it) }
+
+        # @param state [JSON::State, nil] the state of the JSON generator
+        # @return [String] the JSON of {#to_body}, so that a value nested in a plain hash serializes too
+        # @api public
+        def to_json(state = nil) = to_body.to_json(state)
       end
     end
   end

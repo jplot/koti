@@ -35,6 +35,8 @@ module Hue
         def initialize: (**untyped fields) -> void
 
         def to_body: () -> Hash[Symbol, untyped]
+
+        def to_json: (?untyped state) -> String
       end
     end
   end

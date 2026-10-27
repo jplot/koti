@@ -42,7 +42,7 @@ module Ajax
 
         # @api private
         # @return [String] +time+ as DC-09 writes it
-        def self.stamp(time) = time.utc.strftime('_%H:%M:%S,%m-%d-%Y')
+        def self.stamp(time) = time.getutc.strftime('_%H:%M:%S,%m-%d-%Y')
 
         def self.check(match)
           raise FrameError, 'CRC mismatch' unless match[:crc].hex == Sia.crc(match[:body])

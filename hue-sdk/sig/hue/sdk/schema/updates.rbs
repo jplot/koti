@@ -1,0 +1,1148 @@
+module Hue
+  module Sdk
+    module Schema
+      class OnFeatureBasicUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader on: bool?
+
+        def self.new: (?on: bool?) -> OnFeatureBasicUpdate
+        def self.from: (Hash[String, untyped] data) -> OnFeatureBasicUpdate
+      end
+
+      class DimmingFeatureBasicUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader brightness: Numeric?
+
+        def self.new: (?brightness: Numeric?) -> DimmingFeatureBasicUpdate
+        def self.from: (Hash[String, untyped] data) -> DimmingFeatureBasicUpdate
+      end
+
+      class ColorPointUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader x: Numeric
+        attr_reader y: Numeric
+
+        def self.new: (x: Numeric, y: Numeric) -> ColorPointUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorPointUpdate
+      end
+
+      class ColorFeatureBasicUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader xy: ColorPointUpdate?
+
+        def self.new: (?xy: ColorPointUpdate?) -> ColorFeatureBasicUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorFeatureBasicUpdate
+      end
+
+      class ColorTemperatureFeatureBasicUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mirek: Integer?
+
+        def self.new: (?mirek: Integer?) -> ColorTemperatureFeatureBasicUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorTemperatureFeatureBasicUpdate
+      end
+
+      class GradientPointUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader color: ColorFeatureBasicUpdate
+
+        def self.new: (color: ColorFeatureBasicUpdate) -> GradientPointUpdate
+        def self.from: (Hash[String, untyped] data) -> GradientPointUpdate
+      end
+
+      class Rotation2dBasicUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader angle: Integer
+
+        def self.new: (angle: Integer) -> Rotation2dBasicUpdate
+        def self.from: (Hash[String, untyped] data) -> Rotation2dBasicUpdate
+      end
+
+      class GradientFeatureBasicWithRotation2dBasicUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader points: Array[GradientPointUpdate]
+        attr_reader rotation_2d: Rotation2dBasicUpdate?
+        attr_reader mode: String?
+
+        def self.new: (points: Array[GradientPointUpdate], ?rotation_2d: Rotation2dBasicUpdate?, ?mode: String?) -> GradientFeatureBasicWithRotation2dBasicUpdate
+        def self.from: (Hash[String, untyped] data) -> GradientFeatureBasicWithRotation2dBasicUpdate
+      end
+
+      class EffectV2FeatureBasicParametersUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader color: ColorFeatureBasicUpdate?
+        attr_reader color_temperature: ColorTemperatureFeatureBasicUpdate?
+        attr_reader speed: Numeric?
+
+        def self.new: (?color: ColorFeatureBasicUpdate?, ?color_temperature: ColorTemperatureFeatureBasicUpdate?, ?speed: Numeric?) -> EffectV2FeatureBasicParametersUpdate
+        def self.from: (Hash[String, untyped] data) -> EffectV2FeatureBasicParametersUpdate
+      end
+
+      class EffectV2FeatureBasicActionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader effect: String
+        attr_reader parameters: EffectV2FeatureBasicParametersUpdate?
+
+        def self.new: (effect: String, ?parameters: EffectV2FeatureBasicParametersUpdate?) -> EffectV2FeatureBasicActionUpdate
+        def self.from: (Hash[String, untyped] data) -> EffectV2FeatureBasicActionUpdate
+      end
+
+      class EffectV2FeatureBasicUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: EffectV2FeatureBasicActionUpdate
+
+        def self.new: (action: EffectV2FeatureBasicActionUpdate) -> EffectV2FeatureBasicUpdate
+        def self.from: (Hash[String, untyped] data) -> EffectV2FeatureBasicUpdate
+      end
+
+      class ActionActionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader on: OnFeatureBasicUpdate?
+        attr_reader dimming: DimmingFeatureBasicUpdate?
+        attr_reader color: ColorFeatureBasicUpdate?
+        attr_reader color_temperature: ColorTemperatureFeatureBasicUpdate?
+        attr_reader gradient: GradientFeatureBasicWithRotation2dBasicUpdate?
+        attr_reader effects_v2: EffectV2FeatureBasicUpdate?
+
+        def self.new: (?on: OnFeatureBasicUpdate?, ?dimming: DimmingFeatureBasicUpdate?, ?color: ColorFeatureBasicUpdate?, ?color_temperature: ColorTemperatureFeatureBasicUpdate?, ?gradient: GradientFeatureBasicWithRotation2dBasicUpdate?, ?effects_v2: EffectV2FeatureBasicUpdate?) -> ActionActionUpdate
+        def self.from: (Hash[String, untyped] data) -> ActionActionUpdate
+      end
+
+      class ResourceIdentifierUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader rid: String
+        attr_reader rtype: String
+
+        def self.new: (rid: String, rtype: String) -> ResourceIdentifierUpdate
+        def self.from: (Hash[String, untyped] data) -> ResourceIdentifierUpdate
+      end
+
+      class ActionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader target: ResourceIdentifierUpdate
+        attr_reader action: ActionActionUpdate
+
+        def self.new: (target: ResourceIdentifierUpdate, action: ActionActionUpdate) -> ActionUpdate
+        def self.from: (Hash[String, untyped] data) -> ActionUpdate
+      end
+
+      class InstallCodeUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mac_address: String
+        attr_reader ic: String
+
+        def self.new: (mac_address: String, ic: String) -> InstallCodeUpdate
+        def self.from: (Hash[String, untyped] data) -> InstallCodeUpdate
+      end
+
+      class AddInstallCodesUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader install_codes: Array[InstallCodeUpdate]?
+
+        def self.new: (?install_codes: Array[InstallCodeUpdate]?) -> AddInstallCodesUpdate
+        def self.from: (Hash[String, untyped] data) -> AddInstallCodesUpdate
+      end
+
+      class AlertFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: String
+
+        def self.new: (action: String) -> AlertFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> AlertFeatureUpdate
+      end
+
+      class AssociationFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader association: String?
+
+        def self.new: (?association: String?) -> AssociationFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> AssociationFeatureUpdate
+      end
+
+      class ColorFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader xy: ColorPointUpdate?
+
+        def self.new: (?xy: ColorPointUpdate?) -> ColorFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorFeatureUpdate
+      end
+
+      class ColorFeatureWriteOnlyUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader xy: ColorPointUpdate
+
+        def self.new: (xy: ColorPointUpdate) -> ColorFeatureWriteOnlyUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorFeatureWriteOnlyUpdate
+      end
+
+      class ColorPaletteUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader color: ColorFeatureBasicUpdate
+        attr_reader dimming: DimmingFeatureBasicUpdate
+
+        def self.new: (color: ColorFeatureBasicUpdate, dimming: DimmingFeatureBasicUpdate) -> ColorPaletteUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorPaletteUpdate
+      end
+
+      class ColorTemperatureDeltaFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: String
+        attr_reader mirek_delta: Integer?
+
+        def self.new: (action: String, ?mirek_delta: Integer?) -> ColorTemperatureDeltaFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorTemperatureDeltaFeatureUpdate
+      end
+
+      class ColorTemperatureFeatureBasicWithValidFlagUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mirek: Integer?
+
+        def self.new: (?mirek: Integer?) -> ColorTemperatureFeatureBasicWithValidFlagUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorTemperatureFeatureBasicWithValidFlagUpdate
+      end
+
+      class ColorTemperatureFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mirek: Integer?
+
+        def self.new: (?mirek: Integer?) -> ColorTemperatureFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorTemperatureFeatureUpdate
+      end
+
+      class ColorTemperatureFeatureWriteOnlyUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mirek: Integer
+
+        def self.new: (mirek: Integer) -> ColorTemperatureFeatureWriteOnlyUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorTemperatureFeatureWriteOnlyUpdate
+      end
+
+      class ColorTemperaturePaletteUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader color_temperature: ColorTemperatureFeatureBasicUpdate
+        attr_reader dimming: DimmingFeatureBasicUpdate
+
+        def self.new: (color_temperature: ColorTemperatureFeatureBasicUpdate, dimming: DimmingFeatureBasicUpdate) -> ColorTemperaturePaletteUpdate
+        def self.from: (Hash[String, untyped] data) -> ColorTemperaturePaletteUpdate
+      end
+
+      class OrientationFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader orientation: String?
+
+        def self.new: (?orientation: String?) -> OrientationFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> OrientationFeatureUpdate
+      end
+
+      class OrderFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader order: String?
+
+        def self.new: (?order: String?) -> OrderFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> OrderFeatureUpdate
+      end
+
+      class Rotation2dVisualOffsetUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader offset: Integer
+        attr_reader direction: String
+
+        def self.new: (offset: Integer, direction: String) -> Rotation2dVisualOffsetUpdate
+        def self.from: (Hash[String, untyped] data) -> Rotation2dVisualOffsetUpdate
+      end
+
+      class ContentConfigurationUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader orientation: OrientationFeatureUpdate?
+        attr_reader order: OrderFeatureUpdate?
+        attr_reader association: AssociationFeatureUpdate?
+        attr_reader rotation_2d_visual_offset: Rotation2dVisualOffsetUpdate?
+
+        def self.new: (?orientation: OrientationFeatureUpdate?, ?order: OrderFeatureUpdate?, ?association: AssociationFeatureUpdate?, ?rotation_2d_visual_offset: Rotation2dVisualOffsetUpdate?) -> ContentConfigurationUpdate
+        def self.from: (Hash[String, untyped] data) -> ContentConfigurationUpdate
+      end
+
+      class SensitivityAttributeFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader sensitivity: Integer
+
+        def self.new: (sensitivity: Integer) -> SensitivityAttributeFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> SensitivityAttributeFeatureUpdate
+      end
+
+      class ConvenienceAreaMotionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader algorithm_mode: String?
+        attr_reader sensitivity: SensitivityAttributeFeatureUpdate?
+        attr_reader enabled: bool?
+
+        def self.new: (?algorithm_mode: String?, ?sensitivity: SensitivityAttributeFeatureUpdate?, ?enabled: bool?) -> ConvenienceAreaMotionUpdate
+        def self.from: (Hash[String, untyped] data) -> ConvenienceAreaMotionUpdate
+      end
+
+      class CoordinateMetersUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader x: Numeric
+        attr_reader y: Numeric
+        attr_reader z: Numeric
+
+        def self.new: (x: Numeric, y: Numeric, z: Numeric) -> CoordinateMetersUpdate
+        def self.from: (Hash[String, untyped] data) -> CoordinateMetersUpdate
+      end
+
+      class TimeUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader hour: Integer
+        attr_reader minute: Integer
+        attr_reader second: Integer
+
+        def self.new: (hour: Integer, minute: Integer, second: Integer) -> TimeUpdate
+        def self.from: (Hash[String, untyped] data) -> TimeUpdate
+      end
+
+      class TimePointUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader kind: String
+        attr_reader time: TimeUpdate?
+
+        def self.new: (kind: String, ?time: TimeUpdate?) -> TimePointUpdate
+        def self.from: (Hash[String, untyped] data) -> TimePointUpdate
+      end
+
+      class SmartSceneTimeslotUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader start_time: TimePointUpdate
+        attr_reader target: ResourceIdentifierUpdate
+
+        def self.new: (start_time: TimePointUpdate, target: ResourceIdentifierUpdate) -> SmartSceneTimeslotUpdate
+        def self.from: (Hash[String, untyped] data) -> SmartSceneTimeslotUpdate
+      end
+
+      class DayTimeslotsUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader timeslots: Array[SmartSceneTimeslotUpdate]
+        attr_reader recurrence: Array[String]
+
+        def self.new: (timeslots: Array[SmartSceneTimeslotUpdate], recurrence: Array[String]) -> DayTimeslotsUpdate
+        def self.from: (Hash[String, untyped] data) -> DayTimeslotsUpdate
+      end
+
+      class DeviceMetadataUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader archetype: String?
+        attr_reader name: String?
+
+        def self.new: (?archetype: String?, ?name: String?) -> DeviceMetadataUpdate
+        def self.from: (Hash[String, untyped] data) -> DeviceMetadataUpdate
+      end
+
+      class IdentifyFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: String
+        attr_reader duration: Integer?
+
+        def self.new: (action: String, ?duration: Integer?) -> IdentifyFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> IdentifyFeatureUpdate
+      end
+
+      class UsertestFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader usertest: bool?
+
+        def self.new: (?usertest: bool?) -> UsertestFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> UsertestFeatureUpdate
+      end
+
+      class SwitchModeFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mode: String
+
+        def self.new: (mode: String) -> SwitchModeFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> SwitchModeFeatureUpdate
+      end
+
+      class QuaternionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader x: Numeric
+        attr_reader y: Numeric
+        attr_reader z: Numeric
+        attr_reader w: Numeric
+
+        def self.new: (x: Numeric, y: Numeric, z: Numeric, w: Numeric) -> QuaternionUpdate
+        def self.from: (Hash[String, untyped] data) -> QuaternionUpdate
+      end
+
+      class ObjectTransformUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader position: CoordinateMetersUpdate
+        attr_reader rotation: QuaternionUpdate
+
+        def self.new: (position: CoordinateMetersUpdate, rotation: QuaternionUpdate) -> ObjectTransformUpdate
+        def self.from: (Hash[String, untyped] data) -> ObjectTransformUpdate
+      end
+
+      class GeometryObjectUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader reference: ResourceIdentifierUpdate
+        attr_reader transform: ObjectTransformUpdate
+
+        def self.new: (reference: ResourceIdentifierUpdate, transform: ObjectTransformUpdate) -> GeometryObjectUpdate
+        def self.from: (Hash[String, untyped] data) -> GeometryObjectUpdate
+      end
+
+      class GeometryUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader objects: Array[GeometryObjectUpdate]?
+
+        def self.new: (?objects: Array[GeometryObjectUpdate]?) -> GeometryUpdate
+        def self.from: (Hash[String, untyped] data) -> GeometryUpdate
+      end
+
+      class DeviceUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader metadata: DeviceMetadataUpdate?
+        attr_reader identify: IdentifyFeatureUpdate?
+        attr_reader usertest: UsertestFeatureUpdate?
+        attr_reader device_mode: SwitchModeFeatureUpdate?
+        attr_reader geometry: GeometryUpdate?
+
+        def self.new: (?metadata: DeviceMetadataUpdate?, ?identify: IdentifyFeatureUpdate?, ?usertest: UsertestFeatureUpdate?, ?device_mode: SwitchModeFeatureUpdate?, ?geometry: GeometryUpdate?) -> DeviceUpdate
+        def self.from: (Hash[String, untyped] data) -> DeviceUpdate
+      end
+
+      class DimmingConfigurationFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader min_level: Numeric
+
+        def self.new: (min_level: Numeric) -> DimmingConfigurationFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> DimmingConfigurationFeatureUpdate
+      end
+
+      class DimmingDeltaFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: String
+        attr_reader brightness_delta: Numeric?
+
+        def self.new: (action: String, ?brightness_delta: Numeric?) -> DimmingDeltaFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> DimmingDeltaFeatureUpdate
+      end
+
+      class DimmingFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader brightness: Numeric?
+
+        def self.new: (?brightness: Numeric?) -> DimmingFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> DimmingFeatureUpdate
+      end
+
+      class DynamicsFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader speed: Numeric?
+        attr_reader duration: Integer?
+
+        def self.new: (?speed: Numeric?, ?duration: Integer?) -> DynamicsFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> DynamicsFeatureUpdate
+      end
+
+      class EffectFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader effect: String?
+
+        def self.new: (?effect: String?) -> EffectFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> EffectFeatureUpdate
+      end
+
+      class EffectsV2ParametersUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader color: ColorFeatureBasicUpdate?
+        attr_reader color_temperature: ColorTemperatureFeatureBasicWithValidFlagUpdate?
+        attr_reader speed: Numeric?
+        attr_reader rotation_2d: Rotation2dBasicUpdate?
+
+        def self.new: (?color: ColorFeatureBasicUpdate?, ?color_temperature: ColorTemperatureFeatureBasicWithValidFlagUpdate?, ?speed: Numeric?, ?rotation_2d: Rotation2dBasicUpdate?) -> EffectsV2ParametersUpdate
+        def self.from: (Hash[String, untyped] data) -> EffectsV2ParametersUpdate
+      end
+
+      class EffectV2FeatureActionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader effect: String
+        attr_reader parameters: EffectsV2ParametersUpdate?
+
+        def self.new: (effect: String, ?parameters: EffectsV2ParametersUpdate?) -> EffectV2FeatureActionUpdate
+        def self.from: (Hash[String, untyped] data) -> EffectV2FeatureActionUpdate
+      end
+
+      class EffectV2FeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: EffectV2FeatureActionUpdate?
+
+        def self.new: (?action: EffectV2FeatureActionUpdate?) -> EffectV2FeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> EffectV2FeatureUpdate
+      end
+
+      class EntertainmentConfigurationMetadataUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader name: String
+
+        def self.new: (name: String) -> EntertainmentConfigurationMetadataUpdate
+        def self.from: (Hash[String, untyped] data) -> EntertainmentConfigurationMetadataUpdate
+      end
+
+      class StreamingProxyUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mode: String
+        attr_reader node: ResourceIdentifierUpdate?
+
+        def self.new: (mode: String, ?node: ResourceIdentifierUpdate?) -> StreamingProxyUpdate
+        def self.from: (Hash[String, untyped] data) -> StreamingProxyUpdate
+      end
+
+      class PositionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader x: Numeric
+        attr_reader y: Numeric
+        attr_reader z: Numeric
+
+        def self.new: (x: Numeric, y: Numeric, z: Numeric) -> PositionUpdate
+        def self.from: (Hash[String, untyped] data) -> PositionUpdate
+      end
+
+      class ServiceLocationUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader service: ResourceIdentifierUpdate
+        attr_reader positions: Array[PositionUpdate]
+        attr_reader equalization_factor: Numeric?
+
+        def self.new: (service: ResourceIdentifierUpdate, positions: Array[PositionUpdate], ?equalization_factor: Numeric?) -> ServiceLocationUpdate
+        def self.from: (Hash[String, untyped] data) -> ServiceLocationUpdate
+      end
+
+      class EntertainmentLocationsUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader service_locations: Array[ServiceLocationUpdate]
+
+        def self.new: (service_locations: Array[ServiceLocationUpdate]) -> EntertainmentLocationsUpdate
+        def self.from: (Hash[String, untyped] data) -> EntertainmentLocationsUpdate
+      end
+
+      class EntertainmentConfigurationUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader metadata: EntertainmentConfigurationMetadataUpdate?
+        attr_reader configuration_type: String?
+        attr_reader action: String?
+        attr_reader stream_proxy: StreamingProxyUpdate?
+        attr_reader locations: EntertainmentLocationsUpdate?
+
+        def self.new: (?metadata: EntertainmentConfigurationMetadataUpdate?, ?configuration_type: String?, ?action: String?, ?stream_proxy: StreamingProxyUpdate?, ?locations: EntertainmentLocationsUpdate?) -> EntertainmentConfigurationUpdate
+        def self.from: (Hash[String, untyped] data) -> EntertainmentConfigurationUpdate
+      end
+
+      class GeofenceClientUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader is_at_home: bool?
+        attr_reader name: String?
+
+        def self.new: (?is_at_home: bool?, ?name: String?) -> GeofenceClientUpdate
+        def self.from: (Hash[String, untyped] data) -> GeofenceClientUpdate
+      end
+
+      class Rotation2dWithValidFlagUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader angle: Integer
+
+        def self.new: (angle: Integer) -> Rotation2dWithValidFlagUpdate
+        def self.from: (Hash[String, untyped] data) -> Rotation2dWithValidFlagUpdate
+      end
+
+      class GradientFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader points: Array[GradientPointUpdate]
+        attr_reader rotation_2d: Rotation2dWithValidFlagUpdate?
+        attr_reader mode: String?
+
+        def self.new: (points: Array[GradientPointUpdate], ?rotation_2d: Rotation2dWithValidFlagUpdate?, ?mode: String?) -> GradientFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> GradientFeatureUpdate
+      end
+
+      class SignalingFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader signal: String
+        attr_reader duration: Integer?
+        attr_reader colors: Array[ColorFeatureBasicUpdate]?
+
+        def self.new: (signal: String, ?duration: Integer?, ?colors: Array[ColorFeatureBasicUpdate]?) -> SignalingFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> SignalingFeatureUpdate
+      end
+
+      class GroupedLightUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader on: OnFeatureBasicUpdate?
+        attr_reader dimming: DimmingFeatureBasicUpdate?
+        attr_reader color_temperature: ColorTemperatureFeatureWriteOnlyUpdate?
+        attr_reader color: ColorFeatureWriteOnlyUpdate?
+        attr_reader signaling: SignalingFeatureUpdate?
+
+        def self.new: (?on: OnFeatureBasicUpdate?, ?dimming: DimmingFeatureBasicUpdate?, ?color_temperature: ColorTemperatureFeatureWriteOnlyUpdate?, ?color: ColorFeatureWriteOnlyUpdate?, ?signaling: SignalingFeatureUpdate?) -> GroupedLightUpdate
+        def self.from: (Hash[String, untyped] data) -> GroupedLightUpdate
+      end
+
+      class LightMetadataUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader archetype: String?
+        attr_reader function: String?
+        attr_reader name: String?
+
+        def self.new: (?archetype: String?, ?function: String?, ?name: String?) -> LightMetadataUpdate
+        def self.from: (Hash[String, untyped] data) -> LightMetadataUpdate
+      end
+
+      class PixelPositionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader index: Integer
+        attr_reader position: CoordinateMetersUpdate
+
+        def self.new: (index: Integer, position: CoordinateMetersUpdate) -> PixelPositionUpdate
+        def self.from: (Hash[String, untyped] data) -> PixelPositionUpdate
+      end
+
+      class LightServiceGeometryUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader pixel_positions: Array[PixelPositionUpdate]?
+
+        def self.new: (?pixel_positions: Array[PixelPositionUpdate]?) -> LightServiceGeometryUpdate
+        def self.from: (Hash[String, untyped] data) -> LightServiceGeometryUpdate
+      end
+
+      class OnFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader on: bool?
+
+        def self.new: (?on: bool?) -> OnFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> OnFeatureUpdate
+      end
+
+      class TimedEffectFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader effect: String?
+        attr_reader duration: Integer?
+
+        def self.new: (?effect: String?, ?duration: Integer?) -> TimedEffectFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> TimedEffectFeatureUpdate
+      end
+
+      class PowerupFeatureOnUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mode: String
+        attr_reader on: OnFeatureBasicUpdate?
+
+        def self.new: (mode: String, ?on: OnFeatureBasicUpdate?) -> PowerupFeatureOnUpdate
+        def self.from: (Hash[String, untyped] data) -> PowerupFeatureOnUpdate
+      end
+
+      class PowerupFeatureDimmingUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mode: String
+        attr_reader dimming: DimmingFeatureBasicUpdate?
+
+        def self.new: (mode: String, ?dimming: DimmingFeatureBasicUpdate?) -> PowerupFeatureDimmingUpdate
+        def self.from: (Hash[String, untyped] data) -> PowerupFeatureDimmingUpdate
+      end
+
+      class PowerupFeatureColorUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mode: String
+        attr_reader color_temperature: ColorTemperatureFeatureBasicUpdate?
+        attr_reader color: ColorFeatureBasicUpdate?
+
+        def self.new: (mode: String, ?color_temperature: ColorTemperatureFeatureBasicUpdate?, ?color: ColorFeatureBasicUpdate?) -> PowerupFeatureColorUpdate
+        def self.from: (Hash[String, untyped] data) -> PowerupFeatureColorUpdate
+      end
+
+      class PowerupFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader preset: String
+        attr_reader on: PowerupFeatureOnUpdate?
+        attr_reader dimming: PowerupFeatureDimmingUpdate?
+        attr_reader color: PowerupFeatureColorUpdate?
+
+        def self.new: (preset: String, ?on: PowerupFeatureOnUpdate?, ?dimming: PowerupFeatureDimmingUpdate?, ?color: PowerupFeatureColorUpdate?) -> PowerupFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> PowerupFeatureUpdate
+      end
+
+      class LightUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader metadata: LightMetadataUpdate?
+        attr_reader identify: IdentifyFeatureUpdate?
+        attr_reader on: OnFeatureUpdate?
+        attr_reader dimming: DimmingFeatureUpdate?
+        attr_reader dimming_delta: DimmingDeltaFeatureUpdate?
+        attr_reader dimming_configuration: DimmingConfigurationFeatureUpdate?
+        attr_reader color_temperature: ColorTemperatureFeatureUpdate?
+        attr_reader color_temperature_delta: ColorTemperatureDeltaFeatureUpdate?
+        attr_reader color: ColorFeatureUpdate?
+        attr_reader dynamics: DynamicsFeatureUpdate?
+        attr_reader alert: AlertFeatureUpdate?
+        attr_reader signaling: SignalingFeatureUpdate?
+        attr_reader gradient: GradientFeatureUpdate?
+        attr_reader effects: EffectFeatureUpdate?
+        attr_reader effects_v2: EffectV2FeatureUpdate?
+        attr_reader timed_effects: TimedEffectFeatureUpdate?
+        attr_reader powerup: PowerupFeatureUpdate?
+        attr_reader content_configuration: ContentConfigurationUpdate?
+        attr_reader geometry: LightServiceGeometryUpdate?
+
+        def self.new: (?metadata: LightMetadataUpdate?, ?identify: IdentifyFeatureUpdate?, ?on: OnFeatureUpdate?, ?dimming: DimmingFeatureUpdate?, ?dimming_delta: DimmingDeltaFeatureUpdate?, ?dimming_configuration: DimmingConfigurationFeatureUpdate?, ?color_temperature: ColorTemperatureFeatureUpdate?, ?color_temperature_delta: ColorTemperatureDeltaFeatureUpdate?, ?color: ColorFeatureUpdate?, ?dynamics: DynamicsFeatureUpdate?, ?alert: AlertFeatureUpdate?, ?signaling: SignalingFeatureUpdate?, ?gradient: GradientFeatureUpdate?, ?effects: EffectFeatureUpdate?, ?effects_v2: EffectV2FeatureUpdate?, ?timed_effects: TimedEffectFeatureUpdate?, ?powerup: PowerupFeatureUpdate?, ?content_configuration: ContentConfigurationUpdate?, ?geometry: LightServiceGeometryUpdate?) -> LightUpdate
+        def self.from: (Hash[String, untyped] data) -> LightUpdate
+      end
+
+      class ParticipantUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader resource: ResourceIdentifierUpdate
+
+        def self.new: (resource: ResourceIdentifierUpdate) -> ParticipantUpdate
+        def self.from: (Hash[String, untyped] data) -> ParticipantUpdate
+      end
+
+      class MotionAreaConfigurationUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader name: String?
+        attr_reader group: ResourceIdentifierUpdate?
+        attr_reader participants: Array[ParticipantUpdate]?
+        attr_reader enabled: bool?
+
+        def self.new: (?name: String?, ?group: ResourceIdentifierUpdate?, ?participants: Array[ParticipantUpdate]?, ?enabled: bool?) -> MotionAreaConfigurationUpdate
+        def self.from: (Hash[String, untyped] data) -> MotionAreaConfigurationUpdate
+      end
+
+      class MotionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader sensitivity: SensitivityAttributeFeatureUpdate?
+        attr_reader enabled: bool?
+
+        def self.new: (?sensitivity: SensitivityAttributeFeatureUpdate?, ?enabled: bool?) -> MotionUpdate
+        def self.from: (Hash[String, untyped] data) -> MotionUpdate
+      end
+
+      class MuteFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mute: String
+
+        def self.new: (mute: String) -> MuteFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> MuteFeatureUpdate
+      end
+
+      class NamedResourceMetadataUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader name: String?
+
+        def self.new: (?name: String?) -> NamedResourceMetadataUpdate
+        def self.from: (Hash[String, untyped] data) -> NamedResourceMetadataUpdate
+      end
+
+      class PaletteUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader color: Array[ColorPaletteUpdate]
+        attr_reader dimming: Array[DimmingFeatureBasicUpdate]
+        attr_reader color_temperature: Array[ColorTemperaturePaletteUpdate]
+        attr_reader effects_v2: Array[EffectV2FeatureBasicUpdate]
+
+        def self.new: (color: Array[ColorPaletteUpdate], dimming: Array[DimmingFeatureBasicUpdate], color_temperature: Array[ColorTemperaturePaletteUpdate], effects_v2: Array[EffectV2FeatureBasicUpdate]) -> PaletteUpdate
+        def self.from: (Hash[String, untyped] data) -> PaletteUpdate
+      end
+
+      class PowerOutputModeFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader mode: String
+
+        def self.new: (mode: String) -> PowerOutputModeFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> PowerOutputModeFeatureUpdate
+      end
+
+      class PowerOutputConfigurationUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader output_mode: PowerOutputModeFeatureUpdate
+
+        def self.new: (output_mode: PowerOutputModeFeatureUpdate) -> PowerOutputConfigurationUpdate
+        def self.from: (Hash[String, untyped] data) -> PowerOutputConfigurationUpdate
+      end
+
+      class RecallFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: String?
+
+        def self.new: (?action: String?) -> RecallFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> RecallFeatureUpdate
+      end
+
+      class RoomMetadataUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader archetype: String?
+        attr_reader name: String?
+
+        def self.new: (?archetype: String?, ?name: String?) -> RoomMetadataUpdate
+        def self.from: (Hash[String, untyped] data) -> RoomMetadataUpdate
+      end
+
+      class RoomUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader metadata: RoomMetadataUpdate?
+        attr_reader geometry: GeometryUpdate?
+        attr_reader children: Array[ResourceIdentifierUpdate]?
+
+        def self.new: (?metadata: RoomMetadataUpdate?, ?geometry: GeometryUpdate?, ?children: Array[ResourceIdentifierUpdate]?) -> RoomUpdate
+        def self.from: (Hash[String, untyped] data) -> RoomUpdate
+      end
+
+      class SceneMappingUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader algorithm: String
+
+        def self.new: (algorithm: String) -> SceneMappingUpdate
+        def self.from: (Hash[String, untyped] data) -> SceneMappingUpdate
+      end
+
+      class SceneMetadataUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader name: String
+
+        def self.new: (name: String) -> SceneMetadataUpdate
+        def self.from: (Hash[String, untyped] data) -> SceneMetadataUpdate
+      end
+
+      class SceneUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader metadata: SceneMetadataUpdate?
+        attr_reader speed: Numeric?
+        attr_reader auto_dynamic: bool?
+        attr_reader mapping: SceneMappingUpdate?
+        attr_reader actions: Array[ActionUpdate]?
+        attr_reader palette: PaletteUpdate?
+        attr_reader recall: RecallFeatureUpdate?
+
+        def self.new: (?metadata: SceneMetadataUpdate?, ?speed: Numeric?, ?auto_dynamic: bool?, ?mapping: SceneMappingUpdate?, ?actions: Array[ActionUpdate]?, ?palette: PaletteUpdate?, ?recall: RecallFeatureUpdate?) -> SceneUpdate
+        def self.from: (Hash[String, untyped] data) -> SceneUpdate
+      end
+
+      class SecurityAreaMotionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader sensitivity: SensitivityAttributeFeatureUpdate?
+        attr_reader enabled: bool?
+
+        def self.new: (?sensitivity: SensitivityAttributeFeatureUpdate?, ?enabled: bool?) -> SecurityAreaMotionUpdate
+        def self.from: (Hash[String, untyped] data) -> SecurityAreaMotionUpdate
+      end
+
+      class ServiceGroupUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader metadata: NamedResourceMetadataUpdate?
+        attr_reader children: Array[ResourceIdentifierUpdate]?
+
+        def self.new: (?metadata: NamedResourceMetadataUpdate?, ?children: Array[ResourceIdentifierUpdate]?) -> ServiceGroupUpdate
+        def self.from: (Hash[String, untyped] data) -> ServiceGroupUpdate
+      end
+
+      class SmartSceneRecallFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: String
+
+        def self.new: (action: String) -> SmartSceneRecallFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> SmartSceneRecallFeatureUpdate
+      end
+
+      class SmartSceneUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader metadata: SceneMetadataUpdate?
+        attr_reader week_timeslots: Array[DayTimeslotsUpdate]?
+        attr_reader transition_duration: Integer?
+        attr_reader recall: SmartSceneRecallFeatureUpdate?
+
+        def self.new: (?metadata: SceneMetadataUpdate?, ?week_timeslots: Array[DayTimeslotsUpdate]?, ?transition_duration: Integer?, ?recall: SmartSceneRecallFeatureUpdate?) -> SmartSceneUpdate
+        def self.from: (Hash[String, untyped] data) -> SmartSceneUpdate
+      end
+
+      class VolumeUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader level: Numeric
+
+        def self.new: (level: Numeric) -> VolumeUpdate
+        def self.from: (Hash[String, untyped] data) -> VolumeUpdate
+      end
+
+      class SpeakerAlarmFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader sound: String
+        attr_reader duration: Integer?
+        attr_reader volume: VolumeUpdate?
+
+        def self.new: (sound: String, ?duration: Integer?, ?volume: VolumeUpdate?) -> SpeakerAlarmFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> SpeakerAlarmFeatureUpdate
+      end
+
+      class SpeakerFeatureUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader sound: String
+        attr_reader volume: VolumeUpdate?
+
+        def self.new: (sound: String, ?volume: VolumeUpdate?) -> SpeakerFeatureUpdate
+        def self.from: (Hash[String, untyped] data) -> SpeakerFeatureUpdate
+      end
+
+      class SpeakerUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader alarm: SpeakerAlarmFeatureUpdate?
+        attr_reader chime: SpeakerFeatureUpdate?
+        attr_reader mute: MuteFeatureUpdate?
+
+        def self.new: (?alarm: SpeakerAlarmFeatureUpdate?, ?chime: SpeakerFeatureUpdate?, ?mute: MuteFeatureUpdate?) -> SpeakerUpdate
+        def self.from: (Hash[String, untyped] data) -> SpeakerUpdate
+      end
+
+      class ZigbeeChannelUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader value: String
+
+        def self.new: (value: String) -> ZigbeeChannelUpdate
+        def self.from: (Hash[String, untyped] data) -> ZigbeeChannelUpdate
+      end
+
+      class ZigbeeConnectivityUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader channel: ZigbeeChannelUpdate
+
+        def self.new: (channel: ZigbeeChannelUpdate) -> ZigbeeConnectivityUpdate
+        def self.from: (Hash[String, untyped] data) -> ZigbeeConnectivityUpdate
+      end
+
+      class ZigbeeDeviceDiscoveryActionUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action_type: String
+        attr_reader search_codes: Array[String]?
+
+        def self.new: (action_type: String, ?search_codes: Array[String]?) -> ZigbeeDeviceDiscoveryActionUpdate
+        def self.from: (Hash[String, untyped] data) -> ZigbeeDeviceDiscoveryActionUpdate
+      end
+
+      class ZigbeeDeviceDiscoveryUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: ZigbeeDeviceDiscoveryActionUpdate?
+        attr_reader add_install_codes: AddInstallCodesUpdate?
+
+        def self.new: (?action: ZigbeeDeviceDiscoveryActionUpdate?, ?add_install_codes: AddInstallCodesUpdate?) -> ZigbeeDeviceDiscoveryUpdate
+        def self.from: (Hash[String, untyped] data) -> ZigbeeDeviceDiscoveryUpdate
+      end
+
+      class ZoneUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader metadata: RoomMetadataUpdate?
+        attr_reader children: Array[ResourceIdentifierUpdate]?
+
+        def self.new: (?metadata: RoomMetadataUpdate?, ?children: Array[ResourceIdentifierUpdate]?) -> ZoneUpdate
+        def self.from: (Hash[String, untyped] data) -> ZoneUpdate
+      end
+    end
+  end
+end

@@ -27,4 +27,9 @@ task :steep do
   sh 'steep check'
 end
 
+desc 'Regenerate the typed values from schema/hue.json'
+task :schema do
+  ruby 'schema/generate.rb'
+end
+
 task default: %i[rubocop spec yard:undocumented rbs:validate steep]

@@ -1,1 +1,6 @@
 inherit_from: ../.rubocop.yml
+
+# The value classes written by schema/generate.rb: one declaration per class of the Hue app.
+Metrics/ModuleLength:
+  Exclude:
+    - 'lib/hue/sdk/schema/*.rb'

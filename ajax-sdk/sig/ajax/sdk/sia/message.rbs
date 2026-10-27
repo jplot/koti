@@ -1,0 +1,38 @@
+module Ajax
+  module Sdk
+    module Sia
+      class Message < Data
+        FRAME: Regexp
+        STAMP: Regexp
+
+        attr_reader type: String
+        attr_reader encrypted: bool
+        attr_reader sequence: String
+        attr_reader receiver: String?
+        attr_reader line: String
+        attr_reader account: String
+        attr_reader content: String?
+        attr_reader timestamp: Time?
+
+        def self.new: (type: String, encrypted: bool, sequence: String, receiver: String?, line: String, account: String, content: String?, timestamp: Time?) -> Message
+        def self.parse: (String frame, ?cipher: Cipher?) -> Message
+        def self.nak: (?Time time) -> String
+        def self.frame: (String body) -> String
+        def self.stamp: (Time time) -> String
+        def self.check: (MatchData match) -> void
+        def self.build: (MatchData match, String? plain) -> Message
+        def self.content_of: (String plain) -> String
+        def self.unseal: (String hex, Cipher cipher, String type) -> String
+        def self.clear: (String rest) -> String
+        def self.time_in: (String plain) -> Time?
+
+        def ack: (?cipher: Cipher?) -> String
+        def duh: () -> String
+
+        private
+
+        def answer: (String kind, Cipher? cipher) -> String
+      end
+    end
+  end
+end

@@ -1,0 +1,20 @@
+module Ajax
+  module Sdk
+    module Sia
+      class Cipher
+        IV: String
+
+        @key: String
+
+        def initialize: (String key) -> void
+        def inspect: () -> String
+        def decrypt: (String hex) -> String
+        def encrypt: (String text) -> String
+
+        private
+
+        def run: (Symbol direction, String data) -> String
+      end
+    end
+  end
+end

@@ -1,7 +1,8 @@
 # ajax-sdk
 
-Unofficial Ruby client for [Ajax Systems](https://ajax.systems) alarms. It logs in to the cloud the
-official mobile app uses and reads your spaces, devices and history, and arms or disarms a space.
+Unofficial Ruby client for [Ajax Systems](https://ajax.systems) alarms. It receives the events your
+hub sends over SIA DC-09 on the local network, and it logs in to the cloud the official mobile app
+uses to read your spaces, devices and history, and to arm or disarm a space.
 
 > **Unofficial.** Ajax Systems does not endorse or support this gem. "Ajax" and the Ajax logo are
 > trademarks of Ajax Systems. Use it with an account you control, at your own risk.
@@ -28,6 +29,47 @@ Ajax::Sdk.configure do |config|
   config.totp_secret    = ENV.fetch("AJAX_TOTP_SECRET")
 end
 ```
+
+## Local events (SIA DC-09)
+
+The hub can report its events straight to a monitoring station over SIA DC-09, without the cloud. In
+the Ajax app, set the hub's monitoring station to SIA DC-09 with the address and port of the machine
+running koti, an object number (the account) and an encryption key of 16 characters or 32 hexadecimal
+digits (the hub encrypts with AES-128), then choose the SIA-DCS format:
+
+```ruby
+Ajax::Sdk.configure do |config|
+  config.sia_account = ENV.fetch("AJAX_SIA_ACCOUNT")
+  config.sia_key     = ENV.fetch("AJAX_SIA_KEY")
+  config.sia_port    = 18_083 # the default; config.sia_host defaults to 0.0.0.0
+end
+
+Ajax::Sdk.sia_events do |event|
+  event.code   # => "BA"
+  event.label  # => "Burglary Alarm"
+  event.group  # => "1"
+  event.number # => "3", the device; for arming and disarming, the user
+end
+
+Ajax::Sdk.sia_events.first(3) # lazily, without a block; iterate it with each, first or take, not next
+```
+
+The receiver answers each frame the way DC-09 expects: an ACK (encrypted like the frame), a NAK when
+the timestamp falls outside `config.sia_timeband` (40 s behind, 20 s ahead by default), a DUH for
+another account or for a clear frame while a key is set, and nothing for a frame whose CRC or length
+is wrong. SIA carries alarms, arming and disarming, and device troubles such as a low battery (`XT`)
+or a lost connection (`XL`); it carries no battery percentage, no signal level and no commands. While
+no receiver runs, the hub reports the monitoring station as lost. The ACK goes out as soon as an event
+is queued, so events still queued when `sia_events` stops are lost to koti, though the hub counts them
+as delivered.
+
+Set a key. Without one, any device on the network can send events the receiver accepts. With one, a
+device on the network cannot make up an event, but a device placed between the hub and koti can still
+replay or alter frames: DC-09 encrypts without authenticating.
+
+`Ajax::Sdk::Sia::Receiver` is the server itself, for running it under your own supervision; its block
+may be called from several threads at once, one per hub connection, and an exception it raises is
+reported with `warn` without closing the connection.
 
 ## Reading
 
@@ -92,6 +134,9 @@ cloud.server_stream(path, { space_id: space.id }).first
 - `Cloud::ReadError(reason)` — the gateway refused a read.
 - `Cloud::ReadOnlyError` — a command was blocked because the client is read-only.
 - `Cloud::UnknownMethodError` / `Cloud::UnknownMessageError` — an unknown path or message name.
+- `Sia::FrameError` — a frame is not valid DC-09 (`Sia::Message.parse`); the receiver stays silent on it.
+- `ConfigurationError` — a missing or malformed setting: no password, no `sia_account` for `sia_events`,
+  a SIA key that is neither 16 characters nor 32 hexadecimal digits.
 
 ## Live specs
 
@@ -108,7 +153,9 @@ command reaches the hub.
 
 The protobuf schemas and the gRPC method table are extracted from the official Android app
 (`com.ajaxsystems` 3.59) and shipped as `lib/ajax/sdk/cloud/schemas/`. Transport is the `grpc` gem,
-messages are `google-protobuf`, TOTP is `rotp`.
+messages are `google-protobuf`, TOTP is `rotp`. The SIA event labels in `lib/ajax/sdk/sia/codes.tsv`
+come from [pysiaalarm](https://github.com/eavanvalkenburg/pysiaalarm) (MIT License, notice in
+`LICENSE`).
 
 ## License
 

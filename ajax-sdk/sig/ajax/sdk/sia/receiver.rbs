@@ -3,6 +3,8 @@ module Ajax
     module Sia
       class Receiver
         LIMIT: Integer
+        PER_PEER: Integer
+        BACKOFF: Float
 
         @host: String
         @port: Integer
@@ -10,7 +12,7 @@ module Ajax
         @cipher: Cipher?
         @timeband: [Integer, Integer]
         @handler: ^(Event) -> void
-        @clients: Hash[TCPSocket, Thread]
+        @clients: Hash[TCPSocket, [String, Thread]]
         @mutex: Thread::Mutex
         @server: TCPServer
         @acceptor: Thread
@@ -22,8 +24,10 @@ module Ajax
 
         private
 
-        def accept_loop: () -> nil
+        def accept_loop: () -> void
+        def admit: (TCPSocket socket) -> void
         def serve: (TCPSocket socket) -> nil
+        def deliver: (Event event) -> void
         def answer: (String frame) -> [String?, Event?]
         def timely?: (Time? time) -> bool
       end

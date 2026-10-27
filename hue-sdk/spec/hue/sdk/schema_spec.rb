@@ -33,6 +33,11 @@ RSpec.describe Hue::Sdk::Schema do
       .to raise_error(ArgumentError, /missing keyword: :archetype/)
   end
 
+  it 'refuses a body whose required field is nil' do
+    metadata = described_class::RoomMetadataAdd.new(name: nil, archetype: 'kitchen')
+    expect { metadata.to_body }.to raise_error(ArgumentError, /name/)
+  end
+
   it 'turns a request into a body without its empty fields' do
     update = described_class::LightUpdate.new(on: described_class::OnFeatureUpdate.new(on: false),
                                               dimming: described_class::DimmingFeatureUpdate.new(brightness: 40))

@@ -79,8 +79,15 @@ module Hue
         end
 
         # @return [Hash{Symbol=>Object}] the value as a JSON body, without its nil members
+        # @raise [ArgumentError] if a member the class requires is nil
         # @api public
-        def to_body = to_h.compact.transform_values { Value.dump(it) }
+        def to_body
+          value_class = self.class #: ClassMethods
+          missing = to_h.filter_map { |name, field| name if field.nil? } - value_class.optional_members
+          raise ArgumentError, "required field left nil: #{missing.join(', ')}" if missing.any?
+
+          to_h.compact.transform_values { Value.dump(it) }
+        end
 
         # @param state [JSON::State, nil] the state of the JSON generator
         # @return [String] the JSON of {#to_body}, so that a value nested in a plain hash serializes too

@@ -2,6 +2,7 @@
 
 require_relative 'decode'
 require_relative 'device'
+require_relative 'notification'
 
 module Ajax
   module Sdk
@@ -57,10 +58,11 @@ module Ajax
 
         # @param space_id [String]
         # @param limit [Integer] how many to read back
-        # @return [Array<Hash>] recent notifications of the space, most recent first
+        # @return [Array<Notification>] recent notifications of the space, most recent first
         # @raise [ReadError] when the gateway refuses the read
         def notifications(space_id, limit: 50)
-          success!(call(NOTIFICATIONS, { filter: { origin: { space_id: } }, limit: }))[:notifications] || []
+          answer = success!(call(NOTIFICATIONS, { filter: { origin: { space_id: } }, limit: }))
+          (answer[:notifications] || []).map { Notification.from(it) }
         end
 
         # @return [void] arm the space

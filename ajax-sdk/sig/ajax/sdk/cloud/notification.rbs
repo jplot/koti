@@ -1,0 +1,32 @@
+module Ajax
+  module Sdk
+    module Cloud
+      class Source < Data
+        attr_reader type: Symbol
+        attr_reader id: String
+        attr_reader name: String?
+
+        def self.new: (type: Symbol, id: String, name: String?) -> Source
+        def self.from: (Hash[Symbol, untyped] raw) -> Source
+      end
+
+      class Notification < Data
+        attr_reader id: String
+        attr_reader time: Time?
+        attr_reader kind: Symbol
+        attr_reader event: Symbol?
+        attr_reader transition: Symbol?
+        attr_reader source: Source?
+        attr_reader folder: Symbol
+        attr_reader importance: Symbol
+        attr_reader read: bool
+        attr_reader raw: Hash[Symbol, untyped]
+
+        def self.new: (id: String, time: Time?, kind: Symbol, event: Symbol?, transition: Symbol?, source: Source?,
+                       folder: Symbol, importance: Symbol, read: bool, raw: Hash[Symbol, untyped]) -> Notification
+        def self.from: (Hash[Symbol, untyped] raw) -> Notification
+        def self.about: (Hash[Symbol, untyped] content) -> { event: Symbol?, transition: Symbol?, source: Source? }
+      end
+    end
+  end
+end

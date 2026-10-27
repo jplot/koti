@@ -21,6 +21,10 @@ module Ajax
         # @param oneof [Hash{Symbol=>Object}, nil] a message holding one member of a oneof, such as +{ impulse: {} }+
         # @return [Symbol, nil] the member that is set
         def choice(oneof) = oneof&.keys&.first
+
+        # @param timestamp [Hash{Symbol=>Integer}, nil] a +google.protobuf.Timestamp+
+        # @return [Time, nil] in UTC
+        def time(timestamp) = timestamp && Time.at(timestamp[:seconds].to_i, timestamp[:nanos].to_i, :nsec, in: 'UTC')
       end
     end
   end

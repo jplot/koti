@@ -74,6 +74,6 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
   it 'reads notifications of a space' do
     allow(host).to receive(:call).and_return({ success: { notifications: [{ id: 'n1' }] } })
 
-    expect(host.notifications('s1', limit: 5)).to eq([{ id: 'n1' }])
+    expect(host.notifications('s1', limit: 5).map(&:id)).to eq(['n1'])
   end
 end

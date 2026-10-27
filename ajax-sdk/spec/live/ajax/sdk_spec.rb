@@ -21,11 +21,11 @@ RSpec.describe 'Ajax cloud', :live do # rubocop:disable RSpec/DescribeClass -- i
   end
 
   it 'reads the devices of a space as a snapshot' do
-    expect(cloud.devices(space.id)).to be_an(Array)
+    expect(cloud.devices(space.id)).to all(be_an(Ajax::Sdk::Cloud::Device))
   end
 
   it 'reads recent notifications of a space' do
-    expect(cloud.notifications(space.id, limit: 5)).to be_an(Array)
+    expect(cloud.notifications(space.id, limit: 5)).to all(be_an(Ajax::Sdk::Cloud::Notification))
   end
 
   it 'refuses to arm because the client is read-only' do

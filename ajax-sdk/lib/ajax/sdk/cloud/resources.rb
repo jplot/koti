@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'decode'
+require_relative 'device'
+
 module Ajax
   module Sdk
     module Cloud
@@ -45,11 +48,11 @@ module Ajax
         # @return [Space, nil]
         def space(id) = spaces.find { |candidate| candidate.id == id }
 
-        # @return [Array<Hash>] the devices of +space_id+ with their status, as a first snapshot
+        # @return [Array<Device>] the devices of +space_id+ with their status, as a first snapshot
         # @raise [ReadError] when the gateway refuses the read
         def devices(space_id)
           snapshot = success!(server_stream(DEVICES, { space_id: }).first || {})
-          snapshot.dig(:snapshot, :light_device_items) || []
+          (snapshot.dig(:snapshot, :light_device_items) || []).filter_map { Device.from(it) }
         end
 
         # @param space_id [String]

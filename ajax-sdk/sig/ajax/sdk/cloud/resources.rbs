@@ -23,7 +23,7 @@ module Ajax
 
         def spaces: () -> Array[Space]
         def space: (String id) -> Space?
-        def devices: (String space_id) -> Array[Hash[Symbol, untyped]]
+        def devices: (String space_id) -> Array[Device]
         def notifications: (String space_id, ?limit: Integer) -> Array[Hash[Symbol, untyped]]
         def arm: (String space_id, ?ignore_alarms: bool) -> void
         def disarm: (String space_id) -> void

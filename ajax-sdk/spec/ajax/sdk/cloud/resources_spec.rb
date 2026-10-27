@@ -57,11 +57,12 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
     expect { host.spaces }.to raise_error(Ajax::Sdk::Cloud::ReadError, /bad_request/)
   end
 
-  it 'reads the first devices snapshot' do
-    snapshot = { success: { snapshot: { light_device_items: [{ hub_device: {} }, { smart_lock: {} }] } } }
-    allow(host).to receive(:server_stream).and_return([snapshot].each)
+  it 'reads the devices of the first snapshot, leaving out the items that are not devices' do
+    items = [{ hub_device: { common_device: { profile: { id: 'd1' } } } }, { smart_lock: { profile: { id: 'd2' } } },
+             { access_cards_count: { count: 4 } }]
+    allow(host).to receive(:server_stream).and_return([{ success: { snapshot: { light_device_items: items } } }].each)
 
-    expect(host.devices('s1').size).to eq(2)
+    expect(host.devices('s1').map(&:id)).to eq(%w[d1 d2])
   end
 
   it 'raises ReadError when the devices stream answers a failure' do

@@ -194,8 +194,23 @@ class SchemaGenerator
     end
 
     def model(type, slots)
-      ["      class #{type.split('_').map(&:capitalize).join} < Base", '        class Instance < Base::Instance',
-       "          def attributes: () -> Schema::#{slots.fetch('response')}", '        end', "      end\n"].join("\n")
+      ["      class #{type.split('_').map(&:capitalize).join} < Base", *create(slots['create']),
+       '        class Instance < Base::Instance', "          def attributes: () -> Schema::#{slots.fetch('response')}",
+       *update(slots['update']), '        end', "      end\n"].join("\n")
+    end
+
+    def create(request)
+      return [] unless request
+
+      ["        def create: (Schema::#{request} request) -> Instance",
+       '                  | (**untyped attributes) -> Instance', '']
+    end
+
+    def update(request)
+      return [] unless request
+
+      ["          def update: (Schema::#{request} request) -> self",
+       '                    | (**untyped attributes) -> self']
     end
   end
 end

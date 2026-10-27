@@ -53,6 +53,18 @@ RSpec.describe Hue::Sdk::Models::Base do
     expect(gets).to eq(0)
   end
 
+  it 'puts a typed request on update' do
+    Hue::Sdk.Light('l1').update(Hue::Sdk::Schema::LightUpdate.new(on: Hue::Sdk::Schema::OnFeatureUpdate.new(on: false)))
+    expect(bridge.requests.last.body).to eq('{"on":{"on":false}}')
+  end
+
+  it 'posts a typed request on create' do
+    metadata = Hue::Sdk::Schema::RoomMetadataAdd.new(name: 'Kitchen', archetype: 'kitchen')
+    Hue::Sdk.Room.create(Hue::Sdk::Schema::RoomAdd.new(metadata:, children: []))
+    expect(JSON.parse(bridge.requests.last.body))
+      .to eq('metadata' => { 'name' => 'Kitchen', 'archetype' => 'kitchen' }, 'children' => [])
+  end
+
   it 'issues a DELETE on delete' do
     expect(Hue::Sdk.Scene('s1').delete).to be(true)
   end

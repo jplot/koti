@@ -118,8 +118,8 @@ zone.delete
 resource.
 
 The changes can also be a typed request, of the class the Hue app sends for that type
-(`Hue::Sdk::Schema::LightUpdate`, `Hue::Sdk::Schema::ZoneAdd`…): an unknown field, or a missing
-one the bridge needs, raises `ArgumentError` before anything is sent.
+(`Hue::Sdk::Schema::LightUpdate`, `Hue::Sdk::Schema::ZoneAdd`…): an unknown field, or one the
+bridge needs left out or nil, raises `ArgumentError` before anything is sent.
 
 ```ruby
 light.update(Hue::Sdk::Schema::LightUpdate.new(
@@ -129,7 +129,8 @@ light.update(Hue::Sdk::Schema::LightUpdate.new(
 ```
 
 The app has request classes for 18 types to update and 8 to create, listed below. The hash form
-remains for the other types and for the fields the app never sends.
+remains for the other types, and keywords given along with a request are added to its body for the
+fields the app never sends.
 
 <details>
 <summary>Resource types and operations</summary>

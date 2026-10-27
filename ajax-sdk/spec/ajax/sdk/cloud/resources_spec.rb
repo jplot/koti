@@ -19,6 +19,11 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
 
       expect(space).to have_attributes(id: 's1', hub_id: 'h1', name: 'Home', security_state: :disarmed, online: true)
     end
+
+    it 'gives the values the cloud leaves out at their default' do
+      expect(described_class.from({})).to have_attributes(id: '', hub_id: nil, name: '', security_state: :unspecified,
+                                                          online: false)
+    end
   end
 
   it 'lists spaces' do
@@ -57,11 +62,12 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
     expect { host.spaces }.to raise_error(Ajax::Sdk::Cloud::ReadError, /bad_request/)
   end
 
-  it 'reads the first devices snapshot' do
-    snapshot = { success: { snapshot: { light_device_items: [{ hub_device: {} }, { smart_lock: {} }] } } }
-    allow(host).to receive(:server_stream).and_return([snapshot].each)
+  it 'reads the devices of the first snapshot, leaving out the items that are not devices' do
+    items = [{ hub_device: { common_device: { profile: { id: 'd1' } } } }, { smart_lock: { profile: { id: 'd2' } } },
+             { access_cards_count: { count: 4 } }]
+    allow(host).to receive(:server_stream).and_return([{ success: { snapshot: { light_device_items: items } } }].each)
 
-    expect(host.devices('s1').size).to eq(2)
+    expect(host.devices('s1').map(&:id)).to eq(%w[d1 d2])
   end
 
   it 'raises ReadError when the devices stream answers a failure' do
@@ -73,6 +79,6 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
   it 'reads notifications of a space' do
     allow(host).to receive(:call).and_return({ success: { notifications: [{ id: 'n1' }] } })
 
-    expect(host.notifications('s1', limit: 5)).to eq([{ id: 'n1' }])
+    expect(host.notifications('s1', limit: 5).map(&:id)).to eq(['n1'])
   end
 end

@@ -2,14 +2,14 @@ module Ajax
   module Sdk
     module Cloud
       class Space < Data
-        attr_reader id: String?
+        attr_reader id: String
         attr_reader hub_id: String?
-        attr_reader name: String?
+        attr_reader name: String
         attr_reader security_state: Symbol
         attr_reader online: bool
         attr_reader raw: Hash[Symbol, untyped]
 
-        def self.new: (id: String?, hub_id: String?, name: String?, security_state: Symbol, online: bool, raw: Hash[Symbol, untyped]) -> Space
+        def self.new: (id: String, hub_id: String?, name: String, security_state: Symbol, online: bool, raw: Hash[Symbol, untyped]) -> Space
         def self.from: (Hash[Symbol, untyped] raw) -> Space
       end
 
@@ -23,8 +23,8 @@ module Ajax
 
         def spaces: () -> Array[Space]
         def space: (String id) -> Space?
-        def devices: (String space_id) -> Array[Hash[Symbol, untyped]]
-        def notifications: (String space_id, ?limit: Integer) -> Array[Hash[Symbol, untyped]]
+        def devices: (String space_id) -> Array[Device]
+        def notifications: (String space_id, ?limit: Integer) -> Array[Notification]
         def arm: (String space_id, ?ignore_alarms: bool) -> void
         def disarm: (String space_id) -> void
         def arm_night: (String space_id, ?ignore_alarms: bool) -> void

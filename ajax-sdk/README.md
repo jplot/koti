@@ -82,14 +82,27 @@ space.name           # => "Home"
 space.security_state # => :disarmed
 space.online         # => true
 
-cloud.devices(space.id)                 # => [{ hub_device: { … } }, …] one snapshot
-cloud.notifications(space.id, limit: 20) # => [{ … }, …] most recent first
+door = cloud.devices(space.id).find { it.kind == :door_protect_plus } # one snapshot
+door.battery     # => #<data Battery state=:ok, charge=100, exact=true>
+door.signal      # => :strong
+door.temperature # => 22
+door.states      # => [] ([:offline] when the hub lost it)
+door.flags       # => [:armed_in_night_mode, :delay_when_leaving]
+
+note = cloud.notifications(space.id, limit: 20).first # most recent first
+note.event       # => :space_disarmed
+note.source      # => #<data Source type=:space_member, id="…", name="…">
 ```
 
-Spaces come back as {Ajax::Sdk::Cloud::Space} values; devices and notifications come back as plain
-Hashes decoded from the gateway, with the whole payload under each entry. `spaces` reads every page.
-A read the gateway refuses raises `Ajax::Sdk::Cloud::ReadError`, whose `reason` names why (for example
-`:bad_request`).
+Spaces, devices and notifications come back as `Data` values (`Space`, `Device`, `Notification`, under
+`Ajax::Sdk::Cloud`); their YARD and RBS signatures say which fields are always there and which may be
+nil. A field the cloud leaves out reads as its protobuf default: an empty string, `0`, `false`, or
+`:unspecified` for an enum. Each value keeps the whole decoded Hash in `raw`, for the statuses and
+properties it does not name.
+
+A battery whose `exact` is false comes from a device that reports no percentage: the app then shows
+« OK » from 21 % and « discharged » below, not the number. `spaces` reads every page. A read the gateway
+refuses raises `Ajax::Sdk::Cloud::ReadError`, whose `reason` names why (for example `:bad_request`).
 
 ## Commanding
 

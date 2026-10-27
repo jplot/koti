@@ -9,6 +9,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Typed cloud values: `devices` returns `Device` values (type, room, states, malfunctions, `Battery`,
+  signal level, temperature and the statuses that carry no value as `flags`) and `notifications` returns
+  `Notification` values (time, event, transition, `Source`, folder, importance); both keep `raw`.
 - Local SIA DC-09 receiver (`Ajax::Sdk.sia_events`, `Sia::Receiver`, CRC from `digest-crc`): accepts the hub's frames over
   TCP, checks their CRC and length, decrypts AES-CBC, checks the timestamp, answers ACK, NAK or DUH,
   and yields events with their SIA code, label, group and number (device or user). The SIA key is hidden from `inspect`.

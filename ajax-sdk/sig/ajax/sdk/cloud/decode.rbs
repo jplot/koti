@@ -1,0 +1,11 @@
+module Ajax
+  module Sdk
+    module Cloud
+      module Decode
+        def self?.enum: (Symbol? value, ?String prefix) -> Symbol
+        def self?.choice: (Hash[Symbol, untyped]? oneof) -> Symbol?
+        def self?.time: (Hash[Symbol, Integer]? timestamp) -> Time?
+      end
+    end
+  end
+end

@@ -7,10 +7,10 @@ RSpec.describe Ajax::Sdk::Sia::Cipher do
     expect(described_class.new(SiaFrames::KEY).decrypt(sia_encrypt(text))).to eq(text)
   end
 
-  it 'uses AES-256 for a 32-character key' do
-    key = '0123456789ABCDEF0123456789ABCDEF'
+  it 'decodes a key of 32 hexadecimal digits to its 16 bytes' do
+    key = '000102030405060708090A0B0C0D0E0F'
 
-    expect(described_class.new(key).decrypt(sia_encrypt('x' * 16, key))).to eq('x' * 16)
+    expect(described_class.new(key).decrypt(sia_encrypt('x' * 16, [key].pack('H*')))).to eq('x' * 16)
   end
 
   it 'pads with zeros on the left to whole blocks' do
@@ -23,7 +23,9 @@ RSpec.describe Ajax::Sdk::Sia::Cipher do
     expect(described_class.new(SiaFrames::KEY).inspect).not_to include(SiaFrames::KEY)
   end
 
-  it 'refuses a key that is not 16, 24 or 32 characters' do
-    expect { described_class.new('short') }.to raise_error(Ajax::Sdk::ConfigurationError)
+  it 'refuses a key that is neither 16 characters nor 32 hexadecimal digits', :aggregate_failures do
+    ['short', 'x' * 24, 'x' * 32].each do |key|
+      expect { described_class.new(key) }.to raise_error(Ajax::Sdk::ConfigurationError)
+    end
   end
 end

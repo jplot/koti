@@ -5,20 +5,22 @@ require 'openssl'
 module Ajax
   module Sdk
     module Sia
-      # AES-CBC the way DC-09 uses it: a zero IV, no cipher padding, and a key of 16, 24 or 32 characters
-      # whose bytes are the AES-128, -192 or -256 key.
+      # AES-128-CBC the way Ajax hubs use it for DC-09: a zero IV, no cipher padding, and a key of 16
+      # characters taken as its bytes, or of 32 hexadecimal digits.
       class Cipher
         IV = ("\0" * 16).b.freeze
         private_constant :IV
 
         # @param key [String] the encryption key set on the hub
-        # @raise [ConfigurationError] when the key is not 16, 24 or 32 characters long
+        # @raise [ConfigurationError] when the key is neither 16 characters nor 32 hexadecimal digits
         def initialize(key)
-          unless [16, 24, 32].include?(key.bytesize)
-            raise ConfigurationError, 'the SIA key must have 16, 24 or 32 characters'
-          end
-
-          @key = key.b
+          @key = if key.match?(/\A\h{32}\z/)
+                   [key].pack('H*')
+                 elsif key.bytesize == 16
+                   key.b
+                 else
+                   raise ConfigurationError, 'the SIA key must be 16 characters or 32 hexadecimal digits'
+                 end
         end
 
         # @return [String] a description that never prints the key
@@ -40,7 +42,7 @@ module Ajax
         private
 
         def run(direction, data)
-          cipher = OpenSSL::Cipher.new("aes-#{@key.bytesize * 8}-cbc").public_send(direction)
+          cipher = OpenSSL::Cipher.new('aes-128-cbc').public_send(direction)
           cipher.key = @key
           cipher.iv = IV
           cipher.padding = 0

@@ -11,7 +11,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Local SIA DC-09 receiver (`Ajax::Sdk.sia_events`, `Sia::Receiver`): accepts the hub's frames over
   TCP, checks their CRC and length, decrypts AES-CBC, checks the timestamp, answers ACK, NAK or DUH,
-  and yields events with their SIA code, label, zone and user. The SIA key is hidden from `inspect`.
+  and yields events with their SIA code, label, group and number (device or user). The SIA key is hidden from `inspect`.
 - Cloud client over gRPC (`grpc`, `google-protobuf`, `rotp`): login with the password hash and
   two-factor authentication, reading spaces (every page), devices and notifications, and arming or
   disarming a space, plus a generic call by gRPC path whose streams yield to a block or return an

@@ -45,9 +45,10 @@ Ajax::Sdk.configure do |config|
 end
 
 Ajax::Sdk.sia_events do |event|
-  event.code  # => "BA"
-  event.label # => "Burglary Alarm"
-  event.zone  # => "1"
+  event.code   # => "BA"
+  event.label  # => "Burglary Alarm"
+  event.group  # => "1"
+  event.number # => "3", the device; for arming and disarming, the user
 end
 
 Ajax::Sdk.sia_events.first(3) # lazily, without a block; iterate it with each, first or take, not next

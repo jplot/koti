@@ -64,7 +64,7 @@ module Hue
       class ConvenienceAreaMotion < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::ConvenienceAreaMotion
-          def update: (Schema::ConvenienceAreaMotionUpdate request) -> self
+          def update: (Schema::ConvenienceAreaMotionUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -72,7 +72,7 @@ module Hue
       class Device < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::Device
-          def update: (Schema::DeviceUpdate request) -> self
+          def update: (Schema::DeviceUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -96,23 +96,23 @@ module Hue
       end
 
       class EntertainmentConfiguration < Base
-        def create: (Schema::EntertainmentConfigurationAdd request) -> Instance
+        def create: (Schema::EntertainmentConfigurationAdd request, **untyped attributes) -> Instance
                   | (**untyped attributes) -> Instance
 
         class Instance < Base::Instance
           def attributes: () -> Schema::EntertainmentConfiguration
-          def update: (Schema::EntertainmentConfigurationUpdate request) -> self
+          def update: (Schema::EntertainmentConfigurationUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
 
       class GeofenceClient < Base
-        def create: (Schema::GeofenceClientAdd request) -> Instance
+        def create: (Schema::GeofenceClientAdd request, **untyped attributes) -> Instance
                   | (**untyped attributes) -> Instance
 
         class Instance < Base::Instance
           def attributes: () -> Schema::GeofenceClient
-          def update: (Schema::GeofenceClientUpdate request) -> self
+          def update: (Schema::GeofenceClientUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -126,7 +126,7 @@ module Hue
       class GroupedLight < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::GroupedLight
-          def update: (Schema::GroupedLightUpdate request) -> self
+          def update: (Schema::GroupedLightUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -152,7 +152,7 @@ module Hue
       class Light < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::Light
-          def update: (Schema::LightUpdate request) -> self
+          def update: (Schema::LightUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -178,7 +178,7 @@ module Hue
       class Motion < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::Motion
-          def update: (Schema::MotionUpdate request) -> self
+          def update: (Schema::MotionUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -190,12 +190,12 @@ module Hue
       end
 
       class MotionAreaConfiguration < Base
-        def create: (Schema::MotionAreaConfigurationAdd request) -> Instance
+        def create: (Schema::MotionAreaConfigurationAdd request, **untyped attributes) -> Instance
                   | (**untyped attributes) -> Instance
 
         class Instance < Base::Instance
           def attributes: () -> Schema::MotionAreaConfiguration
-          def update: (Schema::MotionAreaConfigurationUpdate request) -> self
+          def update: (Schema::MotionAreaConfigurationUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -203,7 +203,7 @@ module Hue
       class PowerOutputConfiguration < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::PowerOutputConfiguration
-          def update: (Schema::PowerOutputConfigurationUpdate request) -> self
+          def update: (Schema::PowerOutputConfigurationUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -215,23 +215,23 @@ module Hue
       end
 
       class Room < Base
-        def create: (Schema::RoomAdd request) -> Instance
+        def create: (Schema::RoomAdd request, **untyped attributes) -> Instance
                   | (**untyped attributes) -> Instance
 
         class Instance < Base::Instance
           def attributes: () -> Schema::Room
-          def update: (Schema::RoomUpdate request) -> self
+          def update: (Schema::RoomUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
 
       class Scene < Base
-        def create: (Schema::SceneAdd request) -> Instance
+        def create: (Schema::SceneAdd request, **untyped attributes) -> Instance
                   | (**untyped attributes) -> Instance
 
         class Instance < Base::Instance
           def attributes: () -> Schema::Scene
-          def update: (Schema::SceneUpdate request) -> self
+          def update: (Schema::SceneUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -239,29 +239,29 @@ module Hue
       class SecurityAreaMotion < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::SecurityAreaMotion
-          def update: (Schema::SecurityAreaMotionUpdate request) -> self
+          def update: (Schema::SecurityAreaMotionUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
 
       class ServiceGroup < Base
-        def create: (Schema::ServiceGroupAdd request) -> Instance
+        def create: (Schema::ServiceGroupAdd request, **untyped attributes) -> Instance
                   | (**untyped attributes) -> Instance
 
         class Instance < Base::Instance
           def attributes: () -> Schema::ServiceGroup
-          def update: (Schema::ServiceGroupUpdate request) -> self
+          def update: (Schema::ServiceGroupUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
 
       class SmartScene < Base
-        def create: (Schema::SmartSceneAdd request) -> Instance
+        def create: (Schema::SmartSceneAdd request, **untyped attributes) -> Instance
                   | (**untyped attributes) -> Instance
 
         class Instance < Base::Instance
           def attributes: () -> Schema::SmartScene
-          def update: (Schema::SmartSceneUpdate request) -> self
+          def update: (Schema::SmartSceneUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -269,7 +269,7 @@ module Hue
       class Speaker < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::Speaker
-          def update: (Schema::SpeakerUpdate request) -> self
+          def update: (Schema::SpeakerUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -307,7 +307,7 @@ module Hue
       class ZigbeeConnectivity < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::ZigbeeConnectivity
-          def update: (Schema::ZigbeeConnectivityUpdate request) -> self
+          def update: (Schema::ZigbeeConnectivityUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
@@ -315,18 +315,18 @@ module Hue
       class ZigbeeDeviceDiscovery < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::ZigbeeDeviceDiscovery
-          def update: (Schema::ZigbeeDeviceDiscoveryUpdate request) -> self
+          def update: (Schema::ZigbeeDeviceDiscoveryUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end
 
       class Zone < Base
-        def create: (Schema::ZoneAdd request) -> Instance
+        def create: (Schema::ZoneAdd request, **untyped attributes) -> Instance
                   | (**untyped attributes) -> Instance
 
         class Instance < Base::Instance
           def attributes: () -> Schema::Zone
-          def update: (Schema::ZoneUpdate request) -> self
+          def update: (Schema::ZoneUpdate request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
       end

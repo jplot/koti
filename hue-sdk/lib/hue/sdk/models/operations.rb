@@ -10,11 +10,11 @@ module Hue
           # Creates a resource.
           #
           # @param request [Schema::Value, nil] the new resource, typed (+Schema::RoomAdd+ for a room…)
-          # @param attributes [Hash] the new resource as a hash, when no request is given
+          # @param attributes [Hash] the new resource as a hash, or fields added to the request
           # @return [Base::Instance] the created resource, loaded lazily
           # @api public
           def create(request = nil, **attributes)
-            created = Client.post(path, body: request ? request.to_body : attributes).first.to_h
+            created = Client.post(path, body: request ? request.to_body.merge(attributes) : attributes).first.to_h
             self.class::Instance.new(created.fetch('rid'))
           end
         end
@@ -24,11 +24,11 @@ module Hue
           # Updates the resource; the next {Base::Instance#data} call reloads it.
           #
           # @param request [Schema::Value, nil] the changes, typed (+Schema::LightUpdate+ for a light…)
-          # @param attributes [Hash] the changes as a hash, when no request is given
+          # @param attributes [Hash] the changes as a hash, or fields added to the request
           # @return [self]
           # @api public
           def update(request = nil, **attributes)
-            Client.put(path, body: request ? request.to_body : attributes)
+            Client.put(path, body: request ? request.to_body.merge(attributes) : attributes)
             @data = nil
             self
           end

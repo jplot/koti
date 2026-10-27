@@ -58,6 +58,12 @@ RSpec.describe Hue::Sdk::Models::Base do
     expect(bridge.requests.last.body).to eq('{"on":{"on":false}}')
   end
 
+  it 'sends the keywords given along with a typed request' do
+    update = Hue::Sdk::Schema::LightUpdate.new(on: Hue::Sdk::Schema::OnFeatureUpdate.new(on: true))
+    Hue::Sdk.Light('l1').update(update, dimming: { brightness: 40 })
+    expect(bridge.requests.last.body).to eq('{"on":{"on":true},"dimming":{"brightness":40}}')
+  end
+
   it 'posts a typed request on create' do
     metadata = Hue::Sdk::Schema::RoomMetadataAdd.new(name: 'Kitchen', archetype: 'kitchen')
     Hue::Sdk.Room.create(Hue::Sdk::Schema::RoomAdd.new(metadata:, children: []))

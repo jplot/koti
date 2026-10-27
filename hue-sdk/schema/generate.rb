@@ -202,14 +202,14 @@ class SchemaGenerator
     def create(request)
       return [] unless request
 
-      ["        def create: (Schema::#{request} request) -> Instance",
+      ["        def create: (Schema::#{request} request, **untyped attributes) -> Instance",
        '                  | (**untyped attributes) -> Instance', '']
     end
 
     def update(request)
       return [] unless request
 
-      ["          def update: (Schema::#{request} request) -> self",
+      ["          def update: (Schema::#{request} request, **untyped attributes) -> self",
        '                    | (**untyped attributes) -> self']
     end
   end

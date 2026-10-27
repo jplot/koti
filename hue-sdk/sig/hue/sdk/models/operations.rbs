@@ -3,12 +3,12 @@ module Hue
     module Models
       module Operations
         module Create : Base
-          def create: (Schema::Value request) -> Base::Instance
+          def create: (Schema::Value request, **untyped attributes) -> Base::Instance
                     | (**untyped attributes) -> Base::Instance
         end
 
         module Update : Base::Instance
-          def update: (Schema::Value request) -> self
+          def update: (Schema::Value request, **untyped attributes) -> self
                     | (**untyped attributes) -> self
         end
 

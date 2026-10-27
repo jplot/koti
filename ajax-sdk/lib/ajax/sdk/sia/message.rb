@@ -27,7 +27,7 @@ module Ajax
         def self.parse(frame, cipher: nil)
           match = FRAME.match(frame.b) or raise FrameError, 'not a DC-09 frame'
           check(match)
-          build(match, match[:star] ? cipher && unseal(match[:rest], cipher) : clear(match[:rest]))
+          build(match, match[:star] ? cipher && unseal(match[:rest], cipher, match[:type]) : clear(match[:rest]))
         end
 
         # @param time [Time]
@@ -55,14 +55,18 @@ module Ajax
               timestamp: plain && time_in(plain))
         end
 
-        def self.content_of(plain) = plain.partition(']').first.force_encoding('UTF-8')
+        def self.content_of(plain) = plain.partition(']').first.force_encoding('UTF-8').scrub
 
-        # Encrypted frames must carry a timestamp: noise from a wrong key never ends with one.
-        def self.unseal(hex, cipher)
+        # Encrypted frames must end with a timestamp, which noise from a wrong key never does. Only a link
+        # test may lack the pipe after its padding, so a replayed ACK cannot pass for an event.
+        def self.unseal(hex, cipher, type)
           raise FrameError, 'encrypted part is not whole AES blocks' unless hex.match?(/\A(?:\h{32})+\z/)
 
           plain = cipher.decrypt(hex)
-          plain = plain.include?('|') ? plain.split('|', 2).fetch(1) : plain[/\].*\z/m].to_s
+          plain = if plain.include?('|') then plain.split('|', 2).fetch(1)
+                  elsif type == 'NULL' then plain[/\].*\z/m].to_s
+                  else raise FrameError, 'no pipe after the padding of a data frame'
+                  end
           plain.match?(STAMP) ? plain : raise(FrameError, 'the key does not open this frame')
         end
 

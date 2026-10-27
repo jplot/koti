@@ -22,7 +22,7 @@ module Ajax
         def self.check: (MatchData match) -> void
         def self.build: (MatchData match, String? plain) -> Message
         def self.content_of: (String plain) -> String
-        def self.unseal: (String hex, Cipher cipher) -> String
+        def self.unseal: (String hex, Cipher cipher, String type) -> String
         def self.clear: (String rest) -> String
         def self.time_in: (String plain) -> Time?
 

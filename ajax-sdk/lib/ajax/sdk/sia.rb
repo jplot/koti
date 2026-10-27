@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'digest/crc16'
 require_relative 'sia/cipher'
 require_relative 'sia/message'
 require_relative 'sia/codes'
@@ -13,13 +14,7 @@ module Ajax
     module Sia
       # @param text [String] a frame from its first +"+ up to, not including, its +\r+
       # @return [Integer] the CRC-16/ARC that DC-09 writes in front of each frame
-      def self.crc(text)
-        text.each_byte.reduce(0) do |crc, byte|
-          crc ^= byte
-          8.times { crc = crc.odd? ? (crc >> 1) ^ 0xA001 : crc >> 1 }
-          crc
-        end
-      end
+      def self.crc(text) = Digest::CRC16.checksum(text)
     end
   end
 end

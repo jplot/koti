@@ -52,3 +52,9 @@ end
 class TCPServer
   def initialize: (String host, Integer port) -> void | ...
 end
+
+module Digest
+  class CRC16
+    def self.checksum: (String data) -> Integer
+  end
+end

@@ -19,6 +19,11 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
 
       expect(space).to have_attributes(id: 's1', hub_id: 'h1', name: 'Home', security_state: :disarmed, online: true)
     end
+
+    it 'gives the values the cloud leaves out at their default' do
+      expect(described_class.from({})).to have_attributes(id: '', hub_id: nil, name: '', security_state: :unspecified,
+                                                          online: false)
+    end
   end
 
   it 'lists spaces' do

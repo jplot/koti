@@ -2,14 +2,14 @@ module Ajax
   module Sdk
     module Cloud
       class Space < Data
-        attr_reader id: String?
+        attr_reader id: String
         attr_reader hub_id: String?
-        attr_reader name: String?
+        attr_reader name: String
         attr_reader security_state: Symbol
         attr_reader online: bool
         attr_reader raw: Hash[Symbol, untyped]
 
-        def self.new: (id: String?, hub_id: String?, name: String?, security_state: Symbol, online: bool, raw: Hash[Symbol, untyped]) -> Space
+        def self.new: (id: String, hub_id: String?, name: String, security_state: Symbol, online: bool, raw: Hash[Symbol, untyped]) -> Space
         def self.from: (Hash[Symbol, untyped] raw) -> Space
       end
 

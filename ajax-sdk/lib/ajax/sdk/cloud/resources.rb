@@ -13,8 +13,8 @@ module Ajax
         # @param raw [Hash] one entry of findUserSpacesWithPagination
         # @return [Space]
         def self.from(raw)
-          new(id: raw[:id], hub_id: raw[:hub_id], name: raw.dig(:profile, :name),
-              security_state: raw[:security_state].to_s.sub(/\ADISPLAYED_SPACE_SECURITY_STATE_/, '').downcase.to_sym,
+          new(id: raw[:id].to_s, hub_id: raw[:hub_id], name: raw.dig(:profile, :name).to_s,
+              security_state: Decode.enum(raw[:security_state], 'DISPLAYED_SPACE_SECURITY_STATE_'),
               online: raw[:hub_connection_status] == :CONNECTION_STATUS_ONLINE, raw:)
         end
       end

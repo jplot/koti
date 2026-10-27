@@ -73,6 +73,14 @@ RSpec.describe Hue::Sdk::Models::Base do
       .to be_a(Hue::Sdk::Models::Resource::Instance).and(have_attributes(id: 'x1'))
   end
 
+  it 'reads a resource as a typed value' do
+    expect(Hue::Sdk.Light('l1').attributes.on).to eq(Hue::Sdk::Schema::OnFeature.new(on: true))
+  end
+
+  it 'gives no typed value to an unknown resource type' do
+    expect(Hue::Sdk.Device('d1').services.last).not_to respond_to(:attributes)
+  end
+
   it 'hides deprecated fields' do
     expect(Hue::Sdk.Light('l1').data).not_to have_key('effects')
   end

@@ -2134,6 +2134,8 @@ module Hue
         def self.new: (metadata: RoomMetadata, children: Array[ResourceIdentifier], services: Array[ResourceIdentifier], id: String, ?id_v1: String?) -> Zone
         def self.from: (Hash[String, untyped] data) -> Zone
       end
+
+      RESPONSES: Hash[String, Value::ClassMethods]
     end
   end
 end

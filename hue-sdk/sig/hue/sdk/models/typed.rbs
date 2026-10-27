@@ -1,0 +1,9 @@
+module Hue
+  module Sdk
+    module Models
+      module Typed : Base::Instance
+        def attributes: () -> Data
+      end
+    end
+  end
+end

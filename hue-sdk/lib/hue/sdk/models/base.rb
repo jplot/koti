@@ -93,7 +93,7 @@ module Hue
             data.merge(key => without(data[key], *nested))
           end
 
-          # Binds the model to a resource type and registers it.
+          # Binds the model to a resource type, registers it and gives its instances their typed value.
           #
           # @param type [String]
           # @return [void]
@@ -101,6 +101,7 @@ module Hue
           def resource_type(type)
             @type = type
             REGISTRY[type] = self
+            self::Instance.include(Typed)
           end
 
           # Mixes in the write operations the API accepts for this type.

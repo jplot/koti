@@ -2650,6 +2650,55 @@ module Hue
         optional :id_v1
         nested metadata: RoomMetadata, children: [ResourceIdentifier], services: [ResourceIdentifier]
       end
+
+      # Response value class of each resource type.
+      RESPONSES = {
+        'behavior_instance' => BehaviorInstance,
+        'behavior_script' => BehaviorScript,
+        'behavior_script_formula' => BehaviorScriptFormula,
+        'bell_button' => BellButton,
+        'bridge' => Bridge,
+        'bridge_home' => BridgeHome,
+        'button' => Button,
+        'camera_motion' => CameraMotion,
+        'clip' => Clip,
+        'contact' => Contact,
+        'convenience_area_motion' => ConvenienceAreaMotion,
+        'device' => Device,
+        'device_power' => DevicePower,
+        'device_software_update' => DeviceSoftwareUpdate,
+        'entertainment' => Entertainment,
+        'entertainment_configuration' => EntertainmentConfiguration,
+        'geofence_client' => GeofenceClient,
+        'geolocation' => Geolocation,
+        'grouped_light' => GroupedLight,
+        'grouped_light_level' => GroupedLightLevel,
+        'grouped_motion' => GroupedMotion,
+        'homekit' => Homekit,
+        'light' => Light,
+        'light_level' => LightLevel,
+        'matter' => Matter,
+        'matter_fabric' => MatterFabric,
+        'motion' => Motion,
+        'motion_area_candidate' => MotionAreaCandidate,
+        'motion_area_configuration' => MotionAreaConfiguration,
+        'power_output_configuration' => PowerOutputConfiguration,
+        'relative_rotary' => RelativeRotary,
+        'room' => Room,
+        'scene' => Scene,
+        'security_area_motion' => SecurityAreaMotion,
+        'service_group' => ServiceGroup,
+        'smart_scene' => SmartScene,
+        'speaker' => Speaker,
+        'switch_input_configuration' => SwitchInputConfiguration,
+        'tamper' => Tamper,
+        'temperature' => Temperature,
+        'wifi_connectivity' => WifiConnectivity,
+        'zgp_connectivity' => ZgpConnectivity,
+        'zigbee_connectivity' => ZigbeeConnectivity,
+        'zigbee_device_discovery' => ZigbeeDeviceDiscovery,
+        'zone' => Zone
+      }.freeze
     end
   end
 end

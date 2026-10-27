@@ -1,0 +1,275 @@
+module Hue
+  module Sdk
+    module Models
+      class BehaviorInstance < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BehaviorInstance
+        end
+      end
+
+      class BehaviorScript < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BehaviorScript
+        end
+      end
+
+      class BehaviorScriptFormula < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BehaviorScriptFormula
+        end
+      end
+
+      class BellButton < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BellButton
+        end
+      end
+
+      class Bridge < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Bridge
+        end
+      end
+
+      class BridgeHome < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BridgeHome
+        end
+      end
+
+      class Button < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Button
+        end
+      end
+
+      class CameraMotion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::CameraMotion
+        end
+      end
+
+      class Clip < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Clip
+        end
+      end
+
+      class Contact < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Contact
+        end
+      end
+
+      class ConvenienceAreaMotion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ConvenienceAreaMotion
+        end
+      end
+
+      class Device < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Device
+        end
+      end
+
+      class DevicePower < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::DevicePower
+        end
+      end
+
+      class DeviceSoftwareUpdate < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::DeviceSoftwareUpdate
+        end
+      end
+
+      class Entertainment < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Entertainment
+        end
+      end
+
+      class EntertainmentConfiguration < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::EntertainmentConfiguration
+        end
+      end
+
+      class GeofenceClient < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::GeofenceClient
+        end
+      end
+
+      class Geolocation < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Geolocation
+        end
+      end
+
+      class GroupedLight < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::GroupedLight
+        end
+      end
+
+      class GroupedLightLevel < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::GroupedLightLevel
+        end
+      end
+
+      class GroupedMotion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::GroupedMotion
+        end
+      end
+
+      class Homekit < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Homekit
+        end
+      end
+
+      class Light < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Light
+        end
+      end
+
+      class LightLevel < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::LightLevel
+        end
+      end
+
+      class Matter < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Matter
+        end
+      end
+
+      class MatterFabric < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::MatterFabric
+        end
+      end
+
+      class Motion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Motion
+        end
+      end
+
+      class MotionAreaCandidate < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::MotionAreaCandidate
+        end
+      end
+
+      class MotionAreaConfiguration < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::MotionAreaConfiguration
+        end
+      end
+
+      class PowerOutputConfiguration < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::PowerOutputConfiguration
+        end
+      end
+
+      class RelativeRotary < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::RelativeRotary
+        end
+      end
+
+      class Room < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Room
+        end
+      end
+
+      class Scene < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Scene
+        end
+      end
+
+      class SecurityAreaMotion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::SecurityAreaMotion
+        end
+      end
+
+      class ServiceGroup < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ServiceGroup
+        end
+      end
+
+      class SmartScene < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::SmartScene
+        end
+      end
+
+      class Speaker < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Speaker
+        end
+      end
+
+      class SwitchInputConfiguration < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::SwitchInputConfiguration
+        end
+      end
+
+      class Tamper < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Tamper
+        end
+      end
+
+      class Temperature < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Temperature
+        end
+      end
+
+      class WifiConnectivity < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::WifiConnectivity
+        end
+      end
+
+      class ZgpConnectivity < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ZgpConnectivity
+        end
+      end
+
+      class ZigbeeConnectivity < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ZigbeeConnectivity
+        end
+      end
+
+      class ZigbeeDeviceDiscovery < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ZigbeeDeviceDiscovery
+        end
+      end
+
+      class Zone < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Zone
+        end
+      end
+    end
+  end
+end

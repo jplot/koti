@@ -47,6 +47,10 @@ RSpec.describe Hue::Sdk::Schema do
     expect(room.to_body[:children]).to eq([{ rid: 'd1', rtype: 'device' }])
   end
 
+  it 'gives every registered resource type a response value' do
+    expect(Hue::Sdk::Models::REGISTRY.keys - described_class::RESPONSES.keys).to be_empty
+  end
+
   it 'matches what schema/generate.rb writes from schema/hue.json' do
     root = File.expand_path('../../..', __dir__)
     files = SchemaGenerator.new(JSON.parse(File.read(File.join(root, 'schema/hue.json')))).files

@@ -16,6 +16,7 @@ Gem::Specification.new do |spec|
   # grpc and google-protobuf ship precompiled binaries only up to Ruby 3.4; the rest of koti stays on 4.0.
   spec.required_ruby_version = ['>= 3.4', '< 4.0']
 
+  spec.add_dependency 'digest-crc', '~> 0.7'
   spec.add_dependency 'google-protobuf', '~> 4.36'
   spec.add_dependency 'grpc', '~> 1.85'
   spec.add_dependency 'rotp', '~> 6.3'

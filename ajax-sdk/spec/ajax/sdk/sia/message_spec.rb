@@ -47,6 +47,18 @@ RSpec.describe Ajax::Sdk::Sia::Message do
     expect { described_class.parse(frame, cipher:) }.to raise_error(Ajax::Sdk::Sia::FrameError)
   end
 
+  it 'rejects an encrypted data frame without the pipe that ends its padding' do
+    frame = sia_frame(%("*SIA-DCS"0001R0L0#AAA[#{sia_encrypt("]#{sia_stamp}".rjust(32, '0'))}))
+
+    expect { described_class.parse(frame, cipher:) }.to raise_error(Ajax::Sdk::Sia::FrameError)
+  end
+
+  it 'reads an encrypted link test without that pipe' do
+    frame = sia_frame(%("*NULL"0001R0L0#AAA[#{sia_encrypt("]#{sia_stamp}".rjust(32, '0'))}))
+
+    expect(described_class.parse(frame, cipher:)).to have_attributes(type: 'NULL', content: '')
+  end
+
   it 'answers a clear frame with a clear ACK' do
     expect(described_class.parse(clear).ack).to eq(sia_frame('"ACK"0084L0#AAA[]'))
   end

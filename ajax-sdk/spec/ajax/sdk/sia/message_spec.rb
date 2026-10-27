@@ -75,6 +75,14 @@ RSpec.describe Ajax::Sdk::Sia::Message do
     expect(described_class.parse(clear).duh).to eq(sia_frame('"DUH"0084L0#AAA[]'))
   end
 
+  it 'leaves the time it stamps in its own zone' do
+    time = Time.new(2026, 10, 27, 1, 34, 8, '+01:00')
+
+    described_class.nak(time)
+
+    expect(time.utc_offset).to eq(3600)
+  end
+
   it 'builds a NAK with the current timestamp' do
     time = Time.utc(2026, 10, 27, 9, 30, 15)
 

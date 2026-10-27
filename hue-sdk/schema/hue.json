@@ -1,0 +1,7980 @@
+{
+  "resources": {
+    "behavior_instance": {
+      "response": "BehaviorInstance"
+    },
+    "behavior_script": {
+      "response": "BehaviorScript"
+    },
+    "behavior_script_formula": {
+      "response": "BehaviorScriptFormula"
+    },
+    "bell_button": {
+      "response": "BellButton"
+    },
+    "bridge": {
+      "response": "Bridge"
+    },
+    "bridge_home": {
+      "response": "BridgeHome"
+    },
+    "button": {
+      "response": "Button"
+    },
+    "camera_motion": {
+      "response": "CameraMotion"
+    },
+    "clip": {
+      "response": "Clip"
+    },
+    "contact": {
+      "response": "Contact"
+    },
+    "convenience_area_motion": {
+      "response": "ConvenienceAreaMotion",
+      "update": "ConvenienceAreaMotionUpdate"
+    },
+    "device": {
+      "response": "Device",
+      "update": "DeviceUpdate"
+    },
+    "device_power": {
+      "response": "DevicePower"
+    },
+    "device_software_update": {
+      "response": "DeviceSoftwareUpdate"
+    },
+    "entertainment": {
+      "response": "Entertainment"
+    },
+    "entertainment_configuration": {
+      "response": "EntertainmentConfiguration",
+      "update": "EntertainmentConfigurationUpdate",
+      "create": "EntertainmentConfigurationAdd"
+    },
+    "geofence_client": {
+      "response": "GeofenceClient",
+      "update": "GeofenceClientUpdate",
+      "create": "GeofenceClientAdd"
+    },
+    "geolocation": {
+      "response": "Geolocation"
+    },
+    "grouped_light": {
+      "response": "GroupedLight",
+      "update": "GroupedLightUpdate"
+    },
+    "grouped_light_level": {
+      "response": "GroupedLightLevel"
+    },
+    "grouped_motion": {
+      "response": "GroupedMotion"
+    },
+    "homekit": {
+      "response": "Homekit"
+    },
+    "light": {
+      "response": "Light",
+      "update": "LightUpdate"
+    },
+    "light_level": {
+      "response": "LightLevel"
+    },
+    "matter": {
+      "response": "Matter"
+    },
+    "matter_fabric": {
+      "response": "MatterFabric"
+    },
+    "motion": {
+      "response": "Motion",
+      "update": "MotionUpdate"
+    },
+    "motion_area_candidate": {
+      "response": "MotionAreaCandidate"
+    },
+    "motion_area_configuration": {
+      "response": "MotionAreaConfiguration",
+      "update": "MotionAreaConfigurationUpdate",
+      "create": "MotionAreaConfigurationAdd"
+    },
+    "power_output_configuration": {
+      "response": "PowerOutputConfiguration",
+      "update": "PowerOutputConfigurationUpdate"
+    },
+    "relative_rotary": {
+      "response": "RelativeRotary"
+    },
+    "room": {
+      "response": "Room",
+      "update": "RoomUpdate",
+      "create": "RoomAdd"
+    },
+    "scene": {
+      "response": "Scene",
+      "update": "SceneUpdate",
+      "create": "SceneAdd"
+    },
+    "security_area_motion": {
+      "response": "SecurityAreaMotion",
+      "update": "SecurityAreaMotionUpdate"
+    },
+    "service_group": {
+      "response": "ServiceGroup",
+      "update": "ServiceGroupUpdate",
+      "create": "ServiceGroupAdd"
+    },
+    "smart_scene": {
+      "response": "SmartScene",
+      "update": "SmartSceneUpdate",
+      "create": "SmartSceneAdd"
+    },
+    "speaker": {
+      "response": "Speaker",
+      "update": "SpeakerUpdate"
+    },
+    "switch_input_configuration": {
+      "response": "SwitchInputConfiguration"
+    },
+    "tamper": {
+      "response": "Tamper"
+    },
+    "temperature": {
+      "response": "Temperature"
+    },
+    "wifi_connectivity": {
+      "response": "WifiConnectivity"
+    },
+    "zgp_connectivity": {
+      "response": "ZgpConnectivity"
+    },
+    "zigbee_connectivity": {
+      "response": "ZigbeeConnectivity",
+      "update": "ZigbeeConnectivityUpdate"
+    },
+    "zigbee_device_discovery": {
+      "response": "ZigbeeDeviceDiscovery",
+      "update": "ZigbeeDeviceDiscoveryUpdate"
+    },
+    "zone": {
+      "response": "Zone",
+      "update": "ZoneUpdate",
+      "create": "ZoneAdd"
+    }
+  },
+  "classes": {
+    "AbsoluteVolumeFeature": {
+      "origin": "AbsoluteVolumeFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "level": {
+          "type": "Numeric",
+          "required": false
+        },
+        "scope_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        }
+      }
+    },
+    "Action": {
+      "origin": "ActionAdded",
+      "kind": "response",
+      "fields": {
+        "target": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "action": {
+          "type": {
+            "class": "ActionAction"
+          },
+          "required": true
+        }
+      }
+    },
+    "ActionAction": {
+      "origin": "ActionActionAdded",
+      "kind": "response",
+      "fields": {
+        "on": {
+          "type": {
+            "class": "OnFeatureBasic"
+          },
+          "required": false
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasic"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasic"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasic"
+          },
+          "required": false
+        },
+        "gradient": {
+          "type": {
+            "class": "GradientFeatureBasicWithRotation2dBasic"
+          },
+          "required": false
+        },
+        "effects": {
+          "type": {
+            "class": "EffectFeatureBasic"
+          },
+          "required": false
+        },
+        "effects_v2": {
+          "type": {
+            "class": "EffectV2FeatureBasic"
+          },
+          "required": false
+        },
+        "dynamics": {
+          "type": {
+            "class": "DynamicsFeatureReadWrite"
+          },
+          "required": false
+        }
+      }
+    },
+    "ActionActionAdd": {
+      "origin": "ActionActionAdd",
+      "kind": "add",
+      "fields": {
+        "on": {
+          "type": {
+            "class": "OnFeatureBasicAdd"
+          },
+          "required": false
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasicAdd"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicAdd"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasicAdd"
+          },
+          "required": false
+        },
+        "gradient": {
+          "type": {
+            "class": "GradientFeatureBasicWithRotation2dBasicAdd"
+          },
+          "required": false
+        },
+        "effects_v2": {
+          "type": {
+            "class": "EffectV2FeatureBasicAdd"
+          },
+          "required": false
+        }
+      }
+    },
+    "ActionActionUpdate": {
+      "origin": "ActionActionUpdate",
+      "kind": "update",
+      "fields": {
+        "on": {
+          "type": {
+            "class": "OnFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "gradient": {
+          "type": {
+            "class": "GradientFeatureBasicWithRotation2dBasicUpdate"
+          },
+          "required": false
+        },
+        "effects_v2": {
+          "type": {
+            "class": "EffectV2FeatureBasicUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "ActionAdd": {
+      "origin": "ActionAdd",
+      "kind": "add",
+      "fields": {
+        "target": {
+          "type": {
+            "class": "ResourceIdentifierAdd"
+          },
+          "required": true
+        },
+        "action": {
+          "type": {
+            "class": "ActionActionAdd"
+          },
+          "required": true
+        }
+      }
+    },
+    "ActionUpdate": {
+      "origin": "ActionUpdate",
+      "kind": "update",
+      "fields": {
+        "target": {
+          "type": {
+            "class": "ResourceIdentifierUpdate"
+          },
+          "required": true
+        },
+        "action": {
+          "type": {
+            "class": "ActionActionUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "ActiveTimeslot": {
+      "origin": "ActiveTimeslotAdded",
+      "kind": "response",
+      "fields": {
+        "timeslot_id": {
+          "type": "Integer",
+          "required": true
+        },
+        "weekday": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    "AddInstallCodes": {
+      "origin": "AddInstallCodesAdded",
+      "kind": "response",
+      "fields": {}
+    },
+    "AddInstallCodesUpdate": {
+      "origin": "AddInstallCodesUpdate",
+      "kind": "update",
+      "fields": {
+        "install_codes": {
+          "type": {
+            "list": {
+              "class": "InstallCodeUpdate"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "AlertFeature": {
+      "origin": "AlertFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "action_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "breathe",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "AlertFeatureUpdate": {
+      "origin": "AlertFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "breathe",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "AssociationFeature": {
+      "origin": "AssociationFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "association": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "not_associated",
+            "screen",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "AssociationFeatureUpdate": {
+      "origin": "AssociationFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "association": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "BehaviorInstance": {
+      "origin": "BehaviorInstanceAdded",
+      "kind": "response",
+      "fields": {
+        "script_id": {
+          "type": "String",
+          "required": true
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "state": {
+          "type": "Hash",
+          "required": false
+        },
+        "configuration": {
+          "type": "Hash",
+          "required": true
+        },
+        "dependees": {
+          "type": {
+            "list": {
+              "class": "ResourceDependee"
+            }
+          },
+          "required": true
+        },
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "initializing",
+            "running",
+            "disabled",
+            "errored"
+          ]
+        },
+        "last_error": {
+          "type": "String",
+          "required": true
+        },
+        "metadata": {
+          "type": {
+            "class": "InstanceMetadata"
+          },
+          "required": true
+        },
+        "migrated_from": {
+          "type": "String",
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "BehaviorScript": {
+      "origin": "BehaviorScriptAdded",
+      "kind": "response",
+      "fields": {
+        "description": {
+          "type": "String",
+          "required": true
+        },
+        "configuration_schema": {
+          "type": "Hash",
+          "required": true
+        },
+        "trigger_schema": {
+          "type": "Hash",
+          "required": true
+        },
+        "state_schema": {
+          "type": "Hash",
+          "required": true
+        },
+        "version": {
+          "type": "String",
+          "required": true
+        },
+        "metadata": {
+          "type": {
+            "class": "ScriptMetadata"
+          },
+          "required": true
+        },
+        "supported_features": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        },
+        "max_number_instances": {
+          "type": "Integer",
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "BehaviorScriptFormula": {
+      "origin": "BehaviorScriptFormulaAdded",
+      "kind": "response",
+      "fields": {
+        "language": {
+          "type": "String",
+          "required": false
+        },
+        "content": {
+          "type": {
+            "class": "BehaviorScriptFormulaContent"
+          },
+          "required": false
+        },
+        "description": {
+          "type": "String",
+          "required": false
+        },
+        "configuration_schema": {
+          "type": "Hash",
+          "required": false
+        },
+        "trigger_schema": {
+          "type": "Hash",
+          "required": false
+        },
+        "state_schema": {
+          "type": "Hash",
+          "required": false
+        },
+        "version": {
+          "type": "String",
+          "required": false
+        },
+        "metadata": {
+          "type": {
+            "class": "ScriptMetadata"
+          },
+          "required": false
+        },
+        "supported_features": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        },
+        "max_number_instances": {
+          "type": "Integer",
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "BehaviorScriptFormulaContent": {
+      "origin": "BehaviorScriptFormulaContentAdded",
+      "kind": "response",
+      "fields": {}
+    },
+    "BellButton": {
+      "origin": "BellButtonAdded",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "SwitchInputMetadata"
+          },
+          "required": true
+        },
+        "button": {
+          "type": {
+            "class": "ButtonFeature"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Bridge": {
+      "origin": "BridgeAdded",
+      "kind": "response",
+      "fields": {
+        "bridge_id": {
+          "type": "String",
+          "required": true
+        },
+        "time_zone": {
+          "type": {
+            "class": "TimeZoneFeature"
+          },
+          "required": true
+        },
+        "import": {
+          "type": {
+            "class": "ImportFeature"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "BridgeHome": {
+      "origin": "BridgeHomeAdded",
+      "kind": "response",
+      "fields": {
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "services": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Button": {
+      "origin": "ButtonAdded",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "SwitchInputMetadata"
+          },
+          "required": true
+        },
+        "button": {
+          "type": {
+            "class": "ButtonFeature"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ButtonFeature": {
+      "origin": "ButtonFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "last_event": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "initial_press",
+            "repeat",
+            "short_release",
+            "long_press",
+            "long_release",
+            "double_short_release",
+            "unknown"
+          ]
+        },
+        "button_report": {
+          "type": {
+            "class": "ButtonReport"
+          },
+          "required": false
+        },
+        "repeat_interval": {
+          "type": "Integer",
+          "required": false
+        },
+        "event_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "initial_press",
+            "repeat",
+            "short_release",
+            "long_press",
+            "long_release",
+            "double_short_release",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "ButtonReport": {
+      "origin": "ButtonReportAdded",
+      "kind": "response",
+      "fields": {
+        "event": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "initial_press",
+            "repeat",
+            "short_release",
+            "long_press",
+            "long_release",
+            "double_short_release",
+            "unknown"
+          ]
+        },
+        "updated": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "CameraMotion": {
+      "origin": "CameraMotionAdded",
+      "kind": "response",
+      "fields": {
+        "sensitivity": {
+          "type": {
+            "class": "SensitivityAttributeFeature"
+          },
+          "required": false
+        },
+        "motion": {
+          "type": {
+            "class": "MotionSensingFeature"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Clip": {
+      "origin": "ClipAdded",
+      "kind": "response",
+      "fields": {
+        "resources": {
+          "type": {
+            "list": "String"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ColorFeature": {
+      "origin": "ColorFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "gamut": {
+          "type": {
+            "class": "ColorFeatureGamut"
+          },
+          "required": false
+        },
+        "gamut_type": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "A",
+            "B",
+            "C",
+            "other"
+          ]
+        },
+        "xy": {
+          "type": {
+            "class": "ColorPoint"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorFeatureBasic": {
+      "origin": "ColorFeatureBasicAdded",
+      "kind": "response",
+      "fields": {
+        "xy": {
+          "type": {
+            "class": "ColorPoint"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorFeatureBasicAdd": {
+      "origin": "ColorFeatureBasicAdd",
+      "kind": "add",
+      "fields": {
+        "xy": {
+          "type": {
+            "class": "ColorPointAdd"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorFeatureBasicUpdate": {
+      "origin": "ColorFeatureBasicUpdate",
+      "kind": "update",
+      "fields": {
+        "xy": {
+          "type": {
+            "class": "ColorPointUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "ColorFeatureGamut": {
+      "origin": "ColorFeatureGamutAdded",
+      "kind": "response",
+      "fields": {
+        "red": {
+          "type": {
+            "class": "ColorPoint"
+          },
+          "required": true
+        },
+        "green": {
+          "type": {
+            "class": "ColorPoint"
+          },
+          "required": true
+        },
+        "blue": {
+          "type": {
+            "class": "ColorPoint"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorFeatureUpdate": {
+      "origin": "ColorFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "xy": {
+          "type": {
+            "class": "ColorPointUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "ColorFeatureWriteOnly": {
+      "origin": "ColorFeatureWriteOnlyAdded",
+      "kind": "response",
+      "fields": {}
+    },
+    "ColorFeatureWriteOnlyUpdate": {
+      "origin": "ColorFeatureWriteOnlyUpdate",
+      "kind": "update",
+      "fields": {
+        "xy": {
+          "type": {
+            "class": "ColorPointUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorPalette": {
+      "origin": "ColorPaletteAdded",
+      "kind": "response",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasic"
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasic"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorPaletteAdd": {
+      "origin": "ColorPaletteAdd",
+      "kind": "add",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicAdd"
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasicAdd"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorPaletteUpdate": {
+      "origin": "ColorPaletteUpdate",
+      "kind": "update",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicUpdate"
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasicUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorPoint": {
+      "origin": "ColorPointAdded",
+      "kind": "response",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "ColorPointAdd": {
+      "origin": "ColorPointAdd",
+      "kind": "add",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "ColorPointUpdate": {
+      "origin": "ColorPointUpdate",
+      "kind": "update",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "ColorTemperatureDeltaFeature": {
+      "origin": "ColorTemperatureDeltaFeatureAdded",
+      "kind": "response",
+      "fields": {}
+    },
+    "ColorTemperatureDeltaFeatureUpdate": {
+      "origin": "ColorTemperatureDeltaFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "up",
+            "down",
+            "stop"
+          ]
+        },
+        "mirek_delta": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ColorTemperatureFeature": {
+      "origin": "ColorTemperatureFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "mirek_schema": {
+          "type": {
+            "class": "ColorTemperatureMirekSchema"
+          },
+          "required": true
+        },
+        "mirek_valid": {
+          "type": "Boolean",
+          "required": true
+        },
+        "mirek": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ColorTemperatureFeatureBasic": {
+      "origin": "ColorTemperatureFeatureBasicAdded",
+      "kind": "response",
+      "fields": {
+        "mirek": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ColorTemperatureFeatureBasicAdd": {
+      "origin": "ColorTemperatureFeatureBasicAdd",
+      "kind": "add",
+      "fields": {
+        "mirek": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ColorTemperatureFeatureBasicUpdate": {
+      "origin": "ColorTemperatureFeatureBasicUpdate",
+      "kind": "update",
+      "fields": {
+        "mirek": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ColorTemperatureFeatureBasicWithValidFlag": {
+      "origin": "ColorTemperatureFeatureBasicWithValidFlagAdded",
+      "kind": "response",
+      "fields": {
+        "mirek_valid": {
+          "type": "Boolean",
+          "required": false
+        },
+        "mirek": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ColorTemperatureFeatureBasicWithValidFlagUpdate": {
+      "origin": "ColorTemperatureFeatureBasicWithValidFlagUpdate",
+      "kind": "update",
+      "fields": {
+        "mirek": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ColorTemperatureFeatureUpdate": {
+      "origin": "ColorTemperatureFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "mirek": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ColorTemperatureFeatureWriteOnly": {
+      "origin": "ColorTemperatureFeatureWriteOnlyAdded",
+      "kind": "response",
+      "fields": {}
+    },
+    "ColorTemperatureFeatureWriteOnlyUpdate": {
+      "origin": "ColorTemperatureFeatureWriteOnlyUpdate",
+      "kind": "update",
+      "fields": {
+        "mirek": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "ColorTemperatureMirekSchema": {
+      "origin": "ColorTemperatureMirekSchemaAdded",
+      "kind": "response",
+      "fields": {
+        "mirek_minimum": {
+          "type": "Integer",
+          "required": false
+        },
+        "mirek_maximum": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ColorTemperaturePalette": {
+      "origin": "ColorTemperaturePaletteAdded",
+      "kind": "response",
+      "fields": {
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasic"
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasic"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorTemperaturePaletteAdd": {
+      "origin": "ColorTemperaturePaletteAdd",
+      "kind": "add",
+      "fields": {
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasicAdd"
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasicAdd"
+          },
+          "required": true
+        }
+      }
+    },
+    "ColorTemperaturePaletteUpdate": {
+      "origin": "ColorTemperaturePaletteUpdate",
+      "kind": "update",
+      "fields": {
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasicUpdate"
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasicUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "Contact": {
+      "origin": "ContactAdded",
+      "kind": "response",
+      "fields": {
+        "contact_report": {
+          "type": {
+            "class": "ContactReport"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ContactReport": {
+      "origin": "ContactReportAdded",
+      "kind": "response",
+      "fields": {
+        "state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "contact",
+            "no_contact"
+          ]
+        },
+        "changed": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "ContentConfiguration": {
+      "origin": "ContentConfigurationAdded",
+      "kind": "response",
+      "fields": {
+        "orientation": {
+          "type": {
+            "class": "OrientationFeature"
+          },
+          "required": false
+        },
+        "order": {
+          "type": {
+            "class": "OrderFeature"
+          },
+          "required": false
+        },
+        "association": {
+          "type": {
+            "class": "AssociationFeature"
+          },
+          "required": false
+        },
+        "rotation_2d_visual_offset": {
+          "type": {
+            "class": "Rotation2dVisualOffset"
+          },
+          "required": false
+        }
+      }
+    },
+    "ContentConfigurationUpdate": {
+      "origin": "ContentConfigurationUpdate",
+      "kind": "update",
+      "fields": {
+        "orientation": {
+          "type": {
+            "class": "OrientationFeatureUpdate"
+          },
+          "required": false
+        },
+        "order": {
+          "type": {
+            "class": "OrderFeatureUpdate"
+          },
+          "required": false
+        },
+        "association": {
+          "type": {
+            "class": "AssociationFeatureUpdate"
+          },
+          "required": false
+        },
+        "rotation_2d_visual_offset": {
+          "type": {
+            "class": "Rotation2dVisualOffsetUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "ContentObject": {
+      "origin": "ContentObjectAdded",
+      "kind": "response",
+      "fields": {
+        "supported_content": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ConvenienceAreaMotion": {
+      "origin": "ConvenienceAreaMotionAdded",
+      "kind": "response",
+      "fields": {
+        "algorithm_mode": {
+          "type": "String",
+          "required": false
+        },
+        "algorithm_mode_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        },
+        "sensitivity": {
+          "type": {
+            "class": "SensitivityAttributeFeature"
+          },
+          "required": false
+        },
+        "motion": {
+          "type": {
+            "class": "MotionSensingFeature"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ConvenienceAreaMotionUpdate": {
+      "origin": "ConvenienceAreaMotionUpdate",
+      "kind": "update",
+      "fields": {
+        "algorithm_mode": {
+          "type": "String",
+          "required": false
+        },
+        "sensitivity": {
+          "type": {
+            "class": "SensitivityAttributeFeatureUpdate"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "CoordinateMeters": {
+      "origin": "CoordinateMetersAdded",
+      "kind": "response",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        },
+        "z": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "CoordinateMetersUpdate": {
+      "origin": "CoordinateMetersUpdate",
+      "kind": "update",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        },
+        "z": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "DayTimeslots": {
+      "origin": "DayTimeslotsAdded",
+      "kind": "response",
+      "fields": {
+        "timeslots": {
+          "type": {
+            "list": {
+              "class": "SmartSceneTimeslot"
+            }
+          },
+          "required": true
+        },
+        "recurrence": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    "DayTimeslotsAdd": {
+      "origin": "DayTimeslotsAdd",
+      "kind": "add",
+      "fields": {
+        "timeslots": {
+          "type": {
+            "list": {
+              "class": "SmartSceneTimeslotAdd"
+            }
+          },
+          "required": true
+        },
+        "recurrence": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    "DayTimeslotsUpdate": {
+      "origin": "DayTimeslotsUpdate",
+      "kind": "update",
+      "fields": {
+        "timeslots": {
+          "type": {
+            "list": {
+              "class": "SmartSceneTimeslotUpdate"
+            }
+          },
+          "required": true
+        },
+        "recurrence": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        }
+      }
+    },
+    "Device": {
+      "origin": "DeviceAdded",
+      "kind": "response",
+      "fields": {
+        "product_data": {
+          "type": {
+            "class": "DeviceProductData"
+          },
+          "required": true
+        },
+        "metadata": {
+          "type": {
+            "class": "DeviceMetadata"
+          },
+          "required": true
+        },
+        "identify": {
+          "type": {
+            "class": "IdentifyFeature"
+          },
+          "required": false
+        },
+        "usertest": {
+          "type": {
+            "class": "UsertestFeature"
+          },
+          "required": false
+        },
+        "device_mode": {
+          "type": {
+            "class": "SwitchModeFeature"
+          },
+          "required": false
+        },
+        "services": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "geometry": {
+          "type": {
+            "class": "Geometry"
+          },
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "DeviceMetadata": {
+      "origin": "DeviceMetadataAdded",
+      "kind": "response",
+      "fields": {
+        "archetype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_v2",
+            "unknown_archetype",
+            "classic_bulb",
+            "sultan_bulb",
+            "flood_bulb",
+            "spot_bulb",
+            "candle_bulb",
+            "luster_bulb",
+            "pendant_round",
+            "pendant_long",
+            "ceiling_round",
+            "ceiling_square",
+            "floor_shade",
+            "floor_lantern",
+            "table_shade",
+            "recessed_ceiling",
+            "recessed_floor",
+            "single_spot",
+            "double_spot",
+            "table_wash",
+            "wall_lantern",
+            "wall_shade",
+            "flexible_lamp",
+            "ground_spot",
+            "wall_spot",
+            "plug",
+            "hue_go",
+            "hue_lightstrip",
+            "hue_iris",
+            "hue_bloom",
+            "bollard",
+            "wall_washer",
+            "hue_play",
+            "vintage_bulb",
+            "christmas_tree",
+            "string_light",
+            "hue_centris",
+            "hue_lightstrip_tv",
+            "hue_lightstrip_pc",
+            "hue_tube",
+            "hue_signe",
+            "pendant_spot",
+            "ceiling_horizontal",
+            "ceiling_tube",
+            "bridge_v3",
+            "hue_chime",
+            "vintage_candle_bulb",
+            "ellipse_bulb",
+            "triangle_bulb",
+            "small_globe_bulb",
+            "large_globe_bulb",
+            "edison_bulb",
+            "up_and_down",
+            "up_and_down_up",
+            "up_and_down_down",
+            "hue_floodlight_camera",
+            "twilight",
+            "twilight_front",
+            "twilight_back",
+            "hue_play_wallwasher",
+            "hue_omniglow",
+            "hue_omniglow_arc",
+            "hue_neon",
+            "hue_flux_arc",
+            "hue_go_xxl",
+            "hue_switch_module",
+            "string_globe",
+            "string_permanent",
+            "string_icicle",
+            "string_grid",
+            "string_net",
+            "rigid_tube",
+            "flexible_tube",
+            "pendant_tube",
+            "vertical_tube",
+            "recessed_ceiling_tube",
+            "panels",
+            "wall_rectangle"
+          ]
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "DeviceMetadataUpdate": {
+      "origin": "DeviceMetadataUpdate",
+      "kind": "update",
+      "fields": {
+        "archetype": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "bridge_v2",
+            "unknown_archetype",
+            "classic_bulb",
+            "sultan_bulb",
+            "flood_bulb",
+            "spot_bulb",
+            "candle_bulb",
+            "luster_bulb",
+            "pendant_round",
+            "pendant_long",
+            "ceiling_round",
+            "ceiling_square",
+            "floor_shade",
+            "floor_lantern",
+            "table_shade",
+            "recessed_ceiling",
+            "recessed_floor",
+            "single_spot",
+            "double_spot",
+            "table_wash",
+            "wall_lantern",
+            "wall_shade",
+            "flexible_lamp",
+            "ground_spot",
+            "wall_spot",
+            "plug",
+            "hue_go",
+            "hue_lightstrip",
+            "hue_iris",
+            "hue_bloom",
+            "bollard",
+            "wall_washer",
+            "hue_play",
+            "vintage_bulb",
+            "christmas_tree",
+            "string_light",
+            "hue_centris",
+            "hue_lightstrip_tv",
+            "hue_lightstrip_pc",
+            "hue_tube",
+            "hue_signe",
+            "pendant_spot",
+            "ceiling_horizontal",
+            "ceiling_tube",
+            "bridge_v3",
+            "hue_chime",
+            "vintage_candle_bulb",
+            "ellipse_bulb",
+            "triangle_bulb",
+            "small_globe_bulb",
+            "large_globe_bulb",
+            "edison_bulb",
+            "up_and_down",
+            "up_and_down_up",
+            "up_and_down_down",
+            "hue_floodlight_camera",
+            "twilight",
+            "twilight_front",
+            "twilight_back",
+            "hue_play_wallwasher",
+            "hue_omniglow",
+            "hue_omniglow_arc",
+            "hue_neon",
+            "hue_flux_arc",
+            "hue_go_xxl",
+            "hue_switch_module",
+            "string_globe",
+            "string_permanent",
+            "string_icicle",
+            "string_grid",
+            "string_net",
+            "rigid_tube",
+            "flexible_tube",
+            "pendant_tube",
+            "vertical_tube",
+            "recessed_ceiling_tube",
+            "panels",
+            "wall_rectangle"
+          ]
+        },
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "DevicePower": {
+      "origin": "DevicePowerAdded",
+      "kind": "response",
+      "fields": {
+        "power_state": {
+          "type": {
+            "class": "DevicePowerState"
+          },
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "DevicePowerState": {
+      "origin": "DevicePowerStateAdded",
+      "kind": "response",
+      "fields": {
+        "battery_state": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "normal",
+            "low",
+            "critical"
+          ]
+        },
+        "battery_level": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "DeviceProductData": {
+      "origin": "DeviceProductDataAdded",
+      "kind": "response",
+      "fields": {
+        "model_id": {
+          "type": "String",
+          "required": true
+        },
+        "manufacturer_name": {
+          "type": "String",
+          "required": true
+        },
+        "product_name": {
+          "type": "String",
+          "required": true
+        },
+        "product_archetype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_v2",
+            "unknown_archetype",
+            "classic_bulb",
+            "sultan_bulb",
+            "flood_bulb",
+            "spot_bulb",
+            "candle_bulb",
+            "luster_bulb",
+            "pendant_round",
+            "pendant_long",
+            "ceiling_round",
+            "ceiling_square",
+            "floor_shade",
+            "floor_lantern",
+            "table_shade",
+            "recessed_ceiling",
+            "recessed_floor",
+            "single_spot",
+            "double_spot",
+            "table_wash",
+            "wall_lantern",
+            "wall_shade",
+            "flexible_lamp",
+            "ground_spot",
+            "wall_spot",
+            "plug",
+            "hue_go",
+            "hue_lightstrip",
+            "hue_iris",
+            "hue_bloom",
+            "bollard",
+            "wall_washer",
+            "hue_play",
+            "vintage_bulb",
+            "christmas_tree",
+            "string_light",
+            "hue_centris",
+            "hue_lightstrip_tv",
+            "hue_lightstrip_pc",
+            "hue_tube",
+            "hue_signe",
+            "pendant_spot",
+            "ceiling_horizontal",
+            "ceiling_tube",
+            "bridge_v3",
+            "hue_chime",
+            "vintage_candle_bulb",
+            "ellipse_bulb",
+            "triangle_bulb",
+            "small_globe_bulb",
+            "large_globe_bulb",
+            "edison_bulb",
+            "up_and_down",
+            "up_and_down_up",
+            "up_and_down_down",
+            "hue_floodlight_camera",
+            "twilight",
+            "twilight_front",
+            "twilight_back",
+            "hue_play_wallwasher",
+            "hue_omniglow",
+            "hue_omniglow_arc",
+            "hue_neon",
+            "hue_flux_arc",
+            "hue_go_xxl",
+            "hue_switch_module",
+            "string_globe",
+            "string_permanent",
+            "string_icicle",
+            "string_grid",
+            "string_net",
+            "rigid_tube",
+            "flexible_tube",
+            "pendant_tube",
+            "vertical_tube",
+            "recessed_ceiling_tube",
+            "panels",
+            "wall_rectangle"
+          ]
+        },
+        "certified": {
+          "type": "Boolean",
+          "required": true
+        },
+        "software_version": {
+          "type": "String",
+          "required": true
+        },
+        "hardware_platform_type": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "DeviceSoftwareUpdate": {
+      "origin": "DeviceSoftwareUpdateAdded",
+      "kind": "response",
+      "fields": {
+        "state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_update",
+            "update_pending",
+            "ready_to_install",
+            "installing",
+            "unknown"
+          ]
+        },
+        "problems": {
+          "type": {
+            "list": "String"
+          },
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "DeviceUpdate": {
+      "origin": "DeviceUpdate",
+      "kind": "update",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "DeviceMetadataUpdate"
+          },
+          "required": false
+        },
+        "identify": {
+          "type": {
+            "class": "IdentifyFeatureUpdate"
+          },
+          "required": false
+        },
+        "usertest": {
+          "type": {
+            "class": "UsertestFeatureUpdate"
+          },
+          "required": false
+        },
+        "device_mode": {
+          "type": {
+            "class": "SwitchModeFeatureUpdate"
+          },
+          "required": false
+        },
+        "geometry": {
+          "type": {
+            "class": "GeometryUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "DimmingConfigurationFeature": {
+      "origin": "DimmingConfigurationFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "min_level": {
+          "type": "Numeric",
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "DimmingConfigurationFeatureUpdate": {
+      "origin": "DimmingConfigurationFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "min_level": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "DimmingDeltaFeature": {
+      "origin": "DimmingDeltaFeatureAdded",
+      "kind": "response",
+      "fields": {}
+    },
+    "DimmingDeltaFeatureUpdate": {
+      "origin": "DimmingDeltaFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "up",
+            "down",
+            "stop"
+          ]
+        },
+        "brightness_delta": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "DimmingFeature": {
+      "origin": "DimmingFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "min_dim_level": {
+          "type": "Numeric",
+          "required": false
+        },
+        "brightness": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "DimmingFeatureBasic": {
+      "origin": "DimmingFeatureBasicAdded",
+      "kind": "response",
+      "fields": {
+        "brightness": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "DimmingFeatureBasicAdd": {
+      "origin": "DimmingFeatureBasicAdd",
+      "kind": "add",
+      "fields": {
+        "brightness": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "DimmingFeatureBasicUpdate": {
+      "origin": "DimmingFeatureBasicUpdate",
+      "kind": "update",
+      "fields": {
+        "brightness": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "DimmingFeatureUpdate": {
+      "origin": "DimmingFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "brightness": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "DynamicsFeature": {
+      "origin": "DynamicsFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "none",
+            "dynamic_palette",
+            "unknown"
+          ]
+        },
+        "status_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "none",
+            "dynamic_palette",
+            "unknown"
+          ]
+        },
+        "speed": {
+          "type": "Numeric",
+          "required": true
+        },
+        "speed_valid": {
+          "type": "Boolean",
+          "required": true
+        }
+      }
+    },
+    "DynamicsFeatureBasic": {
+      "origin": "DynamicsFeatureBasicAdded",
+      "kind": "response",
+      "fields": {}
+    },
+    "DynamicsFeatureReadWrite": {
+      "origin": "DynamicsFeatureReadWriteAdded",
+      "kind": "response",
+      "fields": {
+        "duration": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "DynamicsFeatureUpdate": {
+      "origin": "DynamicsFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "speed": {
+          "type": "Numeric",
+          "required": false
+        },
+        "duration": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "EffectFeature": {
+      "origin": "EffectFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "status_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        },
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        },
+        "effect_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "EffectFeatureBasic": {
+      "origin": "EffectFeatureBasicAdded",
+      "kind": "response",
+      "fields": {
+        "effect": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "EffectFeatureUpdate": {
+      "origin": "EffectFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "effect": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "EffectV2Feature": {
+      "origin": "EffectV2FeatureAdded",
+      "kind": "response",
+      "fields": {
+        "action": {
+          "type": {
+            "class": "EffectV2FeatureAction"
+          },
+          "required": true
+        },
+        "status": {
+          "type": {
+            "class": "EffectV2FeatureStatus"
+          },
+          "required": true
+        }
+      }
+    },
+    "EffectV2FeatureAction": {
+      "origin": "EffectV2FeatureActionAdded",
+      "kind": "response",
+      "fields": {
+        "effect_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "EffectV2FeatureActionUpdate": {
+      "origin": "EffectV2FeatureActionUpdate",
+      "kind": "update",
+      "fields": {
+        "effect": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        },
+        "parameters": {
+          "type": {
+            "class": "EffectsV2ParametersUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "EffectV2FeatureBasic": {
+      "origin": "EffectV2FeatureBasicAdded",
+      "kind": "response",
+      "fields": {
+        "action": {
+          "type": {
+            "class": "EffectV2FeatureBasicAction"
+          },
+          "required": true
+        }
+      }
+    },
+    "EffectV2FeatureBasicAction": {
+      "origin": "EffectV2FeatureBasicActionAdded",
+      "kind": "response",
+      "fields": {
+        "effect": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        },
+        "parameters": {
+          "type": {
+            "class": "EffectV2FeatureBasicParameters"
+          },
+          "required": false
+        }
+      }
+    },
+    "EffectV2FeatureBasicActionAdd": {
+      "origin": "EffectV2FeatureBasicActionAdd",
+      "kind": "add",
+      "fields": {
+        "effect": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        },
+        "parameters": {
+          "type": {
+            "class": "EffectV2FeatureBasicParametersAdd"
+          },
+          "required": false
+        }
+      }
+    },
+    "EffectV2FeatureBasicActionUpdate": {
+      "origin": "EffectV2FeatureBasicActionUpdate",
+      "kind": "update",
+      "fields": {
+        "effect": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        },
+        "parameters": {
+          "type": {
+            "class": "EffectV2FeatureBasicParametersUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "EffectV2FeatureBasicAdd": {
+      "origin": "EffectV2FeatureBasicAdd",
+      "kind": "add",
+      "fields": {
+        "action": {
+          "type": {
+            "class": "EffectV2FeatureBasicActionAdd"
+          },
+          "required": true
+        }
+      }
+    },
+    "EffectV2FeatureBasicParameters": {
+      "origin": "EffectV2FeatureBasicParametersAdded",
+      "kind": "response",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasic"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasic"
+          },
+          "required": false
+        },
+        "speed": {
+          "type": "Numeric",
+          "required": false
+        },
+        "rotation_2d": {
+          "type": {
+            "class": "Rotation2dBasic"
+          },
+          "required": false
+        }
+      }
+    },
+    "EffectV2FeatureBasicParametersAdd": {
+      "origin": "EffectV2FeatureBasicParametersAdd",
+      "kind": "add",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicAdd"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasicAdd"
+          },
+          "required": false
+        },
+        "speed": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "EffectV2FeatureBasicParametersUpdate": {
+      "origin": "EffectV2FeatureBasicParametersUpdate",
+      "kind": "update",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "speed": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "EffectV2FeatureBasicUpdate": {
+      "origin": "EffectV2FeatureBasicUpdate",
+      "kind": "update",
+      "fields": {
+        "action": {
+          "type": {
+            "class": "EffectV2FeatureBasicActionUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "EffectV2FeatureStatus": {
+      "origin": "EffectV2FeatureStatusAdded",
+      "kind": "response",
+      "fields": {
+        "effect": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        },
+        "effect_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "no_effect",
+            "candle",
+            "fire",
+            "sparkle",
+            "glisten",
+            "opal",
+            "prism",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "unknown"
+          ]
+        },
+        "parameters": {
+          "type": {
+            "class": "EffectsV2Parameters"
+          },
+          "required": false
+        }
+      }
+    },
+    "EffectV2FeatureUpdate": {
+      "origin": "EffectV2FeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "action": {
+          "type": {
+            "class": "EffectV2FeatureActionUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "EffectsV2Parameters": {
+      "origin": "EffectsV2ParametersAdded",
+      "kind": "response",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasic"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasicWithValidFlag"
+          },
+          "required": false
+        },
+        "speed": {
+          "type": "Numeric",
+          "required": false
+        },
+        "rotation_2d": {
+          "type": {
+            "class": "Rotation2dBasic"
+          },
+          "required": false
+        }
+      }
+    },
+    "EffectsV2ParametersUpdate": {
+      "origin": "EffectsV2ParametersUpdate",
+      "kind": "update",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasicWithValidFlagUpdate"
+          },
+          "required": false
+        },
+        "speed": {
+          "type": "Numeric",
+          "required": false
+        },
+        "rotation_2d": {
+          "type": {
+            "class": "Rotation2dBasicUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "Entertainment": {
+      "origin": "EntertainmentAdded",
+      "kind": "response",
+      "fields": {
+        "renderer": {
+          "type": "Boolean",
+          "required": true
+        },
+        "renderer_reference": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": false
+        },
+        "proxy": {
+          "type": "Boolean",
+          "required": true
+        },
+        "equalizer": {
+          "type": "Boolean",
+          "required": false
+        },
+        "max_streams": {
+          "type": "Integer",
+          "required": false
+        },
+        "segments": {
+          "type": {
+            "class": "SegmentationProperties"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "EntertainmentChannel": {
+      "origin": "EntertainmentChannelAdded",
+      "kind": "response",
+      "fields": {
+        "channel_id": {
+          "type": "Integer",
+          "required": true
+        },
+        "position": {
+          "type": {
+            "class": "Position"
+          },
+          "required": true
+        },
+        "members": {
+          "type": {
+            "list": {
+              "class": "SegmentReference"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "EntertainmentConfiguration": {
+      "origin": "EntertainmentConfigurationAdded",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "EntertainmentConfigurationMetadata"
+          },
+          "required": true
+        },
+        "name": {
+          "type": "String",
+          "required": false
+        },
+        "configuration_type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "screen",
+            "music",
+            "3dspace",
+            "other",
+            "monitor"
+          ]
+        },
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "active",
+            "inactive"
+          ]
+        },
+        "active_streamer": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": false
+        },
+        "stream_proxy": {
+          "type": {
+            "class": "StreamingProxy"
+          },
+          "required": true
+        },
+        "channels": {
+          "type": {
+            "list": {
+              "class": "EntertainmentChannel"
+            }
+          },
+          "required": true
+        },
+        "locations": {
+          "type": {
+            "class": "EntertainmentLocations"
+          },
+          "required": true
+        },
+        "light_services": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "EntertainmentConfigurationAdd": {
+      "origin": "EntertainmentConfigurationAdd",
+      "kind": "add",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "EntertainmentConfigurationMetadataAdd"
+          },
+          "required": true
+        },
+        "configuration_type": {
+          "type": "String",
+          "required": true
+        },
+        "locations": {
+          "type": {
+            "class": "EntertainmentLocationsAdd"
+          },
+          "required": true
+        },
+        "stream_proxy": {
+          "type": {
+            "class": "StreamingProxyAdd"
+          },
+          "required": false
+        }
+      }
+    },
+    "EntertainmentConfigurationMetadata": {
+      "origin": "EntertainmentConfigurationMetadataAdded",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "EntertainmentConfigurationMetadataAdd": {
+      "origin": "EntertainmentConfigurationMetadataAdd",
+      "kind": "add",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "EntertainmentConfigurationMetadataUpdate": {
+      "origin": "EntertainmentConfigurationMetadataUpdate",
+      "kind": "update",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "EntertainmentConfigurationUpdate": {
+      "origin": "EntertainmentConfigurationUpdate",
+      "kind": "update",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "EntertainmentConfigurationMetadataUpdate"
+          },
+          "required": false
+        },
+        "configuration_type": {
+          "type": "String",
+          "required": false
+        },
+        "action": {
+          "type": "String",
+          "required": false
+        },
+        "stream_proxy": {
+          "type": {
+            "class": "StreamingProxyUpdate"
+          },
+          "required": false
+        },
+        "locations": {
+          "type": {
+            "class": "EntertainmentLocationsUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "EntertainmentLocations": {
+      "origin": "EntertainmentLocationsAdded",
+      "kind": "response",
+      "fields": {
+        "service_locations": {
+          "type": {
+            "list": {
+              "class": "ServiceLocation"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "EntertainmentLocationsAdd": {
+      "origin": "EntertainmentLocationsAdd",
+      "kind": "add",
+      "fields": {
+        "service_locations": {
+          "type": {
+            "list": {
+              "class": "ServiceLocationAdd"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "EntertainmentLocationsUpdate": {
+      "origin": "EntertainmentLocationsUpdate",
+      "kind": "update",
+      "fields": {
+        "service_locations": {
+          "type": {
+            "list": {
+              "class": "ServiceLocationUpdate"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "FabricData": {
+      "origin": "FabricDataAdded",
+      "kind": "response",
+      "fields": {
+        "label": {
+          "type": "String",
+          "required": true
+        },
+        "vendor_id": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "GeofenceClient": {
+      "origin": "GeofenceClientAdded",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "GeofenceClientAdd": {
+      "origin": "GeofenceClientAdd",
+      "kind": "add",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "GeofenceClientUpdate": {
+      "origin": "GeofenceClientUpdate",
+      "kind": "update",
+      "fields": {
+        "is_at_home": {
+          "type": "Boolean",
+          "required": false
+        },
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Geolocation": {
+      "origin": "GeolocationAdded",
+      "kind": "response",
+      "fields": {
+        "is_configured": {
+          "type": "Boolean",
+          "required": true
+        },
+        "sun_today": {
+          "type": {
+            "class": "SunToday"
+          },
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Geometry": {
+      "origin": "GeometryAdded",
+      "kind": "response",
+      "fields": {
+        "objects": {
+          "type": {
+            "list": {
+              "class": "GeometryObject"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "GeometryObject": {
+      "origin": "GeometryObjectAdded",
+      "kind": "response",
+      "fields": {
+        "reference": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "transform": {
+          "type": {
+            "class": "ObjectTransform"
+          },
+          "required": true
+        }
+      }
+    },
+    "GeometryObjectUpdate": {
+      "origin": "GeometryObjectUpdate",
+      "kind": "update",
+      "fields": {
+        "reference": {
+          "type": {
+            "class": "ResourceIdentifierUpdate"
+          },
+          "required": true
+        },
+        "transform": {
+          "type": {
+            "class": "ObjectTransformUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "GeometryUpdate": {
+      "origin": "GeometryUpdate",
+      "kind": "update",
+      "fields": {
+        "objects": {
+          "type": {
+            "list": {
+              "class": "GeometryObjectUpdate"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "GradientFeature": {
+      "origin": "GradientFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "points_capable": {
+          "type": "Integer",
+          "required": false
+        },
+        "mode_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "interpolated_palette",
+            "interpolated_palette_mirrored",
+            "random_pixelated",
+            "segmented_palette"
+          ]
+        },
+        "pixel_count": {
+          "type": "Integer",
+          "required": false
+        },
+        "rotation_2d": {
+          "type": {
+            "class": "Rotation2dWithValidFlag"
+          },
+          "required": false
+        },
+        "points": {
+          "type": {
+            "list": {
+              "class": "GradientPoint"
+            }
+          },
+          "required": true
+        },
+        "mode": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "interpolated_palette",
+            "interpolated_palette_mirrored",
+            "random_pixelated",
+            "segmented_palette"
+          ]
+        }
+      }
+    },
+    "GradientFeatureBasicWithRotation2dBasic": {
+      "origin": "GradientFeatureBasicWithRotation2dBasicAdded",
+      "kind": "response",
+      "fields": {
+        "rotation_2d": {
+          "type": {
+            "class": "Rotation2dBasic"
+          },
+          "required": false
+        },
+        "points": {
+          "type": {
+            "list": {
+              "class": "GradientPoint"
+            }
+          },
+          "required": true
+        },
+        "mode": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "interpolated_palette",
+            "interpolated_palette_mirrored",
+            "random_pixelated",
+            "segmented_palette"
+          ]
+        }
+      }
+    },
+    "GradientFeatureBasicWithRotation2dBasicAdd": {
+      "origin": "GradientFeatureBasicWithRotation2dBasicAdd",
+      "kind": "add",
+      "fields": {
+        "points": {
+          "type": {
+            "list": {
+              "class": "GradientPointAdd"
+            }
+          },
+          "required": true
+        },
+        "rotation_2d": {
+          "type": {
+            "class": "Rotation2dBasicAdd"
+          },
+          "required": false
+        },
+        "mode": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "interpolated_palette",
+            "interpolated_palette_mirrored",
+            "random_pixelated",
+            "segmented_palette"
+          ]
+        }
+      }
+    },
+    "GradientFeatureBasicWithRotation2dBasicUpdate": {
+      "origin": "GradientFeatureBasicWithRotation2dBasicUpdate",
+      "kind": "update",
+      "fields": {
+        "points": {
+          "type": {
+            "list": {
+              "class": "GradientPointUpdate"
+            }
+          },
+          "required": true
+        },
+        "rotation_2d": {
+          "type": {
+            "class": "Rotation2dBasicUpdate"
+          },
+          "required": false
+        },
+        "mode": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "interpolated_palette",
+            "interpolated_palette_mirrored",
+            "random_pixelated",
+            "segmented_palette"
+          ]
+        }
+      }
+    },
+    "GradientFeatureUpdate": {
+      "origin": "GradientFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "points": {
+          "type": {
+            "list": {
+              "class": "GradientPointUpdate"
+            }
+          },
+          "required": true
+        },
+        "rotation_2d": {
+          "type": {
+            "class": "Rotation2dWithValidFlagUpdate"
+          },
+          "required": false
+        },
+        "mode": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "interpolated_palette",
+            "interpolated_palette_mirrored",
+            "random_pixelated",
+            "segmented_palette"
+          ]
+        }
+      }
+    },
+    "GradientPoint": {
+      "origin": "GradientPointAdded",
+      "kind": "response",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasic"
+          },
+          "required": true
+        }
+      }
+    },
+    "GradientPointAdd": {
+      "origin": "GradientPointAdd",
+      "kind": "add",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicAdd"
+          },
+          "required": true
+        }
+      }
+    },
+    "GradientPointUpdate": {
+      "origin": "GradientPointUpdate",
+      "kind": "update",
+      "fields": {
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "GroupedLight": {
+      "origin": "GroupedLightAdded",
+      "kind": "response",
+      "fields": {
+        "on": {
+          "type": {
+            "class": "OnFeatureBasic"
+          },
+          "required": false
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasic"
+          },
+          "required": false
+        },
+        "dimming_delta": {
+          "type": {
+            "class": "DimmingDeltaFeature"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureWriteOnly"
+          },
+          "required": false
+        },
+        "color_temperature_delta": {
+          "type": {
+            "class": "ColorTemperatureDeltaFeature"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "ColorFeatureWriteOnly"
+          },
+          "required": false
+        },
+        "alert": {
+          "type": {
+            "class": "AlertFeature"
+          },
+          "required": false
+        },
+        "signaling": {
+          "type": {
+            "class": "SignalingFeatureBasic"
+          },
+          "required": false
+        },
+        "dynamics": {
+          "type": {
+            "class": "DynamicsFeatureBasic"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "GroupedLightLevel": {
+      "origin": "GroupedLightLevelAdded",
+      "kind": "response",
+      "fields": {
+        "light": {
+          "type": {
+            "class": "LightLevelSensorFeature"
+          },
+          "required": true
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "GroupedLightUpdate": {
+      "origin": "GroupedLightUpdate",
+      "kind": "update",
+      "fields": {
+        "on": {
+          "type": {
+            "class": "OnFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureWriteOnlyUpdate"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "ColorFeatureWriteOnlyUpdate"
+          },
+          "required": false
+        },
+        "signaling": {
+          "type": {
+            "class": "SignalingFeatureUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "GroupedMotion": {
+      "origin": "GroupedMotionAdded",
+      "kind": "response",
+      "fields": {
+        "motion": {
+          "type": {
+            "class": "MotionSensingFeature"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Homekit": {
+      "origin": "HomekitAdded",
+      "kind": "response",
+      "fields": {
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "pairing",
+            "paired",
+            "unpaired"
+          ]
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "IdentifyFeature": {
+      "origin": "IdentifyFeatureAdded",
+      "kind": "response",
+      "fields": {}
+    },
+    "IdentifyFeatureUpdate": {
+      "origin": "IdentifyFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": true
+        },
+        "duration": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "ImportFeature": {
+      "origin": "ImportFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "origin": {
+          "type": "String",
+          "required": false
+        },
+        "time": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "InstallCodeUpdate": {
+      "origin": "InstallCodeUpdate",
+      "kind": "update",
+      "fields": {
+        "mac_address": {
+          "type": "String",
+          "required": true
+        },
+        "ic": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "InstanceMetadata": {
+      "origin": "InstanceMetadataAdded",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Light": {
+      "origin": "LightAdded",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "LightMetadata"
+          },
+          "required": false
+        },
+        "product_data": {
+          "type": {
+            "class": "LightProductdata"
+          },
+          "required": false
+        },
+        "identify": {
+          "type": {
+            "class": "IdentifyFeature"
+          },
+          "required": false
+        },
+        "service_id": {
+          "type": "Integer",
+          "required": false
+        },
+        "on": {
+          "type": {
+            "class": "OnFeature"
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeature"
+          },
+          "required": false
+        },
+        "dimming_delta": {
+          "type": {
+            "class": "DimmingDeltaFeature"
+          },
+          "required": false
+        },
+        "dimming_configuration": {
+          "type": {
+            "class": "DimmingConfigurationFeature"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeature"
+          },
+          "required": false
+        },
+        "color_temperature_delta": {
+          "type": {
+            "class": "ColorTemperatureDeltaFeature"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "ColorFeature"
+          },
+          "required": false
+        },
+        "dynamics": {
+          "type": {
+            "class": "DynamicsFeature"
+          },
+          "required": false
+        },
+        "alert": {
+          "type": {
+            "class": "AlertFeature"
+          },
+          "required": false
+        },
+        "signaling": {
+          "type": {
+            "class": "SignalingFeature"
+          },
+          "required": false
+        },
+        "mode": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "normal",
+            "streaming"
+          ]
+        },
+        "gradient": {
+          "type": {
+            "class": "GradientFeature"
+          },
+          "required": false
+        },
+        "effects": {
+          "type": {
+            "class": "EffectFeature"
+          },
+          "required": false
+        },
+        "effects_v2": {
+          "type": {
+            "class": "EffectV2Feature"
+          },
+          "required": false
+        },
+        "timed_effects": {
+          "type": {
+            "class": "TimedEffectFeature"
+          },
+          "required": false
+        },
+        "powerup": {
+          "type": {
+            "class": "PowerupFeature"
+          },
+          "required": false
+        },
+        "content_configuration": {
+          "type": {
+            "class": "ContentConfiguration"
+          },
+          "required": false
+        },
+        "geometry": {
+          "type": {
+            "class": "LightServiceGeometry"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "LightLevel": {
+      "origin": "LightLevelAdded",
+      "kind": "response",
+      "fields": {
+        "light": {
+          "type": {
+            "class": "LightLevelSensorFeature"
+          },
+          "required": true
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "LightLevelReport": {
+      "origin": "LightLevelReportAdded",
+      "kind": "response",
+      "fields": {
+        "light_level": {
+          "type": "Integer",
+          "required": true
+        },
+        "changed": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "LightLevelSensorFeature": {
+      "origin": "LightLevelSensorFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "light_level": {
+          "type": "Integer",
+          "required": false
+        },
+        "light_level_valid": {
+          "type": "Boolean",
+          "required": false
+        },
+        "light_level_report": {
+          "type": {
+            "class": "LightLevelReport"
+          },
+          "required": false
+        }
+      }
+    },
+    "LightMetadata": {
+      "origin": "LightMetadataAdded",
+      "kind": "response",
+      "fields": {
+        "archetype": {
+          "type": "String",
+          "required": false
+        },
+        "fixed_mired": {
+          "type": "Integer",
+          "required": false
+        },
+        "function": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "functional",
+            "decorative",
+            "mixed",
+            "unknown"
+          ]
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "LightMetadataUpdate": {
+      "origin": "LightMetadataUpdate",
+      "kind": "update",
+      "fields": {
+        "archetype": {
+          "type": "String",
+          "required": false
+        },
+        "function": {
+          "type": "String",
+          "required": false
+        },
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "LightProductdata": {
+      "origin": "LightProductdataAdded",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false
+        },
+        "archetype": {
+          "type": "String",
+          "required": false
+        },
+        "function": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "functional",
+            "decorative",
+            "mixed",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "LightServiceGeometry": {
+      "origin": "LightServiceGeometryAdded",
+      "kind": "response",
+      "fields": {
+        "pixel_positions": {
+          "type": {
+            "list": {
+              "class": "PixelPosition"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "LightServiceGeometryUpdate": {
+      "origin": "LightServiceGeometryUpdate",
+      "kind": "update",
+      "fields": {
+        "pixel_positions": {
+          "type": {
+            "list": {
+              "class": "PixelPositionUpdate"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "LightUpdate": {
+      "origin": "LightUpdate",
+      "kind": "update",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "LightMetadataUpdate"
+          },
+          "required": false
+        },
+        "identify": {
+          "type": {
+            "class": "IdentifyFeatureUpdate"
+          },
+          "required": false
+        },
+        "on": {
+          "type": {
+            "class": "OnFeatureUpdate"
+          },
+          "required": false
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureUpdate"
+          },
+          "required": false
+        },
+        "dimming_delta": {
+          "type": {
+            "class": "DimmingDeltaFeatureUpdate"
+          },
+          "required": false
+        },
+        "dimming_configuration": {
+          "type": {
+            "class": "DimmingConfigurationFeatureUpdate"
+          },
+          "required": false
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureUpdate"
+          },
+          "required": false
+        },
+        "color_temperature_delta": {
+          "type": {
+            "class": "ColorTemperatureDeltaFeatureUpdate"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "ColorFeatureUpdate"
+          },
+          "required": false
+        },
+        "dynamics": {
+          "type": {
+            "class": "DynamicsFeatureUpdate"
+          },
+          "required": false
+        },
+        "alert": {
+          "type": {
+            "class": "AlertFeatureUpdate"
+          },
+          "required": false
+        },
+        "signaling": {
+          "type": {
+            "class": "SignalingFeatureUpdate"
+          },
+          "required": false
+        },
+        "gradient": {
+          "type": {
+            "class": "GradientFeatureUpdate"
+          },
+          "required": false
+        },
+        "effects": {
+          "type": {
+            "class": "EffectFeatureUpdate"
+          },
+          "required": false
+        },
+        "effects_v2": {
+          "type": {
+            "class": "EffectV2FeatureUpdate"
+          },
+          "required": false
+        },
+        "timed_effects": {
+          "type": {
+            "class": "TimedEffectFeatureUpdate"
+          },
+          "required": false
+        },
+        "powerup": {
+          "type": {
+            "class": "PowerupFeatureUpdate"
+          },
+          "required": false
+        },
+        "content_configuration": {
+          "type": {
+            "class": "ContentConfigurationUpdate"
+          },
+          "required": false
+        },
+        "geometry": {
+          "type": {
+            "class": "LightServiceGeometryUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "Matter": {
+      "origin": "MatterAdded",
+      "kind": "response",
+      "fields": {
+        "max_fabrics": {
+          "type": "Integer",
+          "required": true
+        },
+        "has_qr_code": {
+          "type": "Boolean",
+          "required": true
+        },
+        "software_version_string": {
+          "type": "String",
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "MatterFabric": {
+      "origin": "MatterFabricAdded",
+      "kind": "response",
+      "fields": {
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "pending",
+            "paired",
+            "timedout"
+          ]
+        },
+        "fabric_data": {
+          "type": {
+            "class": "FabricData"
+          },
+          "required": false
+        },
+        "creation_time": {
+          "type": "String",
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Motion": {
+      "origin": "MotionAdded",
+      "kind": "response",
+      "fields": {
+        "sensitivity": {
+          "type": {
+            "class": "SensitivityAttributeFeature"
+          },
+          "required": false
+        },
+        "motion": {
+          "type": {
+            "class": "MotionSensingFeature"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "MotionAreaCandidate": {
+      "origin": "MotionAreaCandidateAdded",
+      "kind": "response",
+      "fields": {
+        "capabilities": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        },
+        "characteristics": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "MotionAreaConfiguration": {
+      "origin": "MotionAreaConfigurationAdded",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "group": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "participants": {
+          "type": {
+            "list": {
+              "class": "Participant"
+            }
+          },
+          "required": true
+        },
+        "services": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "health": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "healthy",
+            "unhealthy",
+            "degraded",
+            "recovering",
+            "unrecoverable",
+            "not_running",
+            "unknown"
+          ]
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "MotionAreaConfigurationAdd": {
+      "origin": "MotionAreaConfigurationAdd",
+      "kind": "add",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "group": {
+          "type": {
+            "class": "ResourceIdentifierAdd"
+          },
+          "required": true
+        },
+        "participants": {
+          "type": {
+            "list": {
+              "class": "ParticipantAdd"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "MotionAreaConfigurationUpdate": {
+      "origin": "MotionAreaConfigurationUpdate",
+      "kind": "update",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false
+        },
+        "group": {
+          "type": {
+            "class": "ResourceIdentifierUpdate"
+          },
+          "required": false
+        },
+        "participants": {
+          "type": {
+            "list": {
+              "class": "ParticipantUpdate"
+            }
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "MotionReport": {
+      "origin": "MotionReportAdded",
+      "kind": "response",
+      "fields": {
+        "motion": {
+          "type": "Boolean",
+          "required": true
+        },
+        "changed": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "MotionSensingFeature": {
+      "origin": "MotionSensingFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "motion": {
+          "type": "Boolean",
+          "required": false
+        },
+        "motion_valid": {
+          "type": "Boolean",
+          "required": false
+        },
+        "motion_report": {
+          "type": {
+            "class": "MotionReport"
+          },
+          "required": false
+        }
+      }
+    },
+    "MotionUpdate": {
+      "origin": "MotionUpdate",
+      "kind": "update",
+      "fields": {
+        "sensitivity": {
+          "type": {
+            "class": "SensitivityAttributeFeatureUpdate"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "MuteFeature": {
+      "origin": "MuteFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "mute": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "mute",
+            "unmute"
+          ]
+        }
+      }
+    },
+    "MuteFeatureUpdate": {
+      "origin": "MuteFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "mute": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "mute",
+            "unmute"
+          ]
+        }
+      }
+    },
+    "NamedResourceMetadata": {
+      "origin": "NamedResourceMetadataAdded",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "NamedResourceMetadataAdd": {
+      "origin": "NamedResourceMetadataAdd",
+      "kind": "add",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "NamedResourceMetadataUpdate": {
+      "origin": "NamedResourceMetadataUpdate",
+      "kind": "update",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ObjectTransform": {
+      "origin": "ObjectTransformAdded",
+      "kind": "response",
+      "fields": {
+        "position": {
+          "type": {
+            "class": "CoordinateMeters"
+          },
+          "required": true
+        },
+        "rotation": {
+          "type": {
+            "class": "Quaternion"
+          },
+          "required": true
+        }
+      }
+    },
+    "ObjectTransformUpdate": {
+      "origin": "ObjectTransformUpdate",
+      "kind": "update",
+      "fields": {
+        "position": {
+          "type": {
+            "class": "CoordinateMetersUpdate"
+          },
+          "required": true
+        },
+        "rotation": {
+          "type": {
+            "class": "QuaternionUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "OnFeature": {
+      "origin": "OnFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "on": {
+          "type": "Boolean",
+          "required": true
+        }
+      }
+    },
+    "OnFeatureBasic": {
+      "origin": "OnFeatureBasicAdded",
+      "kind": "response",
+      "fields": {
+        "on": {
+          "type": "Boolean",
+          "required": true
+        }
+      }
+    },
+    "OnFeatureBasicAdd": {
+      "origin": "OnFeatureBasicAdd",
+      "kind": "add",
+      "fields": {
+        "on": {
+          "type": "Boolean",
+          "required": true
+        }
+      }
+    },
+    "OnFeatureBasicUpdate": {
+      "origin": "OnFeatureBasicUpdate",
+      "kind": "update",
+      "fields": {
+        "on": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "OnFeatureUpdate": {
+      "origin": "OnFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "on": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "OrderFeature": {
+      "origin": "OrderFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "order": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "forward",
+            "reversed",
+            "unknown"
+          ]
+        },
+        "configurable": {
+          "type": "Boolean",
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "set",
+            "changing",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "OrderFeatureUpdate": {
+      "origin": "OrderFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "order": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "OrientationFeature": {
+      "origin": "OrientationFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "orientation": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "horizontal",
+            "vertical",
+            "unknown"
+          ]
+        },
+        "configurable": {
+          "type": "Boolean",
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "set",
+            "changing",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "OrientationFeatureUpdate": {
+      "origin": "OrientationFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "orientation": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Palette": {
+      "origin": "PaletteAdded",
+      "kind": "response",
+      "fields": {
+        "color": {
+          "type": {
+            "list": {
+              "class": "ColorPalette"
+            }
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "list": {
+              "class": "DimmingFeatureBasic"
+            }
+          },
+          "required": true
+        },
+        "color_temperature": {
+          "type": {
+            "list": {
+              "class": "ColorTemperaturePalette"
+            }
+          },
+          "required": true
+        },
+        "effects": {
+          "type": {
+            "list": {
+              "class": "EffectFeatureBasic"
+            }
+          },
+          "required": false
+        },
+        "effects_v2": {
+          "type": {
+            "list": {
+              "class": "EffectV2FeatureBasic"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "PaletteAdd": {
+      "origin": "PaletteAdd",
+      "kind": "add",
+      "fields": {
+        "color": {
+          "type": {
+            "list": {
+              "class": "ColorPaletteAdd"
+            }
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "list": {
+              "class": "DimmingFeatureBasicAdd"
+            }
+          },
+          "required": true
+        },
+        "color_temperature": {
+          "type": {
+            "list": {
+              "class": "ColorTemperaturePaletteAdd"
+            }
+          },
+          "required": true
+        },
+        "effects_v2": {
+          "type": {
+            "list": {
+              "class": "EffectV2FeatureBasicAdd"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "PaletteUpdate": {
+      "origin": "PaletteUpdate",
+      "kind": "update",
+      "fields": {
+        "color": {
+          "type": {
+            "list": {
+              "class": "ColorPaletteUpdate"
+            }
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "list": {
+              "class": "DimmingFeatureBasicUpdate"
+            }
+          },
+          "required": true
+        },
+        "color_temperature": {
+          "type": {
+            "list": {
+              "class": "ColorTemperaturePaletteUpdate"
+            }
+          },
+          "required": true
+        },
+        "effects_v2": {
+          "type": {
+            "list": {
+              "class": "EffectV2FeatureBasicUpdate"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "Participant": {
+      "origin": "ParticipantAdded",
+      "kind": "response",
+      "fields": {
+        "resource": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "status": {
+          "type": {
+            "class": "ParticipantStatus"
+          },
+          "required": false
+        }
+      }
+    },
+    "ParticipantAdd": {
+      "origin": "ParticipantAdd",
+      "kind": "add",
+      "fields": {
+        "resource": {
+          "type": {
+            "class": "ResourceIdentifierAdd"
+          },
+          "required": true
+        }
+      }
+    },
+    "ParticipantStatus": {
+      "origin": "ParticipantStatusAdded",
+      "kind": "response",
+      "fields": {
+        "health": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "healthy",
+            "unhealthy",
+            "degraded",
+            "recovering",
+            "unrecoverable",
+            "not_running",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "ParticipantUpdate": {
+      "origin": "ParticipantUpdate",
+      "kind": "update",
+      "fields": {
+        "resource": {
+          "type": {
+            "class": "ResourceIdentifierUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "PixelPosition": {
+      "origin": "PixelPositionAdded",
+      "kind": "response",
+      "fields": {
+        "index": {
+          "type": "Integer",
+          "required": true
+        },
+        "position": {
+          "type": {
+            "class": "CoordinateMeters"
+          },
+          "required": true
+        }
+      }
+    },
+    "PixelPositionUpdate": {
+      "origin": "PixelPositionUpdate",
+      "kind": "update",
+      "fields": {
+        "index": {
+          "type": "Integer",
+          "required": true
+        },
+        "position": {
+          "type": {
+            "class": "CoordinateMetersUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "PlaybackFeature": {
+      "origin": "PlaybackFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "content": {
+          "type": {
+            "class": "ContentObject"
+          },
+          "required": false
+        }
+      }
+    },
+    "Position": {
+      "origin": "PositionAdded",
+      "kind": "response",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        },
+        "z": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "PositionAdd": {
+      "origin": "PositionAdd",
+      "kind": "add",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        },
+        "z": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "PositionUpdate": {
+      "origin": "PositionUpdate",
+      "kind": "update",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        },
+        "z": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "PowerOutputConfiguration": {
+      "origin": "PowerOutputConfigurationAdded",
+      "kind": "response",
+      "fields": {
+        "linked_services": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": false
+        },
+        "output_mode": {
+          "type": {
+            "class": "PowerOutputModeFeature"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "PowerOutputConfigurationUpdate": {
+      "origin": "PowerOutputConfigurationUpdate",
+      "kind": "update",
+      "fields": {
+        "output_mode": {
+          "type": {
+            "class": "PowerOutputModeFeatureUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "PowerOutputModeFeature": {
+      "origin": "PowerOutputModeFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": false
+        },
+        "mode_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "PowerOutputModeFeatureUpdate": {
+      "origin": "PowerOutputModeFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "PowerupFeature": {
+      "origin": "PowerupFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "preset": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "safety",
+            "powerfail",
+            "last_on_state",
+            "custom",
+            "unknown"
+          ]
+        },
+        "configured": {
+          "type": "Boolean",
+          "required": true
+        },
+        "on": {
+          "type": {
+            "class": "PowerupFeatureOn"
+          },
+          "required": true
+        },
+        "dimming": {
+          "type": {
+            "class": "PowerupFeatureDimming"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "PowerupFeatureColor"
+          },
+          "required": false
+        }
+      }
+    },
+    "PowerupFeatureColor": {
+      "origin": "PowerupFeatureColorAdded",
+      "kind": "response",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "color_temperature",
+            "color",
+            "previous"
+          ]
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasic"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasic"
+          },
+          "required": false
+        }
+      }
+    },
+    "PowerupFeatureColorUpdate": {
+      "origin": "PowerupFeatureColorUpdate",
+      "kind": "update",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "color_temperature",
+            "color",
+            "previous"
+          ]
+        },
+        "color_temperature": {
+          "type": {
+            "class": "ColorTemperatureFeatureBasicUpdate"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "ColorFeatureBasicUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "PowerupFeatureDimming": {
+      "origin": "PowerupFeatureDimmingAdded",
+      "kind": "response",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "dimming",
+            "previous"
+          ]
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasic"
+          },
+          "required": false
+        }
+      }
+    },
+    "PowerupFeatureDimmingUpdate": {
+      "origin": "PowerupFeatureDimmingUpdate",
+      "kind": "update",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "dimming",
+            "previous"
+          ]
+        },
+        "dimming": {
+          "type": {
+            "class": "DimmingFeatureBasicUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "PowerupFeatureOn": {
+      "origin": "PowerupFeatureOnAdded",
+      "kind": "response",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        "on": {
+          "type": {
+            "class": "OnFeatureBasic"
+          },
+          "required": false
+        }
+      }
+    },
+    "PowerupFeatureOnUpdate": {
+      "origin": "PowerupFeatureOnUpdate",
+      "kind": "update",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        "on": {
+          "type": {
+            "class": "OnFeatureBasicUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "PowerupFeatureUpdate": {
+      "origin": "PowerupFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "preset": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "safety",
+            "powerfail",
+            "last_on_state",
+            "custom",
+            "unknown"
+          ]
+        },
+        "on": {
+          "type": {
+            "class": "PowerupFeatureOnUpdate"
+          },
+          "required": false
+        },
+        "dimming": {
+          "type": {
+            "class": "PowerupFeatureDimmingUpdate"
+          },
+          "required": false
+        },
+        "color": {
+          "type": {
+            "class": "PowerupFeatureColorUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "Quaternion": {
+      "origin": "QuaternionAdded",
+      "kind": "response",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        },
+        "z": {
+          "type": "Numeric",
+          "required": true
+        },
+        "w": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "QuaternionUpdate": {
+      "origin": "QuaternionUpdate",
+      "kind": "update",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        },
+        "z": {
+          "type": "Numeric",
+          "required": true
+        },
+        "w": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "RecallFeature": {
+      "origin": "RecallFeatureAdded",
+      "kind": "response",
+      "fields": {}
+    },
+    "RecallFeatureUpdate": {
+      "origin": "RecallFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "active",
+            "static",
+            "dynamic_palette"
+          ]
+        }
+      }
+    },
+    "RelativeRotary": {
+      "origin": "RelativeRotaryAdded",
+      "kind": "response",
+      "fields": {
+        "relative_rotary": {
+          "type": {
+            "class": "RelativeRotaryFeature"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "RelativeRotaryEvent": {
+      "origin": "RelativeRotaryEventAdded",
+      "kind": "response",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "start",
+            "repeat",
+            "unknown"
+          ]
+        },
+        "rotation": {
+          "type": {
+            "class": "RelativeRotation"
+          },
+          "required": true
+        }
+      }
+    },
+    "RelativeRotaryFeature": {
+      "origin": "RelativeRotaryFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "last_event": {
+          "type": {
+            "class": "RelativeRotaryEvent"
+          },
+          "required": false
+        },
+        "rotary_report": {
+          "type": {
+            "class": "RelativeRotaryReport"
+          },
+          "required": false
+        }
+      }
+    },
+    "RelativeRotaryReport": {
+      "origin": "RelativeRotaryReportAdded",
+      "kind": "response",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "start",
+            "repeat",
+            "unknown"
+          ]
+        },
+        "rotation": {
+          "type": {
+            "class": "RelativeRotation"
+          },
+          "required": true
+        },
+        "updated": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "RelativeRotation": {
+      "origin": "RelativeRotationAdded",
+      "kind": "response",
+      "fields": {
+        "direction": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "clock_wise",
+            "counter_clock_wise"
+          ]
+        },
+        "steps": {
+          "type": "Integer",
+          "required": true
+        },
+        "duration": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "ResourceDependee": {
+      "origin": "ResourceDependeeAdded",
+      "kind": "response",
+      "fields": {
+        "target": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "level": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "non_critical",
+            "critical"
+          ]
+        }
+      }
+    },
+    "ResourceIdentifier": {
+      "origin": "ResourceIdentifierAdded",
+      "kind": "response",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "device",
+            "bridge_home",
+            "room",
+            "zone",
+            "light",
+            "button",
+            "relative_rotary",
+            "temperature",
+            "light_level",
+            "motion",
+            "entertainment",
+            "grouped_light",
+            "device_power",
+            "device_update",
+            "ip_connectivity",
+            "zigbee_bridge_connectivity",
+            "zigbee_connectivity",
+            "zgp_connectivity",
+            "remote_access",
+            "bridge",
+            "device_discovery",
+            "system_update",
+            "scene",
+            "smart_scene",
+            "entertainment_configuration",
+            "public_image",
+            "auth_v1",
+            "behavior_script",
+            "behavior_instance",
+            "geofence",
+            "geofence_client",
+            "depender",
+            "homekit",
+            "matter",
+            "matter_fabric",
+            "contact",
+            "tamper",
+            "camera_motion",
+            "convenience_area_motion",
+            "security_area_motion",
+            "motion_area_configuration",
+            "service_group",
+            "private_group",
+            "grouped_motion",
+            "grouped_light_level",
+            "bell_button",
+            "clip",
+            "device_software_update",
+            "geolocation",
+            "speaker",
+            "switch_input_configuration",
+            "zigbee_device_discovery",
+            "wifi_connectivity",
+            "motion_area_candidate",
+            "recipe",
+            "taurus_7455",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "ResourceIdentifierAdd": {
+      "origin": "ResourceIdentifierAdd",
+      "kind": "add",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "device",
+            "bridge_home",
+            "room",
+            "zone",
+            "light",
+            "button",
+            "relative_rotary",
+            "temperature",
+            "light_level",
+            "motion",
+            "entertainment",
+            "grouped_light",
+            "device_power",
+            "device_update",
+            "ip_connectivity",
+            "zigbee_bridge_connectivity",
+            "zigbee_connectivity",
+            "zgp_connectivity",
+            "remote_access",
+            "bridge",
+            "device_discovery",
+            "system_update",
+            "scene",
+            "smart_scene",
+            "entertainment_configuration",
+            "public_image",
+            "auth_v1",
+            "behavior_script",
+            "behavior_instance",
+            "geofence",
+            "geofence_client",
+            "depender",
+            "homekit",
+            "matter",
+            "matter_fabric",
+            "contact",
+            "tamper",
+            "camera_motion",
+            "convenience_area_motion",
+            "security_area_motion",
+            "motion_area_configuration",
+            "service_group",
+            "private_group",
+            "grouped_motion",
+            "grouped_light_level",
+            "bell_button",
+            "clip",
+            "device_software_update",
+            "geolocation",
+            "speaker",
+            "switch_input_configuration",
+            "zigbee_device_discovery",
+            "wifi_connectivity",
+            "motion_area_candidate",
+            "recipe",
+            "taurus_7455",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "ResourceIdentifierUpdate": {
+      "origin": "ResourceIdentifierUpdate",
+      "kind": "update",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "device",
+            "bridge_home",
+            "room",
+            "zone",
+            "light",
+            "button",
+            "relative_rotary",
+            "temperature",
+            "light_level",
+            "motion",
+            "entertainment",
+            "grouped_light",
+            "device_power",
+            "device_update",
+            "ip_connectivity",
+            "zigbee_bridge_connectivity",
+            "zigbee_connectivity",
+            "zgp_connectivity",
+            "remote_access",
+            "bridge",
+            "device_discovery",
+            "system_update",
+            "scene",
+            "smart_scene",
+            "entertainment_configuration",
+            "public_image",
+            "auth_v1",
+            "behavior_script",
+            "behavior_instance",
+            "geofence",
+            "geofence_client",
+            "depender",
+            "homekit",
+            "matter",
+            "matter_fabric",
+            "contact",
+            "tamper",
+            "camera_motion",
+            "convenience_area_motion",
+            "security_area_motion",
+            "motion_area_configuration",
+            "service_group",
+            "private_group",
+            "grouped_motion",
+            "grouped_light_level",
+            "bell_button",
+            "clip",
+            "device_software_update",
+            "geolocation",
+            "speaker",
+            "switch_input_configuration",
+            "zigbee_device_discovery",
+            "wifi_connectivity",
+            "motion_area_candidate",
+            "recipe",
+            "taurus_7455",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "Room": {
+      "origin": "RoomAdded",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "RoomMetadata"
+          },
+          "required": true
+        },
+        "geometry": {
+          "type": {
+            "class": "Geometry"
+          },
+          "required": false
+        },
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "services": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "RoomAdd": {
+      "origin": "RoomAdd",
+      "kind": "add",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "RoomMetadataAdd"
+          },
+          "required": true
+        },
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifierAdd"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "RoomMetadata": {
+      "origin": "RoomMetadataAdded",
+      "kind": "response",
+      "fields": {
+        "archetype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "living_room",
+            "kitchen",
+            "dining",
+            "bedroom",
+            "kids_bedroom",
+            "bathroom",
+            "nursery",
+            "recreation",
+            "office",
+            "gym",
+            "hallway",
+            "toilet",
+            "front_door",
+            "garage",
+            "terrace",
+            "garden",
+            "driveway",
+            "carport",
+            "home",
+            "downstairs",
+            "upstairs",
+            "top_floor",
+            "attic",
+            "guest_room",
+            "staircase",
+            "lounge",
+            "man_cave",
+            "computer",
+            "studio",
+            "music",
+            "tv",
+            "reading",
+            "closet",
+            "storage",
+            "laundry_room",
+            "balcony",
+            "porch",
+            "barbecue",
+            "pool",
+            "other"
+          ]
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "RoomMetadataAdd": {
+      "origin": "RoomMetadataAdd",
+      "kind": "add",
+      "fields": {
+        "archetype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "living_room",
+            "kitchen",
+            "dining",
+            "bedroom",
+            "kids_bedroom",
+            "bathroom",
+            "nursery",
+            "recreation",
+            "office",
+            "gym",
+            "hallway",
+            "toilet",
+            "front_door",
+            "garage",
+            "terrace",
+            "garden",
+            "driveway",
+            "carport",
+            "home",
+            "downstairs",
+            "upstairs",
+            "top_floor",
+            "attic",
+            "guest_room",
+            "staircase",
+            "lounge",
+            "man_cave",
+            "computer",
+            "studio",
+            "music",
+            "tv",
+            "reading",
+            "closet",
+            "storage",
+            "laundry_room",
+            "balcony",
+            "porch",
+            "barbecue",
+            "pool",
+            "other"
+          ]
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "RoomMetadataUpdate": {
+      "origin": "RoomMetadataUpdate",
+      "kind": "update",
+      "fields": {
+        "archetype": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "living_room",
+            "kitchen",
+            "dining",
+            "bedroom",
+            "kids_bedroom",
+            "bathroom",
+            "nursery",
+            "recreation",
+            "office",
+            "gym",
+            "hallway",
+            "toilet",
+            "front_door",
+            "garage",
+            "terrace",
+            "garden",
+            "driveway",
+            "carport",
+            "home",
+            "downstairs",
+            "upstairs",
+            "top_floor",
+            "attic",
+            "guest_room",
+            "staircase",
+            "lounge",
+            "man_cave",
+            "computer",
+            "studio",
+            "music",
+            "tv",
+            "reading",
+            "closet",
+            "storage",
+            "laundry_room",
+            "balcony",
+            "porch",
+            "barbecue",
+            "pool",
+            "other"
+          ]
+        },
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "RoomUpdate": {
+      "origin": "RoomUpdate",
+      "kind": "update",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "RoomMetadataUpdate"
+          },
+          "required": false
+        },
+        "geometry": {
+          "type": {
+            "class": "GeometryUpdate"
+          },
+          "required": false
+        },
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifierUpdate"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "Rotation2dBasic": {
+      "origin": "Rotation2dBasicAdded",
+      "kind": "response",
+      "fields": {
+        "angle": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "Rotation2dBasicAdd": {
+      "origin": "Rotation2dBasicAdd",
+      "kind": "add",
+      "fields": {
+        "angle": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "Rotation2dBasicUpdate": {
+      "origin": "Rotation2dBasicUpdate",
+      "kind": "update",
+      "fields": {
+        "angle": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "Rotation2dVisualOffset": {
+      "origin": "Rotation2dVisualOffsetAdded",
+      "kind": "response",
+      "fields": {
+        "offset": {
+          "type": "Integer",
+          "required": false
+        },
+        "direction": {
+          "type": "String",
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Rotation2dVisualOffsetUpdate": {
+      "origin": "Rotation2dVisualOffsetUpdate",
+      "kind": "update",
+      "fields": {
+        "offset": {
+          "type": "Integer",
+          "required": true
+        },
+        "direction": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "Rotation2dWithValidFlag": {
+      "origin": "Rotation2dWithValidFlagAdded",
+      "kind": "response",
+      "fields": {
+        "angle_valid": {
+          "type": "Boolean",
+          "required": false
+        },
+        "angle": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "Rotation2dWithValidFlagUpdate": {
+      "origin": "Rotation2dWithValidFlagUpdate",
+      "kind": "update",
+      "fields": {
+        "angle": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "Scene": {
+      "origin": "SceneAdded",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "SceneMetadata"
+          },
+          "required": true
+        },
+        "group": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "speed": {
+          "type": "Numeric",
+          "required": true
+        },
+        "auto_dynamic": {
+          "type": "Boolean",
+          "required": false
+        },
+        "status": {
+          "type": {
+            "class": "SceneStatus"
+          },
+          "required": false
+        },
+        "mapping": {
+          "type": {
+            "class": "SceneMapping"
+          },
+          "required": false
+        },
+        "last_actions_update": {
+          "type": {
+            "class": "SceneLastActionsUpdate"
+          },
+          "required": false
+        },
+        "actions": {
+          "type": {
+            "list": {
+              "class": "Action"
+            }
+          },
+          "required": true
+        },
+        "palette": {
+          "type": {
+            "class": "Palette"
+          },
+          "required": false
+        },
+        "recall": {
+          "type": {
+            "class": "RecallFeature"
+          },
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "SceneAdd": {
+      "origin": "SceneAdd",
+      "kind": "add",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "SceneMetadataAdd"
+          },
+          "required": true
+        },
+        "group": {
+          "type": {
+            "class": "ResourceIdentifierAdd"
+          },
+          "required": true
+        },
+        "actions": {
+          "type": {
+            "list": {
+              "class": "ActionAdd"
+            }
+          },
+          "required": true
+        },
+        "speed": {
+          "type": "Numeric",
+          "required": false
+        },
+        "auto_dynamic": {
+          "type": "Boolean",
+          "required": false
+        },
+        "mapping": {
+          "type": {
+            "class": "SceneMappingAdd"
+          },
+          "required": false
+        },
+        "palette": {
+          "type": {
+            "class": "PaletteAdd"
+          },
+          "required": false
+        }
+      }
+    },
+    "SceneLastActionsUpdate": {
+      "origin": "SceneLastActionsUpdateAdded",
+      "kind": "response",
+      "fields": {
+        "source": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "clip",
+            "autogrow",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "SceneMapping": {
+      "origin": "SceneMappingAdded",
+      "kind": "response",
+      "fields": {
+        "algorithm": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "classic",
+            "spatial",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "SceneMappingAdd": {
+      "origin": "SceneMappingAdd",
+      "kind": "add",
+      "fields": {}
+    },
+    "SceneMappingUpdate": {
+      "origin": "SceneMappingUpdate",
+      "kind": "update",
+      "fields": {
+        "algorithm": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "SceneMetadata": {
+      "origin": "SceneMetadataAdded",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "image": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": false
+        },
+        "appdata": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "SceneMetadataAdd": {
+      "origin": "SceneMetadataAdd",
+      "kind": "add",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "image": {
+          "type": {
+            "class": "ResourceIdentifierAdd"
+          },
+          "required": false
+        }
+      }
+    },
+    "SceneMetadataUpdate": {
+      "origin": "SceneMetadataUpdate",
+      "kind": "update",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "SceneStatus": {
+      "origin": "SceneStatusAdded",
+      "kind": "response",
+      "fields": {
+        "active": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "inactive",
+            "static",
+            "dynamic_palette",
+            "unknown"
+          ]
+        },
+        "last_recall": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "SceneUpdate": {
+      "origin": "SceneUpdate",
+      "kind": "update",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "SceneMetadataUpdate"
+          },
+          "required": false
+        },
+        "speed": {
+          "type": "Numeric",
+          "required": false
+        },
+        "auto_dynamic": {
+          "type": "Boolean",
+          "required": false
+        },
+        "mapping": {
+          "type": {
+            "class": "SceneMappingUpdate"
+          },
+          "required": false
+        },
+        "actions": {
+          "type": {
+            "list": {
+              "class": "ActionUpdate"
+            }
+          },
+          "required": false
+        },
+        "palette": {
+          "type": {
+            "class": "PaletteUpdate"
+          },
+          "required": false
+        },
+        "recall": {
+          "type": {
+            "class": "RecallFeatureUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "ScriptMetadata": {
+      "origin": "ScriptMetadataAdded",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false
+        },
+        "category": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "automation",
+            "entertainment",
+            "accessory",
+            "other"
+          ]
+        }
+      }
+    },
+    "SecurityAreaMotion": {
+      "origin": "SecurityAreaMotionAdded",
+      "kind": "response",
+      "fields": {
+        "sensitivity": {
+          "type": {
+            "class": "SensitivityAttributeFeature"
+          },
+          "required": false
+        },
+        "motion": {
+          "type": {
+            "class": "MotionSensingFeature"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "SecurityAreaMotionUpdate": {
+      "origin": "SecurityAreaMotionUpdate",
+      "kind": "update",
+      "fields": {
+        "sensitivity": {
+          "type": {
+            "class": "SensitivityAttributeFeatureUpdate"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "Segment": {
+      "origin": "SegmentAdded",
+      "kind": "response",
+      "fields": {
+        "start": {
+          "type": "Integer",
+          "required": true
+        },
+        "length": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "SegmentReference": {
+      "origin": "SegmentReferenceAdded",
+      "kind": "response",
+      "fields": {
+        "service": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "index": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "SegmentationProperties": {
+      "origin": "SegmentationPropertiesAdded",
+      "kind": "response",
+      "fields": {
+        "configurable": {
+          "type": "Boolean",
+          "required": true
+        },
+        "max_segments": {
+          "type": "Integer",
+          "required": true
+        },
+        "segments": {
+          "type": {
+            "list": {
+              "class": "Segment"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "SensitivityAttributeFeature": {
+      "origin": "SensitivityAttributeFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "sensitivity": {
+          "type": "Integer",
+          "required": true
+        },
+        "sensitivity_max": {
+          "type": "Integer",
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "set",
+            "changing",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "SensitivityAttributeFeatureUpdate": {
+      "origin": "SensitivityAttributeFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "sensitivity": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "ServiceGroup": {
+      "origin": "ServiceGroupAdded",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "NamedResourceMetadata"
+          },
+          "required": true
+        },
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "services": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ServiceGroupAdd": {
+      "origin": "ServiceGroupAdd",
+      "kind": "add",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "NamedResourceMetadataAdd"
+          },
+          "required": true
+        },
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifierAdd"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "ServiceGroupUpdate": {
+      "origin": "ServiceGroupUpdate",
+      "kind": "update",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "NamedResourceMetadataUpdate"
+          },
+          "required": false
+        },
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifierUpdate"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "ServiceLocation": {
+      "origin": "ServiceLocationAdded",
+      "kind": "response",
+      "fields": {
+        "service": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "position": {
+          "type": {
+            "class": "Position"
+          },
+          "required": false
+        },
+        "positions": {
+          "type": {
+            "list": {
+              "class": "Position"
+            }
+          },
+          "required": true
+        },
+        "equalization_factor": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "ServiceLocationAdd": {
+      "origin": "ServiceLocationAdd",
+      "kind": "add",
+      "fields": {
+        "service": {
+          "type": {
+            "class": "ResourceIdentifierAdd"
+          },
+          "required": true
+        },
+        "positions": {
+          "type": {
+            "list": {
+              "class": "PositionAdd"
+            }
+          },
+          "required": true
+        },
+        "equalization_factor": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "ServiceLocationUpdate": {
+      "origin": "ServiceLocationUpdate",
+      "kind": "update",
+      "fields": {
+        "service": {
+          "type": {
+            "class": "ResourceIdentifierUpdate"
+          },
+          "required": true
+        },
+        "positions": {
+          "type": {
+            "list": {
+              "class": "PositionUpdate"
+            }
+          },
+          "required": true
+        },
+        "equalization_factor": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "SignalingFeature": {
+      "origin": "SignalingFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "status": {
+          "type": {
+            "class": "SignalingStatus"
+          },
+          "required": false
+        },
+        "signal_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "no_signal",
+            "on_off",
+            "on_off_color",
+            "alternating",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "SignalingFeatureBasic": {
+      "origin": "SignalingFeatureBasicAdded",
+      "kind": "response",
+      "fields": {
+        "signal_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "no_signal",
+            "on_off",
+            "on_off_color",
+            "alternating",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "SignalingFeatureUpdate": {
+      "origin": "SignalingFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "signal": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_signal",
+            "on_off",
+            "on_off_color",
+            "alternating",
+            "unknown"
+          ]
+        },
+        "duration": {
+          "type": "Integer",
+          "required": false
+        },
+        "colors": {
+          "type": {
+            "list": {
+              "class": "ColorFeatureBasicUpdate"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "SignalingStatus": {
+      "origin": "SignalingStatusAdded",
+      "kind": "response",
+      "fields": {
+        "signal": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "no_signal",
+            "on_off",
+            "on_off_color",
+            "alternating",
+            "unknown"
+          ]
+        },
+        "estimated_end": {
+          "type": "String",
+          "required": false
+        },
+        "colors": {
+          "type": {
+            "list": {
+              "class": "ColorFeatureBasic"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "SmartScene": {
+      "origin": "SmartSceneAdded",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "SceneMetadata"
+          },
+          "required": true
+        },
+        "group": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "week_timeslots": {
+          "type": {
+            "list": {
+              "class": "DayTimeslots"
+            }
+          },
+          "required": true
+        },
+        "transition_duration": {
+          "type": "Integer",
+          "required": false
+        },
+        "active_timeslot": {
+          "type": {
+            "class": "ActiveTimeslot"
+          },
+          "required": false
+        },
+        "state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "active",
+            "inactive"
+          ]
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "SmartSceneAdd": {
+      "origin": "SmartSceneAdd",
+      "kind": "add",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "SceneMetadataAdd"
+          },
+          "required": true
+        },
+        "group": {
+          "type": {
+            "class": "ResourceIdentifierAdd"
+          },
+          "required": true
+        },
+        "week_timeslots": {
+          "type": {
+            "list": {
+              "class": "DayTimeslotsAdd"
+            }
+          },
+          "required": true
+        },
+        "transition_duration": {
+          "type": "Integer",
+          "required": false
+        },
+        "recall": {
+          "type": {
+            "class": "SmartSceneRecallFeatureAdd"
+          },
+          "required": false
+        }
+      }
+    },
+    "SmartSceneRecallFeatureAdd": {
+      "origin": "SmartSceneRecallFeatureAdd",
+      "kind": "add",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "activate",
+            "deactivate"
+          ]
+        }
+      }
+    },
+    "SmartSceneRecallFeatureUpdate": {
+      "origin": "SmartSceneRecallFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "activate",
+            "deactivate"
+          ]
+        }
+      }
+    },
+    "SmartSceneTimeslot": {
+      "origin": "SmartSceneTimeslotAdded",
+      "kind": "response",
+      "fields": {
+        "start_time": {
+          "type": {
+            "class": "TimePoint"
+          },
+          "required": true
+        },
+        "target": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        }
+      }
+    },
+    "SmartSceneTimeslotAdd": {
+      "origin": "SmartSceneTimeslotAdd",
+      "kind": "add",
+      "fields": {
+        "start_time": {
+          "type": {
+            "class": "TimePointAdd"
+          },
+          "required": true
+        },
+        "target": {
+          "type": {
+            "class": "ResourceIdentifierAdd"
+          },
+          "required": true
+        }
+      }
+    },
+    "SmartSceneTimeslotUpdate": {
+      "origin": "SmartSceneTimeslotUpdate",
+      "kind": "update",
+      "fields": {
+        "start_time": {
+          "type": {
+            "class": "TimePointUpdate"
+          },
+          "required": true
+        },
+        "target": {
+          "type": {
+            "class": "ResourceIdentifierUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "SmartSceneUpdate": {
+      "origin": "SmartSceneUpdate",
+      "kind": "update",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "SceneMetadataUpdate"
+          },
+          "required": false
+        },
+        "week_timeslots": {
+          "type": {
+            "list": {
+              "class": "DayTimeslotsUpdate"
+            }
+          },
+          "required": false
+        },
+        "transition_duration": {
+          "type": "Integer",
+          "required": false
+        },
+        "recall": {
+          "type": {
+            "class": "SmartSceneRecallFeatureUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "Speaker": {
+      "origin": "SpeakerAdded",
+      "kind": "response",
+      "fields": {
+        "alarm": {
+          "type": {
+            "class": "SpeakerAlarmFeature"
+          },
+          "required": false
+        },
+        "chime": {
+          "type": {
+            "class": "SpeakerFeature"
+          },
+          "required": false
+        },
+        "alert": {
+          "type": {
+            "class": "SpeakerFeature"
+          },
+          "required": false
+        },
+        "mute": {
+          "type": {
+            "class": "MuteFeature"
+          },
+          "required": false
+        },
+        "volume": {
+          "type": {
+            "class": "AbsoluteVolumeFeature"
+          },
+          "required": false
+        },
+        "volume_delta": {
+          "type": {
+            "class": "VolumeDeltaFeature"
+          },
+          "required": false
+        },
+        "playback": {
+          "type": {
+            "class": "PlaybackFeature"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "SpeakerAlarmFeature": {
+      "origin": "SpeakerAlarmFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "sound_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "unknown",
+            "no_sound",
+            "alert",
+            "bleep",
+            "ding_dong_classic",
+            "ding_dong_modern",
+            "rise",
+            "siren",
+            "westminster_classic",
+            "westminster_modern",
+            "ding_dong_xylo",
+            "hue_default",
+            "sonar",
+            "swing",
+            "bright",
+            "glow",
+            "bounce",
+            "reveal",
+            "welcome",
+            "bright_modern",
+            "fairy",
+            "galaxy",
+            "echo"
+          ]
+        },
+        "status": {
+          "type": {
+            "class": "Status"
+          },
+          "required": true
+        }
+      }
+    },
+    "SpeakerAlarmFeatureUpdate": {
+      "origin": "SpeakerAlarmFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "sound": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "unknown",
+            "no_sound",
+            "alert",
+            "bleep",
+            "ding_dong_classic",
+            "ding_dong_modern",
+            "rise",
+            "siren",
+            "westminster_classic",
+            "westminster_modern",
+            "ding_dong_xylo",
+            "hue_default",
+            "sonar",
+            "swing",
+            "bright",
+            "glow",
+            "bounce",
+            "reveal",
+            "welcome",
+            "bright_modern",
+            "fairy",
+            "galaxy",
+            "echo"
+          ]
+        },
+        "duration": {
+          "type": "Integer",
+          "required": false
+        },
+        "volume": {
+          "type": {
+            "class": "VolumeUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "SpeakerFeature": {
+      "origin": "SpeakerFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "sound_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "unknown",
+            "no_sound",
+            "alert",
+            "bleep",
+            "ding_dong_classic",
+            "ding_dong_modern",
+            "rise",
+            "siren",
+            "westminster_classic",
+            "westminster_modern",
+            "ding_dong_xylo",
+            "hue_default",
+            "sonar",
+            "swing",
+            "bright",
+            "glow",
+            "bounce",
+            "reveal",
+            "welcome",
+            "bright_modern",
+            "fairy",
+            "galaxy",
+            "echo"
+          ]
+        },
+        "status": {
+          "type": {
+            "class": "Status"
+          },
+          "required": true
+        }
+      }
+    },
+    "SpeakerFeatureUpdate": {
+      "origin": "SpeakerFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "sound": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "unknown",
+            "no_sound",
+            "alert",
+            "bleep",
+            "ding_dong_classic",
+            "ding_dong_modern",
+            "rise",
+            "siren",
+            "westminster_classic",
+            "westminster_modern",
+            "ding_dong_xylo",
+            "hue_default",
+            "sonar",
+            "swing",
+            "bright",
+            "glow",
+            "bounce",
+            "reveal",
+            "welcome",
+            "bright_modern",
+            "fairy",
+            "galaxy",
+            "echo"
+          ]
+        },
+        "volume": {
+          "type": {
+            "class": "VolumeUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "SpeakerUpdate": {
+      "origin": "SpeakerUpdate",
+      "kind": "update",
+      "fields": {
+        "alarm": {
+          "type": {
+            "class": "SpeakerAlarmFeatureUpdate"
+          },
+          "required": false
+        },
+        "chime": {
+          "type": {
+            "class": "SpeakerFeatureUpdate"
+          },
+          "required": false
+        },
+        "mute": {
+          "type": {
+            "class": "MuteFeatureUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "Status": {
+      "origin": "StatusAdded",
+      "kind": "response",
+      "fields": {
+        "sound": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "unknown",
+            "no_sound",
+            "alert",
+            "bleep",
+            "ding_dong_classic",
+            "ding_dong_modern",
+            "rise",
+            "siren",
+            "westminster_classic",
+            "westminster_modern",
+            "ding_dong_xylo",
+            "hue_default",
+            "sonar",
+            "swing",
+            "bright",
+            "glow",
+            "bounce",
+            "reveal",
+            "welcome",
+            "bright_modern",
+            "fairy",
+            "galaxy",
+            "echo"
+          ]
+        },
+        "sound_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "unknown",
+            "no_sound",
+            "alert",
+            "bleep",
+            "ding_dong_classic",
+            "ding_dong_modern",
+            "rise",
+            "siren",
+            "westminster_classic",
+            "westminster_modern",
+            "ding_dong_xylo",
+            "hue_default",
+            "sonar",
+            "swing",
+            "bright",
+            "glow",
+            "bounce",
+            "reveal",
+            "welcome",
+            "bright_modern",
+            "fairy",
+            "galaxy",
+            "echo"
+          ]
+        },
+        "estimated_end": {
+          "type": {
+            "class": "StatusEstimatedEnd"
+          },
+          "required": false
+        }
+      }
+    },
+    "StatusEstimatedEnd": {
+      "origin": "StatusEstimatedEndAdded",
+      "kind": "response",
+      "fields": {
+        "estimate": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "StreamingProxy": {
+      "origin": "StreamingProxyAdded",
+      "kind": "response",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "auto",
+            "manual"
+          ]
+        },
+        "node": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        }
+      }
+    },
+    "StreamingProxyAdd": {
+      "origin": "StreamingProxyAdd",
+      "kind": "add",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true
+        },
+        "node": {
+          "type": {
+            "class": "ResourceIdentifierAdd"
+          },
+          "required": false
+        }
+      }
+    },
+    "StreamingProxyUpdate": {
+      "origin": "StreamingProxyUpdate",
+      "kind": "update",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true
+        },
+        "node": {
+          "type": {
+            "class": "ResourceIdentifierUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "SunToday": {
+      "origin": "SunTodayAdded",
+      "kind": "response",
+      "fields": {
+        "sunset_time": {
+          "type": "String",
+          "required": true
+        },
+        "day_type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "normal_day",
+            "polar_day",
+            "polar_night",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "SwitchInputConfiguration": {
+      "origin": "SwitchInputConfigurationAdded",
+      "kind": "response",
+      "fields": {
+        "switch_mode": {
+          "type": {
+            "class": "SwitchModeFeature"
+          },
+          "required": false
+        },
+        "linked_services": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "SwitchInputMetadata": {
+      "origin": "SwitchInputMetadataAdded",
+      "kind": "response",
+      "fields": {
+        "control_id": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "SwitchModeFeature": {
+      "origin": "SwitchModeFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "switch_single_rocker",
+            "switch_single_pushbutton",
+            "switch_dual_rocker",
+            "switch_dual_pushbutton",
+            "unknown"
+          ]
+        },
+        "mode_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "switch_single_rocker",
+            "switch_single_pushbutton",
+            "switch_dual_rocker",
+            "switch_dual_pushbutton",
+            "unknown"
+          ]
+        },
+        "status": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "set",
+            "changing",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "SwitchModeFeatureUpdate": {
+      "origin": "SwitchModeFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "mode": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "Tamper": {
+      "origin": "TamperAdded",
+      "kind": "response",
+      "fields": {
+        "tamper_reports": {
+          "type": {
+            "list": {
+              "class": "TamperReport"
+            }
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "TamperReport": {
+      "origin": "TamperReportAdded",
+      "kind": "response",
+      "fields": {
+        "source": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "battery_door",
+            "unknown"
+          ]
+        },
+        "state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "tampered",
+            "not_tampered"
+          ]
+        },
+        "changed": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "Temperature": {
+      "origin": "TemperatureAdded",
+      "kind": "response",
+      "fields": {
+        "temperature": {
+          "type": {
+            "class": "TemperatureSensorFeature"
+          },
+          "required": true
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "TemperatureReport": {
+      "origin": "TemperatureReportAdded",
+      "kind": "response",
+      "fields": {
+        "temperature": {
+          "type": "Numeric",
+          "required": true
+        },
+        "changed": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "TemperatureSensorFeature": {
+      "origin": "TemperatureSensorFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "temperature": {
+          "type": "Numeric",
+          "required": false
+        },
+        "temperature_valid": {
+          "type": "Boolean",
+          "required": false
+        },
+        "temperature_report": {
+          "type": {
+            "class": "TemperatureReport"
+          },
+          "required": false
+        }
+      }
+    },
+    "Time": {
+      "origin": "TimeAdded",
+      "kind": "response",
+      "fields": {
+        "hour": {
+          "type": "Integer",
+          "required": true
+        },
+        "minute": {
+          "type": "Integer",
+          "required": true
+        },
+        "second": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "TimeAdd": {
+      "origin": "TimeAdd",
+      "kind": "add",
+      "fields": {
+        "hour": {
+          "type": "Integer",
+          "required": true
+        },
+        "minute": {
+          "type": "Integer",
+          "required": true
+        },
+        "second": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "TimePoint": {
+      "origin": "TimePointAdded",
+      "kind": "response",
+      "fields": {
+        "kind": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "time",
+            "sunrise",
+            "sunset"
+          ]
+        },
+        "time": {
+          "type": {
+            "class": "Time"
+          },
+          "required": false
+        }
+      }
+    },
+    "TimePointAdd": {
+      "origin": "TimePointAdd",
+      "kind": "add",
+      "fields": {
+        "kind": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "time",
+            "sunrise",
+            "sunset"
+          ]
+        },
+        "time": {
+          "type": {
+            "class": "TimeAdd"
+          },
+          "required": false
+        }
+      }
+    },
+    "TimePointUpdate": {
+      "origin": "TimePointUpdate",
+      "kind": "update",
+      "fields": {
+        "kind": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "time",
+            "sunrise",
+            "sunset"
+          ]
+        },
+        "time": {
+          "type": {
+            "class": "TimeUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "TimeUpdate": {
+      "origin": "TimeUpdate",
+      "kind": "update",
+      "fields": {
+        "hour": {
+          "type": "Integer",
+          "required": true
+        },
+        "minute": {
+          "type": "Integer",
+          "required": true
+        },
+        "second": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "TimeZoneFeature": {
+      "origin": "TimeZoneFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "time_zone": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "TimedEffectFeature": {
+      "origin": "TimedEffectFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "status_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "no_effect",
+            "sunrise",
+            "sunset",
+            "unknown"
+          ]
+        },
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "no_effect",
+            "sunrise",
+            "sunset",
+            "unknown"
+          ]
+        },
+        "effect_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "no_effect",
+            "sunrise",
+            "sunset",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "TimedEffectFeatureUpdate": {
+      "origin": "TimedEffectFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "effect": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "no_effect",
+            "sunrise",
+            "sunset",
+            "unknown"
+          ]
+        },
+        "duration": {
+          "type": "Integer",
+          "required": false
+        }
+      }
+    },
+    "UsertestFeature": {
+      "origin": "UsertestFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "usertest": {
+          "type": "Boolean",
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "set",
+            "changing",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "UsertestFeatureUpdate": {
+      "origin": "UsertestFeatureUpdate",
+      "kind": "update",
+      "fields": {
+        "usertest": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "VolumeDeltaFeature": {
+      "origin": "VolumeDeltaFeatureAdded",
+      "kind": "response",
+      "fields": {
+        "scope_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        }
+      }
+    },
+    "VolumeUpdate": {
+      "origin": "VolumeUpdate",
+      "kind": "update",
+      "fields": {
+        "level": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "WifiConnectivity": {
+      "origin": "WifiConnectivityAdded",
+      "kind": "response",
+      "fields": {
+        "has_ssid": {
+          "type": "Boolean",
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ZgpConnectivity": {
+      "origin": "ZgpConnectivityAdded",
+      "kind": "response",
+      "fields": {
+        "source_id": {
+          "type": "String",
+          "required": true
+        },
+        "channel_confirmed": {
+          "type": "String",
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "connected",
+            "disconnected",
+            "connectivity_issue",
+            "unidirectional_incoming",
+            "pending_discovery"
+          ]
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ZigbeeChannel": {
+      "origin": "ZigbeeChannelAdded",
+      "kind": "response",
+      "fields": {
+        "value": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "channel_11",
+            "channel_15",
+            "channel_20",
+            "channel_25",
+            "not_configured",
+            "unknown"
+          ]
+        },
+        "status": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "set",
+            "changing",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "ZigbeeChannelUpdate": {
+      "origin": "ZigbeeChannelUpdate",
+      "kind": "update",
+      "fields": {
+        "value": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "ZigbeeConnectivity": {
+      "origin": "ZigbeeConnectivityAdded",
+      "kind": "response",
+      "fields": {
+        "mac_address": {
+          "type": "String",
+          "required": true
+        },
+        "channel": {
+          "type": {
+            "class": "ZigbeeChannel"
+          },
+          "required": false
+        },
+        "extended_pan_id": {
+          "type": "String",
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "connected",
+            "disconnected",
+            "connectivity_issue",
+            "unidirectional_incoming",
+            "pending_discovery"
+          ]
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ZigbeeConnectivityUpdate": {
+      "origin": "ZigbeeConnectivityUpdate",
+      "kind": "update",
+      "fields": {
+        "channel": {
+          "type": {
+            "class": "ZigbeeChannelUpdate"
+          },
+          "required": true
+        }
+      }
+    },
+    "ZigbeeDeviceDiscovery": {
+      "origin": "ZigbeeDeviceDiscoveryAdded",
+      "kind": "response",
+      "fields": {
+        "status": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "active",
+            "ready",
+            "unknown"
+          ]
+        },
+        "action": {
+          "type": {
+            "class": "ZigbeeDeviceDiscoveryAction"
+          },
+          "required": false
+        },
+        "add_install_codes": {
+          "type": {
+            "class": "AddInstallCodes"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": {
+            "class": "ResourceIdentifier"
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ZigbeeDeviceDiscoveryAction": {
+      "origin": "ZigbeeDeviceDiscoveryActionAdded",
+      "kind": "response",
+      "fields": {
+        "action_type_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "search",
+            "search_allow_default_link_key",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "ZigbeeDeviceDiscoveryActionUpdate": {
+      "origin": "ZigbeeDeviceDiscoveryActionUpdate",
+      "kind": "update",
+      "fields": {
+        "action_type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "search",
+            "search_allow_default_link_key",
+            "unknown"
+          ]
+        },
+        "search_codes": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        }
+      }
+    },
+    "ZigbeeDeviceDiscoveryUpdate": {
+      "origin": "ZigbeeDeviceDiscoveryUpdate",
+      "kind": "update",
+      "fields": {
+        "action": {
+          "type": {
+            "class": "ZigbeeDeviceDiscoveryActionUpdate"
+          },
+          "required": false
+        },
+        "add_install_codes": {
+          "type": {
+            "class": "AddInstallCodesUpdate"
+          },
+          "required": false
+        }
+      }
+    },
+    "Zone": {
+      "origin": "ZoneAdded",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "RoomMetadata"
+          },
+          "required": true
+        },
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "services": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifier"
+            }
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ZoneAdd": {
+      "origin": "ZoneAdd",
+      "kind": "add",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "RoomMetadataAdd"
+          },
+          "required": true
+        },
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifierAdd"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "ZoneUpdate": {
+      "origin": "ZoneUpdate",
+      "kind": "update",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "RoomMetadataUpdate"
+          },
+          "required": false
+        },
+        "children": {
+          "type": {
+            "list": {
+              "class": "ResourceIdentifierUpdate"
+            }
+          },
+          "required": false
+        }
+      }
+    }
+  }
+}

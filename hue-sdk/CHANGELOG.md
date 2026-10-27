@@ -25,3 +25,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   with the `ffi` gem), through the libssl Ruby's OpenSSL extension is linked with; the lights of
   the area are put back as they were when streaming ends.
 - RBS signatures for the whole public API.
+- Typed values generated from the Hue app's own classes: `attributes` reads a resource as a
+  `Hue::Sdk::Schema` value whose signature tells which fields the bridge always sends, and
+  `update` and `create` accept the request classes the app sends (`Schema::LightUpdate`,
+  `Schema::RoomAdd`…).

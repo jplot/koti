@@ -26,6 +26,22 @@ RSpec.describe Hue::Sdk, :live do
     expect(lights).to all(be_a(Hue::Sdk::Models::Light::Instance))
   end
 
+  def missing(value, path)
+    value.class.members.flat_map do |name|
+      field = value.public_send(name)
+      next(value.class.optional_members.include?(name) ? [] : ["#{path}.#{name}"]) if field.nil?
+
+      Array(field).grep(Hue::Sdk::Schema::Value).flat_map { missing(it, "#{path}.#{name}") }
+    end
+  end
+
+  it 'reads every resource as a typed value holding its required fields' do
+    values = Hue::Sdk::Client.get('/resource').filter_map do |data|
+      Hue::Sdk::Models::REGISTRY[data['type']]&.then { it::Instance.new(data['id'], data:).attributes }
+    end
+    expect(values.flat_map { missing(it, it.class.name) }).to be_empty
+  end
+
   it 'registers every resource type the firmware supports' do
     supported = described_class.Clip.list.first['resources'] - %w[private_group private_scene]
     expect(supported - Hue::Sdk::Models::REGISTRY.keys).to be_empty

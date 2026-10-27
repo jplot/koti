@@ -7,6 +7,7 @@ require_relative 'sdk/connection'
 require_relative 'sdk/client'
 require_relative 'sdk/discovery'
 require_relative 'sdk/pairing'
+require_relative 'sdk/schema'
 require_relative 'sdk/models'
 require_relative 'sdk/events'
 

@@ -1,0 +1,43 @@
+module Hue
+  module Sdk
+    module Schema
+      module Value : Data
+        type nested_type = ClassMethods | [ClassMethods]
+
+        def self.included: (Module base) -> void
+
+        def self.load: (nested_type? type, untyped data) -> untyped
+
+        def self.dump: (untyped value) -> untyped
+
+        module ClassMethods
+          @optional_members: Array[Symbol]?
+
+          @nested_members: Hash[Symbol, nested_type]?
+
+          def optional_members: () -> Array[Symbol]
+
+          def nested_members: () -> Hash[Symbol, nested_type]
+
+          def from: (Hash[String, untyped] data) -> Data
+
+          def members: () -> Array[Symbol]
+
+          def new: (**untyped fields) -> Data
+
+          private
+
+          def optional: (*Symbol names) -> void
+
+          def nested: (**nested_type types) -> void
+        end
+
+        def initialize: (**untyped fields) -> void
+
+        def to_body: () -> Hash[Symbol, untyped]
+
+        def to_json: (?untyped state) -> String
+      end
+    end
+  end
+end

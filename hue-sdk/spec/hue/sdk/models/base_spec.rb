@@ -53,6 +53,29 @@ RSpec.describe Hue::Sdk::Models::Base do
     expect(gets).to eq(0)
   end
 
+  it 'puts a typed request on update' do
+    Hue::Sdk.Light('l1').update(Hue::Sdk::Schema::LightUpdate.new(on: Hue::Sdk::Schema::OnFeatureUpdate.new(on: false)))
+    expect(bridge.requests.last.body).to eq('{"on":{"on":false}}')
+  end
+
+  it 'sends the keywords given along with a typed request' do
+    update = Hue::Sdk::Schema::LightUpdate.new(on: Hue::Sdk::Schema::OnFeatureUpdate.new(on: true))
+    Hue::Sdk.Light('l1').update(update, dimming: { brightness: 40 })
+    expect(bridge.requests.last.body).to eq('{"on":{"on":true},"dimming":{"brightness":40}}')
+  end
+
+  it 'sends a typed value given among the keywords as its body' do
+    Hue::Sdk.Light('l1').update(on: Hue::Sdk::Schema::OnFeatureUpdate.new(on: true))
+    expect(bridge.requests.last.body).to eq('{"on":{"on":true}}')
+  end
+
+  it 'posts a typed request on create' do
+    metadata = Hue::Sdk::Schema::RoomMetadataAdd.new(name: 'Kitchen', archetype: 'kitchen')
+    Hue::Sdk.Room.create(Hue::Sdk::Schema::RoomAdd.new(metadata:, children: []))
+    expect(JSON.parse(bridge.requests.last.body))
+      .to eq('metadata' => { 'name' => 'Kitchen', 'archetype' => 'kitchen' }, 'children' => [])
+  end
+
   it 'issues a DELETE on delete' do
     expect(Hue::Sdk.Scene('s1').delete).to be(true)
   end
@@ -71,6 +94,18 @@ RSpec.describe Hue::Sdk::Models::Base do
   it 'resolves an unknown resource type to a generic resource' do
     expect(Hue::Sdk.Device('d1').services.last)
       .to be_a(Hue::Sdk::Models::Resource::Instance).and(have_attributes(id: 'x1'))
+  end
+
+  it 'reads a resource as a typed value' do
+    expect(Hue::Sdk.Light('l1').attributes.on).to eq(Hue::Sdk::Schema::OnFeature.new(on: true))
+  end
+
+  it 'reads a hidden deprecated field of the typed value as nil' do
+    expect(Hue::Sdk.Light('l1').attributes.effects).to be_nil
+  end
+
+  it 'gives no typed value to an unknown resource type' do
+    expect(Hue::Sdk.Device('d1').services.last).not_to respond_to(:attributes)
   end
 
   it 'hides deprecated fields' do

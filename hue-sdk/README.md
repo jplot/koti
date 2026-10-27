@@ -87,6 +87,15 @@ light.data        # the whole resource
 light['dimming']  # one attribute
 ```
 
+`attributes` gives the same resource as a typed value, `Hue::Sdk::Schema::Light` for a light, its
+nested objects typed too. Its signature tells which fields the bridge always sends; the others may
+be `nil`.
+
+```ruby
+light.attributes.on.on                # => true
+light.attributes.dimming&.brightness  # => 60.0, nil for a light that does not dim
+```
+
 `Hue::Sdk.resource(type, id = nil)` does the same from a type name. A type this version does not
 know yet gets a read-only generic model instead of an error. Deprecated fields are left out of
 `data` and of event changes: `effects` on a light, `device_mode` on a device, and the sensor
@@ -108,56 +117,71 @@ zone.delete
 `update` returns the resource and reloads its data on next access; `create` returns the new
 resource.
 
+The changes can also be a typed request, of the class the Hue app sends for that type
+(`Hue::Sdk::Schema::LightUpdate`, `Hue::Sdk::Schema::ZoneAdd`…): an unknown field, or one the
+bridge needs left out or nil, raises `ArgumentError` before anything is sent.
+
+```ruby
+light.update(Hue::Sdk::Schema::LightUpdate.new(
+  on: Hue::Sdk::Schema::OnFeatureUpdate.new(on: true),
+  dimming: Hue::Sdk::Schema::DimmingFeatureUpdate.new(brightness: 60.0)
+))
+```
+
+The app has request classes for 18 types to update and 8 to create, listed below. The hash form
+remains for the other types, and keywords given along with a request are added to its body for the
+fields the app never sends.
+
 <details>
 <summary>Resource types and operations</summary>
 
-| Type | Entry point | Operations |
-|---|---|---|
-| `behavior_instance` | `Hue::Sdk.BehaviorInstance` | list, get, create, update, delete |
-| `behavior_script` | `Hue::Sdk.BehaviorScript` | list, get, update |
-| `behavior_script_formula` | `Hue::Sdk.BehaviorScriptFormula` | list, get, create, delete |
-| `bell_button` | `Hue::Sdk.BellButton` | list, get, update |
-| `bridge` | `Hue::Sdk.Bridge` | list, get, update |
-| `bridge_home` | `Hue::Sdk.BridgeHome` | list, get |
-| `button` | `Hue::Sdk.Button` | list, get, update |
-| `camera_motion` | `Hue::Sdk.CameraMotion` | list, get, update |
-| `clip` | `Hue::Sdk.Clip` | list, get |
-| `contact` | `Hue::Sdk.Contact` | list, get, update |
-| `convenience_area_motion` | `Hue::Sdk.ConvenienceAreaMotion` | list, get, update |
-| `device` | `Hue::Sdk.Device` | list, get, update, delete |
-| `device_power` | `Hue::Sdk.DevicePower` | list, get |
-| `device_software_update` | `Hue::Sdk.DeviceSoftwareUpdate` | list, get, update |
-| `entertainment` | `Hue::Sdk.Entertainment` | list, get, update |
-| `entertainment_configuration` | `Hue::Sdk.EntertainmentConfiguration` | list, get, create, update, delete |
-| `geofence_client` | `Hue::Sdk.GeofenceClient` | list, get, create, update, delete |
-| `geolocation` | `Hue::Sdk.Geolocation` | list, get, update |
-| `grouped_light` | `Hue::Sdk.GroupedLight` | list, get, update |
-| `grouped_light_level` | `Hue::Sdk.GroupedLightLevel` | list, get, update |
-| `grouped_motion` | `Hue::Sdk.GroupedMotion` | list, get, update |
-| `homekit` | `Hue::Sdk.Homekit` | list, get, update |
-| `light` | `Hue::Sdk.Light` | list, get, update |
-| `light_level` | `Hue::Sdk.LightLevel` | list, get, update |
-| `matter` | `Hue::Sdk.Matter` | list, get, update |
-| `matter_fabric` | `Hue::Sdk.MatterFabric` | list, get, update, delete |
-| `motion` | `Hue::Sdk.Motion` | list, get, update |
-| `motion_area_candidate` | `Hue::Sdk.MotionAreaCandidate` | list, get, update |
-| `motion_area_configuration` | `Hue::Sdk.MotionAreaConfiguration` | list, get, create, update, delete |
-| `power_output_configuration` | `Hue::Sdk.PowerOutputConfiguration` | list, get, update |
-| `relative_rotary` | `Hue::Sdk.RelativeRotary` | list, get, update |
-| `room` | `Hue::Sdk.Room` | list, get, create, update, delete |
-| `scene` | `Hue::Sdk.Scene` | list, get, create, update, delete |
-| `security_area_motion` | `Hue::Sdk.SecurityAreaMotion` | list, get, update |
-| `service_group` | `Hue::Sdk.ServiceGroup` | list, get, create, update, delete |
-| `smart_scene` | `Hue::Sdk.SmartScene` | list, get, create, update, delete |
-| `speaker` | `Hue::Sdk.Speaker` | list, get, update |
-| `switch_input_configuration` | `Hue::Sdk.SwitchInputConfiguration` | list, get, update |
-| `tamper` | `Hue::Sdk.Tamper` | list, get, update |
-| `temperature` | `Hue::Sdk.Temperature` | list, get, update |
-| `wifi_connectivity` | `Hue::Sdk.WifiConnectivity` | list, get, update |
-| `zgp_connectivity` | `Hue::Sdk.ZgpConnectivity` | list, get, update |
-| `zigbee_connectivity` | `Hue::Sdk.ZigbeeConnectivity` | list, get, update |
-| `zigbee_device_discovery` | `Hue::Sdk.ZigbeeDeviceDiscovery` | list, get, update |
-| `zone` | `Hue::Sdk.Zone` | list, get, create, update, delete |
+| Type | Entry point | Operations | Typed requests |
+|---|---|---|---|
+| `behavior_instance` | `Hue::Sdk.BehaviorInstance` | list, get, create, update, delete | — |
+| `behavior_script` | `Hue::Sdk.BehaviorScript` | list, get, update | — |
+| `behavior_script_formula` | `Hue::Sdk.BehaviorScriptFormula` | list, get, create, delete | — |
+| `bell_button` | `Hue::Sdk.BellButton` | list, get, update | — |
+| `bridge` | `Hue::Sdk.Bridge` | list, get, update | — |
+| `bridge_home` | `Hue::Sdk.BridgeHome` | list, get | — |
+| `button` | `Hue::Sdk.Button` | list, get, update | — |
+| `camera_motion` | `Hue::Sdk.CameraMotion` | list, get, update | — |
+| `clip` | `Hue::Sdk.Clip` | list, get | — |
+| `contact` | `Hue::Sdk.Contact` | list, get, update | — |
+| `convenience_area_motion` | `Hue::Sdk.ConvenienceAreaMotion` | list, get, update | `ConvenienceAreaMotionUpdate` |
+| `device` | `Hue::Sdk.Device` | list, get, update, delete | `DeviceUpdate` |
+| `device_power` | `Hue::Sdk.DevicePower` | list, get | — |
+| `device_software_update` | `Hue::Sdk.DeviceSoftwareUpdate` | list, get, update | — |
+| `entertainment` | `Hue::Sdk.Entertainment` | list, get, update | — |
+| `entertainment_configuration` | `Hue::Sdk.EntertainmentConfiguration` | list, get, create, update, delete | `EntertainmentConfigurationUpdate`, `EntertainmentConfigurationAdd` |
+| `geofence_client` | `Hue::Sdk.GeofenceClient` | list, get, create, update, delete | `GeofenceClientUpdate`, `GeofenceClientAdd` |
+| `geolocation` | `Hue::Sdk.Geolocation` | list, get, update | — |
+| `grouped_light` | `Hue::Sdk.GroupedLight` | list, get, update | `GroupedLightUpdate` |
+| `grouped_light_level` | `Hue::Sdk.GroupedLightLevel` | list, get, update | — |
+| `grouped_motion` | `Hue::Sdk.GroupedMotion` | list, get, update | — |
+| `homekit` | `Hue::Sdk.Homekit` | list, get, update | — |
+| `light` | `Hue::Sdk.Light` | list, get, update | `LightUpdate` |
+| `light_level` | `Hue::Sdk.LightLevel` | list, get, update | — |
+| `matter` | `Hue::Sdk.Matter` | list, get, update | — |
+| `matter_fabric` | `Hue::Sdk.MatterFabric` | list, get, update, delete | — |
+| `motion` | `Hue::Sdk.Motion` | list, get, update | `MotionUpdate` |
+| `motion_area_candidate` | `Hue::Sdk.MotionAreaCandidate` | list, get, update | — |
+| `motion_area_configuration` | `Hue::Sdk.MotionAreaConfiguration` | list, get, create, update, delete | `MotionAreaConfigurationUpdate`, `MotionAreaConfigurationAdd` |
+| `power_output_configuration` | `Hue::Sdk.PowerOutputConfiguration` | list, get, update | `PowerOutputConfigurationUpdate` |
+| `relative_rotary` | `Hue::Sdk.RelativeRotary` | list, get, update | — |
+| `room` | `Hue::Sdk.Room` | list, get, create, update, delete | `RoomUpdate`, `RoomAdd` |
+| `scene` | `Hue::Sdk.Scene` | list, get, create, update, delete | `SceneUpdate`, `SceneAdd` |
+| `security_area_motion` | `Hue::Sdk.SecurityAreaMotion` | list, get, update | `SecurityAreaMotionUpdate` |
+| `service_group` | `Hue::Sdk.ServiceGroup` | list, get, create, update, delete | `ServiceGroupUpdate`, `ServiceGroupAdd` |
+| `smart_scene` | `Hue::Sdk.SmartScene` | list, get, create, update, delete | `SmartSceneUpdate`, `SmartSceneAdd` |
+| `speaker` | `Hue::Sdk.Speaker` | list, get, update | `SpeakerUpdate` |
+| `switch_input_configuration` | `Hue::Sdk.SwitchInputConfiguration` | list, get, update | — |
+| `tamper` | `Hue::Sdk.Tamper` | list, get, update | — |
+| `temperature` | `Hue::Sdk.Temperature` | list, get, update | — |
+| `wifi_connectivity` | `Hue::Sdk.WifiConnectivity` | list, get, update | — |
+| `zgp_connectivity` | `Hue::Sdk.ZgpConnectivity` | list, get, update | — |
+| `zigbee_connectivity` | `Hue::Sdk.ZigbeeConnectivity` | list, get, update | `ZigbeeConnectivityUpdate` |
+| `zigbee_device_discovery` | `Hue::Sdk.ZigbeeDeviceDiscovery` | list, get, update | `ZigbeeDeviceDiscoveryUpdate` |
+| `zone` | `Hue::Sdk.Zone` | list, get, create, update, delete | `ZoneUpdate`, `ZoneAdd` |
 
 </details>
 
@@ -242,6 +266,10 @@ Bridge Pro firmware lists in its own `clip` resource, the
 [openhue](https://github.com/openhue/openhue-api) OpenAPI description,
 [aiohue](https://github.com/home-assistant-libs/aiohue) and
 [Q42.HueApi](https://github.com/michielpost/Q42.HueApi).
+
+The typed values come from the Hue app itself: the classes it parses the bridge's JSON with, and
+the requests it sends. [schema/README.md](schema/README.md) tells how they were read and how to
+regenerate them.
 
 ## Development
 

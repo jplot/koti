@@ -1,0 +1,335 @@
+module Hue
+  module Sdk
+    module Models
+      class BehaviorInstance < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BehaviorInstance
+        end
+      end
+
+      class BehaviorScript < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BehaviorScript
+        end
+      end
+
+      class BehaviorScriptFormula < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BehaviorScriptFormula
+        end
+      end
+
+      class BellButton < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BellButton
+        end
+      end
+
+      class Bridge < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Bridge
+        end
+      end
+
+      class BridgeHome < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::BridgeHome
+        end
+      end
+
+      class Button < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Button
+        end
+      end
+
+      class CameraMotion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::CameraMotion
+        end
+      end
+
+      class Clip < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Clip
+        end
+      end
+
+      class Contact < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Contact
+        end
+      end
+
+      class ConvenienceAreaMotion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ConvenienceAreaMotion
+          def update: (Schema::ConvenienceAreaMotionUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class Device < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Device
+          def update: (Schema::DeviceUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class DevicePower < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::DevicePower
+        end
+      end
+
+      class DeviceSoftwareUpdate < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::DeviceSoftwareUpdate
+        end
+      end
+
+      class Entertainment < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Entertainment
+        end
+      end
+
+      class EntertainmentConfiguration < Base
+        def create: (Schema::EntertainmentConfigurationAdd request, **untyped attributes) -> Instance
+                  | (**untyped attributes) -> Instance
+
+        class Instance < Base::Instance
+          def attributes: () -> Schema::EntertainmentConfiguration
+          def update: (Schema::EntertainmentConfigurationUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class GeofenceClient < Base
+        def create: (Schema::GeofenceClientAdd request, **untyped attributes) -> Instance
+                  | (**untyped attributes) -> Instance
+
+        class Instance < Base::Instance
+          def attributes: () -> Schema::GeofenceClient
+          def update: (Schema::GeofenceClientUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class Geolocation < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Geolocation
+        end
+      end
+
+      class GroupedLight < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::GroupedLight
+          def update: (Schema::GroupedLightUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class GroupedLightLevel < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::GroupedLightLevel
+        end
+      end
+
+      class GroupedMotion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::GroupedMotion
+        end
+      end
+
+      class Homekit < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Homekit
+        end
+      end
+
+      class Light < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Light
+          def update: (Schema::LightUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class LightLevel < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::LightLevel
+        end
+      end
+
+      class Matter < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Matter
+        end
+      end
+
+      class MatterFabric < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::MatterFabric
+        end
+      end
+
+      class Motion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Motion
+          def update: (Schema::MotionUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class MotionAreaCandidate < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::MotionAreaCandidate
+        end
+      end
+
+      class MotionAreaConfiguration < Base
+        def create: (Schema::MotionAreaConfigurationAdd request, **untyped attributes) -> Instance
+                  | (**untyped attributes) -> Instance
+
+        class Instance < Base::Instance
+          def attributes: () -> Schema::MotionAreaConfiguration
+          def update: (Schema::MotionAreaConfigurationUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class PowerOutputConfiguration < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::PowerOutputConfiguration
+          def update: (Schema::PowerOutputConfigurationUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class RelativeRotary < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::RelativeRotary
+        end
+      end
+
+      class Room < Base
+        def create: (Schema::RoomAdd request, **untyped attributes) -> Instance
+                  | (**untyped attributes) -> Instance
+
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Room
+          def update: (Schema::RoomUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class Scene < Base
+        def create: (Schema::SceneAdd request, **untyped attributes) -> Instance
+                  | (**untyped attributes) -> Instance
+
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Scene
+          def update: (Schema::SceneUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class SecurityAreaMotion < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::SecurityAreaMotion
+          def update: (Schema::SecurityAreaMotionUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class ServiceGroup < Base
+        def create: (Schema::ServiceGroupAdd request, **untyped attributes) -> Instance
+                  | (**untyped attributes) -> Instance
+
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ServiceGroup
+          def update: (Schema::ServiceGroupUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class SmartScene < Base
+        def create: (Schema::SmartSceneAdd request, **untyped attributes) -> Instance
+                  | (**untyped attributes) -> Instance
+
+        class Instance < Base::Instance
+          def attributes: () -> Schema::SmartScene
+          def update: (Schema::SmartSceneUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class Speaker < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Speaker
+          def update: (Schema::SpeakerUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class SwitchInputConfiguration < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::SwitchInputConfiguration
+        end
+      end
+
+      class Tamper < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Tamper
+        end
+      end
+
+      class Temperature < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Temperature
+        end
+      end
+
+      class WifiConnectivity < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::WifiConnectivity
+        end
+      end
+
+      class ZgpConnectivity < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ZgpConnectivity
+        end
+      end
+
+      class ZigbeeConnectivity < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ZigbeeConnectivity
+          def update: (Schema::ZigbeeConnectivityUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class ZigbeeDeviceDiscovery < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::ZigbeeDeviceDiscovery
+          def update: (Schema::ZigbeeDeviceDiscoveryUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class Zone < Base
+        def create: (Schema::ZoneAdd request, **untyped attributes) -> Instance
+                  | (**untyped attributes) -> Instance
+
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Zone
+          def update: (Schema::ZoneUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+    end
+  end
+end

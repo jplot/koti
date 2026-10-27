@@ -16,6 +16,7 @@ module Hue
 end
 
 require_relative 'models/operations'
+require_relative 'models/typed'
 require_relative 'models/base'
 require_relative 'models/resource'
 Dir[File.join(File.dirname(__FILE__), 'models', '*.rb')].each { |model| require model }

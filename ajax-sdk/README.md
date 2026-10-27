@@ -34,7 +34,8 @@ end
 
 The hub can report its events straight to a monitoring station over SIA DC-09, without the cloud. In
 the Ajax app, set the hub's monitoring station to SIA DC-09 with the address and port of the machine
-running koti, an object number (the account) and an encryption key of 16, 24 or 32 characters, then:
+running koti, an object number (the account) and an encryption key of 16 characters or 32 hexadecimal
+digits (the hub encrypts with AES-128), then choose the SIA-DCS format:
 
 ```ruby
 Ajax::Sdk.configure do |config|
@@ -49,7 +50,7 @@ Ajax::Sdk.sia_events do |event|
   event.zone  # => "1"
 end
 
-Ajax::Sdk.sia_events.first(3) # lazily, without a block
+Ajax::Sdk.sia_events.first(3) # lazily, without a block; iterate it with each, first or take, not next
 ```
 
 The receiver answers each frame the way DC-09 expects: an ACK (encrypted like the frame), a NAK when
@@ -57,10 +58,17 @@ the timestamp falls outside `config.sia_timeband` (40 s behind, 20 s ahead by de
 another account or for a clear frame while a key is set, and nothing for a frame whose CRC or length
 is wrong. SIA carries alarms, arming and disarming, and device troubles such as a low battery (`XT`)
 or a lost connection (`XL`); it carries no battery percentage, no signal level and no commands. While
-no receiver runs, the hub reports the monitoring station as lost.
+no receiver runs, the hub reports the monitoring station as lost. The ACK goes out as soon as an event
+is queued, so events still queued when `sia_events` stops are lost to koti, though the hub counts them
+as delivered.
+
+Set a key. Without one, any device on the network can send events the receiver accepts. With one, a
+device on the network cannot make up an event, but a device placed between the hub and koti can still
+replay or alter frames: DC-09 encrypts without authenticating.
 
 `Ajax::Sdk::Sia::Receiver` is the server itself, for running it under your own supervision; its block
-may be called from several threads at once, one per hub connection.
+may be called from several threads at once, one per hub connection, and an exception it raises is
+reported with `warn` without closing the connection.
 
 ## Reading
 
@@ -127,7 +135,7 @@ cloud.server_stream(path, { space_id: space.id }).first
 - `Cloud::UnknownMethodError` / `Cloud::UnknownMessageError` — an unknown path or message name.
 - `Sia::FrameError` — a frame is not valid DC-09 (`Sia::Message.parse`); the receiver stays silent on it.
 - `ConfigurationError` — a missing or malformed setting: no password, no `sia_account` for `sia_events`,
-  a SIA key that is not 16, 24 or 32 characters long.
+  a SIA key that is neither 16 characters nor 32 hexadecimal digits.
 
 ## Live specs
 

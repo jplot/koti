@@ -23,7 +23,11 @@ module Ajax
     extend Configuration
 
     # Runs a {Sia::Receiver} with the configured +sia_*+ settings and yields each event it accepts; the
-    # receiver stops when the block exits. Without a block, returns a lazy Enumerator of the events.
+    # receiver stops when the block exits. Without a block, returns a lazy Enumerator of the events:
+    # iterate it with +each+, +first+ or +take+, since +next+ never stops the receiver.
+    #
+    # The hub gets its ACK as soon as an event is queued, so events still queued when the iteration
+    # stops are lost to the caller, though the hub counts them as delivered.
     #
     # @yieldparam event [Sia::Event]
     # @return [Enumerator::Lazy, nil]

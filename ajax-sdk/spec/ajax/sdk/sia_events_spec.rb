@@ -28,7 +28,7 @@ RSpec.describe Ajax::Sdk, '.sia_events' do
 
     send_when_listening(sia_frame('"SIA-DCS"0001L0#AAA[#AAA|Nri2/BA7]'))
 
-    expect(reader.value.first).to have_attributes(code: 'BA', zone: '2', text: '7')
+    expect(reader.value.first).to have_attributes(code: 'BA', group: '2', number: '7')
     expect { TCPServer.new('127.0.0.1', port).close }.not_to raise_error
   end
 

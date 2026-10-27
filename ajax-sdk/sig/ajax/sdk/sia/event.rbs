@@ -7,13 +7,13 @@ module Ajax
         attr_reader account: String
         attr_reader code: String?
         attr_reader label: String?
-        attr_reader zone: String?
-        attr_reader user: String?
+        attr_reader group: String?
+        attr_reader number: String?
         attr_reader time: Time?
         attr_reader text: String?
         attr_reader raw: Message
 
-        def self.new: (account: String, code: String?, label: String?, zone: String?, user: String?, time: Time?, text: String?, raw: Message) -> Event
+        def self.new: (account: String, code: String?, label: String?, group: String?, number: String?, time: Time?, text: String?, raw: Message) -> Event
         def self.from: (Message message) -> Event
       end
     end

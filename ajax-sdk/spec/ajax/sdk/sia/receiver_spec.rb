@@ -25,7 +25,8 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
 
   it 'acknowledges a frame and yields its event', :aggregate_failures do
     expect(exchange(sia_frame('"SIA-DCS"0084L0#AAA[#AAA|Nri1/XC12]'))).to eq([sia_frame('"ACK"0084L0#AAA[]')])
-    expect(events.pop(timeout: 1)).to have_attributes(account: 'AAA', code: 'XC', zone: '1', label: be_a(String))
+    expect(events.pop(timeout: 1))
+      .to have_attributes(account: 'AAA', code: 'XC', group: '1', number: '12', label: be_a(String))
   end
 
   it 'answers DUH to an unknown account' do
@@ -56,7 +57,7 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
 
     it 'acknowledges an encrypted frame in kind and yields its event', :aggregate_failures do
       expect(exchange(encrypted_sia_frame('SIA-DCS', '#AAA|Nri1/BA3')).first).to include('"*ACK"0001R0L0#AAA[')
-      expect(events.pop(timeout: 1)).to have_attributes(code: 'BA', zone: '1', text: '3')
+      expect(events.pop(timeout: 1)).to have_attributes(code: 'BA', group: '1', number: '3')
     end
 
     it 'answers DUH to a clear frame', :aggregate_failures do
@@ -73,13 +74,13 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
   end
 
   context 'when the block raises' do
-    let(:handler) { ->(event) { event.text == '1' ? raise('handler bug') : events << event } }
+    let(:handler) { ->(event) { event.number == '1' ? raise('handler bug') : events << event } }
 
     it 'reports it and keeps serving the hub', :aggregate_failures do
       frames = [sia_frame('"SIA-DCS"0010L0#AAA[#AAA|Nri1/BA1]'), sia_frame('"SIA-DCS"0011L0#AAA[#AAA|Nri1/BA2]')]
 
       expect { expect(exchange(*frames).compact.size).to eq(2) }.to output(/handler bug/).to_stderr
-      expect(events.pop(timeout: 1)).to have_attributes(text: '2')
+      expect(events.pop(timeout: 1)).to have_attributes(number: '2')
     end
   end
 
@@ -128,7 +129,7 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
     batches = Array.new(8) { |hub| Array.new(25) { hub_frame(hub, it) } }
 
     acks = batches.map { |batch| Thread.new { send_in_pieces(batch) } }.map(&:value)
-    received = Array.new(200) { events.pop(timeout: 2)&.then { [it.zone, it.text] } }
+    received = Array.new(200) { events.pop(timeout: 2)&.then { [it.group, it.number] } }
 
     expect(acks).to eq(batches.map { |batch| batch.map { ack_for(it) } })
     expect(received.compact.sort).to eq(Array.new(8) { |hub| Array.new(25) { [hub.to_s, it.to_s] } }.flatten(1).sort)

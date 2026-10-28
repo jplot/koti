@@ -53,4 +53,26 @@ RSpec.describe Miele::Sdk::Events::Advertiser do
   it 'stays silent on queries for other names' do
     expect(ask('_hue._tcp.local', Resolv::DNS::Resource::IN::PTR)).to be_nil
   end
+
+  context 'when a reply fails to go out' do
+    before do
+      advertiser.stop
+      allow(Miele::Sdk::Discovery).to receive(:query_socket).and_wrap_original do |query_socket, *arguments|
+        sends = 0
+        query_socket.call(*arguments).tap do |socket|
+          allow(socket).to receive(:send).and_wrap_original do |send, *packet|
+            raise Errno::ENETUNREACH if (sends += 1) == 2
+
+            send.call(*packet)
+          end
+        end
+      end
+      advertiser.start
+    end
+
+    it 'answers the next query' do
+      ask(advertiser.hostname, Resolv::DNS::Resource::IN::A)
+      expect(ask(advertiser.hostname, Resolv::DNS::Resource::IN::A)).not_to be_nil
+    end
+  end
 end

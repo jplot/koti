@@ -102,7 +102,8 @@ module Miele
       def exchange(host, request)
         config = Sdk.config
         timeouts = { open_timeout: config.open_timeout, read_timeout: config.read_timeout }
-        Net::HTTP.start(host, config.port, **timeouts) { |http| http.request(request) }
+        # nil is the proxy: an http_proxy set for the Internet would otherwise receive every LAN request.
+        Net::HTTP.start(host, config.port, nil, **timeouts) { |http| http.request(request) }
       rescue *NETWORK_ERRORS => e
         raise ConnectionError, "#{host}:#{config&.port}: #{e.message}"
       end

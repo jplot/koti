@@ -37,6 +37,8 @@ RSpec.describe Miele::Sdk::Events::Listener do
 
   after { fake.stop }
 
+  around { |example| Timeout.timeout(5) { example.run } }
+
   def push_state
     Thread.new do
       callback = URI(Array.new(4) { callbacks.pop }.find { it.end_with?('/State/') })

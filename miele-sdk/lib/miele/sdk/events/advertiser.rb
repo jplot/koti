@@ -71,6 +71,8 @@ module Miele
             reply = answer(packet, from[1])
             host, to = from[1] == 5353 ? [@address, port] : [from[3], from[1]]
             @socket.send(reply, 0, host, to) if reply
+          rescue SystemCallError
+            nil # a network change (ENETUNREACH, ENOBUFS) loses this reply, not the next ones
           end
         rescue IOError
           nil

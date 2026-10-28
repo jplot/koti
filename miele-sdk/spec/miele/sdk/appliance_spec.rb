@@ -25,8 +25,15 @@ RSpec.describe Miele::Sdk::Appliance do
   end
 
   it 'reads ident and translates the device type', :aggregate_failures do
-    expect(appliance.ident).to eq(ident)
+    expect(appliance.ident).to have_attributes(device_type: 13, device_ident_label: have_attributes(fab_number: fab))
     expect(appliance.device_type).to eq(:oven_microwave)
+  end
+
+  it 'reads its supervision and the update of its module as typed values', :aggregate_failures do
+    resources["/Devices/#{fab}/SuperVision"] = { 'Enabled' => true, 'ErrorOnly' => false }
+    resources['/Update/'] = { 'NewerAvailable' => false, 'UpdateInProgress' => false, 'CurrentVersion' => '31.17' }
+    expect(appliance.supervision).to have_attributes(enabled: true, error_only: false, entries: {})
+    expect(appliance.software_update).to have_attributes(newer_available: false, current_version: '31.17')
   end
 
   it 'reads each resource at its path' do

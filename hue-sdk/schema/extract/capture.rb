@@ -20,7 +20,13 @@ module Schema
         end
       end
 
-      def write(path) = File.write(path, JSON.pretty_generate(Hue::Sdk::Client.get('/resource')), perm: 0o600)
+      def write(path)
+        json = JSON.pretty_generate(Hue::Sdk::Client.get('/resource'))
+        File.open(path, 'w', 0o600) do |file|
+          file.chmod(0o600)
+          file.write(json)
+        end
+      end
     end
   end
 end

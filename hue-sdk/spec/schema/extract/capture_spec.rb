@@ -27,4 +27,10 @@ RSpec.describe Schema::Extract::Capture do
     expect(JSON.parse(File.read(path))).to eq([{ 'id' => 'l1', 'type' => 'light', 'on' => { 'on' => true } }])
     expect(File.stat(path).mode & 0o777).to eq(0o600)
   end
+
+  it 'leaves a capture it overwrites readable by its owner only' do
+    File.write(path, '[]', perm: 0o644)
+    described_class.write(path)
+    expect(File.stat(path).mode & 0o777).to eq(0o600)
+  end
 end

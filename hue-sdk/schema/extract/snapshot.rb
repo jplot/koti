@@ -68,8 +68,10 @@ module Schema
     Objdump = Data.define(:command, :library) do
       def call(address, size)
         range = ["--start-address=0x#{address.to_s(16)}", "--stop-address=0x#{(address + size).to_s(16)}"]
-        IO.popen([command, '-D', '--no-show-raw-insn', '--triple=aarch64', *range, library], &:read)
-          .lines.grep(/\A\s+\h+:\s/).map { instruction(it) }
+        listing = IO.popen([command, '-D', '--no-show-raw-insn', '--triple=aarch64', *range, library], &:read)
+        raise "#{command} failed on #{library}" unless Process.last_status.success?
+
+        listing.lines.grep(/\A\s+\h+:\s/).map { instruction(it) }
       end
 
       private

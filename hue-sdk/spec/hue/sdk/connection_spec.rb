@@ -45,6 +45,11 @@ RSpec.describe Hue::Sdk::Connection do
     expect { described_class.request(:get, '/') }.to raise_error(Hue::Sdk::ConnectionError, /host is not configured/)
   end
 
+  it 'raises TLSError when no bridge id is configured' do
+    Hue::Sdk.config.bridge_id = nil
+    expect { described_class.request(:get, '/') }.to raise_error(Hue::Sdk::TLSError, /bridge_id is not configured/)
+  end
+
   it 'raises ConnectionError naming the host when it is unreachable' do
     Hue::Sdk.config.port = TCPServer.new('127.0.0.1', 0).then { |server| server.addr[1].tap { server.close } }
     expect { described_class.request(:get, '/') }.to raise_error(Hue::Sdk::ConnectionError, /127\.0\.0\.1:/)

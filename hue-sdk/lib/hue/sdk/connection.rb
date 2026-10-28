@@ -90,6 +90,7 @@ module Hue
       def establish(read_timeout = Sdk.config.read_timeout)
         config = Sdk.config
         host = config.host or raise ConnectionError, 'host is not configured'
+        config.bridge_id or raise TLSError, 'bridge_id is not configured'
         # nil is the proxy: an http_proxy set for the Internet would otherwise tunnel every bridge request.
         http = Net::HTTP.new(host, config.port, nil)
         pin(http, config)

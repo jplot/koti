@@ -9,6 +9,8 @@ module Miele
         attr_reader content: Hash[String, untyped]
 
         def self.new: (fab: String, resource: String, content: Hash[String, untyped]) -> Event
+
+        def attributes: () -> (Schema::DeviceIdentification | Schema::DeviceState)
       end
     end
   end

@@ -112,8 +112,8 @@ ident and of the state.
 
 | Value | Read from, or sent to | Miele app class |
 |---|---|---|
-| `DeviceIdentification`, with `DeviceIdentificationLabel` and `XkmIdentificationLabel` | `ident` | `DeviceIdentificationDto` and its two labels |
-| `DeviceState` | `state.attributes`, and the body of each state command | `DeviceStateDto` |
+| `DeviceIdentification`, with `DeviceIdentificationLabel` and `XkmIdentificationLabel` | `ident`, and `event.attributes` for `/Ident/` | `DeviceIdentificationDto` and its two labels |
+| `DeviceState` | `state.attributes`, `event.attributes` for `/State/`, and the body of each state command | `DeviceStateDto` |
 | `SuperVision` | `supervision`, the peers in `entries` | `SuperVisionDto` |
 | `ModuleUpdateInfo` | `software_update` | `ModuleUpdateInfoDto`, and `CheckUpdateResponseBodyDto` for `ReleaseNotes` |
 | `SuperVisionDevice` and `Subscription` | the bodies `events` puts and posts to enroll an appliance | `SuperVisionDeviceDto` and `SubscriptionDto` |
@@ -194,9 +194,11 @@ end
 `listener_port`, and asks each appliance to push its changes to it: it declares this host in the
 appliance's `SuperVision` and subscribes to `/State/`, `/State/Light/`, `/State/Status/` and
 `/Ident/`. It then blocks and yields a `Miele::Sdk::Events::Event` (`fab`, `resource`, `content`)
-per change, on the calling thread. Without a block it returns a lazy enumerator: iterate it with
-`each`, `first` or `take`, since an external `next` never reaches the end of the stream and leaves
-the subscriptions in place.
+per change, on the calling thread. `event.attributes` reads `content` as a typed value: a
+`DeviceIdentification` for `/Ident/`, else a `DeviceState`, of which `/State/Light/` and
+`/State/Status/` fill only `light` or `status`. Without a block it returns a lazy enumerator:
+iterate it with `each`, `first` or `take`, since an external `next` never reaches the end of the
+stream and leaves the subscriptions in place.
 
 When the block breaks or raises, the subscriptions are deleted and `SuperVision` stops showing
 this host; the peer entry itself stays listed. An appliance that cannot be reached at that point

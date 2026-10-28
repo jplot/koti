@@ -30,5 +30,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   real hood and hob have been received; a real oven accepted the subscriptions and never pushed.
 - Typed values (`Miele::Sdk::Schema`) from the classes the Miele app 4.19.0 reads and writes the
   local JSON with: `ident`, `supervision` and `software_update` return them, `State#attributes`
-  reads the state as one, and commands and enrollment build their bodies from them.
+  and `Events::Event#attributes` read a state or a pushed change as one, and commands and
+  enrollment build their bodies from them.
 - RBS signatures for the whole public API.

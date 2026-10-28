@@ -33,6 +33,8 @@ module Schema
     # The schema's classes as the app's code describes them: a response from what its fromJson decodes, a request from
     # what its toJson writes. A field none of them types is left untyped, as an +Object+.
     class Classes
+      KINDS = { 'double' => 'Numeric', 'int' => 'Integer', 'string' => 'String' }.freeze
+
       attr_reader :all
 
       # @param report [Hash{String=>Array<String>}] collects what the reader should check
@@ -98,8 +100,7 @@ module Schema
         declared = @requests[kind][name]['declared'][written['offset']]
         return { 'class' => declared } if declared && request?(kind, declared)
 
-        Types.primitive(declared) || { 'double' => 'Numeric', 'int' => 'Integer' }[written['kind']] ||
-          counterpart(name, kind, key)
+        Types.primitive(declared) || KINDS[written['kind']] || counterpart(name, kind, key)
       end
 
       def counterpart(name, kind, key)

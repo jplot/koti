@@ -64,9 +64,9 @@ module Schema
       end
     end
 
-    # One toJson walked in code order. A field load followed by a call with a pool string in x2 writes that key, the
-    # field null-checked against w22 first being optional. A string loaded into x16 right before a field load is the
-    # key of a map literal, always written.
+    # One toJson walked in code order. A call with a pool string in x2 writes that key, with the field loaded since the
+    # previous key (optional if null-checked against w22) or else the constant in x3: +SceneMappingAdd+ always sends
+    # +"algorithm": "spatial"+. A string loaded into x16 right before a field load is a map literal's key, always sent.
     class ToJson
       FIELDS = {
         /\Aldur\s+(w\d+), \[x\d+, #0x(\h+)\]/ => 'pointer',
@@ -80,6 +80,9 @@ module Schema
         /add\s+(x\d+), x27, #0x(\h+), lsl #12/ => :page,
         /ldr\s+x2, \[x27, #0x(\h+)\]/ => :key,
         /ldr\s+x2, \[(x\d+), #0x(\h+)\]/ => :paged_key,
+        /\Aldr\s+x3, \[x27, #0x(\h+)\]/ => :constant,
+        /\Aldr\s+x3, \[x3, #0x(\h+)\]/ => :paged_constant,
+        /\Amov\s+x3, #0x\h+\z/ => :integer,
         /\Ablr?\s/ => :call
       }.freeze
 
@@ -138,9 +141,21 @@ module Schema
 
       def paged_key(base, offset) = (@key = @snapshot.string(@pages.delete(base) + offset.hex) if @pages[base])
 
+      def constant(offset) = string(offset.hex)
+
+      def paged_constant(offset) = (string(@pages.delete('x3') + offset.hex) if @pages['x3'])
+
+      def string(offset) = @constant = ('string' if @snapshot.string(offset))
+
+      def integer = @constant = 'int'
+
       def call
-        write(@key, @load, required: !@load[:checked]) if @key && @load
-        @key = nil
+        return unless @key
+
+        if @load then write(@key, @load, required: !@load[:checked])
+        elsif @constant then @written[@key] = { 'kind' => @constant, 'required' => true }
+        end
+        @key = @load = @constant = nil
       end
     end
   end

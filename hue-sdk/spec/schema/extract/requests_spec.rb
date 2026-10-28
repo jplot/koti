@@ -25,7 +25,14 @@ RSpec.describe Schema::Extract::Requests do
           }
         }
       DART
-      'asm/bridge_control/src/raml_code.add.dart' => '',
+      'asm/bridge_control/src/raml_code.add.dart' => <<~DART,
+        class SceneMappingAdd extends Object {
+
+          Map<String, Object?> toJson(SceneMappingAdd) {
+            // ** addr: 0xa00, size: 0x60
+          }
+        }
+      DART
       'pp.txt' => <<~POOL
         [pp+0x10] String: "on"
         [pp+0x40] String: "brightness"
@@ -33,12 +40,16 @@ RSpec.describe Schema::Extract::Requests do
         [pp+0x58] String: "duration"
         [pp+0x1060] String: "on"
         [pp+0x1068] String: "version"
+        [pp+0x1070] String: "algorithm"
+        [pp+0x2008] String: "spatial"
+        [pp+0x78] String: "second"
+        [pp+0x80] String: "minute"
       POOL
     )
   end
   let(:responses) do
     { 'update' => { 'LightUpdate' => { 'on' => { 'class' => 'OnFeatureUpdate' } }, 'OnFeatureUpdate' => nil },
-      'add' => {} }
+      'add' => { 'SceneMappingAdd' => nil } }
   end
   let(:code) do
     { 0x600 => %W[bl\t0x650 ret], 0x650 => %W[bl\t0x700 ret],
@@ -47,7 +58,10 @@ RSpec.describe Schema::Extract::Requests do
                 "ldr\tx2, [x27, #0x40]", "bl\t0x900", "ldr\tx16, [x27, #0x50]", "ldur\tw5, [x4, #0x7]",
                 "ldur\tx6, [x4, #0x1b]", "ldr\tx2, [x27, #0x58]", "blr\tx30", 'ret'],
       0x800 => ["ldur\tw3, [x1, #0x7]", "cmp\tw9, w22", "add\tx2, x27, #0x1, lsl #12", "ldr\tx2, [x2, #0x60]",
-                "blr\tx30", "add\tx16, x27, #0x1, lsl #12", "ldr\tx16, [x16, #0x68]", "ldur\tw5, [x1, #0xf]"] }
+                "blr\tx30", "add\tx16, x27, #0x1, lsl #12", "ldr\tx16, [x16, #0x68]", "ldur\tw5, [x1, #0xf]"],
+      0xa00 => ["ldur\tx6, [x1, #0xf]", "ldr\tx2, [x27, #0x80]", "blr\tx30",
+                "add\tx2, x27, #0x1, lsl #12", "ldr\tx2, [x2, #0x70]", "add\tx3, x27, #0x2, lsl #12",
+                "ldr\tx3, [x3, #0x8]", "blr\tx30", "ldr\tx2, [x27, #0x78]", "mov\tx3, #0x0", "blr\tx30"] }
   end
 
   after { FileUtils.remove_entry(directory) }
@@ -65,6 +79,13 @@ RSpec.describe Schema::Extract::Requests do
     expect(requests.read.dig('update', 'OnFeatureUpdate', 'written'))
       .to eq('on' => { 'offset' => 0x8, 'kind' => 'pointer', 'required' => true },
              'version' => { 'offset' => 0x10, 'kind' => 'pointer', 'required' => true })
+  end
+
+  it 'writes a key whose value is a constant string or integer, not the field written before it' do
+    expect(requests.read.dig('add', 'SceneMappingAdd', 'written'))
+      .to eq('minute' => { 'offset' => 0x10, 'kind' => 'int', 'required' => true },
+             'algorithm' => { 'kind' => 'string', 'required' => true },
+             'second' => { 'kind' => 'int', 'required' => true })
   end
 
   it 'keeps what fromJson decodes and the fields blutter types, by offset' do

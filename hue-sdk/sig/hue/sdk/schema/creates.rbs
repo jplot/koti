@@ -381,7 +381,9 @@ module Hue
         include Value
         extend Value::ClassMethods
 
-        def self.new: () -> SceneMappingAdd
+        attr_reader algorithm: String
+
+        def self.new: (algorithm: String) -> SceneMappingAdd
         def self.from: (Hash[String, untyped] data) -> SceneMappingAdd
       end
 

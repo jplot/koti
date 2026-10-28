@@ -30,7 +30,8 @@ RSpec.describe Schema::Extract::Merge do
                                           'step' => written[16, false, 'int'] }, 'declared' => {} },
       'SignalingFeatureUpdate' => { 'written' => { 'signal' => written[8, true], 'colors' => written[12, false] },
                                     'declared' => {} },
-      'BridgeUpdate' => { 'written' => { 'identify' => written[8, true] }, 'declared' => {} }
+      'BridgeUpdate' => { 'written' => { 'identify' => written[8, true],
+                                         'action' => { 'kind' => 'string', 'required' => true } }, 'declared' => {} }
     }, 'add' => {} }
   end
   let(:aiohue) do
@@ -86,9 +87,13 @@ RSpec.describe Schema::Extract::Merge do
 
   it 'types a write-only request field from aiohue, down to the fields of a class it names' do
     expect([fields('LightUpdate', 'type').slice('duration', 'signaling'), fields('SignalingFeatureUpdate', 'type'),
-            fields('BridgeUpdate', 'type')])
+            fields('BridgeUpdate', 'type')['identify']])
       .to eq([{ 'duration' => 'Integer', 'signaling' => { 'class' => 'SignalingFeatureUpdate' } },
-              { 'signal' => 'String', 'colors' => { 'list' => 'String' } }, { 'identify' => 'Object' }])
+              { 'signal' => 'String', 'colors' => { 'list' => 'String' } }, 'Object'])
+  end
+
+  it 'types a request field the app writes with a constant from the constant' do
+    expect(fields('BridgeUpdate', 'type')['action']).to eq('String')
   end
 
   it 'requires a response field aiohue requires and every captured resource holds, and the id of any resource' do
@@ -101,7 +106,7 @@ RSpec.describe Schema::Extract::Merge do
     expect(%w[LightUpdate DimmingUpdate SignalingFeatureUpdate BridgeUpdate].map { fields(it, 'required') })
       .to eq([{ 'on' => false, 'mode' => false, 'duration' => false, 'dimming' => false, 'signaling' => false },
               { 'brightness' => true, 'step' => false }, { 'signal' => true, 'colors' => false },
-              { 'identify' => true }])
+              { 'identify' => true, 'action' => true }])
   end
 
   it 'takes the values of an enum from aiohue' do

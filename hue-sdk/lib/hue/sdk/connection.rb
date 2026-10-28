@@ -73,8 +73,8 @@ module Hue
         raise ConnectionError, "#{endpoint}: #{e.message}"
       end
 
-      # Net::HTTP is not thread-safe: each thread keeps its own keep-alive
-      # connection, renewed when the bridge settings change.
+      # Net::HTTP is not thread-safe: each thread, and each fiber within it, keeps
+      # its own keep-alive connection, renewed when the bridge settings change.
       #
       # @return [Net::HTTP] a started keep-alive connection
       # @api private
@@ -90,7 +90,9 @@ module Hue
       def establish(read_timeout = Sdk.config.read_timeout)
         config = Sdk.config
         host = config.host or raise ConnectionError, 'host is not configured'
-        http = Net::HTTP.new(host, config.port)
+        config.bridge_id or raise TLSError, 'bridge_id is not configured'
+        # nil is the proxy: an http_proxy set for the Internet would otherwise tunnel every bridge request.
+        http = Net::HTTP.new(host, config.port, nil)
         pin(http, config)
         http.open_timeout = config.open_timeout
         http.read_timeout = read_timeout

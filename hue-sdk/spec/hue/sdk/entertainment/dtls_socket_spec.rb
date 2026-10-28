@@ -49,6 +49,14 @@ RSpec.describe Hue::Sdk::Entertainment::DtlsSocket do
     expect { connect }.to raise_error(Hue::Sdk::ConnectionError, /DTLS handshake failed/)
   end
 
+  it 'raises ConnectionError and closes its socket when the host does not resolve', :aggregate_failures do
+    sockets = []
+    allow(UDPSocket).to(receive(:new).and_wrap_original { |new| new.call.tap { sockets << it } })
+    expect { described_class.open(host: 'bridge.invalid', port:, identity:, psk: [key].pack('H*')) }
+      .to raise_error(Hue::Sdk::ConnectionError, /bridge\.invalid:\d+: /)
+    expect(sockets).to all(be_closed)
+  end
+
   it 'refuses to write once closed' do
     socket = serve { connect.tap(&:close) }
     expect { socket.write('late') }.to raise_error(IOError, /closed/)

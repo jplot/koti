@@ -1,0 +1,61 @@
+module Miele
+  module Sdk
+    module Schema
+      class DeviceIdentificationLabel < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader version: String?
+        attr_reader fab_number: String?
+        attr_reader fab_index: String?
+        attr_reader tech_type: String?
+        attr_reader mat_number: String?
+        attr_reader sw_ids: Array[Integer]?
+
+        def self.new: (?version: String?, ?fab_number: String?, ?fab_index: String?, ?tech_type: String?,
+                       ?mat_number: String?, ?sw_ids: Array[Integer]?) -> DeviceIdentificationLabel
+        def self.from: (Hash[String, untyped] data) -> DeviceIdentificationLabel
+      end
+
+      class XkmIdentificationLabel < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader version: String?
+        attr_reader fab_number: String?
+        attr_reader fab_index: String?
+        attr_reader tech_type: String?
+        attr_reader mat_number: String?
+        attr_reader sw_ids: Array[Integer]?
+        attr_reader release_version: String?
+
+        def self.new: (?version: String?, ?fab_number: String?, ?fab_index: String?, ?tech_type: String?,
+                       ?mat_number: String?, ?sw_ids: Array[Integer]?, ?release_version: String?)
+                    -> XkmIdentificationLabel
+        def self.from: (Hash[String, untyped] data) -> XkmIdentificationLabel
+      end
+
+      class DeviceIdentification < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader device_type: Integer?
+        attr_reader sub_type: Integer?
+        attr_reader ceced_type: Integer?
+        attr_reader device_name: String?
+        attr_reader device_ident_label: DeviceIdentificationLabel?
+        attr_reader app_support: Integer?
+        attr_reader fct_support: Integer?
+        attr_reader xkm_support: Integer?
+        attr_reader protocol_version: Integer?
+        attr_reader xkm_ident_label: XkmIdentificationLabel?
+
+        def self.new: (?device_type: Integer?, ?sub_type: Integer?, ?ceced_type: Integer?, ?device_name: String?,
+                       ?device_ident_label: DeviceIdentificationLabel?, ?app_support: Integer?,
+                       ?fct_support: Integer?, ?xkm_support: Integer?, ?protocol_version: Integer?,
+                       ?xkm_ident_label: XkmIdentificationLabel?) -> DeviceIdentification
+        def self.from: (Hash[String, untyped] data) -> DeviceIdentification
+      end
+    end
+  end
+end

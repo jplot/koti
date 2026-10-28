@@ -1,0 +1,28 @@
+module Miele
+  module Sdk
+    module Schema
+      class SuperVision < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader enabled: bool
+        attr_reader error_only: bool
+        attr_reader entries: Hash[String, untyped]
+
+        def self.new: (enabled: bool, error_only: bool, entries: Hash[String, untyped]) -> SuperVision
+        def self.from: (Hash[String, untyped] data) -> SuperVision
+      end
+
+      class SuperVisionDevice < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader show: bool
+        attr_reader signal: bool?
+
+        def self.new: (show: bool, ?signal: bool?) -> SuperVisionDevice
+        def self.from: (Hash[String, untyped] data) -> SuperVisionDevice
+      end
+    end
+  end
+end

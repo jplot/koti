@@ -1,0 +1,21 @@
+module Miele
+  module Sdk
+    module Schema
+      class ModuleUpdateInfo < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader newer_available: bool
+        attr_reader current_version: String?
+        attr_reader available_version: String?
+        attr_reader type: String?
+        attr_reader release_notes: String?
+        attr_reader update_in_progress: bool
+
+        def self.new: (newer_available: bool, ?current_version: String?, ?available_version: String?,
+                       ?type: String?, ?release_notes: String?, update_in_progress: bool) -> ModuleUpdateInfo
+        def self.from: (Hash[String, untyped] data) -> ModuleUpdateInfo
+      end
+    end
+  end
+end

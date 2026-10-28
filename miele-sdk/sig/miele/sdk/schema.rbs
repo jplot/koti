@@ -1,0 +1,49 @@
+module Miele
+  module Sdk
+    module Schema
+      module Value : Data
+        def self.included: (Module base) -> void
+
+        module ClassMethods
+          @optional_members: Array[Symbol]?
+
+          @nested_members: Hash[Symbol, ClassMethods]?
+
+          @keys: Hash[Symbol, String]?
+
+          attr_reader extension_member: Symbol?
+
+          def optional_members: () -> Array[Symbol]
+
+          def nested_members: () -> Hash[Symbol, ClassMethods]
+
+          def json_keys: () -> Hash[Symbol, String]
+
+          def from: (Hash[String, untyped] data) -> Data
+
+          def body: (Hash[Symbol, untyped] fields) -> Hash[String, untyped]
+
+          def members: () -> Array[Symbol]
+
+          def new: (**untyped fields) -> Data
+
+          private
+
+          def optional: (*Symbol names) -> void
+
+          def nested: (**ClassMethods types) -> void
+
+          def keys: (**String names) -> void
+
+          def extension: (Symbol name) -> void
+        end
+
+        def initialize: (**untyped fields) -> void
+
+        def to_body: () -> Hash[String, untyped]
+
+        def to_json: (?untyped state) -> String
+      end
+    end
+  end
+end

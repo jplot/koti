@@ -1,0 +1,51 @@
+module Miele
+  module Sdk
+    module Schema
+      class DeviceState < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader status: Integer?
+        attr_reader internal_state: Integer?
+        attr_reader program_type: Integer?
+        attr_reader program_id: Integer?
+        attr_reader program_phase: Integer?
+        attr_reader remaining_time: Array[Integer]?
+        attr_reader start_time: Array[Integer]?
+        attr_reader target_temperature: Array[Integer]?
+        attr_reader temperature: Array[Integer]?
+        attr_reader signal_info: bool?
+        attr_reader signal_failure: bool?
+        attr_reader signal_door: bool?
+        attr_reader remote_enable: Array[Integer]?
+        attr_reader process_action: Integer?
+        attr_reader light: Integer?
+        attr_reader extended_state: String?
+        attr_reader ventilation_step: Integer?
+        attr_reader elapsed_time: Array[Integer]?
+        attr_reader device_action: Integer?
+        attr_reader standby_state: Integer?
+        attr_reader sync_state: Integer?
+        attr_reader plate_step: Array[Integer]?
+        attr_reader plate_remaining_heat: Array[Integer]?
+        attr_reader plate_remaining_minutes: Array[Integer]?
+        attr_reader plate_elapsed_minutes: Array[Integer]?
+        attr_reader plate_timer_seconds: Array[Integer]?
+        attr_reader spinning_speed: Integer?
+        attr_reader drying_step: Integer?
+
+        def self.new: (?status: Integer?, ?internal_state: Integer?, ?program_type: Integer?, ?program_id: Integer?,
+                       ?program_phase: Integer?, ?remaining_time: Array[Integer]?, ?start_time: Array[Integer]?,
+                       ?target_temperature: Array[Integer]?, ?temperature: Array[Integer]?, ?signal_info: bool?,
+                       ?signal_failure: bool?, ?signal_door: bool?, ?remote_enable: Array[Integer]?,
+                       ?process_action: Integer?, ?light: Integer?, ?extended_state: String?,
+                       ?ventilation_step: Integer?, ?elapsed_time: Array[Integer]?, ?device_action: Integer?,
+                       ?standby_state: Integer?, ?sync_state: Integer?, ?plate_step: Array[Integer]?,
+                       ?plate_remaining_heat: Array[Integer]?, ?plate_remaining_minutes: Array[Integer]?,
+                       ?plate_elapsed_minutes: Array[Integer]?, ?plate_timer_seconds: Array[Integer]?,
+                       ?spinning_speed: Integer?, ?drying_step: Integer?) -> DeviceState
+        def self.from: (Hash[String, untyped] data) -> DeviceState
+      end
+    end
+  end
+end

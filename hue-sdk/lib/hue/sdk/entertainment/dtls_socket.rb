@@ -95,6 +95,9 @@ module Hue
             socket.connect(host, port)
             socket.nonblock = false # steep:ignore NoMethod
             socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_RCVTIMEO, timeval) # steep:ignore ArgumentTypeMismatch
+          rescue SocketError, SystemCallError => e
+            socket.close
+            raise ConnectionError, "#{@endpoint}: #{e.message}"
           end
         end
       end

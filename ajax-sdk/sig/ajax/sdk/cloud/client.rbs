@@ -5,7 +5,8 @@ module Ajax
         include Resources
 
         IDENTITY: ^(String) -> String
-        READS: Array[String]
+        READ_WORDS: Array[String]
+        WRITE_WORDS: Array[String]
 
         @settings: Configuration::Settings
         @session: Session
@@ -36,6 +37,7 @@ module Ajax
         def decode: (String path, String bytes) -> Hash[Symbol, untyped]
         def message: (String path, untyped request) -> untyped
         def refuse_write: (String path) -> void
+        def read?: (String path) -> bool
         def authenticating: [T] (?^() -> bool retriable) { (Hash[String, String]) -> T } -> T
       end
     end

@@ -169,7 +169,7 @@ The protobuf schemas and the gRPC method table are extracted from the official A
 (`com.ajaxsystems` 3.59) and shipped as `lib/ajax/sdk/cloud/schemas/`. Transport is the `grpc` gem,
 messages are `google-protobuf`, TOTP is `rotp`. The SIA event labels in `lib/ajax/sdk/sia/codes.tsv`
 come from [pysiaalarm](https://github.com/eavanvalkenburg/pysiaalarm) (MIT License, notice in
-`LICENSE`).
+`LICENSE`). `schema/README.md` tells how to rebuild both.
 
 ## License
 

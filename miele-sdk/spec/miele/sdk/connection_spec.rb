@@ -66,6 +66,21 @@ RSpec.describe Miele::Sdk::Connection do
     expect { call(:get, '/Devices/') }.to raise_error(Miele::Sdk::ConnectionError, /127\.0\.0\.1:/)
   end
 
+  context 'when the environment names a proxy' do
+    around do |example|
+      ENV['http_proxy'] = "http://127.0.0.1:#{appliance.port}"
+      example.run
+    ensure
+      ENV.delete('http_proxy')
+    end
+
+    it 'connects to the appliance itself', :aggregate_failures do
+      Miele::Sdk.config.open_timeout = 0.2
+      expect { described_class.request('192.0.2.20', :get, '/Devices/') }.to raise_error(Miele::Sdk::ConnectionError)
+      expect(appliance.requests).to be_empty
+    end
+  end
+
   it 'rejects a group key that is not 128 hex digits' do
     Miele::Sdk.config.group_key = 'abc'
     expect { call(:get, '/Devices/') }.to raise_error(Miele::Sdk::ConfigurationError, /group_key/)

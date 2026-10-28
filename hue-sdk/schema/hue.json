@@ -6050,7 +6050,12 @@
     "SceneMappingAdd": {
       "origin": "SceneMappingAdd",
       "kind": "add",
-      "fields": {}
+      "fields": {
+        "algorithm": {
+          "type": "String",
+          "required": true
+        }
+      }
     },
     "SceneMappingUpdate": {
       "origin": "SceneMappingUpdate",

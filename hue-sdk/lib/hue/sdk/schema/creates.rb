@@ -426,7 +426,10 @@ module Hue
       end
 
       # Part of a resource sent to create it (Hue app class +SceneMappingAdd+).
-      SceneMappingAdd = Data.define do
+      #
+      # @!attribute [r] algorithm
+      #   @return [String]
+      SceneMappingAdd = Data.define(:algorithm) do
         include Value
       end
 

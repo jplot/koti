@@ -45,7 +45,8 @@ end
 | `event_read_timeout` | `300` s | event stream |
 
 Every connection is pinned: the bridge certificate must be signed by the Hue root CA and carry
-the configured bridge id. Each thread keeps its own keep-alive connection.
+the configured bridge id. Each thread, and each fiber within it, keeps its own keep-alive
+connection.
 
 ## Discovery
 
@@ -63,7 +64,8 @@ The query is sent again after 1 and 3 seconds, since Wi-Fi drops multicast packe
 
 ## Pairing
 
-Press the round button on the bridge, then within 30 seconds:
+With `host` and `bridge_id` configured, from `discover` for instance, press the round button on
+the bridge, then within 30 seconds:
 
 ```ruby
 credentials = Hue::Sdk.pair(app_name: 'koti')

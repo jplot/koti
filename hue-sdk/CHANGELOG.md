@@ -11,7 +11,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Configuration of the bridge address, identity, keys and timeouts through `Hue::Sdk.configure`.
 - HTTPS connections pinned to the Signify root CA and to the configured bridge id, one
-  keep-alive connection per thread.
+  keep-alive connection per thread and per fiber.
 - CLIP v2 client mapping error statuses to `Hue::Sdk::Error` subclasses, partial success
   (207) included.
 - Bridge discovery over mDNS, repeating the query so a lost packet does not hide the bridge.

@@ -73,8 +73,8 @@ module Hue
         raise ConnectionError, "#{endpoint}: #{e.message}"
       end
 
-      # Net::HTTP is not thread-safe: each thread keeps its own keep-alive
-      # connection, renewed when the bridge settings change.
+      # Net::HTTP is not thread-safe: each thread, and each fiber within it, keeps
+      # its own keep-alive connection, renewed when the bridge settings change.
       #
       # @return [Net::HTTP] a started keep-alive connection
       # @api private

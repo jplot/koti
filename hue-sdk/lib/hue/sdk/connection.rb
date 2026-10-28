@@ -90,7 +90,8 @@ module Hue
       def establish(read_timeout = Sdk.config.read_timeout)
         config = Sdk.config
         host = config.host or raise ConnectionError, 'host is not configured'
-        http = Net::HTTP.new(host, config.port)
+        # nil is the proxy: an http_proxy set for the Internet would otherwise tunnel every bridge request.
+        http = Net::HTTP.new(host, config.port, nil)
         pin(http, config)
         http.open_timeout = config.open_timeout
         http.read_timeout = read_timeout

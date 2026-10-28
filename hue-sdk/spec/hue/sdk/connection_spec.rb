@@ -50,6 +50,29 @@ RSpec.describe Hue::Sdk::Connection do
     expect { described_class.request(:get, '/') }.to raise_error(Hue::Sdk::ConnectionError, /127\.0\.0\.1:/)
   end
 
+  context 'when the environment names a proxy' do
+    let(:proxy) { TCPServer.new('127.0.0.1', 0) }
+
+    around do |example|
+      saved = ENV.fetch('http_proxy', nil)
+      ENV['http_proxy'] = "http://127.0.0.1:#{proxy.addr[1]}"
+      example.run
+    ensure
+      ENV['http_proxy'] = saved
+      proxy.close
+    end
+
+    it 'connects to the bridge itself', :aggregate_failures do
+      Hue::Sdk.configure do |config|
+        config.host = '192.0.2.20'
+        config.open_timeout = 0.2
+        config.read_timeout = 0.2
+      end
+      expect { described_class.request(:get, '/') }.to raise_error(Hue::Sdk::ConnectionError, /192\.0\.2\.20/)
+      expect(proxy.accept_nonblock(exception: false)).to eq(:wait_readable)
+    end
+  end
+
   context 'when the bridge drops the connection without closing TLS' do
     let(:bridge) { FakeBridge.start { [200, {}, 'partial', :cut] } }
 

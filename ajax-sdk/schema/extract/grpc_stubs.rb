@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'java_names'
+
 module Schema
   module Extract
     # The gRPC stubs of the app as jadx decompiles them: the service each stub class names, and each method with its
@@ -23,7 +25,8 @@ module Schema
         source[GRPC_CLASS, 1] ? stubs.merge(source[GRPC_CLASS, 1] => name) : stubs
       end
 
-      # @return [Array<Array>] +[service, method, call type, request class, response class]+ for each method
+      # @return [Array<Array>] +[service, method, call type, request class, response class]+ for each method, the
+      #   classes by their full names
       def rpcs(source, service_names)
         rows = []
         position = 0
@@ -32,10 +35,13 @@ module Schema
           next unless (service = service(match[2].strip, service_names))
 
           window = source[position, 400]
-          rows << [service, match[3], CALL_TYPES.fetch(match[1]), window[REQUEST, 1], window[RESPONSE, 1]]
+          classes = [REQUEST, RESPONSE].map { message(window, it, source) }
+          rows << [service, match[3], CALL_TYPES.fetch(match[1]), *classes]
         end
         rows
       end
+
+      def message(window, pattern, source) = JavaNames.qualify(window[pattern, 1], source)
 
       def service(holder, service_names)
         holder.start_with?('"') ? holder.delete('"') : service_names[holder.split('.').first]

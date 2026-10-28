@@ -3,6 +3,7 @@
 require 'google/protobuf'
 require 'google/protobuf/descriptor_pb'
 require_relative 'java_literals'
+require_relative 'java_names'
 
 module Schema
   module Extract
@@ -20,7 +21,7 @@ module Schema
       end
 
       # @param descriptors [Array<String>] FileDescriptorProto bytes
-      # @param texts [Hash{String=>String}] each decompiled class by name
+      # @param texts [Hash{String=>String}] each decompiled class by full name
       def initialize(descriptors, texts)
         @texts = texts
         @fields = {}
@@ -80,13 +81,13 @@ module Schema
 
       def by_descriptor(klass)
         text = @texts[klass] or return
-        candidates = @files[text[GET_DESCRIPTOR, 1]] or return
+        candidates = @files[JavaNames.qualify(text[GET_DESCRIPTOR, 1], text)] or return
         numbers = self.class.field_numbers(text)
         matches = candidates.select { @fields[it] == numbers }
         matches.first if matches.one?
       end
 
-      def by_class_name(klass, package) = in_package(@simple[klass], package).min_by(&:length)
+      def by_class_name(klass, package) = in_package(@simple[klass.split('.').last], package).min_by(&:length)
 
       def by_fields(klass, package)
         numbers = self.class.field_numbers(@texts[klass].to_s)

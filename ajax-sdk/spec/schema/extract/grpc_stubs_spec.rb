@@ -11,10 +11,14 @@ RSpec.describe Schema::Extract::GrpcStubs do
     }
   JAVA
   let(:obfuscated) { <<~JAVA }
+    package defpackage;
+
+    import demo.login_by_password.LoginByPasswordResponse;
+
     uunVarB.e = lda0.a;
     uunVarB.a = mda0.a(LoginByPasswordServiceGrpcKt.SERVICE_NAME, "execute");
     sy80 defaultInstance = sy80.getDefaultInstance();
-    uunVarB.d = new luh0(vy80.getDefaultInstance());
+    uunVarB.d = new luh0(LoginByPasswordResponse.getDefaultInstance());
     uunVarC.e = lda0.d;
     uunVarC.a = mda0.a("demo.stream.StreamService", "watch");
     ab12 defaultInstance = ab12.getDefaultInstance();
@@ -33,10 +37,11 @@ RSpec.describe Schema::Extract::GrpcStubs do
              'LoginByPasswordServiceGrpcKt' => 'demo.login_by_password.LoginByPasswordService')
   end
 
-  it 'reads the service, method, call type and message classes of each method it can name' do
+  it 'reads the service, method, call type and message classes of each method it can name, by their full names' do
     expect(described_class.rpcs(obfuscated, described_class.service_names(stub_file)))
-      .to eq([['demo.login_by_password.LoginByPasswordService', 'execute', :unary, 'sy80', 'vy80'],
-              ['demo.stream.StreamService', 'watch', :bidi, 'ab12', 'cd34'],
+      .to eq([['demo.login_by_password.LoginByPasswordService', 'execute', :unary, 'defpackage.sy80',
+               'demo.login_by_password.LoginByPasswordResponse'],
+              ['demo.stream.StreamService', 'watch', :bidi, 'defpackage.ab12', 'defpackage.cd34'],
               ['demo.stream.StreamService', 'upload', :client_stream, nil, nil],
               ['demo.stream.StreamService', 'follow', :server_stream, nil, nil]])
   end

@@ -46,6 +46,27 @@ RSpec.describe Schema::Extract::Linker do
       .to eq(%w[p.sec.ArmSpaceRequest p.sec.ArmSpaceResponse])
   end
 
+  def about(version)
+    file("#{version}.proto", "p.#{version}", [message('GetAboutRequest', field('hub_id', 1)),
+                                              message('GetAboutResponse', field("#{version}_only", 1))])
+  end
+
+  def about_texts
+    texts = %w[v2 v3].each_with_object({}) do |version, all|
+      all["p.#{version}.AboutProto"] = built(about(version))
+      all["p.#{version}.GetAboutResponse"] = "package p.#{version};\nint #{version.upcase}_ONLY_FIELD_NUMBER = 1;\n" \
+                                             "#{descriptor_of('AboutProto')}"
+    end
+    texts.merge('defpackage.k9' => "package defpackage;\nimport p.v3.AboutProto;\nint HUB_ID_FIELD_NUMBER = 1;\n" \
+                                   "#{descriptor_of('AboutProto')}")
+  end
+
+  it 'finds the descriptor of a class through its imports or package, a class of the same name aside' do
+    linker = described_class.new([about('v2'), about('v3')], about_texts)
+    expect(linker.pair('p.svc.AboutService', 'execute', 'defpackage.k9', 'p.v3.GetAboutResponse'))
+      .to eq(%w[p.v3.GetAboutRequest p.v3.GetAboutResponse])
+  end
+
   it 'pairs a class without descriptor by its field numbers in the service package' do
     expect(linker.pair('p.sec.HubService', 'check', 'zz9', 'StatusResponse'))
       .to eq(%w[p.sec.StatusRequest p.sec.StatusResponse])

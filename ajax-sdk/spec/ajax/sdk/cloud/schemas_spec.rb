@@ -11,6 +11,15 @@ RSpec.describe Ajax::Sdk::Cloud::Schemas do
       expect(rpc.request).to end_with('login_by_password.LoginByPasswordRequest')
     end
 
+    it 'gives a v3 method the v3 message of the same name as its v2 one' do
+      rpc = described_class.rpc(
+        '/systems.ajax.api.ecosystem.v3.mobilegwsvc.service.get_device_about.GetDeviceAboutService/execute'
+      )
+
+      expect(rpc.response)
+        .to eq('systems.ajax.api.ecosystem.v3.mobilegwsvc.service.get_device_about.GetDeviceAboutResponse')
+    end
+
     it 'knows that arming a space is unary' do
       rpc = described_class.rpc('/systems.ajax.api.mobile.v2.space.security.SpaceSecurityService/arm')
 

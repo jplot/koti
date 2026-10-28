@@ -17,14 +17,22 @@ module Schema
       def write(roots, directory)
         sources = read(roots)
         descriptors = sources.values.flat_map { JavaLiterals.descriptors(it) }.uniq
-        linker = Linker.new(descriptors, sources.transform_keys { File.basename(it, '.java') })
+                             .sort_by { [Google::Protobuf::FileDescriptorProto.decode(it).name, it] }
+        linker = Linker.new(descriptors, sources)
         write_descriptors(File.join(directory, 'descriptors.pb.gz'), descriptors)
         File.open(File.join(directory, 'methods.tsv'), 'w') { table(it, rpcs(sources.values), linker) }
       end
 
-      # @return [Hash{String=>String}] each .java file to its text
+      # Two runs often hold the same class, but for a comment: sorted roots pick the same text whatever their order.
+      #
+      # @return [Hash{String=>String}] the text of each class, by full name
       def read(roots)
-        roots.flat_map { Dir.glob(File.join(it, '**', '*.java')) }.to_h { [it, File.read(it, encoding: Encoding::UTF_8)] }
+        roots.sort.each_with_object({}) do |root, sources|
+          Dir.glob(File.join(root, '**', '*.java')).each do |path|
+            name = path.delete_prefix(File.join(root, '')).delete_suffix('.java').tr('/', '.')
+            sources[name] = File.read(path, encoding: Encoding::UTF_8)
+          end
+        end
       end
 
       def rpcs(texts)

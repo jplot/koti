@@ -12,12 +12,13 @@ does not use it.
   classes of their requests and responses, mostly obfuscated. `descriptors.pb.gz` holds every
   descriptor as a `FileDescriptorSet`; `methods.tsv` each method with its request and response
   messages.
-- **Pairing.** A class's own descriptor pins its file and its field numbers pick the message there.
-  Else a readable `*Request` or `*Response` class gives its message by name, and an obfuscated one by
-  its field numbers in the service's package. A method without a class takes the messages of its
-  name (`arm` takes `ArmRequest`), of its service's (`LoginByPasswordService` takes
-  `LoginByPasswordRequest`), or the package's lone request and response. From the app 3.59, 598
-  methods are paired and 11 are not.
+- **Pairing.** A class goes by its full Java name, from the imports or the package of the file that
+  names it. Its own descriptor pins its file and its field numbers pick the message there. Else a
+  readable `*Request` or `*Response` class gives its message by name, and an obfuscated one by its
+  field numbers in the service's package. A method without a class takes the messages of its name
+  (`arm` takes `ArmRequest`), of its service's (`LoginByPasswordService` takes
+  `LoginByPasswordRequest`), or the package's lone request and response. From the app 3.59, 607
+  methods are paired and 2 are not.
 - **SIA codes.** [pysiaalarm](https://github.com/eavanvalkenburg/pysiaalarm) (commit `c445c15`)
   lists the codes in `src/pysiaalarm/data/sia_codes.py`, read as text.
 
@@ -27,14 +28,11 @@ does not use it.
    The files above come from three runs with `--show-bad-code`, over its `classes18.dex` and
    `classes26.dex` to `classes31.dex`, over its other `classes*.dex` and over the whole APK, and a
    fourth without it, over `classes12.dex` alone.
-2. Rebuild the cloud schemas from the `sources/` directory of every run; the methods left unpaired
-   are listed on stderr. The order of the directories sets the order of the descriptors, and which
-   class counts when two share a name: the files above come from the `classes18.dex`… run, the other
-   dex, the whole APK, then `classes12.dex`.
+2. Rebuild the cloud schemas from the `sources/` directory of every run, in any order; the methods
+   left unpaired are listed on stderr:
 
    ```sh
-   bundle exec ruby schema/extract/schemas.rb path/to/jadx-gw/sources path/to/jadx-rest/sources \
-     path/to/jadx/sources path/to/jadx12/sources --out lib/ajax/sdk/cloud/schemas
+   bundle exec ruby schema/extract/schemas.rb path/to/jadx-*/sources --out lib/ajax/sdk/cloud/schemas
    ```
 
 3. Rebuild the SIA codes from a pysiaalarm checkout:

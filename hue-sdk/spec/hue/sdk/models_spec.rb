@@ -44,6 +44,16 @@ RSpec.describe Hue::Sdk::Models do
     expect(firmware_types - described_class::REGISTRY.keys).to be_empty
   end
 
+  it 'hides only fields the typed value of the type has', :aggregate_failures do
+    described_class::REGISTRY.each_value do |model|
+      model.hidden_fields.each do |path|
+        *parents, field = path.split('.').map(&:to_sym)
+        owner = parents.reduce(Hue::Sdk::Schema::RESPONSES[model.type]) { |type, key| type&.nested_members&.[](key) }
+        expect(owner&.members).to include(field), "#{model.type} hides #{path}"
+      end
+    end
+  end
+
   it 'allows the operations confirmed for these types', :aggregate_failures do
     app_operations.each do |type, operations|
       collection = Hue::Sdk.resource(type)

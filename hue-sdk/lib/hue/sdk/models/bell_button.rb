@@ -7,7 +7,7 @@ module Hue
       class BellButton < Base
         resource_type 'bell_button'
         operations :update
-        deprecated 'bell.last_event'
+        deprecated 'button.last_event'
       end
     end
   end

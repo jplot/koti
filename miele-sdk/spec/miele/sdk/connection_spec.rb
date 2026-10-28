@@ -68,10 +68,11 @@ RSpec.describe Miele::Sdk::Connection do
 
   context 'when the environment names a proxy' do
     around do |example|
+      saved = ENV.fetch('http_proxy', nil)
       ENV['http_proxy'] = "http://127.0.0.1:#{appliance.port}"
       example.run
     ensure
-      ENV.delete('http_proxy')
+      ENV['http_proxy'] = saved
     end
 
     it 'connects to the appliance itself', :aggregate_failures do

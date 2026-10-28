@@ -5,7 +5,7 @@ module Ajax
     module Sia
       # The SIA event codes and their English labels, from pysiaalarm's table (MIT License, see LICENSE).
       module Codes
-        LABELS = File.readlines(File.join(__dir__ || '.', 'codes.tsv'), chomp: true)
+        LABELS = File.readlines(File.join(__dir__ || '.', 'codes.tsv'), chomp: true, encoding: 'UTF-8')
                      .to_h { [it[0, 2].to_s, it[3..].to_s] }.freeze
         private_constant :LABELS
 

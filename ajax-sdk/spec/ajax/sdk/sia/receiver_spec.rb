@@ -40,6 +40,13 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
     expect(events).to be_empty
   end
 
+  it 'answers NAK to a frame stamped further ahead than the time band allows', :aggregate_failures do
+    early = sia_frame("\"SIA-DCS\"0013L0#AAA[#AAA|Nri1/BA3]#{sia_stamp(Time.now + 30)}")
+
+    expect(exchange(early).first).to include('"NAK"')
+    expect(events).to be_empty
+  end
+
   it 'acknowledges a link test without an event', :aggregate_failures do
     expect(exchange(sia_frame('"NULL"0003L0#AAA[]'))).to eq([sia_frame('"ACK"0003L0#AAA[]')])
     expect(events).to be_empty
@@ -58,6 +65,13 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
     it 'acknowledges an encrypted frame in kind and yields its event', :aggregate_failures do
       expect(exchange(encrypted_sia_frame('SIA-DCS', '#AAA|Nri1/BA3')).first).to include('"*ACK"0001R0L0#AAA[')
       expect(events.pop(timeout: 1)).to have_attributes(code: 'BA', group: '1', number: '3')
+    end
+
+    it 'answers NAK to an encrypted frame outside the time band', :aggregate_failures do
+      late = encrypted_sia_frame('SIA-DCS', '#AAA|Nri1/BA3', time: Time.now - 120)
+
+      expect(exchange(late).first).to include('"NAK"')
+      expect(events).to be_empty
     end
 
     it 'answers DUH to a clear frame', :aggregate_failures do

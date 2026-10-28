@@ -63,11 +63,13 @@ RSpec.describe Ajax::Sdk::Sia::Message do
     expect(described_class.parse(clear).ack).to eq(sia_frame('"ACK"0084L0#AAA[]'))
   end
 
-  it 'answers an encrypted frame with an encrypted ACK carrying the time' do
+  it 'answers an encrypted frame with an encrypted ACK carrying the time', :aggregate_failures do
     message = described_class.parse(encrypted_sia_frame('SIA-DCS', '#AAA|Nri1/BA3', sequence: '0042'), cipher:)
 
-    hex = message.ack(cipher:)[/\A\n\h{8}"\*ACK"0042R0L0#AAA\[(\h+)\r\z/, 1]
+    ack = message.ack(cipher:)
+    hex = ack[/\A\n\h{8}"\*ACK"0042R0L0#AAA\[(\h+)\r\z/, 1]
 
+    expect(ack).to eq(sia_frame(%("*ACK"0042R0L0#AAA[#{hex})))
     expect(sia_decrypt(hex.to_s)).to match(/\A0+\]_\d\d:\d\d:\d\d,\d\d-\d\d-\d{4}\z/)
   end
 

@@ -26,6 +26,13 @@ RSpec.describe Ajax::Sdk::Cloud::Schemas do
       expect(rpc.type).to eq(:unary)
     end
 
+    it 'streams the user spaces with messages it can load', :aggregate_failures do
+      rpc = described_class.rpc('/systems.ajax.api.mobile.v2.space.SpaceService/streamUserSpaces')
+
+      expect(rpc.type).to eq(:server_stream)
+      expect([rpc.request, rpc.response].map { described_class.message(it) }).to all(be_a(Class))
+    end
+
     it 'raises UnknownMethodError for a path it does not know' do
       expect { described_class.rpc('/Nope/nope') }.to raise_error(Ajax::Sdk::Cloud::UnknownMethodError, %r{/Nope/nope})
     end

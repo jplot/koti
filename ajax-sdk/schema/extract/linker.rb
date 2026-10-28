@@ -84,6 +84,8 @@ module Schema
         candidates = @files[JavaNames.qualify(text[GET_DESCRIPTOR, 1], text)] or return
         numbers = self.class.field_numbers(text)
         matches = candidates.select { @fields[it] == numbers }
+        # No method of the app 3.59 takes or returns a nested message: none of the 1,214 in methods.tsv.
+        matches = matches.reject { @names.include?(it.rpartition('.').first) } unless matches.one?
         matches.first if matches.one?
       end
 

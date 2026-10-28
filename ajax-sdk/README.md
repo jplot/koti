@@ -117,7 +117,9 @@ cloud.disarm_night(space.id)   # disarm from night mode
 A command the hub refuses raises `Ajax::Sdk::Cloud::CommandError`, whose `reason` names why
 (for example `:hub_offline`). Set `config.read_only = true` to make every command raise
 `Ajax::Sdk::Cloud::ReadOnlyError` before anything is sent — the live specs use it so they never change
-a real alarm's state.
+a real alarm's state. The generic methods below obey it too: a method passes only when its name
+starts with `get`, `find`, `search` or `stream` and holds no write word (`create`, `delete`, `reset`,
+`test`…), so a stream that changes state is refused like any command.
 
 ## Any method
 

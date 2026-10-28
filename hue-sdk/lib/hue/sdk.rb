@@ -120,6 +120,8 @@ module Hue
     entry :SecurityAreaMotion, 'security_area_motion'
     entry :ServiceGroup, 'service_group'
     entry :SmartScene, 'smart_scene'
+    entry :Sonos, 'sonos'
+    entry :SonosConnectivity, 'sonos_connectivity'
     entry :Speaker, 'speaker'
     entry :SwitchInputConfiguration, 'switch_input_configuration'
     entry :Tamper, 'tamper'

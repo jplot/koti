@@ -128,7 +128,7 @@ light.update(Hue::Sdk::Schema::LightUpdate.new(
 ))
 ```
 
-The app has request classes for 18 types to update and 8 to create, listed below. The hash form
+The app has request classes for 19 types to update and 8 to create, listed below. The hash form
 remains for the other types, and keywords given along with a request are added to its body for the
 fields the app never sends.
 
@@ -173,6 +173,8 @@ fields the app never sends.
 | `security_area_motion` | `Hue::Sdk.SecurityAreaMotion` | list, get, update | `SecurityAreaMotionUpdate` |
 | `service_group` | `Hue::Sdk.ServiceGroup` | list, get, create, update, delete | `ServiceGroupUpdate`, `ServiceGroupAdd` |
 | `smart_scene` | `Hue::Sdk.SmartScene` | list, get, create, update, delete | `SmartSceneUpdate`, `SmartSceneAdd` |
+| `sonos` | `Hue::Sdk.Sonos` | list, get, update | `SonosUpdate` |
+| `sonos_connectivity` | `Hue::Sdk.SonosConnectivity` | list, get | — |
 | `speaker` | `Hue::Sdk.Speaker` | list, get, update | `SpeakerUpdate` |
 | `switch_input_configuration` | `Hue::Sdk.SwitchInputConfiguration` | list, get, update | — |
 | `tamper` | `Hue::Sdk.Tamper` | list, get, update | — |

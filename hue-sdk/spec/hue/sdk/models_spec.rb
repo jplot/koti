@@ -11,7 +11,7 @@ RSpec.describe Hue::Sdk::Models do
     RBS::DefinitionBuilder.new(env:).build_singleton(RBS::TypeName.parse('::Hue::Sdk')).methods
   end
 
-  # The `clip` resource of a Bridge Pro on swversion 2071524040 lists these types, plus
+  # The `clip` resource of a Bridge Pro on swversion 2071556020 lists these types, plus
   # private_group and private_scene, which answer 404 to application keys.
   let(:firmware_types) do
     %w[behavior_instance behavior_script behavior_script_formula bell_button bridge bridge_home button
@@ -19,8 +19,8 @@ RSpec.describe Hue::Sdk::Models do
        entertainment entertainment_configuration geofence_client geolocation grouped_light
        grouped_light_level grouped_motion light light_level matter matter_fabric motion
        motion_area_candidate motion_area_configuration power_output_configuration relative_rotary room
-       scene security_area_motion service_group smart_scene speaker switch_input_configuration tamper
-       temperature zgp_connectivity zigbee_connectivity zigbee_device_discovery zone]
+       scene security_area_motion service_group smart_scene sonos sonos_connectivity speaker
+       switch_input_configuration tamper temperature zgp_connectivity zigbee_connectivity zigbee_device_discovery zone]
   end
 
   let(:app_operations) do
@@ -28,7 +28,8 @@ RSpec.describe Hue::Sdk::Models do
       'behavior_instance' => %i[create update delete], 'behavior_script_formula' => %i[create delete],
       'clip' => [], 'entertainment_configuration' => %i[create update delete],
       'matter_fabric' => %i[update delete], 'motion_area_configuration' => %i[create update delete],
-      'power_output_configuration' => %i[update], 'service_group' => %i[create update delete]
+      'power_output_configuration' => %i[update], 'service_group' => %i[create update delete],
+      'sonos' => %i[update], 'sonos_connectivity' => []
     }
   end
 

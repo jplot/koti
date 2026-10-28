@@ -1046,6 +1046,16 @@ module Hue
         def self.from: (Hash[String, untyped] data) -> SmartSceneUpdate
       end
 
+      class SonosUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: String
+
+        def self.new: (action: String) -> SonosUpdate
+        def self.from: (Hash[String, untyped] data) -> SonosUpdate
+      end
+
       class VolumeUpdate < Data
         include Value
         extend Value::ClassMethods

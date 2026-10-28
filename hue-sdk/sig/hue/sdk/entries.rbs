@@ -108,6 +108,12 @@ module Hue
     def self.SmartScene: (?nil id) -> Models::SmartScene
                        | (String id) -> Models::SmartScene::Instance
 
+    def self.Sonos: (?nil id) -> Models::Sonos
+                  | (String id) -> Models::Sonos::Instance
+
+    def self.SonosConnectivity: (?nil id) -> Models::SonosConnectivity
+                              | (String id) -> Models::SonosConnectivity::Instance
+
     def self.Speaker: (?nil id) -> Models::Speaker
                     | (String id) -> Models::Speaker::Instance
 

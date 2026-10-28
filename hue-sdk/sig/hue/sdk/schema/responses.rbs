@@ -1892,6 +1892,32 @@ module Hue
         def self.from: (Hash[String, untyped] data) -> SmartScene
       end
 
+      class Sonos < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action_values: Array[String]?
+        attr_reader id: String
+        attr_reader id_v1: String?
+
+        def self.new: (?action_values: Array[String]?, id: String, ?id_v1: String?) -> Sonos
+        def self.from: (Hash[String, untyped] data) -> Sonos
+      end
+
+      class SonosConnectivity < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader device_id: String?
+        attr_reader status: String?
+        attr_reader owner: ResourceIdentifier?
+        attr_reader id: String
+        attr_reader id_v1: String?
+
+        def self.new: (?device_id: String?, ?status: String?, ?owner: ResourceIdentifier?, id: String, ?id_v1: String?) -> SonosConnectivity
+        def self.from: (Hash[String, untyped] data) -> SonosConnectivity
+      end
+
       class StatusEstimatedEnd < Data
         include Value
         extend Value::ClassMethods

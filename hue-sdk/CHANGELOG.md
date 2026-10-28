@@ -16,7 +16,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   (207) included.
 - Bridge discovery over mDNS, repeating the query so a lost packet does not hide the bridge.
 - Pairing with the link button, returning the application key and the client key.
-- A model and an entry point for each of the 45 resource types of the Bridge Pro firmware,
+- A model and an entry point for each of the 47 resource types of the Bridge Pro firmware,
   offering only the operations the bridge accepts, with `owner`, `children` and `services`
   associations; deprecated fields are left out.
 - Real-time events through `Hue::Sdk.events`, with automatic reconnection sending the id of the

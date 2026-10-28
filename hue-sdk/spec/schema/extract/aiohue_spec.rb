@@ -59,4 +59,8 @@ RSpec.describe Schema::Extract::Aiohue do
   it 'requires a response field without default that cannot be None' do
     expect(%w[mode type].map { described_class.required?(aiohue.field('Light', it)) }).to eq([true, false])
   end
+
+  it 'raises when the directory holds no aiohue model' do
+    expect { described_class.read(File.join(directory, 'aiohue')) }.to raise_error(ArgumentError, /no aiohue class/)
+  end
 end

@@ -34,4 +34,12 @@ RSpec.describe Schema::Extract::Objdump do
     expect(File.read(File.join(directory, 'arguments')))
       .to include('--start-address=0x14e4f80 --stop-address=0x14e5004 libapp.so')
   end
+
+  context 'when llvm-objdump fails' do
+    before { File.write(File.join(directory, 'llvm-objdump'), "#!/bin/sh\nexit 1\n", perm: 0o755) }
+
+    it 'raises instead of reading no instruction' do
+      expect { objdump.call(0x14e4f80, 0x84) }.to raise_error(RuntimeError, /llvm-objdump failed on libapp\.so/)
+    end
+  end
 end

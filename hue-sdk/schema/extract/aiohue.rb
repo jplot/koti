@@ -10,7 +10,12 @@ module Schema
       SUFFIXES = { 'update' => 'Put', 'add' => 'Post' }.freeze
 
       # @param models [String] aiohue's aiohue/v2/models directory
-      def self.read(models) = new(JSON.parse(IO.popen(['python3', '-I', SCRIPT, models], &:read)))
+      def self.read(models)
+        data = JSON.parse(IO.popen(['python3', '-I', SCRIPT, models], &:read))
+        raise ArgumentError, "no aiohue class in #{models}: give its aiohue/v2/models" if data.fetch('classes').empty?
+
+        new(data)
+      end
 
       # A response field aiohue gives neither a default nor None is never absent.
       def self.required?(field) = field['default'].nil? && !field['type'].end_with?('| None')

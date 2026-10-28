@@ -1215,6 +1215,14 @@ module Hue
                recall: SmartSceneRecallFeatureUpdate
       end
 
+      # The changes sent to update a +sonos+ resource (Hue app class +SonosUpdate+).
+      #
+      # @!attribute [r] action
+      #   @return [String]
+      SonosUpdate = Data.define(:action) do
+        include Value
+      end
+
       # Part of the changes sent to update a resource (Hue app class +VolumeUpdate+).
       #
       # @!attribute [r] level

@@ -266,6 +266,20 @@ module Hue
         end
       end
 
+      class Sonos < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::Sonos
+          def update: (Schema::SonosUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
+        end
+      end
+
+      class SonosConnectivity < Base
+        class Instance < Base::Instance
+          def attributes: () -> Schema::SonosConnectivity
+        end
+      end
+
       class Speaker < Base
         class Instance < Base::Instance
           def attributes: () -> Schema::Speaker

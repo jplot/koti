@@ -2336,6 +2336,39 @@ module Hue
                active_timeslot: ActiveTimeslot
       end
 
+      # The +sonos+ resource as the bridge reports it (Hue app class +SonosAdded+).
+      #
+      # @!attribute [r] action_values
+      #   @return [Array<String>, nil]
+      # @!attribute [r] id
+      #   @return [String]
+      # @!attribute [r] id_v1
+      #   @return [String, nil]
+      Sonos = Data.define(:action_values, :id, :id_v1) do
+        include Value
+
+        optional :action_values, :id_v1
+      end
+
+      # The +sonos_connectivity+ resource as the bridge reports it (Hue app class +SonosConnectivityAdded+).
+      #
+      # @!attribute [r] device_id
+      #   @return [String, nil]
+      # @!attribute [r] status
+      #   @return [String, nil]
+      # @!attribute [r] owner
+      #   @return [ResourceIdentifier, nil]
+      # @!attribute [r] id
+      #   @return [String]
+      # @!attribute [r] id_v1
+      #   @return [String, nil]
+      SonosConnectivity = Data.define(:device_id, :status, :owner, :id, :id_v1) do
+        include Value
+
+        optional :device_id, :status, :owner, :id_v1
+        nested owner: ResourceIdentifier
+      end
+
       # Part of a resource as the bridge reports it (Hue app class +StatusEstimatedEndAdded+).
       #
       # @!attribute [r] estimate
@@ -2689,6 +2722,8 @@ module Hue
         'security_area_motion' => SecurityAreaMotion,
         'service_group' => ServiceGroup,
         'smart_scene' => SmartScene,
+        'sonos' => Sonos,
+        'sonos_connectivity' => SonosConnectivity,
         'speaker' => Speaker,
         'switch_input_configuration' => SwitchInputConfiguration,
         'tamper' => Tamper,

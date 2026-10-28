@@ -1,0 +1,10 @@
+module Hue
+  module Sdk
+    module Models
+      class SonosConnectivity < Base
+        class Instance < Base::Instance
+        end
+      end
+    end
+  end
+end

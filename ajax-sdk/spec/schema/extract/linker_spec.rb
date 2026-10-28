@@ -104,6 +104,15 @@ RSpec.describe Schema::Extract::Linker do
     expect(described_class.new([twin], texts).pair('p.twin.TwinService', 'run', 'xx1', 'AResponse')).to be_nil
   end
 
+  it 'pairs a class without fields with the top-level message of its file, a nested one aside' do
+    stream = file('stream.proto', 'p.user',
+                  ['StreamRequest', message('StreamResponse', field('space', 1), nested: [message('Failure')])])
+    texts = { 'StreamProto' => built(stream), 'zq1' => "class zq1 {}\n#{descriptor_of('StreamProto')}",
+              'zq2' => "int SPACE_FIELD_NUMBER = 1;\n#{descriptor_of('StreamProto')}" }
+    expect(described_class.new([stream], texts).pair('p.space.SpaceService', 'streamUserSpaces', 'zq1', 'zq2'))
+      .to eq(%w[p.user.StreamRequest p.user.StreamResponse])
+  end
+
   it 'leaves a method unpaired when its package holds several requests and no name matches' do
     expect(linker.pair('p.sec.OtherService', 'run', nil, nil)).to be_nil
   end

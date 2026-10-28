@@ -13,12 +13,12 @@ does not use it.
   descriptor as a `FileDescriptorSet`; `methods.tsv` each method with its request and response
   messages.
 - **Pairing.** A class goes by its full Java name, from the imports or the package of the file that
-  names it. Its own descriptor pins its file and its field numbers pick the message there. Else a
-  readable `*Request` or `*Response` class gives its message by name, and an obfuscated one by its
-  field numbers in the service's package. A method without a class takes the messages of its name
-  (`arm` takes `ArmRequest`), of its service's (`LoginByPasswordService` takes
-  `LoginByPasswordRequest`), or the package's lone request and response. From the app 3.59, 607
-  methods are paired and 2 are not.
+  names it. Its own descriptor pins its file and its field numbers pick the message there, a
+  top-level one when they leave several. Else a readable `*Request` or `*Response` class gives its
+  message by name, and an obfuscated one by its field numbers in the service's package. A method
+  without a class takes the messages of its name (`arm` takes `ArmRequest`), of its service's
+  (`LoginByPasswordService` takes `LoginByPasswordRequest`), or the package's lone request and
+  response. From the app 3.59, 608 methods are paired and 1 is not.
 - **SIA codes.** [pysiaalarm](https://github.com/eavanvalkenburg/pysiaalarm) (commit `c445c15`)
   lists the codes in `src/pysiaalarm/data/sia_codes.py`, read as text.
 

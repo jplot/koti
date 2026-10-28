@@ -92,6 +92,29 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
     expect(client.call(spaces)).to be_a(Hash)
   end
 
+  context 'when read-only' do
+    before { allow(settings).to receive(:read_only).and_return(true) }
+
+    def gateway(name) = "/systems.ajax.api.ecosystem.v3.mobilegwsvc.service.#{name}Service/execute"
+
+    it 'refuses the server streams that change state, before any call', :aggregate_failures do
+      writes = %w[stream_create_access_card.StreamCreateAccessCard stream_radio_test.StreamRadioTest
+                  stream_z_wave_device_registration.classic_inclusion.StreamZWaveDeviceClassicInclusionRegistration]
+      writes.each do |name|
+        expect { client.call(gateway(name), {}) }.to raise_error(Ajax::Sdk::Cloud::ReadOnlyError), name
+      end
+    end
+
+    it 'lets the raw reads through', :aggregate_failures do
+      reads = [gateway('get_device_parts.GetDeviceParts'), gateway('find_single_notification.FindSingleNotification'),
+               '/systems.ajax.api.mobile.v2.space.scenario.ScenarioService/findAll']
+      reads.each do |path|
+        allow(grpc).to receive(:request_response).and_return(empty_response(path))
+        expect { client.call(path) }.not_to raise_error, path
+      end
+    end
+  end
+
   it 'logs in again and retries once after an Unauthenticated answer' do
     answers = [-> { raise GRPC::Unauthenticated, 'nope' }, -> { empty_response(spaces) }]
     allow(grpc).to receive(:request_response) { answers.shift.call }

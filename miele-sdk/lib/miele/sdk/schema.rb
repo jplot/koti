@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'json'
+
 module Miele
   module Sdk
     # Typed values of the JSON the appliances and their Wi-Fi modules serve, after the classes the Miele

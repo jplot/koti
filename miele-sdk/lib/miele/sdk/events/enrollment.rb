@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
-
 module Miele
   module Sdk
     module Events
@@ -26,7 +24,7 @@ module Miele
           supervise(appliance, our_fab, true)
           RESOURCES.each do |resource|
             callback = "http://#{callback_host}:#{port}/Devices/#{our_fab}/SuperVision/#{appliance.fab}#{resource}"
-            body = JSON.generate(Resource: "/Devices/#{appliance.fab}#{resource}", Callback: callback)
+            body = Schema::Subscription.new(resource: "/Devices/#{appliance.fab}#{resource}", callback:).to_json
             Connection.request(appliance.host, :post, '/Subscriptions', body:)
           end
         end
@@ -54,7 +52,7 @@ module Miele
         # @api private
         def supervise(appliance, our_fab, on)
           Connection.request(appliance.host, :put, "/Devices/#{appliance.fab}/SuperVision/#{our_fab}",
-                             body: JSON.generate(Show: on, Signal: on))
+                             body: Schema::SuperVisionDevice.new(show: on, signal: on).to_json)
         rescue ResponseError => e
           raise unless [400, 404].include?(e.status)
         end

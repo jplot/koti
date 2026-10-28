@@ -87,9 +87,9 @@ module Miele
 
       def device: (String resource) -> resource
 
-      def command: (Hash[Symbol, Integer] body) -> Connection::Response
+      def command: (Schema::DeviceState request) -> Connection::Response
 
-      def change: (Hash[Symbol, Integer] body) -> void
+      def change: (Schema::DeviceState request) -> void
 
       def tolerating_no_op: () { () -> untyped } -> void
 

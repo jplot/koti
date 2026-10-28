@@ -81,31 +81,31 @@ module Miele
       # @return [void]
       # @raise [ResponseError] if the appliance refuses (400)
       # @api public
-      def start = command(ProcessAction: 1)
+      def start = command(Schema::DeviceState.new(process_action: 1))
 
       # @return [void]
       # @raise [ResponseError] if the appliance refuses (400)
       # @api public
-      def stop = command(ProcessAction: 2)
+      def stop = command(Schema::DeviceState.new(process_action: 2))
 
       # @return [void]
       # @raise [ResponseError] if the appliance refuses (400)
       # @api public
-      def pause = command(ProcessAction: 3)
+      def pause = command(Schema::DeviceState.new(process_action: 3))
 
       # @return [void]
       # @api public
-      def light_on = change(Light: 1)
+      def light_on = change(Schema::DeviceState.new(light: 1))
 
       # @return [void]
       # @api public
-      def light_off = change(Light: 2)
+      def light_off = change(Schema::DeviceState.new(light: 2))
 
       # Wakes the appliance from standby.
       #
       # @return [void]
       # @api public
-      def wake = change(DeviceAction: 2)
+      def wake = change(Schema::DeviceState.new(device_action: 2))
 
       # Switches the appliance on, waking it first when it sleeps.
       #
@@ -195,14 +195,14 @@ module Miele
       # @return [Hash{String=>Object}]
       def device(resource) = get("/Devices/#{fab}/#{resource}")
 
-      # @param body [Hash{Symbol=>Integer}]
+      # @param request [Schema::DeviceState]
       # @return [Connection::Response]
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
-      def command(body) = Connection.request(host, :put, "/Devices/#{fab}/State", body: JSON.generate(body))
+      def command(request) = Connection.request(host, :put, "/Devices/#{fab}/State", body: request.to_json)
 
-      # @param body [Hash{Symbol=>Integer}]
+      # @param request [Schema::DeviceState]
       # @return [void]
-      def change(body) = tolerating_no_op { command(body) }
+      def change(request) = tolerating_no_op { command(request) }
 
       # The appliance answers 400 to a write that changes nothing, such as
       # switching on a light already on.

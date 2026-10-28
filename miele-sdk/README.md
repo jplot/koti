@@ -249,7 +249,8 @@ anything is sent.
   [ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan), building on the work of
   [MieleRESTServer](https://github.com/akappner/MieleRESTServer).
 - Typed values: the JSON classes of the Miele app 4.19.0, read from its assemblies. A hood and a
-  hob with EK039W modules serve no key these classes lack.
+  hob with EK039W modules serve no key these classes lack. `schema/README.md` tells how to check
+  them against a newer version of the app.
 - Program phases, the professional appliances and the second steam oven generation:
   [Home Assistant](https://github.com/home-assistant/core/tree/dev/homeassistant/components/miele).
 

@@ -63,6 +63,26 @@ RSpec.describe Schema::Extract::Schemas do
     expect(Dir.children(directory)).to eq(['sources'])
   end
 
+  def other_run
+    File.join(directory, 'other').tap do |other|
+      FileUtils.mkdir_p(other)
+      early = Google::Protobuf::FileDescriptorProto.new(name: 'a.proto', package: 'p.a')
+      literal = Google::Protobuf::FileDescriptorProto.encode(early).bytes.map { format('\\u%04x', it) }.join
+      File.write("#{other}/AProto.java", %(a = internalBuildGeneratedFileFrom(new String[]{"#{literal}"}, deps);))
+    end
+  end
+
+  def output_of(roots, name)
+    FileUtils.mkdir_p(out = File.join(directory, name))
+    described_class.write(roots, out)
+    [File.read("#{out}/methods.tsv"), Zlib.gunzip(File.binread("#{out}/descriptors.pb.gz"))]
+  end
+
+  it 'writes the same files whatever the order of the jadx directories', :aggregate_failures do
+    roots = [File.join(directory, 'sources'), other_run]
+    expect { expect(output_of(roots, 'forward')).to eq(output_of(roots.reverse, 'backward')) }.to output.to_stderr
+  end
+
   it 'writes the length of each descriptor as a protobuf varint' do
     expect([127, 200, 300].map { described_class.varint(it) }).to eq(["\x7F".b, "\xC8\x01".b, "\xAC\x02".b])
   end

@@ -23,7 +23,7 @@ description at run time, but a spec fails while the generated files differ from 
   of a response come from the `fromJson` of its class; those of a request from its `toJson`, a key
   written without a null check being required.
 - **What the app leaves out.** An AOT build drops the classes the app never uses: there is a
-  request class for 18 types to update and 8 to create, and a request class only holds the fields
+  request class for 19 types to update and 8 to create, and a request class only holds the fields
   the app sends.
 - **Always present.** The app reads every response field as nullable. A response field is required
   here when [aiohue](https://github.com/home-assistant-libs/aiohue) (commit `e12e5a7`) requires it

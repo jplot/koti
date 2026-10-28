@@ -1,0 +1,16 @@
+module Miele
+  module Sdk
+    module Schema
+      class Subscription < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader resource: String?
+        attr_reader callback: String?
+
+        def self.new: (?resource: String?, ?callback: String?) -> Subscription
+        def self.from: (Hash[String, untyped] data) -> Subscription
+      end
+    end
+  end
+end

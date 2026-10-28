@@ -29,9 +29,9 @@ module Miele
       # @api public
       def fab = @fab ||= get('/Devices/').keys.fetch(0)
 
-      # @return [Hash{String=>Object}] identity: device type, protocol version, fabrication and module labels
+      # @return [Schema::DeviceIdentification] identity: device type, protocol version, fabrication and module labels
       # @api public
-      def ident = device('Ident')
+      def ident = Schema::DeviceIdentification.from(device('Ident'))
 
       # @return [Hash{String=>Object}] links to the settings the appliance exposes
       # @api public
@@ -46,9 +46,9 @@ module Miele
       # @api public
       def update = device('Update')
 
-      # @return [Hash{String=>Object}] appliances this one notifies, and whether it notifies them
+      # @return [Schema::SuperVision] appliances this one notifies, and whether it notifies them
       # @api public
-      def supervision = device('SuperVision')
+      def supervision = Schema::SuperVision.from(device('SuperVision'))
 
       # @return [Hash{String=>Object}] the communication module's +/Info+
       # @api public
@@ -58,21 +58,21 @@ module Miele
       # @api public
       def host_info = get('/Host')
 
-      # @return [Hash{String=>Object}] software update state of the communication module
+      # @return [Schema::ModuleUpdateInfo] software update state of the communication module
       # @api public
-      def software_update = get('/Update/')
+      def software_update = Schema::ModuleUpdateInfo.from(get('/Update/'))
 
       # @return [Symbol] +DeviceType+ of {#ident} named by {Catalog::DEVICE_TYPES}, or +:unknown+
       # @api public
-      def device_type = @device_type ||= Catalog::DEVICE_TYPES.fetch(ident['DeviceType'], :unknown)
+      def device_type = @device_type ||= Catalog::DEVICE_TYPES.fetch(ident.device_type, :unknown)
 
       # @return [Integer, nil] +ProtocolVersion+ of {#ident}: 2 on Dop1 appliances, 3 or 4 on DOP2 ones
       # @api public
-      def protocol_version = @protocol_version ||= ident['ProtocolVersion']
+      def protocol_version = @protocol_version ||= ident.protocol_version
 
       # @return [String, nil] +TechType+ of {#ident}'s device label, the model name
       # @api public
-      def tech_type = @tech_type ||= ident.dig('DeviceIdentLabel', 'TechType')
+      def tech_type = @tech_type ||= ident.device_ident_label&.tech_type
 
       # @return [State]
       # @api public
@@ -81,31 +81,31 @@ module Miele
       # @return [void]
       # @raise [ResponseError] if the appliance refuses (400)
       # @api public
-      def start = command(ProcessAction: 1)
+      def start = command(Schema::DeviceState.new(process_action: 1))
 
       # @return [void]
       # @raise [ResponseError] if the appliance refuses (400)
       # @api public
-      def stop = command(ProcessAction: 2)
+      def stop = command(Schema::DeviceState.new(process_action: 2))
 
       # @return [void]
       # @raise [ResponseError] if the appliance refuses (400)
       # @api public
-      def pause = command(ProcessAction: 3)
+      def pause = command(Schema::DeviceState.new(process_action: 3))
 
       # @return [void]
       # @api public
-      def light_on = change(Light: 1)
+      def light_on = change(Schema::DeviceState.new(light: 1))
 
       # @return [void]
       # @api public
-      def light_off = change(Light: 2)
+      def light_off = change(Schema::DeviceState.new(light: 2))
 
       # Wakes the appliance from standby.
       #
       # @return [void]
       # @api public
-      def wake = change(DeviceAction: 2)
+      def wake = change(Schema::DeviceState.new(device_action: 2))
 
       # Switches the appliance on, waking it first when it sleeps.
       #
@@ -195,14 +195,14 @@ module Miele
       # @return [Hash{String=>Object}]
       def device(resource) = get("/Devices/#{fab}/#{resource}")
 
-      # @param body [Hash{Symbol=>Integer}]
+      # @param request [Schema::DeviceState]
       # @return [Connection::Response]
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
-      def command(body) = Connection.request(host, :put, "/Devices/#{fab}/State", body: JSON.generate(body))
+      def command(request) = Connection.request(host, :put, "/Devices/#{fab}/State", body: request.to_json)
 
-      # @param body [Hash{Symbol=>Integer}]
+      # @param request [Schema::DeviceState]
       # @return [void]
-      def change(body) = tolerating_no_op { command(body) }
+      def change(request) = tolerating_no_op { command(request) }
 
       # The appliance answers 400 to a write that changes nothing, such as
       # switching on a light already on.

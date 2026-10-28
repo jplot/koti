@@ -63,6 +63,12 @@ RSpec.describe Miele::Sdk::Events::Listener do
       .to eq(%w[/State/ /State/Light/ /State/Status/ /Ident/])
   end
 
+  it 'subscribes under the paths of the appliance' do
+    push_state.tap { listener.each.first }.join
+    resources = fake.requests.select { it.verb == 'POST' }.map { JSON.parse(it.body).fetch('Resource') }
+    expect(resources).to eq(%w[/State/ /State/Light/ /State/Status/ /Ident/].map { "/Devices/#{fab}#{it}" })
+  end
+
   it 'withdraws its subscriptions when the block ends', :aggregate_failures do
     push_state.tap { listener.each.first }.join
     expect(subscriptions).to eq('1' => cloud)

@@ -76,7 +76,7 @@ Wi-Fi drops multicast packets; the default 4-second window fits three queries.
 oven = Miele::Sdk.appliance('192.0.2.20')
 oven.fab           # => "000123456789", the fabrication number
 oven.device_type   # => :oven_microwave
-oven.ident         # => {"DeviceType" => 13, "ProtocolVersion" => 4, "DeviceIdentLabel" => {…}, …}
+oven.ident         # => #<data Miele::Sdk::Schema::DeviceIdentification device_type=13, …>
 oven.protocol_version  # => 4: DOP2 (3 or 4), or Dop1 (2)
 oven.tech_type     # => "H7164BP", the model
 
@@ -96,11 +96,35 @@ state.light                # => :on
 
 Hoods add `state.ventilation_step` (0 to 4), hobs `state.plates`, one `Plate` per cooking zone
 (`step`, `remaining_heat`, `remaining_minutes`, `elapsed_minutes`, `timer_seconds`). Unknown
-values read `:unknown`, and `state.raw` keeps the resource as served.
+values read `:unknown`, `state.raw` keeps the resource as served, and `state.attributes` gives it
+as a typed value.
 
-The other resources come as served: `settings`, `service`, `update` and `supervision` of the
-appliance, `info`, `host_info` and `software_update` of its Wi-Fi module, and `get(path)` for any
-other one.
+`supervision` and `software_update` come as typed values too. The other resources come as served,
+the Miele app reading none of them as JSON: `settings`, `service` and `update` of the appliance,
+`info` and `host_info` of its Wi-Fi module, and `get(path)` for any other one.
+
+### Typed values
+
+`Miele::Sdk::Schema` holds the classes the Miele app 4.19.0 reads and writes the local JSON with,
+as `Data` values. A member is its JSON key in snake case (`ProgramID` is `program_id`, `SWIDs` is
+`sw_ids`), and it may be nil wherever the app's class lets it be null, as every member of the
+ident and of the state.
+
+| Value | Read from, or sent to | Miele app class |
+|---|---|---|
+| `DeviceIdentification`, with `DeviceIdentificationLabel` and `XkmIdentificationLabel` | `ident` | `DeviceIdentificationDto` and its two labels |
+| `DeviceState` | `state.attributes`, and the body of each state command | `DeviceStateDto` |
+| `SuperVision` | `supervision`, the peers in `entries` | `SuperVisionDto` |
+| `ModuleUpdateInfo` | `software_update` | `ModuleUpdateInfoDto`, and `CheckUpdateResponseBodyDto` for `ReleaseNotes` |
+| `SuperVisionDevice` and `Subscription` | the bodies `events` puts and posts to enroll an appliance | `SuperVisionDeviceDto` and `SubscriptionDto` |
+
+```ruby
+Miele::Sdk::Schema::DeviceState.from(json)               # a parsed resource; unknown keys are ignored
+Miele::Sdk::Schema::DeviceState.new(light: 1).to_body    # => {"Light" => 1}
+Miele::Sdk::Schema::SuperVisionDevice.new(signal: true)  # ArgumentError: missing keyword: :show
+```
+
+A value refuses a member its class lacks, and `to_body` refuses a required member left nil.
 
 ## Commands
 
@@ -224,6 +248,8 @@ anything is sent.
 - The local protocol (signing, DOP2 layout, Dop1 objects, power sequence, SuperVision):
   [ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan), building on the work of
   [MieleRESTServer](https://github.com/akappner/MieleRESTServer).
+- Typed values: the JSON classes of the Miele app 4.19.0, read from its assemblies. A hood and a
+  hob with EK039W modules serve no key these classes lack.
 - Program phases, the professional appliances and the second steam oven generation:
   [Home Assistant](https://github.com/home-assistant/core/tree/dev/homeassistant/components/miele).
 

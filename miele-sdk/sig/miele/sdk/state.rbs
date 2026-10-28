@@ -28,6 +28,8 @@ module Miele
       def initialize: (Hash[String, untyped] raw, Symbol device_type, ?protocol_version: Integer?,
                        ?tech_type: String?) -> void
 
+      def attributes: () -> Schema::DeviceState
+
       def status: () -> Symbol
 
       def program_type: () -> Symbol

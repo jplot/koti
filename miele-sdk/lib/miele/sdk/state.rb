@@ -54,6 +54,10 @@ module Miele
         @tech_type = tech_type
       end
 
+      # @return [Schema::DeviceState] {#raw} as a typed value
+      # @api public
+      def attributes = Schema::DeviceState.from(raw)
+
       # @return [Symbol] one of {Catalog::STATUS} or of the device type's {Catalog::DEVICE_STATUS}, or +:unknown+
       # @api public
       def status = Catalog::STATUS[raw['Status']] || Catalog::DEVICE_STATUS.dig(device_type, raw['Status']) || :unknown

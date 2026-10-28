@@ -28,6 +28,10 @@ RSpec.describe Miele::Sdk::State do
     expect(state.remaining_time).to eq(5400)
   end
 
+  it 'reads the resource as a typed value' do
+    expect(state.attributes).to have_attributes(status: 1, remaining_time: [1, 30], signal_door: true, light: 1)
+  end
+
   it 'reads a time sent as plain minutes' do
     raw['RemainingTime'] = 90
     expect(state.remaining_time).to eq(5400)

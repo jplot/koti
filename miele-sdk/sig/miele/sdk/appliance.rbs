@@ -25,7 +25,7 @@ module Miele
 
       def fab: () -> String
 
-      def ident: () -> resource
+      def ident: () -> Schema::DeviceIdentification
 
       def settings: () -> resource
 
@@ -33,13 +33,13 @@ module Miele
 
       def update: () -> resource
 
-      def supervision: () -> resource
+      def supervision: () -> Schema::SuperVision
 
       def info: () -> resource
 
       def host_info: () -> resource
 
-      def software_update: () -> resource
+      def software_update: () -> Schema::ModuleUpdateInfo
 
       def device_type: () -> Symbol
 
@@ -87,9 +87,9 @@ module Miele
 
       def device: (String resource) -> resource
 
-      def command: (Hash[Symbol, Integer] body) -> Connection::Response
+      def command: (Schema::DeviceState request) -> Connection::Response
 
-      def change: (Hash[Symbol, Integer] body) -> void
+      def change: (Schema::DeviceState request) -> void
 
       def tolerating_no_op: () { () -> untyped } -> void
 

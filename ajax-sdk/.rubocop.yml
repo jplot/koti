@@ -4,3 +4,10 @@ inherit_from: ../.rubocop.yml
 # while the rest of koti stays on 4.0.
 AllCops:
   TargetRubyVersion: 3.4
+  Exclude:
+    - 'lib/ajax/sdk/cloud/messages.rb'
+    - 'lib/ajax/sdk/cloud/messages/**/*'
+
+inherit_mode:
+  merge:
+    - Exclude

@@ -157,7 +157,8 @@ module Schema
         @types = {}
         Google::Protobuf::FileDescriptorSet.decode(descriptors).file.each { index(it) }
         @entries = @types.filter_map { |name, type| [name, type.descriptor] if map_entry?(type.descriptor) }.to_h
-        @reached = reach(rpcs.flat_map { it.last(2) })
+        @roots = rpcs.flat_map { it.last(2) }.uniq.sort
+        @reached = reach(@roots)
         @modules = {}
       end
 
@@ -171,13 +172,19 @@ module Schema
       def files = (messages + enums).map(&:file).uniq.sort
 
       # @return [Array<Message, Enum>] the generated types +file+ declares outside any message
-      def top_level(file) = children { it.file == file && it.parent.nil? }
+      def top_level(file) = children.fetch([:file, file], [])
 
       # @return [Array<Message, Enum>] the generated types the message +full_name+ declares
-      def nested(full_name) = children { it.parent == full_name }
+      def nested(full_name) = children.fetch(full_name, [])
 
       # @return [Message, Enum] the generated type of that name
       def type(full_name) = by_name.fetch(full_name)
+
+      # @return [Array<String>] the requests and responses of the methods, sorted
+      attr_reader :roots
+
+      # @return [String] the package of a type
+      def package(full_name) = @types.fetch(full_name).package
 
       # @param full_name [String] a message or enum, without a leading dot
       # @return [String] the Ruby constant of its value class or module
@@ -231,7 +238,11 @@ module Schema
 
       def by_name = @by_name ||= (messages + enums).to_h { [it.full_name, it] }
 
-      def children = @types.filter_map { |name, type| by_name[name] if by_name.key?(name) && yield(type) }
+      def children
+        @children ||= @types.select { |name, _| by_name.key?(name) }
+                            .group_by { |_, type| type.parent || [:file, type.file] }
+                            .transform_values { |types| types.map { by_name.fetch(it.first) } }
+      end
 
       def map_entry?(descriptor) = descriptor.is_a?(Google::Protobuf::DescriptorProto) && descriptor.options&.map_entry
 

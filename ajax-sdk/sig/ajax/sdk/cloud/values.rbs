@@ -16,6 +16,10 @@ module Ajax
         def problem: () -> untyped
       end
 
+      module Messages
+        def self.type: (String full_name) -> Class
+      end
+
       module Encode
         def self?.time: (Time time) -> Hash[Symbol, Integer]
         def self?.duration: (Float seconds) -> Hash[Symbol, Integer]

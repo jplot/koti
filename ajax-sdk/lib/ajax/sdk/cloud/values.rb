@@ -57,6 +57,18 @@ module Ajax
         # @return [Hash{Symbol=>Object}] the wrapper
         def wrapper(value) = { value: }
       end
+
+      # The typed values of the cloud messages; messages.rb declares them.
+      module Messages
+        # @param full_name [String] the protobuf name of a request or response of the method table
+        # @return [Class] its value class
+        # @raise [UnknownMessageError] when no method of the table has it
+        def self.type(full_name)
+          const_get(TYPES.fetch(full_name) { raise UnknownMessageError, "unknown message #{full_name}" })
+        end
+      end
     end
   end
 end
+
+require_relative 'messages'

@@ -25,6 +25,15 @@ module Ajax
         # @param timestamp [Hash{Symbol=>Integer}, nil] a +google.protobuf.Timestamp+
         # @return [Time, nil] in UTC
         def time(timestamp) = timestamp && Time.at(timestamp[:seconds].to_i, timestamp[:nanos].to_i, :nsec, in: 'UTC')
+
+        # @param duration [Hash{Symbol=>Integer}, nil] a +google.protobuf.Duration+
+        # @return [Float, nil] in seconds
+        def duration(duration) = duration && (duration[:seconds].to_i + (duration[:nanos].to_i / 1_000_000_000.0))
+
+        # @param wrapper [Hash{Symbol=>Object}, nil] a wrapper such as +google.protobuf.StringValue+
+        # @param default [Object] the protobuf default of what it holds, which +to_h+ leaves out
+        # @return [Object, nil] what it holds
+        def wrapper(wrapper, default) = wrapper&.fetch(:value, default)
       end
     end
   end

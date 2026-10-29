@@ -1,0 +1,26 @@
+module Ajax
+  module Sdk
+    module Cloud
+      module Enum : Module
+        def from: (Symbol | Integer | nil value) -> (Symbol | Integer)
+        def proto: (Symbol | Integer value) -> (Symbol | Integer)
+        def default: () -> Symbol
+
+        private
+
+        def values: () -> Hash[Symbol, Symbol]
+      end
+
+      module Outcome
+        def success: () -> untyped
+        def problem: () -> untyped
+      end
+
+      module Encode
+        def self?.time: (Time time) -> Hash[Symbol, Integer]
+        def self?.duration: (Float seconds) -> Hash[Symbol, Integer]
+        def self?.wrapper: (untyped value) -> Hash[Symbol, untyped]
+      end
+    end
+  end
+end

@@ -13,8 +13,17 @@ module Schema
     # A real oneof of a message: its protobuf name, the Ruby method telling which member is set, and its members.
     Oneof = Data.define(:name, :reader, :choices)
 
-    # A field: its Ruby name, its +to_h+ key, and +map+ as its key and value fields when it is a map.
     Field = Data.define(:name, :key, :number, :kind, :type, :label, :presence, :map)
+
+    # A field: its Ruby name, its +to_h+ key, and +map+ as its key and value fields when it is a map.
+    class Field
+      # @return [Boolean] whether its member may be nil: a scalar or an enum holds its protobuf default unless it
+      #   sits in a oneof or is +optional+
+      def nilable? = !presence.nil? || %i[message timestamp duration wrapper].include?(kind)
+
+      # @return [Boolean] whether it is repeated, and not a map
+      def list? = label == :repeated && map.nil?
+    end
 
     # An enum and its values, each as its protobuf name and its short symbol, in the order of the descriptor.
     Enum = Data.define(:full_name, :constant, :file, :values)
@@ -64,9 +73,10 @@ module Schema
 
     # The fields, oneofs and outcome of a message descriptor.
     module Shapes
-      WRAPPERS = %w[Double Float Int64 UInt64 Int32 UInt32 Bool String Bytes].map { "google.protobuf.#{it}Value" }
+      WRAPPERS = %w[Double Float Int64 UInt64 Int32 UInt32 Bool String Bytes]
+                 .to_h { ["google.protobuf.#{it}Value", it.downcase.to_sym] }.freeze
       CONVERTED = { 'google.protobuf.Timestamp' => :timestamp, 'google.protobuf.Duration' => :duration,
-                    **WRAPPERS.to_h { [it, :wrapper] } }.freeze
+                    **WRAPPERS.transform_values { :wrapper } }.freeze
 
       module_function
 
@@ -160,6 +170,15 @@ module Schema
       # @return [Array<String>] the .proto files holding a generated type
       def files = (messages + enums).map(&:file).uniq.sort
 
+      # @return [Array<Message, Enum>] the generated types +file+ declares outside any message
+      def top_level(file) = children { it.file == file && it.parent.nil? }
+
+      # @return [Array<Message, Enum>] the generated types the message +full_name+ declares
+      def nested(full_name) = children { it.parent == full_name }
+
+      # @return [Message, Enum] the generated type of that name
+      def type(full_name) = by_name.fetch(full_name)
+
       # @param full_name [String] a message or enum, without a leading dot
       # @return [String] the Ruby constant of its value class or module
       def constant(full_name)
@@ -209,6 +228,10 @@ module Schema
       def generated(kind)
         @types.filter_map { |name, type| name if @reached[name] && type.descriptor.is_a?(kind) && !@entries[name] }
       end
+
+      def by_name = @by_name ||= (messages + enums).to_h { [it.full_name, it] }
+
+      def children = @types.filter_map { |name, type| by_name[name] if by_name.key?(name) && yield(type) }
 
       def map_entry?(descriptor) = descriptor.is_a?(Google::Protobuf::DescriptorProto) && descriptor.options&.map_entry
 

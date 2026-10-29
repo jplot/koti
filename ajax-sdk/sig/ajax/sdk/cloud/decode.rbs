@@ -5,6 +5,8 @@ module Ajax
         def self?.enum: (Symbol? value, ?String prefix) -> Symbol
         def self?.choice: (Hash[Symbol, untyped]? oneof) -> Symbol?
         def self?.time: (Hash[Symbol, Integer]? timestamp) -> Time?
+        def self?.duration: (Hash[Symbol, Integer]? duration) -> Float?
+        def self?.wrapper: (Hash[Symbol, untyped]? wrapper, untyped default) -> untyped
       end
     end
   end

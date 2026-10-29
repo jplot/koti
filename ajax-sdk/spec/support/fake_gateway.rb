@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Plain-text gRPC server standing in for the mobile gateway on one server-streaming method: it streams
-# +count+ answers holding an empty success, +pause+ seconds apart, and pushes true to +closed+ once it stops.
+# Plain-text gRPC server standing in for the mobile gateway on one server-streaming method: it streams the
+# answers in +first+, then +count+ answers holding an empty success, +pause+ seconds apart, and pushes true to
+# +closed+ once it stops.
 class FakeGateway
   # grpc logs each reply with to_s, which crashes google-protobuf 4.36 on a message of the shipped pool holding a
   # sub-message: replies go out already encoded.
@@ -11,11 +12,11 @@ class FakeGateway
 
   attr_reader :port, :closed
 
-  def self.start(path, count:, pause:) = new(path, count:, pause:).tap(&:start)
+  def self.start(path, count:, pause:, first: []) = new(path, count:, pause:, first:).tap(&:start)
 
-  def initialize(path, count:, pause:)
+  def initialize(path, count:, pause:, first: [])
     @closed = Queue.new
-    @service = streaming_service(path, count, pause)
+    @service = streaming_service(path, [*first, *Array.new(count) { { success: {} } }], pause)
   end
 
   def start
@@ -30,16 +31,16 @@ class FakeGateway
 
   private
 
-  def streaming_service(path, count, pause)
+  def streaming_service(path, messages, pause)
     table = Ajax::Sdk::Cloud::Schemas.rpc(path)
     request, answer = [table.request, table.response].map { Ajax::Sdk::Cloud::Schemas.message(it) }
-    service(path.split('/')[1], request, answer, replies(answer, count, pause))
+    service(path.split('/')[1], request, answer, replies(answer, messages, pause))
   end
 
-  def replies(answer, count, pause)
+  def replies(answer, messages, pause)
     lambda do
       Enumerator.new do |out|
-        count.times { (out << Encoded.new(answer.encode(answer.new(success: {})))) && sleep(pause) }
+        messages.each { (out << Encoded.new(answer.encode(answer.new(it)))) && sleep(pause) }
       ensure
         @closed << true
       end

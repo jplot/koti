@@ -31,16 +31,13 @@ module Ajax
         def disarm_night: (String space_id) -> void
 
         # Provided by Client, used here.
-        def call: (String path, ?Hash[Symbol, untyped] request) ?{ (Hash[Symbol, untyped]) -> void } -> untyped
-        def server_stream: (String path, ?Hash[Symbol, untyped] request) -> Enumerator[Hash[Symbol, untyped], nil]
-        def read_only?: () -> bool
+        def call: (String path, ?untyped request) ?{ (untyped) -> void } -> untyped
+        def server_stream: (String path, ?untyped request) -> Enumerator[untyped, nil]
 
         private
 
         def command: (String path, String space_id, ?ignore_alarms: bool?) -> void
-        def refusal: (Hash[Symbol, untyped]? failure) -> Symbol
         def space_locator: (String space_id) -> Hash[Symbol, untyped]
-        def success!: (Hash[Symbol, untyped] answer) -> Hash[Symbol, untyped]
       end
     end
   end

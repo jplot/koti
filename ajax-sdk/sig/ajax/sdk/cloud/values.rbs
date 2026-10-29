@@ -12,12 +12,20 @@ module Ajax
       end
 
       module Outcome
+        def self.settle: (untyped value, singleton(RefusedError) error) -> untyped
+        def self.refusal: (untyped problem) -> Symbol
+
         def success: () -> untyped
         def problem: () -> untyped
       end
 
       module Messages
-        def self.type: (String full_name) -> Class
+        interface _Generated
+          def from: (Hash[Symbol, untyped] hash) -> untyped
+          def new: (**untyped) -> untyped
+        end
+
+        def self.type: (String full_name) -> _Generated
       end
 
       module Encode

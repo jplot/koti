@@ -32,7 +32,30 @@ module Ajax
 
       # Marks a generated response whose +success+ shares a oneof with +failure+ (or +error+), which it
       # gives as +problem+.
-      module Outcome; end
+      module Outcome
+        # @param value [Data] a response
+        # @param error [Class] the {RefusedError} to raise
+        # @return [Data] the response as it is, or its success when it is an {Outcome}
+        # @raise [RefusedError] when the response holds its failure, or neither member
+        def self.settle(value, error)
+          return value unless value.is_a?(Outcome)
+
+          problem = value.problem
+          return value.success if problem.nil? && !value.success.nil?
+
+          reason = refusal(problem)
+          raise error.new(reason, failure: problem, details: (problem.public_send(reason) unless reason == :refused))
+        end
+
+        # The app 3.59 names the reason in the one oneof of 575 failures; 12 have none.
+        def self.refusal(problem)
+          return :refused unless problem
+
+          oneofs = problem.class.const_get(:ONEOFS)
+          (problem.public_send(oneofs.keys.first) if oneofs.size == 1) || :refused
+        end
+        private_class_method :refusal
+      end
 
       # Writers of the converted members of a generated value, back to what google-protobuf takes.
       #

@@ -11,23 +11,39 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
                                                         client_device_model: 'koti', client_version: '3.59')
   end
 
-  def success(token: "\xAB\xCD".b, user: 'user-1')
-    { success: { session_token: token, lite_account: { user_hex_id: user } } }
+  def response(service, hash)
+    Ajax::Sdk::Cloud::Messages.type("systems.ajax.api.ecosystem.v3.mobilegwsvc.service.#{service}Response").from(hash)
   end
+
+  def password(hash) = response('login_by_password.LoginByPassword', hash)
+
+  def totp(hash) = response('login_by_totp.LoginByTotp', hash)
+
+  def success(answer = method(:password))
+    answer.call({ success: { session_token: "\xAB\xCD".b, lite_account: { user_hex_id: 'user-1' } } })
+  end
+
+  def two_factor = password({ failure: { two_fa_required: { request_id: 'req-1' } } })
+
+  def invalid_totp = totp({ failure: { invalid_totp: {} } })
+
+  def totp_success = success(method(:totp))
+
+  def retried = [two_factor, invalid_totp, totp_success]
 
   it 'logs in with the password hash and keeps the session', :aggregate_failures do
     allow(client).to receive(:authenticate).and_return(success)
 
     session.login
 
+    expect(client).to have_received(:authenticate)
+      .with(anything, have_attributes(password_sha256_hash: 'abc123', user_role: :user), anything)
     expect(session.metadata).to include('client-session-token' => 'ABCD', 'a911-user-id' => 'user-1',
                                         'client-user-role' => 'USER', 'client-user-login' => 'koti@example.com')
   end
 
   it 'completes a two-factor login with the TOTP code', :aggregate_failures do
-    allow(client).to receive(:authenticate).and_return(
-      { failure: { two_fa_required: { request_id: 'req-1' } } }, success
-    )
+    allow(client).to receive(:authenticate).and_return(two_factor, totp_success)
 
     session.login
 
@@ -36,9 +52,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
   end
 
   it 'retries once with the next window on invalid_totp' do
-    allow(client).to receive(:authenticate).and_return(
-      { failure: { two_fa_required: { request_id: 'req-1' } } }, { failure: { invalid_totp: {} } }, success
-    )
+    allow(client).to receive(:authenticate).and_return(two_factor, invalid_totp, totp_success)
 
     session.login
 
@@ -46,7 +60,8 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
   end
 
   it 'raises AuthenticationError naming the reason and attempts left', :aggregate_failures do
-    allow(client).to receive(:authenticate).and_return({ failure: { invalid_credentials: {}, attempts_left: 2 } })
+    refused = password({ failure: { invalid_credentials: {}, attempts_left: 2 } })
+    allow(client).to receive(:authenticate).and_return(refused)
 
     expect { session.login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError, /2 attempts/) do |error|
       expect(error.reason).to eq(:invalid_credentials)
@@ -61,7 +76,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
 
   it 'raises when two-factor is required but no secret is configured', :aggregate_failures do
     allow(settings).to receive(:totp_secret).and_return(nil)
-    allow(client).to receive(:authenticate).and_return({ failure: { two_fa_required: { request_id: 'r' } } })
+    allow(client).to receive(:authenticate).and_return(two_factor)
 
     expect { session.login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
       expect(error.reason).to eq(:two_fa_required)
@@ -85,12 +100,12 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
   end
 
   def totp_codes_sent(first, retry_at)
-    answers = [{ failure: { two_fa_required: { request_id: 'r' } } }, { failure: { invalid_totp: {} } }, success]
-    sent = []
-    allow(client).to receive(:authenticate) { |_path, request, _metadata| (sent << request[:totp]) && answers.shift }
+    answers = retried
+    requests = []
+    allow(client).to receive(:authenticate) { |_path, request, _metadata| (requests << request) && answers.shift }
     allow(Time).to receive(:now).and_return(first, retry_at)
     session.login
-    sent.compact
+    requests.filter_map { it.to_h[:totp] }
   end
 
   it 'retries with the current code when the first one expired in transit' do
@@ -106,10 +121,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
   end
 
   it 'gives up after a second invalid_totp', :aggregate_failures do
-    allow(client).to receive(:authenticate).and_return(
-      { failure: { two_fa_required: { request_id: 'r' } } }, { failure: { invalid_totp: {} } },
-      { failure: { invalid_totp: {} } }
-    )
+    allow(client).to receive(:authenticate).and_return(two_factor, invalid_totp, invalid_totp)
 
     expect { session.login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
       expect(error.reason).to eq(:invalid_totp)

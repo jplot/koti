@@ -5,8 +5,7 @@ module Ajax
         GATEWAY: String
         PASSWORD: String
         TOTP: String
-        ROLE: Symbol
-        REASONS: Array[Symbol]
+        module LOGIN = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service
 
         @client: Client
         @settings: Configuration::Settings
@@ -25,14 +24,14 @@ module Ajax
         def sign_in_flow: () -> void
         def require_credentials: () -> void
         def two_factor: (untyped request_id) -> void
-        def sign_in: (String path, Hash[Symbol, untyped] request) -> Hash[Symbol, untyped]?
+        def sign_in: (String path, untyped request) -> untyped
         def login_with_totp: (untyped request_id, ?String? sent) -> void
         def totp_code: (String? sent) -> String
-        def accept: (Hash[Symbol, untyped] success) -> nil
-        def password_request: () -> Hash[Symbol, untyped]
-        def totp_request: (untyped request_id, String totp) -> Hash[Symbol, untyped]
+        def accept: (untyped success) -> nil
+        def password_request: () -> LOGIN::LoginByPassword::LoginByPasswordRequest
+        def totp_request: (untyped request_id, String totp) -> LOGIN::LoginByTotp::LoginByTotpRequest
         def password_hash: () -> String
-        def reason: (Hash[Symbol, untyped] failure) -> Symbol
+        def reason: (untyped failure) -> Symbol
         def app_metadata: () -> Hash[String, String]
       end
     end

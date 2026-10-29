@@ -33,13 +33,13 @@ module Ajax
         # @return [Array<Space>] every space of the account, across every page
         # @raise [ReadError] when the gateway refuses the read
         def spaces
-          found = [] #: Array[Hash[Symbol, untyped]]
+          found = [] #: Array[untyped]
           request = {} #: Hash[Symbol, untyped]
           loop do
-            page = success!(call(SPACES, request))
-            found.concat(page[:spaces] || [])
-            token = page.dig(:pagination, :forward_exclusive_pagination_token).to_s
-            return found.map { |raw| Space.from(raw) } if token.empty?
+            page = call(SPACES, request)
+            found.concat(page.spaces)
+            token = page.pagination&.forward_exclusive_pagination_token.to_s
+            return found.map { Space.from(it.raw) } if token.empty?
 
             request = { pagination: { forward_exclusive_pagination_token: token } }
           end
@@ -52,8 +52,8 @@ module Ajax
         # @return [Array<Device>] the devices of +space_id+ with their status, as a first snapshot
         # @raise [ReadError] when the gateway refuses the read
         def devices(space_id)
-          snapshot = success!(server_stream(DEVICES, { space_id: }).first || {})
-          (snapshot.dig(:snapshot, :light_device_items) || []).filter_map { Device.from(it) }
+          first = server_stream(DEVICES, { space_id: }).first or raise ReadError, :refused
+          (first.snapshot&.light_device_items || []).filter_map { Device.from(it.raw) }
         end
 
         # @param space_id [String]
@@ -61,8 +61,8 @@ module Ajax
         # @return [Array<Notification>] recent notifications of the space, most recent first
         # @raise [ReadError] when the gateway refuses the read
         def notifications(space_id, limit: 50)
-          answer = success!(call(NOTIFICATIONS, { filter: { origin: { space_id: } }, limit: }))
-          (answer[:notifications] || []).map { Notification.from(it) }
+          page = call(NOTIFICATIONS, { filter: { origin: { space_id: } }, limit: })
+          page.notifications.map { Notification.from(it.raw) }
         end
 
         # @return [void] arm the space
@@ -80,21 +80,13 @@ module Ajax
         private
 
         def command(path, space_id, ignore_alarms: nil)
-          raise ReadOnlyError, "#{path} refused: the client is read-only" if read_only?
-
           request = space_locator(space_id)
           request[:ignore_alarms] = ignore_alarms unless ignore_alarms.nil?
-          answer = call(path, request)
-          return if answer[:success]
-
-          raise CommandError, refusal(answer[:failure])
+          call(path, request)
+          nil
         end
 
-        def refusal(failure) = (failure || {}).keys.first || :refused
-
         def space_locator(space_id) = { space_locator: { space_id: } }
-
-        def success!(answer) = answer[:success] || raise(ReadError, refusal(answer[:failure]))
       end
     end
   end

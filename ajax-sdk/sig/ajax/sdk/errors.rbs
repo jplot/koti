@@ -29,20 +29,22 @@ module Ajax
         def initialize: (Symbol reason, ?String? message) -> void
       end
 
-      class ReadError < Error
+      class RefusedError < Error
         @reason: Symbol
+        @failure: untyped
+        @details: untyped
 
         attr_reader reason: Symbol
+        attr_reader failure: untyped
+        attr_reader details: untyped
 
-        def initialize: (Symbol reason, ?String? message) -> void
+        def initialize: (Symbol reason, ?String? message, ?failure: untyped, ?details: untyped) -> void
       end
 
-      class CommandError < Error
-        @reason: Symbol
+      class ReadError < RefusedError
+      end
 
-        attr_reader reason: Symbol
-
-        def initialize: (Symbol reason, ?String? message) -> void
+      class CommandError < RefusedError
       end
     end
   end

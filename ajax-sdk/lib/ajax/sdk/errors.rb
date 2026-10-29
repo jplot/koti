@@ -36,31 +36,35 @@ module Ajax
       # A state-changing command was blocked because the client is configured read-only.
       class ReadOnlyError < Error; end
 
-      # A read (spaces, devices, …) was refused by the gateway. +reason+ is a symbol such as +:bad_request+.
-      class ReadError < Error
+      # The gateway answered a call with its +failure+ (or +error+) member, or with neither member. +reason+ is
+      # the member of the failure that is set, such as +:hub_offline+, or +:refused+ when none is.
+      class RefusedError < Error
         # @return [Symbol] the machine-readable reason
         attr_reader :reason
 
+        # @return [Data, nil] the whole failure, as a generated value
+        attr_reader :failure
+
+        # @return [Object, nil] what the failure gives for its reason, such as the devices in trouble
+        attr_reader :details
+
         # @param reason [Symbol]
         # @param message [String]
-        def initialize(reason, message = nil)
+        # @param failure [Data, nil]
+        # @param details [Object, nil]
+        def initialize(reason, message = nil, failure: nil, details: nil)
           @reason = reason
+          @failure = failure
+          @details = details
           super(message || reason.to_s)
         end
       end
+
+      # A read (spaces, devices, …) was refused by the gateway. +reason+ is a symbol such as +:bad_request+.
+      class ReadError < RefusedError; end
 
       # A command (arm, disarm, …) was refused by the hub. +reason+ is a symbol such as +:hub_offline+.
-      class CommandError < Error
-        # @return [Symbol] the machine-readable reason
-        attr_reader :reason
-
-        # @param reason [Symbol]
-        # @param message [String]
-        def initialize(reason, message = nil)
-          @reason = reason
-          super(message || reason.to_s)
-        end
-      end
+      class CommandError < RefusedError; end
     end
   end
 end

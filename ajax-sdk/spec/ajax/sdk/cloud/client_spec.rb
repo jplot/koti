@@ -21,10 +21,12 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
     allow(client.session).to receive_messages(ensure_login: nil, login: nil, metadata: {})
   end
 
-  def empty_response(path)
+  def answer(path, message = { success: {} })
     klass = Ajax::Sdk::Cloud::Schemas.message(Ajax::Sdk::Cloud::Schemas.rpc(path).response)
-    klass.encode(klass.new)
+    klass.encode(klass.new(message))
   end
+
+  def type(path) = Ajax::Sdk::Cloud::Messages.type(Ajax::Sdk::Cloud::Schemas.rpc(path).response)
 
   def streaming(*answers)
     allow(grpc).to receive(:server_streamer) do |*, **options, &relay|
@@ -33,14 +35,51 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
     end
   end
 
-  it 'makes a unary call and returns a Hash' do
-    allow(grpc).to receive(:request_response).and_return(empty_response(spaces))
+  it 'returns the success of a unary call as a typed value' do
+    allow(grpc).to receive(:request_response).and_return(answer(spaces, success: { spaces: [{ id: 's1' }] }))
 
-    expect(client.call(spaces)).to be_a(Hash)
+    expect(client.call(spaces)).to be_a(type(spaces)::Success).and(have_attributes(spaces: [have_attributes(id: 's1')]))
+  end
+
+  it 'raises CommandError with the reason and its details', :aggregate_failures do
+    arm = '/systems.ajax.api.mobile.v2.space.security.SpaceSecurityService/arm'
+    refusal = { failure: { hub_detected_malfunctions: { troubled_devices: {} } } }
+    allow(grpc).to receive(:request_response).and_return(answer(arm, refusal))
+
+    expect { client.call(arm, { space_locator: { space_id: 's1' } }) }
+      .to raise_error(Ajax::Sdk::Cloud::CommandError) do |error|
+      expect(error).to have_attributes(reason: :hub_detected_malfunctions, failure: type(arm)::Failure)
+      expect(error.details.troubled_devices).to be_a(Data)
+    end
+  end
+
+  it 'raises ReadError :refused for an answer without success or failure', :aggregate_failures do
+    allow(grpc).to receive(:request_response).and_return(answer(spaces, {}))
+
+    expect { client.call(spaces) }.to raise_error(Ajax::Sdk::Cloud::ReadError) { expect(it.reason).to eq(:refused) }
+  end
+
+  it 'raises from a stream whose message is a failure', :aggregate_failures do
+    streaming(answer(devices), answer(devices, failure: { bad_request: {} }))
+    collected = []
+
+    expect { client.call(devices, { space_id: 's1' }) { collected << it } }
+      .to raise_error(Ajax::Sdk::Cloud::ReadError, 'bad_request')
+    expect(collected).to contain_exactly(be_a(type(devices)::Success))
+  end
+
+  it 'sends a typed request' do
+    sent = []
+    allow(grpc).to receive(:request_response) { |_path, request, *| (sent << request) && answer(spaces) }
+    request = Ajax::Sdk::Cloud::Messages.type(Ajax::Sdk::Cloud::Schemas.rpc(spaces).request).new(limit: 5)
+
+    client.call(spaces, request)
+
+    expect(sent.map { it.to_h[:limit] }).to eq([5])
   end
 
   it 'yields each message of a server stream' do
-    streaming(empty_response(devices))
+    streaming(answer(devices))
     collected = []
 
     client.call(devices, { space_id: 's1' }) { |message| collected << message }
@@ -49,13 +88,13 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
   end
 
   it 'returns an Enumerator from a stream called without a block' do
-    streaming(empty_response(devices))
+    streaming(answer(devices))
 
-    expect(client.server_stream(devices, { space_id: 's1' }).first).to be_a(Hash)
+    expect(client.server_stream(devices, { space_id: 's1' }).first).to be_a(type(devices)::Success)
   end
 
   it 'raises rather than replay a stream whose session expires after a message', :aggregate_failures do
-    streaming(empty_response(devices), GRPC::Unauthenticated.new('expired'))
+    streaming(answer(devices), GRPC::Unauthenticated.new('expired'))
     collected = []
 
     expect { client.server_stream(devices, { space_id: 's1' }) { |message| collected << message } }
@@ -66,8 +105,8 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
 
   it 'gives unary calls a deadline and leaves streams without one', :aggregate_failures do
     unary_options = []
-    allow(grpc).to receive(:request_response) { |*, **options| (unary_options << options) && empty_response(spaces) }
-    streaming(empty_response(devices))
+    allow(grpc).to receive(:request_response) { |*, **options| (unary_options << options) && answer(spaces) }
+    streaming(answer(devices))
 
     client.call(spaces)
     client.call(devices, { space_id: 's1' }) { |_message| nil }
@@ -87,9 +126,9 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
 
   it 'still allows a read through the generic call when read-only' do
     allow(settings).to receive(:read_only).and_return(true)
-    allow(grpc).to receive(:request_response).and_return(empty_response(spaces))
+    allow(grpc).to receive(:request_response).and_return(answer(spaces))
 
-    expect(client.call(spaces)).to be_a(Hash)
+    expect(client.call(spaces)).to be_a(type(spaces)::Success)
   end
 
   context 'when read-only' do
@@ -109,14 +148,14 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
       reads = [gateway('get_device_parts.GetDeviceParts'), gateway('find_single_notification.FindSingleNotification'),
                '/systems.ajax.api.mobile.v2.space.scenario.ScenarioService/findAll']
       reads.each do |path|
-        allow(grpc).to receive(:request_response).and_return(empty_response(path))
+        allow(grpc).to receive(:request_response).and_return(answer(path))
         expect { client.call(path) }.not_to raise_error, path
       end
     end
   end
 
   it 'logs in again and retries once after an Unauthenticated answer' do
-    answers = [-> { raise GRPC::Unauthenticated, 'nope' }, -> { empty_response(spaces) }]
+    answers = [-> { raise GRPC::Unauthenticated, 'nope' }, -> { answer(spaces) }]
     allow(grpc).to receive(:request_response) { answers.shift.call }
 
     client.unary(spaces)

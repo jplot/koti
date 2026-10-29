@@ -131,7 +131,8 @@ cloud.call("/systems.ajax.api.mobile.v2.space.SpaceService/findUserSpacesWithPag
 
 `#call` picks the call kind (unary, server stream, …) from the table; `#unary`, `#server_stream`,
 `#client_stream` and `#bidi` are the direct accessors. A request is a Hash, a generated value or a
-google-protobuf message.
+google-protobuf message; a Hash names enum values as protobuf does (`:USER_ROLE_USER`), a value by
+their short symbols (`:user`).
 
 Responses come back as values generated from the app's schemas, under `Ajax::Sdk::Cloud::Messages`:
 a `Data` class per message (5,828) and a module per enum (907), each loaded on its first use, with YARD
@@ -155,7 +156,7 @@ arming refused for `:hub_detected_malfunctions` carries the devices in trouble.
 
 ```ruby
 page = cloud.call('/systems.ajax.api.mobile.v2.space.SpaceService/findUserSpacesWithPagination')
-page.spaces.map { it.profile.name }
+page.spaces.map { it.profile&.name }
 ```
 
 A stream yields each message to the block, or returns an Enumerator without one; leaving it early

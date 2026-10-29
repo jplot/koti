@@ -20,7 +20,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   (`Cloud::Messages`, 5,828 `Data` classes and 907 enum modules, loaded on first use), with their RBS;
   `rake generate` rewrites them and `rake generate:check` fails when they drift.
 - `Cloud::RefusedError`, the parent of `ReadError` and `CommandError`.
-
 - Typed cloud values: `devices` returns `Device` values (type, room, states, malfunctions, `Battery`,
   signal level, temperature and the statuses that carry no value as `flags`) and `notifications` returns
   `Notification` values (time, event, transition, `Source`, folder, importance); both keep `raw`.

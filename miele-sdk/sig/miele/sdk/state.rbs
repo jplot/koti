@@ -1,6 +1,8 @@
 module Miele
   module Sdk
     class State
+      include RemoteControl
+
       class Plate < Data
         attr_reader step: Integer?
         attr_reader remaining_heat: Integer?
@@ -53,8 +55,6 @@ module Miele
       def door_open?: () -> bool
 
       def failure?: () -> bool
-
-      def remote_control?: () -> bool
 
       def light: () -> Symbol?
 

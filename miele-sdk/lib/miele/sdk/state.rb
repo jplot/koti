@@ -7,6 +7,8 @@ module Miele
     # @example Read how long an oven still runs
     #   Miele::Sdk.appliance('192.0.2.20').state.remaining_time # => 5400
     class State
+      include RemoteControl
+
       # One cooking zone of a hob.
       #
       # @!attribute [r] step
@@ -113,10 +115,6 @@ module Miele
 
       # @api public
       def failure? = raw['SignalFailure'] == true
-
-      # @return [Boolean] whether the appliance accepts commands (Mobile Controllable on)
-      # @api public
-      def remote_control? = raw.dig('RemoteEnable', 0).to_i.anybits?(1)
 
       # @return [Symbol, nil] +:on+, +:off+, or nil without a light
       # @api public

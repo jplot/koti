@@ -24,9 +24,11 @@ module Miele
         def self.[]: (Symbol type, untyped value) -> Field
       end
 
-      SCALARS: Hash[Integer, [Symbol, String, Integer]]
+      SCALARS: Hash[Symbol, [String, Integer]]
 
-      COMPOSITES: Hash[Integer, Symbol]
+      TYPES: Hash[Integer, Symbol]
+
+      CODES: Hash[Symbol, Integer]
 
       class Reader
         @bytes: String
@@ -45,9 +47,9 @@ module Miele
 
         def field: () -> Field
 
-        def scalar: (Integer code) -> Field
+        def value: (Symbol type) -> untyped
 
-        def composite: (Symbol type) -> untyped
+        def scalar: (Symbol type) -> (Integer | Float | bool)
 
         def read: (String directive, Integer size) -> untyped
       end
@@ -56,9 +58,19 @@ module Miele
 
       def self?.encode: (Leaf leaf) -> String
 
-      def self?.encode_field: (Integer index, Field field) -> String
+      def self?.encode_fields: (Hash[Integer, Field] fields) -> String
 
-      def self?.scalar_value: (Field field, Integer size) -> Integer
+      def self?.payload: (Symbol type, untyped value) -> String
+
+      def self?.struct_bytes: (Hash[Integer, Field] fields) -> String
+
+      def self?.sequence: (Array[untyped] items) { (untyped) -> String } -> String
+
+      def self?.element: (Symbol type) -> Symbol
+
+      def self?.scalar_bytes: (Symbol type, untyped value) -> String
+
+      def self?.scalar_value: (Symbol type, untyped value, Integer size) -> (Integer | Float)
 
       def self?.range: (Symbol type, Integer size) -> Range[Integer]
     end

@@ -10,10 +10,6 @@ module Miele
     #   oven = Miele::Sdk.appliance('192.0.2.20')
     #   oven.device_type # => :oven_microwave
     class Appliance
-      # Start of a user request on DOP2 2/1583, before its opcode, as ha-miele-at-lan sends it.
-      USER_REQUEST = ['00100001062f00000000000100010700'].pack('H*').freeze
-      private_constant :USER_REQUEST
-
       # @return [String] address or +.local+ name of the appliance
       attr_reader :host
 
@@ -37,9 +33,14 @@ module Miele
       # @api public
       def settings = device('Settings')
 
-      # @return [Hash{String=>Object}] links to the service data of the appliance
+      # @return [Hash{String=>Object}] links to the service data of the Wi-Fi module, which it serves locally
       # @api public
       def service = device('Service')
+
+      # @return [Hash{String=>Object}] the services the Miele app reads (camera, remote update, Con@ctivity…)
+      # @raise [NotFoundError] on EK057 and EK039W modules, which do not serve it locally
+      # @api public
+      def services = device('services')
 
       # @return [Hash{String=>Object}] software update state of the appliance itself
       # @raise [NotFoundError] on appliances that do not serve it
@@ -70,6 +71,10 @@ module Miele
       # @api public
       def protocol_version = @protocol_version ||= ident.protocol_version
 
+      # @return [Symbol] {#protocol_version} named by {Catalog::PROTOCOLS}, or +:unknown+
+      # @api public
+      def protocol = Catalog::PROTOCOLS.fetch(protocol_version, :unknown)
+
       # @return [String, nil] +TechType+ of {#ident}'s device label, the model name
       # @api public
       def tech_type = @tech_type ||= ident.device_ident_label&.tech_type
@@ -78,65 +83,58 @@ module Miele
       # @api public
       def state = State.new(device('State'), device_type, protocol_version:, tech_type:)
 
-      # @return [void]
-      # @raise [ResponseError] if the appliance refuses (400)
-      # @api public
-      def start = command(Schema::DeviceState.new(process_action: 1))
-
-      # @return [void]
-      # @raise [ResponseError] if the appliance refuses (400)
-      # @api public
-      def stop = command(Schema::DeviceState.new(process_action: 2))
-
-      # @return [void]
-      # @raise [ResponseError] if the appliance refuses (400)
-      # @api public
-      def pause = command(Schema::DeviceState.new(process_action: 3))
-
-      # @return [void]
-      # @api public
-      def light_on = change(Schema::DeviceState.new(light: 1))
-
-      # @return [void]
-      # @api public
-      def light_off = change(Schema::DeviceState.new(light: 2))
-
       # Wakes the appliance from standby.
       #
       # @return [void]
       # @api public
       def wake = change(Schema::DeviceState.new(device_action: 2))
 
-      # Switches the appliance on, waking it first when it sleeps.
+      # Switches the appliance on as the app's oven module does, waking it first when it sleeps. The app's
+      # other families switch on in their own way.
       #
       # @return [void]
-      # @raise [ResponseError] if the appliance refuses both ways of switching
+      # @raise [ResponseError] if the appliance still refuses after three attempts
       # @api public
-      def power_on = power(4, 0x10)
+      def power_on
+        3.times do |attempt|
+          rouse if attempt.positive?
+          return write_dop2(power_leaf(4))
+        rescue ResponseError => e
+          raise unless e.status == 500 && attempt < 2
+        end
+      end
 
       # @return [void]
-      # @raise [ResponseError] if the appliance refuses both ways of switching
+      # @raise [ResponseError] if the appliance refuses
       # @api public
-      def power_off = power(1, 0x13)
+      def power_off = write_dop2(power_leaf(1))
 
+      # Without an index, the read is the one the app's live observation sends; its one-shot reads give
+      # +idx1: 0, idx2: 0+ and its polls +idx1: 0, idx2: 1+.
+      #
       # @param unit [Integer]
       # @param attribute [Integer]
-      # @param idx1 [Integer]
-      # @param idx2 [Integer]
+      # @param idx1 [Integer, nil]
+      # @param idx2 [Integer, nil]
       # @return [Dop2::Leaf]
       # @raise [Dop2::DecodeError]
       # @api public
-      def dop2(unit, attribute, idx1: 0, idx2: 0)
-        Dop2.decode(Connection.request(host, :get, dop2_path(unit, attribute, idx1, idx2)).body)
+      def dop2(unit, attribute, idx1: nil, idx2: nil)
+        path = dop2_path(unit, attribute)
+        path += "?idx1=#{idx1.to_i}&idx2=#{idx2.to_i}" unless idx1.nil? && idx2.nil?
+        Dop2.decode(Connection.request(host, :get, path).body)
       end
 
       # The reference pads every DOP2 write to 32 bytes; shorter ones were never tried on an appliance.
       #
-      # @param leaf [Dop2::Leaf] a leaf of scalar fields
+      # @param leaf [Dop2::Leaf]
+      # @param with_index [Boolean] whether its indexes also go in the path, as the app's hood and coffee
+      #   modules write; its oven, dishwasher and laundry modules leave them in the body only
       # @return [void]
       # @api public
-      def write_dop2(leaf)
-        path = dop2_path(leaf.unit, leaf.attribute, leaf.idx1, leaf.idx2)
+      def write_dop2(leaf, with_index: false)
+        path = dop2_path(leaf.unit, leaf.attribute)
+        path += "?idx1=#{leaf.idx1}&idx2=#{leaf.idx2}" if with_index
         Connection.request(host, :put, path, body: Dop2.encode(leaf).ljust(32, ' '))
       end
 
@@ -169,10 +167,11 @@ module Miele
         tolerating_no_op { dop1(Dop1.main_light(on)) }
       end
 
-      # @param pf_id [Integer] programming function id (40010: grease filter, 40011: charcoal filter)
+      # @param pf_id [Integer] programming function id: 40010 and 40011 are the current grease and charcoal filter
+      #   limits; writing 1 to 40012 or 40013 resets their operating hours
       # @return [Integer, nil] nil when the hood does not expose that setting
       # @api public
-      def setting(pf_id) = Dop1.setting_value(JSON.parse(dop1(Dop1.setting(pf_id))).fetch('Response'), pf_id)
+      def setting(pf_id) = Dop1.setting_value(JSON.parse(dop1(Dop1.setting(pf_id))).fetch('Response'))
 
       # @param pf_id [Integer] programming function id
       # @param value [Integer] unsigned 32-bit value
@@ -216,27 +215,20 @@ module Miele
       end
 
       # @return [String]
-      def dop2_path(unit, attribute, idx1, idx2) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}?idx1=#{idx1}&idx2=#{idx2}"
+      def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"
 
-      # A sleeping appliance answers 500 to the state write on 2/1586; the
-      # reference wakes it, waits 3 s and retries, twice at most, then sends
-      # the switch opcode on 2/1583.
+      # The appliance state on 2/1586: 4 switches on, 1 off.
       #
-      # @param state [Integer] appliance state: 4 on, 1 off
-      # @param opcode [Integer] user request switching the same way
-      # @return [void]
-      def power(state, opcode)
-        leaf = Dop2::Leaf.new(unit: 2, attribute: 1586, idx1: 0, idx2: 0,
-                              fields: { 1 => Dop2::Field.new(type: :e8, value: state) })
-        3.times do |attempt|
-          rouse if attempt.positive?
-          return write_dop2(leaf)
-        rescue ResponseError => e
-          break unless e.status == 500
-        end
-        Connection.request(host, :put, dop2_path(2, 1583, 0, 0), body: USER_REQUEST + opcode.chr + (' ' * 15))
+      # @param state [Integer]
+      # @return [Dop2::Leaf]
+      def power_leaf(state)
+        Dop2::Leaf.new(unit: 2, attribute: 1586, idx1: 0, idx2: 0,
+                       fields: { 1 => Dop2::Field.new(type: :e8, value: state) })
       end
 
+      # A sleeping appliance answers 500 to the state write; the app then sends DeviceAction 2, waits 3 s and
+      # tries again, with no limit: three attempts here.
+      #
       # @return [void]
       def rouse
         begin

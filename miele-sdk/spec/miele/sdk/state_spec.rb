@@ -115,12 +115,25 @@ RSpec.describe Miele::Sdk::State do
     expect([state.door_open?, state.failure?, state.remote_control?, state.light]).to eq([true, false, true, :on])
   end
 
+  it 'tests remote control the way the app does for each family', :aggregate_failures do
+    expect(described_class.new({ 'RemoteEnable' => [1, 0, 0] }, :oven).remote_control?).to be(false)
+    oven = described_class.new({ 'RemoteEnable' => [15, 0, 1] }, :oven)
+    expect([oven.remote_control?, oven.mobile_start?, oven.local_control?]).to eq([true, true, false])
+    expect(described_class.new({ 'RemoteEnable' => [1, 0, 0] }, :dishwasher).remote_control?).to be(true)
+    laundry = described_class.new({ 'RemoteEnable' => [9, 0, 1] }, :washing_machine)
+    expect([laundry.remote_control?, laundry.mobile_start?, laundry.local_control?]).to eq([true, true, true])
+  end
+
+  it 'says nothing of remote control where the app tests nothing' do
+    expect(described_class.new({ 'RemoteEnable' => [15, 0, 1] }, :hood).remote_control?).to be_nil
+  end
+
   context 'with a hood' do
     let(:device_type) { :hood }
     let(:raw) { { 'Status' => 5, 'ProgramPhase' => 4608, 'RemoteEnable' => [9, 0, 0], 'VentilationStep' => 3 } }
 
     it 'reads its ventilation step' do
-      expect([state.status, state.ventilation_step, state.remote_control?]).to eq([:running, 3, true])
+      expect([state.status, state.ventilation_step, state.remote_control?]).to eq([:running, 3, nil])
     end
 
     it 'reads status 148 as ready' do
@@ -145,7 +158,7 @@ RSpec.describe Miele::Sdk::State do
       expect(state.plates.first).to have_attributes(step: 4, remaining_heat: 0, remaining_minutes: 12,
                                                     elapsed_minutes: 3, timer_seconds: 720)
       expect(state.plates.last).to have_attributes(step: 0, remaining_heat: 2)
-      expect(state.remote_control?).to be(false)
+      expect(state.remote_control?).to be_nil
     end
 
     it 'maps a phase without a published table to :unknown' do

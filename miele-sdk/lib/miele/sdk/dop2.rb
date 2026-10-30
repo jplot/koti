@@ -25,21 +25,27 @@ module Miele
       # One field of a leaf.
       #
       # @!attribute [r] type
-      #   @return [Symbol] +:bool+, +:u8+ to +:e64+, +:struct+, +:e16_array+, +:string+ or +:struct_array+
+      #   @return [Symbol] a scalar (+:bool+, +:u8+ to +:e64+, +:float+, +:double+), +:struct+, the array of a
+      #     scalar (+:u16_array+…), +:string+ or +:struct_array+
       # @!attribute [r] value
-      #   @return [Integer, Boolean, String, Array<Integer>, Hash{Integer=>Field}, Array<Hash{Integer=>Field}>]
+      #   @return [Integer, Float, Boolean, String, Array<Integer, Float, Boolean>, Hash{Integer=>Field},
+      #     Array<Hash{Integer=>Field}>]
       Field = Data.define(:type, :value)
 
       SCALARS = {
-        0x01 => [:bool, 'C', 1], 0x02 => [:u8, 'C', 1], 0x03 => [:i8, 'c', 1], 0x04 => [:e8, 'C', 1],
-        0x05 => [:u16, 'n', 2], 0x06 => [:i16, 's>', 2], 0x07 => [:e16, 'n', 2],
-        0x08 => [:u32, 'N', 4], 0x09 => [:i32, 'l>', 4], 0x0a => [:e32, 'N', 4],
-        0x0b => [:u64, 'Q>', 8], 0x0c => [:i64, 'q>', 8], 0x0d => [:e64, 'Q>', 8]
+        bool: ['C', 1], u8: ['C', 1], i8: ['c', 1], e8: ['C', 1], u16: ['n', 2], i16: ['s>', 2], e16: ['n', 2],
+        u32: ['N', 4], i32: ['l>', 4], e32: ['N', 4], u64: ['Q>', 8], i64: ['q>', 8], e64: ['Q>', 8],
+        float: ['g', 4], double: ['G', 8]
       }.freeze
       private_constant :SCALARS
 
-      COMPOSITES = { 0x10 => :struct, 0x17 => :e16_array, 0x20 => :string, 0x21 => :struct_array }.freeze
-      private_constant :COMPOSITES
+      # The type codes of the app's Dop2AttributeFactory, 1 to 33.
+      TYPES = [*SCALARS.keys, :struct, *SCALARS.keys.map { :"#{it}_array" }, :string, :struct_array]
+              .each.with_index(1).to_h { |type, code| [code, type] }.freeze
+      private_constant :TYPES
+
+      CODES = TYPES.invert.freeze
+      private_constant :CODES
 
       # Walks the bytes of one leaf.
       class Reader
@@ -70,32 +76,32 @@ module Miele
         def field
           position = @offset
           code = read('C', 1)
-          return scalar(code) if SCALARS.key?(code)
-
-          type = COMPOSITES.fetch(code) do
+          type = TYPES.fetch(code) do
             raise DecodeError, format('unknown DOP2 type 0x%<code>02x at byte %<position>d', code:, position:)
           end
-          Field.new(type:, value: composite(type))
-        end
-
-        # @param code [Integer] one of {SCALARS}
-        # @return [Field]
-        def scalar(code)
-          type, directive, size = SCALARS.fetch(code)
-          value = read(directive, size)
-          Field.new(type:, value: type == :bool ? value == 1 : value)
+          Field.new(type:, value: value(type))
         end
 
         # @param type [Symbol]
         # @return [Object]
-        def composite(type)
+        def value(type)
+          return scalar(type) if SCALARS.key?(type)
+
           count = read('n', 2)
           case type
           when :struct then fields(count)
-          when :e16_array then Array.new(count) { read('n', 2) }
-          when :string then read("a#{count}", count).force_encoding(Encoding::UTF_8)
-          else Array.new(count) { fields(read('n', 2)) }
+          when :string then read("a#{count}", count).sub(/\0+\z/, '').force_encoding(Encoding::UTF_8)
+          when :struct_array then Array.new(count) { fields(read('n', 2)) }
+          else Array.new(count) { scalar(Dop2.element(type)) }
           end
+        end
+
+        # @param type [Symbol] one of {SCALARS}
+        # @return [Integer, Float, Boolean]
+        def scalar(type)
+          directive, size = SCALARS.fetch(type)
+          value = read(directive, size)
+          type == :bool ? value == 1 : value
         end
 
         # @return [Object]
@@ -116,36 +122,79 @@ module Miele
       # @api public
       def decode(bytes) = Reader.new(bytes).leaf
 
-      # @param leaf [Leaf] a leaf of scalar fields
+      # @param leaf [Leaf]
       # @return [String] the leaf's bytes, unpadded
-      # @raise [ArgumentError] if a field is a struct, an array or a string
+      # @raise [ArgumentError] if a value does not fit its field, or a type is unknown
       # @api public
       def encode(leaf)
-        body = [leaf.unit, leaf.attribute, leaf.idx1, leaf.idx2, leaf.fields.size].pack('n5') +
-               leaf.fields.map { |index, field| encode_field(index, field) }.join
+        header = [leaf.unit, leaf.attribute, leaf.idx1, leaf.idx2, leaf.fields.size].pack('n5')
+        body = header + encode_fields(leaf.fields)
         [body.bytesize].pack('n') + body
       end
 
-      # @param index [Integer]
-      # @param field [Field]
+      # @param fields [Hash{Integer=>Field}]
       # @return [String]
       # @api private
-      def encode_field(index, field)
-        code, (_, directive, size) = SCALARS.find { |_, (type)| type == field.type }
-        raise ArgumentError, "cannot encode a #{field.type} field" unless code
-
-        [index, code, scalar_value(field, size.to_i)].pack("nC#{directive}")
+      def encode_fields(fields)
+        fields.map do |index, field|
+          code = CODES.fetch(field.type) { raise ArgumentError, "unknown DOP2 type #{field.type.inspect}" }
+          [index, code].pack('nC') + payload(field.type, field.value)
+        end.join
       end
 
-      # @param field [Field] a scalar field
+      # The app counts the NUL it appends to a string in the string's length.
+      #
+      # @param type [Symbol]
+      # @param value [Object]
+      # @return [String]
+      # @api private
+      def payload(type, value)
+        return scalar_bytes(type, value) if SCALARS.key?(type)
+
+        case type
+        when :struct then struct_bytes(value)
+        when :string then "#{value}\0".b.then { [it.bytesize].pack('n') + it }
+        when :struct_array then sequence(value) { struct_bytes(it) }
+        else sequence(value) { scalar_bytes(element(type), it) }
+        end
+      end
+
+      # @param fields [Hash{Integer=>Field}]
+      # @return [String] the count, then the fields
+      # @api private
+      def struct_bytes(fields) = [fields.size].pack('n') + encode_fields(fields)
+
+      # @param items [Array]
+      # @yieldparam item [Object]
+      # @yieldreturn [String] the bytes of one item
+      # @return [String] the count, then the items
+      # @api private
+      def sequence(items, &) = [items.size].pack('n') + items.map(&).join
+
+      # @param type [Symbol] an array type
+      # @return [Symbol] the type of its elements
+      # @api private
+      def element(type) = type.to_s.delete_suffix('_array').to_sym
+
+      # @param type [Symbol] one of {SCALARS}
+      # @param value [Integer, Float, Boolean]
+      # @return [String]
+      # @api private
+      def scalar_bytes(type, value)
+        directive, size = SCALARS.fetch(type)
+        [scalar_value(type, value, size)].pack(directive)
+      end
+
+      # @param type [Symbol]
+      # @param value [Integer, Float, Boolean]
       # @param size [Integer] bytes of the value
-      # @return [Integer]
+      # @return [Integer, Float]
       # @raise [ArgumentError] if the value does not fit the field
       # @api private
-      def scalar_value(field, size)
-        value = field.value
-        return value ? 1 : 0 if field.type == :bool
-        raise ArgumentError, "#{value} does not fit a #{field.type} field" unless range(field.type, size).cover?(value)
+      def scalar_value(type, value, size)
+        return value ? 1 : 0 if type == :bool
+        return value if %i[float double].include?(type)
+        raise ArgumentError, "#{value} does not fit a #{type} field" unless range(type, size).cover?(value)
 
         value
       end

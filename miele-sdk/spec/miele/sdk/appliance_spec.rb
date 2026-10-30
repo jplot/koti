@@ -37,11 +37,31 @@ RSpec.describe Miele::Sdk::Appliance do
   end
 
   it 'reads each resource at its path' do
-    readers = { settings: "/Devices/#{fab}/Settings", service: "/Devices/#{fab}/Service",
+    readers = { settings: "/Devices/#{fab}/Settings",
                 update: "/Devices/#{fab}/Update", supervision: "/Devices/#{fab}/SuperVision",
                 info: '/Info', host_info: '/Host', software_update: '/Update/' }
     readers.each_key { appliance.public_send(it) }
     expect(paths).to include(*readers.values)
+  end
+
+  it 'still reads the Service resource the modules serve' do
+    appliance.service
+    expect(paths.last).to eq("/Devices/#{fab}/Service")
+  end
+
+  it 'reads the services in lower case' do
+    appliance.services
+    expect(paths.last).to eq("/Devices/#{fab}/services")
+  end
+
+  it 'knows every device type of the app' do
+    expect([Miele::Sdk::Catalog::DEVICE_TYPES.size, Miele::Sdk::Catalog::DEVICE_TYPES[39]])
+      .to eq([74, :electrical_oven_double])
+  end
+
+  it 'names the protocol' do
+    ident['ProtocolVersion'] = 203
+    expect(appliance.protocol).to eq(:lhb_tod2_cooling)
   end
 
   context 'with a device type missing from the catalog' do
@@ -75,26 +95,20 @@ RSpec.describe Miele::Sdk::Appliance do
   context 'when sending commands' do
     def sent = fake.requests.select { it.verb == 'PUT' }.map { [it.path, JSON.parse(it.body)] }
 
-    it 'sends the light command' do
-      appliance.light_on
-      expect(sent).to eq([["/Devices/#{fab}/State", { 'Light' => 1 }]])
+    it 'sends the wake command' do
+      appliance.wake
+      expect(sent).to eq([["/Devices/#{fab}/State", { 'DeviceAction' => 2 }]])
     end
 
-    it 'sends each state command' do
-      %i[start stop pause light_off wake].each { appliance.public_send(it) }
-      expect(sent.map(&:last)).to eq([{ 'ProcessAction' => 1 }, { 'ProcessAction' => 2 }, { 'ProcessAction' => 3 },
-                                      { 'Light' => 2 }, { 'DeviceAction' => 2 }])
+    it 'no longer offers start, stop, pause or the light' do
+      expect(%i[start stop pause light_on light_off].select { appliance.respond_to?(it) }).to be_empty
     end
 
     context 'when the appliance answers 400' do
       let(:command_answer) { [400, {}, ''] }
 
       it 'treats a 400 answer to a command as done' do
-        expect { appliance.light_on }.not_to raise_error
-      end
-
-      it 'raises ResponseError when it refuses a process action' do
-        expect { appliance.start }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+        expect { appliance.wake }.not_to raise_error
       end
     end
 
@@ -102,7 +116,7 @@ RSpec.describe Miele::Sdk::Appliance do
       let(:command_answer) { [403, {}, ''] }
 
       it 'raises RemoteControlDisabledError when remote control is off' do
-        expect { appliance.light_on }.to raise_error(Miele::Sdk::RemoteControlDisabledError)
+        expect { appliance.wake }.to raise_error(Miele::Sdk::RemoteControlDisabledError)
       end
     end
   end

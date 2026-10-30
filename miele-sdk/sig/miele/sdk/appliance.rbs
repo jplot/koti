@@ -7,8 +7,6 @@ module Miele
 
       type resource = Hash[String, untyped]
 
-      USER_REQUEST: String
-
       @fab: String?
 
       @device_type: Symbol?
@@ -31,6 +29,8 @@ module Miele
 
       def service: () -> resource
 
+      def services: () -> resource
+
       def update: () -> resource
 
       def supervision: () -> Schema::SuperVision
@@ -45,19 +45,11 @@ module Miele
 
       def protocol_version: () -> Integer?
 
+      def protocol: () -> Symbol
+
       def tech_type: () -> String?
 
       def state: () -> State
-
-      def start: () -> void
-
-      def stop: () -> void
-
-      def pause: () -> void
-
-      def light_on: () -> void
-
-      def light_off: () -> void
 
       def wake: () -> void
 
@@ -65,9 +57,9 @@ module Miele
 
       def power_off: () -> void
 
-      def dop2: (Integer unit, Integer attribute, ?idx1: Integer, ?idx2: Integer) -> Dop2::Leaf
+      def dop2: (Integer unit, Integer attribute, ?idx1: Integer?, ?idx2: Integer?) -> Dop2::Leaf
 
-      def write_dop2: (Dop2::Leaf leaf) -> void
+      def write_dop2: (Dop2::Leaf leaf, ?with_index: bool) -> void
 
       def dop1: (String request) -> String
 
@@ -93,9 +85,9 @@ module Miele
 
       def tolerating_no_op: () { () -> untyped } -> void
 
-      def dop2_path: (Integer unit, Integer attribute, Integer idx1, Integer idx2) -> String
+      def dop2_path: (Integer unit, Integer attribute) -> String
 
-      def power: (Integer state, Integer opcode) -> void
+      def power_leaf: (Integer state) -> Dop2::Leaf
 
       def rouse: () -> void
     end

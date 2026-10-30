@@ -3,6 +3,7 @@ module Ajax
     module Cloud
       class Client
         include Resources
+        include Methods
 
         IDENTITY: ^(String) -> String
         READ_WORDS: Array[String]

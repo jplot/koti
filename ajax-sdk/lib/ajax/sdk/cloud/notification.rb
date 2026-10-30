@@ -18,15 +18,17 @@ module Ajax
       # and +transition+ how (+:triggered+, +:recovered+ or +:impulse+). +folder+ is the app's tab
       # (+:alarm+, +:malfunction+, +:user_automation+…) and +importance+ +:default+, +:positive+,
       # +:warning+ or +:attention+. +token+ is its universal token, which reads the pages around it.
+      # +parent_id+ is the offline notification it is grouped under, nil outside a group.
       Notification = Data.define(:id, :time, :kind, :event, :transition, :source, :folder, :importance, :read,
-                                 :token, :raw) do
+                                 :token, :parent_id, :raw) do
         # @param raw [Hash{Symbol=>Object}] one entry of findNotifications
+        # @param parent_id [String, nil] the offline notification it is grouped under
         # @return [Notification]
-        def self.from(raw)
+        def self.from(raw, parent_id: nil)
           kind, content = raw[:content]&.first
           new(id: raw[:id].to_s, time: Decode.time(raw[:server_timestamp]),
               kind: kind ? kind.to_s.delete_suffix('_notification_content').to_sym : :unknown, **about(content || {}),
-              **marks(raw), raw:)
+              **marks(raw), parent_id:, raw:)
         end
 
         # @api private

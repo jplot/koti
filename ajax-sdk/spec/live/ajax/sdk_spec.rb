@@ -39,7 +39,7 @@ RSpec.describe 'Ajax cloud', :live do # rubocop:disable RSpec/DescribeClass -- i
   it 'walks the notification history, page by page, with distinct tokens', :aggregate_failures do
     history = cloud.notification_history(space.id).first(25)
 
-    expect(history.size).to be <= 25
+    expect(history.map(&:token)).to all(match(/\S/))
     expect(history.map(&:token).uniq.size).to eq(history.size)
   end
 

@@ -105,6 +105,25 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
     expect(host).to have_received(:call).with(log, hash_including(pagination: { forward_pagination_token: 'u981' }))
   end
 
+  def entry(seconds) = { id: "n#{seconds}", universal_token: "u#{seconds}", server_timestamp: { seconds: } }
+
+  it 'pages from the oldest notification outside an offline group, most recent first', :aggregate_failures do
+    group = { parent_notification_id: 'n103', notifications: [{ **entry(50), id: 'c50' }] }
+    first = success(log, { notifications: [entry(101), entry(103), entry(102)], offline_notifications_data: [group] })
+    allow(host).to receive(:call).and_return(first, page_of(0, from: 0))
+
+    history = host.notification_history('s1', limit: 3).to_a
+    expect(history.map { [it.id, it.parent_id] }).to eq([['n103', nil], ['n102', nil], ['n101', nil], %w[c50 n103]])
+    expect(host).to have_received(:call).with(log, hash_including(pagination: { forward_pagination_token: 'u101' }))
+  end
+
+  it 'stops the history on an empty page', :aggregate_failures do
+    allow(host).to receive(:call).and_return(page_of(0, from: 0))
+
+    expect(host.notification_history('s1', limit: 0).to_a).to be_empty
+    expect(host).to have_received(:call).once
+  end
+
   it 'ends the history on a page short of notifications outside an offline group' do
     grouped = Array.new(5) { |index| { id: "c#{index}", server_timestamp: { seconds: 900 - index } } }
     allow(host).to receive(:call).and_return(page_of(19, from: 1000, grouped:))

@@ -58,30 +58,33 @@ module Ajax
 
         # @param space_id [String]
         # @param limit [Integer] how many to read back; the app never asks for more than 20
-        # @param older_than [String, nil] the {Notification#token} of a notification, to read those before it
-        # @param newer_than [String, nil] the {Notification#token} of a notification, to read those after it
+        # @param older_than [String, nil] the {Notification#token} of a notification outside an offline group, to
+        #   read those before it
+        # @param newer_than [String, nil] the {Notification#token} of a notification outside an offline group, to
+        #   read those after it
         # @return [Array<Notification>] one page of the space's notifications, with those grouped under an offline
-        #   one, most recent first
+        #   one (their {Notification#parent_id} set), most recent first
         # @raise [ArgumentError] when given both tokens
         # @raise [ReadError] when the gateway refuses the read
         def notifications(space_id, limit: 20, older_than: nil, newer_than: nil)
-          newest_first(notification_page(space_id, limit:, older_than:, newer_than:).flatten)
+          newest_first(notification_page(space_id, limit:, older_than:, newer_than:))
         end
 
         # @param space_id [String]
-        # @param limit [Integer] the size of each page read
-        # @return [Enumerator::Lazy<Notification>] every notification of the space, most recent first, read a page
-        #   at a time
+        # @param limit [Integer] the size of each page read; a gateway that sends fewer ends the history there
+        # @return [Enumerator::Lazy<Notification>] every notification of the space, a page at a time, each page most
+        #   recent first
         # @raise [ReadError] when the gateway refuses a read
         def notification_history(space_id, limit: 20)
           Enumerator.new do |out|
             older_than = nil
             loop do
-              top, grouped = notification_page(space_id, limit:, older_than:)
-              newest_first(top + grouped).each { out << it }
+              page = newest_first(notification_page(space_id, limit:, older_than:))
+              page.each { out << it }
+              top = page.reject(&:parent_id)
               break if top.empty? || top.size < limit
 
-              older_than = newest_first(top).last&.token
+              older_than = top.last&.token
             end
           end.lazy
         end
@@ -110,15 +113,17 @@ module Ajax
         def space_locator(space_id) = { space_locator: { space_id: } }
 
         # The app pages from the token of a notification it holds, never from next_*_pagination_token, and ends on
-        # a page short of notifications outside an offline group: those come first here, the grouped ones second.
+        # a page short of notifications outside an offline group.
         def notification_page(space_id, limit:, older_than: nil, newer_than: nil)
           raise ArgumentError, 'give older_than or newer_than, not both' if older_than && newer_than
 
           pagination = ({ forward_pagination_token: older_than } if older_than) ||
                        ({ backward_pagination_token: newer_than } if newer_than)
           page = call(NOTIFICATIONS, { filter: { origin: { space_id: } }, limit:, pagination: }.compact)
-          [page.notifications.map { Notification.from(it.raw) },
-           page.offline_notifications_data.flat_map(&:notifications).map { Notification.from(it.raw) }]
+          grouped = page.offline_notifications_data.flat_map do |group|
+            group.notifications.map { Notification.from(it.raw, parent_id: group.parent_notification_id) }
+          end
+          page.notifications.map { Notification.from(it.raw) } + grouped
         end
 
         def newest_first(notifications) = notifications.sort_by { -it.time.to_f }

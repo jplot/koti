@@ -66,6 +66,6 @@ RSpec.describe Miele::Sdk, :live do
   end
 
   it 'cannot write' do
-    expect { appliances.first.light_on }.to raise_error(RuntimeError, /read-only: PUT refused/)
+    expect { appliances.first.wake }.to raise_error(RuntimeError, /read-only: PUT refused/)
   end
 end

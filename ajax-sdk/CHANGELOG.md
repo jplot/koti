@@ -23,6 +23,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `current_member(space_id)`: the signed-in account's role and permissions in a space, which the app reads to
+  offer only what the account may do; the README lists what the app checks before each shortcut.
 - `events(space_id)`: one feed of `Event`s (space, security, groups, rooms, devices, notifications) for a
   space, from four streams that reopen on their own and catch up on what they missed; `Cloud::Tracker`
   keeps the `SpaceState` behind it.

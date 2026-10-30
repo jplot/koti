@@ -60,6 +60,11 @@ RSpec.describe 'Ajax cloud', :live do # rubocop:disable RSpec/DescribeClass -- i
     expect(unless_refused { cloud.groups(space.id) }).to all(have_attributes(id: be_a(String)))
   end
 
+  it 'reads the role and the permissions of the signed-in account' do
+    expect(cloud.current_member(space.id).user_current_member)
+      .to have_attributes(role: be_a(Symbol), space_permissions: have_attributes(permissions: all(be_a(Symbol))))
+  end
+
   it 'reads the scenarios of a space' do
     expect(unless_refused { cloud.scenarios(space.id) }).to all(have_attributes(id: be_a(String)))
   end

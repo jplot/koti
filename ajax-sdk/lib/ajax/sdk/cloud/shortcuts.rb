@@ -381,6 +381,12 @@ module Ajax
           # @raise [ReadError] when the gateway refuses the read
           def groups(space_id) = space_snapshot(space_id)&.security&.groups || []
 
+          # @param space_id [String]
+          # @return [Data, nil] the signed-in account as a member of the space (+CurrentMember+): its role and
+          #   permissions, which the app reads to show only the actions they allow
+          # @raise [ReadError] when the gateway refuses the read
+          def current_member(space_id) = space_snapshot(space_id)&.current_member
+
           # @param device [Device] a device with LifeQuality measures
           # @param from [Time]
           # @param to [Time]

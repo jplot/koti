@@ -101,6 +101,7 @@ module Ajax
           def disable_scenario: (String space_id, String scenario_id) -> nil
           def rooms: (String space_id) -> Array[SPACE::Room::Room]
           def groups: (String space_id) -> Array[SPACE::Security::Group::Group]
+          def current_member: (String space_id) -> SPACE::CurrentMember?
           def life_quality_history: (Device device, from: Time, to: Time, ?step: step, ?time_zone: String) -> LifeQualityHistory
 
           private

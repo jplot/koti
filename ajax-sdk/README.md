@@ -151,15 +151,18 @@ change:
 | `:device` | `Device` | `[:hub_device, hub_id, device_id]` (the hub has `device_id == hub_id`), `[:video_edge, id]`, `[:video_edge_channel, video_edge_id, channel_id]`, `[:smart_lock, id]`, `[:chime, id]` |
 | `:notification` | `Notification` | its id |
 
-`state` is the whole space once the change is applied. The first messages give every item as an addition.
+`state` is the whole space once the message that brought the change is applied. The first messages give every
+item as an addition.
 
 A stream that breaks (unavailable, deadline, internal, unauthenticated…) or ends reopens 1, 2, 4, 8, 16 then
 30 seconds later, back to 1 second at its first message, forever. A snapshot after a reopening is compared
-with what was kept, so the changes made meanwhile come out as events. The notification stream has no
-snapshot: when it reopens, the notifications newer than the newest kept are read back page by page; one
-created between that read and the reopening can be missed. A failure the gateway answers (a refusal) is
-raised, and so is any other error. An exception in the block, `break`, or leaving the Enumerator stops the
-four threads and closes their calls.
+with what was kept, so the changes made meanwhile come out as events, and nothing else. The notification
+stream has no snapshot: before it first opens, its thread notes the newest notification; before each
+reopening, it reads back page by page the ones created since, waiting and retrying like the stream when that
+read fails too. One created between that read and the reopening can be missed. A failure the gateway answers
+(a refusal) is raised, and so is any other error. An exception in the block, `break`, or `first(n)` stops the
+four threads and closes their calls; an Enumerator walked with `next` keeps them running. The queue between
+the threads and the caller has no limit: a block slower than the streams makes it grow.
 
 Not followed: the cloud smart locks' own stream, a roller shutter's movement, and the app's trouble, offline
 and low-battery lists; their lasting state is already in the devices.

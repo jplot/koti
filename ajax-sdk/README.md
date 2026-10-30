@@ -89,6 +89,9 @@ door.temperature # => 22
 door.states      # => [] ([:offline] when the hub lost it)
 door.flags       # => [:armed_in_night_mode, :delay_when_leaving]
 
+switch = cloud.devices(space.id).find { it.kind == :light_switch_two_gang }
+switch.channels  # => [#<data Channel number=1, on=true, name="Hall", brightness=nil>, …]
+
 note = cloud.notifications(space.id, limit: 20).first # most recent first
 note.event       # => :space_disarmed
 note.source      # => #<data Source type=:space_member, id="…", name="…">
@@ -99,6 +102,12 @@ Spaces, devices and notifications come back as `Data` values (`Space`, `Device`,
 nil. A field the cloud leaves out reads as its protobuf default: an empty string, `0`, `false`, or
 `:unspecified` for an enum. Each value keeps the whole decoded Hash in `raw`, for the statuses and
 properties it does not name.
+
+From its properties, a device also reads its `channels` (a relay's, a light switch's gangs, a socket's or a
+valve's, with a dimmer's `brightness`; `on` is nil when the device does not know), a roller `shutter`
+(`position` is the opening in percent, 100 open, nil while it moves), the state of a `lock` (`:locked`,
+`:pending_unlocked`…), `life_quality` (temperature, humidity and CO2, whose units °C, % and ppm are inferred,
+not verified) and a fire detector's `mute_command`. `space_id` names its space.
 
 A battery whose `exact` is false comes from a device that reports no percentage: the app then shows
 « OK » from 21 % and « discharged » below, not the number. `spaces` reads every page. A read the gateway
@@ -121,6 +130,42 @@ a real alarm's state. The named and generic methods below obey it too: a method 
 method (its service, for an `…/execute` path), which ends its Ruby name, starts with `get`, `find`,
 `search` or `stream` and holds no write word (`create`, `delete`, `reset`, `test`…). So
 `space_find_user_spaces_with_pagination` reads, and a stream that changes state is refused like any command.
+
+## Shortcuts
+
+| Shortcut | What it sends |
+|---|---|
+| `turn_on(device, channel: 1)`, `turn_off` | `device_command_device_on` / `_off`, with the family type the app sends: `light_switch`, `socket_base` or `water_stop_base` by the device's channels; `relay` with no channel, `relay_fibra_base` or `transmitter_fibra_base` by its kind |
+| `set_brightness(device, percent)` | `device_command_brightness`: 1 to 100, relative, on the first channel |
+| `open_shutter`, `close_shutter`, `stop_shutter(device)`, `move_shutter(device, percent)` | `device_command_roller_shutter_control`: the opening, 100 open and 0 closed, or stop |
+| `bypass(device, tamper_only: false, once: false)`, `unbypass(device, once: false)` | `device_command_device_bypass` |
+| `arm_group(space_id, group_id, ignore_alarms: false)`, `disarm_group` | `space_security_arm_group`, `space_security_disarm_group` |
+| `set_security_mode(space_id, mode)` | `space_security_set_security_mode`: `:regular` or `:group` |
+| `panic(space_id, location: nil)` | `space_press_panic_button`: **a real alarm** |
+| `lock(device)`, `unlock`, `unlatch` | a lock of the hub: `device_command_device_off` / `_on`; a cloud lock: `switch_smart_lock`, the only one that unlatches |
+| `mute(device)` | `device_command_sound_off`: the detector's own alarm, and external ones when its `mute_command` says so |
+| `mute_fire_detectors(hub_id, except_triggered: false)` | `device_command_mute_all_fire_detectors` (`_except_triggered`) |
+| `reset_fire_alarm(hub_id)` | `hub_command_en54_hub_action` |
+| `device_details(device)`, `hub_details(space_id, hub_id)` | the first message of `stream_hub_device`, `stream_device_info`; a device whose type the app does not open this way (a hub, for example) raises `ReadError` `:refused` |
+| `update_device_settings(device, *updates)`, `rename(device, name)`, `update_hub_settings(space_id, hub_id, *updates)` | `update_hub_device`, `update_device`; they return the success, which may say the change waits for a press on the device |
+| `scenarios(space_id)`, `enable_scenario` / `disable_scenario(space_id, scenario_id)` | `stream_light_scenarios`, `set_scenario_state` |
+| `rooms(space_id)`, `groups(space_id)` | the first message of `space_stream` |
+| `life_quality_history(device, from:, to:, step: :hour, time_zone: 'UTC')` | `life_quality_data_get_life_quality_data`, as a `LifeQualityHistory`: each measure by the start of its bucket |
+
+Each shortcut calls a named method (below), so Steep checks its request and read-only mode refuses its
+commands. A device the shortcut does not fit raises `ArgumentError` before anything is sent; commands return
+nil. They send what the app 3.59 sends, which differs from what one would guess in three places:
+
+- The app never sends a slat command and never reads `SlatPosition`, so there is no slat shortcut.
+- To turn a device on or off, it sends the type of its family, not the device's exact type. It always turns
+  a legacy relay in impulse mode on; `turn_off` sends off to it anyway.
+- `stream_hub_device` and `update_hub_device` do not cover relays, sockets, light switches or valves: their
+  settings have no known path. A fire alarm resets through the cloud only on an EN54 hub.
+
+Verified so far: the reads `rooms`, `hub_details` and `device_details`, against the real cloud and read-only;
+`groups` answered an empty list. No shortcut that writes has been tried on a real device, and none has met a shutter, lock,
+dimmer, valve, LifeQuality or EN54 device. The gateway refuses `scenarios` to an account whose role is a
+plain user (`ReadError`, `:permission_denied`), as the live specs' account is.
 
 ## Any method
 

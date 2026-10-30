@@ -4,6 +4,7 @@ module Ajax
       class Client
         include Resources
         include Methods
+        include Shortcuts
 
         IDENTITY: ^(String) -> String
         READ_WORDS: Array[String]

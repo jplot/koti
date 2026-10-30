@@ -53,7 +53,7 @@ module Ajax
         # @raise [ReadError] when the gateway refuses the read
         def devices(space_id)
           first = server_stream(DEVICES, { space_id: }).first or raise ReadError, :refused
-          (first.snapshot&.light_device_items || []).filter_map { Device.from(it.raw) }
+          (first.snapshot&.light_device_items || []).filter_map { Device.from(it, space_id:) }
         end
 
         # @param space_id [String]

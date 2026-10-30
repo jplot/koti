@@ -58,7 +58,7 @@ RSpec.describe Ajax::Sdk::Cloud::Resources do
     snapshot = success(devices, { snapshot: { light_device_items: items } })
     allow(host).to receive(:server_stream).and_return([snapshot].each)
 
-    expect(host.devices('s1').map(&:id)).to eq(%w[d1 d2])
+    expect(host.devices('s1').map { [it.id, it.space_id] }).to eq([%w[d1 s1], %w[d2 s1]])
   end
 
   it 'raises ReadError when the devices stream ends without a message' do

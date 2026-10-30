@@ -44,9 +44,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :devices => self.devices.map { it.to_message },
-        :options => self.options&.to_message,
-        :sample_id => self.sample_id&.to_message,
+        :devices => self.devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceReference) },
+        :options => self.options&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::PlayAudioTarget::Options) },
+        :sample_id => self.sample_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::PlayAudioTarget::SampleId) },
         :volume_level => self.volume_level&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::PlayAudioTarget::VolumeLevel.proto(it) },
         :repeat_amount => self.repeat_amount&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::PlayAudioTarget::RepeatAmount.proto(it) },
       }.compact
@@ -84,8 +84,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_devices => self.available_devices.map { it.to_message },
-          :sample_ids => self.sample_ids.map { it.to_message },
+          :available_devices => self.available_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceTargetInfo) },
+          :sample_ids => self.sample_ids.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::PlayAudioTarget::SampleId) },
         }.compact
       end
     end

@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAgreementByKey::GetAgreementByKeyResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAgreementByKey::GetAgreementByKeyResponse::Failure) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :agreement => self.agreement&.to_message,
+          :agreement => self.agreement&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AgreementInfo) },
         }.compact
       end
     end
@@ -111,7 +111,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :agreement_not_found => self.agreement_not_found&.to_message,
+          :agreement_not_found => self.agreement_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

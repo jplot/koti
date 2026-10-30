@@ -52,6 +52,12 @@ RSpec.describe Ajax::Sdk::Cloud::Methods do
     expect(grpc).not_to have_received(:request_response)
   end
 
+  it 'rejects a Hash for a sub-message before sending', :aggregate_failures do
+    expect { client.space_security_arm_group(space_locator: { space_id: 'space-1' }) }
+      .to raise_error(TypeError, /SpaceLocator/)
+    expect(grpc).not_to have_received(:request_response)
+  end
+
   it 'refuses a named command when read-only' do
     allow(settings).to receive(:read_only).and_return(true)
 

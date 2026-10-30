@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       {
         :applying_duration => self.applying_duration&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         :device_reader_position => self.device_reader_position&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accesscard::ApplyCardToActivatedDevice::DeviceReaderPosition.proto(it) },
-        :device_reader_id => self.device_reader_id&.to_message,
+        :device_reader_id => self.device_reader_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId) },
       }.compact
     end
 

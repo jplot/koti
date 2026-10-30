@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::Failure) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :snapshot => self.snapshot&.to_message,
-          :update => self.update&.to_message,
+          :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::Snapshot) },
+          :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::Update) },
         }.compact
       end
 
@@ -133,7 +133,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           :status => self.status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::TestStatus.proto(it) },
           :test_initiator_id => self.test_initiator_id,
           :test_end_time => self.test_end_time&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
-          :fire_devices => self.fire_devices.map { it.to_message },
+          :fire_devices => self.fire_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::FireDevice) },
           :is_fire_alarm => self.is_fire_alarm,
         }.compact
       end
@@ -183,7 +183,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           :status => self.status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::TestStatus.proto(it) },
           :test_initiator_id => self.test_initiator_id,
           :test_end_time => self.test_end_time&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
-          :fire_device_update => self.fire_device_update&.to_message,
+          :fire_device_update => self.fire_device_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::FireDeviceUpdate) },
           :is_fire_alarm => self.is_fire_alarm,
         }.compact
       end
@@ -229,7 +229,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         {
           :device_id => self.device_id,
           :is_iwh_supported => self.is_iwh_supported,
-          :iwh_signal_quality => self.iwh_signal_quality&.to_message,
+          :iwh_signal_quality => self.iwh_signal_quality&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::SignalQuality) },
         }.compact
       end
     end
@@ -267,7 +267,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       def to_message
         {
           :device_id => self.device_id,
-          :iwh_signal_quality => self.iwh_signal_quality&.to_message,
+          :iwh_signal_quality => self.iwh_signal_quality&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamInterconnectWithoutHubTest::StreamInterconnectWithoutHubTestStatusResponse::SignalQuality) },
         }.compact
       end
     end
@@ -342,8 +342,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :hub_not_found => self.hub_not_found&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_not_found => self.hub_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

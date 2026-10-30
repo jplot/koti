@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device
       {
         :id => self.id,
         :room_id => self.room_id,
-        :add_hub_by_qr_transition => self.add_hub_by_qr_transition&.to_message,
-        :transfer_hub_settings_transition => self.transfer_hub_settings_transition&.to_message,
+        :add_hub_by_qr_transition => self.add_hub_by_qr_transition&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub::AddHubByQrTransition) },
+        :transfer_hub_settings_transition => self.transfer_hub_settings_transition&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub::TransferHubSettingsTransition) },
       }.compact
     end
 
@@ -80,7 +80,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :stage => self.stage&.to_message,
+          :stage => self.stage&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub::AddHubByQrTransition::Stage) },
         }.compact
       end
 
@@ -116,8 +116,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :transition_in_progress => self.transition_in_progress&.to_message,
-            :transition_failed => self.transition_failed&.to_message,
+            :transition_in_progress => self.transition_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub::AddHubByQrTransition::Stage::TransitionInProgress) },
+            :transition_failed => self.transition_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub::AddHubByQrTransition::Stage::TransitionFailed) },
           }.compact
         end
 
@@ -209,7 +209,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :stage => self.stage&.to_message,
+          :stage => self.stage&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub::TransferHubSettingsTransition::Stage) },
         }.compact
       end
 
@@ -248,9 +248,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :transition_in_progress => self.transition_in_progress&.to_message,
-            :transition_failed => self.transition_failed&.to_message,
-            :transition_completed => self.transition_completed&.to_message,
+            :transition_in_progress => self.transition_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub::TransferHubSettingsTransition::Stage::TransitionInProgress) },
+            :transition_failed => self.transition_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub::TransferHubSettingsTransition::Stage::TransitionFailed) },
+            :transition_completed => self.transition_completed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub::TransferHubSettingsTransition::Stage::TransitionCompleted) },
           }.compact
         end
 

@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :time => self.time&.to_message,
+        :time => self.time&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Type::TimeOfDay) },
         :days => self.days.map { ::Ajax::Sdk::Cloud::Messages::Google::Type::DayOfWeek.proto(it) },
       }.compact
     end

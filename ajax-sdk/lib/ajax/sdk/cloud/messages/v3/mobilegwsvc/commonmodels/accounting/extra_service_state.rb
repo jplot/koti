@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :active => self.active&.to_message,
-        :suspended => self.suspended&.to_message,
-        :deactivated => self.deactivated&.to_message,
+        :active => self.active&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraServiceState::Active) },
+        :suspended => self.suspended&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraServiceState::Suspended) },
+        :deactivated => self.deactivated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraServiceState::Deactivated) },
       }.compact
     end
 

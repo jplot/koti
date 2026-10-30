@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetDeviceAbout::GetDeviceAboutResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetDeviceAbout::GetDeviceAboutResponse::Failure) },
       }.compact
     end
 
@@ -89,11 +89,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :hub => self.hub&.to_message,
-          :video_edge => self.video_edge&.to_message,
-          :hub_device => self.hub_device&.to_message,
-          :chime => self.chime&.to_message,
-          :multi_hub => self.multi_hub&.to_message,
+          :hub => self.hub&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Device::GetDeviceAboutResponse::Hub) },
+          :video_edge => self.video_edge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Device::GetDeviceAboutResponse::VideoEdge) },
+          :hub_device => self.hub_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Device::GetDeviceAboutResponse::HubDevice) },
+          :chime => self.chime&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Device::GetDeviceAboutResponse::Chime) },
+          :multi_hub => self.multi_hub&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetDeviceAbout::GetDeviceAboutResponse::MultiHub) },
         }.compact
       end
 
@@ -133,7 +133,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :hub => self.hub&.to_message,
+          :hub => self.hub&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Device::GetDeviceAboutResponse::Hub) },
           :add_option => self.add_option&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetDeviceAbout::GetDeviceAboutResponse::MultiHub::AddOption.proto(it) },
         }.compact
       end
@@ -182,9 +182,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :device_not_found => self.device_not_found&.to_message,
-          :device_is_already_installed => self.device_is_already_installed&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :device_not_found => self.device_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :device_is_already_installed => self.device_is_already_installed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

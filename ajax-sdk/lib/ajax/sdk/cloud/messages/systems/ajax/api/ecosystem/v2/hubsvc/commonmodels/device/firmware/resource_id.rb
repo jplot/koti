@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :firmware_id => self.firmware_id&.to_message,
+        :firmware_id => self.firmware_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Firmware::ResourceId::FirmwareId) },
       }.compact
     end
 

@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     def to_message
       {
         :parent_notification_id => self.parent_notification_id,
-        :notifications => self.notifications.map { it.to_message },
-        :out_of_limit => self.out_of_limit&.to_message,
+        :notifications => self.notifications.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Notification) },
+        :out_of_limit => self.out_of_limit&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::OfflineNotificationsData::OutOfLimit) },
       }.compact
     end
 
@@ -73,7 +73,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :notification => self.notification&.to_message,
+          :notification => self.notification&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Notification) },
         }.compact
       end
     end

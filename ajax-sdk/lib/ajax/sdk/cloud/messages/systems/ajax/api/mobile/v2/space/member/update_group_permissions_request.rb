@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
-        :space_members_group_permissions => self.space_members_group_permissions.map { it.to_message },
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
+        :space_members_group_permissions => self.space_members_group_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::SpaceMemberGroupPermissions) },
       }.compact
     end
   end
@@ -74,7 +74,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
     def to_message
       {
         :space_member_id => self.space_member_id,
-        :group_permissions => self.group_permissions.map { it.to_message },
+        :group_permissions => self.group_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::GroupPermissions) },
       }.compact
     end
   end
@@ -111,8 +111,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::UpdateSpaceMemberGroupPermissionsResponse::Failure) },
       }.compact
     end
 
@@ -180,16 +180,16 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :member_not_found => self.member_not_found&.to_message,
-          :group_not_found => self.group_not_found&.to_message,
-          :hub_is_offline => self.hub_is_offline&.to_message,
-          :hub_error => self.hub_error&.to_message,
-          :hub_wrong_state => self.hub_wrong_state&.to_message,
-          :space_locked => self.space_locked&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :member_not_found => self.member_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :group_not_found => self.group_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_is_offline => self.hub_is_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_error => self.hub_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_wrong_state => self.hub_wrong_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_locked => self.space_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::SpaceLockedError) },
         }.compact
       end
 

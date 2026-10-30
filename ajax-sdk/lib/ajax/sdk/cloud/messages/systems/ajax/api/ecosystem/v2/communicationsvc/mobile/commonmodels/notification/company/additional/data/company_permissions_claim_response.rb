@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         :request_id => self.request_id,
         :company_name => self.company_name,
         :company_mail => self.company_mail,
-        :permissions_type => self.permissions_type&.to_message,
-        :initiator_info => self.initiator_info&.to_message,
+        :permissions_type => self.permissions_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Company::Additional::Data::PermissionsClaimType) },
+        :initiator_info => self.initiator_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Company::Additional::Data::InitiatorInfo) },
       }.compact
     end
   end

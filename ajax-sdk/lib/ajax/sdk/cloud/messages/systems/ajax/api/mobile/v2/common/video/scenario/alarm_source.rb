@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario
     def to_message
       {
         :source_id => self.source_id,
-        :alarms => self.alarms.map { it.to_message },
-        :hts_alarm => self.hts_alarm&.to_message,
+        :alarms => self.alarms.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::Alarm::Alarm) },
+        :hts_alarm => self.hts_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::AlarmSource::HtsAlarm) },
       }.compact
     end
 

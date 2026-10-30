@@ -73,8 +73,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation::RemoveInstallationCompanyResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation::RemoveInstallationCompanyResponse::Failure) },
       }.compact
     end
 
@@ -157,12 +157,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :hub_locked => self.hub_locked&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :space_locked => self.space_locked&.to_message,
-          :company_has_subscriptions => self.company_has_subscriptions&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_locked => self.hub_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_locked => self.space_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::SpaceLockedError) },
+          :company_has_subscriptions => self.company_has_subscriptions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

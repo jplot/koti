@@ -46,9 +46,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :object_type => self.object_type&.to_message,
-        :additional_param => self.additional_param&.to_message,
-        :device_sensor => self.device_sensor&.to_message,
+        :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :additional_param => self.additional_param&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandDetectionTestStart::DeviceCommandDetectionTestStartRequest::AdditionalParam) },
+        :device_sensor => self.device_sensor&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Sensor::DeviceSensor) },
       }.compact
     end
 

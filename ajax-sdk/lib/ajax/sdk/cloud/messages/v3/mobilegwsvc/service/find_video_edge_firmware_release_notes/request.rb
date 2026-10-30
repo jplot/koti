@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :firmware_id => self.firmware_id&.to_message,
+        :firmware_id => self.firmware_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Firmware::VideoEdgeFirmwareId) },
         :language_code => self.language_code,
       }.compact
     end

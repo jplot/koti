@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :id => self.id,
-        :settings => self.settings&.to_message,
-        :capabilities => self.capabilities&.to_message,
+        :settings => self.settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::OutputDigitalLine::OutputDigitalLineSettings) },
+        :capabilities => self.capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::OutputDigitalLine::OutputDigitalLineCapabilities) },
       }.compact
     end
 
@@ -123,7 +123,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :idle_states => self.idle_states.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::DigitalLineIdleState.proto(it) },
-          :delay_times => self.delay_times&.to_message,
+          :delay_times => self.delay_times&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::OutputDigitalLine::OutputDigitalLineCapabilities::OutputDelayTimes) },
         }.compact
       end
 
@@ -156,7 +156,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :durations_list => self.durations_list&.to_message,
+            :durations_list => self.durations_list&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::OutputDigitalLine::OutputDigitalLineCapabilities::OutputDelayTimes::Discrete) },
           }.compact
         end
 

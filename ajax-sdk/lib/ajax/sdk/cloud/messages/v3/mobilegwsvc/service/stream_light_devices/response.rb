@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Failure) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :snapshot => self.snapshot&.to_message,
-          :updates => self.updates&.to_message,
+          :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Snapshot) },
+          :updates => self.updates&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Updates) },
         }.compact
       end
 
@@ -117,7 +117,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :light_device_items => self.light_device_items.map { it.to_message },
+            :light_device_items => self.light_device_items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceItem) },
           }.compact
         end
       end
@@ -151,7 +151,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :updates => self.updates.map { it.to_message },
+            :updates => self.updates.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update) },
           }.compact
         end
       end
@@ -206,14 +206,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :device_id => self.device_id&.to_message,
-            :snapshot_update => self.snapshot_update&.to_message,
-            :status_update => self.status_update&.to_message,
+            :device_id => self.device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceId) },
+            :snapshot_update => self.snapshot_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update::SnapshotUpdate) },
+            :status_update => self.status_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update::StatusUpdate) },
             :malfunctions_update => self.malfunctions_update,
-            :state_update => self.state_update&.to_message,
-            :light_video_edge_update => self.light_video_edge_update&.to_message,
-            :light_video_edge_channel_update => self.light_video_edge_channel_update&.to_message,
-            :light_smart_lock_update => self.light_smart_lock_update&.to_message,
+            :state_update => self.state_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update::StateUpdate) },
+            :light_video_edge_update => self.light_video_edge_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update::LightVideoEdgeUpdate) },
+            :light_video_edge_channel_update => self.light_video_edge_channel_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update::LightVideoEdgeChannelUpdate) },
+            :light_smart_lock_update => self.light_smart_lock_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update::LightSmartLockUpdate) },
           }.compact
         end
 
@@ -252,7 +252,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :light_device_item => self.light_device_item&.to_message,
+              :light_device_item => self.light_device_item&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceItem) },
               :update_type => self.update_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::UpdateType.proto(it) },
             }.compact
           end
@@ -287,7 +287,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :spread_properties_update => self.spread_properties_update&.to_message,
+              :spread_properties_update => self.spread_properties_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update::LightSmartLockUpdate::SmartLockSpreadPropertiesUpdate) },
             }.compact
           end
 
@@ -327,7 +327,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
             def to_message
               {
                 :update_type => self.update_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::UpdateType.proto(it) },
-                :spread_property => self.spread_property&.to_message,
+                :spread_property => self.spread_property&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Smartlock::Light::LightSmartLock::SmartLockSpreadProperty) },
               }.compact
             end
           end
@@ -368,7 +368,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :spread_properties_update => self.spread_properties_update&.to_message,
+              :spread_properties_update => self.spread_properties_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update::LightVideoEdgeUpdate::SpreadPropertiesUpdate) },
               :name => self.name,
               :room_id => self.room_id,
             }.compact
@@ -410,7 +410,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
             def to_message
               {
                 :update_type => self.update_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::UpdateType.proto(it) },
-                :spread_properties => self.spread_properties&.to_message,
+                :spread_properties => self.spread_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdge::SpreadProperties) },
               }.compact
             end
           end
@@ -460,12 +460,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :source_aliases => self.source_aliases&.to_message,
+              :source_aliases => self.source_aliases&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SourceAliases) },
               :name => self.name,
               :room_id => self.room_id,
               :group_id => self.group_id,
-              :backup_channel_properties => self.backup_channel_properties&.to_message,
-              :spread_properties_update => self.spread_properties_update&.to_message,
+              :backup_channel_properties => self.backup_channel_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdgeChannel::BackupChannelProperties) },
+              :spread_properties_update => self.spread_properties_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLightDevices::StreamLightDevicesResponse::Success::Update::LightVideoEdgeChannelUpdate::SpreadPropertiesUpdate) },
             }.compact
           end
 
@@ -505,7 +505,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
             def to_message
               {
                 :update_type => self.update_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::UpdateType.proto(it) },
-                :spread_properties => self.spread_properties&.to_message,
+                :spread_properties => self.spread_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdgeChannel::SpreadProperties) },
               }.compact
             end
           end
@@ -543,7 +543,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :status => self.status&.to_message,
+              :status => self.status&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceStatus) },
               :update_type => self.update_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::UpdateType.proto(it) },
             }.compact
           end
@@ -618,7 +618,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

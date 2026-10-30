@@ -61,8 +61,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :lines_powered => self.lines_powered.map { it.to_message },
-          :malfunctioned_lines => self.malfunctioned_lines.map { it.to_message },
+          :lines_powered => self.lines_powered.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::Lines::LinesPowerSupplySeparatePart::LinePowerSupply) },
+          :malfunctioned_lines => self.malfunctioned_lines.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::Lines::LinesPowerSupplySeparatePart::MalfunctionedLine) },
         }.compact
       end
     end
@@ -102,7 +102,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :line => self.line&.to_message,
+          :line => self.line&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine::Line) },
           :bus_power_state => self.bus_power_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::Lines::LinesPowerSupplySeparatePart::BusPowerState.proto(it) },
           :malfunction => self.malfunction&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::Lines::LinePowerMalfunction.proto(it) },
         }.compact
@@ -141,7 +141,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :fibra_line => self.fibra_line&.to_message,
+          :fibra_line => self.fibra_line&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine) },
           :malfunction => self.malfunction&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::Lines::LinePowerMalfunction.proto(it) },
         }.compact
       end

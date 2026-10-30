@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandRollerShutterControl::DeviceCommandRollerShutterControlResponse::Failure) },
       }.compact
     end
 
@@ -98,14 +98,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :permission_denied => self.permission_denied&.to_message,
-          :hub_wrong_state => self.hub_wrong_state&.to_message,
-          :hub_busy => self.hub_busy&.to_message,
-          :hub_offline => self.hub_offline&.to_message,
-          :shutter_motor_overheating => self.shutter_motor_overheating&.to_message,
-          :shutter_low_voltage_issue => self.shutter_low_voltage_issue&.to_message,
-          :shutter_high_voltage_issue => self.shutter_high_voltage_issue&.to_message,
-          :calibration_required => self.calibration_required&.to_message,
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_wrong_state => self.hub_wrong_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::HubWrongStateError) },
+          :hub_busy => self.hub_busy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::HubBusyError) },
+          :hub_offline => self.hub_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :shutter_motor_overheating => self.shutter_motor_overheating&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :shutter_low_voltage_issue => self.shutter_low_voltage_issue&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :shutter_high_voltage_issue => self.shutter_high_voltage_issue&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :calibration_required => self.calibration_required&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

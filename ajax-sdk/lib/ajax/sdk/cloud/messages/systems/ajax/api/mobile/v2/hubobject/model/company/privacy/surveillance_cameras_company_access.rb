@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::P
     def to_message
       {
         :company_id => self.company_id,
-        :rights => self.rights&.to_message,
+        :rights => self.rights&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::SurveillanceCamerasCompanyRights) },
       }.compact
     end
   end

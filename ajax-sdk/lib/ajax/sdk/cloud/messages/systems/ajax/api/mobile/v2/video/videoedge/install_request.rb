@@ -50,7 +50,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :video_edge_id => self.video_edge_id,
         :video_edge_name => self.video_edge_name,
         :room_id => self.room_id,
@@ -93,8 +93,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::InstallVideoEdgeResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::InstallVideoEdgeResponse::Failure) },
       }.compact
     end
 
@@ -209,19 +209,19 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :video_edge_is_already_installed => self.video_edge_is_already_installed&.to_message,
-          :video_edge_not_found => self.video_edge_not_found&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :room_not_found => self.room_not_found&.to_message,
-          :space_locked => self.space_locked&.to_message,
-          :group_not_found => self.group_not_found&.to_message,
-          :video_edge_is_offline => self.video_edge_is_offline&.to_message,
-          :role_access_required => self.role_access_required&.to_message,
-          :not_accredited_for_s_line => self.not_accredited_for_s_line&.to_message,
-          :not_authorized_for_s_line_devices => self.not_authorized_for_s_line_devices&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_is_already_installed => self.video_edge_is_already_installed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_not_found => self.video_edge_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :room_not_found => self.room_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_locked => self.space_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::SpaceLockedError) },
+          :group_not_found => self.group_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_is_offline => self.video_edge_is_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :role_access_required => self.role_access_required&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :not_accredited_for_s_line => self.not_accredited_for_s_line&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :not_authorized_for_s_line_devices => self.not_authorized_for_s_line_devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

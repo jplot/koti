@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :water_stop_error_code_info => self.water_stop_error_code_info&.to_message,
+        :water_stop_error_code_info => self.water_stop_error_code_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::ErrorCodeInfo::WaterStopErrorCodeInfo) },
       }.compact
     end
 

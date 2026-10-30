@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :regular_mode => self.regular_mode&.to_message,
-        :group_mode => self.group_mode&.to_message,
+        :regular_mode => self.regular_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Regular::RegularModeSpaceSecurity) },
+        :group_mode => self.group_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupModeSpaceSecurity) },
         :displayed_security_state => self.displayed_security_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::DisplayedSpaceSecurityState.proto(it) },
-        :displayed_security_state_v2 => self.displayed_security_state_v2&.to_message,
+        :displayed_security_state_v2 => self.displayed_security_state_v2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::DisplayedSpaceSecurityStateV2) },
       }.compact
     end
 

@@ -51,7 +51,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         :initiator_name => self.initiator_name,
         :channel_id => self.channel_id,
         :channel_name => self.channel_name,
-        :export_ranges => self.export_ranges.map { it.to_message },
+        :export_ranges => self.export_ranges.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Video::TimestampRange) },
         :timezone_id => self.timezone_id,
       }.compact
     end

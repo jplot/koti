@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :automation_device => self.automation_device&.to_message,
+        :automation_device => self.automation_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationDevice) },
         :automation_action_display_type => self.automation_action_display_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationActionDisplayType.proto(it) },
       }.compact
     end
@@ -73,7 +73,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :automation_device_reference => self.automation_device_reference&.to_message,
+        :automation_device_reference => self.automation_device_reference&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationDeviceReference) },
         :automation_action_display_type => self.automation_action_display_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationActionDisplayType.proto(it) },
       }.compact
     end

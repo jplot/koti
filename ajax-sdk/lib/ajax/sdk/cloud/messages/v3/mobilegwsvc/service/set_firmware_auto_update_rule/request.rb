@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
     def to_message
       {
         :space_id => self.space_id,
-        :device_id => self.device_id&.to_message,
-        :rule => self.rule&.to_message,
+        :device_id => self.device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId) },
+        :rule => self.rule&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::FirmwareAutoUpdateRule) },
       }.compact
     end
   end

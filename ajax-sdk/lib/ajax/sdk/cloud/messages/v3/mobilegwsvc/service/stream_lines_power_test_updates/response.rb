@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Failure) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :line_power_test => self.line_power_test&.to_message,
+          :line_power_test => self.line_power_test&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::LinesPowerTest) },
         }.compact
       end
     end
@@ -120,10 +120,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :unknown => self.unknown&.to_message,
-          :blocked => self.blocked&.to_message,
-          :active => self.active&.to_message,
-          :finished => self.finished&.to_message,
+          :unknown => self.unknown&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Unknown) },
+          :blocked => self.blocked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Blocked) },
+          :active => self.active&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Active) },
+          :finished => self.finished&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Finished) },
         }.compact
       end
 
@@ -193,9 +193,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :no_fibra_devices => self.no_fibra_devices&.to_message,
-          :malfunction => self.malfunction&.to_message,
-          :malfunction_on_rings => self.malfunction_on_rings&.to_message,
+          :no_fibra_devices => self.no_fibra_devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Blocked::NoFibraDevices) },
+          :malfunction => self.malfunction&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Blocked::Malfunction) },
+          :malfunction_on_rings => self.malfunction_on_rings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Blocked::MalfunctionOnRings) },
         }.compact
       end
 
@@ -285,7 +285,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :lines => self.lines.map { it.to_message },
+            :lines => self.lines.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine) },
           }.compact
         end
       end
@@ -381,8 +381,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         {
           :finish_timestamp => self.finish_timestamp&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
           :power_test_finished_state => self.power_test_finished_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Finished::PowerTestFinishedState.proto(it) },
-          :success => self.success&.to_message,
-          :interrupted => self.interrupted&.to_message,
+          :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Finished::Success) },
+          :interrupted => self.interrupted&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::Finished::Interrupted) },
         }.compact
       end
 
@@ -422,7 +422,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         def to_message
           {
             :power_state => self.power_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::PowerState.proto(it) },
-            :line_power_states => self.line_power_states.map { it.to_message },
+            :line_power_states => self.line_power_states.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::LinePowerState) },
           }.compact
         end
       end
@@ -498,9 +498,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :line => self.line&.to_message,
+          :line => self.line&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine) },
           :power_state => self.power_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::PowerState.proto(it) },
-          :device_power_states => self.device_power_states.map { it.to_message },
+          :device_power_states => self.device_power_states.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::DevicePowerState) },
         }.compact
       end
     end
@@ -547,8 +547,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       def to_message
         {
           :device_name => self.device_name,
-          :device_type => self.device_type&.to_message,
-          :line_extender => self.line_extender&.to_message,
+          :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+          :line_extender => self.line_extender&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LineExtender) },
           :power_state => self.power_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamLinesPowerTestUpdates::StreamLinesPowerTestResponse::PowerState.proto(it) },
           :device_id => self.device_id,
         }.compact
@@ -587,8 +587,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy
         :space_member_id => self.space_member_id,
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :object_type => self.object_type&.to_message,
-        :hub_device_privacy_permissions => self.hub_device_privacy_permissions.map { it.to_message },
+        :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :hub_device_privacy_permissions => self.hub_device_privacy_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy::HubDevicePrivacyPermission) },
       }.compact
     end
   end

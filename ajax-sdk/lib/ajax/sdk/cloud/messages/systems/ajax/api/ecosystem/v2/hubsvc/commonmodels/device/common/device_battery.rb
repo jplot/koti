@@ -44,8 +44,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :battery_failures => self.battery_failures.map { it.to_message },
-        :stop_charging_reasons => self.stop_charging_reasons.map { it.to_message },
+        :battery_failures => self.battery_failures.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBattery::BatteryFailure) },
+        :stop_charging_reasons => self.stop_charging_reasons.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBattery::StopChargingReason) },
         :battery_charge_level_percentage => self.battery_charge_level_percentage,
         :battery_status => self.battery_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::BatteryStatus.proto(it) },
         :battery_charge_volt => self.battery_charge_volt,
@@ -81,7 +81,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :stop_charging_reasons => self.stop_charging_reasons.map { it.to_message },
+          :stop_charging_reasons => self.stop_charging_reasons.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBattery::StopChargingReason) },
         }.compact
       end
     end

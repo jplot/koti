@@ -62,8 +62,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User::InitiateUserDeletionResponse::Failure) },
       }.compact
     end
 
@@ -116,11 +116,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :user_not_found => self.user_not_found&.to_message,
-          :user_is_owner_in_companies => self.user_is_owner_in_companies&.to_message,
-          :user_is_employee_in_companies => self.user_is_employee_in_companies&.to_message,
-          :protected_from_deletion_due_to_spaces => self.protected_from_deletion_due_to_spaces&.to_message,
-          :cannot_send_confirmation_codes => self.cannot_send_confirmation_codes&.to_message,
+          :user_not_found => self.user_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :user_is_owner_in_companies => self.user_is_owner_in_companies&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User::InitiateUserDeletionResponse::Failure::ProtectedFromDeletionDueToCompaniesError) },
+          :user_is_employee_in_companies => self.user_is_employee_in_companies&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User::InitiateUserDeletionResponse::Failure::ProtectedFromDeletionDueToCompaniesError) },
+          :protected_from_deletion_due_to_spaces => self.protected_from_deletion_due_to_spaces&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User::InitiateUserDeletionResponse::Failure::ProtectedFromDeletionDueToSpacesError) },
+          :cannot_send_confirmation_codes => self.cannot_send_confirmation_codes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 
@@ -156,7 +156,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :companies => self.companies.map { it.to_message },
+            :companies => self.companies.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User::InitiateUserDeletionResponse::Failure::ProtectedFromDeletionDueToCompaniesError::Company) },
           }.compact
         end
 
@@ -197,7 +197,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User
             {
               :company_id => self.company_id,
               :name => self.name,
-              :image => self.image&.to_message,
+              :image => self.image&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
             }.compact
           end
         end
@@ -232,7 +232,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :last_user_in_spaces => self.last_user_in_spaces.map { it.to_message },
+            :last_user_in_spaces => self.last_user_in_spaces.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User::InitiateUserDeletionResponse::Failure::ProtectedFromDeletionDueToSpacesError::Space) },
           }.compact
         end
 
@@ -273,7 +273,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User
             {
               :space_id => self.space_id,
               :name => self.name,
-              :image => self.image&.to_message,
+              :image => self.image&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
             }.compact
           end
         end

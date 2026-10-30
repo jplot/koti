@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamProvisioningListItems::StreamProvisioningListItemsResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamProvisioningListItems::StreamProvisioningListItemsResponse::Failure) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :snapshot => self.snapshot&.to_message,
-          :update => self.update&.to_message,
+          :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamProvisioningListItems::StreamProvisioningListItemsResponse::Success::Snapshot) },
+          :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamProvisioningListItems::StreamProvisioningListItemsResponse::Success::Update) },
         }.compact
       end
 
@@ -117,7 +117,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :provision_list_items => self.provision_list_items.map { it.to_message },
+            :provision_list_items => self.provision_list_items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamProvisioningListItems::StreamProvisioningListItemsResponse::Success::ProvisionListItem) },
           }.compact
         end
       end
@@ -225,7 +225,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         def to_message
           {
             :device_id => self.device_id,
-            :snapshot_update => self.snapshot_update&.to_message,
+            :snapshot_update => self.snapshot_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamProvisioningListItems::StreamProvisioningListItemsResponse::Success::Update::SnapshotUpdate) },
           }.compact
         end
 
@@ -264,7 +264,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :provision_list_item => self.provision_list_item&.to_message,
+              :provision_list_item => self.provision_list_item&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamProvisioningListItems::StreamProvisioningListItemsResponse::Success::ProvisionListItem) },
               :update_type => self.update_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::UpdateType.proto(it) },
             }.compact
           end
@@ -301,7 +301,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

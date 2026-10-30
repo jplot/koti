@@ -45,8 +45,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     def to_message
       {
         :additional_id_format => self.additional_id_format&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceIdFormat.proto(it) },
-        :additional_id_1 => self.additional_id_1&.to_message,
-        :additional_id_2 => self.additional_id_2&.to_message,
+        :additional_id_1 => self.additional_id_1&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceAdditionalIdPart::AdditionalId) },
+        :additional_id_2 => self.additional_id_2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceAdditionalIdPart::AdditionalId) },
         :supported_relations => self.supported_relations.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceAdditionalIdPart::AdditionalId::Relation.proto(it) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceAdditionalIdPart::Capability.proto(it) },
       }.compact
@@ -172,8 +172,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :additional_id_1 => self.additional_id_1&.to_message,
-          :additional_id_2 => self.additional_id_2&.to_message,
+          :additional_id_1 => self.additional_id_1&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceAdditionalIdPart::AdditionalId::AdditionalIdSettings) },
+          :additional_id_2 => self.additional_id_2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceAdditionalIdPart::AdditionalId::AdditionalIdSettings) },
         }.compact
       end
     end

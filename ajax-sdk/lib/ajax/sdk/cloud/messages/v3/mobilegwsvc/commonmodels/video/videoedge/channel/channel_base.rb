@@ -57,14 +57,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :id => self.id,
-        :device_info => self.device_info&.to_message,
-        :info => self.info&.to_message,
+        :device_info => self.device_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::MediaDeviceInfo) },
+        :info => self.info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::ChannelInfo) },
         :state => self.state.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::ChannelState.proto(it) },
         :record_mode => self.record_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::RecordMode.proto(it) },
         :record_policy => self.record_policy&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::RecordPolicy.proto(it) },
         :zombie => self.zombie,
-        :cloud_archive => self.cloud_archive&.to_message,
-        :smart_backlight_trigger_settings => self.smart_backlight_trigger_settings&.to_message,
+        :cloud_archive => self.cloud_archive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Cloudarchive::CloudArchive) },
+        :smart_backlight_trigger_settings => self.smart_backlight_trigger_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SmartBacklightTriggerSettings) },
       }.compact
     end
   end

@@ -58,7 +58,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :malfunctions => self.malfunctions.map { it.to_message },
+          :malfunctions => self.malfunctions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubMalfunctionsPart::Malfunction) },
         }.compact
       end
     end
@@ -113,14 +113,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :wifi => self.wifi&.to_message,
-          :battery_charging => self.battery_charging&.to_message,
-          :battery_absent => self.battery_absent&.to_message,
-          :flash_memory => self.flash_memory&.to_message,
-          :battery_charge_voltage => self.battery_charge_voltage&.to_message,
-          :battery_charger => self.battery_charger&.to_message,
-          :hardware_failure => self.hardware_failure&.to_message,
-          :lines_malfunction => self.lines_malfunction&.to_message,
+          :wifi => self.wifi&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :battery_charging => self.battery_charging&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :battery_absent => self.battery_absent&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :flash_memory => self.flash_memory&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :battery_charge_voltage => self.battery_charge_voltage&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :battery_charger => self.battery_charger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :hardware_failure => self.hardware_failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :lines_malfunction => self.lines_malfunction&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubMalfunctionsPart::LinesMalfunction) },
         }.compact
       end
 
@@ -157,7 +157,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :lines => self.lines.map { it.to_message },
+          :lines => self.lines.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine) },
         }.compact
       end
     end

@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :clusters => self.clusters.map { it.to_message },
+        :clusters => self.clusters.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ZWaveDevicePackage::ZWaveDeviceClustersPart::Cluster) },
       }.compact
     end
 
@@ -75,9 +75,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :object_id => self.object_id_,
-          :basic => self.basic&.to_message,
-          :on_off => self.on_off&.to_message,
-          :electrical_measurement => self.electrical_measurement&.to_message,
+          :basic => self.basic&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ZWaveDevicePackage::ZWaveDeviceClustersPart::Cluster::Basic) },
+          :on_off => self.on_off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ZWaveDevicePackage::ZWaveDeviceClustersPart::Cluster::OnOff) },
+          :electrical_measurement => self.electrical_measurement&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ZWaveDevicePackage::ZWaveDeviceClustersPart::Cluster::ElectricalMeasurement) },
         }.compact
       end
 

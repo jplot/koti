@@ -58,7 +58,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :object_indexes_duplication_warning => self.object_indexes_duplication_warning&.to_message,
+          :object_indexes_duplication_warning => self.object_indexes_duplication_warning&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
         }.compact
       end
     end

@@ -48,7 +48,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
         :video_edge_id => self.video_edge_id,
         :name => self.name,
         :new_name => self.new_name,
-        :permissions => self.permissions&.to_message,
+        :permissions => self.permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Localuser::LocalUserPermissions) },
       }.compact
     end
   end

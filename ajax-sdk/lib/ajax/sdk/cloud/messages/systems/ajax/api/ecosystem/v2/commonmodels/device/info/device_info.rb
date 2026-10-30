@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Inf
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_lightweight_parts => self.device_lightweight_parts.map { it.to_message },
+        :device_lightweight_parts => self.device_lightweight_parts.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Info::Lightweight::DeviceLightweightPart) },
       }.compact
     end
   end

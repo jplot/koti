@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetCertificatesFromVideoEdge::GetCertificatesFromVideoEdgeResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetCertificatesFromVideoEdge::GetCertificatesFromVideoEdgeResponse::Failure) },
       }.compact
     end
 
@@ -95,7 +95,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
           :supported_x509_versions => self.supported_x509_versions.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Crypto::X509Version.proto(it) },
           :supported_rsa_key_lengths => self.supported_rsa_key_lengths,
           :supported_signature_algorithms => self.supported_signature_algorithms.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::CryptoHashAlgorithm.proto(it) },
-          :server_certificates => self.server_certificates.map { it.to_message },
+          :server_certificates => self.server_certificates.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Crypto::X509Certificate) },
           :pkcs12_supported => self.pkcs12_supported,
           :pkcs10_supported => self.pkcs10_supported,
         }.compact
@@ -143,11 +143,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :video_edge_is_offline => self.video_edge_is_offline&.to_message,
-          :unimplemented_video_edge_command => self.unimplemented_video_edge_command&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :video_edge_is_offline => self.video_edge_is_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :unimplemented_video_edge_command => self.unimplemented_video_edge_command&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

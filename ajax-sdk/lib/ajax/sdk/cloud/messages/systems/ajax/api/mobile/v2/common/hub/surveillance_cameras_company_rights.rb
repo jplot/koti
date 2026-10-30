@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :shared_cameras => self.shared_cameras&.to_message,
+        :shared_cameras => self.shared_cameras&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::SurveillanceCamerasCompanyRights::SurveillanceCamerasDevices) },
         :availability_type => self.availability_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::SurveillanceCamerasCompanyRights::AvailabilityType.proto(it) },
       }.compact
     end

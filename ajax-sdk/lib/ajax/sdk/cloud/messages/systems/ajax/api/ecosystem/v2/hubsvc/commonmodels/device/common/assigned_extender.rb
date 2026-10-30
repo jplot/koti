@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :extender_info => self.extender_info&.to_message,
+        :extender_info => self.extender_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AssignedExtender::ExtenderInfo) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AssignedExtender::Capability.proto(it) },
       }.compact
     end

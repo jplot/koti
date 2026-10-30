@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :integrity_checks => self.integrity_checks.map { it.to_message },
+        :integrity_checks => self.integrity_checks.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmingRestrictionsPart::IntegrityCheck) },
       }.compact
     end
 
@@ -65,7 +65,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :integrity_checks => self.integrity_checks.map { it.to_message },
+          :integrity_checks => self.integrity_checks.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmingRestrictionsPart::IntegrityCheck) },
         }.compact
       end
     end

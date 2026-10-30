@@ -43,7 +43,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       {
         :opening_sensor_enabled => self.opening_sensor_enabled,
         :opening_sensor_status => self.opening_sensor_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart::OpeningSensorStatus.proto(it) },
-        :magnetic_masking => self.magnetic_masking&.to_message,
+        :magnetic_masking => self.magnetic_masking&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart::MagneticMasking) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart::Capability.proto(it) },
       }.compact
     end
@@ -88,7 +88,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         {
           :opening_sensor_enabled => self.opening_sensor_enabled,
           :antimasking => self.antimasking,
-          :masking_sensitivity => self.masking_sensitivity&.to_message,
+          :masking_sensitivity => self.masking_sensitivity&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::MaskingSensitivity) },
           :detect_masking => self.detect_masking&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart::MagneticMasking::DetectMasking.proto(it) },
         }.compact
       end
@@ -137,7 +137,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         {
           :magnetic_antimasking => self.magnetic_antimasking,
           :is_masked_status => self.is_masked_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart::MagneticMasking::IsMaskedStatus.proto(it) },
-          :masking_sensitivity => self.masking_sensitivity&.to_message,
+          :masking_sensitivity => self.masking_sensitivity&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::MaskingSensitivity) },
           :detect_masking => self.detect_masking&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart::MagneticMasking::DetectMasking.proto(it) },
           :detect_masking_capabilities => self.detect_masking_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart::MagneticMasking::DetectMasking.proto(it) },
         }.compact

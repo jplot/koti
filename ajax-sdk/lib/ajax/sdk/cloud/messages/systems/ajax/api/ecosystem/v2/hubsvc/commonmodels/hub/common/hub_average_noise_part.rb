@@ -61,7 +61,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :channel_infos => self.channel_infos.map { it.to_message },
+          :channel_infos => self.channel_infos.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubAverageNoisePart::Lightweight::ChannelNoizeInfo) },
           :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubAverageNoisePart::Capability.proto(it) },
         }.compact
       end

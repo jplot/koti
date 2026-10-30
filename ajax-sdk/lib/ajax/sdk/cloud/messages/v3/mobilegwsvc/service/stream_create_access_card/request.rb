@@ -46,9 +46,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       {
         :space_id => self.space_id,
         :access_card_name => self.access_card_name,
-        :access_card_type_settings => self.access_card_type_settings&.to_message,
-        :access_card_member => self.access_card_member&.to_message,
-        :device_id_to_manage_adding => self.device_id_to_manage_adding&.to_message,
+        :access_card_type_settings => self.access_card_type_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessCardTypePart::AccessCardTypeSettings) },
+        :access_card_member => self.access_card_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart::AssociatedMemberSettings) },
+        :device_id_to_manage_adding => self.device_id_to_manage_adding&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId) },
       }.compact
     end
   end

@@ -70,9 +70,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
         :fire_zone_id => self.fire_zone_id,
         :device_location => self.device_location,
         :lock_master_code => self.lock_master_code,
-        :smart_lock_first_code => self.smart_lock_first_code&.to_message,
-        :third_party_device_config => self.third_party_device_config&.to_message,
-        :takeover_module_config => self.takeover_module_config&.to_message,
+        :smart_lock_first_code => self.smart_lock_first_code&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubRequest::SmartLockFirstCode) },
+        :third_party_device_config => self.third_party_device_config&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubRequest::ThirdPartyDeviceConfig) },
+        :takeover_module_config => self.takeover_module_config&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubRequest::TakeoverModuleConfig) },
       }.compact
     end
 
@@ -192,7 +192,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
           :assigned_takeover_index => self.assigned_takeover_index,
           :third_party_device_id => self.third_party_device_id,
           :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ThirdPartyDeviceType.proto(it) },
-          :device_id => self.device_id&.to_message,
+          :device_id => self.device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubRequest::ThirdPartyDeviceConfig::Id) },
           :device_subtype => self.device_subtype&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSubtype.proto(it) },
         }.compact
       end

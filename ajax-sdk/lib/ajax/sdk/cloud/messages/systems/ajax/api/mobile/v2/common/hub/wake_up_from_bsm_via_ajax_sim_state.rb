@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :wake_up_available => self.wake_up_available&.to_message,
-        :wake_up_temporarily_unavailable => self.wake_up_temporarily_unavailable&.to_message,
+        :wake_up_available => self.wake_up_available&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::WakeUpFromBsmViaAjaxSimState::WakeUpAvailable) },
+        :wake_up_temporarily_unavailable => self.wake_up_temporarily_unavailable&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::WakeUpFromBsmViaAjaxSimState::WakeUpTemporarilyUnavailable) },
       }.compact
     end
 

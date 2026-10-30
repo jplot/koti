@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     def to_message
       {
         :third_party_device_type => self.third_party_device_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ThirdPartyDeviceType.proto(it) },
-        :third_party_device_id => self.third_party_device_id&.to_message,
+        :third_party_device_id => self.third_party_device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceId) },
         :available_third_party_device_types => self.available_third_party_device_types.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ThirdPartyDeviceType.proto(it) },
       }.compact
     end

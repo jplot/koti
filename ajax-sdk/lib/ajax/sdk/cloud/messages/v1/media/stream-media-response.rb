@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Media
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :media => self.media.map { it.to_message },
+        :media => self.media.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Media::Media) },
       }.compact
     end
   end

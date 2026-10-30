@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::Failure) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :snapshot => self.snapshot&.to_message,
-          :update => self.update&.to_message,
+          :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::Snapshot) },
+          :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::Update) },
         }.compact
       end
 
@@ -129,8 +129,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         {
           :total_num_of_targets => self.total_num_of_targets,
           :total_processed => self.total_processed,
-          :errors => self.errors.map { it.to_message },
-          :company_template_metadata => self.company_template_metadata&.to_message,
+          :errors => self.errors.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::SettingsApplyResultOnTarget) },
+          :company_template_metadata => self.company_template_metadata&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::TemplateMetadata) },
         }.compact
       end
     end
@@ -202,7 +202,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :application_result => self.application_result&.to_message,
+          :application_result => self.application_result&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::SettingsApplyResultOnTarget) },
         }.compact
       end
     end
@@ -242,9 +242,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :target => self.target&.to_message,
+          :target => self.target&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::SettingTarget) },
           :apply_status => self.apply_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::SettingsApplyStatus.proto(it) },
-          :target_profile => self.target_profile&.to_message,
+          :target_profile => self.target_profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::TargetProfile) },
         }.compact
       end
     end
@@ -278,7 +278,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :light_device_id => self.light_device_id&.to_message,
+          :light_device_id => self.light_device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceId) },
         }.compact
       end
 
@@ -315,7 +315,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_profile => self.device_profile&.to_message,
+          :device_profile => self.device_profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDevicePresetApplication::StreamDevicePresetApplicationResponse::TargetProfile::DeviceProfile) },
         }.compact
       end
 
@@ -351,7 +351,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :device_type => self.device_type&.to_message,
+            :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::Type::DeviceType) },
           }.compact
         end
       end
@@ -389,8 +389,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :illegal_argument => self.illegal_argument&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
+          :illegal_argument => self.illegal_argument&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

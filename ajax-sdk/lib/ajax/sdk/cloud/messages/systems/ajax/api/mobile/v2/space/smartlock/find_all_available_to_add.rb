@@ -73,8 +73,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock::FindAllSmartLocksAvailableToAddResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock::FindAllSmartLocksAvailableToAddResponse::Failure) },
       }.compact
     end
 
@@ -115,7 +115,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :smart_locks => self.smart_locks.map { it.to_message },
+          :smart_locks => self.smart_locks.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockAvailableToAdd) },
         }.compact
       end
     end
@@ -161,11 +161,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :external_service_access_denied => self.external_service_access_denied&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :space_armed => self.space_armed&.to_message,
+          :external_service_access_denied => self.external_service_access_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

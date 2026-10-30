@@ -58,9 +58,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevic
         :model => self.model,
         :name => self.name,
         :source_video_edge_id => self.source_video_edge_id,
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :make_permanent => self.make_permanent,
-        :pair_mode => self.pair_mode&.to_message,
+        :pair_mode => self.pair_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevice::AddVideoEdgeRequest::PairMode) },
       }.compact
     end
 
@@ -96,8 +96,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevic
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :auto => self.auto&.to_message,
-          :manual => self.manual&.to_message,
+          :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevice::AddVideoEdgeRequest::PairMode::PairModeAuto) },
+          :manual => self.manual&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevice::AddVideoEdgeRequest::PairMode::PairModeManual) },
         }.compact
       end
 
@@ -160,7 +160,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevic
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :connection_settings => self.connection_settings&.to_message,
+            :connection_settings => self.connection_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::ConnectionSettings) },
           }.compact
         end
       end
@@ -199,8 +199,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevic
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevice::AddVideoEdgeResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevice::AddVideoEdgeResponse::Failure) },
       }.compact
     end
 
@@ -245,7 +245,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevic
       def to_message
         {
           :media_device_id => self.media_device_id,
-          :channels => self.channels.map { it.to_message },
+          :channels => self.channels.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevice::AddVideoEdgeResponse::AvailableChannel) },
         }.compact
       end
     end
@@ -352,20 +352,20 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Mediadevic
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :video_edge_not_found => self.video_edge_not_found&.to_message,
-          :source_video_edge_not_found => self.source_video_edge_not_found&.to_message,
-          :bad_device_family => self.bad_device_family&.to_message,
-          :bad_device_model => self.bad_device_model&.to_message,
-          :onvif_authorization_failed => self.onvif_authorization_failed&.to_message,
-          :connection_failed => self.connection_failed&.to_message,
-          :channels_number_constraint_violation => self.channels_number_constraint_violation&.to_message,
-          :video_edge_is_offline => self.video_edge_is_offline&.to_message,
-          :unsupported_source_video_edge => self.unsupported_source_video_edge&.to_message,
-          :mismatch_source_video_edge => self.mismatch_source_video_edge&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_not_found => self.video_edge_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :source_video_edge_not_found => self.source_video_edge_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :bad_device_family => self.bad_device_family&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :bad_device_model => self.bad_device_model&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :onvif_authorization_failed => self.onvif_authorization_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :connection_failed => self.connection_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :channels_number_constraint_violation => self.channels_number_constraint_violation&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_is_offline => self.video_edge_is_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :unsupported_source_video_edge => self.unsupported_source_video_edge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :mismatch_source_video_edge => self.mismatch_source_video_edge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

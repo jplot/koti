@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       {
         :space_id => self.space_id,
         :company_id => self.company_id,
-        :arm_prevention_override_permissions => self.arm_prevention_override_permissions&.to_message,
+        :arm_prevention_override_permissions => self.arm_prevention_override_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateCompanyExtendedPermissions::UpdateCompanyExtendedPermissionsRequest::ArmPreventionOverridePermissions) },
       }.compact
     end
 

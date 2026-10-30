@@ -46,7 +46,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
       {
         :initiator_email => self.initiator_email,
         :request_id => self.request_id,
-        :channels => self.channels.map { it.to_message },
+        :channels => self.channels.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Additional::Data::Privacy::RequestedVideoChannelData) },
         :permissions => self.permissions.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Additional::Data::Privacy::ChannelPermission.proto(it) },
         :duration => self.duration&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
       }.compact

@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mc
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :off => self.off&.to_message,
-        :mechanical => self.mechanical&.to_message,
-        :digital => self.digital&.to_message,
-        :siren => self.siren&.to_message,
+        :off => self.off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mcu::Chime::OffMode) },
+        :mechanical => self.mechanical&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mcu::Chime::MechanicalMode) },
+        :digital => self.digital&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mcu::Chime::DigitalMode) },
+        :siren => self.siren&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mcu::Chime::SirenMode) },
       }.compact
     end
 

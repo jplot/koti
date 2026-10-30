@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
     def to_message
       {
         :hub_id => self.hub_id,
-        :rings_to_add => self.rings_to_add.map { it.to_message },
-        :rings_to_delete => self.rings_to_delete.map { it.to_message },
+        :rings_to_add => self.rings_to_add.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine::Ring) },
+        :rings_to_delete => self.rings_to_delete.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine::Ring) },
       }.compact
     end
   end

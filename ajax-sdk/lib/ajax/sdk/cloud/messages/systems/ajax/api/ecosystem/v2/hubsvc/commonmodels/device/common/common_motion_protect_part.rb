@@ -44,11 +44,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_arming_part => self.common_arming_part&.to_message,
-        :device_temperature => self.device_temperature&.to_message,
-        :sensitivity_part => self.sensitivity_part&.to_message,
+        :common_arming_part => self.common_arming_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart) },
+        :device_temperature => self.device_temperature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTemperature) },
+        :sensitivity_part => self.sensitivity_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SensitivityPart) },
         :device_tamper_status => self.device_tamper_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTamperStatus.proto(it) },
-        :siren_triggers => self.siren_triggers&.to_message,
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
       }.compact
     end
   end

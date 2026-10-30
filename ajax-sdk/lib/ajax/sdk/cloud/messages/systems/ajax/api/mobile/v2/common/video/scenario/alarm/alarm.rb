@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::Ala
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_alarm => self.hub_alarm&.to_message,
+        :hub_alarm => self.hub_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Hub::HubEventQualifier) },
       }.compact
     end
 

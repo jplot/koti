@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sav
       {
         :hub_id => self.hub_id,
         :beep_operation_type => self.beep_operation_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::BeepOperationType.proto(it) },
-        :devices => self.devices.map { it.to_message },
+        :devices => self.devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::SelectedDevice) },
       }.compact
     end
   end

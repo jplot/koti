@@ -70,7 +70,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :range => self.range&.to_message,
+        :range => self.range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::ThresholdMetricRange) },
       }.compact
     end
   end

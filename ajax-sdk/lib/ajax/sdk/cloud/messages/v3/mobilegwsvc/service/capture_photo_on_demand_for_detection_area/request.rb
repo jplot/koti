@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Cap
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :object_type => self.object_type&.to_message,
-        :mount_height => self.mount_height&.to_message,
+        :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :mount_height => self.mount_height&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::DetectionArea::MountHeight) },
       }.compact
     end
   end

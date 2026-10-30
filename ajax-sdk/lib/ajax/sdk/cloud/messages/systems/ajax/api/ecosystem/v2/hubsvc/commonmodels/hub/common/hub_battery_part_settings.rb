@@ -77,10 +77,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :internal_battery => self.internal_battery&.to_message,
-        :available_internal_batteries => self.available_internal_batteries.map { it.to_message },
+        :internal_battery => self.internal_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::InternalBattery) },
+        :available_internal_batteries => self.available_internal_batteries.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::InternalBattery) },
         :primary_power_source_voltage => self.primary_power_source_voltage&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::PrimaryPowerSourceVoltage.proto(it) },
-        :available_primary_power_source_voltages => self.available_primary_power_source_voltages.map { it.to_message },
+        :available_primary_power_source_voltages => self.available_primary_power_source_voltages.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::AvailablePrimaryPowerSourceVoltage) },
         :internal_battery_charging_type => self.internal_battery_charging_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::InternalBatteryChargingType.proto(it) },
         :available_internal_battery_charging_type => self.available_internal_battery_charging_type.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::InternalBatteryChargingType.proto(it) },
         :internal_battery_charging_speed => self.internal_battery_charging_speed&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::InternalBatteryChargingSpeed.proto(it) },
@@ -135,8 +135,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       def to_message
         {
           :severity => self.severity&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::Severity.proto(it) },
-          :battery_charge_level_percentage => self.battery_charge_level_percentage&.to_message,
-          :battery_charge_volt => self.battery_charge_volt&.to_message,
+          :battery_charge_level_percentage => self.battery_charge_level_percentage&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::PercentageState) },
+          :battery_charge_volt => self.battery_charge_volt&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::VoltageState) },
           :special_state => self.special_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::SpecialState.proto(it) },
         }.compact
       end
@@ -298,9 +298,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
         {
           :internal_battery_type => self.internal_battery_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::InternalBatteryType.proto(it) },
           :internal_battery_low_level_voltage => self.internal_battery_low_level_voltage,
-          :internal_battery_low_level_voltage_range => self.internal_battery_low_level_voltage_range&.to_message,
+          :internal_battery_low_level_voltage_range => self.internal_battery_low_level_voltage_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::Range) },
           :internal_battery_cut_off_voltage => self.internal_battery_cut_off_voltage,
-          :internal_battery_cut_off_voltage_range => self.internal_battery_cut_off_voltage_range&.to_message,
+          :internal_battery_cut_off_voltage_range => self.internal_battery_cut_off_voltage_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart::Range) },
         }.compact
       end
     end

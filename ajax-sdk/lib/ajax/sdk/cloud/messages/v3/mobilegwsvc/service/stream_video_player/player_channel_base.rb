@@ -54,12 +54,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     def to_message
       {
         :id => self.id,
-        :device_info => self.device_info&.to_message,
-        :video_capabilities => self.video_capabilities&.to_message,
-        :video_settings => self.video_settings&.to_message,
-        :audio_settings => self.audio_settings&.to_message,
-        :cloud_archive => self.cloud_archive&.to_message,
-        :audio_output_capabilities => self.audio_output_capabilities&.to_message,
+        :device_info => self.device_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::MediaDeviceInfo) },
+        :video_capabilities => self.video_capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::VideoCapabilities) },
+        :video_settings => self.video_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::VideoSettings) },
+        :audio_settings => self.audio_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::AudioSettings) },
+        :cloud_archive => self.cloud_archive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Cloudarchive::CloudArchive) },
+        :audio_output_capabilities => self.audio_output_capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::AudioOutputCapabilities) },
         :zombie => self.zombie,
       }.compact
     end

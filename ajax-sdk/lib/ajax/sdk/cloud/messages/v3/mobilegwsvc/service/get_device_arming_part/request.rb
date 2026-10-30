@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     def to_message
       {
         :space_id => self.space_id,
-        :video_edge_channel => self.video_edge_channel&.to_message,
+        :video_edge_channel => self.video_edge_channel&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::VideoEdgeChannel) },
       }.compact
     end
 

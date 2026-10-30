@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_fibra_part => self.common_fibra_part&.to_message,
-        :two_tamper_part => self.two_tamper_part&.to_message,
-        :siren_triggers => self.siren_triggers&.to_message,
-        :detectors_power_line_part => self.detectors_power_line_part&.to_message,
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
+        :two_tamper_part => self.two_tamper_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::TwoTamperPart) },
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
+        :detectors_power_line_part => self.detectors_power_line_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DetectorsPowerLinePart) },
       }.compact
     end
   end
@@ -90,11 +90,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_fibra_part => self.common_fibra_part&.to_message,
-        :siren_triggers => self.siren_triggers&.to_message,
-        :detectors_power_line_part => self.detectors_power_line_part&.to_message,
-        :two_tamper_part => self.two_tamper_part&.to_message,
-        :select_panel_part => self.select_panel_part&.to_message,
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
+        :detectors_power_line_part => self.detectors_power_line_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DetectorsPowerLinePart) },
+        :two_tamper_part => self.two_tamper_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::TwoTamperPart) },
+        :select_panel_part => self.select_panel_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SelectPanelPart) },
       }.compact
     end
   end

@@ -89,8 +89,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock::AddSmartLockByExternalIdResponse::Failure) },
       }.compact
     end
 
@@ -164,18 +164,18 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :external_service_access_denied => self.external_service_access_denied&.to_message,
-          :bad_request => self.bad_request&.to_message,
-          :smart_lock_not_found => self.smart_lock_not_found&.to_message,
-          :smart_lock_already_added_by_another_space_member => self.smart_lock_already_added_by_another_space_member&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :room_not_found => self.room_not_found&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :smart_lock_offline => self.smart_lock_offline&.to_message,
-          :members_limit_exceeded => self.members_limit_exceeded&.to_message,
-          :group_not_found => self.group_not_found&.to_message,
-          :smart_lock_without_group => self.smart_lock_without_group&.to_message,
+          :external_service_access_denied => self.external_service_access_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :smart_lock_not_found => self.smart_lock_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :smart_lock_already_added_by_another_space_member => self.smart_lock_already_added_by_another_space_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :room_not_found => self.room_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :smart_lock_offline => self.smart_lock_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :members_limit_exceeded => self.members_limit_exceeded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :group_not_found => self.group_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :smart_lock_without_group => self.smart_lock_without_group&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

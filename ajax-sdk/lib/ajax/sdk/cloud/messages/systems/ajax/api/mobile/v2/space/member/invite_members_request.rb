@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
     def to_message
       {
         :space_id => self.space_id,
-        :emails => self.emails.map { it.to_message },
+        :emails => self.emails.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::SpaceMemberEmail) },
       }.compact
     end
   end
@@ -70,7 +70,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :result => self.result.map { it.to_message },
+        :result => self.result.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::InviteSpaceMembersResponse::InviteResult) },
       }.compact
     end
 
@@ -109,9 +109,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :email => self.email&.to_message,
-          :success => self.success&.to_message,
-          :failure => self.failure&.to_message,
+          :email => self.email&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::SpaceMemberEmail) },
+          :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+          :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::InviteSpaceMembersResponse::Failure) },
         }.compact
       end
 
@@ -174,14 +174,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :too_many_users => self.too_many_users&.to_message,
-          :already_exist => self.already_exist&.to_message,
-          :pro_not_found => self.pro_not_found&.to_message,
-          :space_locked => self.space_locked&.to_message,
-          :too_many_emails => self.too_many_emails&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :too_many_users => self.too_many_users&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :already_exist => self.already_exist&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :pro_not_found => self.pro_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_locked => self.space_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::SpaceLockedError) },
+          :too_many_emails => self.too_many_emails&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::InviteSpaceMembersResponse::LimitError) },
         }.compact
       end
 

@@ -73,8 +73,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User::ConfirmUserDeletionResponse::Failure) },
       }.compact
     end
 
@@ -118,8 +118,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::User
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :otp_code_invalid => self.otp_code_invalid&.to_message,
-          :user_not_found => self.user_not_found&.to_message,
+          :otp_code_invalid => self.otp_code_invalid&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :user_not_found => self.user_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

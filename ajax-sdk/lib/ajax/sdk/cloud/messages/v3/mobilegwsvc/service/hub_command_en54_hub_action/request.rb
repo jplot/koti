@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Hub
         :hub_id => self.hub_id,
         :command_type => self.command_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::HubCommandEn54HubAction::HubCommandEn54HubActionRequest::CommandType.proto(it) },
         :cms_disablement_events_args => self.cms_disablement_events_args&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::HubCommandEn54HubAction::HubCommandEn54HubActionRequest::En54HubActionCmsDisablementEventsArgs.proto(it) },
-        :brightness_args => self.brightness_args&.to_message,
+        :brightness_args => self.brightness_args&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::HubCommandEn54HubAction::HubCommandEn54HubActionRequest::En54HubActionBrightnessUpdateArgs) },
       }.compact
     end
 

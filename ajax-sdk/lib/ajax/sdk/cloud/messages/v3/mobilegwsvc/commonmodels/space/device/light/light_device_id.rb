@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_light_device_id => self.hub_light_device_id&.to_message,
-        :video_edge_id => self.video_edge_id&.to_message,
-        :video_edge_channel_reference => self.video_edge_channel_reference&.to_message,
-        :smart_lock_id => self.smart_lock_id&.to_message,
+        :hub_light_device_id => self.hub_light_device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceId::HubLightDeviceId) },
+        :video_edge_id => self.video_edge_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceId::VideoEdgeId) },
+        :video_edge_channel_reference => self.video_edge_channel_reference&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceId::VideoEdgeChannelReference) },
+        :smart_lock_id => self.smart_lock_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceId::SmartLockId) },
       }.compact
     end
 
@@ -88,7 +88,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         {
           :device_id => self.device_id,
           :hub_id => self.hub_id,
-          :type => self.type&.to_message,
+          :type => self.type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         }.compact
       end
     end

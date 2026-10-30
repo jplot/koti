@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :company_logo => self.company_logo&.to_message,
+        :company_logo => self.company_logo&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
         :company_name => self.company_name,
-        :company_billing_info => self.company_billing_info&.to_message,
+        :company_billing_info => self.company_billing_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company::CompanyBillingInfo) },
       }.compact
     end
   end

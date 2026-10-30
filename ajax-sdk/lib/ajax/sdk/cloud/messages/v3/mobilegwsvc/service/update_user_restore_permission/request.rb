@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       {
         :space_id => self.space_id,
         :space_member_id => self.space_member_id,
-        :restore_permission_patches => self.restore_permission_patches.map { it.to_message },
+        :restore_permission_patches => self.restore_permission_patches.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateUserRestorePermission::UpdateUserRestorePermissionRequest::RestorePermissionPatch) },
       }.compact
     end
 

@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario
         :id => self.id,
         :name => self.name,
         :enabled => self.enabled,
-        :cases => self.cases.map { it.to_message },
+        :cases => self.cases.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Scenario::Case) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :trigger => self.trigger&.to_message,
-          :action => self.action&.to_message,
+          :trigger => self.trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::Trigger) },
+          :action => self.action&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::Action) },
         }.compact
       end
     end

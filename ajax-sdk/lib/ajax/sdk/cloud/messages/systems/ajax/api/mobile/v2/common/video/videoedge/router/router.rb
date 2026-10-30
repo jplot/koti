@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ro
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :capabilities => self.capabilities&.to_message,
-        :poe => self.poe&.to_message,
+        :capabilities => self.capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Router::RouterCapabilities) },
+        :poe => self.poe&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Router::Poe) },
       }.compact
     end
   end

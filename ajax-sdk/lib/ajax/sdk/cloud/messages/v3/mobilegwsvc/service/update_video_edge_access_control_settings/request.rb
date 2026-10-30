@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       {
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
-        :access_control_settings_update => self.access_control_settings_update&.to_message,
+        :access_control_settings_update => self.access_control_settings_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateVideoEdgeAccessControlSettings::UpdateVideoEdgeAccessControlSettingsRequest::AccessControlSettingsUpdate) },
       }.compact
     end
 
@@ -82,10 +82,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :card_reader_settings_update => self.card_reader_settings_update&.to_message,
-          :bluetooth_reader_settings_update => self.bluetooth_reader_settings_update&.to_message,
-          :access_control_relay_settings_update => self.access_control_relay_settings_update&.to_message,
-          :security_mode_control_settings_update => self.security_mode_control_settings_update&.to_message,
+          :card_reader_settings_update => self.card_reader_settings_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateVideoEdgeAccessControlSettings::UpdateVideoEdgeAccessControlSettingsRequest::CardReaderSettingsUpdate) },
+          :bluetooth_reader_settings_update => self.bluetooth_reader_settings_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateVideoEdgeAccessControlSettings::UpdateVideoEdgeAccessControlSettingsRequest::BluetoothReaderSettingsUpdate) },
+          :access_control_relay_settings_update => self.access_control_relay_settings_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateVideoEdgeAccessControlSettings::UpdateVideoEdgeAccessControlSettingsRequest::AccessControlRelaySettingsUpdate) },
+          :security_mode_control_settings_update => self.security_mode_control_settings_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateVideoEdgeAccessControlSettings::UpdateVideoEdgeAccessControlSettingsRequest::SecurityModeControlSettingsUpdate) },
         }.compact
       end
     end
@@ -236,7 +236,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       def to_message
         {
           :security_mode_control_state => self.security_mode_control_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::SecurityModeControlState.proto(it) },
-          :security_control_target => self.security_control_target&.to_message,
+          :security_control_target => self.security_control_target&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::SecurityControlTarget) },
           :long_tap_duration => self.long_tap_duration&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         }.compact
       end

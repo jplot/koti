@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
         :channel_id => self.channel_id,
-        :audio_input_settings => self.audio_input_settings&.to_message,
-        :audio_output_settings => self.audio_output_settings&.to_message,
+        :audio_input_settings => self.audio_input_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::Audio::AudioInputSettings) },
+        :audio_output_settings => self.audio_output_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::Audio::AudioOutputSettings) },
       }.compact
     end
   end

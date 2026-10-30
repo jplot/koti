@@ -51,11 +51,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     def to_message
       {
         :id => self.id,
-        :channels => self.channels.map { it.to_message },
-        :detectors => self.detectors.map { it.to_message },
-        :storage_devices => self.storage_devices.map { it.to_message },
+        :channels => self.channels.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannelBase) },
+        :detectors => self.detectors.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerDetector) },
+        :storage_devices => self.storage_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerStorageDevice) },
         :timezone_id => self.timezone_id,
-        :power_management => self.power_management&.to_message,
+        :power_management => self.power_management&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerPowerManagement) },
         :display_zombie_channels_available => self.display_zombie_channels_available,
       }.compact
     end

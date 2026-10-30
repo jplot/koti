@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :entire_system => self.entire_system&.to_message,
-        :groups => self.groups&.to_message,
+        :entire_system => self.entire_system&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::ArmamentScope::EntireSystem) },
+        :groups => self.groups&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::ArmamentScope::Groups) },
       }.compact
     end
 

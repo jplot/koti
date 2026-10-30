@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common
     def to_message
       {
         :image_id => self.image_id,
-        :images => self.images.map { it.to_message },
+        :images => self.images.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Logo::Image) },
       }.compact
     end
 

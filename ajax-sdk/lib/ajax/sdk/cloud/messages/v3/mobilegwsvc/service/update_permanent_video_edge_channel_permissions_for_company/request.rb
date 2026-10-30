@@ -47,12 +47,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :company_hex_id => self.company_hex_id,
         :video_edge_id => self.video_edge_id,
         :channel_id => self.channel_id,
-        :updates => self.updates.map { it.to_message },
-        :policy => self.policy&.to_message,
+        :updates => self.updates.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Privacy::ChannelPermissionUpdate) },
+        :policy => self.policy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissionPolicy) },
       }.compact
     end
   end

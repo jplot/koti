@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       {
         :space_id => self.space_id,
         :space_member_id => self.space_member_id,
-        :wide_space_permission_patches => self.wide_space_permission_patches.map { it.to_message },
+        :wide_space_permission_patches => self.wide_space_permission_patches.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateWideSpacePermissions::UpdateWideSpacePermissionsRequest::WideSpacePermissionPatch) },
       }.compact
     end
 

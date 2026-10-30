@@ -69,8 +69,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware::StartSystemFirmwareUpdateResponse::Failure) },
       }.compact
     end
 
@@ -121,9 +121,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware
       def to_message
         {
           :message => self.message,
-          :no_update_available => self.no_update_available&.to_message,
-          :hub_offline => self.hub_offline&.to_message,
-          :hub_in_bsm_mode => self.hub_in_bsm_mode&.to_message,
+          :no_update_available => self.no_update_available&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_offline => self.hub_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_in_bsm_mode => self.hub_in_bsm_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

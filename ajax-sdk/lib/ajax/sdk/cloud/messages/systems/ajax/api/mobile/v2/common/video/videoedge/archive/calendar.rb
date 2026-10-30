@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ar
       {
         :start_day => self.start_day&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
         :days => self.days,
-        :tz_map => self.tz_map.map { it.to_message },
+        :tz_map => self.tz_map.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::Calendar::TzEntry) },
       }.compact
     end
 

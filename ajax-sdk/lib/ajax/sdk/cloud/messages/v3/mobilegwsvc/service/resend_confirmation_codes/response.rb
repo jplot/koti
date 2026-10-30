@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Res
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::ResendConfirmationCodes::ResendConfirmationCodesResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::ResendConfirmationCodes::ResendConfirmationCodesResponse::Failure) },
       }.compact
     end
 
@@ -84,8 +84,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Res
       def to_message
         {
           :expected_token_length => self.expected_token_length,
-          :validation_by_sms => self.validation_by_sms&.to_message,
-          :validation_by_call => self.validation_by_call&.to_message,
+          :validation_by_sms => self.validation_by_sms&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Validation::ValidationBySms) },
+          :validation_by_call => self.validation_by_call&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Validation::ValidationByCall) },
         }.compact
       end
 
@@ -150,15 +150,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Res
       def to_message
         {
           :attempts_left => self.attempts_left,
-          :bad_request => self.bad_request&.to_message,
-          :email_validation_failed => self.email_validation_failed&.to_message,
-          :phone_validation_failed => self.phone_validation_failed&.to_message,
-          :cannot_request_confirmation_codes => self.cannot_request_confirmation_codes&.to_message,
-          :cannot_send_confirmation_codes => self.cannot_send_confirmation_codes&.to_message,
-          :domain_does_not_exist => self.domain_does_not_exist&.to_message,
-          :mailbox_does_not_exist => self.mailbox_does_not_exist&.to_message,
-          :mailbox_has_insufficient_storage => self.mailbox_has_insufficient_storage&.to_message,
-          :too_many_attempts => self.too_many_attempts&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :email_validation_failed => self.email_validation_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :phone_validation_failed => self.phone_validation_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :cannot_request_confirmation_codes => self.cannot_request_confirmation_codes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :cannot_send_confirmation_codes => self.cannot_send_confirmation_codes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :domain_does_not_exist => self.domain_does_not_exist&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :mailbox_does_not_exist => self.mailbox_does_not_exist&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :mailbox_has_insufficient_storage => self.mailbox_has_insufficient_storage&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :too_many_attempts => self.too_many_attempts&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

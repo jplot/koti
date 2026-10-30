@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
     def to_message
       {
         :file_id => self.file_id,
-        :update => self.update&.to_message,
+        :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateAudioFileForAudioScenarios::UpdateAudioFileForAudioScenariosRequest::Update) },
         :hub_id => self.hub_id,
       }.compact
     end

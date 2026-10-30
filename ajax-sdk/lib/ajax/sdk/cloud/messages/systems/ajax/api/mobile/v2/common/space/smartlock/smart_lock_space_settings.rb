@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
     def to_message
       {
         :room_id => self.room_id,
-        :event_settings => self.event_settings&.to_message,
+        :event_settings => self.event_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockEventSettings) },
         :group_id => self.group_id,
       }.compact
     end

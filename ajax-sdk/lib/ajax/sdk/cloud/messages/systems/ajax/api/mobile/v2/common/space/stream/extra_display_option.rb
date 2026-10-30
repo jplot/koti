@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :dashboard_action => self.dashboard_action.map { it.to_message },
+        :dashboard_action => self.dashboard_action.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream::DashboardActions::DashboardAction) },
       }.compact
     end
 
@@ -68,8 +68,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :low_battery_device_screen_action => self.low_battery_device_screen_action&.to_message,
-          :offline_device_screen_action => self.offline_device_screen_action&.to_message,
+          :low_battery_device_screen_action => self.low_battery_device_screen_action&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream::DashboardActions::LowBatteryDeviceScreenAction) },
+          :offline_device_screen_action => self.offline_device_screen_action&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream::DashboardActions::OfflineDeviceScreenAction) },
         }.compact
       end
 

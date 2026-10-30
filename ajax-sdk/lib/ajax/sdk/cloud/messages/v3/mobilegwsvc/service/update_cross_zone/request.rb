@@ -80,7 +80,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
         :tamper_confirmation => self.tamper_confirmation,
         :sirens_react_on_confirmation => self.sirens_react_on_confirmation,
         :external_contact_confirmation => self.external_contact_confirmation,
-        :included_devices => self.included_devices&.to_message,
+        :included_devices => self.included_devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateCrossZone::UpdateCrossZoneRequest::IncludedDevices) },
       }.compact
     end
 
@@ -113,7 +113,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :included_devices => self.included_devices.map { it.to_message },
+          :included_devices => self.included_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::HubDevice) },
         }.compact
       end
     end

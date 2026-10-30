@@ -56,7 +56,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
         :device_name => self.device_name,
         :dsk_code => self.dsk_code,
         :connection_type => self.connection_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ZWaveDevicePackage::ZWaveDeviceConnectionType.proto(it) },
-        :device_type_info => self.device_type_info&.to_message,
+        :device_type_info => self.device_type_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterZWaveDeviceToHub::SmartStart::RegisterZWaveDeviceToHubSmartStartRequest::DeviceTypeInfo) },
       }.compact
     end
 

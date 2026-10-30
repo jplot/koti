@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Acc
     def to_message
       {
         :perimeter_arm => self.perimeter_arm,
-        :group_permissions => self.group_permissions.map { it.to_message },
+        :group_permissions => self.group_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessDeviceSecurityPart::GroupPermissions) },
         :access_device_security_capabilities => self.access_device_security_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessDeviceSecurityPart::AccessDeviceSecurityCapability.proto(it) },
       }.compact
     end
@@ -115,7 +115,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Acc
       def to_message
         {
           :perimeter_arm => self.perimeter_arm,
-          :group_permissions => self.group_permissions.map { it.to_message },
+          :group_permissions => self.group_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessDeviceSecurityPart::GroupPermissions) },
         }.compact
       end
     end

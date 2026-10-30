@@ -60,14 +60,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :id => self.id,
-        :service => self.service&.to_message,
-        :extra_service_state => self.extra_service_state&.to_message,
-        :enriched_target_info => self.enriched_target_info.map { it.to_message },
-        :accounting_company => self.accounting_company&.to_message,
+        :service => self.service&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::Service) },
+        :extra_service_state => self.extra_service_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraServiceState) },
+        :enriched_target_info => self.enriched_target_info.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::EnrichedTargetInfo) },
+        :accounting_company => self.accounting_company&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::AccountingCompany) },
         :sorting_key => self.sorting_key,
         :subscription_id => self.subscription_id,
         :service_switch_availability_status => self.service_switch_availability_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ServiceSwitchAvailabilityStatus.proto(it) },
-        :subscription_owner => self.subscription_owner&.to_message,
+        :subscription_owner => self.subscription_owner&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::SubscriptionOwner) },
         :available_subscription_actions => self.available_subscription_actions.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::SubscriptionAction.proto(it) },
       }.compact
     end

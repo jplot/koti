@@ -69,8 +69,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock::StreamSmartLockUpdatesResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock::StreamSmartLockUpdatesResponse::Failure) },
       }.compact
     end
 
@@ -120,10 +120,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :initial_state => self.initial_state&.to_message,
-          :installed => self.installed&.to_message,
-          :uninstalled => self.uninstalled&.to_message,
-          :partially_changed => self.partially_changed&.to_message,
+          :initial_state => self.initial_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock::StreamSmartLockUpdatesResponse::Success::InitialState) },
+          :installed => self.installed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock::StreamSmartLockUpdatesResponse::Success::Installed) },
+          :uninstalled => self.uninstalled&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock::StreamSmartLockUpdatesResponse::Success::Uninstalled) },
+          :partially_changed => self.partially_changed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock::StreamSmartLockUpdatesResponse::Success::PartiallyChanged) },
         }.compact
       end
 
@@ -159,7 +159,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :smart_locks => self.smart_locks.map { it.to_message },
+            :smart_locks => self.smart_locks.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockInSpace) },
           }.compact
         end
       end
@@ -193,7 +193,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :smart_lock => self.smart_lock&.to_message,
+            :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockInSpace) },
           }.compact
         end
       end
@@ -268,8 +268,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
         def to_message
           {
             :smart_lock_id => self.smart_lock_id,
-            :details => self.details&.to_message,
-            :space_settings => self.space_settings&.to_message,
+            :details => self.details&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLock) },
+            :space_settings => self.space_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockSpaceSettings) },
           }.compact
         end
 
@@ -313,9 +313,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Smartlock
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :permission_denied => self.permission_denied&.to_message,
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

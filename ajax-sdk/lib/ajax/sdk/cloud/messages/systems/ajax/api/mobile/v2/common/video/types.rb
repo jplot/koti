@@ -453,8 +453,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :v4 => self.v4&.to_message,
-        :v6 => self.v6&.to_message,
+        :v4 => self.v4&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::IpAddressV4) },
+        :v6 => self.v6&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::IpAddressV6) },
       }.compact
     end
 

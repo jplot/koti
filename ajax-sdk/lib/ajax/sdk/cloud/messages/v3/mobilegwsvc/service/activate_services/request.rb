@@ -46,7 +46,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Act
       {
         :feature_target_id => self.feature_target_id,
         :feature_target => self.feature_target&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::FeatureTarget.proto(it) },
-        :service_to_activate => self.service_to_activate.map { it.to_message },
+        :service_to_activate => self.service_to_activate.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::ActivateServices::ActivateServicesRequest::ServiceToActivate) },
         :reseller_id => self.reseller_id,
         :agreement_version => self.agreement_version,
       }.compact

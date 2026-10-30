@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Sp
     def to_message
       {
         :room_id => self.room_id,
-        :event_settings => self.event_settings&.to_message,
-        :app_settings => self.app_settings&.to_message,
+        :event_settings => self.event_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Spacesettings::EventSettings) },
+        :app_settings => self.app_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Spacesettings::AppSettings) },
       }.compact
     end
   end

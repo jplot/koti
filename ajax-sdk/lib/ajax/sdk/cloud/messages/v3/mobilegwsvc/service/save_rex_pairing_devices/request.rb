@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sav
       {
         :hub_id => self.hub_id,
         :rex_id => self.rex_id,
-        :rex_type => self.rex_type&.to_message,
-        :devices => self.devices.map { it.to_message },
+        :rex_type => self.rex_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :devices => self.devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::SelectedDevice) },
       }.compact
     end
   end

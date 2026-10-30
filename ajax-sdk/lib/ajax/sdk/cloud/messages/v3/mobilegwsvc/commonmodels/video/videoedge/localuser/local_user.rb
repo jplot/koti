@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :name => self.name,
-        :permissions => self.permissions&.to_message,
+        :permissions => self.permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Localuser::LocalUserPermissions) },
       }.compact
     end
   end

@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :warnings => self.warnings.map { it.to_message },
+        :warnings => self.warnings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceWarnings::WarningData) },
       }.compact
     end
 
@@ -74,10 +74,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :installation_issue => self.installation_issue&.to_message,
-          :antimasking_not_calibrated => self.antimasking_not_calibrated&.to_message,
-          :mask_sensor_requires_calibration => self.mask_sensor_requires_calibration&.to_message,
-          :roller_shutter_requires_calibration => self.roller_shutter_requires_calibration&.to_message,
+          :installation_issue => self.installation_issue&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceWarnings::InstallationIssue) },
+          :antimasking_not_calibrated => self.antimasking_not_calibrated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceWarnings::AntimaskingNotCalibrated) },
+          :mask_sensor_requires_calibration => self.mask_sensor_requires_calibration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceWarnings::MaskSensorRequiresCalibration) },
+          :roller_shutter_requires_calibration => self.roller_shutter_requires_calibration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceWarnings::RollerShutterRequiresCalibration) },
         }.compact
       end
 

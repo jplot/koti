@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Chime::Abou
         :color => self.color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceColor.proto(it) },
         :power_plug_type => self.power_plug_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DevicePowerPlugType.proto(it) },
         :fully_qualified_id => self.fully_qualified_id,
-        :access_points => self.access_points.map { it.to_message },
+        :access_points => self.access_points.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Chime::About::About::AccessPoint) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Chime::Abou
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :wifi => self.wifi&.to_message,
+          :wifi => self.wifi&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Chime::About::About::AccessPoint::WiFiAccessPoint) },
         }.compact
       end
 

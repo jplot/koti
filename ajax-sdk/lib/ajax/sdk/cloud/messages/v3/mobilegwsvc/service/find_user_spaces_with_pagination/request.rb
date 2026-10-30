@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
     def to_message
       {
         :limit => self.limit,
-        :pagination => self.pagination&.to_message,
+        :pagination => self.pagination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Pagination) },
         :search_phrase => self.search_phrase,
       }.compact
     end

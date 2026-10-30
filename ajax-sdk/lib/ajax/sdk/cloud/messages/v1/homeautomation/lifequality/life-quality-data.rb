@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequali
     def to_message
       {
         :value_y => self.value_y,
-        :value_y_range => self.value_y_range&.to_message,
+        :value_y_range => self.value_y_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataRange) },
       }.compact
     end
 
@@ -117,9 +117,9 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequali
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :values_temperature => self.values_temperature.transform_values { it.to_message },
-        :values_humidity => self.values_humidity.transform_values { it.to_message },
-        :values_airquality => self.values_airquality.transform_values { it.to_message },
+        :values_temperature => self.values_temperature.transform_values { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataItem) },
+        :values_humidity => self.values_humidity.transform_values { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataItem) },
+        :values_airquality => self.values_airquality.transform_values { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataItem) },
       }.compact
     end
   end
@@ -171,7 +171,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequali
         :hub_hex_id => self.hub_hex_id,
         :device_hex_id => self.device_hex_id,
         :discreteness => self.discreteness&.then { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataDiscreteness.proto(it) },
-        :time_zone => self.time_zone&.to_message,
+        :time_zone => self.time_zone&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Type::TimeZone) },
         :start_timestamp => self.start_timestamp,
         :end_timestamp => self.end_timestamp,
       }.compact
@@ -222,7 +222,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequali
         :hub_hex_id => self.hub_hex_id,
         :device_hex_id => self.device_hex_id,
         :discreteness => self.discreteness&.then { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataDiscreteness.proto(it) },
-        :time_zone => self.time_zone&.to_message,
+        :time_zone => self.time_zone&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Type::TimeZone) },
         :start_timestamp => self.start_timestamp,
       }.compact
     end

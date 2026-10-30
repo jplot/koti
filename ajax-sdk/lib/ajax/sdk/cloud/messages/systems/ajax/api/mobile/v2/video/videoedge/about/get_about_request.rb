@@ -73,8 +73,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::GetVideoEdgeAboutResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::GetVideoEdgeAboutResponse::Failure) },
       }.compact
     end
 
@@ -115,7 +115,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :about => self.about&.to_message,
+          :about => self.about&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::About) },
         }.compact
       end
     end
@@ -155,9 +155,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :video_edge_not_found => self.video_edge_not_found&.to_message,
-          :video_edge_already_installed => self.video_edge_already_installed&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_not_found => self.video_edge_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_already_installed => self.video_edge_already_installed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

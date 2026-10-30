@@ -44,9 +44,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :unauthorized_access_auto_lock => self.unauthorized_access_auto_lock&.to_message,
+        :unauthorized_access_auto_lock => self.unauthorized_access_auto_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenAccessSettingsPart::UnauthorizedAccessAutoLock) },
         :pass_tag_reading => self.pass_tag_reading,
-        :bluetooth => self.bluetooth&.to_message,
+        :bluetooth => self.bluetooth&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenAccessSettingsPart::Bluetooth) },
         :bluetooth_available_sensitivity => self.bluetooth_available_sensitivity.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenAccessSettingsPart::BluetoothSensitivity.proto(it) },
         :unauthorized_access_auto_lock_available_time => self.unauthorized_access_auto_lock_available_time.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenAccessSettingsPart::AutoLockTime.proto(it) },
       }.compact
@@ -190,9 +190,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :unauthorized_access_auto_lock => self.unauthorized_access_auto_lock&.to_message,
+          :unauthorized_access_auto_lock => self.unauthorized_access_auto_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenAccessSettingsPart::UnauthorizedAccessAutoLock) },
           :pass_tag_reading => self.pass_tag_reading,
-          :bluetooth => self.bluetooth&.to_message,
+          :bluetooth => self.bluetooth&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenAccessSettingsPart::Bluetooth) },
         }.compact
       end
     end

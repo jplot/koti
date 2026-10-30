@@ -75,19 +75,19 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
     def to_message
       {
         :night_mode_arm => self.night_mode_arm&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::NightModeArm.proto(it) },
-        :arm_delay => self.arm_delay&.to_message,
+        :arm_delay => self.arm_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::ArmDelay) },
         :apply_delays_to_night_mode => self.apply_delays_to_night_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::ApplyDelaysToNightMode.proto(it) },
-        :perimeter_arm_delay => self.perimeter_arm_delay&.to_message,
+        :perimeter_arm_delay => self.perimeter_arm_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::PerimeterArmDelay) },
         :arming_mode => self.arming_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::ArmingMode.proto(it) },
-        :alarm_delay => self.alarm_delay&.to_message,
+        :alarm_delay => self.alarm_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::AlarmDelay) },
         :verifies_alarm => self.verifies_alarm&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::VerifiesAlarm.proto(it) },
-        :perimeter_alarm_delay => self.perimeter_alarm_delay&.to_message,
+        :perimeter_alarm_delay => self.perimeter_alarm_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::PerimeterAlarmDelay) },
         :device_alarm_logic_type => self.device_alarm_logic_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::DeviceAlarmLogicType.proto(it) },
-        :indicator_light_mode => self.indicator_light_mode&.to_message,
+        :indicator_light_mode => self.indicator_light_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::IndicatorLightMode) },
         :arming_capabilities => self.arming_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::ArmingCapability.proto(it) },
         :current_standard => self.current_standard&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::SecurityStandard.proto(it) },
         :always_active => self.always_active&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AlwaysActive.proto(it) },
-        :delay_ranges => self.delay_ranges&.to_message,
+        :delay_ranges => self.delay_ranges&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::DelayRanges) },
         :arming_mode_capabilities => self.arming_mode_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::ArmingMode.proto(it) },
       }.compact
     end
@@ -140,11 +140,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
       def to_message
         {
           :night_mode_arm => self.night_mode_arm&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::NightModeArm.proto(it) },
-          :arm_delay => self.arm_delay&.to_message,
-          :perimeter_arm_delay => self.perimeter_arm_delay&.to_message,
+          :arm_delay => self.arm_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::ArmDelay) },
+          :perimeter_arm_delay => self.perimeter_arm_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::PerimeterArmDelay) },
           :arming_mode => self.arming_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::ArmingMode.proto(it) },
-          :alarm_delay => self.alarm_delay&.to_message,
-          :perimeter_alarm_delay => self.perimeter_alarm_delay&.to_message,
+          :alarm_delay => self.alarm_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::AlarmDelay) },
+          :perimeter_alarm_delay => self.perimeter_alarm_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::PerimeterAlarmDelay) },
           :always_active => self.always_active&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AlwaysActive.proto(it) },
         }.compact
       end
@@ -318,8 +318,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :entry_exit_delay_ranges => self.entry_exit_delay_ranges&.to_message,
-          :follower_delay_ranges => self.follower_delay_ranges&.to_message,
+          :entry_exit_delay_ranges => self.entry_exit_delay_ranges&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::DelayRanges::EntryExitDelayRanges) },
+          :follower_delay_ranges => self.follower_delay_ranges&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::DelayRanges::FollowerDelayRanges) },
         }.compact
       end
 
@@ -361,10 +361,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :arm_delay_range => self.arm_delay_range&.to_message,
-            :alarm_delay_range => self.alarm_delay_range&.to_message,
-            :perimeter_arm_delay_range => self.perimeter_arm_delay_range&.to_message,
-            :perimeter_alarm_delay_range => self.perimeter_alarm_delay_range&.to_message,
+            :arm_delay_range => self.arm_delay_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::DelayRanges::DelayRange) },
+            :alarm_delay_range => self.alarm_delay_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::DelayRanges::DelayRange) },
+            :perimeter_arm_delay_range => self.perimeter_arm_delay_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::DelayRanges::DelayRange) },
+            :perimeter_alarm_delay_range => self.perimeter_alarm_delay_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::DelayRanges::DelayRange) },
           }.compact
         end
       end
@@ -398,7 +398,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :perimeter_delays_range => self.perimeter_delays_range&.to_message,
+            :perimeter_delays_range => self.perimeter_delays_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::DelayRanges::DelayRange) },
           }.compact
         end
       end

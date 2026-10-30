@@ -41,8 +41,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_reference => self.device_reference&.to_message,
-        :profile => self.profile&.to_message,
+        :device_reference => self.device_reference&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationDeviceReference) },
+        :profile => self.profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationDeviceProfile) },
         :automation_channel_name => self.automation_channel_name,
         :available_display_types => self.available_display_types.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationActionDisplayType.proto(it) },
       }.compact

@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     def to_message
       {
         :endpoints => self.endpoints.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::En54DisablementEndpoints::Endpoint.proto(it) },
-        :endpoint_data => self.endpoint_data.map { it.to_message },
+        :endpoint_data => self.endpoint_data.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::En54DisablementEndpoints::EndpointData) },
       }.compact
     end
 

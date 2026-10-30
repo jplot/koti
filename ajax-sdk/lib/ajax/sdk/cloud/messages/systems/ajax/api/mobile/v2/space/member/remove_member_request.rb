@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :space_member_id => self.space_member_id,
       }.compact
     end
@@ -73,8 +73,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::RemoveSpaceMemberResponse::Failure) },
       }.compact
     end
 
@@ -130,12 +130,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :space_locked => self.space_locked&.to_message,
-          :unable_to_delete_last_member => self.unable_to_delete_last_member&.to_message,
-          :active_subscription_exist_error => self.active_subscription_exist_error&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_locked => self.space_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::SpaceLockedError) },
+          :unable_to_delete_last_member => self.unable_to_delete_last_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :active_subscription_exist_error => self.active_subscription_exist_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::ActiveSubscriptionExistError) },
         }.compact
       end
 

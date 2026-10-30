@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :id => self.id,
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Integration::SpaceIntegrationType.proto(it) },
         :created_at => self.created_at&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
-        :relations => self.relations.map { it.to_message },
-        :external_user => self.external_user&.to_message,
+        :relations => self.relations.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Integration::Credentials::CredentialsInfo::Relation) },
+        :external_user => self.external_user&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Integration::Credentials::CredentialsInfo::ExternalUser) },
       }.compact
     end
 
@@ -84,8 +84,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :standalone_device_relation => self.standalone_device_relation&.to_message,
-          :space_relation => self.space_relation&.to_message,
+          :standalone_device_relation => self.standalone_device_relation&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Integration::Credentials::CredentialsInfo::StandaloneDeviceRelation) },
+          :space_relation => self.space_relation&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Integration::Credentials::CredentialsInfo::SpaceRelation) },
         }.compact
       end
 
@@ -187,7 +187,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         {
           :space_id => self.space_id,
           :space_name => self.space_name,
-          :profile => self.profile&.to_message,
+          :profile => self.profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceProfile) },
         }.compact
       end
     end

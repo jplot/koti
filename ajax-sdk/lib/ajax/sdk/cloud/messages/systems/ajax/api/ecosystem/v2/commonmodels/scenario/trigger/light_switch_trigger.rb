@@ -38,8 +38,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :devices => self.devices.map { it.to_message },
-        :options => self.options&.to_message,
+        :devices => self.devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceReference) },
+        :options => self.options&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::LightSwitchTrigger::Options) },
         :action => self.action&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::SwitchAction.proto(it) },
       }.compact
     end
@@ -79,7 +79,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_devices => self.available_devices.map { it.to_message },
+          :available_devices => self.available_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceTriggerInfo) },
           :devices_multi_select_allowed => self.devices_multi_select_allowed,
           :available_actions => self.available_actions.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::SwitchAction.proto(it) },
         }.compact

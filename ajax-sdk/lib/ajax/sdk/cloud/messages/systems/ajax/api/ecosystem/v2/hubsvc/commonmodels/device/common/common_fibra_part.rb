@@ -62,17 +62,17 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_profile => self.device_profile&.to_message,
-        :device_telemetry => self.device_telemetry&.to_message,
-        :device_malfunctions => self.device_malfunctions&.to_message,
-        :cms_device_index => self.cms_device_index&.to_message,
-        :fibra_line => self.fibra_line&.to_message,
-        :line_voltage => self.line_voltage&.to_message,
-        :bypass_part => self.bypass_part&.to_message,
+        :device_profile => self.device_profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceProfile) },
+        :device_telemetry => self.device_telemetry&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTelemetry) },
+        :device_malfunctions => self.device_malfunctions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceMalfunctions) },
+        :cms_device_index => self.cms_device_index&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CmsDeviceIndex) },
+        :fibra_line => self.fibra_line&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine) },
+        :line_voltage => self.line_voltage&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LineVoltage) },
+        :bypass_part => self.bypass_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::BypassPart) },
         :device_common_capabilities => self.device_common_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceCommonCapability.proto(it) },
         :device_migration_status => self.device_migration_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceMigrationStatus.proto(it) },
-        :line_extender => self.line_extender&.to_message,
-        :self_monitoring_part => self.self_monitoring_part&.to_message,
+        :line_extender => self.line_extender&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LineExtender) },
+        :self_monitoring_part => self.self_monitoring_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SelfMonitoringPart) },
       }.compact
     end
   end
@@ -164,7 +164,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         :name => self.name,
         :output => self.output,
         :index => self.index,
-        :object_type => self.object_type&.to_message,
+        :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
       }.compact
     end
   end

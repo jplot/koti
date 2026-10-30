@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :auto => self.auto&.to_message,
-        :manual => self.manual&.to_message,
+        :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::FanSpeedSettings::FanSpeedSettingsAutoMode) },
+        :manual => self.manual&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::FanSpeedSettings::FanSpeedSettingsManualMode) },
       }.compact
     end
 

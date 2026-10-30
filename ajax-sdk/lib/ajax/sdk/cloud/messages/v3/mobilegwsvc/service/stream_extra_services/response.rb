@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::Failure) },
       }.compact
     end
 
@@ -83,9 +83,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :snapshot => self.snapshot&.to_message,
-          :update => self.update&.to_message,
-          :stream_update => self.stream_update&.to_message,
+          :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::ExtraServices) },
+          :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::Update) },
+          :stream_update => self.stream_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::StreamUpdate) },
         }.compact
       end
 
@@ -142,11 +142,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         {
           :extra_service_id => self.extra_service_id,
           :subscription_id => self.subscription_id,
-          :extra_service_added => self.extra_service_added&.to_message,
-          :extra_service_state_updated => self.extra_service_state_updated&.to_message,
-          :extra_service_removed => self.extra_service_removed&.to_message,
-          :extra_service_reactivated => self.extra_service_reactivated&.to_message,
-          :extra_service_replaced => self.extra_service_replaced&.to_message,
+          :extra_service_added => self.extra_service_added&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::ExtraServiceAdded) },
+          :extra_service_state_updated => self.extra_service_state_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::ExtraServiceStateUpdated) },
+          :extra_service_removed => self.extra_service_removed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::ExtraServiceRemoved) },
+          :extra_service_reactivated => self.extra_service_reactivated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::ExtraServiceReactivated) },
+          :extra_service_replaced => self.extra_service_replaced&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::ExtraServiceReplaced) },
         }.compact
       end
 
@@ -183,7 +183,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :new_extra_service => self.new_extra_service&.to_message,
+          :new_extra_service => self.new_extra_service&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraService) },
         }.compact
       end
     end
@@ -220,8 +220,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :new_state => self.new_state&.to_message,
-          :extra_service => self.extra_service&.to_message,
+          :new_state => self.new_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraServiceState) },
+          :extra_service => self.extra_service&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraService) },
         }.compact
       end
     end
@@ -282,7 +282,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :new_extra_service => self.new_extra_service&.to_message,
+          :new_extra_service => self.new_extra_service&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraService) },
         }.compact
       end
     end
@@ -316,7 +316,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :new_extra_service => self.new_extra_service&.to_message,
+          :new_extra_service => self.new_extra_service&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraService) },
         }.compact
       end
     end
@@ -353,7 +353,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :extra_services => self.extra_services.map { it.to_message },
+          :extra_services => self.extra_services.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraService) },
           :service_activation_availability_status => self.service_activation_availability_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ServiceActivationAvailabilityStatus.proto(it) },
         }.compact
       end
@@ -388,7 +388,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :service_activation_availability_status_changed => self.service_activation_availability_status_changed&.to_message,
+          :service_activation_availability_status_changed => self.service_activation_availability_status_changed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamExtraServices::StreamExtraServicesResponse::ServiceActivationAvailabilityStatusChanged) },
         }.compact
       end
 
@@ -469,9 +469,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       def to_message
         {
           :message => self.message,
-          :request_timeout => self.request_timeout&.to_message,
-          :illegal_argument => self.illegal_argument&.to_message,
-          :extra_services_not_available => self.extra_services_not_available&.to_message,
+          :request_timeout => self.request_timeout&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :illegal_argument => self.illegal_argument&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :extra_services_not_available => self.extra_services_not_available&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

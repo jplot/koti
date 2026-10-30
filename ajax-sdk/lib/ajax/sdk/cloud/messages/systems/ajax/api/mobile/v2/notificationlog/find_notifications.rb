@@ -41,9 +41,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :filter => self.filter&.to_message,
+        :filter => self.filter&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationsFilter) },
         :limit => self.limit,
-        :pagination => self.pagination&.to_message,
+        :pagination => self.pagination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::FindNotificationsRequest::Pagination) },
         :offline_notifications_inline_limit => self.offline_notifications_inline_limit,
       }.compact
     end
@@ -122,8 +122,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::FindNotificationsResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::FindNotificationsResponse::Failure) },
       }.compact
     end
 
@@ -173,10 +173,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :notifications => self.notifications.map { it.to_message },
+          :notifications => self.notifications.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Notification) },
           :next_forward_pagination_token => self.next_forward_pagination_token,
           :next_backward_pagination_token => self.next_backward_pagination_token,
-          :offline_notifications_data => self.offline_notifications_data.map { it.to_message },
+          :offline_notifications_data => self.offline_notifications_data.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::OfflineNotificationsData) },
         }.compact
       end
     end
@@ -216,9 +216,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :illegal_argument => self.illegal_argument&.to_message,
-          :not_found => self.not_found&.to_message,
-          :internal_error => self.internal_error&.to_message,
+          :illegal_argument => self.illegal_argument&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :not_found => self.not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :internal_error => self.internal_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

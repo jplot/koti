@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Media
     def to_message
       {
         :image_id => self.image_id,
-        :images => self.images.map { it.to_message },
+        :images => self.images.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Image) },
         :expiration_time => self.expiration_time&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
       }.compact
     end

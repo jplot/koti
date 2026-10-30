@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :settings => self.settings&.to_message,
+        :settings => self.settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers::EnabledSirenTriggers) },
         :siren_trigger_capabilities => self.siren_trigger_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers::Trigger.proto(it) },
       }.compact
     end
@@ -111,7 +111,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :siren_triggers => self.siren_triggers.map { it.to_message },
+          :siren_triggers => self.siren_triggers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers::SirenTriggerPatch) },
         }.compact
       end
     end

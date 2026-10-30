@@ -60,7 +60,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         :room_name => self.room_name,
         :device_color => self.device_color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::DeviceColor.proto(it) },
         :video_edge_type => self.video_edge_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::VideoEdgeType.proto(it) },
-        :image_info => self.image_info&.to_message,
+        :image_info => self.image_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::SourceImageInfo) },
       }.compact
     end
   end

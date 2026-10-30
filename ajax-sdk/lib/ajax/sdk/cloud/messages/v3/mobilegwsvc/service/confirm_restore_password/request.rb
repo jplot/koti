@@ -52,7 +52,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Con
         :phone_token => self.phone_token,
         :mail_token => self.mail_token,
         :new_password_sha256_hash => self.new_password_sha256_hash,
-        :verification_codes => self.verification_codes&.to_message,
+        :verification_codes => self.verification_codes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Validation::VerificationCodes) },
       }.compact
     end
   end

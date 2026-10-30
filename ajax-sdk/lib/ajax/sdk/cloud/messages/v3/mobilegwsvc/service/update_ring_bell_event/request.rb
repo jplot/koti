@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
         :video_edge_id => self.video_edge_id,
         :channel_id => self.channel_id,
         :space_id => self.space_id,
-        :accept => self.accept&.to_message,
-        :decline => self.decline&.to_message,
+        :accept => self.accept&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateRingBellEvent::UpdateRingBellEventRequest::Accept) },
+        :decline => self.decline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateRingBellEvent::UpdateRingBellEventRequest::Decline) },
       }.compact
     end
 

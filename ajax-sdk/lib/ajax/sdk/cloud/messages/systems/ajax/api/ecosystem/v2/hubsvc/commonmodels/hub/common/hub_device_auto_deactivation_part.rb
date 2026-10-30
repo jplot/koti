@@ -65,8 +65,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       def to_message
         {
           :restoration_timer => self.restoration_timer&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-          :off => self.off&.to_message,
-          :on => self.on&.to_message,
+          :off => self.off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubDeviceAutoDeactivationPart::Settings::Off) },
+          :on => self.on&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubDeviceAutoDeactivationPart::Settings::On) },
         }.compact
       end
 

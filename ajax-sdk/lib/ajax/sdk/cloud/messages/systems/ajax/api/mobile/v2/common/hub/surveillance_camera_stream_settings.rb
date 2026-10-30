@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub
         :service_type => self.service_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::SurveillanceCameraStreamSettings::ServiceType.proto(it) },
         :crc => self.crc,
         :stream_data_url => self.stream_data_url,
-        :hikvision_or_safire_settings => self.hikvision_or_safire_settings&.to_message,
-        :dahua_or_uniview_settings => self.dahua_or_uniview_settings&.to_message,
+        :hikvision_or_safire_settings => self.hikvision_or_safire_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::SurveillanceCameraStreamSettings::HikvisionOrSafireSettings) },
+        :dahua_or_uniview_settings => self.dahua_or_uniview_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::SurveillanceCameraStreamSettings::DahuaOrUniviewSettings) },
       }.compact
     end
 

@@ -46,9 +46,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ne
       {
         :server_ping_interval => self.server_ping_interval&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         :connection_failure_alarm_delay => self.connection_failure_alarm_delay&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-        :ethernet => self.ethernet&.to_message,
-        :wifi => self.wifi&.to_message,
-        :configuration_status => self.configuration_status&.to_message,
+        :ethernet => self.ethernet&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Network::NetworkTechnology) },
+        :wifi => self.wifi&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Network::NetworkTechnology) },
+        :configuration_status => self.configuration_status&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Network::NetworkConfigurationStatus) },
       }.compact
     end
   end

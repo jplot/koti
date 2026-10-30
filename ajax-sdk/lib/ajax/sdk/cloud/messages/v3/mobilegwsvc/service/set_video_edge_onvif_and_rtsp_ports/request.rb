@@ -48,7 +48,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
         :video_edge_id => self.video_edge_id,
         :onvif_http_port => self.onvif_http_port,
         :rtsp_http_port => self.rtsp_http_port,
-        :onvif_ports => self.onvif_ports&.to_message,
+        :onvif_ports => self.onvif_ports&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::OnvifConnectionPartSettings::OnvifPorts) },
       }.compact
     end
   end

@@ -70,7 +70,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :sensor_options => self.sensor_options.map { it.to_message },
+        :sensor_options => self.sensor_options.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::IntrusionSensorOption) },
       }.compact
     end
   end

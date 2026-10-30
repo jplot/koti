@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Failure) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :scenario_video_edge_triggers => self.scenario_video_edge_triggers.map { it.to_message },
+          :scenario_video_edge_triggers => self.scenario_video_edge_triggers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTrigger) },
         }.compact
       end
 
@@ -131,14 +131,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :motion => self.motion&.to_message,
-            :human => self.human&.to_message,
-            :pet => self.pet&.to_message,
-            :vehicle => self.vehicle&.to_message,
-            :ring_button => self.ring_button&.to_message,
-            :input_digital_line => self.input_digital_line&.to_message,
-            :package => self.package&.to_message,
-            :issues => self.issues.map { it.to_message },
+            :motion => self.motion&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTrigger::Motion) },
+            :human => self.human&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTrigger::Human) },
+            :pet => self.pet&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTrigger::Pet) },
+            :vehicle => self.vehicle&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTrigger::Vehicle) },
+            :ring_button => self.ring_button&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTrigger::RingButton) },
+            :input_digital_line => self.input_digital_line&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTrigger::InputDigitalLine) },
+            :package => self.package&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTrigger::Package) },
+            :issues => self.issues.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTriggerIssue) },
           }.compact
         end
 
@@ -367,8 +367,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :trigger_disabled => self.trigger_disabled&.to_message,
-            :notification_disabled => self.notification_disabled&.to_message,
+            :trigger_disabled => self.trigger_disabled&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTriggerIssue::TriggerDisabled) },
+            :notification_disabled => self.notification_disabled&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggersOnVideoEdgeChannel::GetScenarioTriggersOnVideoEdgeChannelResponse::Success::ScenarioVideoEdgeTriggerIssue::NotificationDisabled) },
           }.compact
         end
 
@@ -469,10 +469,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :channel_not_found => self.channel_not_found&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :channel_not_found => self.channel_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

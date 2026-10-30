@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Req
     def to_message
       {
         :space_id => self.space_id,
-        :space_permissions => self.space_permissions&.to_message,
-        :video_permissions => self.video_permissions&.to_message,
+        :space_permissions => self.space_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RequestAccessInSpace::RequestAccessInSpaceRequest::RequestedSpacePermissions) },
+        :video_permissions => self.video_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RequestAccessInSpace::RequestAccessInSpaceRequest::RequestedVideoPermissions) },
       }.compact
     end
 
@@ -76,8 +76,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Req
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :permanent => self.permanent&.to_message,
-          :temporary => self.temporary&.to_message,
+          :permanent => self.permanent&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RequestAccessInSpace::RequestAccessInSpaceRequest::RequestedSpacePermissions::RequestedPermanentSpacePermissions) },
+          :temporary => self.temporary&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RequestAccessInSpace::RequestAccessInSpaceRequest::RequestedSpacePermissions::RequestedTemporarySpacePermissions) },
         }.compact
       end
 
@@ -181,7 +181,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Req
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :channels => self.channels.map { it.to_message },
+          :channels => self.channels.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::ChannelReference) },
           :permissions => self.permissions.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermission.proto(it) },
           :duration => self.duration&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RequestAccessInSpace::RequestAccessInSpaceRequest::TemporaryPermissionsDuration.proto(it) },
         }.compact

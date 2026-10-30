@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
         :space_member_id => self.space_member_id,
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :object_type => self.object_type&.to_message,
-        :update => self.update&.to_message,
+        :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateHubDeviceUserPrivacyPermissions::UpdateHubDeviceUserPrivacyPermissionsRequest::Update) },
       }.compact
     end
 
@@ -81,7 +81,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :hub_device_privacy_permissions => self.hub_device_privacy_permissions&.to_message,
+          :hub_device_privacy_permissions => self.hub_device_privacy_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Privacy::HubDevicePrivacyPermission) },
         }.compact
       end
     end

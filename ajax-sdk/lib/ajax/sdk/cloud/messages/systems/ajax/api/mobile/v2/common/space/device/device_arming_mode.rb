@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :instant => self.instant&.to_message,
-        :entry_exit => self.entry_exit&.to_message,
-        :follower => self.follower&.to_message,
-        :disabled => self.disabled&.to_message,
+        :instant => self.instant&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::DeviceArmingMode::Instant) },
+        :entry_exit => self.entry_exit&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::DeviceArmingMode::EntryExit) },
+        :follower => self.follower&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::DeviceArmingMode::Follower) },
+        :disabled => self.disabled&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::DeviceArmingMode::Disabled) },
       }.compact
     end
 

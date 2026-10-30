@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAvailableExtraServicesDataForSpace::FindAvailableExtraServicesDataForSpaceResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAvailableExtraServicesDataForSpace::FindAvailableExtraServicesDataForSpaceResponse::Failure) },
       }.compact
     end
 
@@ -83,9 +83,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :prepayment_flow_data => self.prepayment_flow_data&.to_message,
-          :post_payment_flow_data => self.post_payment_flow_data&.to_message,
-          :prepayment_for_companies_flow_data => self.prepayment_for_companies_flow_data&.to_message,
+          :prepayment_flow_data => self.prepayment_flow_data&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAvailableExtraServicesDataForSpace::FindAvailableExtraServicesDataForSpaceResponse::Success::PrepaymentData) },
+          :post_payment_flow_data => self.post_payment_flow_data&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAvailableExtraServicesDataForSpace::FindAvailableExtraServicesDataForSpaceResponse::Success::PostPaymentData) },
+          :prepayment_for_companies_flow_data => self.prepayment_for_companies_flow_data&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAvailableExtraServicesDataForSpace::FindAvailableExtraServicesDataForSpaceResponse::Success::PrepaymentForCompaniesData) },
         }.compact
       end
 
@@ -124,8 +124,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :available_prepayment_service_groups => self.available_prepayment_service_groups.map { it.to_message },
-            :current_context => self.current_context&.to_message,
+            :available_prepayment_service_groups => self.available_prepayment_service_groups.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailablePrePaymentServiceGroup) },
+            :current_context => self.current_context&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::FindAvailableServicesPrePaymentContext) },
           }.compact
         end
       end
@@ -162,8 +162,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :available_post_payment_service_groups => self.available_post_payment_service_groups.map { it.to_message },
-            :current_context => self.current_context&.to_message,
+            :available_post_payment_service_groups => self.available_post_payment_service_groups.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailablePostPaymentServiceGroup) },
+            :current_context => self.current_context&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::FindAvailableServicesContext) },
           }.compact
         end
       end
@@ -200,8 +200,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :available_prepayment_service_groups => self.available_prepayment_service_groups.map { it.to_message },
-            :current_context => self.current_context&.to_message,
+            :available_prepayment_service_groups => self.available_prepayment_service_groups.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailablePrePaymentForCompanyServiceGroup) },
+            :current_context => self.current_context&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::FindAvailableServicesPrePaymentContext) },
           }.compact
         end
       end
@@ -260,15 +260,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :internal_error => self.internal_error&.to_message,
-          :bad_request => self.bad_request&.to_message,
-          :available_mandatory_service_not_found => self.available_mandatory_service_not_found&.to_message,
-          :reseller_not_found => self.reseller_not_found&.to_message,
-          :dealer_not_found => self.dealer_not_found&.to_message,
-          :not_available_for_user => self.not_available_for_user&.to_message,
-          :card_not_added => self.card_not_added&.to_message,
-          :account_company_info_vat_number_validation_invalid => self.account_company_info_vat_number_validation_invalid&.to_message,
-          :account_company_info_vat_number_validation_in_progress => self.account_company_info_vat_number_validation_in_progress&.to_message,
+          :internal_error => self.internal_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :available_mandatory_service_not_found => self.available_mandatory_service_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :reseller_not_found => self.reseller_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :dealer_not_found => self.dealer_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :not_available_for_user => self.not_available_for_user&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::Failure::NotAvailableForUserError) },
+          :card_not_added => self.card_not_added&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :account_company_info_vat_number_validation_invalid => self.account_company_info_vat_number_validation_invalid&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :account_company_info_vat_number_validation_in_progress => self.account_company_info_vat_number_validation_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

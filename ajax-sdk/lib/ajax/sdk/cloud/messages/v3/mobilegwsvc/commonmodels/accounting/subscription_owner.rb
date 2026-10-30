@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :user => self.user&.to_message,
-        :company => self.company&.to_message,
-        :accounting_company => self.accounting_company&.to_message,
+        :user => self.user&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::SubscriptionOwner::User) },
+        :company => self.company&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::CompanyInfo) },
+        :accounting_company => self.accounting_company&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::AccountingCompany) },
       }.compact
     end
 
@@ -91,7 +91,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
           :user_hex_id => self.user_hex_id,
           :first_name => self.first_name,
           :last_name => self.last_name,
-          :images => self.images&.to_message,
+          :images => self.images&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
           :user_role => self.user_role&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Type::UserRole.proto(it) },
         }.compact
       end

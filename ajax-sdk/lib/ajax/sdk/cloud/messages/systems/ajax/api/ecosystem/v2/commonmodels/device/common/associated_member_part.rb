@@ -38,7 +38,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :associated_member => self.associated_member&.to_message,
+        :associated_member => self.associated_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMember) },
         :not_assigned_user_type => self.not_assigned_user_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart::NotAssignedUserType.proto(it) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart::Capability.proto(it) },
       }.compact
@@ -73,7 +73,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :associated_member => self.associated_member&.to_message,
+          :associated_member => self.associated_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart::AssociatedMemberSettings::AssociatedMember) },
         }.compact
       end
 
@@ -112,9 +112,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :associated_space_member => self.associated_space_member&.to_message,
-            :associated_guest => self.associated_guest&.to_message,
-            :not_assigned_member => self.not_assigned_member&.to_message,
+            :associated_space_member => self.associated_space_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart::AssociatedMemberSettings::AssociatedMember::AssociatedSpaceMember) },
+            :associated_guest => self.associated_guest&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart::AssociatedMemberSettings::AssociatedMember::AssociatedGuest) },
+            :not_assigned_member => self.not_assigned_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart::AssociatedMemberSettings::AssociatedMember::NotAssignedMember) },
           }.compact
         end
 

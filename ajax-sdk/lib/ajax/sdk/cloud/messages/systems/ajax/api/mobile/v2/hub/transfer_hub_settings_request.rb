@@ -41,7 +41,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hub
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :donor_hub_id => self.donor_hub_id,
         :target_hub_qr_code => self.target_hub_qr_code,
         :accept_snatch_hub => self.accept_snatch_hub,
@@ -81,8 +81,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hub
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hub::TransferHubSettingsResponse::Failure) },
       }.compact
     end
 
@@ -198,32 +198,32 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :space_locked => self.space_locked&.to_message,
-          :passive_hubs_limit_exceeded => self.passive_hubs_limit_exceeded&.to_message,
-          :hub_in_use => self.hub_in_use&.to_message,
-          :hub_already_in_space => self.hub_already_in_space&.to_message,
-          :target_hub_not_found => self.target_hub_not_found&.to_message,
-          :hub_qr_code_invalid => self.hub_qr_code_invalid&.to_message,
-          :hub_claim_error => self.hub_claim_error&.to_message,
-          :hub_not_empty => self.hub_not_empty&.to_message,
-          :hub_error => self.hub_error&.to_message,
-          :hub_wrong_state => self.hub_wrong_state&.to_message,
-          :hub_busy => self.hub_busy&.to_message,
-          :member_not_support_add_fibra_and_hybrid_hub => self.member_not_support_add_fibra_and_hybrid_hub&.to_message,
-          :member_not_authorized_add_hub => self.member_not_authorized_add_hub&.to_message,
-          :member_not_authorized_add_fibra_and_hybrid_hub => self.member_not_authorized_add_fibra_and_hybrid_hub&.to_message,
-          :hub_locked_by_another_company => self.hub_locked_by_another_company&.to_message,
-          :target_hub_space_on_monitoring => self.target_hub_space_on_monitoring&.to_message,
-          :transfer_hub_settings_validation_errors => self.transfer_hub_settings_validation_errors&.to_message,
-          :donor_hub_has_active_subscriptions => self.donor_hub_has_active_subscriptions&.to_message,
-          :donor_hub_has_active_subscriptions_for_member => self.donor_hub_has_active_subscriptions_for_member&.to_message,
-          :target_hub_has_active_subscriptions => self.target_hub_has_active_subscriptions&.to_message,
-          :target_hub_has_active_subscriptions_for_member => self.target_hub_has_active_subscriptions_for_member&.to_message,
-          :illegal_donor_hub_service_state => self.illegal_donor_hub_service_state&.to_message,
-          :target_access_cards_limit_exceeded => self.target_access_cards_limit_exceeded&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_locked => self.space_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::SpaceLockedError) },
+          :passive_hubs_limit_exceeded => self.passive_hubs_limit_exceeded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::LimitExceededError) },
+          :hub_in_use => self.hub_in_use&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_already_in_space => self.hub_already_in_space&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :target_hub_not_found => self.target_hub_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_qr_code_invalid => self.hub_qr_code_invalid&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_claim_error => self.hub_claim_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_not_empty => self.hub_not_empty&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_error => self.hub_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_wrong_state => self.hub_wrong_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_busy => self.hub_busy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::HubBusyError) },
+          :member_not_support_add_fibra_and_hybrid_hub => self.member_not_support_add_fibra_and_hybrid_hub&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :member_not_authorized_add_hub => self.member_not_authorized_add_hub&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :member_not_authorized_add_fibra_and_hybrid_hub => self.member_not_authorized_add_fibra_and_hybrid_hub&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_locked_by_another_company => self.hub_locked_by_another_company&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :target_hub_space_on_monitoring => self.target_hub_space_on_monitoring&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :transfer_hub_settings_validation_errors => self.transfer_hub_settings_validation_errors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hub::TransferHubSettingsResponse::Failure::TransferHubSettingsValidationErrors) },
+          :donor_hub_has_active_subscriptions => self.donor_hub_has_active_subscriptions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :donor_hub_has_active_subscriptions_for_member => self.donor_hub_has_active_subscriptions_for_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :target_hub_has_active_subscriptions => self.target_hub_has_active_subscriptions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :target_hub_has_active_subscriptions_for_member => self.target_hub_has_active_subscriptions_for_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :illegal_donor_hub_service_state => self.illegal_donor_hub_service_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :target_access_cards_limit_exceeded => self.target_access_cards_limit_exceeded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::LimitExceededError) },
         }.compact
       end
 
@@ -259,7 +259,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hub
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :error => self.error.map { it.to_message },
+            :error => self.error.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hub::TransferHubSettingsResponse::Failure::TransferHubSettingsValidationErrors::TransferHubSettingsValidationError) },
           }.compact
         end
 
@@ -334,21 +334,21 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hub
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :target_permission_denied => self.target_permission_denied&.to_message,
-              :target_armed => self.target_armed&.to_message,
-              :target_state_fetch_failed => self.target_state_fetch_failed&.to_message,
-              :target_offline => self.target_offline&.to_message,
-              :target_in_migration => self.target_in_migration&.to_message,
-              :target_firmware_lower_minimal => self.target_firmware_lower_minimal&.to_message,
-              :target_firmware_lower_donor => self.target_firmware_lower_donor&.to_message,
-              :target_users_limit_exceeded => self.target_users_limit_exceeded&.to_message,
-              :donor_permission_denied => self.donor_permission_denied&.to_message,
-              :donor_state_fetch_failed => self.donor_state_fetch_failed&.to_message,
-              :donor_target_incompatible_types => self.donor_target_incompatible_types&.to_message,
-              :donor_firmware_lower_minimal => self.donor_firmware_lower_minimal&.to_message,
-              :donor_in_migration => self.donor_in_migration&.to_message,
-              :donor_online => self.donor_online&.to_message,
-              :donor_in_service_mode => self.donor_in_service_mode&.to_message,
+              :target_permission_denied => self.target_permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :target_armed => self.target_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :target_state_fetch_failed => self.target_state_fetch_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :target_offline => self.target_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :target_in_migration => self.target_in_migration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :target_firmware_lower_minimal => self.target_firmware_lower_minimal&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :target_firmware_lower_donor => self.target_firmware_lower_donor&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :target_users_limit_exceeded => self.target_users_limit_exceeded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :donor_permission_denied => self.donor_permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :donor_state_fetch_failed => self.donor_state_fetch_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :donor_target_incompatible_types => self.donor_target_incompatible_types&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :donor_firmware_lower_minimal => self.donor_firmware_lower_minimal&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :donor_in_migration => self.donor_in_migration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :donor_online => self.donor_online&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+              :donor_in_service_mode => self.donor_in_service_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
             }.compact
           end
 

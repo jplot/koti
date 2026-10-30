@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :admin => self.admin&.to_message,
-        :operator => self.operator&.to_message,
+        :admin => self.admin&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::LocalUserPermissions::LocalUserAdminRole) },
+        :operator => self.operator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::LocalUserPermissions::LocalUserOperatorRole) },
       }.compact
     end
 

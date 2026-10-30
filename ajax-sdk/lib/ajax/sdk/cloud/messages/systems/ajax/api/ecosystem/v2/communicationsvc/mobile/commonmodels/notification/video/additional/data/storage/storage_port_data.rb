@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :storage_device_port_number => self.storage_device_port_number&.to_message,
+        :storage_device_port_number => self.storage_device_port_number&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Additional::Data::Storage::StorageDevicePortNumber) },
       }.compact
     end
   end

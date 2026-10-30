@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :mode => self.mode&.to_message,
-        :capabilities => self.capabilities&.to_message,
+        :mode => self.mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsMode) },
+        :capabilities => self.capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerCapabilities) },
       }.compact
     end
   end
@@ -79,10 +79,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :always_active => self.always_active&.to_message,
-        :balanced => self.balanced&.to_message,
-        :economy => self.economy&.to_message,
-        :custom => self.custom&.to_message,
+        :always_active => self.always_active&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsMode::AlwaysActive) },
+        :balanced => self.balanced&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsMode::Balanced) },
+        :economy => self.economy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsMode::Economy) },
+        :custom => self.custom&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsMode::Custom) },
       }.compact
     end
 
@@ -242,7 +242,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :mode_capabilities => self.mode_capabilities.map { it.to_message },
+        :mode_capabilities => self.mode_capabilities.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsModeCapabilities) },
       }.compact
     end
   end
@@ -285,10 +285,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :always_active_capabilities => self.always_active_capabilities&.to_message,
-        :balanced_capabilities => self.balanced_capabilities&.to_message,
-        :economy_capabilities => self.economy_capabilities&.to_message,
-        :custom_capabilities => self.custom_capabilities&.to_message,
+        :always_active_capabilities => self.always_active_capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsModeCapabilities::AlwaysActiveModeCapabilities) },
+        :balanced_capabilities => self.balanced_capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsModeCapabilities::BalancedModeCapabilities) },
+        :economy_capabilities => self.economy_capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsModeCapabilities::EconomyModeCapabilities) },
+        :custom_capabilities => self.custom_capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsModeCapabilities::CustomModeCapabilities) },
       }.compact
     end
 
@@ -441,8 +441,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_active_durations => self.available_active_durations.map { it.to_message },
-          :available_playback_pauses => self.available_playback_pauses.map { it.to_message },
+          :available_active_durations => self.available_active_durations.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsModeCapabilities::ActiveDurationCapability) },
+          :available_playback_pauses => self.available_playback_pauses.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsModeCapabilities::PlaybackPauseCapability) },
           :available_cooldown_durations => self.available_cooldown_durations.map { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         }.compact
       end
@@ -481,7 +481,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :duration => self.duration&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-          :while_motion_detected => self.while_motion_detected&.to_message,
+          :while_motion_detected => self.while_motion_detected&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsModeCapabilities::ActiveDurationCapability::WhileMotionDetected) },
         }.compact
       end
 
@@ -549,7 +549,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :duration => self.duration&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-          :without_pause => self.without_pause&.to_message,
+          :without_pause => self.without_pause&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsModeCapabilities::PlaybackPauseCapability::WithoutPause) },
         }.compact
       end
 

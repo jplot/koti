@@ -72,19 +72,19 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ch
     def to_message
       {
         :guid => self.guid,
-        :device_info => self.device_info&.to_message,
-        :info => self.info&.to_message,
+        :device_info => self.device_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::MediaDeviceInfo) },
+        :info => self.info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::ChannelInfo) },
         :state => self.state.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::ChannelState.proto(it) },
         :record_mode => self.record_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::RecordMode.proto(it) },
-        :calendar => self.calendar&.to_message,
+        :calendar => self.calendar&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::Calendar) },
         :record_policy => self.record_policy&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::RecordPolicy.proto(it) },
         :zombie => self.zombie,
-        :cloud_archive => self.cloud_archive&.to_message,
-        :smart_backlight_trigger_settings => self.smart_backlight_trigger_settings&.to_message,
+        :cloud_archive => self.cloud_archive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Cloudarchive::CloudArchive) },
+        :smart_backlight_trigger_settings => self.smart_backlight_trigger_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SmartBacklightTriggerSettings) },
         :room_id => self.room_id,
         :group_id => self.group_id,
-        :space_settings => self.space_settings&.to_message,
-        :source_aliases => self.source_aliases&.to_message,
+        :space_settings => self.space_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Spacesettings::ChannelSpaceSettings) },
+        :source_aliases => self.source_aliases&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SourceAliases) },
       }.compact
     end
   end
@@ -190,7 +190,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ch
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :sources => self.sources.map { it.to_message },
+        :sources => self.sources.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::VideoSource) },
       }.compact
     end
   end
@@ -230,9 +230,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ch
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :primary_source => self.primary_source&.to_message,
-        :nvr_source => self.nvr_source&.to_message,
-        :cloud_archive_source => self.cloud_archive_source&.to_message,
+        :primary_source => self.primary_source&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::PrimarySource) },
+        :nvr_source => self.nvr_source&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::NvrSource) },
+        :cloud_archive_source => self.cloud_archive_source&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::CloudArchiveSource) },
       }.compact
     end
 
@@ -402,8 +402,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ch
     def to_message
       {
         :enabled => self.enabled,
-        :motion => self.motion&.to_message,
-        :object => self.object&.to_message,
+        :motion => self.motion&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SmartBacklightTriggerTypeSettings::Motion) },
+        :object => self.object&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SmartBacklightTriggerTypeSettings::Object) },
       }.compact
     end
 
@@ -501,7 +501,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ch
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :smart_backlight_trigger_types => self.smart_backlight_trigger_types.map { it.to_message },
+        :smart_backlight_trigger_types => self.smart_backlight_trigger_types.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SmartBacklightTriggerTypeSettings) },
       }.compact
     end
   end

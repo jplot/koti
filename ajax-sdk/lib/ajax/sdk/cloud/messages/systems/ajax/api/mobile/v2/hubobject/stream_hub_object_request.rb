@@ -75,10 +75,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :snapshot => self.snapshot&.to_message,
-        :create => self.create&.to_message,
-        :update => self.update&.to_message,
-        :delete => self.delete&.to_message,
+        :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject) },
+        :create => self.create&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject) },
+        :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject) },
+        :delete => self.delete&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject) },
       }.compact
     end
 

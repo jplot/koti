@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ch
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :pir => self.pir&.to_message,
-        :motion => self.motion&.to_message,
-        :object => self.object&.to_message,
-        :line_crossing => self.line_crossing&.to_message,
+        :pir => self.pir&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Detection::PirDetectionSettings) },
+        :motion => self.motion&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Detection::MotionDetectionSettings) },
+        :object => self.object&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Detection::ObjectDetectionSettings) },
+        :line_crossing => self.line_crossing&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Detection::LineCrossingDetectionSettings) },
       }.compact
     end
   end
@@ -182,7 +182,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ch
         :enabled => self.enabled,
         :image_analysis_mode => self.image_analysis_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Detection::ImageAnalysisMode.proto(it) },
         :enabled_object_classes => self.enabled_object_classes.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::ObjectClass.proto(it) },
-        :recommended_stream_settings => self.recommended_stream_settings&.to_message,
+        :recommended_stream_settings => self.recommended_stream_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Detection::ObjectDetectionSettings::RecommendedStreamSettings) },
       }.compact
     end
 
@@ -218,7 +218,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ch
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :resolution => self.resolution&.to_message,
+          :resolution => self.resolution&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoResolution) },
           :bitrate => self.bitrate,
         }.compact
       end

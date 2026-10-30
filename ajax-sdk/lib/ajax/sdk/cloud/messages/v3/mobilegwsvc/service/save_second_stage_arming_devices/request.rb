@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sav
     def to_message
       {
         :hub_id => self.hub_id,
-        :devices => self.devices.map { it.to_message },
+        :devices => self.devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::SelectedDevice) },
       }.compact
     end
   end

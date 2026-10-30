@@ -55,8 +55,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :open_door_alarm => self.open_door_alarm&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::DayAlarmZone::OpenDoorAlarm.proto(it) },
         :notify_about_deactivation => self.notify_about_deactivation&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::DayAlarmZone::NotifyAboutDeactivation.proto(it) },
         :devices_count => self.devices_count,
-        :triggers_count => self.triggers_count&.to_message,
-        :timer => self.timer&.to_message,
+        :triggers_count => self.triggers_count&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::DayAlarmZone::TriggersCount) },
+        :timer => self.timer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::DayAlarmZone::Timer) },
       }.compact
     end
 

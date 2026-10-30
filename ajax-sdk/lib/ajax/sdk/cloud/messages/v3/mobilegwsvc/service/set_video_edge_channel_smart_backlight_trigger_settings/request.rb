@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
         :channel_id => self.channel_id,
-        :smart_backlight_trigger_settings => self.smart_backlight_trigger_settings&.to_message,
+        :smart_backlight_trigger_settings => self.smart_backlight_trigger_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SmartBacklightTriggerSettings) },
       }.compact
     end
   end

@@ -66,7 +66,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :external_stream_controls => self.external_stream_controls.map { it.to_message },
+        :external_stream_controls => self.external_stream_controls.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream::ExternalStreamControl) },
       }.compact
     end
   end

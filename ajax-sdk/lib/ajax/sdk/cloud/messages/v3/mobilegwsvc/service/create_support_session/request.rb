@@ -38,8 +38,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Cre
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :issue_description => self.issue_description&.to_message,
-        :issue_type => self.issue_type&.to_message,
+        :issue_description => self.issue_description&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::SupportSession::IssueDescription) },
+        :issue_type => self.issue_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::SupportSession::SupportSessionIssueType) },
         :reference_token => self.reference_token,
       }.compact
     end

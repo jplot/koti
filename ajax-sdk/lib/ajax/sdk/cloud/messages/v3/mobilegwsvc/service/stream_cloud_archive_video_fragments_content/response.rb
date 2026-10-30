@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentResponse::Failure) },
       }.compact
     end
 
@@ -83,9 +83,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :fragment_content => self.fragment_content&.to_message,
-          :fragment_part_content => self.fragment_part_content&.to_message,
-          :init => self.init&.to_message,
+          :fragment_content => self.fragment_content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentResponse::FragmentContent) },
+          :fragment_part_content => self.fragment_part_content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentResponse::FragmentPartContent) },
+          :init => self.init&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentResponse::Init) },
         }.compact
       end
 
@@ -229,7 +229,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           :offset => self.offset,
           :status => self.status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Cloudarchive::FragmentStatus.proto(it) },
           :content_url => self.content_url,
-          :content_url_headers => self.content_url_headers.map { it.to_message },
+          :content_url_headers => self.content_url_headers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentResponse::FragmentPartContent::Header) },
           :content_url_expires_at => self.content_url_expires_at&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
         }.compact
       end
@@ -314,11 +314,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :playback_limit_exceeded => self.playback_limit_exceeded&.to_message,
-          :cloud_archive_not_found => self.cloud_archive_not_found&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :playback_limit_exceeded => self.playback_limit_exceeded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :cloud_archive_not_found => self.cloud_archive_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

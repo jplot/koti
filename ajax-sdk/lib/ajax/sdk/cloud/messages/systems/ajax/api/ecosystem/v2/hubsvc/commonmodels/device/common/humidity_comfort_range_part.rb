@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       {
         :min_comfort_humidity => self.min_comfort_humidity,
         :max_comfort_humidity => self.max_comfort_humidity,
-        :humidity_comfort_limits => self.humidity_comfort_limits&.to_message,
+        :humidity_comfort_limits => self.humidity_comfort_limits&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::HumidityComfortRangePart::HumidityComfortLimits) },
       }.compact
     end
 

@@ -49,8 +49,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       {
         :id => self.id,
         :name => self.name,
-        :targets => self.targets.map { it.to_message },
-        :schedules => self.schedules.map { it.to_message },
+        :targets => self.targets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::ScheduledAccess::ScheduledAccess::Target) },
+        :schedules => self.schedules.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::ScheduledAccess::ScheduledAccess::Schedule) },
         :enabled => self.enabled,
         :notification_enabled => self.notification_enabled,
       }.compact
@@ -89,7 +89,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :device_id => self.device_id,
-          :device_type => self.device_type&.to_message,
+          :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         }.compact
       end
     end

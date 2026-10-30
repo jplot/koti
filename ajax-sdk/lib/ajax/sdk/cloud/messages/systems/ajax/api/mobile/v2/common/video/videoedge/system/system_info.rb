@@ -72,14 +72,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Sy
         :uptime => self.uptime&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         :average_cpu_consumption => self.average_cpu_consumption,
         :ram_consumption => self.ram_consumption,
-        :firmware_version => self.firmware_version&.to_message,
+        :firmware_version => self.firmware_version&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Firmware::FirmwareVersion) },
         :product_type => self.product_type,
         :platform_name => self.platform_name,
         :timezone_id => self.timezone_id,
         :uuid => self.uuid,
-        :discovery_addresses => self.discovery_addresses.map { it.to_message },
+        :discovery_addresses => self.discovery_addresses.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::Discovering::DiscoveryAddress) },
         :flags => self.flags.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::System::SystemInfoFlag.proto(it) },
-        :fan_states => self.fan_states.map { it.to_message },
+        :fan_states => self.fan_states.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::System::SystemInfo::FanState) },
         :fan_status => self.fan_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::System::SystemInfo::FanStatus.proto(it) },
       }.compact
     end

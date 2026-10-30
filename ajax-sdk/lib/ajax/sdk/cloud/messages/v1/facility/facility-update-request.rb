@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :facility => self.facility&.to_message,
-        :notes => self.notes.map { it.to_message },
+        :facility => self.facility&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::FacilityUpdateRequest::FacilityUpdateModel) },
+        :notes => self.notes.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::Facility::Note) },
       }.compact
     end
 
@@ -79,9 +79,9 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility
       def to_message
         {
           :facility_id => self.facility_id,
-          :general_info => self.general_info&.to_message,
+          :general_info => self.general_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::Facility::GeneralInfo) },
           :version => self.version,
-          :mask => self.mask&.to_message,
+          :mask => self.mask&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::FieldMask) },
         }.compact
       end
     end

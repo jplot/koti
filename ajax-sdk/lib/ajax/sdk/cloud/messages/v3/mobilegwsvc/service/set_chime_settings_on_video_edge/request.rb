@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :video_edge_id => self.video_edge_id,
-        :chime => self.chime&.to_message,
+        :chime => self.chime&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetChimeSettingsOnVideoEdge::SetVideoEdgeChimeSettingsRequest::Chime) },
       }.compact
     end
 
@@ -82,10 +82,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :off => self.off&.to_message,
-          :mechanical => self.mechanical&.to_message,
-          :digital => self.digital&.to_message,
-          :siren => self.siren&.to_message,
+          :off => self.off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetChimeSettingsOnVideoEdge::SetVideoEdgeChimeSettingsRequest::Chime::OffMode) },
+          :mechanical => self.mechanical&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetChimeSettingsOnVideoEdge::SetVideoEdgeChimeSettingsRequest::Chime::MechanicalMode) },
+          :digital => self.digital&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetChimeSettingsOnVideoEdge::SetVideoEdgeChimeSettingsRequest::Chime::DigitalMode) },
+          :siren => self.siren&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetChimeSettingsOnVideoEdge::SetVideoEdgeChimeSettingsRequest::Chime::SirenMode) },
         }.compact
       end
 

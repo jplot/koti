@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Tri
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :sources => self.sources.map { it.to_message },
-        :condition => self.condition&.to_message,
+        :sources => self.sources.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::EventTrigger::EventSource) },
+        :condition => self.condition&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::EventTrigger::EventCondition) },
       }.compact
     end
 
@@ -78,10 +78,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Tri
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :space => self.space&.to_message,
-          :hub_device => self.hub_device&.to_message,
-          :video_edge => self.video_edge&.to_message,
-          :smart_lock => self.smart_lock&.to_message,
+          :space => self.space&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::EventTrigger::EventSource::Space) },
+          :hub_device => self.hub_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::EventTrigger::EventSource::HubDevice) },
+          :video_edge => self.video_edge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::EventTrigger::EventSource::VideoEdge) },
+          :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::EventTrigger::EventSource::SmartLock) },
         }.compact
       end
 
@@ -117,7 +117,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Tri
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :events => self.events.map { it.to_message },
+            :events => self.events.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Space::SpaceEventQualifier) },
           }.compact
         end
       end
@@ -159,7 +159,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Tri
           {
             :id => self.id,
             :hub_id => self.hub_id,
-            :events => self.events.map { it.to_message },
+            :events => self.events.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Hub::HubEventQualifier) },
           }.compact
         end
       end
@@ -200,7 +200,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Tri
         def to_message
           {
             :id => self.id,
-            :events => self.events.map { it.to_message },
+            :events => self.events.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Video::VideoEventQualifier) },
             :channel_id => self.channel_id,
           }.compact
         end
@@ -239,7 +239,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Tri
         def to_message
           {
             :id => self.id,
-            :events => self.events.map { it.to_message },
+            :events => self.events.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::SmartLockEventQualifier) },
           }.compact
         end
       end
@@ -277,8 +277,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Tri
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :any => self.any&.to_message,
-          :all => self.all&.to_message,
+          :any => self.any&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::EventTrigger::EventCondition::Any) },
+          :all => self.all&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::EventTrigger::EventCondition::All) },
         }.compact
       end
 

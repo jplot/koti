@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       {
         :min_comfort_temperature => self.min_comfort_temperature,
         :max_comfort_temperature => self.max_comfort_temperature,
-        :temperature_comfort_limits => self.temperature_comfort_limits&.to_message,
+        :temperature_comfort_limits => self.temperature_comfort_limits&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::TemperatureComfortRangePart::TemperatureComfortLimits) },
       }.compact
     end
 

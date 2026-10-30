@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Fi
       {
         :product_type => self.product_type,
         :platform_name => self.platform_name,
-        :firmware_version => self.firmware_version&.to_message,
+        :firmware_version => self.firmware_version&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Firmware::FirmwareVersion) },
       }.compact
     end
   end

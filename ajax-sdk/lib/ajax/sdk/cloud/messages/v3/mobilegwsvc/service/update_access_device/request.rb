@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_locator => self.device_locator&.to_message,
-        :update => self.update.map { it.to_message },
+        :device_locator => self.device_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateAccessDevice::UpdateAccessDeviceRequest::AccessDeviceLocator) },
+        :update => self.update.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateAccessDevice::UpdateAccessDeviceRequest::Update) },
       }.compact
     end
 
@@ -72,8 +72,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :access_card => self.access_card&.to_message,
-          :access_code => self.access_code&.to_message,
+          :access_card => self.access_card&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateAccessDevice::UpdateAccessDeviceRequest::AccessDeviceLocator::AccessCard) },
+          :access_code => self.access_code&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateAccessDevice::UpdateAccessDeviceRequest::AccessDeviceLocator::AccessCode) },
         }.compact
       end
 
@@ -204,13 +204,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :access_card_profile_settings => self.access_card_profile_settings&.to_message,
-          :associated_member_settings => self.associated_member_settings&.to_message,
-          :day_alarm_deactivation_settings => self.day_alarm_deactivation_settings&.to_message,
-          :access_device_state_settings => self.access_device_state_settings&.to_message,
-          :access_device_security_settings => self.access_device_security_settings&.to_message,
-          :access_card_type_settings => self.access_card_type_settings&.to_message,
-          :arm_prevention_override_permissions_part_settings => self.arm_prevention_override_permissions_part_settings&.to_message,
+          :access_card_profile_settings => self.access_card_profile_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessCardProfilePart::AccessCardProfileSettings) },
+          :associated_member_settings => self.associated_member_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart::AssociatedMemberSettings) },
+          :day_alarm_deactivation_settings => self.day_alarm_deactivation_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DayAlarmDeactivationPart::DayAlarmDeactivationSettings) },
+          :access_device_state_settings => self.access_device_state_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessDeviceStatePart::AccessDeviceStateSettings) },
+          :access_device_security_settings => self.access_device_security_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessDeviceSecurityPart::AccessDeviceSecuritySettings) },
+          :access_card_type_settings => self.access_card_type_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessCardTypePart::AccessCardTypeSettings) },
+          :arm_prevention_override_permissions_part_settings => self.arm_prevention_override_permissions_part_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart::ArmPreventionOverridePermissionsPartSettings) },
         }.compact
       end
 

@@ -56,15 +56,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :common_wings_part => self.common_wings_part&.to_message,
-        :device_battery_without_charging => self.device_battery_without_charging&.to_message,
-        :external_power => self.external_power&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :common_wings_part => self.common_wings_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonWingsPart) },
+        :device_battery_without_charging => self.device_battery_without_charging&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBatteryWithoutCharging) },
+        :external_power => self.external_power&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExternalPower) },
         :device_tamper_status => self.device_tamper_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTamperStatus.proto(it) },
-        :led_indication_part => self.led_indication_part&.to_message,
-        :third_party_device_offline_timeout_part => self.third_party_device_offline_timeout_part&.to_message,
-        :radio_interference_detection_part => self.radio_interference_detection_part&.to_message,
-        :integration_compatibility_mode_part => self.integration_compatibility_mode_part&.to_message,
+        :led_indication_part => self.led_indication_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart) },
+        :third_party_device_offline_timeout_part => self.third_party_device_offline_timeout_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ThirdPartyDeviceOfflineTimeoutPart) },
+        :radio_interference_detection_part => self.radio_interference_detection_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::RadioInterferenceDetectionPart) },
+        :integration_compatibility_mode_part => self.integration_compatibility_mode_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::IntegrationCompatibilityModePart) },
       }.compact
     end
   end

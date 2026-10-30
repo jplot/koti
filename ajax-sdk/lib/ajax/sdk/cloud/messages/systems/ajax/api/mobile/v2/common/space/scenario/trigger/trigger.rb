@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Tri
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :event => self.event&.to_message,
-        :schedule => self.schedule&.to_message,
+        :event => self.event&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Trigger::EventTrigger) },
+        :schedule => self.schedule&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScheduleTrigger) },
       }.compact
     end
 

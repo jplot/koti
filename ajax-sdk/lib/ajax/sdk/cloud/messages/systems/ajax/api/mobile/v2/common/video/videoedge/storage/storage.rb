@@ -43,7 +43,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::St
       {
         :temperature_threshold => self.temperature_threshold,
         :num_ports => self.num_ports,
-        :ports => self.ports.map { it.to_message },
+        :ports => self.ports.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Storage::StoragePort) },
         :eject_supported => self.eject_supported,
       }.compact
     end

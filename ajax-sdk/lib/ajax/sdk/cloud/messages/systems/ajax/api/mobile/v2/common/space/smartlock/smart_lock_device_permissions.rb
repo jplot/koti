@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
       {
         :device_id => self.device_id,
         :smart_lock_permissions => self.smart_lock_permissions.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockPermission.proto(it) },
-        :permissions => self.permissions.map { it.to_message },
+        :permissions => self.permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockPermissions::PermissionState) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
       def to_message
         {
           :permission => self.permission&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockPermission.proto(it) },
-          :type => self.type&.to_message,
+          :type => self.type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockPermissions::PermissionState::Type) },
         }.compact
       end
 
@@ -113,8 +113,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :permanent => self.permanent&.to_message,
-            :temporary_when_alert_received => self.temporary_when_alert_received&.to_message,
+            :permanent => self.permanent&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockPermissions::PermissionState::Type::Permanent) },
+            :temporary_when_alert_received => self.temporary_when_alert_received&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockPermissions::PermissionState::Type::TemporaryWhenAlertReceived) },
           }.compact
         end
 

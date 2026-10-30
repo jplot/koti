@@ -32,6 +32,7 @@ module Ajax
         def self?.time: (Time time) -> Hash[Symbol, Integer]
         def self?.duration: (Float seconds) -> Hash[Symbol, Integer]
         def self?.wrapper: (untyped value) -> Hash[Symbol, untyped]
+        def self?.message: (untyped value, Class type) -> Hash[Symbol, untyped]
       end
     end
   end

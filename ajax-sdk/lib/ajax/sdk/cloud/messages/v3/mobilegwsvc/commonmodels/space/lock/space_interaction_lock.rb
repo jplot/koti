@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :alarm_spam_notification => self.alarm_spam_notification&.to_message,
-        :fire_interconnect_alarm => self.fire_interconnect_alarm&.to_message,
+        :alarm_spam_notification => self.alarm_spam_notification&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::AlarmSpamNotification) },
+        :fire_interconnect_alarm => self.fire_interconnect_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm) },
       }.compact
     end
 

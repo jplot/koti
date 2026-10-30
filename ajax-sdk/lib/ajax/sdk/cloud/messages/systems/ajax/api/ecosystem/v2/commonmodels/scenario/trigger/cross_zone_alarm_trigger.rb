@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :zones => self.zones.map { it.to_message },
-        :options => self.options&.to_message,
+        :zones => self.zones.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::CrossZoneAlarmTrigger::Zone) },
+        :options => self.options&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::CrossZoneAlarmTrigger::Options) },
       }.compact
     end
 
@@ -114,7 +114,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :zones => self.zones.map { it.to_message },
+          :zones => self.zones.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::CrossZoneAlarmTrigger::Zone) },
           :zones_multi_select_allowed => self.zones_multi_select_allowed,
         }.compact
       end

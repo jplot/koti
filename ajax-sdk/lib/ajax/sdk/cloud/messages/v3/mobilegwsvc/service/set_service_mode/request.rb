@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
     def to_message
       {
         :space_id => self.space_id,
-        :action => self.action&.to_message,
+        :action => self.action&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetServiceMode::SetServiceModeRequest::Action) },
       }.compact
     end
 
@@ -72,8 +72,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :enable => self.enable&.to_message,
-          :disable => self.disable&.to_message,
+          :enable => self.enable&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetServiceMode::SetServiceModeRequest::Action::Enable) },
+          :disable => self.disable&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetServiceMode::SetServiceModeRequest::Action::Disable) },
         }.compact
       end
 

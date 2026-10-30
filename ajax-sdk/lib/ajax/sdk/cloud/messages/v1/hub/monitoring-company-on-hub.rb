@@ -58,10 +58,10 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub
       {
         :company_hex_id => self.company_hex_id,
         :name => self.name,
-        :logo => self.logo&.to_message,
+        :logo => self.logo&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Logo) },
         :web_site_url => self.web_site_url,
-        :phone_numbers => self.phone_numbers.map { it.to_message },
-        :customer_inquiries_emails => self.customer_inquiries_emails.map { it.to_message },
+        :phone_numbers => self.phone_numbers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::PhoneNumber) },
+        :customer_inquiries_emails => self.customer_inquiries_emails.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::EmailAddress) },
         :country_code => self.country_code,
         :locations => self.locations,
         :monitoring_status => self.monitoring_status&.then { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::MonitoringCompanyStatus.proto(it) },

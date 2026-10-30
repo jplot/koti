@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting
         :companyHexId => self.companyHexId,
         :name => self.name,
         :service_type => self.service_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::ServiceType.proto(it) },
-        :details => self.details&.to_message,
+        :details => self.details&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::CompanyDetails) },
       }.compact
     end
   end
@@ -126,7 +126,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting
     def to_message
       {
         :web_site_url => self.web_site_url,
-        :contacts => self.contacts.map { it.to_message },
+        :contacts => self.contacts.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::CompanyContact) },
         :emails => self.emails,
         :logo_url => self.logo_url,
       }.compact

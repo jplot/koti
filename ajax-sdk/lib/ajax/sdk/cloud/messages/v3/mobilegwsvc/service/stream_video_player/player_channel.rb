@@ -63,16 +63,16 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     def to_message
       {
         :id => self.id,
-        :device_info => self.device_info&.to_message,
-        :video_capabilities => self.video_capabilities&.to_message,
-        :video_settings => self.video_settings&.to_message,
-        :audio_settings => self.audio_settings&.to_message,
-        :cloud_archive => self.cloud_archive&.to_message,
-        :audio_output_capabilities => self.audio_output_capabilities&.to_message,
+        :device_info => self.device_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::MediaDeviceInfo) },
+        :video_capabilities => self.video_capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::VideoCapabilities) },
+        :video_settings => self.video_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::VideoSettings) },
+        :audio_settings => self.audio_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::AudioSettings) },
+        :cloud_archive => self.cloud_archive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Cloudarchive::CloudArchive) },
+        :audio_output_capabilities => self.audio_output_capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::AudioOutputCapabilities) },
         :zombie => self.zombie,
-        :displayed_source_aliases => self.displayed_source_aliases&.to_message,
-        :primary_source => self.primary_source&.to_message,
-        :linked_actions => self.linked_actions.map { it.to_message },
+        :displayed_source_aliases => self.displayed_source_aliases&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SourceAliases) },
+        :primary_source => self.primary_source&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::PrimarySource) },
+        :linked_actions => self.linked_actions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Automation::VideoEdgeChannelLinkedActionReference) },
       }.compact
     end
 
@@ -169,7 +169,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :ptz => self.ptz&.to_message,
+          :ptz => self.ptz&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Ptz) },
           :has_sub_stream => self.has_sub_stream,
         }.compact
       end
@@ -204,7 +204,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :main_resolution => self.main_resolution&.to_message,
+          :main_resolution => self.main_resolution&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoResolution) },
         }.compact
       end
     end

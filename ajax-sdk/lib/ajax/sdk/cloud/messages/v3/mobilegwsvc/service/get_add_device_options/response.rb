@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::Failure) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :add_device_options => self.add_device_options.map { it.to_message },
+          :add_device_options => self.add_device_options.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::AddDeviceOption) },
         }.compact
       end
     end
@@ -156,22 +156,22 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :manual_entry => self.manual_entry&.to_message,
-          :scan_bus => self.scan_bus&.to_message,
-          :pass_or_tag => self.pass_or_tag&.to_message,
-          :wire_input => self.wire_input&.to_message,
-          :wire_siren => self.wire_siren&.to_message,
-          :access_device => self.access_device&.to_message,
-          :third_party_camera_rtsp => self.third_party_camera_rtsp&.to_message,
-          :third_party_camera_dahua => self.third_party_camera_dahua&.to_message,
-          :third_party_camera_uniview => self.third_party_camera_uniview&.to_message,
-          :third_party_camera_hikvision => self.third_party_camera_hikvision&.to_message,
-          :third_party_camera_safire => self.third_party_camera_safire&.to_message,
-          :sdk_camera_as_video_edge => self.sdk_camera_as_video_edge&.to_message,
-          :third_party_yale_lock_na => self.third_party_yale_lock_na&.to_message,
-          :third_party_yale_lock_eu => self.third_party_yale_lock_eu&.to_message,
-          :z_wave_device => self.z_wave_device&.to_message,
-          :embedded_takeover_module_third_party_device => self.embedded_takeover_module_third_party_device&.to_message,
+          :manual_entry => self.manual_entry&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ManualEntry) },
+          :scan_bus => self.scan_bus&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ScanBus) },
+          :pass_or_tag => self.pass_or_tag&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::PassOrTag) },
+          :wire_input => self.wire_input&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::WireInput) },
+          :wire_siren => self.wire_siren&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::WireSiren) },
+          :access_device => self.access_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::AccessDevice) },
+          :third_party_camera_rtsp => self.third_party_camera_rtsp&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ThirdPartyCameraRtsp) },
+          :third_party_camera_dahua => self.third_party_camera_dahua&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ThirdPartyCameraDahua) },
+          :third_party_camera_uniview => self.third_party_camera_uniview&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ThirdPartyCameraUniview) },
+          :third_party_camera_hikvision => self.third_party_camera_hikvision&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ThirdPartyCameraHikvision) },
+          :third_party_camera_safire => self.third_party_camera_safire&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ThirdPartyCameraSafire) },
+          :sdk_camera_as_video_edge => self.sdk_camera_as_video_edge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::SdkCameraAsVideoEdge) },
+          :third_party_yale_lock_na => self.third_party_yale_lock_na&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ThirdPartyYaleLockNA) },
+          :third_party_yale_lock_eu => self.third_party_yale_lock_eu&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ThirdPartyYaleLockEU) },
+          :z_wave_device => self.z_wave_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::ZWaveDevice) },
+          :embedded_takeover_module_third_party_device => self.embedded_takeover_module_third_party_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAddDeviceOptions::GetAddDeviceOptionsResponse::EmbeddedTakeoverModuleThirdPartyDevice) },
         }.compact
       end
 
@@ -668,7 +668,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

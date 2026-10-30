@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Bul
       {
         :space_id => self.space_id,
         :assignee_ids => self.assignee_ids,
-        :device_ids => self.device_ids.map { it.to_message },
-        :permissions_update => self.permissions_update&.to_message,
+        :device_ids => self.device_ids.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceId) },
+        :permissions_update => self.permissions_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::BulkUpdatePrivacyPermissions::BulkUpdatePrivacyPermissionsRequest::PermissionsUpdate) },
       }.compact
     end
 
@@ -83,9 +83,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Bul
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :video_permissions => self.video_permissions&.to_message,
-          :voice_permissions => self.voice_permissions&.to_message,
-          :motion_permissions => self.motion_permissions&.to_message,
+          :video_permissions => self.video_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::BulkUpdatePrivacyPermissions::BulkUpdatePrivacyPermissionsRequest::VideoPermissions) },
+          :voice_permissions => self.voice_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::BulkUpdatePrivacyPermissions::BulkUpdatePrivacyPermissionsRequest::VoicePermissions) },
+          :motion_permissions => self.motion_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::BulkUpdatePrivacyPermissions::BulkUpdatePrivacyPermissionsRequest::MotionPermissions) },
         }.compact
       end
     end
@@ -122,8 +122,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Bul
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :updates => self.updates.map { it.to_message },
-          :policy => self.policy&.to_message,
+          :updates => self.updates.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Privacy::ChannelPermissionUpdate) },
+          :policy => self.policy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissionPolicy) },
         }.compact
       end
     end
@@ -157,7 +157,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Bul
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :audio_playback_and_download => self.audio_playback_and_download&.to_message,
+          :audio_playback_and_download => self.audio_playback_and_download&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Privacy::HubDevicePrivacyPermission::AudioPlaybackAndDownload) },
         }.compact
       end
     end
@@ -195,7 +195,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Bul
       def to_message
         {
           :photo_on_demand_state => self.photo_on_demand_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::BulkUpdatePrivacyPermissions::BulkUpdatePrivacyPermissionsRequest::MotionPermissions::PhotoOnDemandState.proto(it) },
-          :policy => self.policy&.to_message,
+          :policy => self.policy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissionPolicy) },
         }.compact
       end
 

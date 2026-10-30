@@ -56,9 +56,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario
         :id => self.id,
         :enabled => self.enabled,
         :name => self.name,
-        :alarm_sources => self.alarm_sources.map { it.to_message },
-        :alarm_sources_condition => self.alarm_sources_condition&.to_message,
-        :targets => self.targets.map { it.to_message },
+        :alarm_sources => self.alarm_sources.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::AlarmSource) },
+        :alarm_sources_condition => self.alarm_sources_condition&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::AlarmSourcesCondition) },
+        :targets => self.targets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::TargetVideoEdge) },
         :monitoring_state => self.monitoring_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::MonitoringState.proto(it) },
         :activate_output_digital_line => self.activate_output_digital_line&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::VideoScenario::ActivateOutputDigitalLine.proto(it) },
       }.compact

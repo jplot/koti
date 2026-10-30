@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :not_allowed => self.not_allowed&.to_message,
-        :allowed => self.allowed&.to_message,
+        :not_allowed => self.not_allowed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeeSurveillanceCamerasAccess::NotAllowed) },
+        :allowed => self.allowed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeeSurveillanceCamerasAccess::Allowed) },
       }.compact
     end
 
@@ -99,7 +99,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :devices => self.devices&.to_message,
+          :devices => self.devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::SurveillanceCamerasDevices) },
         }.compact
       end
     end

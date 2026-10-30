@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :always => self.always&.to_message,
-        :when_disarmed => self.when_disarmed&.to_message,
-        :time_window => self.time_window&.to_message,
+        :always => self.always&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::FirmwareAutoUpdateRule::Always) },
+        :when_disarmed => self.when_disarmed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::FirmwareAutoUpdateRule::WhenDisarmed) },
+        :time_window => self.time_window&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::FirmwareAutoUpdateRule::TimeWindow) },
       }.compact
     end
 
@@ -137,7 +137,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :days_of_week => self.days_of_week.map { ::Ajax::Sdk::Cloud::Messages::Google::Type::DayOfWeek.proto(it) },
-          :start_time => self.start_time&.to_message,
+          :start_time => self.start_time&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Type::TimeOfDay) },
           :duration_hours => self.duration_hours,
         }.compact
       end

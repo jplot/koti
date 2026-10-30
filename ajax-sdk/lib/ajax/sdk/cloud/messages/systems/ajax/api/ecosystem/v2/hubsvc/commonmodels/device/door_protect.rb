@@ -44,9 +44,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :common_door_protect_part => self.common_door_protect_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :common_door_protect_part => self.common_door_protect_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonDoorProtectPart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBattery) },
         :deprecated_siren_triggers => self.deprecated_siren_triggers.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::DoorProtect::DeprecatedSirenTrigger.proto(it) },
         :deprecated_chime_triggers => self.deprecated_chime_triggers.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::DoorProtect::DeprecatedChimeTrigger.proto(it) },
       }.compact
@@ -116,13 +116,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :common_door_protect_part => self.common_door_protect_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
-        :fast_tamper_part => self.fast_tamper_part&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :common_door_protect_part => self.common_door_protect_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonDoorProtectPart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBattery) },
+        :fast_tamper_part => self.fast_tamper_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::FastTamperPart) },
         :deprecated_siren_triggers => self.deprecated_siren_triggers.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::DoorProtectS::DeprecatedSirenTrigger.proto(it) },
         :deprecated_chime_triggers => self.deprecated_chime_triggers.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::DoorProtectS::DeprecatedChimeTrigger.proto(it) },
-        :fast_tamper => self.fast_tamper&.to_message,
+        :fast_tamper => self.fast_tamper&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::FastTamper) },
       }.compact
     end
 
@@ -172,7 +172,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_door_protect_part => self.common_door_protect_part&.to_message,
+        :common_door_protect_part => self.common_door_protect_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonDoorProtectPart) },
       }.compact
     end
   end
@@ -206,7 +206,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_door_protect_part => self.common_door_protect_part&.to_message,
+        :common_door_protect_part => self.common_door_protect_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonDoorProtectPart) },
       }.compact
     end
   end
@@ -240,7 +240,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_door_protect_part => self.common_door_protect_part&.to_message,
+        :common_door_protect_part => self.common_door_protect_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonDoorProtectPart) },
       }.compact
     end
   end
@@ -274,7 +274,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_door_protect_part => self.common_door_protect_part&.to_message,
+        :common_door_protect_part => self.common_door_protect_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonDoorProtectPart) },
       }.compact
     end
   end
@@ -308,7 +308,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_door_protect_part => self.common_door_protect_part&.to_message,
+        :common_door_protect_part => self.common_door_protect_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonDoorProtectPart) },
       }.compact
     end
   end
@@ -342,7 +342,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_door_protect_part => self.common_door_protect_part&.to_message,
+        :common_door_protect_part => self.common_door_protect_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonDoorProtectPart) },
       }.compact
     end
   end
@@ -397,14 +397,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_arming_part => self.common_arming_part&.to_message,
-        :device_temperature => self.device_temperature&.to_message,
-        :common_fibra_part => self.common_fibra_part&.to_message,
-        :device_warnings => self.device_warnings&.to_message,
-        :reed_contact_part => self.reed_contact_part&.to_message,
-        :siren_triggers => self.siren_triggers&.to_message,
-        :device_chimes => self.device_chimes&.to_message,
-        :always_active_part => self.always_active_part&.to_message,
+        :common_arming_part => self.common_arming_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart) },
+        :device_temperature => self.device_temperature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTemperature) },
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
+        :device_warnings => self.device_warnings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceWarnings) },
+        :reed_contact_part => self.reed_contact_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart) },
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
+        :device_chimes => self.device_chimes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes) },
+        :always_active_part => self.always_active_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AlwaysActivePart) },
       }.compact
     end
   end
@@ -459,14 +459,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_arming_part => self.common_arming_part&.to_message,
-        :device_temperature => self.device_temperature&.to_message,
-        :common_fibra_part => self.common_fibra_part&.to_message,
-        :device_warnings => self.device_warnings&.to_message,
-        :reed_contact_part => self.reed_contact_part&.to_message,
-        :siren_triggers => self.siren_triggers&.to_message,
-        :device_chimes => self.device_chimes&.to_message,
-        :always_active_part => self.always_active_part&.to_message,
+        :common_arming_part => self.common_arming_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart) },
+        :device_temperature => self.device_temperature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTemperature) },
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
+        :device_warnings => self.device_warnings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceWarnings) },
+        :reed_contact_part => self.reed_contact_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart) },
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
+        :device_chimes => self.device_chimes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes) },
+        :always_active_part => self.always_active_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AlwaysActivePart) },
       }.compact
     end
   end
@@ -533,18 +533,18 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :common_arming_part => self.common_arming_part&.to_message,
-        :device_temperature => self.device_temperature&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :common_arming_part => self.common_arming_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart) },
+        :device_temperature => self.device_temperature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTemperature) },
         :device_tamper_status => self.device_tamper_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTamperStatus.proto(it) },
-        :siren_triggers => self.siren_triggers&.to_message,
-        :device_chimes => self.device_chimes&.to_message,
-        :extra_contact_sensor_part => self.extra_contact_sensor_part&.to_message,
-        :reed_contact_part => self.reed_contact_part&.to_message,
-        :device_battery_without_charging => self.device_battery_without_charging&.to_message,
-        :always_active_part => self.always_active_part&.to_message,
-        :common_wings_part => self.common_wings_part&.to_message,
-        :led_indication_part => self.led_indication_part&.to_message,
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
+        :device_chimes => self.device_chimes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes) },
+        :extra_contact_sensor_part => self.extra_contact_sensor_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExtraContactSensorPart) },
+        :reed_contact_part => self.reed_contact_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart) },
+        :device_battery_without_charging => self.device_battery_without_charging&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBatteryWithoutCharging) },
+        :always_active_part => self.always_active_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AlwaysActivePart) },
+        :common_wings_part => self.common_wings_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonWingsPart) },
+        :led_indication_part => self.led_indication_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart) },
       }.compact
     end
   end
@@ -605,16 +605,16 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :common_arming_part => self.common_arming_part&.to_message,
-        :device_temperature => self.device_temperature&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :common_arming_part => self.common_arming_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart) },
+        :device_temperature => self.device_temperature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTemperature) },
         :device_tamper_status => self.device_tamper_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTamperStatus.proto(it) },
-        :siren_triggers => self.siren_triggers&.to_message,
-        :device_chimes => self.device_chimes&.to_message,
-        :reed_contact_part => self.reed_contact_part&.to_message,
-        :device_battery_without_charging => self.device_battery_without_charging&.to_message,
-        :always_active_part => self.always_active_part&.to_message,
-        :led_indication_part => self.led_indication_part&.to_message,
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
+        :device_chimes => self.device_chimes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes) },
+        :reed_contact_part => self.reed_contact_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ReedContactPart) },
+        :device_battery_without_charging => self.device_battery_without_charging&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBatteryWithoutCharging) },
+        :always_active_part => self.always_active_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AlwaysActivePart) },
+        :led_indication_part => self.led_indication_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart) },
       }.compact
     end
   end

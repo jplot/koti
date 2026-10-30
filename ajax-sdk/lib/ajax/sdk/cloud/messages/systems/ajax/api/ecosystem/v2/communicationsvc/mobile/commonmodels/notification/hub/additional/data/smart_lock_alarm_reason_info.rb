@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     def to_message
       {
         :alarm_reason => self.alarm_reason&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::SmartLockAlarmReasonInfo::AlarmReason.proto(it) },
-        :credential => self.credential&.to_message,
+        :credential => self.credential&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::SmartLockAlarmReasonInfo::CredentialInfo) },
         :error_code => self.error_code&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::SmartLockAlarmReasonInfo::ErrorCode.proto(it) },
       }.compact
     end

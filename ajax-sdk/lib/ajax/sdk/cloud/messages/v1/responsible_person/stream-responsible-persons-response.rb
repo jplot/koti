@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::ResponsiblePerson
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :responsible_persons => self.responsible_persons.map { it.to_message },
+        :responsible_persons => self.responsible_persons.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::ResponsiblePerson::ResponsiblePerson) },
       }.compact
     end
   end

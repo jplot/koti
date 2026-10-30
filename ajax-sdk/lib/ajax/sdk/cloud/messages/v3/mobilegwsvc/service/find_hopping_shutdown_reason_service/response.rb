@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindHoppingShutdownReasonService::FindHoppingShutdownReasonResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindHoppingShutdownReasonService::FindHoppingShutdownReasonResponse::Failure) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :g2_devices_connected => self.g2_devices_connected&.to_message,
-          :parent_hub_hopping_disabled => self.parent_hub_hopping_disabled&.to_message,
+          :g2_devices_connected => self.g2_devices_connected&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindHoppingShutdownReasonService::FindHoppingShutdownReasonResponse::Success::G2DevicesConnected) },
+          :parent_hub_hopping_disabled => self.parent_hub_hopping_disabled&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindHoppingShutdownReasonService::FindHoppingShutdownReasonResponse::Success::ParentHubHoppingDisabled) },
         }.compact
       end
 
@@ -117,7 +117,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :g2_devices => self.g2_devices.map { it.to_message },
+            :g2_devices => self.g2_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindHoppingShutdownReasonService::FindHoppingShutdownReasonResponse::Success::G2Device) },
           }.compact
         end
       end
@@ -155,7 +155,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
         def to_message
           {
             :device_id => self.device_id,
-            :object_type => self.object_type&.to_message,
+            :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
           }.compact
         end
       end
@@ -224,8 +224,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
       def to_message
         {
           :message => self.message,
-          :device_not_found => self.device_not_found&.to_message,
-          :bad_request => self.bad_request&.to_message,
+          :device_not_found => self.device_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

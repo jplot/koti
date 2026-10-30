@@ -52,7 +52,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :device_color => self.device_color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceColor.proto(it) },
         :device_label => self.device_label&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceLabel.proto(it) },
         :sorting_key => self.sorting_key,
-        :device_appearance => self.device_appearance&.to_message,
+        :device_appearance => self.device_appearance&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceAppearance) },
       }.compact
     end
   end

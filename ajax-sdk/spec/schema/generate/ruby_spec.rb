@@ -39,6 +39,12 @@ RSpec.describe Schema::Generate::Ruby do
     expect(klass.new(**probe.from(raw).to_message).to_h).to eq(raw)
   end
 
+  it 'refuses a Hash where a sub-message value goes', :aggregate_failures do
+    expect { probe.new(sub: { n: 1 }).to_message }.to raise_error(TypeError, /Sub/)
+    expect { probe.new(subs: [{ n: 1 }]).to_message }.to raise_error(TypeError, /Sub/)
+    expect { probe.new(tags: { 'k' => { n: 1 } }).to_message }.to raise_error(TypeError, /Sub/)
+  end
+
   it 'refuses an unknown keyword' do
     expect { probe.new(bogus: 1) }.to raise_error(ArgumentError, /bogus/)
   end

@@ -58,13 +58,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
       {
         :id => self.id,
         :universal_token => self.universal_token,
-        :space => self.space&.to_message,
+        :space => self.space&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationSpace) },
         :server_timestamp => self.server_timestamp&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
         :folder => self.folder&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationFolder.proto(it) },
         :importance => self.importance&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationImportance.proto(it) },
-        :content => self.content&.to_message,
+        :content => self.content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationContent) },
         :read_by_user => self.read_by_user,
-        :additional_data => self.additional_data.map { it.to_message },
+        :additional_data => self.additional_data.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationAdditionalData) },
       }.compact
     end
   end

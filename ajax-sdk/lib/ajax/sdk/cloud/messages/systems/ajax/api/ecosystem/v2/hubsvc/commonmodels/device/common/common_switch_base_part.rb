@@ -45,7 +45,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     def to_message
       {
         :event_type => self.event_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSwitchBasePart::EventType.proto(it) },
-        :event_capabilities => self.event_capabilities.map { it.to_message },
+        :event_capabilities => self.event_capabilities.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSwitchBasePart::EventGroup) },
         :local_alarm_only => self.local_alarm_only,
         :switch_state => self.switch_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSwitchBasePart::SwitchState.proto(it) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSwitchBasePart::Capability.proto(it) },

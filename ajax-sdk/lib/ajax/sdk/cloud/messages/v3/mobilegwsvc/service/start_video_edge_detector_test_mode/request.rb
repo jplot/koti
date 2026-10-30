@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sta
       {
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
-        :detector_locator => self.detector_locator&.to_message,
+        :detector_locator => self.detector_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Detection::DetectorLocator) },
       }.compact
     end
   end

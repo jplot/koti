@@ -55,12 +55,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc
       {
         :id => self.id,
         :channel_guid => self.channel_guid,
-        :device_info => self.device_info&.to_message,
+        :device_info => self.device_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::MediaDeviceInfo) },
         :dcp_tag => self.dcp_tag,
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::StreamType.proto(it) },
-        :filter => self.filter.map { it.to_message },
-        :live => self.live&.to_message,
-        :archive => self.archive&.to_message,
+        :filter => self.filter.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FrameTypeId) },
+        :live => self.live&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::Stream::Live) },
+        :archive => self.archive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::Stream::Archive) },
       }.compact
     end
 
@@ -143,7 +143,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :ts_range => self.ts_range&.to_message,
+          :ts_range => self.ts_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::TimestampRange) },
           :pos_update_interval => self.pos_update_interval&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
           :group_id => self.group_id,
         }.compact

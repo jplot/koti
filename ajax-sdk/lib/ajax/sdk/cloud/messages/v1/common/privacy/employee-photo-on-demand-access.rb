@@ -44,11 +44,11 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :employee_event_photos_access => self.employee_event_photos_access&.to_message,
-        :not_allowed => self.not_allowed&.to_message,
-        :allowed_always => self.allowed_always&.to_message,
-        :when_armed => self.when_armed&.to_message,
-        :after_alarm => self.after_alarm&.to_message,
+        :employee_event_photos_access => self.employee_event_photos_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeePhotoOnDemandAccess::EmployeeEventPhotosAccess) },
+        :not_allowed => self.not_allowed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeePhotoOnDemandAccess::NotAllowed) },
+        :allowed_always => self.allowed_always&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeePhotoOnDemandAccess::AllowedAlways) },
+        :when_armed => self.when_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeePhotoOnDemandAccess::WhenArmed) },
+        :after_alarm => self.after_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeePhotoOnDemandAccess::AfterAlarm) },
       }.compact
     end
 
@@ -111,7 +111,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :devices => self.devices&.to_message,
+          :devices => self.devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::PhotoOnDemandDevices) },
         }.compact
       end
     end
@@ -148,8 +148,8 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :allowed => self.allowed&.to_message,
-          :forbidden => self.forbidden&.to_message,
+          :allowed => self.allowed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeePhotoOnDemandAccess::WhenArmed::Allowed) },
+          :forbidden => self.forbidden&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeePhotoOnDemandAccess::WhenArmed::ForbiddenUntilArmed) },
         }.compact
       end
 
@@ -182,7 +182,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :devices => self.devices&.to_message,
+            :devices => self.devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::PhotoOnDemandDevices) },
           }.compact
         end
       end
@@ -216,7 +216,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :devices => self.devices&.to_message,
+            :devices => self.devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::PhotoOnDemandDevices) },
           }.compact
         end
       end
@@ -257,7 +257,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :devices => self.devices&.to_message,
+          :devices => self.devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::PhotoOnDemandDevices) },
           :capture_photo_available_until => self.capture_photo_available_until&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
           :configured_time_to_capture_photo_minutes => self.configured_time_to_capture_photo_minutes&.then { ::Ajax::Sdk::Cloud::Encode.wrapper(it) },
         }.compact

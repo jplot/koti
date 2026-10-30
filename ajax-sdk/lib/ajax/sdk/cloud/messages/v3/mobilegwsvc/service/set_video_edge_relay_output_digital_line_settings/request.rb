@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       {
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
-        :output_digital_line_update => self.output_digital_line_update&.to_message,
+        :output_digital_line_update => self.output_digital_line_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoEdgeRelayOutputDigitalLineSettings::SetVideoEdgeRelayOutputDigitalLineSettingsRequest::RelayOutputDigitalLineUpdate) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       def to_message
         {
           :digital_line_id => self.digital_line_id,
-          :relay_output_digital_line_settings => self.relay_output_digital_line_settings&.to_message,
+          :relay_output_digital_line_settings => self.relay_output_digital_line_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::RelayOutputDigitalLine::RelayOutputDigitalLineSettings) },
         }.compact
       end
     end

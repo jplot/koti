@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Act
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :targets => self.targets.map { it.to_message },
+        :targets => self.targets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::SwitchStateAction::Target) },
         :action_type => self.action_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::SwitchStateAction::ActionType.proto(it) },
       }.compact
     end
@@ -72,8 +72,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Act
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :hub_device => self.hub_device&.to_message,
-          :smart_lock => self.smart_lock&.to_message,
+          :hub_device => self.hub_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::SwitchStateAction::Target::HubDevice) },
+          :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::SwitchStateAction::Target::SmartLock) },
         }.compact
       end
 
@@ -120,7 +120,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Act
           {
             :id => self.id,
             :hub_id => self.hub_id,
-            :object_type => self.object_type&.to_message,
+            :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
             :channels => self.channels.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::SwitchStateAction::Target::HubDevice::Channel.proto(it) },
           }.compact
         end

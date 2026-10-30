@@ -77,8 +77,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::StreamAllUnreadCountersResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::StreamAllUnreadCountersResponse::Failure) },
       }.compact
     end
 
@@ -119,7 +119,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :origin_counters => self.origin_counters.map { it.to_message },
+          :origin_counters => self.origin_counters.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::StreamAllUnreadCountersResponse::Success::OriginTotalCounter) },
         }.compact
       end
 
@@ -194,8 +194,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :illegal_argument => self.illegal_argument&.to_message,
-          :internal_error => self.internal_error&.to_message,
+          :illegal_argument => self.illegal_argument&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :internal_error => self.internal_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

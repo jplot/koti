@@ -110,7 +110,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Company
           :employee_id => self.employee_id,
           :first_name => self.first_name,
           :last_name => self.last_name,
-          :role => self.role&.to_message,
+          :role => self.role&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Company::Employee::ComplexRole) },
           :photo_id => self.photo_id,
           :cluster_company_id => self.cluster_company_id,
         }.compact

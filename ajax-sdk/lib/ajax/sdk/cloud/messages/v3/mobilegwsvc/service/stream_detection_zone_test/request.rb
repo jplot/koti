@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_detection_zone_test => self.hub_detection_zone_test&.to_message,
-        :device_detection_zone_test => self.device_detection_zone_test&.to_message,
+        :hub_detection_zone_test => self.hub_detection_zone_test&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDetectionZoneTest::StreamDetectionZoneTestRequest::HubDetectionZoneTest) },
+        :device_detection_zone_test => self.device_detection_zone_test&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamDetectionZoneTest::StreamDetectionZoneTestRequest::DeviceDetectionZoneTest) },
       }.compact
     end
 

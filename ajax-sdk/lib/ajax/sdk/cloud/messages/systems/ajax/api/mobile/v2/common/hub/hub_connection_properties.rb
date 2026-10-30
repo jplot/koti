@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_offline_event_delay_duration => self.hub_offline_event_delay_duration&.to_message,
-        :hub_channel_offline_event_delay_duration => self.hub_channel_offline_event_delay_duration&.to_message,
+        :hub_offline_event_delay_duration => self.hub_offline_event_delay_duration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::HubConnectionProperties::HubOfflineEventDelayDuration) },
+        :hub_channel_offline_event_delay_duration => self.hub_channel_offline_event_delay_duration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::HubConnectionProperties::HubChannelOfflineEventDelayDuration) },
       }.compact
     end
 
@@ -69,7 +69,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :duration_options => self.duration_options.map { it.to_message },
+          :duration_options => self.duration_options.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Time::DurationOption) },
         }.compact
       end
     end
@@ -103,7 +103,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :duration_options => self.duration_options.map { it.to_message },
+          :duration_options => self.duration_options.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Time::DurationOption) },
         }.compact
       end
     end

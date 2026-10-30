@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Cre
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
         :channel_id => self.channel_id,
-        :automation_device_id => self.automation_device_id&.to_message,
+        :automation_device_id => self.automation_device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::LinkedAutomationDeviceId) },
       }.compact
     end
 

@@ -41,7 +41,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :battery_ping_settings => self.battery_ping_settings.map { it.to_message },
+        :battery_ping_settings => self.battery_ping_settings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBatteryPingsPart::BatteryPingSetting) },
         :available_battery_ping_setting_types => self.available_battery_ping_setting_types.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBatteryPingsPart::BatteryPingSettingType.proto(it) },
         :battery_ping_status => self.battery_ping_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBatteryPingsPart::BatteryPingStatus.proto(it) },
         :battery_ping_last_update_time => self.battery_ping_last_update_time&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :battery_ping_settings => self.battery_ping_settings.map { it.to_message },
+          :battery_ping_settings => self.battery_ping_settings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBatteryPingsPart::BatteryPingSetting) },
         }.compact
       end
     end

@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
     def to_message
       {
         :hub_id => self.hub_id,
-        :hub_delay => self.hub_delay&.to_message,
-        :zone_delay => self.zone_delay&.to_message,
+        :hub_delay => self.hub_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::HubDelay) },
+        :zone_delay => self.zone_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::ZoneDelay) },
       }.compact
     end
 
@@ -79,8 +79,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :delay_sub_command => self.delay_sub_command&.to_message,
-          :delay_type => self.delay_type&.to_message,
+          :delay_sub_command => self.delay_sub_command&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::DelaySubCommand) },
+          :delay_type => self.delay_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::DelayType) },
         }.compact
       end
     end
@@ -121,8 +121,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       def to_message
         {
           :zone_id => self.zone_id,
-          :delay_sub_command => self.delay_sub_command&.to_message,
-          :delay_type => self.delay_type&.to_message,
+          :delay_sub_command => self.delay_sub_command&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::DelaySubCommand) },
+          :delay_type => self.delay_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::DelayType) },
         }.compact
       end
     end
@@ -159,8 +159,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :activate => self.activate&.to_message,
-          :deactivate => self.deactivate&.to_message,
+          :activate => self.activate&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::DelaySubCommand::Activate) },
+          :deactivate => self.deactivate&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::DelaySubCommand::Deactivate) },
         }.compact
       end
 
@@ -257,9 +257,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :double_knock_delay => self.double_knock_delay&.to_message,
-          :multiapartment_delay => self.multiapartment_delay&.to_message,
-          :inv_ack_delay => self.inv_ack_delay&.to_message,
+          :double_knock_delay => self.double_knock_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::DelayType::DoubleKnockDelay) },
+          :multiapartment_delay => self.multiapartment_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::DelayType::MultiapartmentDelay) },
+          :inv_ack_delay => self.inv_ack_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandEn54Delay::DeviceCommandEn54DelayRequest::DelayType::InvAckDelay) },
         }.compact
       end
 

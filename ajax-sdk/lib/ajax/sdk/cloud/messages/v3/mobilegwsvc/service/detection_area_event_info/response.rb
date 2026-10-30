@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Det
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DetectionAreaEventInfo::DetectionAreaEventInfoResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DetectionAreaEventInfo::DetectionAreaEventInfoResponse::Failure) },
       }.compact
     end
 
@@ -81,7 +81,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Det
       def to_message
         {
           :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DetectionAreaEventInfo::DetectionAreaEventInfoResponse::Success::DetectionAreaInfoCapability.proto(it) },
-          :state => self.state&.to_message,
+          :state => self.state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DetectionAreaEventInfo::DetectionAreaEventInfoResponse::Success::State) },
         }.compact
       end
 
@@ -120,9 +120,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Det
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :without_options => self.without_options&.to_message,
-            :mount_height => self.mount_height&.to_message,
-            :range_selection => self.range_selection&.to_message,
+            :without_options => self.without_options&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DetectionAreaEventInfo::DetectionAreaEventInfoResponse::Success::WithoutOptions) },
+            :mount_height => self.mount_height&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DetectionAreaEventInfo::DetectionAreaEventInfoResponse::Success::MountHeight) },
+            :range_selection => self.range_selection&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DetectionAreaEventInfo::DetectionAreaEventInfoResponse::Success::RangeSelection) },
           }.compact
         end
 
@@ -213,7 +213,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Det
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :available_range_items => self.available_range_items.map { it.to_message },
+            :available_range_items => self.available_range_items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DetectionAreaEventInfo::DetectionAreaEventInfoResponse::Success::RangeItem) },
           }.compact
         end
       end
@@ -305,8 +305,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Det
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :not_found => self.not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
+          :not_found => self.not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

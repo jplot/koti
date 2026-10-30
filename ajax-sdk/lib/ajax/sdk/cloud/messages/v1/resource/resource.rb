@@ -108,7 +108,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Resource
     def to_message
       {
         :locale => self.locale,
-        :countries => self.countries.map { it.to_message },
+        :countries => self.countries.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Resource::Country) },
       }.compact
     end
   end

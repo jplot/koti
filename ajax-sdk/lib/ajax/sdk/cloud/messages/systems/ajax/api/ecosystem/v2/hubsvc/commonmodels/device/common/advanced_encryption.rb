@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     def to_message
       {
         :advanced_encryption => self.advanced_encryption&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AdvancedEncryptionPart::AdvancedEncryption.proto(it) },
-        :activation_status => self.activation_status&.to_message,
+        :activation_status => self.activation_status&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AdvancedEncryptionPart::ActivationStatus) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AdvancedEncryptionPart::Capability.proto(it) },
       }.compact
     end
@@ -82,10 +82,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :not_activated => self.not_activated&.to_message,
-          :in_progress => self.in_progress&.to_message,
-          :activated => self.activated&.to_message,
-          :failed => self.failed&.to_message,
+          :not_activated => self.not_activated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :in_progress => self.in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :activated => self.activated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :failed => self.failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
         }.compact
       end
 

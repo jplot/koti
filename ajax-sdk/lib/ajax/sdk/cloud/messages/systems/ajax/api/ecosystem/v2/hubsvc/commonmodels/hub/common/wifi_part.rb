@@ -62,7 +62,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       def to_message
         {
           :is_enabled => self.is_enabled,
-          :device_telemetry => self.device_telemetry&.to_message,
+          :device_telemetry => self.device_telemetry&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTelemetry) },
         }.compact
       end
     end

@@ -57,7 +57,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member
         :name => self.name,
         :email => self.email,
         :role => self.role&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::SpaceMemberRole.proto(it) },
-        :images => self.images&.to_message,
+        :images => self.images&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
         :has_privacy_permission => self.has_privacy_permission,
         :sorting_key => self.sorting_key,
         :hex_id => self.hex_id,

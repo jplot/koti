@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Failure) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :channel_record_settings => self.channel_record_settings&.to_message,
+          :channel_record_settings => self.channel_record_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings) },
         }.compact
       end
 
@@ -116,9 +116,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :local => self.local&.to_message,
-            :unavailable_due_to_enabled_cloud_archive => self.unavailable_due_to_enabled_cloud_archive&.to_message,
-            :context => self.context&.to_message,
+            :local => self.local&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings::LocalRecordSettings) },
+            :unavailable_due_to_enabled_cloud_archive => self.unavailable_due_to_enabled_cloud_archive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings::UnavailableDueToEnabledCloudArchive) },
+            :context => self.context&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings::ChannelRecordSettingsContext) },
           }.compact
         end
 
@@ -230,8 +230,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
             {
               :video_edge_name => self.video_edge_name,
               :supported_storage_device_type => self.supported_storage_device_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings::ChannelRecordSettingsContext::SupportedStorageDeviceType.proto(it) },
-              :statuses => self.statuses.map { it.to_message },
-              :displayed_power_settings_mode => self.displayed_power_settings_mode&.to_message,
+              :statuses => self.statuses.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings::ChannelRecordSettingsContext::ChannelRecordSettingsStatus) },
+              :displayed_power_settings_mode => self.displayed_power_settings_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsMode) },
             }.compact
           end
 
@@ -273,10 +273,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
             # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
             def to_message
               {
-                :storage_device_is_missing => self.storage_device_is_missing&.to_message,
-                :detectors_are_disabled => self.detectors_are_disabled&.to_message,
-                :ring_button_ignores_record_policy => self.ring_button_ignores_record_policy&.to_message,
-                :power_mode_is_not_preferred_for_continuous_recording => self.power_mode_is_not_preferred_for_continuous_recording&.to_message,
+                :storage_device_is_missing => self.storage_device_is_missing&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings::ChannelRecordSettingsContext::ChannelRecordSettingsStatus::StorageDeviceIsMissing) },
+                :detectors_are_disabled => self.detectors_are_disabled&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings::ChannelRecordSettingsContext::ChannelRecordSettingsStatus::DetectorsAreDisabled) },
+                :ring_button_ignores_record_policy => self.ring_button_ignores_record_policy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings::ChannelRecordSettingsContext::ChannelRecordSettingsStatus::RingButtonIgnoresRecordPolicy) },
+                :power_mode_is_not_preferred_for_continuous_recording => self.power_mode_is_not_preferred_for_continuous_recording&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetVideoEdgeChannelLocalRecordSettings::GetVideoEdgeChannelLocalRecordSettingsResponse::Success::ChannelRecordSettings::ChannelRecordSettingsContext::ChannelRecordSettingsStatus::PowerModeIsNotPreferredForContinuousRecording) },
               }.compact
             end
 
@@ -393,7 +393,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
               # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
               def to_message
                 {
-                  :preferred_power_settings_mode => self.preferred_power_settings_mode&.to_message,
+                  :preferred_power_settings_mode => self.preferred_power_settings_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettingsMode) },
                 }.compact
               end
             end
@@ -454,12 +454,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :video_edge_not_found => self.video_edge_not_found&.to_message,
-          :channel_not_found => self.channel_not_found&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :video_edge_not_found => self.video_edge_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :channel_not_found => self.channel_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

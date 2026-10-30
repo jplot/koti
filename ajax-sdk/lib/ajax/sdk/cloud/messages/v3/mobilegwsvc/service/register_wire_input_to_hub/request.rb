@@ -62,7 +62,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
         :wire_input_name => self.wire_input_name,
         :wire_input_index => self.wire_input_index,
         :parent_id => self.parent_id,
-        :parent_type => self.parent_type&.to_message,
+        :parent_type => self.parent_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterWireInputToHub::RegisterWireInputToHubRequest::ParentType) },
         :fire_zone_id => self.fire_zone_id,
         :device_location => self.device_location,
       }.compact
@@ -121,15 +121,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :transmitter_fibra_two_channels => self.transmitter_fibra_two_channels&.to_message,
-          :transmitter_fibra_four_channels_two_relays_two_logical => self.transmitter_fibra_four_channels_two_relays_two_logical&.to_message,
-          :multi_transmitter => self.multi_transmitter&.to_message,
-          :multi_transmitter_fibra => self.multi_transmitter_fibra&.to_message,
-          :en54_io_module_base => self.en54_io_module_base&.to_message,
-          :en54_io_module_two_in_two_out => self.en54_io_module_two_in_two_out&.to_message,
-          :multi_transmitter_g3 => self.multi_transmitter_g3&.to_message,
-          :transmitter_fibra_8_channels => self.transmitter_fibra_8_channels&.to_message,
-          :transmitter_fibra_8_channels_inwall => self.transmitter_fibra_8_channels_inwall&.to_message,
+          :transmitter_fibra_two_channels => self.transmitter_fibra_two_channels&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::TransmitterFibraTwoChannels) },
+          :transmitter_fibra_four_channels_two_relays_two_logical => self.transmitter_fibra_four_channels_two_relays_two_logical&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::TransmitterFibraFourChannelsTwoRelaysTwoLogical) },
+          :multi_transmitter => self.multi_transmitter&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::MultiTransmitter) },
+          :multi_transmitter_fibra => self.multi_transmitter_fibra&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::MultiTransmitterFibra) },
+          :en54_io_module_base => self.en54_io_module_base&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::En54IoModuleBase) },
+          :en54_io_module_two_in_two_out => self.en54_io_module_two_in_two_out&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::En54IoModuleTwoInTwoOut) },
+          :multi_transmitter_g3 => self.multi_transmitter_g3&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::MultiTransmitterG3) },
+          :transmitter_fibra_8_channels => self.transmitter_fibra_8_channels&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::TransmitterFibra8Channels) },
+          :transmitter_fibra_8_channels_inwall => self.transmitter_fibra_8_channels_inwall&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::TransmitterFibra8ChannelsInwall) },
         }.compact
       end
 

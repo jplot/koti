@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :update_candidates => self.update_candidates.map { it.to_message },
+        :update_candidates => self.update_candidates.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::FirmwareUpdateCandidateWithAdditionalInfo) },
       }.compact
     end
   end
@@ -69,8 +69,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :candidate => self.candidate&.to_message,
-        :additional_info => self.additional_info&.to_message,
+        :candidate => self.candidate&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::FirmwareUpdateCandidate) },
+        :additional_info => self.additional_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::FirmwareUpdateCandidateAdditionalInfo) },
       }.compact
     end
   end
@@ -123,8 +123,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :color => self.color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceColor.proto(it) },
         :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::TerminalFirmwareState.proto(it) },
         :sorting_key => self.sorting_key,
-        :video_edge_info => self.video_edge_info&.to_message,
-        :hub_info => self.hub_info&.to_message,
+        :video_edge_info => self.video_edge_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::FirmwareUpdateCandidateAdditionalInfo::VideoEdgeInfo) },
+        :hub_info => self.hub_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::FirmwareUpdateCandidateAdditionalInfo::HubDeviceInfo) },
       }.compact
     end
 
@@ -194,7 +194,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :type => self.type&.to_message,
+          :type => self.type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         }.compact
       end
     end

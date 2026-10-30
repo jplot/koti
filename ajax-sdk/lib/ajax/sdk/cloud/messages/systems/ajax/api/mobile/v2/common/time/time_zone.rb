@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Time
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :time_zone => self.time_zone&.to_message,
+        :time_zone => self.time_zone&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Type::TimeZone) },
       }.compact
     end
   end

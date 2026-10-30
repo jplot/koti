@@ -65,18 +65,18 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :common_wings_part => self.common_wings_part&.to_message,
-        :device_battery_part => self.device_battery_part&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :common_wings_part => self.common_wings_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonWingsPart) },
+        :device_battery_part => self.device_battery_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBattery) },
         :device_tamper_status => self.device_tamper_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTamperStatus.proto(it) },
-        :external_power_part => self.external_power_part&.to_message,
-        :malfunction_badge_part => self.malfunction_badge_part&.to_message,
-        :main_channel_connection_part => self.main_channel_connection_part&.to_message,
-        :ethernet_part => self.ethernet_part&.to_message,
-        :common_standard_compliance_part => self.common_standard_compliance_part&.to_message,
-        :rex_pairing_part => self.rex_pairing_part&.to_message,
-        :led_indication_part => self.led_indication_part&.to_message,
-        :charging_mode_part => self.charging_mode_part&.to_message,
+        :external_power_part => self.external_power_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExternalPower) },
+        :malfunction_badge_part => self.malfunction_badge_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::MalfunctionBadgePart) },
+        :main_channel_connection_part => self.main_channel_connection_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Rangeextender::MainChannelConnectionPart) },
+        :ethernet_part => self.ethernet_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::EthernetPart) },
+        :common_standard_compliance_part => self.common_standard_compliance_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonStandardCompliancePart) },
+        :rex_pairing_part => self.rex_pairing_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Rangeextender::RexPairingPart) },
+        :led_indication_part => self.led_indication_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart) },
+        :charging_mode_part => self.charging_mode_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Rangeextender::ChargingModePart) },
       }.compact
     end
   end
@@ -152,21 +152,21 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :common_wings_part => self.common_wings_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
-        :two_tamper_part => self.two_tamper_part&.to_message,
-        :external_power_part => self.external_power_part&.to_message,
-        :malfunction_badge_part => self.malfunction_badge_part&.to_message,
-        :main_channel_connection_part => self.main_channel_connection_part&.to_message,
-        :ethernet_part => self.ethernet_part&.to_message,
-        :device_fire_zone_part => self.device_fire_zone_part&.to_message,
-        :device_location_part => self.device_location_part&.to_message,
-        :device_en54_faults_part => self.device_en54_faults_part&.to_message,
-        :common_standard_compliance_part => self.common_standard_compliance_part&.to_message,
-        :rex_pairing_part => self.rex_pairing_part&.to_message,
-        :device_en54_testing_part => self.device_en54_testing_part&.to_message,
-        :device_pse_test_part => self.device_pse_test_part&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :common_wings_part => self.common_wings_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonWingsPart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBattery) },
+        :two_tamper_part => self.two_tamper_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::TwoTamperPart) },
+        :external_power_part => self.external_power_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExternalPower) },
+        :malfunction_badge_part => self.malfunction_badge_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::MalfunctionBadgePart) },
+        :main_channel_connection_part => self.main_channel_connection_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Rangeextender::MainChannelConnectionPart) },
+        :ethernet_part => self.ethernet_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::EthernetPart) },
+        :device_fire_zone_part => self.device_fire_zone_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceFireZonePart) },
+        :device_location_part => self.device_location_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceLocationPart) },
+        :device_en54_faults_part => self.device_en54_faults_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54FaultsPart) },
+        :common_standard_compliance_part => self.common_standard_compliance_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonStandardCompliancePart) },
+        :rex_pairing_part => self.rex_pairing_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Rangeextender::RexPairingPart) },
+        :device_en54_testing_part => self.device_en54_testing_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54TestingPart) },
+        :device_pse_test_part => self.device_pse_test_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DevicePseTestPart) },
       }.compact
     end
   end
@@ -242,21 +242,21 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :common_wings_part => self.common_wings_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :common_wings_part => self.common_wings_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonWingsPart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBattery) },
         :device_tamper_status => self.device_tamper_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTamperStatus.proto(it) },
-        :external_power_part => self.external_power_part&.to_message,
-        :jeweller_communication_part => self.jeweller_communication_part&.to_message,
-        :malfunction_badge_part => self.malfunction_badge_part&.to_message,
-        :main_channel_connection_part => self.main_channel_connection_part&.to_message,
-        :ethernet_part => self.ethernet_part&.to_message,
-        :common_standard_compliance_part => self.common_standard_compliance_part&.to_message,
-        :external_antennas_part => self.external_antennas_part&.to_message,
-        :led_indication_part => self.led_indication_part&.to_message,
-        :hopping_part => self.hopping_part&.to_message,
-        :rex_pairing_part => self.rex_pairing_part&.to_message,
-        :device_pse_test_part => self.device_pse_test_part&.to_message,
+        :external_power_part => self.external_power_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExternalPower) },
+        :jeweller_communication_part => self.jeweller_communication_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::JewellerCommunicationPart) },
+        :malfunction_badge_part => self.malfunction_badge_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::MalfunctionBadgePart) },
+        :main_channel_connection_part => self.main_channel_connection_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Rangeextender::MainChannelConnectionPart) },
+        :ethernet_part => self.ethernet_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::EthernetPart) },
+        :common_standard_compliance_part => self.common_standard_compliance_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonStandardCompliancePart) },
+        :external_antennas_part => self.external_antennas_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExternalAntennasPart) },
+        :led_indication_part => self.led_indication_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart) },
+        :hopping_part => self.hopping_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::HoppingPart) },
+        :rex_pairing_part => self.rex_pairing_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Rangeextender::RexPairingPart) },
+        :device_pse_test_part => self.device_pse_test_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DevicePseTestPart) },
       }.compact
     end
   end
@@ -329,20 +329,20 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :common_wings_part => self.common_wings_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
-        :two_tamper_part => self.two_tamper_part&.to_message,
-        :external_power_part => self.external_power_part&.to_message,
-        :malfunction_badge_part => self.malfunction_badge_part&.to_message,
-        :main_channel_connection_part => self.main_channel_connection_part&.to_message,
-        :ethernet_part => self.ethernet_part&.to_message,
-        :device_fire_zone_part => self.device_fire_zone_part&.to_message,
-        :device_location_part => self.device_location_part&.to_message,
-        :device_en54_faults_part => self.device_en54_faults_part&.to_message,
-        :common_standard_compliance_part => self.common_standard_compliance_part&.to_message,
-        :rex_pairing_part => self.rex_pairing_part&.to_message,
-        :device_en54_testing_part => self.device_en54_testing_part&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :common_wings_part => self.common_wings_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonWingsPart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBattery) },
+        :two_tamper_part => self.two_tamper_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::TwoTamperPart) },
+        :external_power_part => self.external_power_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExternalPower) },
+        :malfunction_badge_part => self.malfunction_badge_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::MalfunctionBadgePart) },
+        :main_channel_connection_part => self.main_channel_connection_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Rangeextender::MainChannelConnectionPart) },
+        :ethernet_part => self.ethernet_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::EthernetPart) },
+        :device_fire_zone_part => self.device_fire_zone_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceFireZonePart) },
+        :device_location_part => self.device_location_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceLocationPart) },
+        :device_en54_faults_part => self.device_en54_faults_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54FaultsPart) },
+        :common_standard_compliance_part => self.common_standard_compliance_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonStandardCompliancePart) },
+        :rex_pairing_part => self.rex_pairing_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Rangeextender::RexPairingPart) },
+        :device_en54_testing_part => self.device_en54_testing_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54TestingPart) },
       }.compact
     end
   end

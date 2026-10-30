@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Det
     def to_message
       {
         :notification_id => self.notification_id,
-        :origin => self.origin&.to_message,
+        :origin => self.origin&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationOriginId) },
       }.compact
     end
   end

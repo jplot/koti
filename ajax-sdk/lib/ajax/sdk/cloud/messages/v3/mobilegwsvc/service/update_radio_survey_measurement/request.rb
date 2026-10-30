@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :measurements => self.measurements.map { it.to_message },
+        :measurements => self.measurements.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateRadioSurveyMeasurement::UpdateRadioSurveyMeasurementRequest::MeasurementUpdate) },
       }.compact
     end
 

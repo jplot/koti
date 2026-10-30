@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       {
         :hub_id => self.hub_id,
         :jwl_protocol_version => self.jwl_protocol_version&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateJwlProtocolVersion::UpdateJwlProtocolVersionRequest::JwlProtocolVersion.proto(it) },
-        :selected_devices => self.selected_devices.map { it.to_message },
+        :selected_devices => self.selected_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateJwlProtocolVersion::UpdateJwlProtocolVersionRequest::SelectedDevice) },
       }.compact
     end
 
@@ -76,7 +76,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_type => self.device_type&.to_message,
+          :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
           :device_id => self.device_id,
         }.compact
       end

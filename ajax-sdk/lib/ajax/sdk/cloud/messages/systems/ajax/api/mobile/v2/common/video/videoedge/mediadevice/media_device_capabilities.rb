@@ -81,22 +81,22 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
     def to_message
       {
         :flags => self.flags.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Flag.proto(it) },
-        :main => self.main&.to_message,
-        :sub => self.sub&.to_message,
-        :blc => self.blc&.to_message,
-        :white_balance => self.white_balance&.to_message,
-        :wdr => self.wdr&.to_message,
-        :exposure => self.exposure&.to_message,
-        :ircut_filter_mode => self.ircut_filter_mode&.to_message,
-        :ptz => self.ptz&.to_message,
-        :transform => self.transform&.to_message,
-        :privacy_mask => self.privacy_mask&.to_message,
-        :exposure_metering_area => self.exposure_metering_area&.to_message,
-        :anti_flicker => self.anti_flicker&.to_message,
-        :backlight => self.backlight&.to_message,
-        :image_profile => self.image_profile&.to_message,
-        :noise_reduction => self.noise_reduction&.to_message,
-        :image_presets => self.image_presets.map { it.to_message },
+        :main => self.main&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Stream) },
+        :sub => self.sub&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Stream) },
+        :blc => self.blc&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::BacklightCompensation) },
+        :white_balance => self.white_balance&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::WhiteBalance) },
+        :wdr => self.wdr&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::WideDynamicRange) },
+        :exposure => self.exposure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Exposure) },
+        :ircut_filter_mode => self.ircut_filter_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::IrCutFilterMode) },
+        :ptz => self.ptz&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Ptz) },
+        :transform => self.transform&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Transform) },
+        :privacy_mask => self.privacy_mask&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::PrivacyMaskOptions) },
+        :exposure_metering_area => self.exposure_metering_area&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::ExposureMeteringArea) },
+        :anti_flicker => self.anti_flicker&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::AntiFlicker) },
+        :backlight => self.backlight&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Backlight) },
+        :image_profile => self.image_profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::ImageProfile) },
+        :noise_reduction => self.noise_reduction&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::NoiseReduction) },
+        :image_presets => self.image_presets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::ImagePreset) },
       }.compact
     end
 
@@ -200,8 +200,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :image_illumination_preset => self.image_illumination_preset&.to_message,
-          :capabilities => self.capabilities&.to_message,
+          :image_illumination_preset => self.image_illumination_preset&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::ImagePreset::ImageIlluminationPreset) },
+          :capabilities => self.capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::ImagePreset::Capabilities) },
         }.compact
       end
 
@@ -271,7 +271,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :image_profile => self.image_profile&.to_message,
+            :image_profile => self.image_profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::ImageProfile) },
           }.compact
         end
       end
@@ -315,10 +315,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :off_illumination_mode => self.off_illumination_mode&.to_message,
-          :ir_illumination_mode => self.ir_illumination_mode&.to_message,
-          :white_illumination_mode => self.white_illumination_mode&.to_message,
-          :smart_illumination_mode => self.smart_illumination_mode&.to_message,
+          :off_illumination_mode => self.off_illumination_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Backlight::OffIlluminationMode) },
+          :ir_illumination_mode => self.ir_illumination_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Backlight::IrIlluminationMode) },
+          :white_illumination_mode => self.white_illumination_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Backlight::WhiteIlluminationMode) },
+          :smart_illumination_mode => self.smart_illumination_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Backlight::SmartIlluminationMode) },
         }.compact
       end
 
@@ -475,12 +475,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :resolutions => self.resolutions.map { it.to_message },
+          :resolutions => self.resolutions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoResolution) },
           :codecs => self.codecs.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoCodec.proto(it) },
-          :fps_range => self.fps_range&.to_message,
-          :gop_size_range => self.gop_size_range&.to_message,
-          :bitrate_range => self.bitrate_range&.to_message,
-          :quality_range => self.quality_range&.to_message,
+          :fps_range => self.fps_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::UInt32Range) },
+          :gop_size_range => self.gop_size_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::UInt32Range) },
+          :bitrate_range => self.bitrate_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::UInt32Range) },
+          :quality_range => self.quality_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::UInt32Range) },
         }.compact
       end
     end
@@ -514,7 +514,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :level_range => self.level_range&.to_message,
+          :level_range => self.level_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
         }.compact
       end
     end
@@ -551,8 +551,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :auto => self.auto&.to_message,
-          :manual => self.manual&.to_message,
+          :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::WhiteBalance::AutoMode) },
+          :manual => self.manual&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::WhiteBalance::ManualMode) },
         }.compact
       end
 
@@ -615,8 +615,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :red_gain_range => self.red_gain_range&.to_message,
-            :blue_gain_range => self.blue_gain_range&.to_message,
+            :red_gain_range => self.red_gain_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
+            :blue_gain_range => self.blue_gain_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
           }.compact
         end
       end
@@ -651,7 +651,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :level_range => self.level_range&.to_message,
+          :level_range => self.level_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
         }.compact
       end
     end
@@ -691,9 +691,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :manual => self.manual&.to_message,
-          :auto => self.auto&.to_message,
-          :shutter_speed => self.shutter_speed.map { it.to_message },
+          :manual => self.manual&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Exposure::ManualMode) },
+          :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Exposure::AutoMode) },
+          :shutter_speed => self.shutter_speed.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::ShutterSpeed) },
         }.compact
       end
 
@@ -732,9 +732,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :exposure_time_range => self.exposure_time_range&.to_message,
-            :gain_range => self.gain_range&.to_message,
-            :iris_range => self.iris_range&.to_message,
+            :exposure_time_range => self.exposure_time_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::DurationRange) },
+            :gain_range => self.gain_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
+            :iris_range => self.iris_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
           }.compact
         end
       end
@@ -793,13 +793,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
         def to_message
           {
             :priorities => self.priorities.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::ExposurePriority.proto(it) },
-            :min_exposure_time_range => self.min_exposure_time_range&.to_message,
-            :max_exposure_time_range => self.max_exposure_time_range&.to_message,
-            :min_gain_range => self.min_gain_range&.to_message,
-            :max_gain_range => self.max_gain_range&.to_message,
-            :min_iris_range => self.min_iris_range&.to_message,
-            :max_iris_range => self.max_iris_range&.to_message,
-            :exposure_compensation_range => self.exposure_compensation_range&.to_message,
+            :min_exposure_time_range => self.min_exposure_time_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::DurationRange) },
+            :max_exposure_time_range => self.max_exposure_time_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::DurationRange) },
+            :min_gain_range => self.min_gain_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
+            :max_gain_range => self.max_gain_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
+            :min_iris_range => self.min_iris_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
+            :max_iris_range => self.max_iris_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::FloatRange) },
+            :exposure_compensation_range => self.exposure_compensation_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Int32Range) },
             :presets => self.presets.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::AutoExposurePreset.proto(it) },
           }.compact
         end
@@ -841,9 +841,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :on => self.on&.to_message,
-          :off => self.off&.to_message,
-          :auto => self.auto&.to_message,
+          :on => self.on&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::IrCutFilterMode::OnMode) },
+          :off => self.off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::IrCutFilterMode::OffMode) },
+          :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::IrCutFilterMode::AutoMode) },
         }.compact
       end
 
@@ -938,7 +938,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
           {
             :boundary_types => self.boundary_types.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::IrCutFilterAutoBoundaryType.proto(it) },
             :boundary_offset => self.boundary_offset,
-            :response_time_range => self.response_time_range&.to_message,
+            :response_time_range => self.response_time_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::DurationRange) },
           }.compact
         end
       end
@@ -1083,7 +1083,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
           :max_masks => self.max_masks,
           :max_points_per_mask => self.max_points_per_mask,
           :types => self.types.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::PrivacyMaskType.proto(it) },
-          :color_options => self.color_options.map { it.to_message },
+          :color_options => self.color_options.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Color) },
           :rectangle_only => self.rectangle_only,
           :single_color_only => self.single_color_only,
         }.compact
@@ -1195,7 +1195,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
         {
           :max_count => self.max_count,
           :position_types => self.position_types.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::OsdPositionType.proto(it) },
-          :text_options => self.text_options&.to_message,
+          :text_options => self.text_options&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::OSDOptions::TextOptions) },
         }.compact
       end
 
@@ -1303,7 +1303,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
     def to_message
       {
         :flags => self.flags.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::AudioCapabilities::Flag.proto(it) },
-        :encodings => self.encodings.map { it.to_message },
+        :encodings => self.encodings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::AudioCapabilities::Encoding) },
         :num_audio_channels => self.num_audio_channels,
       }.compact
     end
@@ -1440,9 +1440,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
     def to_message
       {
         :channel_id => self.channel_id,
-        :video => self.video&.to_message,
-        :audio => self.audio&.to_message,
-        :audio_output => self.audio_output&.to_message,
+        :video => self.video&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities) },
+        :audio => self.audio&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::AudioCapabilities) },
+        :audio_output => self.audio_output&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::AudioOutputCapabilities) },
       }.compact
     end
   end
@@ -1480,7 +1480,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
     def to_message
       {
         :flags => self.flags.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::MediaDeviceCapabilities::Flag.proto(it) },
-        :channels => self.channels.map { it.to_message },
+        :channels => self.channels.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::ChannelCapabilities) },
       }.compact
     end
 

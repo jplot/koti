@@ -58,8 +58,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockType.proto(it) },
         :owner_space_member_id => self.owner_space_member_id,
         :name => self.name,
-        :status => self.status&.to_message,
-        :feature => self.feature&.to_message,
+        :status => self.status&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockStatus) },
+        :feature => self.feature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockFeature) },
         :serial_number => self.serial_number,
       }.compact
     end
@@ -112,8 +112,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
         :external_id => self.external_id,
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockType.proto(it) },
         :name => self.name,
-        :status => self.status&.to_message,
-        :feature => self.feature&.to_message,
+        :status => self.status&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockStatus) },
+        :feature => self.feature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockFeature) },
         :serial_number => self.serial_number,
       }.compact
     end
@@ -159,7 +159,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
       {
         :lock_status => self.lock_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockStatus::LockStatus.proto(it) },
         :connection_status => self.connection_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockStatus::ConnectionStatus.proto(it) },
-        :battery_status => self.battery_status&.to_message,
+        :battery_status => self.battery_status&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockStatus::BatteryStatus) },
         :authorization_status => self.authorization_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockStatus::AuthorizationStatus.proto(it) },
       }.compact
     end
@@ -270,9 +270,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :embedded_doorbell => self.embedded_doorbell&.to_message,
-        :bridge => self.bridge&.to_message,
-        :latch_control => self.latch_control&.to_message,
+        :embedded_doorbell => self.embedded_doorbell&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockFeature::EmbeddedDoorbell) },
+        :bridge => self.bridge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockFeature::Bridge) },
+        :latch_control => self.latch_control&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockFeature::LatchControl) },
       }.compact
     end
 
@@ -439,7 +439,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :smart_lock => self.smart_lock&.to_message,
+        :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::ExternalSmartLock) },
         :addition_status => self.addition_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockAvailableToAdd::AdditionStatus.proto(it) },
       }.compact
     end

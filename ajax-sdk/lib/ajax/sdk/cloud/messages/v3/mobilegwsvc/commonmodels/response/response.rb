@@ -86,7 +86,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :error_cause => self.error_cause&.to_message,
+        :error_cause => self.error_cause&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::ErrorCause) },
       }.compact
     end
   end
@@ -123,8 +123,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :error_cause => self.error_cause&.to_message,
-        :error_causes => self.error_causes.map { it.to_message },
+        :error_cause => self.error_cause&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::ErrorCause) },
+        :error_causes => self.error_causes.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::ErrorCause) },
       }.compact
     end
   end
@@ -158,7 +158,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :error_cause => self.error_cause&.to_message,
+        :error_cause => self.error_cause&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::ErrorCause) },
       }.compact
     end
   end
@@ -327,52 +327,52 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_scan => self.hub_scan&.to_message,
-        :hub_pwr_test => self.hub_pwr_test&.to_message,
-        :dev_busy => self.dev_busy&.to_message,
-        :dfu_in_progress => self.dfu_in_progress&.to_message,
-        :radiotest => self.radiotest&.to_message,
-        :dev_zone_test => self.dev_zone_test&.to_message,
-        :card_process => self.card_process&.to_message,
-        :armed => self.armed&.to_message,
-        :exit_timer => self.exit_timer&.to_message,
-        :route => self.route&.to_message,
-        :dev_offline => self.dev_offline&.to_message,
-        :ext_power => self.ext_power&.to_message,
-        :dev_always_active => self.dev_always_active&.to_message,
-        :not_supported => self.not_supported&.to_message,
-        :buses_problem => self.buses_problem&.to_message,
-        :iwh_objects_limit_error => self.iwh_objects_limit_error&.to_message,
-        :iwh_test_in_progress => self.iwh_test_in_progress&.to_message,
-        :ring_problem => self.ring_problem&.to_message,
-        :ring_unregistered => self.ring_unregistered&.to_message,
-        :ring_disconnected => self.ring_disconnected&.to_message,
-        :active_call => self.active_call&.to_message,
-        :fp_bukhoor_forbidden_time => self.fp_bukhoor_forbidden_time&.to_message,
-        :fp_fire_alarm => self.fp_fire_alarm&.to_message,
-        :dev_bypassed => self.dev_bypassed&.to_message,
-        :wrong_power_supply_settings => self.wrong_power_supply_settings&.to_message,
-        :in_lines_short_circuit => self.in_lines_short_circuit&.to_message,
-        :out_lines_short_circuit => self.out_lines_short_circuit&.to_message,
-        :wifi_func_not_work => self.wifi_func_not_work&.to_message,
-        :dev_power_overload => self.dev_power_overload&.to_message,
-        :battery_low => self.battery_low&.to_message,
-        :extra_comm_chan_required => self.extra_comm_chan_required&.to_message,
-        :jamming_detected => self.jamming_detected&.to_message,
-        :walk_test_in_progress => self.walk_test_in_progress&.to_message,
-        :zone_test_in_progress => self.zone_test_in_progress&.to_message,
-        :device_limit_exceeded => self.device_limit_exceeded&.to_message,
-        :wrong_en54_rex_count => self.wrong_en54_rex_count&.to_message,
-        :unsupported_jwl_protocol_version => self.unsupported_jwl_protocol_version&.to_message,
-        :dev_disablement => self.dev_disablement&.to_message,
-        :reject_en54_zone_change => self.reject_en54_zone_change&.to_message,
-        :fast_lost_limit_error => self.fast_lost_limit_error&.to_message,
-        :device_in_calibration => self.device_in_calibration&.to_message,
-        :en54_not_compatible_cfg => self.en54_not_compatible_cfg&.to_message,
-        :id_already_added => self.id_already_added&.to_message,
-        :service_mode_in_progress => self.service_mode_in_progress&.to_message,
-        :source => self.source&.to_message,
-        :zone_test_in_progress_details => self.zone_test_in_progress_details&.to_message,
+        :hub_scan => self.hub_scan&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :hub_pwr_test => self.hub_pwr_test&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :dev_busy => self.dev_busy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :dfu_in_progress => self.dfu_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :radiotest => self.radiotest&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :dev_zone_test => self.dev_zone_test&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :card_process => self.card_process&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :armed => self.armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :exit_timer => self.exit_timer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :route => self.route&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :dev_offline => self.dev_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :ext_power => self.ext_power&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :dev_always_active => self.dev_always_active&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :not_supported => self.not_supported&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :buses_problem => self.buses_problem&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :iwh_objects_limit_error => self.iwh_objects_limit_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :iwh_test_in_progress => self.iwh_test_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :ring_problem => self.ring_problem&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :ring_unregistered => self.ring_unregistered&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :ring_disconnected => self.ring_disconnected&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :active_call => self.active_call&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :fp_bukhoor_forbidden_time => self.fp_bukhoor_forbidden_time&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :fp_fire_alarm => self.fp_fire_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :dev_bypassed => self.dev_bypassed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :wrong_power_supply_settings => self.wrong_power_supply_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :in_lines_short_circuit => self.in_lines_short_circuit&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :out_lines_short_circuit => self.out_lines_short_circuit&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :wifi_func_not_work => self.wifi_func_not_work&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :dev_power_overload => self.dev_power_overload&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :battery_low => self.battery_low&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :extra_comm_chan_required => self.extra_comm_chan_required&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :jamming_detected => self.jamming_detected&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :walk_test_in_progress => self.walk_test_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :zone_test_in_progress => self.zone_test_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :device_limit_exceeded => self.device_limit_exceeded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :wrong_en54_rex_count => self.wrong_en54_rex_count&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :unsupported_jwl_protocol_version => self.unsupported_jwl_protocol_version&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :dev_disablement => self.dev_disablement&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :reject_en54_zone_change => self.reject_en54_zone_change&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :fast_lost_limit_error => self.fast_lost_limit_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :device_in_calibration => self.device_in_calibration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :en54_not_compatible_cfg => self.en54_not_compatible_cfg&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :id_already_added => self.id_already_added&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :service_mode_in_progress => self.service_mode_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+        :source => self.source&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::ErrorCause::Source) },
+        :zone_test_in_progress_details => self.zone_test_in_progress_details&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::ErrorCause::ZoneTestInProgressDetails) },
       }.compact
     end
 
@@ -418,7 +418,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :device_hex_id => self.device_hex_id,
-          :object_type => self.object_type&.to_message,
+          :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         }.compact
       end
     end

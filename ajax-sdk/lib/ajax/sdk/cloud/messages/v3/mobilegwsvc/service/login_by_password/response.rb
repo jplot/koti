@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Log
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::LoginByPassword::LoginByPasswordResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::LoginByPassword::LoginByPasswordResponse::Failure) },
       }.compact
     end
 
@@ -84,8 +84,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Log
       def to_message
         {
           :session_token => self.session_token,
-          :lite_account => self.lite_account&.to_message,
-          :pro_login_response => self.pro_login_response&.to_message,
+          :lite_account => self.lite_account&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Account::LiteAccount) },
+          :pro_login_response => self.pro_login_response&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Auth::LoginResponse) },
         }.compact
       end
     end
@@ -135,11 +135,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Log
       def to_message
         {
           :attempts_left => self.attempts_left,
-          :bad_request => self.bad_request&.to_message,
-          :two_fa_required => self.two_fa_required&.to_message,
-          :account_not_confirmed => self.account_not_confirmed&.to_message,
-          :account_locked => self.account_locked&.to_message,
-          :invalid_credentials => self.invalid_credentials&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :two_fa_required => self.two_fa_required&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::LoginByPassword::LoginByPasswordResponse::TwoFactorAuthRequiredError) },
+          :account_not_confirmed => self.account_not_confirmed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :account_locked => self.account_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :invalid_credentials => self.invalid_credentials&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

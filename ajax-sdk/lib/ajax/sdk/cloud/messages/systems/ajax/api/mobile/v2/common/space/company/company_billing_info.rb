@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_billing_info => self.hub_billing_info&.to_message,
+        :hub_billing_info => self.hub_billing_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company::CompanyBillingInfo::HubBillingInfo) },
         :billing_status => self.billing_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company::CompanyBillingInfo::BillingStatus.proto(it) },
       }.compact
     end

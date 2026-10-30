@@ -42,7 +42,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
     def to_message
       {
         :external_battery_low_level_deci_voltage => self.external_battery_low_level_deci_voltage,
-        :external_battery_low_level_voltage_range => self.external_battery_low_level_voltage_range&.to_message,
+        :external_battery_low_level_voltage_range => self.external_battery_low_level_voltage_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::ExternalBatteryPart::Range) },
         :show_malfunctions_if_external_battery_is_disconnected => self.show_malfunctions_if_external_battery_is_disconnected,
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::ExternalBatteryPart::Capability.proto(it) },
       }.compact
@@ -84,7 +84,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       def to_message
         {
           :severity => self.severity&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::ExternalBatteryPart::Severity.proto(it) },
-          :voltage_value => self.voltage_value&.to_message,
+          :voltage_value => self.voltage_value&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::ExternalBatteryPart::VoltageState) },
           :special_state => self.special_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::ExternalBatteryPart::SpecialState.proto(it) },
         }.compact
       end

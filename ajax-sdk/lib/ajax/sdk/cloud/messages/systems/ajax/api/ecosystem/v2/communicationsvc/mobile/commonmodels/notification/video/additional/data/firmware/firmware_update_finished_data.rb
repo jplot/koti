@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :firmware_id => self.firmware_id&.to_message,
+        :firmware_id => self.firmware_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Additional::Data::Firmware::FirmwareUpdateFinishedData::VideoEdgeFirmwareId) },
       }.compact
     end
 
@@ -73,7 +73,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         {
           :product_type => self.product_type,
           :platform_name => self.platform_name,
-          :firmware_version => self.firmware_version&.to_message,
+          :firmware_version => self.firmware_version&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Additional::Data::Firmware::FirmwareUpdateFinishedData::VideoEdgeFirmwareId::FirmwareVersion) },
         }.compact
       end
 

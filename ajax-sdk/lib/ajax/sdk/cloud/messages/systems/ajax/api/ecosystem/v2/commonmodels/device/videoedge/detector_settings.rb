@@ -45,10 +45,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     def to_message
       {
         :enabled => self.enabled,
-        :fake_settings => self.fake_settings&.to_message,
-        :motion_settings => self.motion_settings&.to_message,
-        :object_settings => self.object_settings&.to_message,
-        :pir_settings => self.pir_settings&.to_message,
+        :fake_settings => self.fake_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::FakeDetectorSettings) },
+        :motion_settings => self.motion_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::MotionDetectorSettings) },
+        :object_settings => self.object_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ObjectDetectorSettings) },
+        :pir_settings => self.pir_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::PirDetectorSettings) },
       }.compact
     end
 
@@ -85,7 +85,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :pir_details_sensitivity => self.pir_details_sensitivity&.to_message,
+        :pir_details_sensitivity => self.pir_details_sensitivity&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::PirDetectorSettings::PirDetailsSensitivity) },
       }.compact
     end
 
@@ -202,7 +202,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :mask => self.mask&.to_message,
+        :mask => self.mask&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::MotionDetectorSettings::Mask) },
       }.compact
     end
 
@@ -277,7 +277,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :class_settings => self.class_settings.map { it.to_message },
+        :class_settings => self.class_settings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ObjectDetectorSettings::ClassSettings) },
       }.compact
     end
 

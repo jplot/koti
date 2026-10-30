@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
         :channel_id => self.channel_id,
-        :config => self.config&.to_message,
+        :config => self.config&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::OsdConfigurationList) },
       }.compact
     end
   end

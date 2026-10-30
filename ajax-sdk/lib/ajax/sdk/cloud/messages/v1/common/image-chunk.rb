@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :data_chunk => self.data_chunk&.to_message,
-        :last_chunk => self.last_chunk&.to_message,
+        :data_chunk => self.data_chunk&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::ImageChunk::DataChunk) },
+        :last_chunk => self.last_chunk&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::ImageChunk::LastChunk) },
       }.compact
     end
 

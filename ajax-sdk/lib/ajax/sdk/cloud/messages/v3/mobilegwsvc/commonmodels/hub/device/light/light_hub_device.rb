@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_device => self.common_device&.to_message,
-        :custom_properties => self.custom_properties&.to_message,
-        :spread_properties => self.spread_properties.map { it.to_message },
-        :device_specific_properties => self.device_specific_properties.map { it.to_message },
+        :common_device => self.common_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::LightCommonHubDevice) },
+        :custom_properties => self.custom_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::LightHubDevice::CustomProperties) },
+        :spread_properties => self.spread_properties.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::LightHubDevice::SpreadProperties) },
+        :device_specific_properties => self.device_specific_properties.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::LightHubDevice::DeviceSpecificProperties) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :relay_single_channel_properties => self.relay_single_channel_properties&.to_message,
+          :relay_single_channel_properties => self.relay_single_channel_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::RelaySingleChannelCustomProperties) },
         }.compact
       end
 
@@ -175,26 +175,26 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :sort_index => self.sort_index,
-          :channel => self.channel&.to_message,
-          :reset_fire_alarm_wi => self.reset_fire_alarm_wi&.to_message,
-          :wire_inputs => self.wire_inputs&.to_message,
-          :light_switch_channel => self.light_switch_channel&.to_message,
-          :keyarm_lock => self.keyarm_lock&.to_message,
-          :fire_device_action_button => self.fire_device_action_button&.to_message,
-          :photo_on_demand => self.photo_on_demand&.to_message,
-          :fire_zones => self.fire_zones&.to_message,
-          :download_firmware_update => self.download_firmware_update&.to_message,
-          :billing_company => self.billing_company&.to_message,
-          :subscription_state => self.subscription_state&.to_message,
-          :vhf_bridge_outputs => self.vhf_bridge_outputs&.to_message,
-          :keypad_lock => self.keypad_lock&.to_message,
-          :socket_base_channel => self.socket_base_channel&.to_message,
-          :life_quality_info => self.life_quality_info&.to_message,
-          :water_stop_channel => self.water_stop_channel&.to_message,
-          :smart_lock_control => self.smart_lock_control&.to_message,
-          :third_party_devices => self.third_party_devices&.to_message,
-          :roller_position => self.roller_position&.to_message,
-          :slat_position => self.slat_position&.to_message,
+          :channel => self.channel&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::RelayChannel) },
+          :reset_fire_alarm_wi => self.reset_fire_alarm_wi&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::ResetFireAlarmWi) },
+          :wire_inputs => self.wire_inputs&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::WireInputs) },
+          :light_switch_channel => self.light_switch_channel&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::LightSwitchChannel) },
+          :keyarm_lock => self.keyarm_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::KeyarmLock) },
+          :fire_device_action_button => self.fire_device_action_button&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::FireDeviceActionButton) },
+          :photo_on_demand => self.photo_on_demand&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::PhotoOnDemand) },
+          :fire_zones => self.fire_zones&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::FireZones) },
+          :download_firmware_update => self.download_firmware_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::DownloadFirmwareUpdate) },
+          :billing_company => self.billing_company&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::BillingCompany) },
+          :subscription_state => self.subscription_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::Properties::SubscriptionState) },
+          :vhf_bridge_outputs => self.vhf_bridge_outputs&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::VhfBridgeOutputs) },
+          :keypad_lock => self.keypad_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::KeypadLock) },
+          :socket_base_channel => self.socket_base_channel&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SocketBaseChannel) },
+          :life_quality_info => self.life_quality_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::LifeQualityInfo) },
+          :water_stop_channel => self.water_stop_channel&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::WaterStopChannel) },
+          :smart_lock_control => self.smart_lock_control&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Light::Properties::SmartLockControl) },
+          :third_party_devices => self.third_party_devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::ThirdPartyDevices) },
+          :roller_position => self.roller_position&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::RollerPosition) },
+          :slat_position => self.slat_position&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SlatPosition) },
         }.compact
       end
 
@@ -264,18 +264,18 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :fire_zone_id => self.fire_zone_id&.to_message,
-          :transmitter_index => self.transmitter_index&.to_message,
-          :motion_cam_hdr => self.motion_cam_hdr&.to_message,
-          :eol_sensor_properties => self.eol_sensor_properties&.to_message,
-          :hub_box_appearance => self.hub_box_appearance&.to_message,
-          :access_devices => self.access_devices&.to_message,
-          :yavir_access_control_properties => self.yavir_access_control_properties&.to_message,
-          :takeover_module_index => self.takeover_module_index&.to_message,
-          :takeover_module_compatibility_mode => self.takeover_module_compatibility_mode&.to_message,
-          :third_party_device_type => self.third_party_device_type&.to_message,
-          :device_location => self.device_location&.to_message,
-          :roller_shutter_operation_mode => self.roller_shutter_operation_mode&.to_message,
+          :fire_zone_id => self.fire_zone_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::FireZoneId) },
+          :transmitter_index => self.transmitter_index&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::TransmitterIndex) },
+          :motion_cam_hdr => self.motion_cam_hdr&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::MotionCamHdr) },
+          :eol_sensor_properties => self.eol_sensor_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::EolSensorProperties) },
+          :hub_box_appearance => self.hub_box_appearance&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::HubBoxAppearance) },
+          :access_devices => self.access_devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::AccessDevices) },
+          :yavir_access_control_properties => self.yavir_access_control_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::YavirAccessControlProperties) },
+          :takeover_module_index => self.takeover_module_index&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::TakeoverModuleIndex) },
+          :takeover_module_compatibility_mode => self.takeover_module_compatibility_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::TakeoverModuleCompatibilityMode) },
+          :third_party_device_type => self.third_party_device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::ThirdPartyDeviceTypeProperty) },
+          :device_location => self.device_location&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::DeviceLocation) },
+          :roller_shutter_operation_mode => self.roller_shutter_operation_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Common::RollerShutterOperationMode) },
         }.compact
       end
 

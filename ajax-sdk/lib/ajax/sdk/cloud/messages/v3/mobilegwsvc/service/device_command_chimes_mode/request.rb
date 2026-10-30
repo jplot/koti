@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       {
         :hub_id => self.hub_id,
         :chimes_status => self.chimes_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandChimesMode::DeviceCommandChimesModeRequest::ChimesStatus.proto(it) },
-        :groups_statuses => self.groups_statuses&.to_message,
+        :groups_statuses => self.groups_statuses&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandChimesMode::DeviceCommandChimesModeRequest::GroupsStatuses) },
       }.compact
     end
 
@@ -76,7 +76,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :groups_statuses => self.groups_statuses.map { it.to_message },
+          :groups_statuses => self.groups_statuses.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandChimesMode::DeviceCommandChimesModeRequest::GroupsStatuses::GroupStatus) },
         }.compact
       end
 

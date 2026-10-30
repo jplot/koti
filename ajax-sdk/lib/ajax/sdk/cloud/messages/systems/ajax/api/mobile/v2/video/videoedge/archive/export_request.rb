@@ -55,12 +55,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Archive
       {
         :video_edge_id => self.video_edge_id,
         :channel_id => self.channel_id,
-        :export_ranges => self.export_ranges.map { it.to_message },
+        :export_ranges => self.export_ranges.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::TimestampRange) },
         :stream_type => self.stream_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::StreamType.proto(it) },
         :with_audio => self.with_audio,
         :with_figures => self.with_figures,
         :video_source_type => self.video_source_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoSourceType.proto(it) },
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
       }.compact
     end
   end
@@ -97,8 +97,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Archive
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Archive::ExportArchiveResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Archive::ExportArchiveResponse::Failure) },
       }.compact
     end
 
@@ -203,17 +203,17 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Archive
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :video_edge_not_found => self.video_edge_not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :channel_not_found => self.channel_not_found&.to_message,
-          :too_many_parallel_exports => self.too_many_parallel_exports&.to_message,
-          :archive_out_of_requested_time_range => self.archive_out_of_requested_time_range&.to_message,
-          :video_edge_is_offline => self.video_edge_is_offline&.to_message,
-          :cloud_archive_not_found => self.cloud_archive_not_found&.to_message,
-          :exports_limit_exceeded => self.exports_limit_exceeded&.to_message,
-          :io_error => self.io_error&.to_message,
-          :command_not_supported => self.command_not_supported&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_not_found => self.video_edge_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :channel_not_found => self.channel_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :too_many_parallel_exports => self.too_many_parallel_exports&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :archive_out_of_requested_time_range => self.archive_out_of_requested_time_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_is_offline => self.video_edge_is_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :cloud_archive_not_found => self.cloud_archive_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :exports_limit_exceeded => self.exports_limit_exceeded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Archive::ExportArchiveResponse::Failure::ExportsLimitExceededError) },
+          :io_error => self.io_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :command_not_supported => self.command_not_supported&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

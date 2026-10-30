@@ -59,7 +59,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :paid_services_activation_required => self.paid_services_activation_required&.to_message,
+        :paid_services_activation_required => self.paid_services_activation_required&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Blank::PaidServicesActivationRequired) },
       }.compact
     end
 

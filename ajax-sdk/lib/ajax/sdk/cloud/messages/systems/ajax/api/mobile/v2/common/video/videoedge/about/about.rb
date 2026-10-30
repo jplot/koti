@@ -53,10 +53,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ab
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::About::Type.proto(it) },
         :color => self.color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::About::Color.proto(it) },
         :device_features => self.device_features.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::About::DeviceFeature.proto(it) },
-        :constraints => self.constraints&.to_message,
+        :constraints => self.constraints&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::Constraints) },
         :mono_channel => self.mono_channel,
         :fully_qualified_id => self.fully_qualified_id,
-        :access_points => self.access_points.map { it.to_message },
+        :access_points => self.access_points.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::About::AccessPoint) },
       }.compact
     end
 
@@ -92,8 +92,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ab
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :wifi => self.wifi&.to_message,
-          :bluetooth => self.bluetooth&.to_message,
+          :wifi => self.wifi&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::About::AccessPoint::WiFiAccessPoint) },
+          :bluetooth => self.bluetooth&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::About::AccessPoint::BluetoothAccessPoint) },
         }.compact
       end
 

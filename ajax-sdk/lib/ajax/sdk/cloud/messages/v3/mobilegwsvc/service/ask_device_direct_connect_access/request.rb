@@ -52,7 +52,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Ask
         :nonce => self.nonce,
         :crypto_cipher_algorithm => self.crypto_cipher_algorithm&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::AskDeviceDirectConnectAccess::AskDeviceDirectConnectAccessRequest::CryptoCipherAlgorithm.proto(it) },
         :crypto_hash_algorithm => self.crypto_hash_algorithm&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::AskDeviceDirectConnectAccess::AskDeviceDirectConnectAccessRequest::CryptoHashAlgorithm.proto(it) },
-        :access_protocol => self.access_protocol&.to_message,
+        :access_protocol => self.access_protocol&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::AskDeviceDirectConnectAccess::AskDeviceDirectConnectAccessRequest::AccessProtocol) },
       }.compact
     end
 
@@ -88,7 +88,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Ask
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :wi_fi => self.wi_fi&.to_message,
+          :wi_fi => self.wi_fi&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::AskDeviceDirectConnectAccess::AskDeviceDirectConnectAccessRequest::AccessProtocol::WiFi) },
         }.compact
       end
 

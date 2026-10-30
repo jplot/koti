@@ -46,9 +46,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Hub
       {
         :hub_id => self.hub_id,
         :fire_zone_id => self.fire_zone_id,
-        :start_fire_zone_test => self.start_fire_zone_test&.to_message,
-        :add_fire_zone_to_test => self.add_fire_zone_to_test&.to_message,
-        :remove_fire_zone_from_test => self.remove_fire_zone_from_test&.to_message,
+        :start_fire_zone_test => self.start_fire_zone_test&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::HubCommandFireZoneTest::HubCommandFireZoneTestRequest::StartFireZoneTest) },
+        :add_fire_zone_to_test => self.add_fire_zone_to_test&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::HubCommandFireZoneTest::HubCommandFireZoneTestRequest::AddFireZoneToTest) },
+        :remove_fire_zone_from_test => self.remove_fire_zone_from_test&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::HubCommandFireZoneTest::HubCommandFireZoneTestRequest::RemoveFireZoneFromTest) },
       }.compact
     end
 

@@ -58,7 +58,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         :extra_contact_type => self.extra_contact_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExtraContactSensorPart::ExtraContactType.proto(it) },
         :extra_contact_types_capabilities => self.extra_contact_types_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExtraContactSensorPart::ExtraContactType.proto(it) },
         :time_before_alarm_seconds => self.time_before_alarm_seconds,
-        :time_before_alarm_range => self.time_before_alarm_range&.to_message,
+        :time_before_alarm_range => self.time_before_alarm_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ExtraContactSensorPart::TimeBeforeAlarmRange) },
         :impulse_before_alarm => self.impulse_before_alarm,
         :available_impulse_before_alarm_values => self.available_impulse_before_alarm_values,
       }.compact

@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :bridge => self.bridge&.to_message,
-        :router => self.router&.to_message,
+        :bridge => self.bridge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Router::OperationMode::BridgeMode) },
+        :router => self.router&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Router::OperationMode::RouterMode) },
       }.compact
     end
 
@@ -99,7 +99,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :configuration => self.configuration&.to_message,
+          :configuration => self.configuration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Router::OperationMode::RouterMode::RouterNetworkConfiguration) },
         }.compact
       end
 
@@ -132,7 +132,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :ipv4 => self.ipv4&.to_message,
+            :ipv4 => self.ipv4&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Router::OperationMode::RouterMode::RouterNetworkConfiguration::RouterNetworkConfigurationIPv4) },
           }.compact
         end
 
@@ -168,8 +168,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :dhcp => self.dhcp&.to_message,
-              :static => self.static&.to_message,
+              :dhcp => self.dhcp&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Router::OperationMode::RouterMode::RouterNetworkConfiguration::RouterNetworkConfigurationIPv4::RouterDhcpServerMode) },
+              :static => self.static&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Router::OperationMode::RouterMode::RouterNetworkConfiguration::RouterNetworkConfigurationIPv4::RouterStaticMode) },
             }.compact
           end
 
@@ -208,8 +208,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
             # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
             def to_message
               {
-                :address => self.address&.to_message,
-                :address_range => self.address_range&.to_message,
+                :address => self.address&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4) },
+                :address_range => self.address_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4Range) },
               }.compact
             end
           end
@@ -246,8 +246,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
             # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
             def to_message
               {
-                :address => self.address&.to_message,
-                :netmask => self.netmask&.to_message,
+                :address => self.address&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4) },
+                :netmask => self.netmask&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4) },
               }.compact
             end
           end

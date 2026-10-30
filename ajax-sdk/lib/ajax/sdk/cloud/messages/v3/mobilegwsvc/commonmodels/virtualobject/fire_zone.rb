@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       {
         :id => self.id,
         :name => self.name,
-        :included_devices => self.included_devices.map { it.to_message },
+        :included_devices => self.included_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::HubDevice) },
       }.compact
     end
   end

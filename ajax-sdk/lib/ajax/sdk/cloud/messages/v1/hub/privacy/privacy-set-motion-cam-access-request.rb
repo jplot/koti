@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::Privacy
     def to_message
       {
         :hub_id => self.hub_id,
-        :privacy_access => self.privacy_access&.to_message,
+        :privacy_access => self.privacy_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::Privacy::PrivacyMotionCamAccess) },
       }.compact
     end
   end

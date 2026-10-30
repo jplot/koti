@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       {
         :language => self.language&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Language.proto(it) },
         :warning => self.warning&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockYaleVoiceLanguagePart::SmartLockYaleVoiceLanguagePartWarning.proto(it) },
-        :language_capabilities => self.language_capabilities.map { it.to_message },
+        :language_capabilities => self.language_capabilities.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockYaleVoiceLanguagePart::SmartLockYaleVoiceLanguagePartCapability) },
       }.compact
     end
 

@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :prepayment_flow_data => self.prepayment_flow_data&.to_message,
-        :post_payment_flow_data => self.post_payment_flow_data&.to_message,
-        :prepayment_for_companies_flow_data => self.prepayment_for_companies_flow_data&.to_message,
+        :prepayment_flow_data => self.prepayment_flow_data&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailableServices::PrepaymentData) },
+        :post_payment_flow_data => self.post_payment_flow_data&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailableServices::PostPaymentData) },
+        :prepayment_for_companies_flow_data => self.prepayment_for_companies_flow_data&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailableServices::PrepaymentForCompaniesData) },
       }.compact
     end
 
@@ -82,9 +82,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_prepayment_service_groups => self.available_prepayment_service_groups.map { it.to_message },
-          :current_context => self.current_context&.to_message,
-          :existing_services => self.existing_services.map { it.to_message },
+          :available_prepayment_service_groups => self.available_prepayment_service_groups.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailablePrePaymentServiceGroup) },
+          :current_context => self.current_context&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::FindAvailableServicesPrePaymentContext) },
+          :existing_services => self.existing_services.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraService) },
         }.compact
       end
     end
@@ -124,9 +124,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_post_payment_service_groups => self.available_post_payment_service_groups.map { it.to_message },
-          :current_context => self.current_context&.to_message,
-          :existing_services => self.existing_services.map { it.to_message },
+          :available_post_payment_service_groups => self.available_post_payment_service_groups.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailablePostPaymentServiceGroup) },
+          :current_context => self.current_context&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::FindAvailableServicesContext) },
+          :existing_services => self.existing_services.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraService) },
         }.compact
       end
     end
@@ -166,9 +166,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_prepayment_service_groups => self.available_prepayment_service_groups.map { it.to_message },
-          :current_context => self.current_context&.to_message,
-          :existing_services => self.existing_services.map { it.to_message },
+          :available_prepayment_service_groups => self.available_prepayment_service_groups.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailablePrePaymentForCompanyServiceGroup) },
+          :current_context => self.current_context&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::FindAvailableServicesPrePaymentContext) },
+          :existing_services => self.existing_services.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::ExtraService) },
         }.compact
       end
     end

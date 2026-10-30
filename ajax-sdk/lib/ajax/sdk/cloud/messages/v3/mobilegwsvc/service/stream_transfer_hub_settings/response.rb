@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::Failure) },
       }.compact
     end
 
@@ -89,11 +89,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :transfer_not_started => self.transfer_not_started&.to_message,
-          :transfer_starting => self.transfer_starting&.to_message,
-          :transfer_in_progress => self.transfer_in_progress&.to_message,
-          :transfer_update => self.transfer_update&.to_message,
-          :transfer_finished => self.transfer_finished&.to_message,
+          :transfer_not_started => self.transfer_not_started&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::TransferNotStarted) },
+          :transfer_starting => self.transfer_starting&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::TransferStarting) },
+          :transfer_in_progress => self.transfer_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::TransferInProgress) },
+          :transfer_update => self.transfer_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::TransferUpdate) },
+          :transfer_finished => self.transfer_finished&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::TransferFinished) },
         }.compact
       end
 
@@ -195,7 +195,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       def to_message
         {
           :target_hub_id => self.target_hub_id,
-          :devices => self.devices.map { it.to_message },
+          :devices => self.devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::DeviceStatus) },
         }.compact
       end
     end
@@ -229,7 +229,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device => self.device&.to_message,
+          :device => self.device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::DeviceMigrationUpdate) },
         }.compact
       end
     end
@@ -323,9 +323,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         {
           :device_id => self.device_id,
           :device_name => self.device_name,
-          :object_type => self.object_type&.to_message,
+          :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
           :device_color => self.device_color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceColor.proto(it) },
-          :device_appearance => self.device_appearance&.to_message,
+          :device_appearance => self.device_appearance&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceAppearance) },
           :status => self.status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamTransferHubSettings::StreamTransferHubSettingsProgressResponse::DeviceMigrationStatus.proto(it) },
           :room_name => self.room_name,
           :is_attached_to_rex => self.is_attached_to_rex,
@@ -404,8 +404,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :passive_hub_not_found => self.passive_hub_not_found&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :passive_hub_not_found => self.passive_hub_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

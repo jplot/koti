@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :disablement_states => self.disablement_states.map { it.to_message },
-        :disablement_state_capabilities => self.disablement_state_capabilities.map { it.to_message },
+        :disablement_states => self.disablement_states.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54DisablementPart::DisablementState) },
+        :disablement_state_capabilities => self.disablement_state_capabilities.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54DisablementPart::DisablementState) },
       }.compact
     end
 
@@ -84,12 +84,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :mcp_disablement_state => self.mcp_disablement_state&.to_message,
-          :smoke_detector_disablement_state => self.smoke_detector_disablement_state&.to_message,
-          :heat_temp_detector_disablement_state => self.heat_temp_detector_disablement_state&.to_message,
-          :sounder_disablement_state => self.sounder_disablement_state&.to_message,
-          :vad_disablement_state => self.vad_disablement_state&.to_message,
-          :smoke_temp_multi_disablement_state => self.smoke_temp_multi_disablement_state&.to_message,
+          :mcp_disablement_state => self.mcp_disablement_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54DisablementPart::McpDisablementState) },
+          :smoke_detector_disablement_state => self.smoke_detector_disablement_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54DisablementPart::SmokeDetectorDisablementState) },
+          :heat_temp_detector_disablement_state => self.heat_temp_detector_disablement_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54DisablementPart::HeatTempDetectorDisablementState) },
+          :sounder_disablement_state => self.sounder_disablement_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54DisablementPart::SounderDisablementState) },
+          :vad_disablement_state => self.vad_disablement_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54DisablementPart::VadDisablementState) },
+          :smoke_temp_multi_disablement_state => self.smoke_temp_multi_disablement_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54DisablementPart::SmokeTempMultiDisablementState) },
         }.compact
       end
 

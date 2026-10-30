@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       {
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
-        :input_digital_line_update => self.input_digital_line_update&.to_message,
-        :output_digital_line_update => self.output_digital_line_update&.to_message,
+        :input_digital_line_update => self.input_digital_line_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoEdgeDigitalLinesSettings::SetVideoEdgeDigitalLinesSettingsRequest::InputDigitalLineUpdate) },
+        :output_digital_line_update => self.output_digital_line_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoEdgeDigitalLinesSettings::SetVideoEdgeDigitalLinesSettingsRequest::OutputDigitalLineUpdate) },
       }.compact
     end
 
@@ -81,7 +81,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       def to_message
         {
           :digital_line_id => self.digital_line_id,
-          :input_settings => self.input_settings&.to_message,
+          :input_settings => self.input_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::InputDigitalLine::InputDigitalLineSettings) },
         }.compact
       end
     end
@@ -119,7 +119,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       def to_message
         {
           :digital_line_id => self.digital_line_id,
-          :output_settings => self.output_settings&.to_message,
+          :output_settings => self.output_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::OutputDigitalLine::OutputDigitalLineSettings) },
         }.compact
       end
     end

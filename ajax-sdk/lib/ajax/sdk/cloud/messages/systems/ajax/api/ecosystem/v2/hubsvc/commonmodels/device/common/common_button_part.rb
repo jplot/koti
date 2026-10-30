@@ -47,11 +47,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_profile => self.device_profile&.to_message,
-        :cms_device_index => self.cms_device_index&.to_message,
-        :bypass_part => self.bypass_part&.to_message,
+        :device_profile => self.device_profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceProfile) },
+        :cms_device_index => self.cms_device_index&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CmsDeviceIndex) },
+        :bypass_part => self.bypass_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::BypassPart) },
         :brightness => self.brightness&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonButtonPart::Brightness.proto(it) },
-        :associated_user => self.associated_user&.to_message,
+        :associated_user => self.associated_user&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonButtonPart::AssociatedUser) },
         :alarm_if_pressed => self.alarm_if_pressed&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonButtonPart::AlarmIfPressed.proto(it) },
       }.compact
     end

@@ -61,8 +61,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device
         :service_state => self.service_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::ServiceState.proto(it) },
         :device_color => self.device_color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::DeviceColor.proto(it) },
         :box_type => self.box_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::HubBoxType.proto(it) },
-        :constraints => self.constraints&.to_message,
-        :hub_features => self.hub_features&.to_message,
+        :constraints => self.constraints&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::DeviceConstraints) },
+        :hub_features => self.hub_features&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::HubFeatures) },
         :chime_status => self.chime_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::DisplayedChimeStatus.proto(it) },
         :restore_required => self.restore_required&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::RestoreRequired.proto(it) },
       }.compact

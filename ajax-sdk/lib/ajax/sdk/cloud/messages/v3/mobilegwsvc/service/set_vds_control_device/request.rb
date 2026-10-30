@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
     def to_message
       {
         :hub_id => self.hub_id,
-        :vds_control_device => self.vds_control_device&.to_message,
+        :vds_control_device => self.vds_control_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Common::VdsControlDevice) },
       }.compact
     end
   end

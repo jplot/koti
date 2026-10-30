@@ -47,11 +47,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub => self.hub&.to_message,
-        :video_edge => self.video_edge&.to_message,
-        :passive_hub => self.passive_hub&.to_message,
-        :smart_lock => self.smart_lock&.to_message,
-        :vaelsys_camera => self.vaelsys_camera&.to_message,
+        :hub => self.hub&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::Hub) },
+        :video_edge => self.video_edge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::VideoEdge) },
+        :passive_hub => self.passive_hub&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::PassiveHub) },
+        :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::SmartLockDevice) },
+        :vaelsys_camera => self.vaelsys_camera&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::VaelsysCamera) },
         :sorting_key => self.sorting_key,
       }.compact
     end

@@ -17,6 +17,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response
     def to_message: () -> ::Hash[::Symbol, untyped]
   end
 
+  class IllegalStateError < ::Data
+    ONEOFS: ::Hash[::Symbol, ::Array[::Symbol]]
+    attr_reader message: ::String
+    attr_reader raw: ::Hash[::Symbol, untyped]
+    def self.new: (?message: ::String, ?raw: ::Hash[::Symbol, untyped]) -> instance
+    def self.from: (::Hash[::Symbol, untyped]) -> instance
+    def to_message: () -> ::Hash[::Symbol, untyped]
+  end
+
   class InternalError < ::Data
     ONEOFS: ::Hash[::Symbol, ::Array[::Symbol]]
     attr_reader message: ::String

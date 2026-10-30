@@ -9,6 +9,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- `notifications` reads 20 by default (it read 50), the most the app asks for.
 - **Breaking:** `Device.from` takes the typed `LightDeviceItem` and the `space_id:`.
 - **Breaking:** `call`, `unary`, `server_stream`, `client_stream` and `bidi` return generated values
   instead of Hashes (`raw` keeps the Hash), and a response whose `success` shares a oneof with its
@@ -17,6 +18,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Every page of a space's notifications: `notifications` takes `older_than:` or `newer_than:` (a
+  notification's new `token`) and adds the notifications grouped under an offline one;
+  `notification_history` reads every page lazily, most recent first.
 - Shortcuts for everyday actions (`Cloud::Shortcuts`): switching, dimming, roller shutters, bypass, group
   arming, the security mode, the panic button, locks, muting, the EN54 fire reset, device and hub details
   and settings, scenarios, rooms, groups and LifeQuality history (`LifeQualityHistory`), built on the

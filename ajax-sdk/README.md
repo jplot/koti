@@ -92,9 +92,12 @@ door.flags       # => [:armed_in_night_mode, :delay_when_leaving]
 switch = cloud.devices(space.id).find { it.kind == :light_switch_two_gang }
 switch.channels  # => [#<data Channel number=1, on=true, name="Hall", brightness=nil>, …]
 
-note = cloud.notifications(space.id, limit: 20).first # most recent first
+note = cloud.notifications(space.id).first # most recent first
 note.event       # => :space_disarmed
 note.source      # => #<data Source type=:space_member, id="…", name="…">
+
+cloud.notifications(space.id, older_than: note.token) # the page before it
+cloud.notification_history(space.id).first(100)       # page after page, most recent first
 ```
 
 Spaces, devices and notifications come back as `Data` values (`Space`, `Device`, `Notification`, under
@@ -108,6 +111,11 @@ valve's, with a dimmer's `brightness`; `on` is nil when the device does not know
 (`position` is the opening in percent, 100 open, nil while it moves), the state of a `lock` (`:locked`,
 `:pending_unlocked`…), `life_quality` (temperature, humidity and CO2, whose units °C, % and ppm are inferred,
 not verified) and a fire detector's `mute_command`. `space_id` names its space.
+
+`notifications` reads one page: 20 by default, the most the app asks for (the gateway's own cap is unknown),
+with the notifications grouped under an offline one. `older_than:` or `newer_than:` take a notification's
+`token` to read the page before or after it. `notification_history` reads every page, lazily, from the
+oldest token of each page, and stops on a page that comes back short.
 
 A battery whose `exact` is false comes from a device that reports no percentage: the app then shows
 « OK » from 21 % and « discharged » below, not the number. `spaces` reads every page. A read the gateway

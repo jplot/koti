@@ -78,6 +78,7 @@ oven.fab           # => "000123456789", the fabrication number
 oven.device_type   # => :oven_microwave
 oven.ident         # => #<data Miele::Sdk::Schema::DeviceIdentification device_type=13, …>
 oven.protocol_version  # => 4: DOP2 (3 or 4), or Dop1 (2)
+oven.protocol     # => :dop2_hdr
 oven.tech_type     # => "H7164BP", the model
 
 state = oven.state
@@ -90,7 +91,7 @@ state.remaining_time       # => 5400, in seconds
 state.temperatures         # => [180.5, nil, nil], in °C, nil where nothing is measured
 state.target_temperatures  # => [180.0, nil, nil]
 state.door_open?           # => false
-state.remote_control?      # => true
+state.remote_control?      # => true; mobile_start? and local_control? as well
 state.light                # => :on
 ```
 
@@ -99,9 +100,15 @@ Hoods add `state.ventilation_step` (0 to 4), hobs `state.plates`, one `Plate` pe
 values read `:unknown`, `state.raw` keeps the resource as served, and `state.attributes` gives it
 as a typed value.
 
-`supervision` and `software_update` come as typed values too. The other resources come as served,
-the Miele app reading none of them as JSON: `settings`, `service` and `update` of the appliance,
-`info` and `host_info` of its Wi-Fi module, and `get(path)` for any other one.
+`remote_control?`, `mobile_start?` and `local_control?` read `RemoteEnable` the way the Miele app
+does for the appliance's family: ovens, warming drawers and coffee machines compare its first
+value to 15 or 7, dishwashers and laundry appliances test its bits. They answer nil for the other
+families, such as hoods and hobs, for which the app never reads it.
+
+`supervision` and `software_update` come as typed values too, and `services` as served: the
+services the Miele app reads (camera, remote update, Con@ctivity). The other resources come as
+served, the app reading none of them: `settings` and `update` of the appliance, `info` and
+`host_info` of its Wi-Fi module, and `get(path)` for any other one.
 
 ### Typed values
 
@@ -133,19 +140,20 @@ controllable* or *Remote control* depending on the model). Otherwise it answers 
 raises `Miele::Sdk::RemoteControlDisabledError`.
 
 ```ruby
-oven.light_on
-oven.light_off
 oven.wake         # out of standby
-oven.start        # ProcessAction 1; stop and pause as well
 oven.power_on     # and power_off
 ```
 
-An appliance answers 400 to a write that changes nothing, such as switching on a light already
-on: `light_on`, `light_off`, `wake` and the hood commands treat it as done. A refused `start`,
-`stop` or `pause` raises `Miele::Sdk::ResponseError`.
+An appliance answers 400 to a write that changes nothing: `wake` and the hood commands treat it as
+done.
 
-`power_on` and `power_off` write DOP2 leaf 2/1586. An appliance asleep answers 500: the SDK wakes
-it, waits 3 seconds and tries again, twice at most, then sends the switch opcode on leaf 2/1583.
+`power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app does. An appliance asleep answers 500:
+like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, giving up
+after three attempts where the app sets no limit. `power_off` writes 1 to the same leaf.
+
+Starting, stopping or pausing a program, and the light, take a different request in each family
+of the app: a user request on DOP2 leaf 2/1583 for DOP2 appliances, `ProcessAction` for Dop1
+dishwashers and laundry appliances, and no light at all for ovens. They will come back per family.
 
 ## DOP2
 
@@ -154,14 +162,18 @@ DOP2 is the binary protocol behind many settings and commands.
 ```ruby
 leaf = oven.dop2(2, 1586)          # Miele::Sdk::Dop2::Leaf: unit, attribute, idx1, idx2, fields
 leaf.fields[1]                     # => #<data Miele::Sdk::Dop2::Field type=:e8, value=4>
+oven.dop2(1, 131, idx1: 0, idx2: 1)  # an index, as the app polls its leaves
 
 oven.write_dop2(Miele::Sdk::Dop2::Leaf.new(unit: 2, attribute: 1586, idx1: 0, idx2: 0,
                                            fields: { 1 => Miele::Sdk::Dop2::Field.new(type: :e8, value: 4) }))
 ```
 
-Fields decode to booleans, signed and unsigned integers of 8 to 64 bits, strings, arrays and
-structs; only scalar fields can be written, and a value outside its field's range raises
-`ArgumentError`. Not every Wi-Fi module serves DOP2: EK057 and EK039W modules answer 404 to every
+Fields decode and encode every type the Miele app knows: booleans, signed and unsigned integers of
+8 to 64 bits, floats, enums, strings, structs, arrays of each scalar and arrays of structs. A value
+outside its field's range raises `ArgumentError`, and a string is read without its trailing NULs
+and written with one, as the app writes it. `dop2` reads `/DOP2/{unit}/{attribute}` without a
+query, as the app reads a leaf once, unless given an index; `write_dop2` writes without one, the
+indexes travelling in the leaf. Not every Wi-Fi module serves DOP2: EK057 and EK039W modules answer 404 to every
 leaf, so `power_on` raises `Miele::Sdk::NotFoundError` on them.
 
 ## Hoods (Dop1)
@@ -173,9 +185,12 @@ hood = Miele::Sdk.appliance('192.0.2.21')
 hood.fan_level = 2           # 0 (off) to 3, 4 for boost, 5 for interval
 hood.fan_run_on_time = 15    # 0, 5 or 15 minutes
 hood.main_light = true
-hood.setting(40_010)         # grease filter saturation, nil when the hood does not expose it
-hood.write_setting(40_010, 0)
+hood.setting(40_010)         # the current grease filter limit, nil when the hood does not expose it
+hood.write_setting(40_012, 1)  # resets the grease filter's operating hours (40_013: charcoal)
 ```
+
+Settings (programming functions, Dop1 object 1201) go out with structure version 1, as the app
+sends them.
 
 A value out of range raises `ArgumentError` before anything is sent. `Miele::Sdk::Dop1` builds
 the requests, and `hood.dop1(request)` sends any other one.
@@ -237,7 +252,9 @@ anything is sent.
 
 ## Sources
 
-- Device types, statuses and program types: the Miele 3rd Party API documentation
+- Device types: the 74 values of the Miele app 4.19.0's `DeviceType` enum, under the names given
+  below where those sources name them.
+- Statuses and program types: the Miele 3rd Party API documentation
   ([capabilities by device](https://developer.miele.com/docs/third-party-api/API_V1.1.x_capabilities_by_device.pdf)
   and its 2022 OpenAPI description). Statuses 144, 145 and 147, and 148 on hoods, take the names
   the Miele app 4.19.0 gives them; the app also gives the program types of DOP2 appliances, the
@@ -257,8 +274,8 @@ anything is sent.
   [Home Assistant](https://github.com/home-assistant/core/tree/dev/homeassistant/components/miele).
 
 Reading was checked against appliances with EK057 and EK039W Wi-Fi modules. Commands, DOP2 and
-Dop1 writes have not run against a real appliance yet: they follow ha-miele-at-lan, which tested
-them on its own appliances.
+Dop1 writes have not run against a real appliance: they send what the Miele app 4.19.0 sends,
+read from its code.
 
 ## Development
 

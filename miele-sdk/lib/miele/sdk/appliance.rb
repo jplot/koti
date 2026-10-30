@@ -33,7 +33,12 @@ module Miele
       # @api public
       def settings = device('Settings')
 
+      # @return [Hash{String=>Object}] links to the service data of the Wi-Fi module, which it serves locally
+      # @api public
+      def service = device('Service')
+
       # @return [Hash{String=>Object}] the services the Miele app reads (camera, remote update, Con@ctivity…)
+      # @raise [NotFoundError] on EK057 and EK039W modules, which do not serve it locally
       # @api public
       def services = device('services')
 
@@ -84,7 +89,8 @@ module Miele
       # @api public
       def wake = change(Schema::DeviceState.new(device_action: 2))
 
-      # Switches the appliance on, waking it first when it sleeps.
+      # Switches the appliance on as the app's oven module does, waking it first when it sleeps. The app's
+      # other families switch on in their own way.
       #
       # @return [void]
       # @raise [ResponseError] if the appliance still refuses after three attempts
@@ -103,7 +109,8 @@ module Miele
       # @api public
       def power_off = write_dop2(power_leaf(1))
 
-      # Read without an index, as the app reads a leaf once; the app polls its leaves with +idx1: 0, idx2: 1+.
+      # Without an index, the read is the one the app's live observation sends; its one-shot reads give
+      # +idx1: 0, idx2: 0+ and its polls +idx1: 0, idx2: 1+.
       #
       # @param unit [Integer]
       # @param attribute [Integer]
@@ -120,11 +127,15 @@ module Miele
 
       # The reference pads every DOP2 write to 32 bytes; shorter ones were never tried on an appliance.
       #
-      # @param leaf [Dop2::Leaf] its indexes travel in the body, as the app writes them
+      # @param leaf [Dop2::Leaf]
+      # @param with_index [Boolean] whether its indexes also go in the path, as the app's hood and coffee
+      #   modules write; its oven, dishwasher and laundry modules leave them in the body only
       # @return [void]
       # @api public
-      def write_dop2(leaf)
-        Connection.request(host, :put, dop2_path(leaf.unit, leaf.attribute), body: Dop2.encode(leaf).ljust(32, ' '))
+      def write_dop2(leaf, with_index: false)
+        path = dop2_path(leaf.unit, leaf.attribute)
+        path += "?idx1=#{leaf.idx1}&idx2=#{leaf.idx2}" if with_index
+        Connection.request(host, :put, path, body: Dop2.encode(leaf).ljust(32, ' '))
       end
 
       # Sends a Dop1 request, which hoods in +ProtocolVersion+ 2 answer instead of DOP2.

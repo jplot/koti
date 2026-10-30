@@ -39,6 +39,12 @@ RSpec.describe Miele::Sdk::Appliance do
     expect(request.headers['content-length']).to eq('32')
   end
 
+  it "writes the index in the path when asked, as the app's hood and coffee modules do" do
+    appliance.write_dop2(Miele::Sdk::Dop2::Leaf.new(unit: 2, attribute: 1583, idx1: 1, idx2: 1, fields: {}),
+                         with_index: true)
+    expect(puts_sent).to eq(['DOP2/2/1583?idx1=1&idx2=1'])
+  end
+
   it 'switches off with one write' do
     appliance.power_off
     expect(puts_sent).to eq(['DOP2/2/1586'])

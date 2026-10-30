@@ -44,6 +44,11 @@ RSpec.describe Miele::Sdk::Appliance do
     expect(paths).to include(*readers.values)
   end
 
+  it 'still reads the Service resource the modules serve' do
+    appliance.service
+    expect(paths.last).to eq("/Devices/#{fab}/Service")
+  end
+
   it 'reads the services in lower case' do
     appliance.services
     expect(paths.last).to eq("/Devices/#{fab}/services")

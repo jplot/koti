@@ -27,6 +27,8 @@ module Miele
 
       def settings: () -> resource
 
+      def service: () -> resource
+
       def services: () -> resource
 
       def update: () -> resource
@@ -57,7 +59,7 @@ module Miele
 
       def dop2: (Integer unit, Integer attribute, ?idx1: Integer?, ?idx2: Integer?) -> Dop2::Leaf
 
-      def write_dop2: (Dop2::Leaf leaf) -> void
+      def write_dop2: (Dop2::Leaf leaf, ?with_index: bool) -> void
 
       def dop1: (String request) -> String
 

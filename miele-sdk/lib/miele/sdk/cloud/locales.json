@@ -1,0 +1,642 @@
+[
+  {
+    "iso": "AE",
+    "countries": [
+      "AE"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "AR",
+    "countries": [
+      "AR"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "AT",
+    "countries": [
+      "AT"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {
+      "authorize": "https://prod.map.miele-iot.com/at/authorize",
+      "token": "https://prod.map.miele-iot.com/at/token",
+      "logout": "https://prod.map.miele-iot.com/at/logout"
+    }
+  },
+  {
+    "iso": "AU",
+    "countries": [
+      "AU"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "BE",
+    "countries": [
+      "BE"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "BG",
+    "countries": [
+      "BG"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "BR",
+    "countries": [
+      "BR"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "BY",
+    "countries": [
+      "BY"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "CA",
+    "countries": [
+      "CA"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "CH",
+    "countries": [
+      "CH",
+      "LI"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "CL",
+    "countries": [
+      "CL"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "CN",
+    "countries": [
+      "CN"
+    ],
+    "rest": "rest-cn.domestic.miele-iot.cn",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "CY",
+    "countries": [
+      "CY"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "CZ",
+    "countries": [
+      "CZ"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {
+      "authorize": "https://prod.map.miele-iot.com/cz/authorize",
+      "token": "https://prod.map.miele-iot.com/cz/token",
+      "logout": "https://prod.map.miele-iot.com/cz/logout"
+    }
+  },
+  {
+    "iso": "DE",
+    "countries": [
+      "DE"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "DK",
+    "countries": [
+      "DK"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": true,
+    "ciam_endpoints": {
+      "authorize": "https://prod.map.miele-iot.com/dk/authorize",
+      "token": "https://prod.map.miele-iot.com/dk/token",
+      "logout": "https://prod.map.miele-iot.com/dk/logout"
+    }
+  },
+  {
+    "iso": "EE",
+    "countries": [
+      "EE"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "EG",
+    "countries": [
+      "EG"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "ES",
+    "countries": [
+      "ES"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "FI",
+    "countries": [
+      "FI"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "FR",
+    "countries": [
+      "FR"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "GB",
+    "countries": [
+      "GB"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": true,
+    "ciam_endpoints": {
+      "authorize": "https://prod.map.miele-iot.com/gb/authorize",
+      "token": "https://prod.map.miele-iot.com/gb/token",
+      "logout": "https://prod.map.miele-iot.com/gb/logout"
+    }
+  },
+  {
+    "iso": "GR",
+    "countries": [
+      "GR"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "HK",
+    "countries": [
+      "HK"
+    ],
+    "rest": "rest-as.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "HR",
+    "countries": [
+      "HR"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {
+      "authorize": "https://prod.map.miele-iot.com/hr/authorize",
+      "token": "https://prod.map.miele-iot.com/hr/token",
+      "logout": "https://prod.map.miele-iot.com/hr/logout"
+    }
+  },
+  {
+    "iso": "HU",
+    "countries": [
+      "HU"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {
+      "authorize": "https://prod.map.miele-iot.com/hu/authorize",
+      "token": "https://prod.map.miele-iot.com/hu/token",
+      "logout": "https://prod.map.miele-iot.com/hu/logout"
+    }
+  },
+  {
+    "iso": "ID",
+    "countries": [
+      "ID"
+    ],
+    "rest": "rest-as.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "IE",
+    "countries": [
+      "IE"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "IL",
+    "countries": [
+      "IL"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "IN",
+    "countries": [
+      "IN"
+    ],
+    "rest": "rest-as.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "IS",
+    "countries": [
+      "IS"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "IT",
+    "countries": [
+      "IT"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {
+      "authorize": "https://prod.map.miele-iot.com/it/authorize",
+      "token": "https://prod.map.miele-iot.com/it/token",
+      "logout": "https://prod.map.miele-iot.com/it/logout"
+    }
+  },
+  {
+    "iso": "JP",
+    "countries": [
+      "JP"
+    ],
+    "rest": "rest-as.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "KI",
+    "countries": [
+      "KI"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "KM",
+    "countries": [
+      "KM"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "KR",
+    "countries": [
+      "KR"
+    ],
+    "rest": "rest-as.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "KY",
+    "countries": [
+      "KY"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "KZ",
+    "countries": [
+      "KZ"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "LB",
+    "countries": [
+      "LB"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "LC",
+    "countries": [
+      "LC"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "LT",
+    "countries": [
+      "LT"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "LU",
+    "countries": [
+      "LU"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "LV",
+    "countries": [
+      "LV"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "MT",
+    "countries": [
+      "MT"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "MX",
+    "countries": [
+      "MX"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "MY",
+    "countries": [
+      "MY"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "NG",
+    "countries": [
+      "NG"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "NL",
+    "countries": [
+      "NL"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "NO",
+    "countries": [
+      "NO"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "NZ",
+    "countries": [
+      "NZ"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "PH",
+    "countries": [
+      "PH"
+    ],
+    "rest": "rest-as.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "PL",
+    "countries": [
+      "PL"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "PT",
+    "countries": [
+      "PT"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "RO",
+    "countries": [
+      "RO"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "RS",
+    "countries": [
+      "RS"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "RU",
+    "countries": [
+      "RU"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "SE",
+    "countries": [
+      "SE"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "SG",
+    "countries": [
+      "SG"
+    ],
+    "rest": "rest-as.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "SH",
+    "countries": [
+      "SH"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "SI",
+    "countries": [
+      "SI"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {
+      "authorize": "https://prod.map.miele-iot.com/si/authorize",
+      "token": "https://prod.map.miele-iot.com/si/token",
+      "logout": "https://prod.map.miele-iot.com/si/logout"
+    }
+  },
+  {
+    "iso": "SK",
+    "countries": [
+      "SK"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {
+      "authorize": "https://prod.map.miele-iot.com/sk/authorize",
+      "token": "https://prod.map.miele-iot.com/sk/token",
+      "logout": "https://prod.map.miele-iot.com/sk/logout"
+    }
+  },
+  {
+    "iso": "SX",
+    "countries": [
+      "SX"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "TH",
+    "countries": [
+      "TH"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "TR",
+    "countries": [
+      "TR"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "UA",
+    "countries": [
+      "UA"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "US",
+    "countries": [
+      "US"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  },
+  {
+    "iso": "ZA",
+    "countries": [
+      "ZA"
+    ],
+    "rest": "rest-eu.domestic.miele-iot.com",
+    "ciam": false,
+    "ciam_endpoints": {}
+  }
+]

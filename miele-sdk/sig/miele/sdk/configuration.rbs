@@ -13,6 +13,12 @@ module Miele
         attr_accessor listener_port: Integer
         attr_accessor advertise_address: String?
         attr_accessor listener_fab: String
+        attr_accessor country: String?
+        attr_accessor email: String?
+        attr_accessor password: String?
+        attr_accessor ciam_client_id: String?
+        attr_accessor cloud_token: String?
+        attr_accessor locales_host: String
 
         def initialize: () -> void
       end

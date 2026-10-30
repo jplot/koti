@@ -44,6 +44,25 @@ module Miele
         #   digits from the host name
         attr_accessor :listener_fab
 
+        # @return [String, nil] ISO code of the country the Miele account is registered in, which picks its cloud
+        attr_accessor :country
+
+        # @return [String, nil] e-mail address of the Miele account
+        attr_accessor :email
+
+        # @return [String, nil] password of the Miele account, sent as is to the cloud's login, as the app sends it
+        attr_accessor :password
+
+        # @return [String, nil] OAuth client id of the Miele app, for the countries that log in through CIAM
+        attr_accessor :ciam_client_id
+
+        # @return [String, nil] a token saved from {Cloud::Session::Token#to_json}, to start without logging in
+        attr_accessor :cloud_token
+
+        # @return [String] where the app reads the cloud of each country (default:
+        #   +https://rest-eu.domestic.miele-iot.com+)
+        attr_accessor :locales_host
+
         # Initializes the settings with their defaults.
         #
         # @api private
@@ -53,6 +72,7 @@ module Miele
           @read_timeout = 10
           @listener_port = 18_082
           @listener_fab = format('000999%06d', Zlib.crc32(Socket.gethostname) % 1_000_000)
+          @locales_host = 'https://rest-eu.domestic.miele-iot.com'
         end
       end
 

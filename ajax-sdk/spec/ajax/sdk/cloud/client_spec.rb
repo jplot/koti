@@ -68,6 +68,13 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
     expect(collected).to contain_exactly(be_a(type(devices)::Success))
   end
 
+  it 'builds a stream request at the call, before returning an Enumerator', :aggregate_failures do
+    ping = '/systems.ajax.api.mobile.v2.connectivity.PingPongService/pingPong'
+
+    expect { client.server_stream(devices, { space_id: 1 }) }.to raise_error(Google::Protobuf::TypeError)
+    expect { client.bidi(ping, [{ bogus: 1 }]) }.to raise_error(ArgumentError, /bogus/)
+  end
+
   it 'sends a typed request' do
     sent = []
     allow(grpc).to receive(:request_response) { |_path, request, *| (sent << request) && answer(spaces) }

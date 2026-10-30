@@ -69,9 +69,10 @@ module Ajax
         # @return [Enumerator, nil] an Enumerator of the messages when no block is given
         def server_stream(path, request = {}, &)
           refuse_write(path)
+          request = message(path, request)
           return enum_for(:server_stream, path, request) unless block_given?
 
-          stream(:server_streamer, path, message(path, request), &)
+          stream(:server_streamer, path, request, &)
         end
 
         # @param requests [Array<Hash, Data>] the request messages
@@ -86,9 +87,10 @@ module Ajax
         # @return [Enumerator, nil] an Enumerator of the messages when no block is given
         def bidi(path, requests, &)
           refuse_write(path)
+          requests = requests.map { message(path, it) }
           return enum_for(:bidi, path, requests) unless block_given?
 
-          stream(:bidi_streamer, path, requests.map { |request| message(path, request) }, &)
+          stream(:bidi_streamer, path, requests, &)
         end
 
         # Sends a unary call without the login retry, so {Session} can log in without recursing.

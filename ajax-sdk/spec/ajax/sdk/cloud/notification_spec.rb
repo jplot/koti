@@ -33,7 +33,16 @@ RSpec.describe Ajax::Sdk::Cloud::Notification do
   it 'gives the values the cloud leaves out at their default' do
     expect(described_class.from({ id: 'n3' })).to have_attributes(
       time: nil, kind: :unknown, event: nil, transition: nil, source: nil, folder: :unspecified,
-      importance: :unspecified, read: false
+      importance: :unspecified, read: false, token: ''
     )
+  end
+
+  it 'keeps the universal token' do
+    expect(described_class.from({ **raw, universal_token: 'u1' }).token).to eq('u1')
+  end
+
+  it 'marks a notification grouped under an offline one', :aggregate_failures do
+    expect(described_class.from(raw, parent_id: 'p1').parent_id).to eq('p1')
+    expect(described_class.from(raw).parent_id).to be_nil
   end
 end

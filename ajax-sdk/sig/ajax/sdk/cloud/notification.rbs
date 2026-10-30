@@ -20,12 +20,16 @@ module Ajax
         attr_reader folder: Symbol
         attr_reader importance: Symbol
         attr_reader read: bool
+        attr_reader token: String
+        attr_reader parent_id: String?
         attr_reader raw: Hash[Symbol, untyped]
 
         def self.new: (id: String, time: Time?, kind: Symbol, event: Symbol?, transition: Symbol?, source: Source?,
-                       folder: Symbol, importance: Symbol, read: bool, raw: Hash[Symbol, untyped]) -> Notification
-        def self.from: (Hash[Symbol, untyped] raw) -> Notification
+                       folder: Symbol, importance: Symbol, read: bool, token: String, parent_id: String?,
+                       raw: Hash[Symbol, untyped]) -> Notification
+        def self.from: (Hash[Symbol, untyped] raw, ?parent_id: String?) -> Notification
         def self.about: (Hash[Symbol, untyped] content) -> { event: Symbol?, transition: Symbol?, source: Source? }
+        def self.marks: (Hash[Symbol, untyped] raw) -> { folder: Symbol, importance: Symbol, read: bool, token: String }
       end
     end
   end

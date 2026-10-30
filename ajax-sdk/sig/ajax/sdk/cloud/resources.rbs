@@ -24,7 +24,8 @@ module Ajax
         def spaces: () -> Array[Space]
         def space: (String id) -> Space?
         def devices: (String space_id) -> Array[Device]
-        def notifications: (String space_id, ?limit: Integer) -> Array[Notification]
+        def notifications: (String space_id, ?limit: Integer, ?older_than: String?, ?newer_than: String?) -> Array[Notification]
+        def notification_history: (String space_id, ?limit: Integer) -> Enumerator::Lazy[Notification, untyped]
         def arm: (String space_id, ?ignore_alarms: bool) -> void
         def disarm: (String space_id) -> void
         def arm_night: (String space_id, ?ignore_alarms: bool) -> void
@@ -38,6 +39,9 @@ module Ajax
 
         def command: (String path, String space_id, ?ignore_alarms: bool?) -> void
         def space_locator: (String space_id) -> Hash[Symbol, untyped]
+        def notification_page: (String space_id, limit: Integer, ?older_than: String?, ?newer_than: String?)
+                             -> Array[Notification]
+        def newest_first: (Array[Notification] notifications) -> Array[Notification]
       end
     end
   end

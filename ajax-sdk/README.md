@@ -224,7 +224,7 @@ plain user (`ReadError`, `:permission_denied`), as the live specs' account is.
 ## Any method
 
 Every gRPC method the app has is in the shipped schema table, and the client has a method for each of
-the 608, named after its path: the service without `Service`, then the method unless it is `execute`,
+the 609, named after its path: the service without `Service`, then the method unless it is `execute`,
 in snake_case.
 
 ```ruby
@@ -251,7 +251,7 @@ google-protobuf message; a Hash names enum values as protobuf does (`:USER_ROLE_
 their short symbols (`:user`).
 
 Responses come back as values generated from the app's schemas, under `Ajax::Sdk::Cloud::Messages`:
-a `Data` class per message (5,828) and a module per enum (907), each loaded on its first use, with YARD
+a `Data` class per message (5,832) and a module per enum (908), each loaded on its first use, with YARD
 and RBS signatures that Steep checks.
 
 - A message is a value whose members are its fields, plus `raw`, the Hash google-protobuf decoded;
@@ -263,7 +263,7 @@ and RBS signatures that Steep checks.
 - A `Timestamp` becomes a `Time` in UTC, a `Duration` a Float of seconds, a wrapper (`StringValue`…)
   what it holds.
 
-A response whose `success` shares a oneof with its `failure` (or `error`), as 584 of the 608 methods
+A response whose `success` shares a oneof with its `failure` (or `error`), as 585 of the 609 methods
 have, is unwrapped:
 `call` returns the success, or raises `ReadError` for a read and `CommandError` for anything else. The
 error's `reason` is the member of the failure that is set (`:hub_offline`), or `:refused` when the

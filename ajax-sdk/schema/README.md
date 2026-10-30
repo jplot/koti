@@ -18,7 +18,7 @@ does not use it.
   message by name, and an obfuscated one by its field numbers in the service's package. A method
   without a class takes the messages of its name (`arm` takes `ArmRequest`), of its service's
   (`LoginByPasswordService` takes `LoginByPasswordRequest`), or the package's lone request and
-  response. From the app 3.59, 608 methods are paired and 1 is not.
+  response. From the app 3.59, all 609 methods are paired.
 - **SIA codes.** [pysiaalarm](https://github.com/eavanvalkenburg/pysiaalarm) (commit `c445c15`)
   lists the codes in `src/pysiaalarm/data/sia_codes.py`, read as text.
 
@@ -49,7 +49,7 @@ the run.
 ## Generated values
 
 `generate/` writes the typed values of the cloud messages from `lib/ajax/sdk/cloud/schemas/` alone: a
-`Data` class per message the 608 methods reach and a module per enum they use, one Ruby file in
+`Data` class per message the 609 methods reach and a module per enum they use, one Ruby file in
 `lib/ajax/sdk/cloud/messages/` and one RBS file in `sig/ajax/sdk/cloud/messages/` per `.proto`, and
 `messages.rb`, which declares the package modules, an `autoload` for each type and the value class of
 each request and response. The files are never edited by hand: change the generator, then run

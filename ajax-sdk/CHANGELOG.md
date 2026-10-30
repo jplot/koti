@@ -7,6 +7,11 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- `PhotoOnDemandService/capturePhoto` is in the method table (`photo_on_demand_capture_photo`): the
+  extractor now reads a request class whose name holds a `$`, and a response declared far from its method.
+
 ### Changed
 
 - `notifications` reads 20 by default (it read 50), the most the app asks for.
@@ -31,11 +36,11 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `Device` reads `space_id`, the `channels` of relays, light switches, sockets and valves (`Channel`, with a
   dimmer's brightness), a roller `shutter` (`Shutter`), a `lock` state, `life_quality` (`LifeQuality`) and a
   fire detector's `mute_command`.
-- A client method for each of the app's 608 gRPC methods (`Cloud::Methods`), named after its path
+- A client method for each of the app's 609 gRPC methods (`Cloud::Methods`), named after its path
   (`stream_light_devices`, `space_security_arm_group`), with YARD and RBS: it builds its typed request
   before sending, and Steep rejects a wrong keyword, type or enum symbol in calling code.
 - Typed values for every cloud message the app's methods use, generated from the shipped schemas
-  (`Cloud::Messages`, 5,828 `Data` classes and 907 enum modules, loaded on first use), with their RBS;
+  (`Cloud::Messages`, 5,832 `Data` classes and 908 enum modules, loaded on first use), with their RBS;
   `rake generate` rewrites them and `rake generate:check` fails when they drift.
 - `Cloud::RefusedError`, the parent of `ReadError` and `CommandError`.
 - Typed cloud values: `devices` returns `Device` values (type, room, states, malfunctions, `Battery`,

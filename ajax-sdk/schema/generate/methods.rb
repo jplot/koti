@@ -31,7 +31,7 @@ module Schema
       end
 
       def doc(model, call)
-        result = relative(returned(model, call)).delete_prefix('::')
+        result = relative(returned(model, call))
         ["# +#{call.path}+, a #{call.type.to_s.tr('_', ' ')} call.", '#', parameter(call),
          *(STREAMS.include?(call.type) ? stream(result) : ["# @return [#{result}]"]),
          *('# @raise [RefusedError] when the gateway answers a failure' if call.response.outcome)]

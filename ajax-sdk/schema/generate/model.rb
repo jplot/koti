@@ -53,7 +53,7 @@ module Schema
       # @return [String] +stream_light_devices+ as +StreamLightDevices+
       def camelize(segment) = segment.split('_').map { it[0].to_s.upcase + it[1..].to_s }.join
 
-      # Words split as Client#read? splits them: the name shows the words the read-only rule judges.
+      # Words split as Client#read? splits them: the words the read-only rule judges end the name.
       #
       # @return [Symbol] +…StreamLightDevicesService/execute+ as +stream_light_devices+,
       #   +…SpaceSecurityService/armGroup+ as +space_security_arm_group+

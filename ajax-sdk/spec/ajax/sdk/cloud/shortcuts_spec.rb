@@ -307,6 +307,18 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       expect(sent.map(&:last)).to all(eq({ space_locator: { space_id: 'space-1' } }))
     end
 
+    it 'reads what the signed-in account may do in a space', :aggregate_failures do
+      hub = { hub_permissions: { hub_id: '0000ABCD', hub_permissions: [:SET_STATE_COMMANDS] } }
+      member = { role: :SPACE_MEMBER_ROLE_USER, space_permissions: { permissions: %i[ARM DISARM] },
+                 devices_permissions: [hub] }
+      success = Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::StreamSpaceUpdatesResponse::Success
+      replying([success.from({ snapshot: { current_member: { user_current_member: member } } })].each)
+      user = client.current_member('space-1').user_current_member
+
+      expect([user.role, user.space_permissions.permissions]).to eq([:user, %i[arm disarm]])
+      expect(user.devices_permissions.first.hub_permissions.hub_permissions).to eq(%i[set_state_commands])
+    end
+
     def quality_answer
       values = { values_temperature: { 3600 => { value_y: 21.5 } },
                  values_humidity: { 3600 => { value_y_range: { min_value_y: 40.0, max_value_y: 45.0 } } } }
@@ -348,7 +360,8 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
     end
 
     def reads
-      { rooms: ['space-1'], groups: ['space-1'], scenarios: ['space-1'], hub_details: %w[space-1 0000ABCD],
+      { rooms: ['space-1'], groups: ['space-1'], current_member: ['space-1'], scenarios: ['space-1'],
+        hub_details: %w[space-1 0000ABCD],
         device_details: [device(:door_protect)] }
     end
 

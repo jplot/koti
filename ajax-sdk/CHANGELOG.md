@@ -9,6 +9,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- `Device.from` takes the typed `LightDeviceItem` and the `space_id:`.
 - **Breaking:** `call`, `unary`, `server_stream`, `client_stream` and `bidi` return generated values
   instead of Hashes (`raw` keeps the Hash), and a response whose `success` shares a oneof with its
   `failure` gives its success or raises `ReadError` (a read) or `CommandError`, with `reason`, `failure`
@@ -16,6 +17,13 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Shortcuts for everyday actions (`Cloud::Shortcuts`): switching, dimming, roller shutters, bypass, group
+  arming, the security mode, the panic button, locks, muting, the EN54 fire reset, device and hub details
+  and settings, scenarios, rooms, groups and LifeQuality history (`LifeQualityHistory`), each sending what
+  the app 3.59 sends.
+- `Device` reads `space_id`, the `channels` of relays, light switches, sockets and valves (`Channel`, with a
+  dimmer's brightness), a roller `shutter` (`Shutter`), a `lock` state, `life_quality` (`LifeQuality`) and a
+  fire detector's `mute_command`.
 - A client method for each of the app's 608 gRPC methods (`Cloud::Methods`), named after its path
   (`stream_light_devices`, `space_security_arm_group`), with YARD and RBS: it builds its typed request
   before sending, and Steep rejects a wrong keyword, type or enum symbol in calling code.

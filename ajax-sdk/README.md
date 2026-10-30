@@ -124,6 +124,46 @@ A battery whose `exact` is false comes from a device that reports no percentage:
 « OK » from 21 % and « discharged » below, not the number. `spaces` reads every page. A read the gateway
 refuses raises `Ajax::Sdk::Cloud::ReadError`, whose `reason` names why (for example `:bad_request`).
 
+## Following a space
+
+```ruby
+cloud.events(space.id) do |event|
+  event.kind   # => :device
+  event.key    # => [:hub_device, "0000ABCD", "0000BEEF"]
+  event.before # => the Device before the change, nil when it appears
+  event.after  # => the Device after it, nil when it goes
+  event.state  # => #<data SpaceState space=…, security=…, groups={…}, rooms={…}, devices={…}>
+end
+
+cloud.events(space.id).first(10) # without a block: a lazy Enumerator
+```
+
+`events` follows one space through four streams of the gateway, each in its own thread: the space (its
+security mode, groups and rooms), the account's spaces (the only source of the hub's online status), the
+devices, and the notifications. The caller's thread alone applies their messages and yields one `Event` per
+change:
+
+| `kind` | `before` / `after` | `key` |
+|---|---|---|
+| `:space` | `Space` (name, security state, online) | the space id |
+| `:security` | the generated `SpaceSecurityMode` | the space id |
+| `:group`, `:room` | the generated `Group`, `Room` | their id |
+| `:device` | `Device` | `[:hub_device, hub_id, device_id]` (the hub has `device_id == hub_id`), `[:video_edge, id]`, `[:video_edge_channel, video_edge_id, channel_id]`, `[:smart_lock, id]`, `[:chime, id]` |
+| `:notification` | `Notification` | its id |
+
+`state` is the whole space once the change is applied. The first messages give every item as an addition.
+
+A stream that breaks (unavailable, deadline, internal, unauthenticated…) or ends reopens 1, 2, 4, 8, 16 then
+30 seconds later, back to 1 second at its first message, forever. A snapshot after a reopening is compared
+with what was kept, so the changes made meanwhile come out as events. The notification stream has no
+snapshot: when it reopens, the notifications newer than the newest kept are read back page by page; one
+created between that read and the reopening can be missed. A failure the gateway answers (a refusal) is
+raised, and so is any other error. An exception in the block, `break`, or leaving the Enumerator stops the
+four threads and closes their calls.
+
+Not followed: the cloud smart locks' own stream, a roller shutter's movement, and the app's trouble, offline
+and low-battery lists; their lasting state is already in the devices.
+
 ## Commanding
 
 ```ruby

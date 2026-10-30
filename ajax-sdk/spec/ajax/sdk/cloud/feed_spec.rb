@@ -51,7 +51,11 @@ RSpec.describe Ajax::Sdk::Cloud::Feed do
 
   def log(*numbers) = { success: { events: numbers.map { { notification_created: note(it) } } } }
 
-  def requests = Array.new(gateway.requests.size) { gateway.requests.pop }
+  def requests = gateway.requests
+
+  def await_streams
+    sleep(0.01) until ([space, summary, devices, notes] - requests.map(&:first)).empty?
+  end
 
   it 'emits what changed while the devices stream was down', :aggregate_failures do
     script[devices] = [[snapshot(100), GRPC::Unavailable.new('down')], [snapshot(50), :open]]
@@ -121,7 +125,7 @@ RSpec.describe Ajax::Sdk::Cloud::Feed do
   it 'closes the four calls when the block raises', :aggregate_failures do
     script[devices] = [[snapshot(100), :open]]
 
-    expect { events { raise 'boom' } }.to raise_error(RuntimeError, 'boom')
+    expect { events { await_streams || raise('boom') } }.to raise_error(RuntimeError, 'boom')
     expect(Array.new(4) { gateway.closed.pop(timeout: 5) }).to contain_exactly(space, summary, devices, notes)
     expect(requests.map(&:first).tally).to eq({ space => 1, summary => 1, devices => 1, notes => 1, find => 1 })
   end
@@ -135,7 +139,7 @@ RSpec.describe Ajax::Sdk::Cloud::Feed do
 
   it 'stops when the enumerator is left early' do
     script[devices] = [[snapshot(100), :open]]
-    events.first(1)
+    events.map { await_streams || it }.first(1)
 
     expect(Array.new(4) { gateway.closed.pop(timeout: 5) }).to contain_exactly(space, summary, devices, notes)
   end

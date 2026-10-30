@@ -3,8 +3,8 @@
 # Plain-text gRPC server standing in for the mobile gateway. A script gives, for each path, the calls it answers in
 # turn: a server stream sends each Hash of its call as a response, raising a gRPC error found among them, then ends,
 # or stays open at +:open+; a unary call answers its one Hash. A stream past the end of its script stays open until
-# the client leaves or the server stops. +closed+ receives the path of each stream as it closes, +requests+ each
-# request as a Hash.
+# the client leaves or the server stops. +closed+ receives the path of each stream as it closes, and +requests+
+# gives every request received so far, with its path.
 class FakeGateway
   # grpc logs each reply with to_s, which crashes google-protobuf 4.36 on a message of the shipped pool holding a
   # sub-message: replies go out already encoded.
@@ -15,7 +15,7 @@ class FakeGateway
   # A server learns that a client left only when a write fails: an open stream writes this every 50 ms.
   KEEPALIVE = { success: {} }.freeze
 
-  attr_reader :port, :closed, :requests
+  attr_reader :port, :closed
 
   # @param script [Hash{String=>Array}, String] the calls by path, or one streaming path for +count+ empty successes
   def self.start(script, count: nil, pause: 0, first: [])
@@ -27,7 +27,8 @@ class FakeGateway
     @script = script.transform_values(&:dup)
     @pause = pause
     @closed = Queue.new
-    @requests = Queue.new
+    @requests = []
+    @lock = Mutex.new
     @stopping = false
   end
 
@@ -45,7 +46,7 @@ class FakeGateway
   end
 
   def answer(path, klass, request, streaming)
-    @requests << [path, request.to_h]
+    @lock.synchronize { @requests << [path, request.to_h] }
     call = @script.fetch(path).shift
     return encoded(klass, call || KEEPALIVE) unless streaming
 
@@ -55,6 +56,8 @@ class FakeGateway
       @closed << path
     end
   end
+
+  def requests = @lock.synchronize { @requests.dup }
 
   private
 

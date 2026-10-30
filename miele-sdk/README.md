@@ -106,9 +106,10 @@ value to 15 or 7, dishwashers and laundry appliances test its bits. They answer 
 families, such as hoods and hobs, for which the app never reads it.
 
 `supervision` and `software_update` come as typed values too, and `services` as served: the
-services the Miele app reads (camera, remote update, Con@ctivity). The other resources come as
-served, the app reading none of them: `settings` and `update` of the appliance, `info` and
-`host_info` of its Wi-Fi module, and `get(path)` for any other one.
+services the Miele app reads (camera, remote update, Con@ctivity), which EK057 and EK039W modules
+do not serve locally (404). The other resources come as served, the app reading none of them:
+`settings`, `service` and `update` of the appliance, `info` and `host_info` of its Wi-Fi module,
+and `get(path)` for any other one.
 
 ### Typed values
 
@@ -147,7 +148,8 @@ oven.power_on     # and power_off
 An appliance answers 400 to a write that changes nothing: `wake` and the hood commands treat it as
 done.
 
-`power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app does. An appliance asleep answers 500:
+`power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app's oven module does; its other families
+switch on in their own way, which will come with them. An appliance asleep answers 500:
 like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, giving up
 after three attempts where the app sets no limit. `power_off` writes 1 to the same leaf.
 
@@ -172,9 +174,11 @@ Fields decode and encode every type the Miele app knows: booleans, signed and un
 8 to 64 bits, floats, enums, strings, structs, arrays of each scalar and arrays of structs. A value
 outside its field's range raises `ArgumentError`, and a string is read without its trailing NULs
 and written with one, as the app writes it. `dop2` reads `/DOP2/{unit}/{attribute}` without a
-query, as the app reads a leaf once, unless given an index; `write_dop2` writes without one, the
-indexes travelling in the leaf. Not every Wi-Fi module serves DOP2: EK057 and EK039W modules answer 404 to every
-leaf, so `power_on` raises `Miele::Sdk::NotFoundError` on them.
+query unless given an index: the app's live observation reads the first way, its one-shot reads
+with `idx1: 0, idx2: 0` and its polls with `idx1: 0, idx2: 1`. `write_dop2` leaves the indexes in
+the leaf, as the app's oven, dishwasher and laundry modules do; `with_index: true` also puts them
+in the path, as its hood and coffee modules do. Not every Wi-Fi module serves DOP2: EK057 and
+EK039W modules answer 404 to every leaf, so `power_on` raises `Miele::Sdk::NotFoundError` on them.
 
 ## Hoods (Dop1)
 

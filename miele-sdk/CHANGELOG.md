@@ -11,21 +11,24 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - **Breaking:** `start`, `stop`, `pause`, `light_on` and `light_off` are gone from `Appliance`: the
   Miele app sends them differently in each family, and they will come back that way.
-- **Breaking:** `service` is `services`, read at the lower-case path the app reads.
 - **Breaking:** `remote_control?` follows the app for each family and answers nil where the app
   never reads `RemoteEnable`; `mobile_start?` and `local_control?` join it.
-- **Breaking:** `dop2` reads without a query unless given an index, `write_dop2` writes without
-  one, and `Dop1.setting_value` takes only the hood's answer.
+- **Breaking:** `dop2` reads without a query unless given an index, `write_dop2` leaves the
+  indexes in the leaf unless given `with_index: true`, and `Dop1.setting_value` takes only the
+  hood's answer.
 
 ### Fixed
 
-- `power_on` and `power_off` send what the app sends, without the 2/1583 opcode fallback taken
-  from ha-miele-at-lan.
+- `power_on` and `power_off` send what the app's oven module sends, without the 2/1583 opcode
+  fallback taken from ha-miele-at-lan.
 - Dop1 settings go out with structure version 1, and the README's filter example resets the
   operating hours (40012) instead of writing the filter limit (40010) to 0.
 - DOP2 fields of every type the app knows decode and encode; strings lose their trailing NULs.
 
 ### Added
+
+- `services`, the lower-case resource the Miele app reads, which EK057 and EK039W modules do not
+  serve locally.
 
 - Configuration of the household GroupID and GroupKey, ports, timeouts and listener identity
   through `Miele::Sdk.configure`.

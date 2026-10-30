@@ -1,0 +1,109 @@
+module Ajax
+  module Sdk
+    module Cloud
+      class Event < Data
+        attr_reader kind: Symbol
+        attr_reader key: untyped
+        attr_reader before: untyped
+        attr_reader after: untyped
+        attr_reader state: SpaceState
+
+        def self.new: (kind: Symbol, key: untyped, before: untyped, after: untyped, state: SpaceState) -> Event
+      end
+
+      class SpaceState < Data
+        type security = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::SpaceSecurityMode
+        type group = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::Group
+        type room = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Room::Room
+
+        attr_reader space: Space?
+        attr_reader security: security?
+        attr_reader groups: Hash[untyped, group]
+        attr_reader rooms: Hash[untyped, room]
+        attr_reader devices: Hash[untyped, Device]
+
+        def self.new: (space: Space?, security: security?, groups: Hash[untyped, group], rooms: Hash[untyped, room],
+                       devices: Hash[untyped, Device]) -> SpaceState
+      end
+
+      class Tracker
+        module LIGHT = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light
+        module SPACE = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
+        KEPT: Integer
+
+        type raw = Hash[Symbol, untyped]
+        type change = Array[untyped]
+
+        module SpaceRules
+          TYPES: Array[Symbol]
+
+          @space_id: String
+          @stores: Hash[Symbol, Hash[untyped, raw]]
+
+          private
+
+          # Provided by Tracker, used here.
+          def put: (Symbol kind, untyped key, raw? raw) -> Array[change]
+          def replace: (Symbol kind, Hash[untyped, raw] fresh) -> Array[change]
+          def by_id: (Array[raw]? list) -> Hash[untyped, raw]
+
+          def space_message: (raw raw) -> Array[change]
+          def space_update: (raw update) -> Array[change]
+          def summary_message: (raw raw) -> Array[change]
+          def lite_space_event: (raw event) -> Array[change]
+          def lite_space_update: (raw updated) -> Array[change]
+        end
+
+        module DeviceRules
+          UPSERT: Array[Symbol]
+
+          @stores: Hash[Symbol, Hash[untyped, raw]]
+
+          private
+
+          # Provided by Tracker, used here.
+          def put: (Symbol kind, untyped key, raw? raw) -> Array[change]
+          def replace: (Symbol kind, Hash[untyped, raw] fresh) -> Array[change]
+
+          def devices_message: (raw raw) -> Array[change]
+          def device_update: (raw update) -> Array[change]
+          def snapshot_update: (Array[untyped] key, raw change) -> Array[change]
+          def changed: (raw item, Symbol kind, untyped change) -> raw
+          def change_body: (raw body, raw profile, Symbol kind, untyped change) -> untyped
+          def replace_status: (raw profile, raw change) -> void
+          def status_kind: (raw status) -> Array[untyped]
+          def replace_state: (raw profile, raw change) -> void
+          def replace_lock: (raw body, raw change) -> void
+          def replace_field: (raw body, raw profile, raw change) -> void
+          def replace_property: (raw body, raw change) -> void
+          def typed?: (raw change) -> bool
+          def item_key: (raw item) -> Array[untyped]
+          def update_key: (raw? id) -> Array[untyped]?
+        end
+
+        include SpaceRules
+        include DeviceRules
+
+        @space_id: String
+        @stores: Hash[Symbol, Hash[untyped, raw]]
+        @state: SpaceState?
+
+        def initialize: (String space_id) -> void
+        def apply: (Symbol source, untyped success) -> Array[Event]
+        def state: () -> SpaceState
+        def newest_token: () -> String?
+
+        private
+
+        def events: (Array[change] changes) -> Array[Event]
+        def notification_event: (raw event) -> Array[change]
+        def put: (Symbol kind, untyped key, raw? raw) -> Array[change]
+        def replace: (Symbol kind, Hash[untyped, raw] fresh) -> Array[change]
+        def by_id: (Array[raw]? list) -> Hash[untyped, raw]
+        def moment: (raw raw) -> Float
+        def values: (Symbol kind) -> Hash[untyped, untyped]
+        def value: (Symbol kind, raw? raw) -> untyped
+      end
+    end
+  end
+end

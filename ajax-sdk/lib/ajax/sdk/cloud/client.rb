@@ -7,6 +7,7 @@ require_relative 'session'
 require_relative 'resources'
 require_relative 'methods'
 require_relative 'shortcuts'
+require_relative 'tracker'
 
 module Ajax
   module Sdk

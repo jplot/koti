@@ -97,7 +97,7 @@ note.event       # => :space_disarmed
 note.source      # => #<data Source type=:space_member, id="…", name="…">
 
 cloud.notifications(space.id, older_than: note.token) # the page before it
-cloud.notification_history(space.id).first(100)       # page after page, most recent first
+cloud.notification_history(space.id).first(100)       # page after page
 ```
 
 Spaces, devices and notifications come back as `Data` values (`Space`, `Device`, `Notification`, under
@@ -112,10 +112,13 @@ valve's, with a dimmer's `brightness`; `on` is nil when the device does not know
 `:pending_unlocked`…), `life_quality` (temperature, humidity and CO2, whose units °C, % and ppm are inferred,
 not verified) and a fire detector's `mute_command`. `space_id` names its space.
 
-`notifications` reads one page: 20 by default, the most the app asks for (the gateway's own cap is unknown),
-with the notifications grouped under an offline one. `older_than:` or `newer_than:` take a notification's
-`token` to read the page before or after it. `notification_history` reads every page, lazily, from the
-oldest token of each page, and stops on a page that comes back short.
+`notifications` reads one page, most recent first: 20 by default, the most the app asks for (the gateway's
+own cap is unknown), with the notifications grouped under an offline one, whose `parent_id` names it.
+`older_than:` or `newer_than:` take the `token` of a notification outside a group (`parent_id` nil), as the
+app does, to read the page before or after it. `notification_history` reads every page lazily, each most
+recent first, from the oldest notification outside a group of the page before; it stops on a page with
+fewer than `limit` of them, so a gateway capping pages below `limit` ends it early. Grouped notifications
+come with their group's page, which can put them after a newer page.
 
 A battery whose `exact` is false comes from a device that reports no percentage: the app then shows
 « OK » from 21 % and « discharged » below, not the number. `spaces` reads every page. A read the gateway

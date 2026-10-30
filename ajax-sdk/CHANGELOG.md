@@ -19,8 +19,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Every page of a space's notifications: `notifications` takes `older_than:` or `newer_than:` (a
-  notification's new `token`) and adds the notifications grouped under an offline one;
-  `notification_history` reads every page lazily, most recent first.
+  notification's new `token`) and adds the notifications grouped under an offline one (`parent_id`);
+  `notification_history` reads every page lazily, each most recent first.
 - Shortcuts for everyday actions (`Cloud::Shortcuts`): switching, dimming, roller shutters, bypass, group
   arming, the security mode, the panic button, locks, muting, the EN54 fire reset, device and hub details
   and settings, scenarios, rooms, groups and LifeQuality history (`LifeQualityHistory`), built on the

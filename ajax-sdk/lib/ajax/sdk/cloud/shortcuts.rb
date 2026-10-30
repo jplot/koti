@@ -61,7 +61,7 @@ module Ajax
         module Outputs
           include Targets
 
-          ROLLER = Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandRollerShutterControl
+          ROLLER = SERVICE::DeviceCommandRollerShutterControl
           # The app 3.59 switches a device by its family, never by its exact type.
           FAMILIES = { light_switch_channel: :light_switch, socket_base_channel: :socket_base,
                        water_stop_channel: :water_stop_base }.freeze
@@ -162,15 +162,17 @@ module Ajax
             { hub_id: hub_id_of(device), device_id: device.id, device_type: family_type(family), channels: }
           end
 
+          # Relays go by their kind, as the app's z221 dispatches them: a legacy relay sends no channel.
           def switch_family(device)
             found = (device.raw.dig(:hub_device, :spread_properties) || []).flat_map(&:keys)
             known = found.find { FAMILIES.key?(it) }
             return FAMILIES.fetch(known) if known
-            if found.include?(:channel)
-              return device.kind.start_with?('transmitter_fibra') ? :transmitter_fibra_base : :relay_fibra_base
-            end
 
-            :relay if device.kind == :relay
+            case device.kind
+            when :relay then :relay
+            when :relay_fibra_base, :four_channels_relay_fibra then :relay_fibra_base
+            else :transmitter_fibra_base if device.kind.start_with?('transmitter_fibra')
+            end
           end
 
           def shutter(device)
@@ -188,9 +190,8 @@ module Ajax
           end
 
           def cloud_lock(device, action)
-            unless device.kind == :smart_lock && device.hub_id.nil?
-              raise ArgumentError, "#{device.kind} of the hub cannot #{action} through the cloud"
-            end
+            raise ArgumentError, "#{device.kind} cannot #{action} through the cloud" unless device.kind == :smart_lock
+            raise ArgumentError, "a lock of the hub cannot #{action}" unless device.hub_id.nil?
 
             switch_smart_lock(space_id: device.space_id, smart_lock_id: device.id, action:)
             nil
@@ -392,7 +393,7 @@ module Ajax
 
             zone = Messages::Google::Type::TimeZone.new(id: time_zone)
             LifeQualityHistory.from(
-              life_quality_data_get_life_quality_data(hub_hex_id: device.hub_id.to_s, device_hex_id: device.id,
+              life_quality_data_get_life_quality_data(hub_hex_id: hub_id_of(device), device_hex_id: device.id,
                                                       discreteness: step, time_zone: zone,
                                                       start_timestamp: from.to_i, end_timestamp: to.to_i)
             )

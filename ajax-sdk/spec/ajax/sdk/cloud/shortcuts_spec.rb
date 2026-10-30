@@ -71,11 +71,24 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         .to eq([{ socket_base: {} }, { water_stop_base: {} }, { transmitter_fibra_base: {} }])
     end
 
-    it 'turns a legacy relay on without a channel' do
+    it 'turns a legacy relay on without a channel, even one that reports a channel' do
       client.turn_on(device(:relay))
+      client.turn_on(device(:relay, { channel: { channel_id: 1 } }))
 
-      expect(sent).to eq([['DeviceCommandDeviceOnService/execute',
-                           { **target, device_type: { relay: {} }, channels: [] }]])
+      expect(sent.map(&:last)).to all(eq({ **target, device_type: { relay: {} }, channels: [] }))
+    end
+
+    it 'switches a Fibra relay by its base type and its channel' do
+      relay = device(:four_channels_relay_fibra, { channel: { channel_id: 1 } }, { channel: { channel_id: 3 } })
+      client.turn_off(relay, channel: 3)
+
+      expect(sent).to eq([['DeviceCommandDeviceOffService/execute',
+                           { **target, device_type: { relay_fibra_base: {} }, channels: [3] }]])
+    end
+
+    it 'refuses a channelled device whose on and off flow the app does not show' do
+      expect { client.turn_on(device(:wall_switch, { channel: { channel_id: 1 } })) }
+        .to raise_error(ArgumentError, /wall_switch/)
     end
 
     it 'refuses to switch a device with no switchable channel, or a channel it does not have', :aggregate_failures do
@@ -109,6 +122,14 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                                       { **target, device_type: { roller_shutter_ls: {} }, stop: {} }])
     end
 
+    it 'closes a shutter and moves it to an opening' do
+      client.close_shutter(device(:roller_shutter_ws))
+      client.move_shutter(device(:roller_shutter_ws), 30)
+
+      expect(sent.map { it.last[:target_position] })
+        .to eq([{ shutter_target_position: 0 }, { shutter_target_position: 30 }])
+    end
+
     it 'refuses a shutter opening outside 0 to 100, or a device that is not a shutter', :aggregate_failures do
       expect { client.move_shutter(device(:roller_shutter_ws), 101) }.to raise_error(ArgumentError, /101/)
       expect { client.close_shutter(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
@@ -123,6 +144,27 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       expect(sent.map { it.last.values_at(:object_type, :bypass_type) })
         .to eq([[{ door_protect_plus: {} }, :BYPASS_ONE_TIME_TAMPER],
                 [{ door_protect_plus: {} }, :BYPASS_ENGINEERING_DISABLE]])
+    end
+
+    it 'arms a group without overriding alarms by default, and disarms it' do
+      client.arm_group('space-1', 'g1')
+      client.disarm_group('space-1', 'g1')
+
+      expect(sent).to eq([['SpaceSecurityService/armGroup',
+                           { space_locator: { space_id: 'space-1' }, group_id: 'g1', ignore_alarms: false }],
+                          ['SpaceSecurityService/disarmGroup',
+                           { space_locator: { space_id: 'space-1' }, group_id: 'g1' }]])
+    end
+
+    it 'bypasses a whole detector or its lid, lasting or once, and lifts a one-time bypass' do
+      detector = device(:door_protect_plus)
+      client.bypass(detector)
+      client.bypass(detector, tamper_only: true)
+      client.bypass(detector, once: true)
+      client.unbypass(detector, once: true)
+
+      expect(sent.map { it.last[:bypass_type] })
+        .to eq(%i[BYPASS_ENGINEERING_SENSOR BYPASS_ENGINEERING_TAMPER BYPASS_ONE_TIME_SENSOR BYPASS_ONE_TIME_DISABLE])
     end
 
     it 'arms a group overriding alarms, and sets the group security mode' do
@@ -142,6 +184,17 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                            { **target, device_type: { smart_lock: {} }, channels: [1] }]])
     end
 
+    it 'unlocks a jeweller lock with device_on, and locks and unlocks a cloud lock' do
+      cloud = device(:smart_lock, hub: false)
+      client.unlock(device(:smart_lock))
+      client.lock(cloud)
+      client.unlock(cloud)
+
+      expect(sent.map { [it.first, it.last[:action]] })
+        .to eq([['DeviceCommandDeviceOnService/execute', nil], ['SwitchSmartLockService/execute', :ACTION_LOCK],
+                ['SwitchSmartLockService/execute', :ACTION_UNLOCK]])
+    end
+
     it 'unlatches a cloud lock' do
       client.unlatch(device(:smart_lock, { smart_lock_control: { state: :LOCK_STATE_LOCKED } }, hub: false))
 
@@ -159,6 +212,16 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       client.mute(device(:fire_protect_two, mute_button(:MUTE_COMMAND_OWN_PLUS_EXTERNAL)))
 
       expect(sent.last.last[:mute_source_alarm]).to eq(%i[MUTE_SOURCE_ALARM_MUTE_OWN MUTE_SOURCE_ALARM_MUTE_EXTERNAL])
+    end
+
+    it 'mutes only its own alarm, and every fire detector of a hub' do
+      client.mute(fire)
+      client.mute_fire_detectors('0000ABCD')
+
+      expect(sent).to eq([['DeviceCommandSoundOffService/execute',
+                           { object_type: { fire_protect_two: {} }, mute_source_alarm: [:MUTE_SOURCE_ALARM_MUTE_OWN],
+                             **target }],
+                          ['DeviceCommandMuteAllFireDetectorsService/execute', { hub_id: '0000ABCD' }]])
     end
 
     it 'refuses to mute a device without a mute command' do
@@ -225,6 +288,13 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       client.enable_scenario('space-1', 'sc1')
       expect(sent.last).to eq(['SetScenarioStateService/execute',
                                { space_id: 'space-1', scenario_id: 'sc1', enabled: true }])
+    end
+
+    it 'disables a scenario' do
+      client.disable_scenario('space-1', 'sc1')
+
+      expect(sent).to eq([['SetScenarioStateService/execute',
+                           { space_id: 'space-1', scenario_id: 'sc1', enabled: false }]])
     end
 
     it 'reads the rooms and the groups of a space', :aggregate_failures do

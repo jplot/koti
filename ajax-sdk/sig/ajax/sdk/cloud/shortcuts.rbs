@@ -26,7 +26,7 @@ module Ajax
         type switched = { hub_id: String, device_id: String, device_type: HUBSVC::ObjectType, channels: Array[Integer] }
         type shutter = { hub_id: String, device_id: String, device_type: HUBSVC::ObjectType }
         type bypass = :engineering_sensor | :engineering_tamper | :one_time_sensor | :one_time_tamper
-        type security_mode = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Security::SetSecurityModeRequest::SecurityMode::value
+        type security_mode = :regular | :group
         type location = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::PressPanicButtonRequest::Location
         type step = ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataDiscreteness::value
         type update = HUBSVC::Device::Update

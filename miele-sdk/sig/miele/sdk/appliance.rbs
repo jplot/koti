@@ -27,7 +27,7 @@ module Miele
 
       def settings: () -> resource
 
-      def service: () -> resource
+      def services: () -> resource
 
       def update: () -> resource
 
@@ -42,6 +42,8 @@ module Miele
       def device_type: () -> Symbol
 
       def protocol_version: () -> Integer?
+
+      def protocol: () -> Symbol
 
       def tech_type: () -> String?
 

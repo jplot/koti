@@ -1,0 +1,21 @@
+module Miele
+  module Sdk
+    module RemoteControl
+      REMOTE_RULES: Hash[Symbol, Symbol]
+
+      def raw: () -> Hash[String, untyped]
+
+      def device_type: () -> Symbol
+
+      def remote_control?: () -> bool?
+
+      def mobile_start?: () -> bool?
+
+      def local_control?: () -> bool?
+
+      private
+
+      def remote: (Integer index) -> Integer
+    end
+  end
+end

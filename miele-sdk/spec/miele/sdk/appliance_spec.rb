@@ -37,11 +37,26 @@ RSpec.describe Miele::Sdk::Appliance do
   end
 
   it 'reads each resource at its path' do
-    readers = { settings: "/Devices/#{fab}/Settings", service: "/Devices/#{fab}/Service",
+    readers = { settings: "/Devices/#{fab}/Settings",
                 update: "/Devices/#{fab}/Update", supervision: "/Devices/#{fab}/SuperVision",
                 info: '/Info', host_info: '/Host', software_update: '/Update/' }
     readers.each_key { appliance.public_send(it) }
     expect(paths).to include(*readers.values)
+  end
+
+  it 'reads the services in lower case' do
+    appliance.services
+    expect(paths.last).to eq("/Devices/#{fab}/services")
+  end
+
+  it 'knows every device type of the app' do
+    expect([Miele::Sdk::Catalog::DEVICE_TYPES.size, Miele::Sdk::Catalog::DEVICE_TYPES[39]])
+      .to eq([74, :electrical_oven_double])
+  end
+
+  it 'names the protocol' do
+    ident['ProtocolVersion'] = 203
+    expect(appliance.protocol).to eq(:lhb_tod2_cooling)
   end
 
   context 'with a device type missing from the catalog' do

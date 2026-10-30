@@ -33,9 +33,9 @@ module Miele
       # @api public
       def settings = device('Settings')
 
-      # @return [Hash{String=>Object}] links to the service data of the appliance
+      # @return [Hash{String=>Object}] the services the Miele app reads (camera, remote update, Con@ctivity…)
       # @api public
-      def service = device('Service')
+      def services = device('services')
 
       # @return [Hash{String=>Object}] software update state of the appliance itself
       # @raise [NotFoundError] on appliances that do not serve it
@@ -65,6 +65,10 @@ module Miele
       # @return [Integer, nil] +ProtocolVersion+ of {#ident}: 2 on Dop1 appliances, 3 or 4 on DOP2 ones
       # @api public
       def protocol_version = @protocol_version ||= ident.protocol_version
+
+      # @return [Symbol] {#protocol_version} named by {Catalog::PROTOCOLS}, or +:unknown+
+      # @api public
+      def protocol = Catalog::PROTOCOLS.fetch(protocol_version, :unknown)
 
       # @return [String, nil] +TechType+ of {#ident}'s device label, the model name
       # @api public

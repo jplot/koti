@@ -17,17 +17,22 @@ module Ajax
       # +:accounting+ or +:blank+. +event+ names what happened (+:motion_detected+, +:space_disarmed+…)
       # and +transition+ how (+:triggered+, +:recovered+ or +:impulse+). +folder+ is the app's tab
       # (+:alarm+, +:malfunction+, +:user_automation+…) and +importance+ +:default+, +:positive+,
-      # +:warning+ or +:attention+.
+      # +:warning+ or +:attention+. +token+ is its universal token, which reads the pages around it.
       Notification = Data.define(:id, :time, :kind, :event, :transition, :source, :folder, :importance, :read,
-                                 :raw) do
+                                 :token, :raw) do
         # @param raw [Hash{Symbol=>Object}] one entry of findNotifications
         # @return [Notification]
         def self.from(raw)
           kind, content = raw[:content]&.first
           new(id: raw[:id].to_s, time: Decode.time(raw[:server_timestamp]),
               kind: kind ? kind.to_s.delete_suffix('_notification_content').to_sym : :unknown, **about(content || {}),
-              folder: Decode.enum(raw[:folder], 'FOLDER_'), importance: Decode.enum(raw[:importance], 'IMPORTANCE_'),
-              read: raw[:read_by_user] == true, raw:)
+              **marks(raw), raw:)
+        end
+
+        # @api private
+        def self.marks(raw)
+          { folder: Decode.enum(raw[:folder], 'FOLDER_'), importance: Decode.enum(raw[:importance], 'IMPORTANCE_'),
+            read: raw[:read_by_user] == true, token: raw[:universal_token].to_s }
         end
 
         # @api private
@@ -37,7 +42,7 @@ module Ajax
           { event: Decode.choice(qualifier[:tag]), transition: Decode.choice(qualifier[:transition]),
             source: source&.then { Source.from(it) } }
         end
-        private_class_method :about
+        private_class_method :about, :marks
       end
     end
   end

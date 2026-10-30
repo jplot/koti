@@ -29,10 +29,11 @@ RSpec.describe Schema::Extract::GrpcStubs do
     uunVarE.a = mda0.a("demo.stream.StreamService", "upload");
     uunVarF.e = lda0.c;
     uunVarF.a = mda0.a("demo.stream.StreamService", "follow");
+    ef56 defaultInstance = ef56.getDefaultInstance();
+    uunVarF.d = new luh0(gh78.getDefaultInstance());
   JAVA
 
-  # The shape of PhotoOnDemandService/capturePhoto in the app 3.59 (cjf0): a request class named with a $, and the
-  # response declared past the 400 characters the extractor used to read.
+  # PhotoOnDemandService/capturePhoto in the app 3.59 (cjf0).
   let(:far) { <<~JAVA }
     package defpackage;
 
@@ -48,14 +49,15 @@ RSpec.describe Schema::Extract::GrpcStubs do
     uunVarB.d = new luh0(e.getDefaultInstance());
     uunVarC.e = lda0.a;
     uunVarC.a = mda0.a("demo.media.PhotoService", "next");
+    uunVarC.d = new luh0(Next$Reply.getDefaultInstance());
   JAVA
 
   it 'reads a request class whose name holds a $' do
     expect(described_class.rpcs(far, {}).first[3]).to eq('demo.media.Caputre$CaptureRequest')
   end
 
-  it 'reads the response however far the stub declares it, and no further' do
-    expect(described_class.rpcs(far, {}).map(&:last)).to eq(['demo.media.e', nil])
+  it 'reads the response however far the stub declares it, a $ in its name too' do
+    expect(described_class.rpcs(far, {}).map(&:last)).to eq(['demo.media.e', 'defpackage.Next$Reply'])
   end
 
   it 'maps the stub classes to the full name of their service' do
@@ -70,6 +72,6 @@ RSpec.describe Schema::Extract::GrpcStubs do
                'demo.login_by_password.LoginByPasswordResponse'],
               ['demo.stream.StreamService', 'watch', :bidi, 'defpackage.ab12', 'defpackage.cd34'],
               ['demo.stream.StreamService', 'upload', :client_stream, nil, nil],
-              ['demo.stream.StreamService', 'follow', :server_stream, nil, nil]])
+              ['demo.stream.StreamService', 'follow', :server_stream, 'defpackage.ef56', 'defpackage.gh78']])
   end
 end

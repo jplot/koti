@@ -41,7 +41,7 @@ module Schema
         rows
       end
 
-      # A method's classes sit anywhere before the next one: capturePhoto declares its response 416 characters on.
+      # A method's classes sit anywhere before the next one: capturePhoto's response ends 419 characters on.
       def declarations(source, from) = source[from...(METHOD.match(source, from)&.begin(0) || source.size)]
 
       def message(window, pattern, source) = JavaNames.qualify(window[pattern, 1], source)

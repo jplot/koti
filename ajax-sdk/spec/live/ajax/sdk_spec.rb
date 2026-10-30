@@ -21,7 +21,7 @@ RSpec.describe 'Ajax cloud', :live do # rubocop:disable RSpec/DescribeClass -- i
   end
 
   it 'reads the devices of a space as a snapshot' do
-    expect(cloud.devices(space.id)).to all(be_an(Ajax::Sdk::Cloud::Device))
+    expect(cloud.devices(space.id)).to all(be_an(Ajax::Sdk::Cloud::Device).and(have_attributes(space_id: space.id)))
   end
 
   it 'reads recent notifications of a space' do

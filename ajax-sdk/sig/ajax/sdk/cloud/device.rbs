@@ -10,11 +10,57 @@ module Ajax
         def self.from: (Hash[Symbol, untyped] raw) -> Battery
       end
 
+      class Channel < Data
+        attr_reader number: Integer
+        attr_reader on: bool?
+        attr_reader name: String?
+        attr_reader brightness: Integer?
+
+        def self.new: (number: Integer, on: bool?, name: String?, brightness: Integer?) -> Channel
+        def self.from: (Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::LightHubDevice::SpreadProperties property)
+                     -> Channel?
+        def self.relay: (Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::RelayChannel? relay)
+                      -> Channel?
+        def self.gang: (Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::LightSwitchChannel? gang)
+                     -> Channel?
+        def self.outlet: (Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SocketBaseChannel
+                        | Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::WaterStopChannel
+                        | nil outlet) -> Channel?
+        def self.number: (Symbol | Integer id) -> Integer
+        def self.switched: (Symbol | Integer state) -> bool?
+      end
+
+      class Shutter < Data
+        attr_reader position: Integer?
+        attr_reader moving: (Symbol | Integer)?
+
+        def self.new: (position: Integer?, moving: (Symbol | Integer)?) -> Shutter
+        def self.from: (Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::RollerPosition roller)
+                     -> Shutter
+        def self.opening: (Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::RollerPosition::Idle idle)
+                        -> Integer?
+      end
+
+      class LifeQuality < Data
+        attr_reader temperature: Float?
+        attr_reader humidity: Float?
+        attr_reader co2: Integer?
+
+        def self.new: (temperature: Float?, humidity: Float?, co2: Integer?) -> LifeQuality
+        def self.from: (Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::LifeQualityInfo info)
+                     -> LifeQuality
+      end
+
       class Device < Data
+        type spread = Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::LightHubDevice::SpreadProperties
+        type properties = { channels: Array[Channel], shutter: Shutter?, lock: (Symbol | Integer)?,
+                            life_quality: LifeQuality?, mute_command: (Symbol | Integer)? }
+
         attr_reader id: String
         attr_reader name: String
         attr_reader kind: Symbol
         attr_reader hub_id: String?
+        attr_reader space_id: String
         attr_reader room_id: String?
         attr_reader group_id: String?
         attr_reader states: Array[Symbol]
@@ -24,17 +70,35 @@ module Ajax
         attr_reader signal: Symbol?
         attr_reader temperature: Integer?
         attr_reader flags: Array[Symbol]
+        attr_reader channels: Array[Channel]
+        attr_reader shutter: Shutter?
+        attr_reader lock: (Symbol | Integer)?
+        attr_reader life_quality: LifeQuality?
+        attr_reader mute_command: (Symbol | Integer)?
         attr_reader raw: Hash[Symbol, untyped]
 
         self.@flag_kinds: Array[Symbol]?
 
-        def self.new: (id: String, name: String, kind: Symbol, hub_id: String?, room_id: String?, group_id: String?,
-                       states: Array[Symbol], malfunctions: Integer, bypassed: bool, battery: Battery?, signal: Symbol?,
-                       temperature: Integer?, flags: Array[Symbol], raw: Hash[Symbol, untyped]) -> Device
-        def self.from: (Hash[Symbol, untyped] item) -> Device?
+        def self.new: (id: String, name: String, kind: Symbol, hub_id: String?, space_id: String, room_id: String?,
+                       group_id: String?, states: Array[Symbol], malfunctions: Integer, bypassed: bool, battery: Battery?,
+                       signal: Symbol?, temperature: Integer?, flags: Array[Symbol], channels: Array[Channel],
+                       shutter: Shutter?, lock: (Symbol | Integer)?, life_quality: LifeQuality?,
+                       mute_command: (Symbol | Integer)?, raw: Hash[Symbol, untyped]) -> Device
+        def self.from: (Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceItem item,
+                        space_id: String) -> Device?
         def self.flag_kinds: () -> Array[Symbol]
         def self.origin: (Hash[Symbol, untyped]? common, Symbol wrapper) -> { kind: Symbol, hub_id: String? }
-        def self.build: (Hash[Symbol, untyped] profile, kind: Symbol, hub_id: String?, raw: Hash[Symbol, untyped]) -> Device
+        def self.build: (Hash[Symbol, untyped] profile, origin: { kind: Symbol, hub_id: String? }, space_id: String,
+                         properties: { channels: Array[Channel], shutter: Shutter?, lock: (Symbol | Integer)?,
+                                       life_quality: LifeQuality?, mute_command: (Symbol | Integer)? },
+                         raw: Hash[Symbol, untyped]) -> Device
+        def self.properties: (Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceItem item)
+                           -> properties
+        def self.shutter: (Array[spread] spread) -> Shutter?
+        def self.life_quality: (Array[spread] spread) -> LifeQuality?
+        def self.lock: (Array[spread] | Array[Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Smartlock::Light::LightSmartLock::SmartLockSpreadProperty] spread)
+                     -> (Symbol | Integer)?
+        def self.mute_command: (Array[spread] spread) -> (Symbol | Integer)?
         def self.statuses: (Array[Hash[Symbol, untyped]] list) -> { battery: Battery?, signal: Symbol?, temperature: Integer?, flags: Array[Symbol] }
       end
     end

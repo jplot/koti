@@ -22,6 +22,8 @@ module Ajax
         @sleeper: _Sleeper
         @tracker: Tracker
         @queue: Thread::Queue[untyped]
+        @newest: [Float, String]?
+        @read: bool
 
         def initialize: (untyped client, String space_id, sleeper: _Sleeper) -> void
         def each: () { (Event) -> void } -> void
@@ -31,9 +33,14 @@ module Ajax
         def deliver: (Symbol source, untyped message) { (Event) -> void } -> void
         def follow: (Symbol source) -> void
         def receive: (Symbol source) -> bool
+        def listen: (Symbol source) { () -> void } -> void
         def subscribe: (Symbol source) { (untyped) -> void } -> nil
         def pause: (Integer delay) -> Integer
-        def catch_up: () -> Array[Event]
+        def catch_up: () -> void
+        def note_newest: () -> void
+        def remember: (Array[[Float, String]] marks) -> [Float, String]?
+        def page_marks: (Array[Notification] notifications) -> Array[[Float, String]]
+        def stream_marks: (untyped message) -> Array[[Float, String]]
         def created: (Array[Notification] page) -> LOG::StreamNotificationLogResponse::Success
       end
     end

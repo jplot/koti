@@ -63,10 +63,50 @@ RSpec.describe Ajax::Sdk::Cloud::Feed do
 
   it 'fills the notification gap after a reconnect', :aggregate_failures do
     script[notes] = [[log(1), GRPC::Unavailable.new('down')]]
-    script[find] = [{ success: { notifications: [note(2)] } }]
+    script[find] = [{ success: {} }, { success: { notifications: [note(2)] } }]
 
     expect(events.find { it.kind == :notification && it.key == 'n2' }.after.token).to eq('u2')
     expect(requests).to include([find, hash_including(pagination: { backward_pagination_token: 'u1' })])
+  end
+
+  it 'keeps following when the catch-up fails during an outage' do
+    script[notes] = [[log(1), GRPC::Unavailable.new('down')], [GRPC::Unavailable.new('still down')]]
+    script[find] = [{ success: {} }, GRPC::Unavailable.new('down'), { success: { notifications: [note(2)] } }]
+
+    expect(events.find { it.kind == :notification && it.key == 'n2' }).not_to be_nil
+  end
+
+  it 'reads back the notifications of a first outage', :aggregate_failures do
+    script[notes] = [[GRPC::Unavailable.new('down')]]
+    script[find] = [{ success: { notifications: [note(1)] } }, { success: { notifications: [note(5)] } }]
+
+    expect(events.find { it.kind == :notification }.key).to eq('n5')
+    expect(requests).to include([find, hash_including(pagination: { backward_pagination_token: 'u1' })])
+  end
+
+  it 'catches up across pages, in the order they happened', :aggregate_failures do
+    script[notes] = [[log(1), GRPC::Unavailable.new('down')]]
+    page = { success: { notifications: (21..40).map { note(it) }.reverse } }
+    script[find] = [{ success: {} }, page, { success: { notifications: [note(41)] } }]
+
+    expect(events.select { it.kind == :notification }.first(22).map(&:key)).to eq(['n1', *(21..41).map { "n#{it}" }])
+    expect(requests).to include([find, hash_including(pagination: { backward_pagination_token: 'u40' })])
+  end
+
+  it 'waits 1, 2, 4, 8, 16 then 30 s between attempts, and 1 s again after a message' do
+    down = GRPC::Unavailable.new('down')
+    script[devices] = [*Array.new(7) { [down] }, [snapshot(100), down], [snapshot(50), :open]]
+    events.find { it.kind == :device && it.before }
+
+    expect(Array.new(8) { slept.pop(timeout: 1) }).to eq([1, 2, 4, 8, 16, 30, 30, 1])
+  end
+
+  it 'reopens after every retriable error' do
+    errors = [GRPC::DeadlineExceeded, GRPC::Internal, GRPC::Cancelled, GRPC::Unknown, GRPC::ResourceExhausted]
+    script[devices] = [*errors.map { [it.new('down')] }, [GRPC::Unauthenticated.new], [GRPC::Unauthenticated.new],
+                       [snapshot(100), :open]]
+
+    expect(events.find { it.kind == :device }.after.battery.charge).to eq(100)
   end
 
   it 'delivers every change when the four streams talk at once', :aggregate_failures do
@@ -83,7 +123,7 @@ RSpec.describe Ajax::Sdk::Cloud::Feed do
 
     expect { events { raise 'boom' } }.to raise_error(RuntimeError, 'boom')
     expect(Array.new(4) { gateway.closed.pop(timeout: 5) }).to contain_exactly(space, summary, devices, notes)
-    expect(requests.map(&:first).tally).to eq({ space => 1, summary => 1, devices => 1, notes => 1 })
+    expect(requests.map(&:first).tally).to eq({ space => 1, summary => 1, devices => 1, notes => 1, find => 1 })
   end
 
   it 'raises a refused stream instead of retrying', :aggregate_failures do

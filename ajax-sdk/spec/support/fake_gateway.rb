@@ -47,7 +47,7 @@ class FakeGateway
   def answer(path, klass, request, streaming)
     @requests << [path, request.to_h]
     call = @script.fetch(path).shift
-    return encoded(klass, call || {}) unless streaming
+    return encoded(klass, call || KEEPALIVE) unless streaming
 
     Enumerator.new do |out|
       stream(klass, call, out)

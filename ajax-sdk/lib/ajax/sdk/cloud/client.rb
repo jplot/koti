@@ -172,11 +172,12 @@ module Ajax
 
         def authenticating(retriable = -> { true })
           @session.ensure_login
-          yield(@session.metadata)
+          metadata = @session.metadata
+          yield(metadata)
         rescue GRPC::Unauthenticated
           raise unless retriable.call
 
-          @session.login
+          @session.login(metadata&.fetch('client-session-token', nil))
           yield(@session.metadata)
         end
       end

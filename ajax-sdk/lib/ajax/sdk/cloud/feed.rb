@@ -34,6 +34,8 @@ module Ajax
           @sleeper = sleeper
           @tracker = Tracker.new(space_id)
           @queue = Queue.new
+          @newest = nil
+          @read = false
         end
 
         # Blocks and yields every event; an exception of the block, or leaving it, closes the four streams.
@@ -57,15 +59,12 @@ module Ajax
         def deliver(source, message, &)
           raise message if message.is_a?(Exception)
 
-          (message == :reopened ? catch_up : @tracker.apply(source, message)).each(&)
+          @tracker.apply(source, message).each(&)
         end
 
         def follow(source)
           delay = 1
-          loop do
-            delay = pause(receive(source) ? 1 : delay)
-            @queue << [source, :reopened] if source == :notifications
-          end
+          loop { delay = pause(receive(source) ? 1 : delay) }
         rescue Stop
           nil
         rescue StandardError => e
@@ -75,15 +74,19 @@ module Ajax
         # @return [Boolean] whether a message came before the stream ended or broke
         def receive(source)
           received = false
-          begin
-            subscribe(source) do |message|
-              received = true
-              @queue << [source, message]
-            end
-          rescue *RETRIABLE
-            nil
-          end
+          listen(source) { received = true }
           received
+        end
+
+        def listen(source)
+          catch_up if source == :notifications
+          subscribe(source) do |message|
+            yield
+            remember(stream_marks(message)) if source == :notifications
+            @queue << [source, message]
+          end
+        rescue *RETRIABLE
+          nil
         end
 
         def subscribe(source, &)
@@ -100,19 +103,32 @@ module Ajax
           [delay * 2, MAX_DELAY].min
         end
 
-        # The notification stream has no snapshot: what it missed is read back, page by page, from the newest kept.
+        # The notification stream has no snapshot. Before its first opening, the thread notes the newest notification;
+        # before each reopening, it reads back the ones created since, as the app pages: from one outside a group.
         def catch_up
-          token = @tracker.newest_token or return []
-          events = [] #: Array[Event]
-          loop do
-            page = @client.notifications(@space_id, limit: PAGE, newer_than: token)
-            events.concat(@tracker.apply(:notifications, created(page)))
-            top = page.reject(&:parent_id)
-            break if top.size < PAGE
+          return note_newest unless @read
 
-            token = top.first&.token
+          loop do
+            page = @client.notifications(@space_id, limit: PAGE, newer_than: @newest&.last)
+            @queue << [:notifications, created(page.reverse)] unless page.empty?
+            top = page.reject(&:parent_id)
+            remember(page_marks(top))
+            break if top.size < PAGE
           end
-          events
+        end
+
+        def note_newest
+          remember(page_marks(@client.notifications(@space_id, limit: 1).reject(&:parent_id)))
+          @read = true
+        end
+
+        def remember(marks) = @newest = [@newest, *marks].compact.max_by(&:first)
+
+        def page_marks(notifications) = notifications.map { [it.time.to_f, it.token] }
+
+        def stream_marks(message)
+          message.events.filter_map { it.notification_created || it.notification_updated }
+                 .map { [it.server_timestamp.to_f, it.universal_token] }
         end
 
         def created(page)

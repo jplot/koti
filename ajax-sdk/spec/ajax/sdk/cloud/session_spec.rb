@@ -92,6 +92,25 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     expect(calls).to eq(1)
   end
 
+  def renewed_tokens
+    tokens = Queue.new
+    %W[\x01 \x02 \x03 \x04 \x05].each { tokens << it.b }
+    allow(client).to receive(:authenticate) do
+      sleep(0.01)
+      password({ success: { session_token: tokens.pop, lite_account: { user_hex_id: 'user-1' } } })
+    end
+  end
+
+  it 'signs in once when several threads find the same token expired' do
+    renewed_tokens
+    session.ensure_login
+    expired = session.metadata['client-session-token']
+
+    Array.new(4) { Thread.new { session.login(expired) } }.each(&:join)
+
+    expect(client).to have_received(:authenticate).twice
+  end
+
   it 'never prints the token or secrets in inspect' do
     allow(client).to receive(:authenticate).and_return(success)
     session.login

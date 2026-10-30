@@ -24,7 +24,15 @@ module Ajax
         SPACE = Messages::Api::Mobile::V2::Common::Space
         # Enough to give an updated notification what it was, and to tell a notification read again after a gap.
         KEPT = 500
-        private_constant :LIGHT, :SPACE, :KEPT
+        MESSAGES = {
+          space: 'systems.ajax.api.mobile.v2.common.space.LiteSpace',
+          security: 'systems.ajax.api.mobile.v2.common.space.security.SpaceSecurityMode',
+          group: 'systems.ajax.api.mobile.v2.common.space.security.group.Group',
+          room: 'systems.ajax.api.mobile.v2.common.space.room.Room',
+          device: 'systems.ajax.api.ecosystem.v3.mobilegwsvc.commonmodels.space.device.light.LightDeviceItem',
+          notification: 'systems.ajax.api.ecosystem.v2.communicationsvc.mobile.commonmodels.notification.Notification'
+        }.freeze
+        private_constant :LIGHT, :SPACE, :KEPT, :MESSAGES
 
         # The rules of +SpaceService/stream+ and +SpaceService/streamUserSpaces+.
         module SpaceRules
@@ -72,7 +80,6 @@ module Ajax
             end
           end
 
-          # Copies the one field the update carries, and its sorting key, onto the space kept.
           def lite_space_update(updated)
             kept = @stores[:space][@space_id] or return []
 
@@ -233,9 +240,6 @@ module Ajax
                                     groups: values(:group), rooms: values(:room), devices: values(:device))
         end
 
-        # @return [String, nil] the token of the newest notification kept, to read the ones missed after it
-        def newest_token = @stores[:notification].values.max_by { moment(it) }&.dig(:universal_token)
-
         private
 
         def events(changes)
@@ -257,7 +261,7 @@ module Ajax
         def put(kind, key, raw)
           store = @stores.fetch(kind)
           before = store[key]
-          return [] if before == raw
+          return [] if same?(kind, before, raw)
 
           raw ? store[key] = raw : store.delete(key)
           @state = nil unless kind == :notification
@@ -267,7 +271,7 @@ module Ajax
         def replace(kind, fresh)
           store = @stores.fetch(kind)
           changes = (store.keys | fresh.keys).filter_map do |key|
-            [kind, key, store[key], fresh[key]] unless store[key] == fresh[key]
+            [kind, key, store[key], fresh[key]] unless same?(kind, store[key], fresh[key])
           end
           store.replace(fresh)
           @state = nil unless changes.empty?
@@ -275,6 +279,24 @@ module Ajax
         end
 
         def by_id(list) = (list || []).to_h { [it[:id], it] }
+
+        # The gateway leaves defaults out and orders its lists its own way; what the rules write does neither.
+        def same?(kind, left, right) = canonical(kind, left) == canonical(kind, right)
+
+        def canonical(kind, raw)
+          return unless raw
+
+          message = Schemas.message(MESSAGES.fetch(kind))
+          sorted(message.decode(message.encode(message.new(raw))).to_h)
+        end
+
+        def sorted(value)
+          case value
+          when Hash then value.transform_values { sorted(it) }
+          when Array then value.map { sorted(it) }.sort_by(&:inspect)
+          else value
+          end
+        end
 
         def moment(raw) = Decode.time(raw[:server_timestamp]).to_f
 

@@ -30,6 +30,7 @@ module Ajax
         module LIGHT = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light
         module SPACE = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
         KEPT: Integer
+        MESSAGES: Hash[Symbol, String]
 
         type raw = Hash[Symbol, untyped]
         type change = Array[untyped]
@@ -91,7 +92,6 @@ module Ajax
         def initialize: (String space_id) -> void
         def apply: (Symbol source, untyped success) -> Array[Event]
         def state: () -> SpaceState
-        def newest_token: () -> String?
 
         private
 
@@ -100,6 +100,9 @@ module Ajax
         def put: (Symbol kind, untyped key, raw? raw) -> Array[change]
         def replace: (Symbol kind, Hash[untyped, raw] fresh) -> Array[change]
         def by_id: (Array[raw]? list) -> Hash[untyped, raw]
+        def same?: (Symbol kind, raw? left, raw? right) -> bool
+        def canonical: (Symbol kind, raw? raw) -> raw?
+        def sorted: (untyped value) -> untyped
         def moment: (raw raw) -> Float
         def values: (Symbol kind) -> Hash[untyped, untyped]
         def value: (Symbol kind, raw? raw) -> untyped

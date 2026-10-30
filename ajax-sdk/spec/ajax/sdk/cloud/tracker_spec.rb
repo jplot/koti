@@ -38,6 +38,8 @@ RSpec.describe Ajax::Sdk::Cloud::Tracker do
            device_id: { smart_lock_id: { id: 'lock-1' } })
   end
 
+  def offline(type) = { state_update: { state: :LIGHT_DEVICE_STATE_OFFLINE, update_type: type } }
+
   def space_update(type, **entity) = space({ update: { space_update_type: type, **entity } })
 
   it 'adds every device of a first snapshot', :aggregate_failures do
@@ -140,6 +142,25 @@ RSpec.describe Ajax::Sdk::Cloud::Tracker do
       .to eq([[:video_edge_channel, 'nvr-1', 'ch1'], { hub_id: '0000ABCD' }])
   end
 
+  it 'emits nothing for a snapshot that repeats what updates gave' do
+    signal = { signal_strength: { device_signal_level: :DEVICE_SIGNAL_LEVEL_WEAK } }
+    tracker.apply(:devices, snapshot(door(statuses: [{ battery: { charge_level_percentage: 90 } }, signal])))
+    battery = { status: { battery: { charge_level_percentage: 40 } }, update_type: :UPDATE_TYPE_UPDATE }
+    [{ status_update: battery }, { malfunctions_update: 0 }, offline(:UPDATE_TYPE_ADD), offline(:UPDATE_TYPE_REMOVE)]
+      .each { tracker.apply(:devices, update(it)) }
+
+    repeated = snapshot(door(statuses: [{ battery: { charge_level_percentage: 40 } }, signal]))
+    expect(tracker.apply(:devices, repeated)).to be_empty
+  end
+
+  it 'emits nothing for an initial state that repeats a lite space update' do
+    tracker.apply(:summary, summary({ initial_state: { spaces: [{ id: 'space-1', malfunctions_count: 2 }] } }))
+    cleared = { space_id: 'space-1', lite_space_updated: { id: 'space-1', malfunctions_count: 0 } }
+    tracker.apply(:summary, summary({ lite_space_event: cleared }))
+
+    expect(tracker.apply(:summary, summary({ initial_state: { spaces: [{ id: 'space-1' }] } }))).to be_empty
+  end
+
   it 'skips a device update it cannot key' do
     tracker.apply(:devices, snapshot(door))
 
@@ -196,7 +217,6 @@ RSpec.describe Ajax::Sdk::Cloud::Tracker do
   it 'keeps the 500 newest notifications', :aggregate_failures do
     tracker.apply(:notifications, log(*(1..501).map { created(it) }))
 
-    expect(tracker.newest_token).to eq('u501')
     expect(tracker.apply(:notifications, log(created(1))).first.before).to be_nil
     read = { notification_updated: { **created(2)[:notification_created], read_by_user: true } }
     expect(tracker.apply(:notifications, log(read)).first.before).not_to be_nil

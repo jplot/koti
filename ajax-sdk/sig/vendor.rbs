@@ -21,6 +21,24 @@ module GRPC
 
   class Unauthenticated < BadStatus
   end
+
+  class Unavailable < BadStatus
+  end
+
+  class DeadlineExceeded < BadStatus
+  end
+
+  class Internal < BadStatus
+  end
+
+  class Cancelled < BadStatus
+  end
+
+  class Unknown < BadStatus
+  end
+
+  class ResourceExhausted < BadStatus
+  end
 end
 
 module Google

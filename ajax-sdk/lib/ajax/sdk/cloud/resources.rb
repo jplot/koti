@@ -89,6 +89,21 @@ module Ajax
           end.lazy
         end
 
+        # Follows the space live through one feed of {Event}s: its security, groups, rooms, summary, devices and
+        # notifications, from four streams that reopen on their own. See {Feed}.
+        #
+        # @param space_id [String]
+        # @param sleeper [#call] waits the given number of seconds before a stream reopens
+        # @yieldparam event [Event]
+        # @return [Enumerator::Lazy<Event>, nil] the events when no block is given
+        # @raise [RefusedError] when a stream answers a failure
+        def events(space_id, sleeper: method(:sleep), &)
+          return enum_for(:events, space_id, sleeper:).lazy unless block_given?
+
+          Feed.new(self, space_id, sleeper:).each(&)
+          nil
+        end
+
         # @return [void] arm the space
         def arm(space_id, ignore_alarms: false) = command("#{SECURITY}/arm", space_id, ignore_alarms:)
 

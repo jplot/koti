@@ -44,7 +44,7 @@ RSpec.describe Ajax::Sdk::Cloud::Client, '#server_stream' do
     it 'raises and closes the call on the server', :aggregate_failures do
       expect { client.server_stream(devices, { space_id: 's1' }) { nil } }
         .to raise_error(Ajax::Sdk::Cloud::ReadError, 'bad_request')
-      expect(gateway.closed.pop(timeout: 1)).to be(true)
+      expect(gateway.closed.pop(timeout: 1)).to eq(devices)
     end
   end
 
@@ -55,7 +55,7 @@ RSpec.describe Ajax::Sdk::Cloud::Client, '#server_stream' do
     it 'closes the call on the server' do
       client.server_stream(devices, { space_id: 's1' }).first
 
-      expect(gateway.closed.pop(timeout: 1)).to be(true)
+      expect(gateway.closed.pop(timeout: 1)).to eq(devices)
     end
   end
 end

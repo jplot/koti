@@ -1,0 +1,41 @@
+module Ajax
+  module Sdk
+    module Cloud
+      interface _Sleeper
+        def call: (Integer seconds) -> untyped
+      end
+
+      class Feed
+        SOURCES: Array[Symbol]
+        RETRIABLE: Array[singleton(StandardError)]
+        MAX_DELAY: Integer
+        PAGE: Integer
+        module SPACE = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
+        module ORIGIN = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification
+        module LOG = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
+
+        class Stop < StandardError
+        end
+
+        @client: Client
+        @space_id: String
+        @sleeper: _Sleeper
+        @tracker: Tracker
+        @queue: Thread::Queue[untyped]
+
+        def initialize: (untyped client, String space_id, sleeper: _Sleeper) -> void
+        def each: () { (Event) -> void } -> void
+
+        private
+
+        def deliver: (Symbol source, untyped message) { (Event) -> void } -> void
+        def follow: (Symbol source) -> void
+        def receive: (Symbol source) -> bool
+        def subscribe: (Symbol source) { (untyped) -> void } -> nil
+        def pause: (Integer delay) -> Integer
+        def catch_up: () -> Array[Event]
+        def created: (Array[Notification] page) -> LOG::StreamNotificationLogResponse::Success
+      end
+    end
+  end
+end

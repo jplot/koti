@@ -26,6 +26,8 @@ module Ajax
         def devices: (String space_id) -> Array[Device]
         def notifications: (String space_id, ?limit: Integer, ?older_than: String?, ?newer_than: String?) -> Array[Notification]
         def notification_history: (String space_id, ?limit: Integer) -> Enumerator::Lazy[Notification, untyped]
+        def events: (String space_id, ?sleeper: _Sleeper) -> Enumerator::Lazy[Event, untyped]
+                  | (String space_id, ?sleeper: _Sleeper) { (Event) -> void } -> nil
         def arm: (String space_id, ?ignore_alarms: bool) -> void
         def disarm: (String space_id) -> void
         def arm_night: (String space_id, ?ignore_alarms: bool) -> void

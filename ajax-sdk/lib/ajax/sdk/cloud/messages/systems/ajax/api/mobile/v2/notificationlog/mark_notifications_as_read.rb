@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :origin => self.origin&.to_message,
-        :mark_as_read => self.mark_as_read.map { it.to_message },
+        :origin => self.origin&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationOriginId) },
+        :mark_as_read => self.mark_as_read.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::MarkNotificationsAsReadRequest::Action) },
       }.compact
     end
 
@@ -75,9 +75,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :all => self.all&.to_message,
-          :all_in_folder => self.all_in_folder&.to_message,
-          :some_in_folder => self.some_in_folder&.to_message,
+          :all => self.all&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::MarkNotificationsAsReadRequest::Action::AllNotifications) },
+          :all_in_folder => self.all_in_folder&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::MarkNotificationsAsReadRequest::Action::AllNotificationsInFolder) },
+          :some_in_folder => self.some_in_folder&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::MarkNotificationsAsReadRequest::Action::SomeNotificationsInFolder) },
         }.compact
       end
 
@@ -217,8 +217,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::MarkNotificationsAsReadResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::MarkNotificationsAsReadResponse::Failure) },
       }.compact
     end
 
@@ -292,9 +292,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :illegal_argument => self.illegal_argument&.to_message,
-          :not_found => self.not_found&.to_message,
-          :internal_error => self.internal_error&.to_message,
+          :illegal_argument => self.illegal_argument&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :not_found => self.not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :internal_error => self.internal_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

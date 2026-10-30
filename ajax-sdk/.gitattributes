@@ -2,3 +2,5 @@ lib/ajax/sdk/cloud/messages.rb linguist-generated
 lib/ajax/sdk/cloud/messages/** linguist-generated
 sig/ajax/sdk/cloud/messages.rbs linguist-generated
 sig/ajax/sdk/cloud/messages/** linguist-generated
+lib/ajax/sdk/cloud/methods.rb linguist-generated
+sig/ajax/sdk/cloud/methods.rbs linguist-generated

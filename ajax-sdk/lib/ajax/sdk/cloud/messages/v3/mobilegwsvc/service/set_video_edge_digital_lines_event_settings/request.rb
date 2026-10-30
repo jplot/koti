@@ -46,7 +46,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       {
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
-        :digital_line_state_entry => self.digital_line_state_entry&.to_message,
+        :digital_line_state_entry => self.digital_line_state_entry&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoEdgeDigitalLinesEventSettings::SetVideoEdgeDigitalLinesEventSettingsRequest::DigitalLineStateEntry) },
         :cooldown_period => self.cooldown_period&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         :monitoring_state => self.monitoring_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::Notification::VideoNotificationMonitoringState.proto(it) },
       }.compact

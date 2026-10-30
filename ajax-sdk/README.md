@@ -117,13 +117,30 @@ cloud.disarm_night(space.id)   # disarm from night mode
 A command the hub refuses raises `Ajax::Sdk::Cloud::CommandError`, whose `reason` names why
 (for example `:hub_offline`). Set `config.read_only = true` to make every command raise
 `Ajax::Sdk::Cloud::ReadOnlyError` before anything is sent — the live specs use it so they never change
-a real alarm's state. The generic methods below obey it too: a method passes only when its name
-starts with `get`, `find`, `search` or `stream` and holds no write word (`create`, `delete`, `reset`,
-`test`…), so a stream that changes state is refused like any command.
+a real alarm's state. The named and generic methods below obey it too: a method passes only when its gRPC
+method (its service, for an `…/execute` path), which ends its Ruby name, starts with `get`, `find`,
+`search` or `stream` and holds no write word (`create`, `delete`, `reset`, `test`…). So
+`space_find_user_spaces_with_pagination` reads, and a stream that changes state is refused like any command.
 
 ## Any method
 
-Every gRPC method the app has is in the shipped schema table, reachable by its path:
+Every gRPC method the app has is in the shipped schema table, and the client has a method for each of
+the 608, named after its path: the service without `Service`, then the method unless it is `execute`,
+in snake_case.
+
+```ruby
+cloud.space_find_user_spaces_with_pagination(limit: 20) # SpaceService/findUserSpacesWithPagination
+cloud.stream_light_devices(space_id: space.id).first     # StreamLightDevicesService/execute
+```
+
+A named method takes the fields of its request as keywords, with generated values for sub-messages; a
+client stream or bidi method takes an Array of requests, each a generated value or a Hash as `#call`
+takes it. It builds the request before anything is sent, streams included, so an unknown keyword or enum
+symbol raises `ArgumentError` and a value of the wrong type (a Hash for a sub-message) `TypeError`. Its RBS
+signature lets Steep reject a wrong keyword, a wrong type or an enum symbol the field does not have, and
+types what comes back.
+
+`#call` still reaches any method by its path:
 
 ```ruby
 cloud.call("/systems.ajax.api.mobile.v2.space.SpaceService/findUserSpacesWithPagination")

@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :selected_feature_target_info => self.selected_feature_target_info&.to_message,
-        :previously_assigned_targets => self.previously_assigned_targets.map { it.to_message },
+        :selected_feature_target_info => self.selected_feature_target_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::EnrichedTargetInfo) },
+        :previously_assigned_targets => self.previously_assigned_targets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::EnrichedTargetInfo) },
       }.compact
     end
   end

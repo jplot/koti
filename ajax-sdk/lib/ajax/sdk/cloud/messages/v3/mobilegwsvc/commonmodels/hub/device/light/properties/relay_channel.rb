@@ -63,7 +63,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :malfunctions => self.malfunctions.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::RelayChannel::Malfunction.proto(it) },
         :is_channel_enabled => self.is_channel_enabled,
         :is_channel_on => self.is_channel_on,
-        :shutoff_timer => self.shutoff_timer&.to_message,
+        :shutoff_timer => self.shutoff_timer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::ActionTimer) },
         :is_transitioning => self.is_transitioning,
       }.compact
     end

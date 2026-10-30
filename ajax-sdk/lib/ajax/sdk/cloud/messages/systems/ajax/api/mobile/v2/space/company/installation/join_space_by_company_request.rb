@@ -72,8 +72,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation::JoinSpaceByCompanyResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation::JoinSpaceByCompanyResponse::Failure) },
       }.compact
     end
 
@@ -114,7 +114,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :facility => self.facility&.to_message,
+          :facility => self.facility&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::Facility) },
         }.compact
       end
     end
@@ -148,7 +148,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :hub_error => self.hub_error&.to_message,
+          :hub_error => self.hub_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation::JoinSpaceByCompanyResponse::Failure::HubError) },
         }.compact
       end
 
@@ -208,15 +208,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :bad_request => self.bad_request&.to_message,
-            :space_not_found => self.space_not_found&.to_message,
-            :hub_not_found => self.hub_not_found&.to_message,
-            :hub_qr_code_invalid => self.hub_qr_code_invalid&.to_message,
-            :hub_claim_error => self.hub_claim_error&.to_message,
-            :space_armed => self.space_armed&.to_message,
-            :hub_claim_forbidden_by_company_error => self.hub_claim_forbidden_by_company_error&.to_message,
-            :hub_offline => self.hub_offline&.to_message,
-            :users_limit_exceed => self.users_limit_exceed&.to_message,
+            :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+            :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+            :hub_not_found => self.hub_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+            :hub_qr_code_invalid => self.hub_qr_code_invalid&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+            :hub_claim_error => self.hub_claim_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+            :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+            :hub_claim_forbidden_by_company_error => self.hub_claim_forbidden_by_company_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+            :hub_offline => self.hub_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+            :users_limit_exceed => self.users_limit_exceed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
           }.compact
         end
 

@@ -15,6 +15,11 @@ RSpec.describe Ajax::Sdk::Cloud::Encode do
     expect(described_class.duration(-1.5)).to eq({ seconds: -1, nanos: -500_000_000 })
   end
 
+  it 'refuses a time or a duration of another type', :aggregate_failures do
+    expect { described_class.time(5) }.to raise_error(TypeError, /Time/)
+    expect { described_class.duration('1') }.to raise_error(TypeError, /Numeric/)
+  end
+
   it 'writes the content of a wrapper back', :aggregate_failures do
     expect(described_class.wrapper(decode.wrapper({ value: 'x' }, ''))).to eq({ value: 'x' })
     expect(decode.wrapper({}, '')).to eq('')

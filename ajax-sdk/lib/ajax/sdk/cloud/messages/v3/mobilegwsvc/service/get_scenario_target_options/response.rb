@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::Failure) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :scenario_target_options => self.scenario_target_options.map { it.to_message },
+          :scenario_target_options => self.scenario_target_options.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::ScenarioTargetOption) },
         }.compact
       end
     end
@@ -120,10 +120,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :permissions_denied => self.permissions_denied&.to_message,
-          :space_armed => self.space_armed&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permissions_denied => self.permissions_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 
@@ -178,13 +178,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :schedule_access_target_option => self.schedule_access_target_option&.to_message,
-          :phod_target_option => self.phod_target_option&.to_message,
-          :switching_state_target_option => self.switching_state_target_option&.to_message,
-          :video_edge_target_option => self.video_edge_target_option&.to_message,
-          :smart_lock_target_option => self.smart_lock_target_option&.to_message,
-          :en54_target_option => self.en54_target_option&.to_message,
-          :audio_target_option => self.audio_target_option&.to_message,
+          :schedule_access_target_option => self.schedule_access_target_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::ScheduleAccessTargetOption) },
+          :phod_target_option => self.phod_target_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::GenericObjectTargetOption) },
+          :switching_state_target_option => self.switching_state_target_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::GenericObjectTargetOption) },
+          :video_edge_target_option => self.video_edge_target_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::VideoEdgeTargetOption) },
+          :smart_lock_target_option => self.smart_lock_target_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::GenericObjectTargetOption) },
+          :en54_target_option => self.en54_target_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::En54TargetOption) },
+          :audio_target_option => self.audio_target_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::GenericObjectTargetOption) },
         }.compact
       end
 
@@ -309,7 +309,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       def to_message
         {
           :video_edge_id => self.video_edge_id,
-          :channels => self.channels.map { it.to_message },
+          :channels => self.channels.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::VideoEdgeTargetOption::Channel) },
         }.compact
       end
 
@@ -381,7 +381,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       def to_message
         {
           :object_id => self.object_id_,
-          :relays_info => self.relays_info&.to_message,
+          :relays_info => self.relays_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsResponse::En54TargetOption::RelaysInfo) },
         }.compact
       end
 

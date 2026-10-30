@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     def to_message
       {
         :service_group_id => self.service_group_id,
-        :feature_target_infos => self.feature_target_infos.map { it.to_message },
+        :feature_target_infos => self.feature_target_infos.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::FeatureTargetInfo) },
         :redirect_link => self.redirect_link,
       }.compact
     end

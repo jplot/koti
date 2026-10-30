@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_device => self.hub_device&.to_message,
-        :hub_device_channel => self.hub_device_channel&.to_message,
-        :smart_lock => self.smart_lock&.to_message,
-        :video_edge_digital_line => self.video_edge_digital_line&.to_message,
+        :hub_device => self.hub_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId::HubDeviceId) },
+        :hub_device_channel => self.hub_device_channel&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationDeviceReference::HubDeviceChannelReference) },
+        :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId::SmartLockId) },
+        :video_edge_digital_line => self.video_edge_digital_line&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationDeviceReference::VideoEdgeOutputDigitalLineReference) },
       }.compact
     end
 
@@ -83,7 +83,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_id => self.device_id&.to_message,
+          :device_id => self.device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId::HubDeviceId) },
           :channel_id => self.channel_id,
         }.compact
       end
@@ -124,7 +124,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_id => self.device_id&.to_message,
+          :device_id => self.device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId::VideoEdgeId) },
           :digital_line_id => self.digital_line_id,
           :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Automation::AutomationDeviceReference::VideoEdgeOutputDigitalLineReference::AppearanceType.proto(it) },
         }.compact

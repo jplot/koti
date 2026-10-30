@@ -70,13 +70,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         :device_color => self.device_color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceColor.proto(it) },
         :device_label => self.device_label&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceLabel.proto(it) },
         :displayed_id => self.displayed_id,
-        :device_profile_settings => self.device_profile_settings&.to_message,
-        :device_appearance => self.device_appearance&.to_message,
+        :device_profile_settings => self.device_profile_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceProfile::DeviceProfileSettings) },
+        :device_appearance => self.device_appearance&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceAppearance) },
         :marketing_device_index => self.marketing_device_index,
         :room_id => self.room_id,
         :group_id => self.group_id,
-        :device_firmware_version => self.device_firmware_version&.to_message,
-        :device_firmware_update => self.device_firmware_update&.to_message,
+        :device_firmware_version => self.device_firmware_version&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceFirmwareVersion) },
+        :device_firmware_update => self.device_firmware_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceFirmwareUpdatePart) },
       }.compact
     end
 

@@ -62,17 +62,17 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :armament => self.armament&.to_message,
-        :switch => self.switch&.to_message,
-        :water_supply => self.water_supply&.to_message,
-        :night_mode => self.night_mode&.to_message,
-        :smart_lock => self.smart_lock&.to_message,
-        :take_photo => self.take_photo&.to_message,
-        :grant_access => self.grant_access&.to_message,
-        :dimmer => self.dimmer&.to_message,
-        :play_audio => self.play_audio&.to_message,
-        :blocking_element => self.blocking_element&.to_message,
-        :warnings => self.warnings.map { it.to_message },
+        :armament => self.armament&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::ArmamentTarget) },
+        :switch => self.switch&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::SwitchTarget) },
+        :water_supply => self.water_supply&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::WaterSupplyTarget) },
+        :night_mode => self.night_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::NightModeTarget) },
+        :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::SmartLockTarget) },
+        :take_photo => self.take_photo&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::TakePhotoTarget) },
+        :grant_access => self.grant_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::GrantAccessTarget) },
+        :dimmer => self.dimmer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::DimmerTarget) },
+        :play_audio => self.play_audio&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::PlayAudioTarget) },
+        :blocking_element => self.blocking_element&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::BlockingElementTarget) },
+        :warnings => self.warnings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::ScenarioTarget::Warning) },
       }.compact
     end
 
@@ -111,8 +111,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :some_devices_have_different_operating_mode => self.some_devices_have_different_operating_mode&.to_message,
-          :device_operating_mode_has_changed => self.device_operating_mode_has_changed&.to_message,
+          :some_devices_have_different_operating_mode => self.some_devices_have_different_operating_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::ScenarioTarget::Warning::SomeDevicesHaveDifferentOperatingMode) },
+          :device_operating_mode_has_changed => self.device_operating_mode_has_changed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::ScenarioTarget::Warning::DeviceOperatingModeHasChanged) },
         }.compact
       end
 

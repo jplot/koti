@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :nvr_source_settings => self.nvr_source_settings&.to_message,
+        :nvr_source_settings => self.nvr_source_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::NvrSourceSettings) },
       }.compact
     end
 
@@ -99,7 +99,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :video_edge_connection_state => self.video_edge_connection_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::ConnectionState.proto(it) },
         :record_mode => self.record_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::RecordMode.proto(it) },
         :record_policy => self.record_policy&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::RecordPolicy.proto(it) },
-        :storage_devices => self.storage_devices.map { it.to_message },
+        :storage_devices => self.storage_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::NvrSourceSettings::StorageDevice) },
         :channel_states => self.channel_states.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::ChannelState.proto(it) },
         :media_device_id => self.media_device_id,
       }.compact

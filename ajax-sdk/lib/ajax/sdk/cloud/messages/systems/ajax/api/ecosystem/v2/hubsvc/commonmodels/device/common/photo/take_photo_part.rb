@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :take_photo_triggers => self.take_photo_triggers.map { it.to_message },
+        :take_photo_triggers => self.take_photo_triggers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::TakePhotoPart::TakePhotoTrigger) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::TakePhotoPart::Capability.proto(it) },
       }.compact
     end
@@ -69,7 +69,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :take_photo_triggers => self.take_photo_triggers.map { it.to_message },
+          :take_photo_triggers => self.take_photo_triggers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::TakePhotoPart::TakePhotoTrigger) },
         }.compact
       end
     end

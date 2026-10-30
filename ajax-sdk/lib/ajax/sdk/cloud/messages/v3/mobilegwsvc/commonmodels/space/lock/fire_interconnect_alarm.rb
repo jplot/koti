@@ -42,9 +42,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :action_types => self.action_types.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::ActionType.proto(it) },
-        :interconnect => self.interconnect&.to_message,
-        :interconnect_delay => self.interconnect_delay&.to_message,
-        :iwh_alarm => self.iwh_alarm&.to_message,
+        :interconnect => self.interconnect&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::Interconnect) },
+        :interconnect_delay => self.interconnect_delay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::InterconnectDelay) },
+        :iwh_alarm => self.iwh_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::IwhAlarm) },
       }.compact
     end
 
@@ -88,7 +88,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         {
           :interconnect_delay_timeout_seconds => self.interconnect_delay_timeout_seconds,
           :interconnect_delay_expiration_unix_time => self.interconnect_delay_expiration_unix_time&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
-          :device => self.device&.to_message,
+          :device => self.device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::FireDevice) },
         }.compact
       end
     end
@@ -125,8 +125,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :interconnect_info => self.interconnect_info&.to_message,
-          :devices => self.devices.map { it.to_message },
+          :interconnect_info => self.interconnect_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::InterconnectInfo) },
+          :devices => self.devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::FireDevice) },
         }.compact
       end
     end
@@ -163,7 +163,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :interconnect_info => self.interconnect_info&.to_message,
+          :interconnect_info => self.interconnect_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::InterconnectInfo) },
           :alarms => self.alarms.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::FireDeviceAlarm.proto(it) },
         }.compact
       end
@@ -251,7 +251,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         {
           :device_id => self.device_id,
           :hub_id => self.hub_id,
-          :device_type => self.device_type&.to_message,
+          :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
           :fire_device_alarms => self.fire_device_alarms.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Lock::FireInterconnectAlarm::FireDeviceAlarm.proto(it) },
         }.compact
       end

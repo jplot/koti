@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :v4 => self.v4&.to_message,
-        :v6 => self.v6&.to_message,
+        :v4 => self.v4&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4) },
+        :v6 => self.v6&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV6) },
       }.compact
     end
 
@@ -110,8 +110,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :start => self.start&.to_message,
-        :end => self.end&.to_message,
+        :start => self.start&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4) },
+        :end => self.end&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4) },
       }.compact
     end
   end
@@ -189,9 +189,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :v4 => self.v4&.to_message,
-        :v6 => self.v6&.to_message,
-        :name_servers => self.name_servers.map { it.to_message },
+        :v4 => self.v4&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::NetworkConfigurationIPv4) },
+        :v6 => self.v6&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::NetworkConfigurationIPv6) },
+        :name_servers => self.name_servers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddress) },
       }.compact
     end
   end
@@ -235,9 +235,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     def to_message
       {
         :method => self.method_&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::Method.proto(it) },
-        :address => self.address&.to_message,
-        :netmask => self.netmask&.to_message,
-        :gateway => self.gateway&.to_message,
+        :address => self.address&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4) },
+        :netmask => self.netmask&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4) },
+        :gateway => self.gateway&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV4) },
       }.compact
     end
   end
@@ -281,9 +281,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     def to_message
       {
         :method => self.method_&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::Method.proto(it) },
-        :address => self.address&.to_message,
+        :address => self.address&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV6) },
         :prefix_length => self.prefix_length,
-        :gateway => self.gateway&.to_message,
+        :gateway => self.gateway&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::IpAddressV6) },
       }.compact
     end
   end

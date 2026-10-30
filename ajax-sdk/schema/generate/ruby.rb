@@ -161,7 +161,6 @@ module Schema
       def write(model, field, value)
         return "#{value}#{each(:transform_values, back(model, field.map.last, 'it'))}" if field.map
         return "#{value}#{each(:map, back(model, field, 'it'))}" if field.list?
-        return "#{value}&.to_message" if field.kind == :message
 
         "#{value}#{each(:then, back(model, field, 'it'), '&.')}"
       end
@@ -169,7 +168,7 @@ module Schema
       def back(model, field, value)
         case field.kind
         when :enum then "::#{model.constant(field.type)}.proto(#{value})"
-        when :message then "#{value}.to_message"
+        when :message then "#{CLOUD}::Encode.message(#{value}, ::#{model.constant(field.type)})"
         when :timestamp then "#{CLOUD}::Encode.time(#{value})"
         when :duration then "#{CLOUD}::Encode.duration(#{value})"
         when :wrapper then "#{CLOUD}::Encode.wrapper(#{value})"

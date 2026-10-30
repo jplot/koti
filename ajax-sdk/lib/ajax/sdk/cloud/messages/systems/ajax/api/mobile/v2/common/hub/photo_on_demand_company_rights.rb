@@ -44,11 +44,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :shared_devices => self.shared_devices&.to_message,
-        :disabled => self.disabled&.to_message,
-        :always => self.always&.to_message,
-        :when_armed => self.when_armed&.to_message,
-        :after_alarm => self.after_alarm&.to_message,
+        :shared_devices => self.shared_devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::PhotoOnDemandCompanyRights::PhotoOnDemandDevices) },
+        :disabled => self.disabled&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::PhotoOnDemandCompanyRights::Never) },
+        :always => self.always&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::PhotoOnDemandCompanyRights::Always) },
+        :when_armed => self.when_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::PhotoOnDemandCompanyRights::WhenArmed) },
+        :after_alarm => self.after_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::PhotoOnDemandCompanyRights::AfterAlarm) },
       }.compact
     end
 
@@ -199,7 +199,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :devices => self.devices.map { it.to_message },
+          :devices => self.devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::PhotoOnDemandCompanyRights::PhotoOnDemandDevice) },
         }.compact
       end
     end

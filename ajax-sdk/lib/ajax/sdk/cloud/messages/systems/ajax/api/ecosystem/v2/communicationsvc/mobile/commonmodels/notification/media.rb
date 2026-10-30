@@ -45,10 +45,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     def to_message
       {
         :notification_id => self.notification_id,
-        :hub_notification_media => self.hub_notification_media&.to_message,
-        :archive_export_media => self.archive_export_media&.to_message,
-        :video_scenario_media => self.video_scenario_media&.to_message,
-        :video_frames_media => self.video_frames_media&.to_message,
+        :hub_notification_media => self.hub_notification_media&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Media::HubNotificationMedia) },
+        :archive_export_media => self.archive_export_media&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Media::Archive::ArchiveExportCompletedMedia) },
+        :video_scenario_media => self.video_scenario_media&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Media::Scenario::VideoScenarioMedia) },
+        :video_frames_media => self.video_frames_media&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Media::Channel::VideoFramesMedia) },
       }.compact
     end
 

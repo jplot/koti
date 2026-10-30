@@ -65,13 +65,21 @@ module Ajax
 
         # @param time [Time]
         # @return [Hash{Symbol=>Integer}] a +google.protobuf.Timestamp+
-        def time(time) = { seconds: time.to_i, nanos: time.nsec }
+        # @raise [TypeError] unless +time+ is a Time
+        def time(time)
+          raise TypeError, "Time expected, got #{time.class}" unless time.is_a?(Time)
+
+          { seconds: time.to_i, nanos: time.nsec }
+        end
 
         # A Duration gives its seconds and nanos the same sign: -1.5 s is -1 s and -500,000,000 ns.
         #
         # @param seconds [Float]
         # @return [Hash{Symbol=>Integer}] a +google.protobuf.Duration+
+        # @raise [TypeError] unless +seconds+ is Numeric
         def duration(seconds)
+          raise TypeError, "Numeric expected, got #{seconds.class}" unless seconds.is_a?(Numeric)
+
           whole = seconds.truncate
           { seconds: whole, nanos: ((seconds - whole) * 1_000_000_000).round }
         end
@@ -79,6 +87,16 @@ module Ajax
         # @param value [Object] what a wrapper such as +google.protobuf.StringValue+ holds
         # @return [Hash{Symbol=>Object}] the wrapper
         def wrapper(value) = { value: }
+
+        # @param value [Data] the generated value of a sub-message
+        # @param type [Class] the value class its field takes
+        # @return [Hash{Symbol=>Object}] the sub-message as google-protobuf takes it
+        # @raise [TypeError] unless +value+ is a +type+
+        def message(value, type)
+          raise TypeError, "#{type.name} expected, got #{value.class}" unless value.is_a?(type)
+
+          value.to_message
+        end
       end
 
       # The typed values of the cloud messages; messages.rb declares them.

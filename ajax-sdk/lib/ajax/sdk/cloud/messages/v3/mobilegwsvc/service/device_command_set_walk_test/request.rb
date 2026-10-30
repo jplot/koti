@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
     def to_message
       {
         :hub_id => self.hub_id,
-        :activate => self.activate&.to_message,
-        :deactivate => self.deactivate&.to_message,
+        :activate => self.activate&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandSetWalkTest::DeviceCommandSetWalkTestRequest::Activate) },
+        :deactivate => self.deactivate&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandSetWalkTest::DeviceCommandSetWalkTestRequest::Deactivate) },
       }.compact
     end
 

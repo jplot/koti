@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
     def to_message
       {
         :space_id => self.space_id,
-        :id => self.id&.to_message,
-        :source => self.source&.to_message,
+        :id => self.id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::ChannelIdOnVideoEdge) },
+        :source => self.source&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::VideoSource) },
       }.compact
     end
   end

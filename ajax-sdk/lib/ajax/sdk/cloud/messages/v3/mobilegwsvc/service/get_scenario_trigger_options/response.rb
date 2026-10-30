@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::Failure) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :scenario_trigger_options => self.scenario_trigger_options.map { it.to_message },
+          :scenario_trigger_options => self.scenario_trigger_options.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::ScenarioTriggerOption) },
         }.compact
       end
     end
@@ -123,11 +123,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :permissions_denied => self.permissions_denied&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :hub_not_found => self.hub_not_found&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permissions_denied => self.permissions_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_not_found => self.hub_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 
@@ -185,14 +185,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :temperature_trigger_option => self.temperature_trigger_option&.to_message,
-          :alarming_device_trigger_option => self.alarming_device_trigger_option&.to_message,
-          :cross_zone_trigger_option => self.cross_zone_trigger_option&.to_message,
-          :smart_lock_trigger_option => self.smart_lock_trigger_option&.to_message,
-          :video_detection_trigger_option => self.video_detection_trigger_option&.to_message,
-          :en54_alarming_device_trigger_option => self.en54_alarming_device_trigger_option&.to_message,
-          :video_alarming_device_trigger_option => self.video_alarming_device_trigger_option&.to_message,
-          :audio_alarming_device_trigger_option => self.audio_alarming_device_trigger_option&.to_message,
+          :temperature_trigger_option => self.temperature_trigger_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::GenericObjectTriggerOption) },
+          :alarming_device_trigger_option => self.alarming_device_trigger_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::AlarmingDeviceTriggerOption) },
+          :cross_zone_trigger_option => self.cross_zone_trigger_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::GenericObjectTriggerOption) },
+          :smart_lock_trigger_option => self.smart_lock_trigger_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::GenericObjectTriggerOption) },
+          :video_detection_trigger_option => self.video_detection_trigger_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::VideoDetectionTriggerOption) },
+          :en54_alarming_device_trigger_option => self.en54_alarming_device_trigger_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::AlarmingDeviceTriggerOption) },
+          :video_alarming_device_trigger_option => self.video_alarming_device_trigger_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::AlarmingDeviceTriggerOption) },
+          :audio_alarming_device_trigger_option => self.audio_alarming_device_trigger_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::AlarmingDeviceTriggerOption) },
         }.compact
       end
 
@@ -263,7 +263,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :channel_reference => self.channel_reference&.to_message,
+          :channel_reference => self.channel_reference&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::ChannelReference) },
         }.compact
       end
     end
@@ -304,7 +304,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       def to_message
         {
           :device_id => self.device_id,
-          :alarm_options => self.alarm_options.map { it.to_message },
+          :alarm_options => self.alarm_options.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::AlarmOption) },
           :device_category => self.device_category&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTriggerOptions::GetScenarioTriggerOptionsResponse::DeviceCategory.proto(it) },
         }.compact
       end

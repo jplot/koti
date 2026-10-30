@@ -51,8 +51,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :target => self.target&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::FeatureTarget.proto(it) },
         :name => self.name,
         :room_name => self.room_name,
-        :hub_additional_info => self.hub_additional_info&.to_message,
-        :video_edge_additional_info => self.video_edge_additional_info&.to_message,
+        :hub_additional_info => self.hub_additional_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::HubAdditionalInfo) },
+        :video_edge_additional_info => self.video_edge_additional_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::VideoEdgeAdditionalInfo) },
       }.compact
     end
 

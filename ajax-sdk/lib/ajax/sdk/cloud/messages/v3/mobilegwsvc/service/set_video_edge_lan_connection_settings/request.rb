@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       {
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
-        :operation_mode => self.operation_mode&.to_message,
+        :operation_mode => self.operation_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Router::OperationMode) },
       }.compact
     end
   end

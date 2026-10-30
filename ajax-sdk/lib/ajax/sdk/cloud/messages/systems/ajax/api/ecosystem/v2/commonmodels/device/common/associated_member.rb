@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :associated_space_member => self.associated_space_member&.to_message,
-        :associated_guest => self.associated_guest&.to_message,
-        :deleted_space_member => self.deleted_space_member&.to_message,
-        :not_assigned_member => self.not_assigned_member&.to_message,
+        :associated_space_member => self.associated_space_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMember::AssociatedSpaceMember) },
+        :associated_guest => self.associated_guest&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMember::AssociatedGuest) },
+        :deleted_space_member => self.deleted_space_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMember::DeletedSpaceMember) },
+        :not_assigned_member => self.not_assigned_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMember::NotAssignedMember) },
       }.compact
     end
 

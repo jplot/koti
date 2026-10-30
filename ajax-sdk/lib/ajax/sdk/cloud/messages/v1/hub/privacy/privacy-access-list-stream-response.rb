@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::Privacy
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :motion_cam_privacy_access => self.motion_cam_privacy_access.map { it.to_message },
-        :streaming_cam_privacy_access => self.streaming_cam_privacy_access.map { it.to_message },
+        :motion_cam_privacy_access => self.motion_cam_privacy_access.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::Privacy::PrivacyMotionCamAccess) },
+        :streaming_cam_privacy_access => self.streaming_cam_privacy_access.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::Privacy::PrivacyStreamingCamAccess) },
       }.compact
     end
   end

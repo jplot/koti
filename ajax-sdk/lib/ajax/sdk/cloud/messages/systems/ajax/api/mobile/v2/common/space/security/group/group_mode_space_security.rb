@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Gro
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :groups => self.groups.map { it.to_message },
+        :groups => self.groups.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity) },
         :night_mode_enabled => self.night_mode_enabled,
         :group_filtering_state => self.group_filtering_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupFilteringState.proto(it) },
-        :service_mode => self.service_mode&.to_message,
+        :service_mode => self.service_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::ServiceMode) },
       }.compact
     end
   end

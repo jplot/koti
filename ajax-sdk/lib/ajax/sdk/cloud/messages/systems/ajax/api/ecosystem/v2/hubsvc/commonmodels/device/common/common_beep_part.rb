@@ -61,7 +61,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         :beep_volume_level => self.beep_volume_level&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::BeepVolumeLevel.proto(it) },
         :beep_config => self.beep_config.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::BeepConfig.proto(it) },
         :chimes => self.chimes&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::Chimes.proto(it) },
-        :progress_annunciation_thresholds => self.progress_annunciation_thresholds&.to_message,
+        :progress_annunciation_thresholds => self.progress_annunciation_thresholds&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ProgressAnnunciationThreshold) },
         :volume_level_capabilities => self.volume_level_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::BeepVolumeLevel.proto(it) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::Capability.proto(it) },
         :beep_device_type => self.beep_device_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::BeepDeviceType.proto(it) },
@@ -114,10 +114,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         {
           :beep_volume_level => self.beep_volume_level&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::BeepVolumeLevel.proto(it) },
           :chimes => self.chimes&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::Chimes.proto(it) },
-          :beep_on_arm_disarm => self.beep_on_arm_disarm.map { it.to_message },
-          :beep_on_delay => self.beep_on_delay.map { it.to_message },
-          :beep_config => self.beep_config.map { it.to_message },
-          :progress_annunciation_thresholds => self.progress_annunciation_thresholds&.to_message,
+          :beep_on_arm_disarm => self.beep_on_arm_disarm.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::CommonBeepPartSettings::BeepOnArmDisarmPatch) },
+          :beep_on_delay => self.beep_on_delay.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::CommonBeepPartSettings::BeepOnDelayPatch) },
+          :beep_config => self.beep_config.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart::CommonBeepPartSettings::BeepConfigPatch) },
+          :progress_annunciation_thresholds => self.progress_annunciation_thresholds&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ProgressAnnunciationThreshold::ProgressAnnunciationThresholdSettings) },
         }.compact
       end
 

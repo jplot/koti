@@ -42,8 +42,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy
     def to_message
       {
         :channel_id => self.channel_id,
-        :active => self.active&.to_message,
-        :granted => self.granted&.to_message,
+        :active => self.active&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissions::ActiveChannelPermissions) },
+        :granted => self.granted&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissions::GrantedChannelPermissions) },
         :group_id => self.group_id,
       }.compact
     end
@@ -117,9 +117,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :permanent => self.permanent&.to_message,
-          :temporary => self.temporary&.to_message,
-          :merged => self.merged&.to_message,
+          :permanent => self.permanent&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::PermanentChannelPermissions) },
+          :temporary => self.temporary&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::TemporaryChannelPermissions) },
+          :merged => self.merged&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissions::MergedGrantedChannelPermissions) },
         }.compact
       end
     end

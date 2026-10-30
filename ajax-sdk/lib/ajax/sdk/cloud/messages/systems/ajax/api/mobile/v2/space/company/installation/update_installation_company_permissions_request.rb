@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
       {
         :space_id => self.space_id,
         :company_hex_id => self.company_hex_id,
-        :update => self.update&.to_message,
+        :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation::UpdateInstallationCompanyPermissionsRequest::PermissionsUpdate) },
       }.compact
     end
 
@@ -76,8 +76,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :space_permission_patch => self.space_permission_patch.map { it.to_message },
-          :hub_permission_patch => self.hub_permission_patch.map { it.to_message },
+          :space_permission_patch => self.space_permission_patch.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation::UpdateInstallationCompanyPermissionsRequest::PermissionsUpdate::SpacePermissionPatch) },
+          :hub_permission_patch => self.hub_permission_patch.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation::UpdateInstallationCompanyPermissionsRequest::PermissionsUpdate::HubPermissionPatch) },
         }.compact
       end
 
@@ -191,8 +191,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation::UpdateInstallationCompanyPermissionsResponse::Failure) },
       }.compact
     end
 
@@ -245,11 +245,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Installation
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :hub_locked => self.hub_locked&.to_message,
-          :space_locked => self.space_locked&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_locked => self.hub_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_locked => self.space_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::SpaceLockedError) },
         }.compact
       end
 

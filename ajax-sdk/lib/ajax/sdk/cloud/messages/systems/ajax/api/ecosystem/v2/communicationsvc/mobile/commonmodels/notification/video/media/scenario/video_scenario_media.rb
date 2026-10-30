@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :channel_metadata => self.channel_metadata.map { it.to_message },
+        :channel_metadata => self.channel_metadata.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Media::Scenario::VideoScenarioMedia::ChannelAlarmFrameMetadata) },
       }.compact
     end
 
@@ -81,7 +81,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
           :channel_id => self.channel_id,
           :channel_name => self.channel_name,
           :room_name => self.room_name,
-          :frame_data_result => self.frame_data_result&.to_message,
+          :frame_data_result => self.frame_data_result&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Media::Scenario::VideoScenarioMedia::FrameDataResult) },
         }.compact
       end
     end
@@ -118,8 +118,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :url_list => self.url_list&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
+          :url_list => self.url_list&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Media::Scenario::VideoScenarioMedia::UrlList) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Media::Scenario::VideoScenarioMedia::PermissionDenied) },
         }.compact
       end
 

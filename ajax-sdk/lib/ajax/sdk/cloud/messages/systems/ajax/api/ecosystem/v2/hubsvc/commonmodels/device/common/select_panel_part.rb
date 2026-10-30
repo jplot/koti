@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :available_device_panel_configs => self.available_device_panel_configs.map { it.to_message },
-        :device_panel_config => self.device_panel_config&.to_message,
+        :available_device_panel_configs => self.available_device_panel_configs.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SelectPanelPart::DevicePanelConfig) },
+        :device_panel_config => self.device_panel_config&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SelectPanelPart::DevicePanelConfig) },
       }.compact
     end
 
@@ -69,7 +69,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_panel_config => self.device_panel_config&.to_message,
+          :device_panel_config => self.device_panel_config&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SelectPanelPart::DevicePanelConfig) },
         }.compact
       end
     end
@@ -144,7 +144,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_panel_config => self.device_panel_config&.to_message,
+          :device_panel_config => self.device_panel_config&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SelectPanelPart::DevicePanelConfig) },
         }.compact
       end
     end

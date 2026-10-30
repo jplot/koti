@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::GetHubMigrationInfoResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::GetHubMigrationInfoResponse::Failure) },
       }.compact
     end
 
@@ -98,14 +98,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :devices => self.devices&.to_message,
-          :rooms => self.rooms&.to_message,
-          :groups => self.groups&.to_message,
-          :users => self.users&.to_message,
-          :cameras => self.cameras&.to_message,
-          :range_extenders => self.range_extenders&.to_message,
-          :access_cards => self.access_cards&.to_message,
-          :access_codes => self.access_codes&.to_message,
+          :devices => self.devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::DevicesMigrationList) },
+          :rooms => self.rooms&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::RoomsMigrationList) },
+          :groups => self.groups&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::GroupsMigrationList) },
+          :users => self.users&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::UsersMigrationList) },
+          :cameras => self.cameras&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::CamerasMigrationList) },
+          :range_extenders => self.range_extenders&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::RangeExtendersMigrationList) },
+          :access_cards => self.access_cards&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::AccessCardsMigrationList) },
+          :access_codes => self.access_codes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::AccessCodesMigrationList) },
         }.compact
       end
     end
@@ -145,9 +145,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :hub_not_found => self.hub_not_found&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_not_found => self.hub_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 
@@ -191,7 +191,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :items => self.items.map { it.to_message },
+        :items => self.items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::DeviceMigrationInfo) },
         :total => self.total,
         :available => self.available,
       }.compact
@@ -227,7 +227,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :items => self.items.map { it.to_message },
+        :items => self.items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::RoomMigrationInfo) },
       }.compact
     end
   end
@@ -261,7 +261,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :items => self.items.map { it.to_message },
+        :items => self.items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::GroupMigrationInfo) },
       }.compact
     end
   end
@@ -295,7 +295,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :items => self.items.map { it.to_message },
+        :items => self.items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::UserMigrationInfo) },
       }.compact
     end
   end
@@ -329,7 +329,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :items => self.items.map { it.to_message },
+        :items => self.items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::DeviceMigrationInfo) },
       }.compact
     end
   end
@@ -369,7 +369,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :items => self.items.map { it.to_message },
+        :items => self.items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::DeviceMigrationInfo) },
         :total => self.total,
         :available => self.available,
       }.compact
@@ -405,7 +405,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :items => self.items.map { it.to_message },
+        :items => self.items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::AccessCardMigrationInfo) },
       }.compact
     end
   end
@@ -439,7 +439,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :items => self.items.map { it.to_message },
+        :items => self.items.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::AccessCodeMigrationInfo) },
       }.compact
     end
   end
@@ -498,8 +498,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
         :name => self.name,
         :room_name => self.room_name,
         :device_color => self.device_color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceColor.proto(it) },
-        :object_type => self.object_type&.to_message,
-        :device_appearance => self.device_appearance&.to_message,
+        :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :device_appearance => self.device_appearance&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceAppearance) },
         :availability => self.availability&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetTransferHubSettingsSummary::DeviceMigrationAvailability.proto(it) },
         :is_attached_to_rex => self.is_attached_to_rex,
       }.compact
@@ -543,7 +543,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       {
         :id => self.id,
         :name => self.name,
-        :images => self.images&.to_message,
+        :images => self.images&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
       }.compact
     end
   end
@@ -585,7 +585,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       {
         :id => self.id,
         :name => self.name,
-        :images => self.images&.to_message,
+        :images => self.images&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
       }.compact
     end
   end
@@ -634,7 +634,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
         :id => self.id,
         :name => self.name,
         :email => self.email,
-        :images => self.images&.to_message,
+        :images => self.images&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
         :role => self.role&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::SpaceMemberRole.proto(it) },
       }.compact
     end
@@ -681,7 +681,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
         :id => self.id,
         :name => self.name,
         :user_name => self.user_name,
-        :type_part => self.type_part&.to_message,
+        :type_part => self.type_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessCardTypePart) },
       }.compact
     end
   end

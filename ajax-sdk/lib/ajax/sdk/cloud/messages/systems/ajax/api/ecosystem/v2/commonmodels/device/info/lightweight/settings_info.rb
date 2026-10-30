@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Inf
     def to_message
       {
         :edit_availability => self.edit_availability&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Info::Lightweight::SettingsInfo::EditAvailability.proto(it) },
-        :additional_states => self.additional_states.map { it.to_message },
+        :additional_states => self.additional_states.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Info::Lightweight::SettingsInfo::AdditionalState) },
       }.compact
     end
 

@@ -51,7 +51,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :external_power_voltage_mv => self.external_power_voltage_mv,
         :external_power_current_ma => self.external_power_current_ma,
         :external_power_state => self.external_power_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mcu::Mcu::ExternalPowerState.proto(it) },
-        :power_settings => self.power_settings&.to_message,
+        :power_settings => self.power_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::PowerSettings) },
         :battery_charged_state => self.battery_charged_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Common::BatteryChargedState.proto(it) },
       }.compact
     end

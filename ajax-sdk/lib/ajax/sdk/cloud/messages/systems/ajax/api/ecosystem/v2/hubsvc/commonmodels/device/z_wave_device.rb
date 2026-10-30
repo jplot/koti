@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_profile_part => self.device_profile_part&.to_message,
-        :z_wave_device_clusters_part => self.z_wave_device_clusters_part&.to_message,
+        :device_profile_part => self.device_profile_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceProfilePart) },
+        :z_wave_device_clusters_part => self.z_wave_device_clusters_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ZWaveDevicePackage::ZWaveDeviceClustersPart) },
       }.compact
     end
   end

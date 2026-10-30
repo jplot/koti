@@ -72,7 +72,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility
         :hub_id => self.hub_id,
         :hub_name => self.hub_name,
         :company_id => self.company_id,
-        :facility_general_info => self.facility_general_info&.to_message,
+        :facility_general_info => self.facility_general_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::Facility::GeneralInfo) },
         :status => self.status&.then { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::Facility::Status.proto(it) },
         :connection_status => self.connection_status&.then { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::Facility::ConnectionStatus.proto(it) },
         :version => self.version,
@@ -127,9 +127,9 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility
         {
           :name => self.name,
           :registration_number => self.registration_number,
-          :address => self.address&.to_message,
-          :phone_numbers => self.phone_numbers.map { it.to_message },
-          :email_addresses => self.email_addresses.map { it.to_message },
+          :address => self.address&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Address) },
+          :phone_numbers => self.phone_numbers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::PhoneNumber) },
+          :email_addresses => self.email_addresses.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::EmailAddress) },
         }.compact
       end
     end

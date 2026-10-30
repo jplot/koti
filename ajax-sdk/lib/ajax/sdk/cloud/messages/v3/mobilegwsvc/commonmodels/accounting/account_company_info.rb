@@ -52,7 +52,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :vat_company_type => self.vat_company_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::VatCompanyType.proto(it) },
         :vat_number => self.vat_number,
         :contact_email => self.contact_email,
-        :billing_address => self.billing_address&.to_message,
+        :billing_address => self.billing_address&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::Address) },
       }.compact
     end
   end

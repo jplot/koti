@@ -61,8 +61,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :unregistered_rings => self.unregistered_rings&.to_message,
-          :disconnected_rings => self.disconnected_rings&.to_message,
+          :unregistered_rings => self.unregistered_rings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::RingsConnectionPart::UnregisteredRings) },
+          :disconnected_rings => self.disconnected_rings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::RingsConnectionPart::DisconnectedRings) },
         }.compact
       end
     end
@@ -99,8 +99,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :rings_to_add => self.rings_to_add.map { it.to_message },
-          :rings_to_delete => self.rings_to_delete.map { it.to_message },
+          :rings_to_add => self.rings_to_add.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine::Ring) },
+          :rings_to_delete => self.rings_to_delete.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine::Ring) },
         }.compact
       end
     end
@@ -134,7 +134,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :rings => self.rings.map { it.to_message },
+          :rings => self.rings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine::Ring) },
         }.compact
       end
     end

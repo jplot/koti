@@ -45,7 +45,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Light::Properties::SmartLockControl::LockState.proto(it) },
-        :unlatch_info => self.unlatch_info&.to_message,
+        :unlatch_info => self.unlatch_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Light::Properties::SmartLockControl::UnlatchInfo) },
         :is_disabled => self.is_disabled,
         :is_authentication_on_action_required => self.is_authentication_on_action_required,
         :is_secure_mode_enabled => self.is_secure_mode_enabled,

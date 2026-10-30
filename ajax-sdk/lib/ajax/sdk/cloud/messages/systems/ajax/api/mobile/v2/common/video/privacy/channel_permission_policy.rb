@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :always => self.always&.to_message,
-        :when_armed => self.when_armed&.to_message,
-        :after_alarm => self.after_alarm&.to_message,
+        :always => self.always&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissionPolicy::AlwaysChannelPermissionPolicy) },
+        :when_armed => self.when_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissionPolicy::WhenArmedChannelPermissionPolicy) },
+        :after_alarm => self.after_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissionPolicy::AfterAlarmChannelPermissionPolicy) },
       }.compact
     end
 

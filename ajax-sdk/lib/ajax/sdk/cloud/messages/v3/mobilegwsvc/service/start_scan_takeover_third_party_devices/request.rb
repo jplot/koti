@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sta
       {
         :hub_id => self.hub_id,
         :takeover_device_id => self.takeover_device_id,
-        :takeover_device_type => self.takeover_device_type&.to_message,
+        :takeover_device_type => self.takeover_device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
       }.compact
     end
   end

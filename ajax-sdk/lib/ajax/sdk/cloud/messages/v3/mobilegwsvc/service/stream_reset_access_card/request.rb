@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     def to_message
       {
         :space_id => self.space_id,
-        :device_id_to_manage_reset => self.device_id_to_manage_reset&.to_message,
+        :device_id_to_manage_reset => self.device_id_to_manage_reset&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId) },
       }.compact
     end
   end

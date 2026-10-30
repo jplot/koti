@@ -63,9 +63,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
     def to_message
       {
         :id => self.id,
-        :profile => self.profile&.to_message,
+        :profile => self.profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceProfile) },
         :security_state => self.security_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::DisplayedSpaceSecurityState.proto(it) },
-        :security_state_v2 => self.security_state_v2&.to_message,
+        :security_state_v2 => self.security_state_v2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::DisplayedSpaceSecurityStateV2) },
         :new_notifications_count => self.new_notifications_count,
         :malfunctions_count => self.malfunctions_count,
         :sorting_key => self.sorting_key,

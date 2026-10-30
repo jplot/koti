@@ -61,7 +61,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::User
         :locale => self.locale,
         :email => self.email,
         :phone => self.phone,
-        :image_urls => self.image_urls&.to_message,
+        :image_urls => self.image_urls&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::ImageUrls) },
         :cluster_user_id => self.cluster_user_id,
         :end_user_agreement_version => self.end_user_agreement_version,
         :privacy_policy_version => self.privacy_policy_version,

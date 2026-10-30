@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Act
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :targets => self.targets.map { it.to_message },
+        :targets => self.targets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::ChangeArmingStateAction::Target) },
         :action_type => self.action_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::ChangeArmingStateAction::ActionType.proto(it) },
       }.compact
     end
@@ -72,8 +72,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Act
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :space => self.space&.to_message,
-          :group => self.group&.to_message,
+          :space => self.space&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::ChangeArmingStateAction::Target::Space) },
+          :group => self.group&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::ChangeArmingStateAction::Target::Group) },
         }.compact
       end
 

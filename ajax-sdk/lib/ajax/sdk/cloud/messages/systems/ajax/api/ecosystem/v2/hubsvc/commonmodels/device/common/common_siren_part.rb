@@ -50,11 +50,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :siren_settings => self.siren_settings&.to_message,
-        :common_beep_part => self.common_beep_part&.to_message,
-        :light_indication => self.light_indication&.to_message,
+        :siren_settings => self.siren_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSirenPart::SirenSettings) },
+        :common_beep_part => self.common_beep_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonBeepPart) },
+        :light_indication => self.light_indication&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LightIndication) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSirenPart::Capabilities.proto(it) },
-        :volumes_with_durations => self.volumes_with_durations.map { it.to_message },
+        :volumes_with_durations => self.volumes_with_durations.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSirenPart::VolumeWithDuration) },
         :siren_volume_level_capabilities => self.siren_volume_level_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSirenPart::SirenVolumeLevel.proto(it) },
         :extended_alarm_duration_capability => self.extended_alarm_duration_capability&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSirenPart::ExtendedAlarmDuration.proto(it) },
       }.compact
@@ -131,7 +131,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :volume => self.volume&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSirenPart::SirenVolumeLevel.proto(it) },
-          :alarm_durations => self.alarm_durations.map { it.to_message },
+          :alarm_durations => self.alarm_durations.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSirenPart::AlarmDuration) },
         }.compact
       end
     end

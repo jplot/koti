@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::Privacy
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::Privacy::PrivacySetMotionCamAccessResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::Privacy::PrivacySetMotionCamAccessResponse::Failure) },
       }.compact
     end
 
@@ -108,7 +108,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::Privacy
       def to_message
         {
           :message => self.message,
-          :permissions_limit_exceeded => self.permissions_limit_exceeded&.to_message,
+          :permissions_limit_exceeded => self.permissions_limit_exceeded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Error::SimpleError) },
         }.compact
       end
 

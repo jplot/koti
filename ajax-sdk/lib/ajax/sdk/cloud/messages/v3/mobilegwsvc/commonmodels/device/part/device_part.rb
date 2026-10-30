@@ -77,22 +77,22 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_chimes => self.device_chimes&.to_message,
-        :siren_triggers => self.siren_triggers&.to_message,
-        :hub_battery_part => self.hub_battery_part&.to_message,
-        :hub_battery_power_saver_part => self.hub_battery_power_saver_part&.to_message,
-        :screen_security_management_part => self.screen_security_management_part&.to_message,
-        :emergency_signals_part => self.emergency_signals_part&.to_message,
-        :telephony_call_options_part => self.telephony_call_options_part&.to_message,
-        :external_battery_part => self.external_battery_part&.to_message,
-        :third_party_device_offline_timeout_part => self.third_party_device_offline_timeout_part&.to_message,
-        :integration_compatibility_mode_part => self.integration_compatibility_mode_part&.to_message,
-        :embedded_takeover_enabled_part => self.embedded_takeover_enabled_part&.to_message,
-        :embedded_takeover_radio_interference_detection_part => self.embedded_takeover_radio_interference_detection_part&.to_message,
-        :hub_wake_up_via_sms_part => self.hub_wake_up_via_sms_part&.to_message,
-        :screen_systems_management_part => self.screen_systems_management_part&.to_message,
-        :screen_access_settings_part => self.screen_access_settings_part&.to_message,
-        :factory_reset_part => self.factory_reset_part&.to_message,
+        :device_chimes => self.device_chimes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes) },
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
+        :hub_battery_part => self.hub_battery_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPart) },
+        :hub_battery_power_saver_part => self.hub_battery_power_saver_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPowerSaverPart) },
+        :screen_security_management_part => self.screen_security_management_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenSecurityManagementPart) },
+        :emergency_signals_part => self.emergency_signals_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::EmergencySignalsPart) },
+        :telephony_call_options_part => self.telephony_call_options_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart) },
+        :external_battery_part => self.external_battery_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::ExternalBatteryPart) },
+        :third_party_device_offline_timeout_part => self.third_party_device_offline_timeout_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ThirdPartyDeviceOfflineTimeoutPart) },
+        :integration_compatibility_mode_part => self.integration_compatibility_mode_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::IntegrationCompatibilityModePart) },
+        :embedded_takeover_enabled_part => self.embedded_takeover_enabled_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::EmbeddedTakeoverEnabledPart) },
+        :embedded_takeover_radio_interference_detection_part => self.embedded_takeover_radio_interference_detection_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::EmbeddedTakeoverRadioInterferenceDetectionPart) },
+        :hub_wake_up_via_sms_part => self.hub_wake_up_via_sms_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubWakeUpViaSmsPart) },
+        :screen_systems_management_part => self.screen_systems_management_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenSystemManagementPart) },
+        :screen_access_settings_part => self.screen_access_settings_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenAccessSettingsPart) },
+        :factory_reset_part => self.factory_reset_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FactoryResetPart) },
       }.compact
     end
 

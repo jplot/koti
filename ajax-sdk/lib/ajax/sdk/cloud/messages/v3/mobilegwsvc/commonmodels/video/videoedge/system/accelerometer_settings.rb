@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :accelerometer_types => self.accelerometer_types.map { it.to_message },
+        :accelerometer_types => self.accelerometer_types.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::AccelerometerSettings::AccelerometerTypeSettings) },
       }.compact
     end
 
@@ -72,8 +72,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :enabled => self.enabled,
-          :movement => self.movement&.to_message,
-          :shock => self.shock&.to_message,
+          :movement => self.movement&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::AccelerometerSettings::AccelerometerTypeSettings::Movement) },
+          :shock => self.shock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::System::AccelerometerSettings::AccelerometerTypeSettings::Shock) },
         }.compact
       end
 

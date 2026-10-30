@@ -38,8 +38,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :details => self.details&.to_message,
-        :event_settings => self.event_settings&.to_message,
+        :details => self.details&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockUpdate) },
+        :event_settings => self.event_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockEventSettings) },
         :room_id => self.room_id,
       }.compact
     end

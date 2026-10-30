@@ -60,15 +60,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model
     def to_message
       {
         :hex_id => self.hex_id,
-        :installation_companies => self.installation_companies&.to_message,
-        :monitoring_companies => self.monitoring_companies&.to_message,
-        :photo_on_demand_companies_access => self.photo_on_demand_companies_access&.to_message,
-        :surveillance_cameras_companies_access => self.surveillance_cameras_companies_access&.to_message,
-        :privacy_overrides => self.privacy_overrides&.to_message,
-        :sim_card => self.sim_card&.to_message,
-        :device_firmware_updates => self.device_firmware_updates&.to_message,
-        :system_firmware_update => self.system_firmware_update&.to_message,
-        :hub_connection_properties => self.hub_connection_properties&.to_message,
+        :installation_companies => self.installation_companies&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject::InstallationCompanies) },
+        :monitoring_companies => self.monitoring_companies&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject::MonitoringCompanies) },
+        :photo_on_demand_companies_access => self.photo_on_demand_companies_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject::PhotoOnDemandCompaniesAccess) },
+        :surveillance_cameras_companies_access => self.surveillance_cameras_companies_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject::SurveillanceCamerasCompaniesAccess) },
+        :privacy_overrides => self.privacy_overrides&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject::PrivacyOverrides) },
+        :sim_card => self.sim_card&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject::SimCard) },
+        :device_firmware_updates => self.device_firmware_updates&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject::DeviceFirmwareUpdates) },
+        :system_firmware_update => self.system_firmware_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Firmware::SystemFirmwareUpdate) },
+        :hub_connection_properties => self.hub_connection_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::HubConnectionProperties) },
       }.compact
     end
 
@@ -101,7 +101,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :installation_company => self.installation_company.map { it.to_message },
+          :installation_company => self.installation_company.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::Installation::InstallationCompany) },
         }.compact
       end
     end
@@ -135,7 +135,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :monitoring_company => self.monitoring_company.map { it.to_message },
+          :monitoring_company => self.monitoring_company.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::Monitoring::MonitoringCompany) },
         }.compact
       end
     end
@@ -169,7 +169,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :company_access => self.company_access.map { it.to_message },
+          :company_access => self.company_access.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::Privacy::PhotoOnDemandCompanyAccess) },
         }.compact
       end
     end
@@ -203,7 +203,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :company_access => self.company_access.map { it.to_message },
+          :company_access => self.company_access.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::Privacy::SurveillanceCamerasCompanyAccess) },
         }.compact
       end
     end
@@ -237,7 +237,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :privacy_override => self.privacy_override.map { it.to_message },
+          :privacy_override => self.privacy_override.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::Privacy::PrivacyOverride) },
         }.compact
       end
     end
@@ -271,7 +271,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_firmware_update => self.device_firmware_update.map { it.to_message },
+          :device_firmware_update => self.device_firmware_update.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Firmware::DeviceFirmwareUpdate) },
         }.compact
       end
     end
@@ -321,7 +321,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model
           :sim_card_status => self.sim_card_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::HubObject::SimCard::SimCardStatus.proto(it) },
           :imei => self.imei,
           :deactivation_date => self.deactivation_date&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
-          :wake_up_from_bsm_via_ajax_sim_state => self.wake_up_from_bsm_via_ajax_sim_state&.to_message,
+          :wake_up_from_bsm_via_ajax_sim_state => self.wake_up_from_bsm_via_ajax_sim_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::WakeUpFromBsmViaAjaxSimState) },
         }.compact
       end
 

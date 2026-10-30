@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Mod
     def to_message
       {
         :subscription_id => self.subscription_id,
-        :updated_targets_list => self.updated_targets_list.map { it.to_message },
+        :updated_targets_list => self.updated_targets_list.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::FeatureTargetInfo) },
       }.compact
     end
   end

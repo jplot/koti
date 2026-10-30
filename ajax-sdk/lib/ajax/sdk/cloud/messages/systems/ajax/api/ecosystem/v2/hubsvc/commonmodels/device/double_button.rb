@@ -41,9 +41,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_button_part => self.common_button_part&.to_message,
-        :device_battery_without_charging => self.device_battery_without_charging&.to_message,
-        :alarm_verification => self.alarm_verification&.to_message,
+        :common_button_part => self.common_button_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonButtonPart) },
+        :device_battery_without_charging => self.device_battery_without_charging&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBatteryWithoutCharging) },
+        :alarm_verification => self.alarm_verification&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AlarmVerification) },
         :siren_triggers => self.siren_triggers.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::DoubleButton::SirenTrigger.proto(it) },
       }.compact
     end

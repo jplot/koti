@@ -27,6 +27,11 @@ RSpec.describe Schema::Generate do
     expect(described_class.check(root)).to eq(['lib/ajax/sdk/cloud/messages/probe.rb'])
   end
 
+  it 'reports the named methods edited by hand' do
+    File.write(File.join(root, 'lib/ajax/sdk/cloud/methods.rb'), "# edited\n", mode: 'a')
+    expect(described_class.check(root)).to eq(['lib/ajax/sdk/cloud/methods.rb'])
+  end
+
   it 'reports a file left over' do
     File.write(File.join(root, 'sig/ajax/sdk/cloud/messages/old.rbs'), '')
     expect(described_class.check(root)).to eq(['sig/ajax/sdk/cloud/messages/old.rbs'])

@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_permission => self.device_permission&.to_message,
+        :device_permission => self.device_permission&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::PhotoOnDemandDevicePermissions::DevicePermission) },
       }.compact
     end
 
@@ -78,10 +78,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member
       def to_message
         {
           :device_id => self.device_id,
-          :not_allowed => self.not_allowed&.to_message,
-          :allowed_always => self.allowed_always&.to_message,
-          :when_armed => self.when_armed&.to_message,
-          :after_alarm => self.after_alarm&.to_message,
+          :not_allowed => self.not_allowed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::PhotoOnDemandDevicePermissions::NotAllowed) },
+          :allowed_always => self.allowed_always&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::PhotoOnDemandDevicePermissions::AllowedAlways) },
+          :when_armed => self.when_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::PhotoOnDemandDevicePermissions::WhenArmed) },
+          :after_alarm => self.after_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::PhotoOnDemandDevicePermissions::AfterAlarm) },
         }.compact
       end
 

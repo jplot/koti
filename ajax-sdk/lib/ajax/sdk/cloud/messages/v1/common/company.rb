@@ -78,9 +78,9 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common
         :name => self.name,
         :status => self.status&.then { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Company::Status.proto(it) },
         :roles => self.roles.map { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Role.proto(it) },
-        :logo => self.logo&.to_message,
-        :emails => self.emails.map { it.to_message },
-        :phones => self.phones.map { it.to_message },
+        :logo => self.logo&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Company::Logo) },
+        :emails => self.emails.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::EmailAddress) },
+        :phones => self.phones.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Company::Phone) },
         :web_page_url => self.web_page_url,
         :permissions => self.permissions.map { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Permission.proto(it) },
         :restore_permissions => self.restore_permissions.map { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::RestorePermission.proto(it) },
@@ -125,7 +125,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common
       def to_message
         {
           :image_id => self.image_id,
-          :images => self.images.map { it.to_message },
+          :images => self.images.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Image) },
         }.compact
       end
     end

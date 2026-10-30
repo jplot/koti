@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :video_edge_id => self.video_edge_id,
         :channel_id => self.channel_id,
-        :notification_settings => self.notification_settings&.to_message,
+        :notification_settings => self.notification_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoNotificationSettings::SetVideoNotificationSettingsRequest::NotificationSettings) },
       }.compact
     end
 
@@ -92,12 +92,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :notification_settings_entries => self.notification_settings_entries.map { it.to_message },
+          :notification_settings_entries => self.notification_settings_entries.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoNotificationSettings::SetVideoNotificationSettingsRequest::NotificationSettings::NotificationSettingsEntry) },
           :monitoring_state => self.monitoring_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::Notification::VideoNotificationMonitoringState.proto(it) },
           :cooldown_period => self.cooldown_period&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
           :object_detection_duration => self.object_detection_duration&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::Notification::VideoNotificationObjectDetectionDuration.proto(it) },
           :confirm_detection_with_pir => self.confirm_detection_with_pir&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::Notification::VideoNotificationConfirmDetectionWithPirState.proto(it) },
-          :line_crossing_changes => self.line_crossing_changes.map { it.to_message },
+          :line_crossing_changes => self.line_crossing_changes.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoNotificationSettings::SetVideoNotificationSettingsRequest::NotificationSettings::LineCrossingNotificationSettingsChange) },
         }.compact
       end
 

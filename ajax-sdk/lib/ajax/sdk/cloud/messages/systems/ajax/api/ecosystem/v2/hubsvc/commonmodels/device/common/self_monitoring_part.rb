@@ -69,7 +69,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :self_monitoring_configs => self.self_monitoring_configs.map { it.to_message },
+          :self_monitoring_configs => self.self_monitoring_configs.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SelfMonitoringPart::SelfMonitoringPartSettings::SelfMonitoringConfigPatch) },
         }.compact
       end
 

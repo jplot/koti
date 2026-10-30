@@ -47,12 +47,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :init => self.init&.to_message,
-        :ask_streams => self.ask_streams&.to_message,
-        :new_ice_candidate => self.new_ice_candidate&.to_message,
-        :offer => self.offer&.to_message,
-        :answer => self.answer&.to_message,
-        :peer_connection_established => self.peer_connection_established&.to_message,
+        :init => self.init&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamWebrtc::StreamWebrtcRequest::Init) },
+        :ask_streams => self.ask_streams&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamWebrtc::StreamWebrtcRequest::AskStreams) },
+        :new_ice_candidate => self.new_ice_candidate&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamWebrtc::StreamWebrtcRequest::NewIceCandidate) },
+        :offer => self.offer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamWebrtc::StreamWebrtcRequest::Offer) },
+        :answer => self.answer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamWebrtc::StreamWebrtcRequest::Answer) },
+        :peer_connection_established => self.peer_connection_established&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamWebrtc::StreamWebrtcRequest::PeerConnectionEstablished) },
       }.compact
     end
 
@@ -100,10 +100,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :space_locator => self.space_locator&.to_message,
+          :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
           :video_edge_id => self.video_edge_id,
-          :initial_streams => self.initial_streams.map { it.to_message },
-          :ice_filters => self.ice_filters&.to_message,
+          :initial_streams => self.initial_streams.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::Stream) },
+          :ice_filters => self.ice_filters&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::IceCandidateFilters) },
           :allow_large_rtp_packets => self.allow_large_rtp_packets,
         }.compact
       end
@@ -138,7 +138,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :streams => self.streams.map { it.to_message },
+          :streams => self.streams.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::Stream) },
         }.compact
       end
     end
@@ -172,7 +172,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :candidate => self.candidate&.to_message,
+          :candidate => self.candidate&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::IceCandidate) },
         }.compact
       end
     end
@@ -206,7 +206,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :session_description => self.session_description&.to_message,
+          :session_description => self.session_description&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::SessionDescription) },
         }.compact
       end
     end
@@ -240,7 +240,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :session_description => self.session_description&.to_message,
+          :session_description => self.session_description&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::SessionDescription) },
         }.compact
       end
     end

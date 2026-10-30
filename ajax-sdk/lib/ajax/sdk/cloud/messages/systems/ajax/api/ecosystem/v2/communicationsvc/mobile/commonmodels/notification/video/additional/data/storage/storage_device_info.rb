@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     def to_message
       {
         :storage_device_id => self.storage_device_id,
-        :storage_device_port_number => self.storage_device_port_number&.to_message,
+        :storage_device_port_number => self.storage_device_port_number&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Additional::Data::Storage::StorageDevicePortNumber) },
       }.compact
     end
   end

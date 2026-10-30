@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::Failure) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :snapshot => self.snapshot&.to_message,
-          :update => self.update&.to_message,
+          :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::Snapshot) },
+          :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::Update) },
         }.compact
       end
 
@@ -127,10 +127,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :accessible_ble_hub_users => self.accessible_ble_hub_users.map { it.to_message },
-          :accessible_ble_hub_devices => self.accessible_ble_hub_devices.map { it.to_message },
-          :accessible_ble_devices => self.accessible_ble_devices.map { it.to_message },
-          :accessible_ble_user => self.accessible_ble_user&.to_message,
+          :accessible_ble_hub_users => self.accessible_ble_hub_users.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::AccessibleBleHubUser) },
+          :accessible_ble_hub_devices => self.accessible_ble_hub_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::AccessibleBleHubDevice) },
+          :accessible_ble_devices => self.accessible_ble_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::AccessibleBleDevice) },
+          :accessible_ble_user => self.accessible_ble_user&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::AccessibleBleUser) },
         }.compact
       end
     end
@@ -171,8 +171,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       def to_message
         {
           :update_type => self.update_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::UpdateType.proto(it) },
-          :accessible_ble_hub_device => self.accessible_ble_hub_device&.to_message,
-          :accessible_ble_device => self.accessible_ble_device&.to_message,
+          :accessible_ble_hub_device => self.accessible_ble_hub_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::AccessibleBleHubDevice) },
+          :accessible_ble_device => self.accessible_ble_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::AccessibleBleDevice) },
         }.compact
       end
 
@@ -266,7 +266,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         {
           :user_id => self.user_id,
           :ble_key_seed => self.ble_key_seed,
-          :space_context_list => self.space_context_list.map { it.to_message },
+          :space_context_list => self.space_context_list.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamSpaceBleInfo::StreamSpaceBleInfoResponse::AccessibleBleUserSpaceContext) },
         }.compact
       end
     end
@@ -384,7 +384,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         {
           :hub_id => self.hub_id,
           :device_id => self.device_id,
-          :object_type => self.object_type&.to_message,
+          :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         }.compact
       end
     end
@@ -421,8 +421,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions => self.arm_prevention_override_permissions.map { it.to_message },
+        :arm_prevention_override_permissions => self.arm_prevention_override_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart::ArmPreventionOverridePermission) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart::Capabilities.proto(it) },
       }.compact
     end
@@ -69,7 +69,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :arm_prevention_override_permissions => self.arm_prevention_override_permissions.map { it.to_message },
+          :arm_prevention_override_permissions => self.arm_prevention_override_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart::ArmPreventionOverridePermission) },
         }.compact
       end
     end

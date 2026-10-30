@@ -43,7 +43,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :object_type => self.object_type&.to_message,
+        :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         :iwh_test_command => self.iwh_test_command&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandInterconnectWithoutHubTest::DeviceCommandInterconnectWithoutHubTestRequest::IWHTestCommand.proto(it) },
       }.compact
     end

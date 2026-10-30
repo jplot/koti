@@ -64,11 +64,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
         :name => self.name,
         :open_door_alarm => self.open_door_alarm&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateDayAlarmZone::UpdateDayAlarmZoneRequest::OpenDoorAlarm.proto(it) },
         :notify_about_deactivation => self.notify_about_deactivation&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateDayAlarmZone::UpdateDayAlarmZoneRequest::NotifyAboutDeactivation.proto(it) },
-        :intrusion_devices => self.intrusion_devices.map { it.to_message },
-        :security_devices => self.security_devices.map { it.to_message },
-        :siren_devices => self.siren_devices.map { it.to_message },
-        :triggers_count => self.triggers_count&.to_message,
-        :timer => self.timer&.to_message,
+        :intrusion_devices => self.intrusion_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::SelectedDevice) },
+        :security_devices => self.security_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::SelectedDevice) },
+        :siren_devices => self.siren_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::SelectedDevice) },
+        :triggers_count => self.triggers_count&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateDayAlarmZone::UpdateDayAlarmZoneRequest::TriggersCount) },
+        :timer => self.timer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateDayAlarmZone::UpdateDayAlarmZoneRequest::Timer) },
       }.compact
     end
 

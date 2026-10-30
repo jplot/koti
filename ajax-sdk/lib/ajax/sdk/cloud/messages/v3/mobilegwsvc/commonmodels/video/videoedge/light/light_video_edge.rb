@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :profile => self.profile&.to_message,
-        :spread_properties => self.spread_properties.map { it.to_message },
-        :video_edge_properties => self.video_edge_properties&.to_message,
+        :profile => self.profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceProfile) },
+        :spread_properties => self.spread_properties.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdge::SpreadProperties) },
+        :video_edge_properties => self.video_edge_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdge::VideoEdgeProperties) },
       }.compact
     end
 
@@ -84,8 +84,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         {
           :id => self.id,
           :sort_index => self.sort_index,
-          :channels => self.channels&.to_message,
-          :subscription_state => self.subscription_state&.to_message,
+          :channels => self.channels&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdge::SpreadProperties::Channels) },
+          :subscription_state => self.subscription_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::Properties::SubscriptionState) },
         }.compact
       end
 
@@ -205,9 +205,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :profile => self.profile&.to_message,
-        :video_edge_channel_properties => self.video_edge_channel_properties&.to_message,
-        :spread_properties => self.spread_properties.map { it.to_message },
+        :profile => self.profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceProfile) },
+        :video_edge_channel_properties => self.video_edge_channel_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdgeChannel::VideoEdgeChannelProperties) },
+        :spread_properties => self.spread_properties.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdgeChannel::SpreadProperties) },
       }.compact
     end
 
@@ -253,9 +253,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :video_edge_type => self.video_edge_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::About::Type.proto(it) },
-          :source_aliases => self.source_aliases&.to_message,
-          :backup_channel_properties => self.backup_channel_properties&.to_message,
-          :ptz_properties => self.ptz_properties&.to_message,
+          :source_aliases => self.source_aliases&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SourceAliases) },
+          :backup_channel_properties => self.backup_channel_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdgeChannel::BackupChannelProperties) },
+          :ptz_properties => self.ptz_properties&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdgeChannel::PtzProperties) },
           :video_edge_id => self.video_edge_id,
         }.compact
       end
@@ -369,8 +369,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         {
           :id => self.id,
           :sort_index => self.sort_index,
-          :subscription_state => self.subscription_state&.to_message,
-          :output_digital_line => self.output_digital_line&.to_message,
+          :subscription_state => self.subscription_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::Properties::SubscriptionState) },
+          :output_digital_line => self.output_digital_line&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdgeChannel::OutputDigitalLine) },
         }.compact
       end
 

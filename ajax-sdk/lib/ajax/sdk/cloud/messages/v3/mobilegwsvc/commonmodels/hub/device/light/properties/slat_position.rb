@@ -38,8 +38,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :idle => self.idle&.to_message,
-        :moving => self.moving&.to_message,
+        :idle => self.idle&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SlatPosition::Idle) },
+        :moving => self.moving&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SlatPosition::Moving) },
         :malfunction => self.malfunction&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SlatPosition::Malfunction.proto(it) },
       }.compact
     end
@@ -82,9 +82,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :partial_percent => self.partial_percent&.to_message,
-          :fully_opened => self.fully_opened&.to_message,
-          :fully_closed => self.fully_closed&.to_message,
+          :partial_percent => self.partial_percent&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SlatPosition::PartialPercent) },
+          :fully_opened => self.fully_opened&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SlatPosition::FullyOpened) },
+          :fully_closed => self.fully_closed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SlatPosition::FullyClosed) },
         }.compact
       end
 

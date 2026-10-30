@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
     def to_message
       {
         :hub_id => self.hub_id,
-        :hub_double_knock => self.hub_double_knock&.to_message,
-        :zone_double_knock => self.zone_double_knock&.to_message,
+        :hub_double_knock => self.hub_double_knock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandDoubleKnock::DeviceCommandDoubleKnockRequest::HubDoubleKnock) },
+        :zone_double_knock => self.zone_double_knock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandDoubleKnock::DeviceCommandDoubleKnockRequest::ZoneDoubleKnock) },
       }.compact
     end
 
@@ -76,7 +76,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :double_knock_sub_command => self.double_knock_sub_command&.to_message,
+          :double_knock_sub_command => self.double_knock_sub_command&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandDoubleKnock::DeviceCommandDoubleKnockRequest::DoubleKnockSubCommand) },
         }.compact
       end
     end
@@ -114,7 +114,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       def to_message
         {
           :zone_id => self.zone_id,
-          :double_knock_sub_command => self.double_knock_sub_command&.to_message,
+          :double_knock_sub_command => self.double_knock_sub_command&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandDoubleKnock::DeviceCommandDoubleKnockRequest::DoubleKnockSubCommand) },
         }.compact
       end
     end
@@ -151,8 +151,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :activate_double_knock => self.activate_double_knock&.to_message,
-          :deactivate_double_knock => self.deactivate_double_knock&.to_message,
+          :activate_double_knock => self.activate_double_knock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandDoubleKnock::DeviceCommandDoubleKnockRequest::DoubleKnockSubCommand::ActivateDoubleKnock) },
+          :deactivate_double_knock => self.deactivate_double_knock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandDoubleKnock::DeviceCommandDoubleKnockRequest::DoubleKnockSubCommand::DeactivateDoubleKnock) },
         }.compact
       end
 

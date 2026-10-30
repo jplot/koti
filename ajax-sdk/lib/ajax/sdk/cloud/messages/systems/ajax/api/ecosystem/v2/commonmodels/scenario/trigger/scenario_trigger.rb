@@ -89,26 +89,26 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :schedule => self.schedule&.to_message,
-        :co2 => self.co2&.to_message,
-        :temperature => self.temperature&.to_message,
-        :humidity => self.humidity&.to_message,
-        :confirmed_alarm => self.confirmed_alarm&.to_message,
-        :button => self.button&.to_message,
-        :kpt => self.kpt&.to_message,
-        :smart_lock => self.smart_lock&.to_message,
-        :light_switch => self.light_switch&.to_message,
-        :schedule_access => self.schedule_access&.to_message,
-        :intrusion_alarm => self.intrusion_alarm&.to_message,
-        :inactivity_trigger => self.inactivity_trigger&.to_message,
-        :fire_alarm => self.fire_alarm&.to_message,
-        :leakage_trigger => self.leakage_trigger&.to_message,
-        :panic_trigger => self.panic_trigger&.to_message,
-        :aux_trigger => self.aux_trigger&.to_message,
-        :malfunction_trigger => self.malfunction_trigger&.to_message,
-        :custom_trigger => self.custom_trigger&.to_message,
-        :doorbell_trigger => self.doorbell_trigger&.to_message,
-        :warnings => self.warnings.map { it.to_message },
+        :schedule => self.schedule&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScheduleTrigger) },
+        :co2 => self.co2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::Co2ThresholdTrigger) },
+        :temperature => self.temperature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::TemperatureThresholdTrigger) },
+        :humidity => self.humidity&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::HumidityThresholdTrigger) },
+        :confirmed_alarm => self.confirmed_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::CrossZoneAlarmTrigger) },
+        :button => self.button&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ButtonTrigger) },
+        :kpt => self.kpt&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::KptTrigger) },
+        :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::SmartLockTrigger) },
+        :light_switch => self.light_switch&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::LightSwitchTrigger) },
+        :schedule_access => self.schedule_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScheduleAccessTrigger) },
+        :intrusion_alarm => self.intrusion_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::IntrusionAlarmTrigger) },
+        :inactivity_trigger => self.inactivity_trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::InactivityTrigger) },
+        :fire_alarm => self.fire_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::FireAlarmTrigger) },
+        :leakage_trigger => self.leakage_trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::LeakageTrigger) },
+        :panic_trigger => self.panic_trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::PanicTrigger) },
+        :aux_trigger => self.aux_trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::AuxTrigger) },
+        :malfunction_trigger => self.malfunction_trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::MalfunctionTrigger) },
+        :custom_trigger => self.custom_trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::CustomTrigger) },
+        :doorbell_trigger => self.doorbell_trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::DoorbellTrigger) },
+        :warnings => self.warnings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScenarioTrigger::Warning) },
       }.compact
     end
 
@@ -153,10 +153,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :some_devices_inactive => self.some_devices_inactive&.to_message,
-          :some_devices_have_different_operating_mode => self.some_devices_have_different_operating_mode&.to_message,
-          :device_operating_mode_has_changed => self.device_operating_mode_has_changed&.to_message,
-          :all_devices_inactive => self.all_devices_inactive&.to_message,
+          :some_devices_inactive => self.some_devices_inactive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScenarioTrigger::Warning::SomeDevicesInactive) },
+          :some_devices_have_different_operating_mode => self.some_devices_have_different_operating_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScenarioTrigger::Warning::SomeDevicesHaveDifferentOperatingMode) },
+          :device_operating_mode_has_changed => self.device_operating_mode_has_changed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScenarioTrigger::Warning::DeviceOperatingModeHasChanged) },
+          :all_devices_inactive => self.all_devices_inactive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScenarioTrigger::Warning::AllDevicesInactive) },
         }.compact
       end
 

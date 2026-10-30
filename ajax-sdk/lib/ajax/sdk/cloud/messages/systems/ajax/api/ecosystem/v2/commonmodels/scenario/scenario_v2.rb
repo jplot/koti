@@ -52,11 +52,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
       {
         :id => self.id,
         :name => self.name,
-        :condition => self.condition&.to_message,
-        :triggers => self.triggers.map { it.to_message },
-        :targets => self.targets.map { it.to_message },
-        :options => self.options&.to_message,
-        :additional_conditions => self.additional_conditions.map { it.to_message },
+        :condition => self.condition&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::Condition) },
+        :triggers => self.triggers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScenarioTrigger) },
+        :targets => self.targets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::ScenarioTarget) },
+        :options => self.options&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::Options) },
+        :additional_conditions => self.additional_conditions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::AdditionalCondition) },
       }.compact
     end
 
@@ -98,10 +98,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :triggers => self.triggers.map { it.to_message },
-          :targets => self.targets.map { it.to_message },
-          :conditions => self.conditions.map { it.to_message },
-          :additional_conditions => self.additional_conditions.map { it.to_message },
+          :triggers => self.triggers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScenarioTrigger) },
+          :targets => self.targets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::ScenarioTarget) },
+          :conditions => self.conditions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::Condition) },
+          :additional_conditions => self.additional_conditions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::AdditionalCondition) },
         }.compact
       end
     end
@@ -138,8 +138,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :any => self.any&.to_message,
-          :all => self.all&.to_message,
+          :any => self.any&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::Condition::AnyCondition) },
+          :all => self.all&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::Condition::AllCondition) },
         }.compact
       end
 
@@ -240,8 +240,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :schedule => self.schedule&.to_message,
-          :armament => self.armament&.to_message,
+          :schedule => self.schedule&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::AdditionalCondition::ScheduleCondition) },
+          :armament => self.armament&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::AdditionalCondition::ArmamentCondition) },
         }.compact
       end
 
@@ -280,7 +280,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :schedules => self.schedules.map { it.to_message },
+            :schedules => self.schedules.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::Schedule) },
             :max_schedules => self.max_schedules,
           }.compact
         end
@@ -318,8 +318,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :any_state => self.any_state&.to_message,
-            :armed => self.armed&.to_message,
+            :any_state => self.any_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::AdditionalCondition::ArmamentCondition::AnyState) },
+            :armed => self.armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::ScenarioV2::AdditionalCondition::ArmamentCondition::Armed) },
           }.compact
         end
 

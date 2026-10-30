@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sav
     def to_message
       {
         :hub_id => self.hub_id,
-        :bukhoor_devices => self.bukhoor_devices.map { it.to_message },
+        :bukhoor_devices => self.bukhoor_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SaveBukhoorDevices::SaveBukhoorDevicesRequest::BukhoorDevice) },
       }.compact
     end
 
@@ -72,8 +72,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sav
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :single_device => self.single_device&.to_message,
-          :device_with_sensors => self.device_with_sensors&.to_message,
+          :single_device => self.single_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Virtualobject::SelectedDevice) },
+          :device_with_sensors => self.device_with_sensors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SaveBukhoorDevices::SaveBukhoorDevicesRequest::BukhoorDevice::DeviceWithSensors) },
         }.compact
       end
 
@@ -116,8 +116,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sav
         def to_message
           {
             :device_id => self.device_id,
-            :object_type => self.object_type&.to_message,
-            :sensors => self.sensors.map { it.to_message },
+            :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+            :sensors => self.sensors.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SaveBukhoorDevices::SaveBukhoorDevicesRequest::BukhoorDevice::Sensor) },
           }.compact
         end
       end

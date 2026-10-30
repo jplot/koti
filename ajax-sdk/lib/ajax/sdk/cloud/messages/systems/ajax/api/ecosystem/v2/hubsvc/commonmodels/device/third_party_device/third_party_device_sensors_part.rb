@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :sensors => self.sensors.map { it.to_message },
+        :sensors => self.sensors.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor) },
       }.compact
     end
 
@@ -115,21 +115,21 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         {
           :index => self.index,
           :enabled => self.enabled,
-          :event_locator => self.event_locator&.to_message,
+          :event_locator => self.event_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceEventLocator) },
           :operating_mode => self.operating_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::OperatingMode.proto(it) },
           :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::State.proto(it) },
           :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::Capability.proto(it) },
-          :opening_sensor => self.opening_sensor&.to_message,
-          :maintenance => self.maintenance&.to_message,
-          :external_contact_1 => self.external_contact_1&.to_message,
-          :external_contact_2 => self.external_contact_2&.to_message,
-          :tilt_sensor => self.tilt_sensor&.to_message,
-          :motion_sensor => self.motion_sensor&.to_message,
-          :fault_mode => self.fault_mode&.to_message,
-          :glass_break_sensor => self.glass_break_sensor&.to_message,
-          :shock_sensor => self.shock_sensor&.to_message,
-          :end_of_life => self.end_of_life&.to_message,
-          :leakage_sensor => self.leakage_sensor&.to_message,
+          :opening_sensor => self.opening_sensor&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::OpeningSensor) },
+          :maintenance => self.maintenance&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::Maintenance) },
+          :external_contact_1 => self.external_contact_1&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::ExternalContact1) },
+          :external_contact_2 => self.external_contact_2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::ExternalContact2) },
+          :tilt_sensor => self.tilt_sensor&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::TiltSensor) },
+          :motion_sensor => self.motion_sensor&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::MotionSensor) },
+          :fault_mode => self.fault_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::FaultMode) },
+          :glass_break_sensor => self.glass_break_sensor&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::GlassBreakSensor) },
+          :shock_sensor => self.shock_sensor&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::ShockSensor) },
+          :end_of_life => self.end_of_life&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::EndOfLife) },
+          :leakage_sensor => self.leakage_sensor&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::LeakageSensor) },
         }.compact
       end
 
@@ -470,7 +470,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
           {
             :index => self.index,
             :enabled => self.enabled,
-            :event_locator => self.event_locator&.to_message,
+            :event_locator => self.event_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceEventLocator::ThirdPartyDeviceEventLocatorSettings) },
           }.compact
         end
       end
@@ -529,7 +529,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :sensors => self.sensors.map { it.to_message },
+          :sensors => self.sensors.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceSensorsPart::Sensor::SensorSettings) },
         }.compact
       end
     end

@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Privacy
       {
         :hub_id => self.hub_id,
         :company_id => self.company_id,
-        :company_rights => self.company_rights&.to_message,
+        :company_rights => self.company_rights&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::PhotoOnDemandCompanyRights) },
       }.compact
     end
   end
@@ -77,8 +77,8 @@ module Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Privacy
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :error => self.error&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :error => self.error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Privacy::ChangePhotoOnDemandCompanyAccessResponse::Error) },
       }.compact
     end
 
@@ -128,10 +128,10 @@ module Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Privacy
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :internal_error => self.internal_error&.to_message,
-          :company_on_hub_not_found_error => self.company_on_hub_not_found_error&.to_message,
-          :permission_denied_error => self.permission_denied_error&.to_message,
-          :deadline_exceeded_error => self.deadline_exceeded_error&.to_message,
+          :internal_error => self.internal_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::InternalError) },
+          :company_on_hub_not_found_error => self.company_on_hub_not_found_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::CompanyOnHubNotFoundError) },
+          :permission_denied_error => self.permission_denied_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::PermissionDeniedError) },
+          :deadline_exceeded_error => self.deadline_exceeded_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DeadlineExceededError) },
         }.compact
       end
 

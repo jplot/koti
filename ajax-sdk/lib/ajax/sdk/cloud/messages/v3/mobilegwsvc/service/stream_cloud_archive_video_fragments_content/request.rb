@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :init => self.init&.to_message,
-        :get => self.get&.to_message,
+        :init => self.init&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentRequest::Init) },
+        :get => self.get&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentRequest::Get) },
       }.compact
     end
 
@@ -122,7 +122,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       def to_message
         {
           :tag => self.tag,
-          :entries => self.entries.map { it.to_message },
+          :entries => self.entries.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentRequest::Get::Entry) },
         }.compact
       end
 
@@ -159,7 +159,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         def to_message
           {
             :fragment_id => self.fragment_id,
-            :fragment_part => self.fragment_part&.to_message,
+            :fragment_part => self.fragment_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentRequest::Get::FragmentPart) },
           }.compact
         end
 

@@ -43,7 +43,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :device_type => self.device_type&.to_message,
+        :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandTurnEthernet::DeviceCommandTurnEthernetRequest::State.proto(it) },
       }.compact
     end

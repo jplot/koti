@@ -449,20 +449,20 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :added => self.added&.to_message,
-        :removed => self.removed&.to_message,
-        :connection_loss => self.connection_loss&.to_message,
-        :locked_manually => self.locked_manually&.to_message,
-        :locked_by_external_user => self.locked_by_external_user&.to_message,
-        :locked_by_space_member => self.locked_by_space_member&.to_message,
-        :locked_by_scenario => self.locked_by_scenario&.to_message,
-        :locking_failed => self.locking_failed&.to_message,
-        :battery_low => self.battery_low&.to_message,
-        :doorbell_pressed => self.doorbell_pressed&.to_message,
-        :locked_automatically => self.locked_automatically&.to_message,
-        :locked_by_keypad => self.locked_by_keypad&.to_message,
-        :keypad_temporarily_disabled => self.keypad_temporarily_disabled&.to_message,
-        :locked_by_matter => self.locked_by_matter&.to_message,
+        :added => self.added&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::Added) },
+        :removed => self.removed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::Removed) },
+        :connection_loss => self.connection_loss&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::ConnectionLoss) },
+        :locked_manually => self.locked_manually&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::LockedManually) },
+        :locked_by_external_user => self.locked_by_external_user&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::LockedByExternalUser) },
+        :locked_by_space_member => self.locked_by_space_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::LockedBySpaceMember) },
+        :locked_by_scenario => self.locked_by_scenario&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::LockedByScenario) },
+        :locking_failed => self.locking_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::LockingFailed) },
+        :battery_low => self.battery_low&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::BatteryLow) },
+        :doorbell_pressed => self.doorbell_pressed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::DoorbellPressed) },
+        :locked_automatically => self.locked_automatically&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::LockedAutomatically) },
+        :locked_by_keypad => self.locked_by_keypad&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::LockedByKeypad) },
+        :keypad_temporarily_disabled => self.keypad_temporarily_disabled&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::KeypadTemporarilyDisabled) },
+        :locked_by_matter => self.locked_by_matter&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Smartlock::LockedByMatter) },
       }.compact
     end
 

@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Gro
       {
         :group_id => self.group_id,
         :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::State.proto(it) },
-        :state_v2 => self.state_v2&.to_message,
-        :transition => self.transition&.to_message,
+        :state_v2 => self.state_v2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::StateV2) },
+        :transition => self.transition&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Gro
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :armed => self.armed&.to_message,
-          :disarmed => self.disarmed&.to_message,
+          :armed => self.armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :disarmed => self.disarmed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::DisarmedState) },
         }.compact
       end
 
@@ -121,8 +121,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Gro
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :desired_state => self.desired_state&.to_message,
-          :stage => self.stage&.to_message,
+          :desired_state => self.desired_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition::DesiredState) },
+          :stage => self.stage&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition::Stage) },
         }.compact
       end
 
@@ -165,7 +165,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Gro
         def to_message
           {
             :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::State.proto(it) },
-            :state_v2 => self.state_v2&.to_message,
+            :state_v2 => self.state_v2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::StateV2) },
             :night_mode_enabled => self.night_mode_enabled,
             :service_mode_enabled => self.service_mode_enabled,
           }.compact
@@ -204,8 +204,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Gro
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :transition_in_progress => self.transition_in_progress&.to_message,
-            :transition_completed => self.transition_completed&.to_message,
+            :transition_in_progress => self.transition_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition::Stage::TransitionInProgress) },
+            :transition_completed => self.transition_completed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition::Stage::TransitionCompleted) },
           }.compact
         end
 
@@ -253,11 +253,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Gro
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :transition_requested => self.transition_requested&.to_message,
-              :awaiting_app_exit_timer_completion => self.awaiting_app_exit_timer_completion&.to_message,
-              :awaiting_second_stage_confirmation => self.awaiting_second_stage_confirmation&.to_message,
-              :two_stage_arming_incomplete => self.two_stage_arming_incomplete&.to_message,
-              :awaiting_vds_arming_completion => self.awaiting_vds_arming_completion&.to_message,
+              :transition_requested => self.transition_requested&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition::Stage::TransitionInProgress::TransitionRequested) },
+              :awaiting_app_exit_timer_completion => self.awaiting_app_exit_timer_completion&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition::Stage::TransitionInProgress::AwaitingAppExitTimerCompletion) },
+              :awaiting_second_stage_confirmation => self.awaiting_second_stage_confirmation&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition::Stage::TransitionInProgress::AwaitingSecondStageConfirmation) },
+              :two_stage_arming_incomplete => self.two_stage_arming_incomplete&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition::Stage::TransitionInProgress::TwoStageArmingIncomplete) },
+              :awaiting_vds_arming_completion => self.awaiting_vds_arming_completion&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::GroupSecurity::Transition::Stage::TransitionInProgress::AwaitingVdsArmingCompletion) },
             }.compact
           end
 

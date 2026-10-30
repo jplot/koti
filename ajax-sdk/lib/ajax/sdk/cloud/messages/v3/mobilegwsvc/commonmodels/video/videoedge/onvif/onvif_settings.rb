@@ -45,10 +45,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :user_auth_enabled => self.user_auth_enabled,
-        :users => self.users.map { it.to_message },
+        :users => self.users.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Onvif::OnvifUser) },
         :http_port => self.http_port,
         :max_users_number => self.max_users_number,
-        :onvif_ports => self.onvif_ports&.to_message,
+        :onvif_ports => self.onvif_ports&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::OnvifConnectionPartSettings::OnvifPorts) },
       }.compact
     end
   end

@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
         :network_interface_id => self.network_interface_id,
-        :ip_configuration_v4 => self.ip_configuration_v4&.to_message,
-        :dns => self.dns.map { it.to_message },
+        :ip_configuration_v4 => self.ip_configuration_v4&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoEdgeNetworkConfiguration::SetVideoEdgeNetworkConfigurationRequest::IpConfigurationV4) },
+        :dns => self.dns.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::IpAddress) },
       }.compact
     end
 
@@ -84,8 +84,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :dhcp => self.dhcp&.to_message,
-          :static => self.static&.to_message,
+          :dhcp => self.dhcp&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoEdgeNetworkConfiguration::SetVideoEdgeNetworkConfigurationRequest::IpConfigurationV4::DhcpConfigurationV4) },
+          :static => self.static&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetVideoEdgeNetworkConfiguration::SetVideoEdgeNetworkConfigurationRequest::IpConfigurationV4::StaticConfigurationV4) },
         }.compact
       end
 
@@ -154,9 +154,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :address => self.address&.to_message,
-            :netmask => self.netmask&.to_message,
-            :gateway => self.gateway&.to_message,
+            :address => self.address&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::IpAddressV4) },
+            :netmask => self.netmask&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::IpAddressV4) },
+            :gateway => self.gateway&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::IpAddressV4) },
           }.compact
         end
       end

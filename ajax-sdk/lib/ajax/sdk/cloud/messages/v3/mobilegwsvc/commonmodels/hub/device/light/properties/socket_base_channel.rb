@@ -51,7 +51,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :operating_mode => self.operating_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SocketBaseChannel::OperatingMode.proto(it) },
         :malfunctions => self.malfunctions.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SocketBaseChannel::Malfunction.proto(it) },
         :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::SocketBaseChannel::State.proto(it) },
-        :shutoff_timer => self.shutoff_timer&.to_message,
+        :shutoff_timer => self.shutoff_timer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::ActionTimer) },
         :is_transitioning => self.is_transitioning,
       }.compact
     end

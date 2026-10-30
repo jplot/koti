@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Firmware
     def to_message
       {
         :firmware_version => self.firmware_version,
-        :status => self.status&.to_message,
+        :status => self.status&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Firmware::SystemFirmwareUpdate::Status) },
         :firmware_version_raw => self.firmware_version_raw,
       }.compact
     end
@@ -76,8 +76,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Firmware
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :not_started => self.not_started&.to_message,
-          :downloading => self.downloading&.to_message,
+          :not_started => self.not_started&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :downloading => self.downloading&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
         }.compact
       end
 

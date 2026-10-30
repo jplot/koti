@@ -5,6 +5,7 @@ require_relative 'schemas'
 require_relative 'values'
 require_relative 'session'
 require_relative 'resources'
+require_relative 'methods'
 
 module Ajax
   module Sdk
@@ -21,6 +22,7 @@ module Ajax
       # {CommandError} with the failure.
       class Client
         include Resources
+        include Methods
 
         IDENTITY = ->(bytes) { bytes }
         # Under read-only, a method runs only when its name starts with a read word and holds no write one, streams
@@ -57,7 +59,8 @@ module Ajax
         # @return [Data] the single response message, or its success
         def unary(path, request = {})
           refuse_write(path)
-          authenticating { |md| settle(path, invoke(:request_response, path, message(path, request), md)) }
+          request = message(path, request)
+          authenticating { |md| settle(path, invoke(:request_response, path, request, md)) }
         end
 
         # Leaving the stream before its end, through +break+ or an Enumerator's +first+, cancels the call.
@@ -66,25 +69,28 @@ module Ajax
         # @return [Enumerator, nil] an Enumerator of the messages when no block is given
         def server_stream(path, request = {}, &)
           refuse_write(path)
+          request = message(path, request)
           return enum_for(:server_stream, path, request) unless block_given?
 
-          stream(:server_streamer, path, message(path, request), &)
+          stream(:server_streamer, path, request, &)
         end
 
         # @param requests [Array<Hash, Data>] the request messages
         # @return [Data] the single response message, or its success
         def client_stream(path, requests)
           refuse_write(path)
-          authenticating { |md| settle(path, invoke(:client_streamer, path, requests.map { message(path, it) }, md)) }
+          requests = requests.map { message(path, it) }
+          authenticating { |md| settle(path, invoke(:client_streamer, path, requests, md)) }
         end
 
         # @yieldparam message [Data] each response message, or its success
         # @return [Enumerator, nil] an Enumerator of the messages when no block is given
         def bidi(path, requests, &)
           refuse_write(path)
+          requests = requests.map { message(path, it) }
           return enum_for(:bidi, path, requests) unless block_given?
 
-          stream(:bidi_streamer, path, requests.map { |request| message(path, request) }, &)
+          stream(:bidi_streamer, path, requests, &)
         end
 
         # Sends a unary call without the login retry, so {Session} can log in without recursing.

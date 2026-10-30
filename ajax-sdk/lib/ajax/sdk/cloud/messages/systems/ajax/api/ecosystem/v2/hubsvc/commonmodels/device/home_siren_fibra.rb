@@ -62,17 +62,17 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_fibra_part => self.common_fibra_part&.to_message,
-        :common_siren_part => self.common_siren_part&.to_message,
-        :alarm_verification => self.alarm_verification&.to_message,
-        :alarm_restriction => self.alarm_restriction&.to_message,
-        :post_alarm_indication_props => self.post_alarm_indication_props&.to_message,
-        :bracket_state_part => self.bracket_state_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
-        :device_temperature => self.device_temperature&.to_message,
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
+        :common_siren_part => self.common_siren_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSirenPart) },
+        :alarm_verification => self.alarm_verification&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AlarmVerification) },
+        :alarm_restriction => self.alarm_restriction&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AlarmRestriction) },
+        :post_alarm_indication_props => self.post_alarm_indication_props&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::PostAlarmIndication) },
+        :bracket_state_part => self.bracket_state_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::BracketStatePart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBatteryWithoutCharging) },
+        :device_temperature => self.device_temperature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTemperature) },
         :device_tamper_status => self.device_tamper_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTamperStatus.proto(it) },
-        :common_standard_compliance_part => self.common_standard_compliance_part&.to_message,
-        :group_association => self.group_association&.to_message,
+        :common_standard_compliance_part => self.common_standard_compliance_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonStandardCompliancePart) },
+        :group_association => self.group_association&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::GroupAssociation) },
       }.compact
     end
   end
@@ -136,17 +136,17 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_fibra_part => self.common_fibra_part&.to_message,
-        :common_siren_part => self.common_siren_part&.to_message,
-        :alarm_verification => self.alarm_verification&.to_message,
-        :alarm_restriction => self.alarm_restriction&.to_message,
-        :post_alarm_indication_props => self.post_alarm_indication_props&.to_message,
-        :bracket_state_part => self.bracket_state_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
-        :device_temperature => self.device_temperature&.to_message,
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
+        :common_siren_part => self.common_siren_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonSirenPart) },
+        :alarm_verification => self.alarm_verification&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AlarmVerification) },
+        :alarm_restriction => self.alarm_restriction&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AlarmRestriction) },
+        :post_alarm_indication_props => self.post_alarm_indication_props&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::PostAlarmIndication) },
+        :bracket_state_part => self.bracket_state_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::BracketStatePart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBatteryWithoutCharging) },
+        :device_temperature => self.device_temperature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTemperature) },
         :device_tamper_status => self.device_tamper_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTamperStatus.proto(it) },
-        :common_standard_compliance_part => self.common_standard_compliance_part&.to_message,
-        :group_association => self.group_association&.to_message,
+        :common_standard_compliance_part => self.common_standard_compliance_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonStandardCompliancePart) },
+        :group_association => self.group_association&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::GroupAssociation) },
       }.compact
     end
   end

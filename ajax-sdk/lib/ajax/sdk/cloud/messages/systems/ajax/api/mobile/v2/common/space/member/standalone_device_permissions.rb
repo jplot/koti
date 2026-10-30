@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :video_edge_permissions => self.video_edge_permissions&.to_message,
-        :hub_permissions => self.hub_permissions&.to_message,
-        :smart_lock_permissions => self.smart_lock_permissions&.to_message,
+        :video_edge_permissions => self.video_edge_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::VideoEdgePermissions) },
+        :hub_permissions => self.hub_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::HubStandaloneDevicePermissions) },
+        :smart_lock_permissions => self.smart_lock_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockPermissions) },
       }.compact
     end
 

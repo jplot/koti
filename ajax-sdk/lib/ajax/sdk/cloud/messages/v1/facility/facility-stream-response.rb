@@ -47,12 +47,12 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :facility => self.facility&.to_message,
-        :access_rights => self.access_rights&.to_message,
-        :monitoring_companies => self.monitoring_companies.map { it.to_message },
-        :facility_editable_fields => self.facility_editable_fields&.to_message,
-        :employee_photo_on_demand_access => self.employee_photo_on_demand_access&.to_message,
-        :employee_surveillance_cameras_access => self.employee_surveillance_cameras_access&.to_message,
+        :facility => self.facility&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::Facility) },
+        :access_rights => self.access_rights&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::AccessRights) },
+        :monitoring_companies => self.monitoring_companies.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Hub::MonitoringCompanyOnHub) },
+        :facility_editable_fields => self.facility_editable_fields&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::FacilityEditableFields) },
+        :employee_photo_on_demand_access => self.employee_photo_on_demand_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeePhotoOnDemandAccess) },
+        :employee_surveillance_cameras_access => self.employee_surveillance_cameras_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::Privacy::EmployeeSurveillanceCamerasAccess) },
       }.compact
     end
   end

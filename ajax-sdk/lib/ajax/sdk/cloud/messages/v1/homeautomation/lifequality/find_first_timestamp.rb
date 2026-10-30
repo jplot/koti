@@ -73,8 +73,8 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequali
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityFindFirstTimestampResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityFindFirstTimestampResponse::Failure) },
       }.compact
     end
 
@@ -162,10 +162,10 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequali
       def to_message
         {
           :message => self.message,
-          :not_found_error => self.not_found_error&.to_message,
-          :authentication_error => self.authentication_error&.to_message,
-          :timeout_error => self.timeout_error&.to_message,
-          :internal_error => self.internal_error&.to_message,
+          :not_found_error => self.not_found_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityFindFirstTimestampResponse::Failure::NotFoundError) },
+          :authentication_error => self.authentication_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityFindFirstTimestampResponse::Failure::AuthenticationError) },
+          :timeout_error => self.timeout_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityFindFirstTimestampResponse::Failure::TimeoutError) },
+          :internal_error => self.internal_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityFindFirstTimestampResponse::Failure::InternalError) },
         }.compact
       end
 

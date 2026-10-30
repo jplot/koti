@@ -43,7 +43,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Room
       {
         :id => self.id,
         :name => self.name,
-        :images => self.images&.to_message,
+        :images => self.images&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
         :sorting_key => self.sorting_key,
       }.compact
     end

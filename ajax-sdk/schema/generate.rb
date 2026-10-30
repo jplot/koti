@@ -5,13 +5,16 @@ require_relative 'generate/model'
 require_relative 'generate/ruby'
 require_relative 'generate/rbs'
 require_relative 'generate/index'
+require_relative 'generate/methods'
 
 module Schema
-  # Writes the typed values of the cloud messages, Ruby and RBS, from the schemas lib/ajax/sdk/cloud/schemas/ ships.
+  # Writes the typed values of the cloud messages and the named methods, Ruby and RBS, from the schemas
+  # lib/ajax/sdk/cloud/schemas/ ships.
   module Generate
     SCHEMAS = 'lib/ajax/sdk/cloud/schemas'
     RUBY = 'lib/ajax/sdk/cloud/messages'
     RBS = 'sig/ajax/sdk/cloud/messages'
+    METHODS = %w[lib/ajax/sdk/cloud/methods.rb sig/ajax/sdk/cloud/methods.rbs].freeze
 
     module_function
 
@@ -41,11 +44,12 @@ module Schema
         stem = proto.delete_suffix('.proto')
         [["#{RUBY}/#{stem}.rb", Ruby.file(model, proto)], ["#{RBS}/#{stem}.rbs", Rbs.file(model, proto)]]
       end
-      files.to_h.merge("#{RUBY}.rb" => Index.ruby(model), "#{RBS}.rbs" => Index.rbs(model))
+      files.to_h.merge("#{RUBY}.rb" => Index.ruby(model), "#{RBS}.rbs" => Index.rbs(model),
+                       METHODS.first => Methods.ruby(model), METHODS.last => Methods.rbs(model))
     end
 
     def written(root)
-      paths = [RUBY, RBS].flat_map { Dir.glob("#{it}/**/*", base: root) } + ["#{RUBY}.rb", "#{RBS}.rbs"]
+      paths = [RUBY, RBS].flat_map { Dir.glob("#{it}/**/*", base: root) } + ["#{RUBY}.rb", "#{RBS}.rbs", *METHODS]
       paths.select { File.file?(File.join(root, it)) }
     end
   end

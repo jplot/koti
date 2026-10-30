@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :id => self.id,
-        :settings => self.settings&.to_message,
-        :capabilities => self.capabilities&.to_message,
+        :settings => self.settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::InputDigitalLine::InputDigitalLineSettings) },
+        :capabilities => self.capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::InputDigitalLine::InputDigitalLineCapabilities) },
       }.compact
     end
 

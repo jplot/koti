@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :recorded_alarms => self.recorded_alarms.map { it.to_message },
+        :recorded_alarms => self.recorded_alarms.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54RecordedAlarmsPart::RecordedAlarm) },
       }.compact
     end
 
@@ -77,11 +77,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :mcp_recorded_alarm => self.mcp_recorded_alarm&.to_message,
-          :smoke_recorded_alarm => self.smoke_recorded_alarm&.to_message,
-          :temp_recorded_alarm => self.temp_recorded_alarm&.to_message,
-          :temp_diff_recorded_alarm => self.temp_diff_recorded_alarm&.to_message,
-          :smoke_temp_multi_recorded_alarm => self.smoke_temp_multi_recorded_alarm&.to_message,
+          :mcp_recorded_alarm => self.mcp_recorded_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54RecordedAlarmsPart::McpRecordedAlarm) },
+          :smoke_recorded_alarm => self.smoke_recorded_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54RecordedAlarmsPart::SmokeRecordedAlarm) },
+          :temp_recorded_alarm => self.temp_recorded_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54RecordedAlarmsPart::TempRecordedAlarm) },
+          :temp_diff_recorded_alarm => self.temp_diff_recorded_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54RecordedAlarmsPart::TempDiffRecordedAlarm) },
+          :smoke_temp_multi_recorded_alarm => self.smoke_temp_multi_recorded_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceEn54RecordedAlarmsPart::SmokeTempMultiRecordedAlarm) },
         }.compact
       end
 

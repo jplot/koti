@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Di
     def to_message
       {
         :id => self.id,
-        :type => self.type&.to_message,
+        :type => self.type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Digitalline::DigitalLine::DigitalLineType) },
       }.compact
     end
 
@@ -72,8 +72,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Di
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :input => self.input&.to_message,
-          :output => self.output&.to_message,
+          :input => self.input&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Digitalline::DigitalLine::DigitalLineInput) },
+          :output => self.output&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Digitalline::DigitalLine::DigitalLineOutput) },
         }.compact
       end
 
@@ -140,8 +140,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Di
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :alarm_out => self.alarm_out&.to_message,
-          :built_in_relay => self.built_in_relay&.to_message,
+          :alarm_out => self.alarm_out&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Digitalline::DigitalLine::DigitalLineOutput::AlarmOut) },
+          :built_in_relay => self.built_in_relay&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Digitalline::DigitalLine::DigitalLineOutput::BuiltInRelay) },
         }.compact
       end
 

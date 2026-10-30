@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       {
         :hub_id => self.hub_id,
         :member_id => self.member_id,
-        :sms_preferences_patches => self.sms_preferences_patches.map { it.to_message },
+        :sms_preferences_patches => self.sms_preferences_patches.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSpaceMemberSmsPreferences::UpdateSpaceMemberSmsPreferencesRequest::SmsPreferencesPatch) },
       }.compact
     end
 

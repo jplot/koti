@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
       }.compact
     end
   end
@@ -69,8 +69,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::StreamSpaceUpdatesResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::StreamSpaceUpdatesResponse::Failure) },
       }.compact
     end
 
@@ -117,9 +117,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :snapshot => self.snapshot&.to_message,
-          :update => self.update&.to_message,
-          :updates => self.updates&.to_message,
+          :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Space) },
+          :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::StreamSpaceUpdatesResponse::Success::Update) },
+          :updates => self.updates&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::StreamSpaceUpdatesResponse::Success::Updates) },
         }.compact
       end
 
@@ -155,7 +155,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :updates => self.updates.map { it.to_message },
+            :updates => self.updates.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::StreamSpaceUpdatesResponse::Success::Update) },
           }.compact
         end
       end
@@ -260,28 +260,28 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space
           {
             :space_id => self.space_id,
             :space_update_type => self.space_update_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::StreamSpaceUpdatesResponse::Success::Update::SpaceUpdateType.proto(it) },
-            :current_member => self.current_member&.to_message,
+            :current_member => self.current_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember) },
             :total_notification_unread_counter => self.total_notification_unread_counter,
-            :security_mode => self.security_mode&.to_message,
-            :group => self.group&.to_message,
-            :profile => self.profile&.to_message,
-            :member => self.member&.to_message,
-            :room => self.room&.to_message,
-            :device => self.device&.to_message,
-            :installation_company => self.installation_company&.to_message,
-            :monitoring_company => self.monitoring_company&.to_message,
-            :privacy_override => self.privacy_override&.to_message,
-            :time_zone_id => self.time_zone_id&.to_message,
-            :pending_member => self.pending_member&.to_message,
-            :video_wall => self.video_wall&.to_message,
-            :address => self.address&.to_message,
+            :security_mode => self.security_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::SpaceSecurityMode) },
+            :group => self.group&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::Group) },
+            :profile => self.profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceProfile) },
+            :member => self.member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::SpaceMember) },
+            :room => self.room&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Room::Room) },
+            :device => self.device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::StandaloneDevice) },
+            :installation_company => self.installation_company&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company::SpaceInstallationCompany) },
+            :monitoring_company => self.monitoring_company&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company::SpaceMonitoringCompany) },
+            :privacy_override => self.privacy_override&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company::PrivacyOverride) },
+            :time_zone_id => self.time_zone_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Time::TimeZone) },
+            :pending_member => self.pending_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::PendingMember) },
+            :video_wall => self.video_wall&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoWall) },
+            :address => self.address&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceAddress) },
             :service_deactivation_pending_status => self.service_deactivation_pending_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::ServiceDeactivationPendingStatus.proto(it) },
             :extra_services_availability_status => self.extra_services_availability_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::ExtraServicesAvailabilityStatus.proto(it) },
-            :space_capabilities => self.space_capabilities&.to_message,
+            :space_capabilities => self.space_capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Capability::SpaceCapabilities) },
             :extra_services_availability_status_v2 => self.extra_services_availability_status_v2&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::ExtraServicesAvailabilityStatus.proto(it) },
-            :external_stream_controls => self.external_stream_controls&.to_message,
-            :external_stream_controls_list => self.external_stream_controls_list&.to_message,
-            :dashboard_actions => self.dashboard_actions&.to_message,
+            :external_stream_controls => self.external_stream_controls&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream::ExternalStreamControl) },
+            :external_stream_controls_list => self.external_stream_controls_list&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream::ExternalStreamControls) },
+            :dashboard_actions => self.dashboard_actions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Stream::DashboardActions) },
           }.compact
         end
 
@@ -333,9 +333,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

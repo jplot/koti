@@ -44,11 +44,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :member_id => self.member_id,
-        :push_preferences_patch => self.push_preferences_patch&.to_message,
-        :push_preferences_patches => self.push_preferences_patches.map { it.to_message },
-        :push_preferences_patch_v2 => self.push_preferences_patch_v2&.to_message,
+        :push_preferences_patch => self.push_preferences_patch&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::UpdateSpaceMemberPushPreferencesRequest::PushPreferencesPatch) },
+        :push_preferences_patches => self.push_preferences_patches.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::UpdateSpaceMemberPushPreferencesRequest::PushPreferencesPatch) },
+        :push_preferences_patch_v2 => self.push_preferences_patch_v2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2) },
       }.compact
     end
 
@@ -123,8 +123,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member::UpdateSpaceMemberPushPreferencesResponse::Failure) },
       }.compact
     end
 
@@ -168,8 +168,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Member
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

@@ -50,8 +50,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :id => self.id&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::LightSwitchChannel::ChannelId.proto(it) },
         :name => self.name,
         :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::LightSwitchChannel::State.proto(it) },
-        :shutoff_timer => self.shutoff_timer&.to_message,
-        :brightness => self.brightness&.to_message,
+        :shutoff_timer => self.shutoff_timer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::ActionTimer) },
+        :brightness => self.brightness&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::LightSwitchChannel::Brightness) },
         :is_transitioning => self.is_transitioning,
       }.compact
     end

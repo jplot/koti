@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :device_type => self.device_type&.to_message,
-        :credential => self.credential&.to_message,
+        :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :credential => self.credential&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSmartLockCredential::UpdateSmartLockCredentialRequest::SmartLockCredentialToUpdate) },
       }.compact
     end
 

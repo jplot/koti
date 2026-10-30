@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Del
     def to_message
       {
         :hub_id => self.hub_id,
-        :audio_sample_identifier => self.audio_sample_identifier&.to_message,
+        :audio_sample_identifier => self.audio_sample_identifier&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeleteAudioFileForAudioScenarios::DeleteAudioFileForAudioScenariosRequest::AudioSampleIdentifier) },
       }.compact
     end
 

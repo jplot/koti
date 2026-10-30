@@ -52,11 +52,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :device_type => self.device_type&.to_message,
-        :target_position => self.target_position&.to_message,
-        :stop => self.stop&.to_message,
-        :switch_shutter_open_close => self.switch_shutter_open_close&.to_message,
-        :switch_slat_open_close => self.switch_slat_open_close&.to_message,
+        :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :target_position => self.target_position&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandRollerShutterControl::DeviceCommandRollerShutterControlRequest::TargetPosition) },
+        :stop => self.stop&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandRollerShutterControl::DeviceCommandRollerShutterControlRequest::Stop) },
+        :switch_shutter_open_close => self.switch_shutter_open_close&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandRollerShutterControl::DeviceCommandRollerShutterControlRequest::SwitchShutterOpenClose) },
+        :switch_slat_open_close => self.switch_slat_open_close&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandRollerShutterControl::DeviceCommandRollerShutterControlRequest::SwitchSlatOpenClose) },
       }.compact
     end
 

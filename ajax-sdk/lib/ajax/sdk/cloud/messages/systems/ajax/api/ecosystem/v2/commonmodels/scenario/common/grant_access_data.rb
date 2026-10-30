@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
         :name => self.name,
         :device_index => self.device_index,
         :access_device_state => self.access_device_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessDeviceStatePart::AccessDeviceState.proto(it) },
-        :access_card_type_part => self.access_card_type_part&.to_message,
+        :access_card_type_part => self.access_card_type_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Accessdevice::AccessCardTypePart) },
       }.compact
     end
   end

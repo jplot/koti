@@ -53,11 +53,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :company_info => self.company_info&.to_message,
-        :space_permissions => self.space_permissions&.to_message,
-        :devices_permissions => self.devices_permissions.map { it.to_message },
+        :company_info => self.company_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::CompanyInfo) },
+        :space_permissions => self.space_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::SpacePermissions) },
+        :devices_permissions => self.devices_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::StandaloneDevicePermissions) },
         :permissions_expired_at => self.permissions_expired_at&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
-        :display_member_permissions => self.display_member_permissions&.to_message,
+        :display_member_permissions => self.display_member_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPermissions) },
         :hub_user_index => self.hub_user_index,
         :space_member_id => self.space_member_id,
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company::SpaceInstallationCompany::InstallationCompanyType.proto(it) },

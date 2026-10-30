@@ -46,7 +46,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       {
         :alarm_led_indication => self.alarm_led_indication&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::AlarmLedIndication.proto(it) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::Capability.proto(it) },
-        :led_brightness => self.led_brightness&.to_message,
+        :led_brightness => self.led_brightness&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::LedBrightness) },
         :led_mode => self.led_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::LedMode.proto(it) },
         :available_led_modes => self.available_led_modes.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::LedMode.proto(it) },
       }.compact
@@ -88,7 +88,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :alarm_led_indication => self.alarm_led_indication&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::AlarmLedIndication.proto(it) },
-          :led_brightness => self.led_brightness&.to_message,
+          :led_brightness => self.led_brightness&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::LedBrightness) },
           :led_mode => self.led_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::LedMode.proto(it) },
         }.compact
       end
@@ -126,8 +126,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :smooth_level => self.smooth_level&.to_message,
-          :selectable_level => self.selectable_level&.to_message,
+          :smooth_level => self.smooth_level&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::SmoothLevel) },
+          :selectable_level => self.selectable_level&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::SelectableLevel) },
         }.compact
       end
 
@@ -168,7 +168,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :current_level => self.current_level,
-          :smooth_limits => self.smooth_limits&.to_message,
+          :smooth_limits => self.smooth_limits&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LedIndicationPart::SmoothLimits) },
         }.compact
       end
     end

@@ -47,12 +47,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_device => self.hub_device&.to_message,
-        :video_edge => self.video_edge&.to_message,
-        :video_edge_channel => self.video_edge_channel&.to_message,
-        :smart_lock => self.smart_lock&.to_message,
-        :access_cards_count => self.access_cards_count&.to_message,
-        :chime => self.chime&.to_message,
+        :hub_device => self.hub_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::LightHubDevice) },
+        :video_edge => self.video_edge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdge) },
+        :video_edge_channel => self.video_edge_channel&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Light::LightVideoEdgeChannel) },
+        :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Smartlock::Light::LightSmartLock) },
+        :access_cards_count => self.access_cards_count&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accesscard::AccessCardsCount) },
+        :chime => self.chime&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Chime::Light::LightChime) },
       }.compact
     end
 

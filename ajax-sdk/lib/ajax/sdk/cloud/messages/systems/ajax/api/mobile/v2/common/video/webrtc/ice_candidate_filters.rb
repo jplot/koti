@@ -38,8 +38,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :type_filter => self.type_filter&.to_message,
-        :protocol_filter => self.protocol_filter&.to_message,
+        :type_filter => self.type_filter&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::IceCandidateFilters::TypeFilter) },
+        :protocol_filter => self.protocol_filter&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::IceCandidateFilters::ProtocolFilter) },
         :force_tcp_for_turn => self.force_tcp_for_turn,
       }.compact
     end

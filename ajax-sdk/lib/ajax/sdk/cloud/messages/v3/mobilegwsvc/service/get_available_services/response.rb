@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::Failure) },
       }.compact
     end
 
@@ -83,9 +83,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_services => self.available_services.map { it.to_message },
-          :ungrouped_available_services_list => self.ungrouped_available_services_list&.to_message,
-          :available_service_groups_list => self.available_service_groups_list&.to_message,
+          :available_services => self.available_services.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::AvailableService) },
+          :ungrouped_available_services_list => self.ungrouped_available_services_list&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::AvailableServicesList) },
+          :available_service_groups_list => self.available_service_groups_list&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::AvailableServiceGroupsList) },
         }.compact
       end
 
@@ -122,7 +122,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :ungrouped_available_services => self.ungrouped_available_services.map { it.to_message },
+          :ungrouped_available_services => self.ungrouped_available_services.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::AvailableService) },
         }.compact
       end
     end
@@ -156,7 +156,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_service_groups => self.available_service_groups.map { it.to_message },
+          :available_service_groups => self.available_service_groups.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::AvailableServicesGroup) },
         }.compact
       end
     end
@@ -196,9 +196,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :service => self.service&.to_message,
-          :resellers => self.resellers.map { it.to_message },
-          :reseller_infos => self.reseller_infos.map { it.to_message },
+          :service => self.service&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::Service) },
+          :resellers => self.resellers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::AccountingCompany) },
+          :reseller_infos => self.reseller_infos.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::Reseller) },
         }.compact
       end
     end
@@ -247,7 +247,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
           :id => self.id,
           :name => self.name,
           :lokalise_id => self.lokalise_id,
-          :item => self.item.map { it.to_message },
+          :item => self.item.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::AvailableServicesGroupItem) },
           :order => self.order,
         }.compact
       end
@@ -286,7 +286,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       def to_message
         {
           :order => self.order,
-          :service => self.service&.to_message,
+          :service => self.service&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::AvailableService) },
         }.compact
       end
     end
@@ -332,11 +332,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :available_mandatory_service_not_found => self.available_mandatory_service_not_found&.to_message,
-          :reseller_not_found => self.reseller_not_found&.to_message,
-          :dealer_not_found => self.dealer_not_found&.to_message,
-          :not_available_for_user => self.not_available_for_user&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :available_mandatory_service_not_found => self.available_mandatory_service_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :reseller_not_found => self.reseller_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :dealer_not_found => self.dealer_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :not_available_for_user => self.not_available_for_user&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetAvailableServices::GetAvailableServicesResponse::Failure::NotAvailableForUserError) },
         }.compact
       end
 

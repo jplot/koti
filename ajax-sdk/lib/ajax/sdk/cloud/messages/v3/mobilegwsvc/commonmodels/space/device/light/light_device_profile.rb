@@ -85,13 +85,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :device_label => self.device_label&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceLabel.proto(it) },
         :malfunctions => self.malfunctions,
         :states => self.states.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceState.proto(it) },
-        :statuses => self.statuses.map { it.to_message },
+        :statuses => self.statuses.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::Light::LightDeviceStatus) },
         :sorting_key => self.sorting_key,
         :device_index => self.device_index,
         :marketing_device_index => self.marketing_device_index,
         :bypassed => self.bypassed,
         :interaction_disabled => self.interaction_disabled,
-        :device_appearance => self.device_appearance&.to_message,
+        :device_appearance => self.device_appearance&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceAppearance) },
         :device_marketing_id => self.device_marketing_id,
       }.compact
     end

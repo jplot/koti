@@ -57,7 +57,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         :lock_status => self.lock_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockPart::LockStatus.proto(it) },
         :hardware_error => self.hardware_error&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockPart::HardwareError.proto(it) },
         :door_open_too_long_alarm_delay => self.door_open_too_long_alarm_delay&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-        :autolock => self.autolock&.to_message,
+        :autolock => self.autolock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockPart::Autolock) },
         :arming_actions => self.arming_actions.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockPart::ArmingAction.proto(it) },
         :hardware_errors => self.hardware_errors.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockPart::HardwareError.proto(it) },
         :available_arming_actions => self.available_arming_actions.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockPart::ArmingAction.proto(it) },
@@ -158,8 +158,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :door_open_too_long_alarm_delay => self.door_open_too_long_alarm_delay&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-          :autolock => self.autolock&.to_message,
-          :arming_actions => self.arming_actions.map { it.to_message },
+          :autolock => self.autolock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockPart::SmartLockPartSettings::AutolockSettings) },
+          :arming_actions => self.arming_actions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockPart::SmartLockPartSettings::ArmingActionPatch) },
         }.compact
       end
 

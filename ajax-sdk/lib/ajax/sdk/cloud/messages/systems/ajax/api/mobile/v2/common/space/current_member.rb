@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :user_current_member => self.user_current_member&.to_message,
-        :pro_current_member => self.pro_current_member&.to_message,
-        :employee_current_member => self.employee_current_member&.to_message,
+        :user_current_member => self.user_current_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::UserCurrentMember) },
+        :pro_current_member => self.pro_current_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::ProCurrentMember) },
+        :employee_current_member => self.employee_current_member&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::EmployeeCurrentMember) },
       }.compact
     end
 
@@ -104,14 +104,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
       def to_message
         {
           :id => self.id,
-          :space_permissions => self.space_permissions&.to_message,
-          :devices_permissions => self.devices_permissions.map { it.to_message },
+          :space_permissions => self.space_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::SpacePermissions) },
+          :devices_permissions => self.devices_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::StandaloneDevicePermissions) },
           :role => self.role&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::SpaceMemberRole.proto(it) },
-          :group_permissions => self.group_permissions.map { it.to_message },
-          :video_wall => self.video_wall&.to_message,
-          :notification_info => self.notification_info&.to_message,
+          :group_permissions => self.group_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::GroupPermissions) },
+          :video_wall => self.video_wall&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoWall) },
+          :notification_info => self.notification_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::NotificationInfo) },
           :wide_space_permissions => self.wide_space_permissions.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::WideSpacePermission.proto(it) },
-          :hub_device_user_privacy_permissions => self.hub_device_user_privacy_permissions.map { it.to_message },
+          :hub_device_user_privacy_permissions => self.hub_device_user_privacy_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy::HubDeviceUserPrivacyPermissions) },
           :hex_id => self.hex_id,
         }.compact
       end
@@ -171,13 +171,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
       def to_message
         {
           :id => self.id,
-          :space_permissions => self.space_permissions&.to_message,
-          :devices_permissions => self.devices_permissions.map { it.to_message },
-          :access_rights => self.access_rights&.to_message,
-          :group_permissions => self.group_permissions.map { it.to_message },
-          :video_wall => self.video_wall&.to_message,
-          :notification_info => self.notification_info&.to_message,
-          :hub_device_user_privacy_permissions => self.hub_device_user_privacy_permissions.map { it.to_message },
+          :space_permissions => self.space_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::SpacePermissions) },
+          :devices_permissions => self.devices_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::StandaloneDevicePermissions) },
+          :access_rights => self.access_rights&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::AccessRights) },
+          :group_permissions => self.group_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::GroupPermissions) },
+          :video_wall => self.video_wall&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoWall) },
+          :notification_info => self.notification_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::NotificationInfo) },
+          :hub_device_user_privacy_permissions => self.hub_device_user_privacy_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy::HubDeviceUserPrivacyPermissions) },
           :hex_id => self.hex_id,
         }.compact
       end
@@ -240,14 +240,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
       def to_message
         {
           :id => self.id,
-          :space_permissions => self.space_permissions&.to_message,
-          :devices_permissions => self.devices_permissions.map { it.to_message },
-          :access_rights => self.access_rights&.to_message,
-          :group_permissions => self.group_permissions.map { it.to_message },
-          :video_wall => self.video_wall&.to_message,
-          :available_actions => self.available_actions&.to_message,
-          :notification_info => self.notification_info&.to_message,
-          :hub_device_user_privacy_permissions => self.hub_device_user_privacy_permissions.map { it.to_message },
+          :space_permissions => self.space_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::SpacePermissions) },
+          :devices_permissions => self.devices_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::StandaloneDevicePermissions) },
+          :access_rights => self.access_rights&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::AccessRights) },
+          :group_permissions => self.group_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::GroupPermissions) },
+          :video_wall => self.video_wall&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoWall) },
+          :available_actions => self.available_actions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::EmployeeCurrentMemberAvailableActions) },
+          :notification_info => self.notification_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::NotificationInfo) },
+          :hub_device_user_privacy_permissions => self.hub_device_user_privacy_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy::HubDeviceUserPrivacyPermissions) },
           :hex_id => self.hex_id,
         }.compact
       end
@@ -344,11 +344,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :request_video_access => self.request_video_access&.to_message,
-          :invite_to_space_access => self.invite_to_space_access&.to_message,
-          :manage_members_access => self.manage_members_access&.to_message,
-          :view_event_photos_access => self.view_event_photos_access&.to_message,
-          :view_event_audios_access => self.view_event_audios_access&.to_message,
+          :request_video_access => self.request_video_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::RequestVideoAccessAvailableActions) },
+          :invite_to_space_access => self.invite_to_space_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::InviteToSpaceAvailableActions) },
+          :manage_members_access => self.manage_members_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::ManageMembersAvailableActions) },
+          :view_event_photos_access => self.view_event_photos_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::ViewEventPhotosActions) },
+          :view_event_audios_access => self.view_event_audios_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::ViewEventAudiosActions) },
         }.compact
       end
     end
@@ -424,7 +424,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
       def to_message
         {
           :can_change_role => self.can_change_role,
-          :can_change_member_permissions => self.can_change_member_permissions&.to_message,
+          :can_change_member_permissions => self.can_change_member_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::CurrentMember::CanChangeMemberPermissions) },
         }.compact
       end
     end

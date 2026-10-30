@@ -62,13 +62,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
         :id => self.id,
         :name => self.name,
         :enabled => self.enabled,
-        :involved_device_ids => self.involved_device_ids.map { it.to_message },
-        :type => self.type&.to_message,
-        :view_state => self.view_state&.to_message,
+        :involved_device_ids => self.involved_device_ids.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId) },
+        :type => self.type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ScenarioType) },
+        :view_state => self.view_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState) },
         :icon_category => self.icon_category&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::IconCategory.proto(it) },
-        :capabilities => self.capabilities&.to_message,
-        :triggers => self.triggers.map { it.to_message },
-        :targets => self.targets.map { it.to_message },
+        :capabilities => self.capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::LightScenarioCapabilities) },
+        :triggers => self.triggers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScenarioTrigger) },
+        :targets => self.targets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Target::ScenarioTarget) },
       }.compact
     end
 
@@ -104,8 +104,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :local => self.local&.to_message,
-          :online => self.online&.to_message,
+          :local => self.local&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ScenarioType::Local) },
+          :online => self.online&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ScenarioType::Online) },
         }.compact
       end
 
@@ -199,8 +199,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :active => self.active&.to_message,
-          :inactive => self.inactive&.to_message,
+          :active => self.active&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState::Active) },
+          :inactive => self.inactive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState::Inactive) },
         }.compact
       end
 
@@ -236,7 +236,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :warnings => self.warnings.map { it.to_message },
+            :warnings => self.warnings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState::Active::Warning) },
           }.compact
         end
 
@@ -275,9 +275,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :some_devices_inactive => self.some_devices_inactive&.to_message,
-              :all_devices_inactive => self.all_devices_inactive&.to_message,
-              :automation_is_not_working_correctly => self.automation_is_not_working_correctly&.to_message,
+              :some_devices_inactive => self.some_devices_inactive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState::Active::Warning::SomeDevicesInactive) },
+              :all_devices_inactive => self.all_devices_inactive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState::Active::Warning::AllDevicesInactive) },
+              :automation_is_not_working_correctly => self.automation_is_not_working_correctly&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState::Active::Warning::AutomationIsNotWorkingCorrectly) },
             }.compact
           end
 
@@ -396,7 +396,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :warnings => self.warnings.map { it.to_message },
+            :warnings => self.warnings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState::Inactive::Warning) },
           }.compact
         end
 
@@ -432,8 +432,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :hub_offline => self.hub_offline&.to_message,
-              :insufficient_permissions => self.insufficient_permissions&.to_message,
+              :hub_offline => self.hub_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState::Inactive::Warning::HubOffline) },
+              :insufficient_permissions => self.insufficient_permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::ViewState::Inactive::Warning::InsufficientPermissions) },
             }.compact
           end
 
@@ -526,7 +526,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :capabilities => self.capabilities.map { it.to_message },
+          :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::LightScenarioCapability) },
         }.compact
       end
     end
@@ -560,7 +560,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :switch_off => self.switch_off&.to_message,
+          :switch_off => self.switch_off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario::LightScenarioCapability::SwitchOff) },
         }.compact
       end
 

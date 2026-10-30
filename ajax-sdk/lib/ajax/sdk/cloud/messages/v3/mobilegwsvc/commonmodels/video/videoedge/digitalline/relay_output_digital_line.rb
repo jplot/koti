@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :id => self.id,
-        :settings => self.settings&.to_message,
-        :capabilities => self.capabilities&.to_message,
+        :settings => self.settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::RelayOutputDigitalLine::RelayOutputDigitalLineSettings) },
+        :capabilities => self.capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::RelayOutputDigitalLine::RelayOutputDigitalLineCapabilities) },
       }.compact
     end
 
@@ -127,7 +127,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         {
           :idle_states => self.idle_states.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::DigitalLineIdleState.proto(it) },
           :output_modes => self.output_modes.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::DigitalLineOutputMode.proto(it) },
-          :delay_times => self.delay_times&.to_message,
+          :delay_times => self.delay_times&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::RelayOutputDigitalLine::RelayOutputDigitalLineCapabilities::OutputDelayTimes) },
         }.compact
       end
 
@@ -160,7 +160,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :durations_list => self.durations_list&.to_message,
+            :durations_list => self.durations_list&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Digitalline::RelayOutputDigitalLine::RelayOutputDigitalLineCapabilities::OutputDelayTimes::Discrete) },
           }.compact
         end
 

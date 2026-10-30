@@ -44,11 +44,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :member_push_preferences => self.member_push_preferences&.to_message,
-        :member_sms_preferences => self.member_sms_preferences&.to_message,
-        :member_call_preferences => self.member_call_preferences&.to_message,
-        :member_push_preferences_v2 => self.member_push_preferences_v2&.to_message,
-        :folder_preferences => self.folder_preferences&.to_message,
+        :member_push_preferences => self.member_push_preferences&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferences) },
+        :member_sms_preferences => self.member_sms_preferences&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberSmsPreferences) },
+        :member_call_preferences => self.member_call_preferences&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberCallPreferences) },
+        :member_push_preferences_v2 => self.member_push_preferences_v2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2) },
+        :folder_preferences => self.folder_preferences&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberFolderPreferences) },
       }.compact
     end
   end
@@ -140,15 +140,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :alarm => self.alarm&.to_message,
-        :malfunction => self.malfunction&.to_message,
-        :security => self.security&.to_message,
-        :system_event => self.system_event&.to_message,
-        :non_security_alert => self.non_security_alert&.to_message,
-        :automation => self.automation&.to_message,
-        :smart_lock => self.smart_lock&.to_message,
-        :video => self.video&.to_message,
-        :doorbell_ringing => self.doorbell_ringing&.to_message,
+        :alarm => self.alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Alarm) },
+        :malfunction => self.malfunction&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Malfunction) },
+        :security => self.security&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Security) },
+        :system_event => self.system_event&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::SystemEvent) },
+        :non_security_alert => self.non_security_alert&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::NonSecurityAlert) },
+        :automation => self.automation&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Automation) },
+        :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::SmartLock) },
+        :video => self.video&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Video) },
+        :doorbell_ringing => self.doorbell_ringing&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::DoorbellRinging) },
       }.compact
     end
 
@@ -193,11 +193,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :intrusion => self.intrusion&.to_message,
-          :panic => self.panic&.to_message,
-          :fire => self.fire&.to_message,
-          :leakage => self.leakage&.to_message,
-          :video => self.video&.to_message,
+          :intrusion => self.intrusion&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Alarm::Intrusion) },
+          :panic => self.panic&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Alarm::Panic) },
+          :fire => self.fire&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Alarm::Fire) },
+          :leakage => self.leakage&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Alarm::Leakage) },
+          :video => self.video&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Alarm::Video) },
         }.compact
       end
 
@@ -664,14 +664,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :motion => self.motion&.to_message,
-          :human => self.human&.to_message,
-          :pet => self.pet&.to_message,
-          :vehicle => self.vehicle&.to_message,
-          :scenario_executed => self.scenario_executed&.to_message,
-          :line_crossing => self.line_crossing&.to_message,
-          :perimeter_crossing => self.perimeter_crossing&.to_message,
-          :package => self.package&.to_message,
+          :motion => self.motion&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Video::Motion) },
+          :human => self.human&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Video::Human) },
+          :pet => self.pet&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Video::Pet) },
+          :vehicle => self.vehicle&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Video::Vehicle) },
+          :scenario_executed => self.scenario_executed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Video::ScenarioExecuted) },
+          :line_crossing => self.line_crossing&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Video::LineCrossing) },
+          :perimeter_crossing => self.perimeter_crossing&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Video::PerimeterCrossing) },
+          :package => self.package&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::DisplayMemberPushPreferencesV2::Video::Package) },
         }.compact
       end
 

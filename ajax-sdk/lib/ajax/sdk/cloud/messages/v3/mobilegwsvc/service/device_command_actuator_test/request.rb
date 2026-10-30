@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :device_type => self.device_type&.to_message,
-        :actuator_test_option => self.actuator_test_option&.to_message,
+        :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :actuator_test_option => self.actuator_test_option&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandActuatorTest::DeviceCommandActuatorTestRequest::ActuatorTestOption) },
       }.compact
     end
 
@@ -85,7 +85,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
         {
           :actuator_test_format_type => self.actuator_test_format_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandActuatorTest::DeviceCommandActuatorTestRequest::ActuatorTestFormatType.proto(it) },
           :actuator_test_endpoints => self.actuator_test_endpoints.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandActuatorTest::DeviceCommandActuatorTestRequest::ActuatorTestEndpoints.proto(it) },
-          :actuator_test_action => self.actuator_test_action&.to_message,
+          :actuator_test_action => self.actuator_test_action&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandActuatorTest::DeviceCommandActuatorTestRequest::ActuatorTestAction) },
         }.compact
       end
     end
@@ -122,8 +122,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :actuator_test_start => self.actuator_test_start&.to_message,
-          :actuator_test_stop => self.actuator_test_stop&.to_message,
+          :actuator_test_start => self.actuator_test_start&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandActuatorTest::DeviceCommandActuatorTestRequest::ActuatorTestStart) },
+          :actuator_test_stop => self.actuator_test_stop&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandActuatorTest::DeviceCommandActuatorTestRequest::ActuatorTestStop) },
         }.compact
       end
 

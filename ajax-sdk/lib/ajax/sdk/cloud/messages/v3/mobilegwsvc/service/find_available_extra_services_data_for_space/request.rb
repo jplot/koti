@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
     def to_message
       {
         :space_id => self.space_id,
-        :request_context => self.request_context&.to_message,
+        :request_context => self.request_context&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAvailableExtraServicesDataForSpace::FindAvailableExtraServicesDataForSpaceRequest::RequestContext) },
       }.compact
     end
 
@@ -72,8 +72,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :default_extra_services_context => self.default_extra_services_context&.to_message,
-          :service_replacement_during_grace_period => self.service_replacement_during_grace_period&.to_message,
+          :default_extra_services_context => self.default_extra_services_context&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAvailableExtraServicesDataForSpace::FindAvailableExtraServicesDataForSpaceRequest::DefaultExtraServicesContext) },
+          :service_replacement_during_grace_period => self.service_replacement_during_grace_period&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAvailableExtraServicesDataForSpace::FindAvailableExtraServicesDataForSpaceRequest::ServiceReplacementDuringGracePeriod) },
         }.compact
       end
 

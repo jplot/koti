@@ -41,9 +41,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :detectors_power_lines => self.detectors_power_lines.map { it.to_message },
-        :power_supplies => self.power_supplies.map { it.to_message },
-        :detectors_consumption => self.detectors_consumption&.to_message,
+        :detectors_power_lines => self.detectors_power_lines.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DetectorsPowerLinePart::DetectorsPowerLine) },
+        :power_supplies => self.power_supplies.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DetectorsPowerLinePart::PowerSupply) },
+        :detectors_consumption => self.detectors_consumption&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DetectorsPowerLinePart::DetectorsConsumption) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DetectorsPowerLinePart::Capability.proto(it) },
       }.compact
     end
@@ -80,7 +80,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :power_supplies => self.power_supplies.map { it.to_message },
+          :power_supplies => self.power_supplies.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DetectorsPowerLinePart::PowerSupply) },
           :enabled_detectors_consumption => self.enabled_detectors_consumption,
         }.compact
       end

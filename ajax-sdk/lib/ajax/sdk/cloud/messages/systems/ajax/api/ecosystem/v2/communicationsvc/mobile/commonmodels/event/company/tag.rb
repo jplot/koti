@@ -359,17 +359,17 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :installation_company_invited => self.installation_company_invited&.to_message,
-        :installation_company_removed => self.installation_company_removed&.to_message,
-        :permanent_permissions_requested => self.permanent_permissions_requested&.to_message,
-        :temporary_permissions_requested => self.temporary_permissions_requested&.to_message,
-        :requested_permanent_permissions_approved => self.requested_permanent_permissions_approved&.to_message,
-        :requested_temporary_permissions_approved => self.requested_temporary_permissions_approved&.to_message,
-        :requested_permissions_rejected => self.requested_permissions_rejected&.to_message,
-        :monitoring_company_invited => self.monitoring_company_invited&.to_message,
-        :monitoring_company_removed => self.monitoring_company_removed&.to_message,
-        :company_became_subsidiary => self.company_became_subsidiary&.to_message,
-        :subsidiary_became_standalone => self.subsidiary_became_standalone&.to_message,
+        :installation_company_invited => self.installation_company_invited&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::InstallationCompanyInvited) },
+        :installation_company_removed => self.installation_company_removed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::InstallationCompanyRemoved) },
+        :permanent_permissions_requested => self.permanent_permissions_requested&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::PermanentPermissionsRequested) },
+        :temporary_permissions_requested => self.temporary_permissions_requested&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::TemporaryPermissionsRequested) },
+        :requested_permanent_permissions_approved => self.requested_permanent_permissions_approved&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::RequestedPermanentPermissionsApproved) },
+        :requested_temporary_permissions_approved => self.requested_temporary_permissions_approved&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::RequestedTemporaryPermissionsApproved) },
+        :requested_permissions_rejected => self.requested_permissions_rejected&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::RequestedPermissionsRejected) },
+        :monitoring_company_invited => self.monitoring_company_invited&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::MonitoringCompanyInvited) },
+        :monitoring_company_removed => self.monitoring_company_removed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::MonitoringCompanyRemoved) },
+        :company_became_subsidiary => self.company_became_subsidiary&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::CompanyBecameSubsidiary) },
+        :subsidiary_became_standalone => self.subsidiary_became_standalone&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Company::SubsidiaryBecameStandalone) },
       }.compact
     end
 

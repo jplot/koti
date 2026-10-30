@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario
     def to_message
       {
         :video_edge_id => self.video_edge_id,
-        :channels => self.channels.map { it.to_message },
+        :channels => self.channels.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::TargetChannel) },
       }.compact
     end
   end

@@ -41,9 +41,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :grantee => self.grantee&.to_message,
-        :initiator => self.initiator&.to_message,
-        :permissions_type => self.permissions_type&.to_message,
+        :grantee => self.grantee&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Space::Additional::Data::AccessRequestSubject) },
+        :initiator => self.initiator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Space::Additional::Data::AccessRequestSubject) },
+        :permissions_type => self.permissions_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Space::Additional::Data::PermissionsClaimType) },
         :is_rejected => self.is_rejected,
       }.compact
     end

@@ -51,7 +51,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :company_id => self.company_id,
         :name => self.name,
         :description => self.description,
-        :settings => self.settings.map { it.to_message },
+        :settings => self.settings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Company::Templates::CompanyTemplateSetting) },
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Company::Templates::CompanyTemplateType.proto(it) },
       }.compact
     end

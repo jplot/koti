@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy
     def to_message
       {
         :permissions => self.permissions.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermission.proto(it) },
-        :policy => self.policy&.to_message,
+        :policy => self.policy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Privacy::ChannelPermissionPolicy) },
       }.compact
     end
   end

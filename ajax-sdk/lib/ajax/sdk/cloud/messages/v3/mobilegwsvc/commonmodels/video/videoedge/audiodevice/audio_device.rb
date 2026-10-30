@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :id => self.id,
         :name => self.name,
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Audiodevice::AudioDevice::Type.proto(it) },
-        :output => self.output&.to_message,
-        :input => self.input&.to_message,
+        :output => self.output&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Audiodevice::AudioDevice::Output) },
+        :input => self.input&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Audiodevice::AudioDevice::Input) },
       }.compact
     end
 

@@ -48,8 +48,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ar
     def to_message
       {
         :ring_depth => self.ring_depth&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-        :stats => self.stats&.to_message,
-        :frame_drop_events => self.frame_drop_events&.to_message,
+        :stats => self.stats&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::Stats) },
+        :frame_drop_events => self.frame_drop_events&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::FrameDropEvents) },
         :max_ring_depth => self.max_ring_depth&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::MaxRingDepth.proto(it) },
         :storage_device_write_mode => self.storage_device_write_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::StorageDeviceWriteMode.proto(it) },
         :data_encryption_type => self.data_encryption_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::Archive::DataEncryptionType.proto(it) },
@@ -132,7 +132,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ar
     def to_message
       {
         :count => self.count,
-        :time_ranges => self.time_ranges.map { it.to_message },
+        :time_ranges => self.time_ranges.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::TimestampRange) },
       }.compact
     end
   end

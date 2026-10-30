@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :preference_patch => self.preference_patch&.to_message,
+        :preference_patch => self.preference_patch&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSpaceMemberFolderPreferences::UpdateSpaceMemberFolderPreferencesRequest::FolderPreferencesPatch) },
       }.compact
     end
 
@@ -73,7 +73,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
         {
           :space_id => self.space_id,
           :member_id => self.member_id,
-          :folder_preferences_patch => self.folder_preferences_patch.map { it.to_message },
+          :folder_preferences_patch => self.folder_preferences_patch.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSpaceMemberFolderPreferences::UpdateSpaceMemberFolderPreferencesRequest::FolderPreferencesPatch::FolderPreferencePatch) },
         }.compact
       end
 

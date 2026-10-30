@@ -47,7 +47,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ch
         :room_id => self.room_id,
         :group_id => self.group_id,
         :arm_in_night_mode => self.arm_in_night_mode,
-        :device_arming_mode => self.device_arming_mode&.to_message,
+        :device_arming_mode => self.device_arming_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::DeviceArmingMode) },
         :arming_capabilities => self.arming_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::CommonArmingPart::ArmingCapability.proto(it) },
       }.compact
     end

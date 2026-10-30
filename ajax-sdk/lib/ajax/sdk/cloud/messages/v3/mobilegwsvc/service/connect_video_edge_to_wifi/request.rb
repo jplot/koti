@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Con
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
         :network_interface_id => self.network_interface_id,
-        :credentials => self.credentials&.to_message,
+        :credentials => self.credentials&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Netwotk::NetworkWifiCredentials) },
       }.compact
     end
   end

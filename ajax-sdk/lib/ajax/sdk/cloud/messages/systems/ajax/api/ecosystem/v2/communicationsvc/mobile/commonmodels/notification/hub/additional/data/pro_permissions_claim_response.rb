@@ -64,7 +64,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         :user_id => self.user_id,
         :user_mail => self.user_mail,
         :user_name => self.user_name,
-        :permissions_type => self.permissions_type&.to_message,
+        :permissions_type => self.permissions_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::PermissionsClaimType) },
       }.compact
     end
   end

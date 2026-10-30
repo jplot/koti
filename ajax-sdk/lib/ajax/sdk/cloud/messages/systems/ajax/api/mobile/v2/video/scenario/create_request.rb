@@ -50,11 +50,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Scenario
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :name => self.name,
-        :alarm_sources => self.alarm_sources.map { it.to_message },
-        :alarm_sources_condition => self.alarm_sources_condition&.to_message,
-        :targets => self.targets.map { it.to_message },
+        :alarm_sources => self.alarm_sources.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::AlarmSource) },
+        :alarm_sources_condition => self.alarm_sources_condition&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::AlarmSourcesCondition) },
+        :targets => self.targets.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::TargetVideoEdge) },
         :monitoring_state => self.monitoring_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::MonitoringState.proto(it) },
         :activate_output_digital_line => self.activate_output_digital_line&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::VideoScenario::ActivateOutputDigitalLine.proto(it) },
       }.compact
@@ -93,8 +93,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Scenario
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Scenario::CreateScenarioResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Scenario::CreateScenarioResponse::Failure) },
       }.compact
     end
 
@@ -135,7 +135,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :scenario => self.scenario&.to_message,
+          :scenario => self.scenario&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Scenario::VideoScenario) },
         }.compact
       end
     end
@@ -205,19 +205,19 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Scenario
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :space_armed => self.space_armed&.to_message,
-          :empty_source_list => self.empty_source_list&.to_message,
-          :hub_not_found => self.hub_not_found&.to_message,
-          :source_not_found => self.source_not_found&.to_message,
-          :target_channel_list_is_empty => self.target_channel_list_is_empty&.to_message,
-          :target_video_edge_not_found => self.target_video_edge_not_found&.to_message,
-          :target_channel_not_found => self.target_channel_not_found&.to_message,
-          :invalid_channel_state => self.invalid_channel_state&.to_message,
-          :duplicated_name => self.duplicated_name&.to_message,
-          :space_locked => self.space_locked&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_armed => self.space_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :empty_source_list => self.empty_source_list&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_not_found => self.hub_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :source_not_found => self.source_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :target_channel_list_is_empty => self.target_channel_list_is_empty&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :target_video_edge_not_found => self.target_video_edge_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :target_channel_not_found => self.target_channel_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :invalid_channel_state => self.invalid_channel_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :duplicated_name => self.duplicated_name&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_locked => self.space_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::SpaceLockedError) },
         }.compact
       end
 

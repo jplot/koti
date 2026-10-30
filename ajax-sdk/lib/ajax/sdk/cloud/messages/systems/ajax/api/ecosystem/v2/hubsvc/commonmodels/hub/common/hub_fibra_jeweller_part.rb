@@ -61,8 +61,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :fast_connection_loss_detection_disabled_warning => self.fast_connection_loss_detection_disabled_warning&.to_message,
-          :device_limit_exceeded_by_frame_warning => self.device_limit_exceeded_by_frame_warning&.to_message,
+          :fast_connection_loss_detection_disabled_warning => self.fast_connection_loss_detection_disabled_warning&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubFibraJewellerPart::FastConnectionLossDetectionDisabledWarning) },
+          :device_limit_exceeded_by_frame_warning => self.device_limit_exceeded_by_frame_warning&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
         }.compact
       end
     end
@@ -96,7 +96,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :fibra_line => self.fibra_line.map { it.to_message },
+          :fibra_line => self.fibra_line.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::FibraLine) },
         }.compact
       end
     end

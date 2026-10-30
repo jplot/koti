@@ -67,7 +67,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Gro
       {
         :id => self.id,
         :name => self.name,
-        :images => self.images&.to_message,
+        :images => self.images&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
         :bulk_arm_involved => self.bulk_arm_involved,
         :bulk_disarm_involved => self.bulk_disarm_involved,
         :two_stage_arming_mode => self.two_stage_arming_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::TwoStageArmingMode.proto(it) },
@@ -76,7 +76,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Gro
         :following_group_auto_arm => self.following_group_auto_arm&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::FollowingGroupAutoArm.proto(it) },
         :following_group_auto_disarm => self.following_group_auto_disarm&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::FollowingGroupAutoDisarm.proto(it) },
         :auto_arm_delay => self.auto_arm_delay&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-        :followed_group_ids => self.followed_group_ids&.to_message,
+        :followed_group_ids => self.followed_group_ids&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::Group::FollowedGroupIds) },
       }.compact
     end
   end

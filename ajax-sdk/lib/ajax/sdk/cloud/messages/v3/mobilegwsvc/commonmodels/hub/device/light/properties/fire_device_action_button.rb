@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :mute_button => self.mute_button&.to_message,
-        :critical_smoke_button => self.critical_smoke_button&.to_message,
-        :critical_co_button => self.critical_co_button&.to_message,
-        :postpone_button => self.postpone_button&.to_message,
+        :mute_button => self.mute_button&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::FireDeviceActionButton::MuteButton) },
+        :critical_smoke_button => self.critical_smoke_button&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::FireDeviceActionButton::CriticalSmokeButton) },
+        :critical_co_button => self.critical_co_button&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::FireDeviceActionButton::CriticalCOButton) },
+        :postpone_button => self.postpone_button&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Light::Properties::FireDeviceActionButton::PostponeButton) },
       }.compact
     end
 

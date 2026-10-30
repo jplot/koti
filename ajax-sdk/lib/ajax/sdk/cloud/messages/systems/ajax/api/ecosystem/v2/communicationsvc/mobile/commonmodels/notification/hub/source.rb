@@ -86,7 +86,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         :wire_input_alarm_type => self.wire_input_alarm_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::CustomAlarmType.proto(it) },
         :device_special_appearance_type => self.device_special_appearance_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::DeviceSpecialAppearanceType.proto(it) },
         :third_party_device_type => self.third_party_device_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::ThirdPartyDeviceType.proto(it) },
-        :image_info => self.image_info&.to_message,
+        :image_info => self.image_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::SourceImageInfo) },
         :room_hex_id => self.room_hex_id,
         :room_name => self.room_name,
       }.compact

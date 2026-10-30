@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Act
         :space_id => self.space_id,
         :video_edge_id => self.video_edge_id,
         :output_digital_line_id => self.output_digital_line_id,
-        :action => self.action&.to_message,
+        :action => self.action&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::ActivateVideoEdgeOutputDigitalLine::ActivateVideoEdgeOutputDigitalLineRequest::Action) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Act
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :impulse => self.impulse&.to_message,
-          :set_logical_state => self.set_logical_state&.to_message,
+          :impulse => self.impulse&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::ActivateVideoEdgeOutputDigitalLine::ActivateVideoEdgeOutputDigitalLineRequest::Action::Impulse) },
+          :set_logical_state => self.set_logical_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::ActivateVideoEdgeOutputDigitalLine::ActivateVideoEdgeOutputDigitalLineRequest::Action::SetLogicalState) },
         }.compact
       end
 

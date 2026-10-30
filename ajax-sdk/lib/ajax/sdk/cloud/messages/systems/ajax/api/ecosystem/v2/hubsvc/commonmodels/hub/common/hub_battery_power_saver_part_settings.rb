@@ -68,11 +68,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
         :battery_save_mode_enabled_checkboxes => self.battery_save_mode_enabled_checkboxes.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPowerSaverPart::BatterySaveModeEnabledCheckbox.proto(it) },
         :server_polling_interval => self.server_polling_interval&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         :cms_server_polling_interval => self.cms_server_polling_interval&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-        :server_polling_interval_range => self.server_polling_interval_range&.to_message,
+        :server_polling_interval_range => self.server_polling_interval_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPowerSaverPart::Range) },
         :battery_save_mode_active_time => self.battery_save_mode_active_time&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-        :battery_save_mode_active_time_range => self.battery_save_mode_active_time_range&.to_message,
+        :battery_save_mode_active_time_range => self.battery_save_mode_active_time_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPowerSaverPart::Range) },
         :stay_active_time_after_tamper_events => self.stay_active_time_after_tamper_events&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-        :stay_active_time_after_tamper_events_range => self.stay_active_time_after_tamper_events_range&.to_message,
+        :stay_active_time_after_tamper_events_range => self.stay_active_time_after_tamper_events_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPowerSaverPart::Range) },
         :firmware_update_in_bsm => self.firmware_update_in_bsm,
         :limit_event_sending_attempts => self.limit_event_sending_attempts,
         :need_to_show_speakerphone_warning => self.need_to_show_speakerphone_warning,
@@ -118,10 +118,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :setup_state => self.setup_state&.to_message,
+          :setup_state => self.setup_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPowerSaverPart::SetupState) },
           :battery_save_mode_enabled_checkboxes => self.battery_save_mode_enabled_checkboxes.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPowerSaverPart::BatterySaveModeEnabledCheckbox.proto(it) },
-          :battery_save_mode_active => self.battery_save_mode_active&.to_message,
-          :battery_save_mode_inactive => self.battery_save_mode_inactive&.to_message,
+          :battery_save_mode_active => self.battery_save_mode_active&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubBatteryPowerSaverPart::BatterySaveModeActive) },
+          :battery_save_mode_inactive => self.battery_save_mode_inactive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
         }.compact
       end
 
@@ -195,8 +195,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :correctly_configured => self.correctly_configured&.to_message,
-          :changes_recommended => self.changes_recommended&.to_message,
+          :correctly_configured => self.correctly_configured&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :changes_recommended => self.changes_recommended&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
         }.compact
       end
 

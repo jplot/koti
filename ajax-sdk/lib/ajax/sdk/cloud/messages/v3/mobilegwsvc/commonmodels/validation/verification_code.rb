@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :email_and_phone => self.email_and_phone&.to_message,
-        :email_and_totp => self.email_and_totp&.to_message,
-        :phone_and_totp => self.phone_and_totp&.to_message,
+        :email_and_phone => self.email_and_phone&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Validation::VerificationCodes::EmailAndPhone) },
+        :email_and_totp => self.email_and_totp&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Validation::VerificationCodes::EmailAndTotp) },
+        :phone_and_totp => self.phone_and_totp&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Validation::VerificationCodes::PhoneAndTotp) },
       }.compact
     end
 

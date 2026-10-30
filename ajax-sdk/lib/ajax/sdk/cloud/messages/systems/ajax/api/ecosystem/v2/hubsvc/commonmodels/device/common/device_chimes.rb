@@ -53,13 +53,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :settings => self.settings&.to_message,
+        :settings => self.settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::ChimesSettings) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::Capability.proto(it) },
         :chimes_trigger_capabilities => self.chimes_trigger_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::ChimesTrigger.proto(it) },
         :enabled_chimes_triggers => self.enabled_chimes_triggers.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::ChimesTrigger.proto(it) },
         :sound_capabilities => self.sound_capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::Sound.proto(it) },
-        :polyphonic_melody_capabilities => self.polyphonic_melody_capabilities.map { it.to_message },
-        :selected_sound => self.selected_sound&.to_message,
+        :polyphonic_melody_capabilities => self.polyphonic_melody_capabilities.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::PolyphonicMelody) },
+        :selected_sound => self.selected_sound&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::SelectedSound) },
         :chimes_setup_blocker => self.chimes_setup_blocker&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::ChimesSetupBlocker.proto(it) },
       }.compact
     end
@@ -139,7 +139,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :sound => self.sound&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::Sound.proto(it) },
-          :polyphonic_melody => self.polyphonic_melody&.to_message,
+          :polyphonic_melody => self.polyphonic_melody&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::PolyphonicMelody) },
         }.compact
       end
 
@@ -184,7 +184,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         {
           :enabled_triggers => self.enabled_triggers.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::ChimesTrigger.proto(it) },
           :chimes_sound => self.chimes_sound&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::Sound.proto(it) },
-          :selected_sound => self.selected_sound&.to_message,
+          :selected_sound => self.selected_sound&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::SelectedSound) },
         }.compact
       end
     end
@@ -224,9 +224,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :chimes_triggers => self.chimes_triggers.map { it.to_message },
+          :chimes_triggers => self.chimes_triggers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::DeviceChimesSettings::ChimesTriggerPatch) },
           :chimes_sound => self.chimes_sound&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::Sound.proto(it) },
-          :selected_sound => self.selected_sound&.to_message,
+          :selected_sound => self.selected_sound&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes::SelectedSound) },
         }.compact
       end
 

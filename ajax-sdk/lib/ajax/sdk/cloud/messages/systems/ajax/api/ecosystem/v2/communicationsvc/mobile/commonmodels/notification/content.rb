@@ -50,13 +50,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_notification_content => self.hub_notification_content&.to_message,
-        :space_notification_content => self.space_notification_content&.to_message,
-        :video_notification_content => self.video_notification_content&.to_message,
-        :smart_lock_notification_content => self.smart_lock_notification_content&.to_message,
-        :company_notification_content => self.company_notification_content&.to_message,
-        :accounting_notification_content => self.accounting_notification_content&.to_message,
-        :blank_notification_content => self.blank_notification_content&.to_message,
+        :hub_notification_content => self.hub_notification_content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::HubNotificationContent) },
+        :space_notification_content => self.space_notification_content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Space::SpaceNotificationContent) },
+        :video_notification_content => self.video_notification_content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::VideoNotificationContent) },
+        :smart_lock_notification_content => self.smart_lock_notification_content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Smartlock::SmartLockNotificationContent) },
+        :company_notification_content => self.company_notification_content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Company::CompanyNotificationContent) },
+        :accounting_notification_content => self.accounting_notification_content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Accounting::AccountingNotificationContent) },
+        :blank_notification_content => self.blank_notification_content&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Blank::BlankNotificationContent) },
       }.compact
     end
 

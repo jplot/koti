@@ -50,9 +50,9 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Auth
         :user_id => self.user_id,
         :session_token => self.session_token,
         :company_id => self.company_id,
-        :employee_info => self.employee_info&.to_message,
-        :user_companies => self.user_companies.map { it.to_message },
-        :user_info => self.user_info&.to_message,
+        :employee_info => self.employee_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Company::Employee::EmployeeInfo) },
+        :user_companies => self.user_companies.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::User::UserCompany) },
+        :user_info => self.user_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::User::UserInfo) },
       }.compact
     end
   end

@@ -35,7 +35,7 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :general_info_editable_fields => self.general_info_editable_fields&.to_message,
+        :general_info_editable_fields => self.general_info_editable_fields&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::FieldMask) },
         :editable_sections => self.editable_sections.map { ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Facility::FacilityEditableFields::EditableSection.proto(it) },
       }.compact
     end

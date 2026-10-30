@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :card_reader_settings => self.card_reader_settings&.to_message,
-        :bluetooth_reader_settings => self.bluetooth_reader_settings&.to_message,
-        :access_control_relay_settings => self.access_control_relay_settings&.to_message,
-        :security_mode_control_settings => self.security_mode_control_settings&.to_message,
+        :card_reader_settings => self.card_reader_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::CardReaderSettings) },
+        :bluetooth_reader_settings => self.bluetooth_reader_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::BluetoothReaderSettings) },
+        :access_control_relay_settings => self.access_control_relay_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::AccessControlRelaySettings) },
+        :security_mode_control_settings => self.security_mode_control_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::SecurityModeControlSettings) },
       }.compact
     end
 
@@ -194,7 +194,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::SecurityModeControlState.proto(it) },
-          :target => self.target&.to_message,
+          :target => self.target&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::SecurityControlTarget) },
           :long_tap_duration => self.long_tap_duration&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         }.compact
       end
@@ -235,9 +235,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :entire_space => self.entire_space&.to_message,
-          :groups => self.groups&.to_message,
-          :night_mode => self.night_mode&.to_message,
+          :entire_space => self.entire_space&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::SecurityControlTarget::SecurityControlTargetEntireSpace) },
+          :groups => self.groups&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::SecurityControlTarget::SecurityControlTargetGroups) },
+          :night_mode => self.night_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::SecurityControlTarget::SecurityControlTargetNightMode) },
         }.compact
       end
 
@@ -300,7 +300,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :entries => self.entries.map { it.to_message },
+            :entries => self.entries.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Accesscontrol::AccessControlSettings::SecurityControlTarget::SecurityControlTargetGroups::SecurityControlTargetGroup) },
           }.compact
         end
 

@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock
     def to_message
       {
         :id => self.id,
-        :details => self.details&.to_message,
-        :space_settings => self.space_settings&.to_message,
+        :details => self.details&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLock) },
+        :space_settings => self.space_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Smartlock::SmartLockSpaceSettings) },
       }.compact
     end
   end

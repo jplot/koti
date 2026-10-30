@@ -96,7 +96,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Ba
         :assigned_extender_device_index => self.assigned_extender_device_index,
         :device_state => self.device_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Common::DeviceState.proto(it) },
         :device_index => self.device_index,
-        :assigned_extender_info => self.assigned_extender_info&.to_message,
+        :assigned_extender_info => self.assigned_extender_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Backupchannel::BackupChannelInfo::AssignedExtenderInfo) },
       }.compact
     end
 

@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       {
         :space_id => self.space_id,
         :target_options_type => self.target_options_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsRequest::TargetOptionsType.proto(it) },
-        :selected_trigger_object => self.selected_trigger_object&.to_message,
+        :selected_trigger_object => self.selected_trigger_object&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsRequest::SelectedTriggerObject) },
       }.compact
     end
 
@@ -73,7 +73,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :hub_selected_trigger_object => self.hub_selected_trigger_object&.to_message,
+          :hub_selected_trigger_object => self.hub_selected_trigger_object&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::GetScenarioTargetOptions::GetScenarioTargetOptionsRequest::SelectedTriggerHubObject) },
         }.compact
       end
 
@@ -114,7 +114,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Get
       def to_message
         {
           :object_id => self.object_id_,
-          :object_type => self.object_type&.to_message,
+          :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         }.compact
       end
     end

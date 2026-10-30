@@ -68,11 +68,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :locale => self.locale,
         :email => self.email,
         :phone => self.phone,
-        :images => self.images&.to_message,
+        :images => self.images&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
         :end_user_agreement_version => self.end_user_agreement_version,
         :privacy_policy_version => self.privacy_policy_version,
         :privacy_notice_version => self.privacy_notice_version,
-        :accreditation => self.accreditation&.to_message,
+        :accreditation => self.accreditation&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Account::Account::Accreditation) },
       }.compact
     end
 
@@ -105,7 +105,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :superior => self.superior&.to_message,
+          :superior => self.superior&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Account::Account::Accreditation::Superior) },
         }.compact
       end
 

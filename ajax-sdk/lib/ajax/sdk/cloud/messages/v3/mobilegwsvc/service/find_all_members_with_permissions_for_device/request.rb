@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
     def to_message
       {
         :space_id => self.space_id,
-        :smart_lock_id => self.smart_lock_id&.to_message,
-        :video_channel_id => self.video_channel_id&.to_message,
+        :smart_lock_id => self.smart_lock_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::SmartLockId) },
+        :video_channel_id => self.video_channel_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Space::Device::VideoChannelId) },
       }.compact
     end
 

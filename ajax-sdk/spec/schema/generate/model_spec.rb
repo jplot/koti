@@ -116,5 +116,17 @@ RSpec.describe Schema::Generate::Model do
       constants = (shipped.messages + shipped.enums).map(&:constant)
       expect(constants.uniq.size).to eq(constants.size)
     end
+
+    it 'names each method after its service and method' do
+      names = shipped.calls.to_h { [it.path, it.name] }
+      expect(names.values_at('/systems.ajax.api.ecosystem.v3.mobilegwsvc.service.stream_light_devices' \
+                             '.StreamLightDevicesService/execute',
+                             '/systems.ajax.api.mobile.v2.space.security.SpaceSecurityService/armGroup'))
+        .to eq(%i[stream_light_devices space_security_arm_group])
+    end
+
+    it 'gives the 608 methods distinct names' do
+      expect(shipped.calls.map(&:name).uniq.size).to eq(608)
+    end
   end
 end

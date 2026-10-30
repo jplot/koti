@@ -42,9 +42,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
     def to_message
       {
         :space_id => self.space_id,
-        :update_channel_position => self.update_channel_position&.to_message,
-        :remove_channel_from_favourites => self.remove_channel_from_favourites&.to_message,
-        :add_channel_to_favourites => self.add_channel_to_favourites&.to_message,
+        :update_channel_position => self.update_channel_position&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSingleSpaceVideoWall::UpdateSingleSpaceVideoWallRequest::UpdateChannelPosition) },
+        :remove_channel_from_favourites => self.remove_channel_from_favourites&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSingleSpaceVideoWall::UpdateSingleSpaceVideoWallRequest::RemoveChannelFromFavourites) },
+        :add_channel_to_favourites => self.add_channel_to_favourites&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSingleSpaceVideoWall::UpdateSingleSpaceVideoWallRequest::AddChannelToFavourites) },
       }.compact
     end
 
@@ -89,10 +89,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :id => self.id&.to_message,
-          :all_group_position => self.all_group_position&.to_message,
-          :favourites_group_position => self.favourites_group_position&.to_message,
-          :room_group_position => self.room_group_position&.to_message,
+          :id => self.id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::ChannelIdOnVideoEdge) },
+          :all_group_position => self.all_group_position&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSingleSpaceVideoWall::UpdateSingleSpaceVideoWallRequest::UpdateChannelPosition::Position) },
+          :favourites_group_position => self.favourites_group_position&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSingleSpaceVideoWall::UpdateSingleSpaceVideoWallRequest::UpdateChannelPosition::Position) },
+          :room_group_position => self.room_group_position&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::UpdateSingleSpaceVideoWall::UpdateSingleSpaceVideoWallRequest::UpdateChannelPosition::Position) },
         }.compact
       end
 
@@ -131,8 +131,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :after_channel_id => self.after_channel_id&.to_message,
-            :before_channel_id => self.before_channel_id&.to_message,
+            :after_channel_id => self.after_channel_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::ChannelIdOnVideoEdge) },
+            :before_channel_id => self.before_channel_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::ChannelIdOnVideoEdge) },
           }.compact
         end
 
@@ -170,7 +170,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :id => self.id&.to_message,
+          :id => self.id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::ChannelIdOnVideoEdge) },
         }.compact
       end
     end
@@ -204,7 +204,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :id => self.id&.to_message,
+          :id => self.id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::ChannelIdOnVideoEdge) },
         }.compact
       end
     end

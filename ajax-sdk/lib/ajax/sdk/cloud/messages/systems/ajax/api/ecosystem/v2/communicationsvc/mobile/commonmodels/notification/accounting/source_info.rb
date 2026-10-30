@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_info => self.hub_info&.to_message,
-        :video_edge_info => self.video_edge_info&.to_message,
-        :subscription_info => self.subscription_info&.to_message,
+        :hub_info => self.hub_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Accounting::Source::Info::HubInfo) },
+        :video_edge_info => self.video_edge_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Accounting::Source::Info::VideoEdgeInfo) },
+        :subscription_info => self.subscription_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Accounting::Source::Info::SubscriptionInfo) },
       }.compact
     end
 

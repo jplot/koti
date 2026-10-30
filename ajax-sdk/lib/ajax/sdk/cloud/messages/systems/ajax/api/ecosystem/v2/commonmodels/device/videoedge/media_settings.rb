@@ -87,20 +87,20 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
         :contrast => self.contrast,
         :saturation => self.saturation,
         :sharpness => self.sharpness,
-        :blc => self.blc&.to_message,
-        :white_balance => self.white_balance&.to_message,
-        :wdr => self.wdr&.to_message,
-        :exposure => self.exposure&.to_message,
-        :ircut_filter => self.ircut_filter&.to_message,
-        :transform => self.transform&.to_message,
-        :off_illumination => self.off_illumination&.to_message,
-        :ir_illumination => self.ir_illumination&.to_message,
-        :white_illumination => self.white_illumination&.to_message,
-        :smart_illumination => self.smart_illumination&.to_message,
-        :exposure_metering_area => self.exposure_metering_area&.to_message,
-        :anti_flicker => self.anti_flicker&.to_message,
-        :noise_reduction => self.noise_reduction&.to_message,
-        :image_profile => self.image_profile&.to_message,
+        :blc => self.blc&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::BacklightCompensation) },
+        :white_balance => self.white_balance&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WhiteBalance) },
+        :wdr => self.wdr&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WideDynamicRange) },
+        :exposure => self.exposure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::Exposure) },
+        :ircut_filter => self.ircut_filter&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::IrCutFilter) },
+        :transform => self.transform&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::Transform) },
+        :off_illumination => self.off_illumination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::OffIllumination) },
+        :ir_illumination => self.ir_illumination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::IrIllumination) },
+        :white_illumination => self.white_illumination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WhiteIllumination) },
+        :smart_illumination => self.smart_illumination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::SmartIllumination) },
+        :exposure_metering_area => self.exposure_metering_area&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::ExposureMeteringArea) },
+        :anti_flicker => self.anti_flicker&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::AntiFlicker) },
+        :noise_reduction => self.noise_reduction&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::NoiseReduction) },
+        :image_profile => self.image_profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::ImageProfile) },
       }.compact
     end
 
@@ -139,8 +139,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :off => self.off&.to_message,
-          :on => self.on&.to_message,
+          :off => self.off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::BacklightCompensation::OffMode) },
+          :on => self.on&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::BacklightCompensation::OnMode) },
         }.compact
       end
 
@@ -283,8 +283,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :manual => self.manual&.to_message,
-          :auto => self.auto&.to_message,
+          :manual => self.manual&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WhiteBalance::ManualMode) },
+          :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WhiteBalance::AutoMode) },
         }.compact
       end
 
@@ -389,8 +389,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :off => self.off&.to_message,
-          :on => self.on&.to_message,
+          :off => self.off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WideDynamicRange::OffMode) },
+          :on => self.on&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WideDynamicRange::OnMode) },
         }.compact
       end
 
@@ -491,8 +491,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :manual => self.manual&.to_message,
-          :auto => self.auto&.to_message,
+          :manual => self.manual&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::Exposure::ManualMode) },
+          :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::Exposure::AutoMode) },
         }.compact
       end
 
@@ -586,9 +586,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
         def to_message
           {
             :priority => self.priority&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::Exposure::AutoMode::ExposurePriority.proto(it) },
-            :exposure_time_range => self.exposure_time_range&.to_message,
-            :gain_range => self.gain_range&.to_message,
-            :iris_range => self.iris_range&.to_message,
+            :exposure_time_range => self.exposure_time_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::DurationRange) },
+            :gain_range => self.gain_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::FloatRange) },
+            :iris_range => self.iris_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::FloatRange) },
             :exposure_compensation => self.exposure_compensation,
             :preset => self.preset&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::Exposure::AutoMode::AutoExposurePreset.proto(it) },
           }.compact
@@ -647,9 +647,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :on => self.on&.to_message,
-          :off => self.off&.to_message,
-          :auto => self.auto&.to_message,
+          :on => self.on&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::IrCutFilter::OnMode) },
+          :off => self.off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::IrCutFilter::OffMode) },
+          :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::IrCutFilter::AutoMode) },
         }.compact
       end
 
@@ -739,7 +739,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :ircut_filter_auto_adjustments => self.ircut_filter_auto_adjustments.map { it.to_message },
+            :ircut_filter_auto_adjustments => self.ircut_filter_auto_adjustments.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::IrCutFilter::AutoMode::IrCutFilterAutoAdjustment) },
           }.compact
         end
 
@@ -900,8 +900,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :auto => self.auto&.to_message,
-          :manual => self.manual&.to_message,
+          :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::IrIllumination::AutoMode) },
+          :manual => self.manual&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::IrIllumination::ManualMode) },
         }.compact
       end
 
@@ -1002,8 +1002,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :auto => self.auto&.to_message,
-          :manual => self.manual&.to_message,
+          :auto => self.auto&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WhiteIllumination::AutoMode) },
+          :manual => self.manual&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WhiteIllumination::ManualMode) },
         }.compact
       end
 
@@ -1111,8 +1111,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :ir_illumination => self.ir_illumination&.to_message,
-          :white_illumination => self.white_illumination&.to_message,
+          :ir_illumination => self.ir_illumination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::IrIllumination) },
+          :white_illumination => self.white_illumination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::WhiteIllumination) },
         }.compact
       end
     end
@@ -1236,8 +1236,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :on => self.on&.to_message,
-          :off => self.off&.to_message,
+          :on => self.on&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::NoiseReduction::OnMode) },
+          :off => self.off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ImagePartSettings::NoiseReduction::OffMode) },
         }.compact
       end
 
@@ -1367,7 +1367,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
         :enabled => self.enabled,
         :codec => self.codec&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::VideoStreamPartSettings::VideoCodec.proto(it) },
         :codec_extradata => self.codec_extradata,
-        :resolution => self.resolution&.to_message,
+        :resolution => self.resolution&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::VideoStreamPartSettings::VideoResolution) },
         :bitrate => self.bitrate,
         :bitrate_type => self.bitrate_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::VideoStreamPartSettings::VideoBitrateType.proto(it) },
         :gop_size => self.gop_size,

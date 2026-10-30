@@ -61,14 +61,14 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company
       {
         :hex_id => self.hex_id,
         :name => self.name&.then { ::Ajax::Sdk::Cloud::Encode.wrapper(it) },
-        :logo => self.logo&.to_message,
-        :emails => self.emails&.to_message,
-        :phones => self.phones&.to_message,
+        :logo => self.logo&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
+        :emails => self.emails&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Strings) },
+        :phones => self.phones&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::CompanyInfo::PhoneNumbers) },
         :web_page_url => self.web_page_url&.then { ::Ajax::Sdk::Cloud::Encode.wrapper(it) },
-        :available_in => self.available_in&.to_message,
+        :available_in => self.available_in&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Strings) },
         :phod_devices_company_rights_feasibility => self.phod_devices_company_rights_feasibility&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::PhodDevicesRightsFeasibility.proto(it) },
         :cobranded_status => self.cobranded_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::CompanyInfo::CobrandedStatus.proto(it) },
-        :organization_role => self.organization_role&.to_message,
+        :organization_role => self.organization_role&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::CompanyInfo::OrganizationRole) },
       }.compact
     end
 
@@ -139,7 +139,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :phoneNumbers => self.phoneNumbers.map { it.to_message },
+          :phoneNumbers => self.phoneNumbers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::CompanyInfo::PhoneNumber) },
         }.compact
       end
     end
@@ -173,7 +173,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :subsidiary_company => self.subsidiary_company&.to_message,
+          :subsidiary_company => self.subsidiary_company&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::CompanyInfo::SubsidiaryCompany) },
         }.compact
       end
 
@@ -210,7 +210,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :headquarter_company_info_light => self.headquarter_company_info_light&.to_message,
+          :headquarter_company_info_light => self.headquarter_company_info_light&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::CompanyInfoLight) },
         }.compact
       end
     end

@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::Failure) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :snapshot => self.snapshot&.to_message,
-          :update => self.update&.to_message,
+          :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::Success::Snapshot) },
+          :update => self.update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::Success::Update) },
         }.compact
       end
 
@@ -117,7 +117,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :state => self.state&.to_message,
+            :state => self.state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::RollerShutterState) },
           }.compact
         end
       end
@@ -154,8 +154,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :shutter_state => self.shutter_state&.to_message,
-            :slat_state => self.slat_state&.to_message,
+            :shutter_state => self.shutter_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::ShutterState) },
+            :slat_state => self.slat_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::SlatState) },
           }.compact
         end
 
@@ -199,9 +199,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :device_not_found => self.device_not_found&.to_message,
-          :hub_offline => self.hub_offline&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :device_not_found => self.device_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_offline => self.hub_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 
@@ -241,8 +241,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :shutter_state => self.shutter_state&.to_message,
-          :slat_state => self.slat_state&.to_message,
+          :shutter_state => self.shutter_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::ShutterState) },
+          :slat_state => self.slat_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::SlatState) },
         }.compact
       end
     end
@@ -276,7 +276,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :movement_state => self.movement_state&.to_message,
+          :movement_state => self.movement_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState) },
         }.compact
       end
     end
@@ -320,9 +320,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       def to_message
         {
           :current_position => self.current_position,
-          :control_source => self.control_source&.to_message,
-          :error => self.error&.to_message,
-          :movement => self.movement&.to_message,
+          :control_source => self.control_source&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::SlatState::ControlSource) },
+          :error => self.error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::SlatState::Failure) },
+          :movement => self.movement&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::SlatState::MovementInfo) },
         }.compact
       end
 
@@ -358,8 +358,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :physical_button => self.physical_button&.to_message,
-            :software => self.software&.to_message,
+            :physical_button => self.physical_button&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::SlatState::PhysicalButton) },
+            :software => self.software&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::SlatState::Software) },
           }.compact
         end
       end
@@ -453,9 +453,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :shutter_motor_overheating => self.shutter_motor_overheating&.to_message,
-            :shutter_low_voltage_issue => self.shutter_low_voltage_issue&.to_message,
-            :shutter_high_voltage_issue => self.shutter_high_voltage_issue&.to_message,
+            :shutter_motor_overheating => self.shutter_motor_overheating&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+            :shutter_low_voltage_issue => self.shutter_low_voltage_issue&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+            :shutter_high_voltage_issue => self.shutter_high_voltage_issue&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
           }.compact
         end
       end
@@ -492,8 +492,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :idle => self.idle&.to_message,
-            :moving => self.moving&.to_message,
+            :idle => self.idle&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::SlatState::MovementInfo::Idle) },
+            :moving => self.moving&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::SlatState::MovementInfo::Moving) },
           }.compact
         end
 
@@ -591,9 +591,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :idle => self.idle&.to_message,
-          :moving => self.moving&.to_message,
-          :error => self.error&.to_message,
+          :idle => self.idle&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Idle) },
+          :moving => self.moving&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Moving) },
+          :error => self.error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Failure) },
         }.compact
       end
 
@@ -684,10 +684,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
             :direction => self.direction&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Direction.proto(it) },
             :current_position => self.current_position,
             :movement_rate_time_per_percent => self.movement_rate_time_per_percent&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
-            :control_source => self.control_source&.to_message,
-            :trigger => self.trigger&.to_message,
-            :target_position => self.target_position&.to_message,
-            :absent_target_position => self.absent_target_position&.to_message,
+            :control_source => self.control_source&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Moving::ControlSource) },
+            :trigger => self.trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Moving::ControlTrigger) },
+            :target_position => self.target_position&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::TargetPosition) },
+            :absent_target_position => self.absent_target_position&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::AbsentTargetPosition) },
           }.compact
         end
 
@@ -726,8 +726,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :physical_button => self.physical_button&.to_message,
-              :software => self.software&.to_message,
+              :physical_button => self.physical_button&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Moving::PhysicalButton) },
+              :software => self.software&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Moving::Software) },
             }.compact
           end
         end
@@ -821,9 +821,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
           def to_message
             {
-              :user => self.user&.to_message,
-              :physical => self.physical&.to_message,
-              :other => self.other&.to_message,
+              :user => self.user&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Moving::ControlTrigger::User) },
+              :physical => self.physical&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Moving::ControlTrigger::Physical) },
+              :other => self.other&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamRollerShutterState::StreamRollerShutterStateResponse::MovementState::Moving::ControlTrigger::Other) },
             }.compact
           end
 
@@ -1016,9 +1016,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :shutter_motor_overheating => self.shutter_motor_overheating&.to_message,
-            :shutter_low_voltage_issue => self.shutter_low_voltage_issue&.to_message,
-            :shutter_high_voltage_issue => self.shutter_high_voltage_issue&.to_message,
+            :shutter_motor_overheating => self.shutter_motor_overheating&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+            :shutter_low_voltage_issue => self.shutter_low_voltage_issue&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+            :shutter_high_voltage_issue => self.shutter_high_voltage_issue&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
           }.compact
         end
       end

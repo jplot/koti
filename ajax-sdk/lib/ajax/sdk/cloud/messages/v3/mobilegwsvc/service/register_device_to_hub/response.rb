@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::Failure) },
       }.compact
     end
 
@@ -86,10 +86,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_added => self.device_added&.to_message,
-          :waiting_for_action => self.waiting_for_action&.to_message,
-          :search_started => self.search_started&.to_message,
-          :cancel_registration => self.cancel_registration&.to_message,
+          :device_added => self.device_added&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::Success::DeviceAdded) },
+          :waiting_for_action => self.waiting_for_action&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::Success::WaitingForAction) },
+          :search_started => self.search_started&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::Success::SearchStarted) },
+          :cancel_registration => self.cancel_registration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::Success::CancelRegistration) },
         }.compact
       end
 
@@ -125,7 +125,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :object_type => self.object_type&.to_message,
+            :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
           }.compact
         end
       end
@@ -159,7 +159,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :process_hopping_shutdown => self.process_hopping_shutdown&.to_message,
+            :process_hopping_shutdown => self.process_hopping_shutdown&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::Success::ProceedHoppingShutdown) },
           }.compact
         end
       end
@@ -247,7 +247,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :rex_device_info => self.rex_device_info.map { it.to_message },
+            :rex_device_info => self.rex_device_info.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::Success::ProceedHoppingShutdown::RexDeviceInfo) },
           }.compact
         end
 
@@ -385,26 +385,26 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :hub_request_already_performed => self.hub_request_already_performed&.to_message,
-          :hub_wrong_state => self.hub_wrong_state&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :hub_busy => self.hub_busy&.to_message,
-          :hub_offline => self.hub_offline&.to_message,
-          :device_search_timeout => self.device_search_timeout&.to_message,
-          :unknown_device => self.unknown_device&.to_message,
-          :hub_type_not_supported => self.hub_type_not_supported&.to_message,
-          :hub_firmware_not_supported => self.hub_firmware_not_supported&.to_message,
-          :s_line_insufficient_access => self.s_line_insufficient_access&.to_message,
-          :s_line_unsupported_role => self.s_line_unsupported_role&.to_message,
-          :device_registration_restricted => self.device_registration_restricted&.to_message,
-          :limit_exceeded_on_fibra_line => self.limit_exceeded_on_fibra_line&.to_message,
-          :limit_exceeded_of_one_byte_devices => self.limit_exceeded_of_one_byte_devices&.to_message,
-          :limit_exceeded_on_ring => self.limit_exceeded_on_ring&.to_message,
-          :limit_exceeded_on_fibra_line_for_fast_lost_detection => self.limit_exceeded_on_fibra_line_for_fast_lost_detection&.to_message,
-          :limit_exceeded_by_frame => self.limit_exceeded_by_frame&.to_message,
-          :switch_load_failed => self.switch_load_failed&.to_message,
-          :objects_limit_exceeded => self.objects_limit_exceeded&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_request_already_performed => self.hub_request_already_performed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_wrong_state => self.hub_wrong_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::HubWrongStateError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_busy => self.hub_busy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::HubBusyError) },
+          :hub_offline => self.hub_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :device_search_timeout => self.device_search_timeout&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :unknown_device => self.unknown_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::UnknownDeviceError) },
+          :hub_type_not_supported => self.hub_type_not_supported&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_firmware_not_supported => self.hub_firmware_not_supported&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::HubFirmwareNotSupportedError) },
+          :s_line_insufficient_access => self.s_line_insufficient_access&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :s_line_unsupported_role => self.s_line_unsupported_role&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :device_registration_restricted => self.device_registration_restricted&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :limit_exceeded_on_fibra_line => self.limit_exceeded_on_fibra_line&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :limit_exceeded_of_one_byte_devices => self.limit_exceeded_of_one_byte_devices&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :limit_exceeded_on_ring => self.limit_exceeded_on_ring&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :limit_exceeded_on_fibra_line_for_fast_lost_detection => self.limit_exceeded_on_fibra_line_for_fast_lost_detection&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :limit_exceeded_by_frame => self.limit_exceeded_by_frame&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :switch_load_failed => self.switch_load_failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :objects_limit_exceeded => self.objects_limit_exceeded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 
@@ -441,7 +441,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_fw_update => self.available_fw_update&.to_message,
+          :available_fw_update => self.available_fw_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::UnknownDeviceError::AvailableFwUpdate) },
         }.compact
       end
 
@@ -513,7 +513,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Reg
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_fw_update => self.available_fw_update&.to_message,
+          :available_fw_update => self.available_fw_update&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::RegisterDeviceToHub::RegisterDeviceToHubResponse::HubFirmwareNotSupportedError::AvailableFwUpdate) },
         }.compact
       end
 

@@ -56,15 +56,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :armed => self.armed&.to_message,
-        :disarmed => self.disarmed&.to_message,
-        :night_mode => self.night_mode&.to_message,
-        :partially_armed => self.partially_armed&.to_message,
-        :awaiting_app_exit_timer => self.awaiting_app_exit_timer&.to_message,
-        :awaiting_second_stage_confirmation => self.awaiting_second_stage_confirmation&.to_message,
-        :two_stage_arming_incomplete => self.two_stage_arming_incomplete&.to_message,
-        :awaiting_vds_arming_completion => self.awaiting_vds_arming_completion&.to_message,
-        :service_mode => self.service_mode&.to_message,
+        :armed => self.armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+        :disarmed => self.disarmed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::DisarmedState) },
+        :night_mode => self.night_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+        :partially_armed => self.partially_armed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+        :awaiting_app_exit_timer => self.awaiting_app_exit_timer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+        :awaiting_second_stage_confirmation => self.awaiting_second_stage_confirmation&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+        :two_stage_arming_incomplete => self.two_stage_arming_incomplete&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+        :awaiting_vds_arming_completion => self.awaiting_vds_arming_completion&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+        :service_mode => self.service_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
       }.compact
     end
 

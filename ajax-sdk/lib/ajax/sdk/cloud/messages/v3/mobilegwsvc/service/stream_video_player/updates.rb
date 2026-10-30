@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :updates => self.updates.map { it.to_message },
+        :updates => self.updates.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::Update) },
       }.compact
     end
   end
@@ -124,25 +124,25 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     def to_message
       {
         :video_edge_id => self.video_edge_id,
-        :video_edge_installed => self.video_edge_installed&.to_message,
-        :video_edge_updated => self.video_edge_updated&.to_message,
-        :timezone_updated => self.timezone_updated&.to_message,
-        :app_settings_updated => self.app_settings_updated&.to_message,
-        :channel_added => self.channel_added&.to_message,
-        :channel_media_device_info_added => self.channel_media_device_info_added&.to_message,
-        :channel_media_device_info_removed => self.channel_media_device_info_removed&.to_message,
-        :detector_added => self.detector_added&.to_message,
-        :detector_state_updated => self.detector_state_updated&.to_message,
-        :detector_removed => self.detector_removed&.to_message,
-        :storage_device_added => self.storage_device_added&.to_message,
-        :storage_device_removed => self.storage_device_removed&.to_message,
-        :channel_video_settings_updated => self.channel_video_settings_updated&.to_message,
-        :channel_audio_settings_updated => self.channel_audio_settings_updated&.to_message,
-        :cloud_archive_updated => self.cloud_archive_updated&.to_message,
-        :channel_displayed_source_aliases_updated => self.channel_displayed_source_aliases_updated&.to_message,
-        :channel_zombie_state_updated => self.channel_zombie_state_updated&.to_message,
-        :power_management_updated => self.power_management_updated&.to_message,
-        :linked_actions_updated => self.linked_actions_updated&.to_message,
+        :video_edge_installed => self.video_edge_installed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::VideoEdgeInstalled) },
+        :video_edge_updated => self.video_edge_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::VideoEdgeUpdated) },
+        :timezone_updated => self.timezone_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::TimezoneUpdated) },
+        :app_settings_updated => self.app_settings_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::AppSettingsUpdated) },
+        :channel_added => self.channel_added&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::ChannelAdded) },
+        :channel_media_device_info_added => self.channel_media_device_info_added&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::ChannelMediaDeviceInfoAdded) },
+        :channel_media_device_info_removed => self.channel_media_device_info_removed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::ChannelMediaDeviceInfoRemoved) },
+        :detector_added => self.detector_added&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::DetectorAdded) },
+        :detector_state_updated => self.detector_state_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::DetectorStateUpdated) },
+        :detector_removed => self.detector_removed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::DetectorRemoved) },
+        :storage_device_added => self.storage_device_added&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::StorageDeviceAdded) },
+        :storage_device_removed => self.storage_device_removed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::StorageDeviceRemoved) },
+        :channel_video_settings_updated => self.channel_video_settings_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::ChannelVideoSettingsUpdated) },
+        :channel_audio_settings_updated => self.channel_audio_settings_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::ChannelAudioSettingsUpdated) },
+        :cloud_archive_updated => self.cloud_archive_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::CloudArchiveUpdated) },
+        :channel_displayed_source_aliases_updated => self.channel_displayed_source_aliases_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::ChannelDisplayedSourceAliasesUpdated) },
+        :channel_zombie_state_updated => self.channel_zombie_state_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::ChannelZombieStateUpdated) },
+        :power_management_updated => self.power_management_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PowerManagementUpdated) },
+        :linked_actions_updated => self.linked_actions_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::LinkedActionsUpdated) },
       }.compact
     end
 
@@ -179,7 +179,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :video_edge => self.video_edge&.to_message,
+        :video_edge => self.video_edge&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerVideoEdge) },
       }.compact
     end
   end
@@ -213,7 +213,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :video_edge_base => self.video_edge_base&.to_message,
+        :video_edge_base => self.video_edge_base&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerVideoEdgeBase) },
       }.compact
     end
   end
@@ -281,7 +281,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :app_settings => self.app_settings&.to_message,
+        :app_settings => self.app_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Spacesettings::AppSettings) },
       }.compact
     end
   end
@@ -315,7 +315,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :channel => self.channel&.to_message,
+        :channel => self.channel&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel) },
       }.compact
     end
   end
@@ -353,7 +353,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     def to_message
       {
         :channel_id => self.channel_id,
-        :media_device_info => self.media_device_info&.to_message,
+        :media_device_info => self.media_device_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::MediaDeviceInfo) },
       }.compact
     end
   end
@@ -421,7 +421,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :detector => self.detector&.to_message,
+        :detector => self.detector&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerDetector) },
       }.compact
     end
   end
@@ -527,7 +527,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :storage_device => self.storage_device&.to_message,
+        :storage_device => self.storage_device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerStorageDevice) },
       }.compact
     end
   end
@@ -603,7 +603,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       {
         :media_device_id => self.media_device_id,
         :channel_id_on_media_device => self.channel_id_on_media_device,
-        :video_settings => self.video_settings&.to_message,
+        :video_settings => self.video_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::VideoSettings) },
       }.compact
     end
   end
@@ -645,7 +645,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       {
         :media_device_id => self.media_device_id,
         :channel_id_on_media_device => self.channel_id_on_media_device,
-        :audio_settings => self.audio_settings&.to_message,
+        :audio_settings => self.audio_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel::AudioSettings) },
       }.compact
     end
   end
@@ -683,7 +683,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     def to_message
       {
         :channel_id => self.channel_id,
-        :cloud_archive => self.cloud_archive&.to_message,
+        :cloud_archive => self.cloud_archive&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::Cloudarchive::CloudArchive) },
       }.compact
     end
   end
@@ -721,7 +721,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     def to_message
       {
         :channel_id => self.channel_id,
-        :displayed_source_aliases => self.displayed_source_aliases&.to_message,
+        :displayed_source_aliases => self.displayed_source_aliases&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Channel::SourceAliases) },
       }.compact
     end
   end
@@ -831,7 +831,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     def to_message
       {
         :channel_id => self.channel_id,
-        :linked_actions => self.linked_actions.map { it.to_message },
+        :linked_actions => self.linked_actions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Automation::VideoEdgeChannelLinkedActionReference) },
       }.compact
     end
   end

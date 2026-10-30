@@ -45,8 +45,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     def to_message
       {
         :id => self.id,
-        :issue_description => self.issue_description&.to_message,
-        :issue_type => self.issue_type&.to_message,
+        :issue_description => self.issue_description&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::SupportSession::IssueDescription) },
+        :issue_type => self.issue_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::SupportSession::SupportSessionIssueType) },
         :status => self.status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::SupportSession::SupportSession::SupportSessionStatus.proto(it) },
         :created_at => self.created_at&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
       }.compact

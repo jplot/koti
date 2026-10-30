@@ -60,15 +60,15 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     def to_message
       {
         :image_resolution => self.image_resolution&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::ImageResolution.proto(it) },
-        :alarms_with_photo_verification => self.alarms_with_photo_verification&.to_message,
+        :alarms_with_photo_verification => self.alarms_with_photo_verification&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::AlarmsWithPhotoVerification) },
         :photos_by_alarm => self.photos_by_alarm,
         :photos_on_demand => self.photos_on_demand,
         :hdr_image => self.hdr_image&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::HdrImage.proto(it) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::Capability.proto(it) },
-        :available_photo_params => self.available_photo_params.map { it.to_message },
+        :available_photo_params => self.available_photo_params.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::AvailablePhotoParams) },
         :available_photo_backlights => self.available_photo_backlights.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::PhotoBacklight.proto(it) },
         :photo_backlight => self.photo_backlight&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::PhotoBacklight.proto(it) },
-        :camera_restrictions => self.camera_restrictions.map { it.to_message },
+        :camera_restrictions => self.camera_restrictions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::CameraRestriction) },
       }.compact
     end
 
@@ -117,7 +117,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :image_resolution => self.image_resolution&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::ImageResolution.proto(it) },
-          :alarms_with_photo_verification => self.alarms_with_photo_verification&.to_message,
+          :alarms_with_photo_verification => self.alarms_with_photo_verification&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::AlarmsWithPhotoVerification) },
           :photos_by_alarm => self.photos_by_alarm,
           :photos_on_demand => self.photos_on_demand,
           :hdr_image => self.hdr_image&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::HdrImage.proto(it) },
@@ -159,7 +159,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :alarms_with_photo_verification => self.alarms_with_photo_verification,
-          :all => self.all&.to_message,
+          :all => self.all&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::AlarmsWithPhotoVerification::All) },
         }.compact
       end
 
@@ -271,9 +271,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :slow_delivery_of_high_resolution_photos => self.slow_delivery_of_high_resolution_photos&.to_message,
-          :reduced_amount_of_photos_by_alarm => self.reduced_amount_of_photos_by_alarm&.to_message,
-          :high_battery_consumption_and_slow_delivery => self.high_battery_consumption_and_slow_delivery&.to_message,
+          :slow_delivery_of_high_resolution_photos => self.slow_delivery_of_high_resolution_photos&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::CameraRestriction::SlowDeliveryOfHighResolutionPhotos) },
+          :reduced_amount_of_photos_by_alarm => self.reduced_amount_of_photos_by_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::CameraRestriction::ReducedAmountOfPhotosByAlarm) },
+          :high_battery_consumption_and_slow_delivery => self.high_battery_consumption_and_slow_delivery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Photo::PhotoPart::CameraRestriction::HighBatteryConsumptionAndSlowDelivery) },
         }.compact
       end
 

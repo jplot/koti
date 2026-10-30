@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :troubled_devices => self.troubled_devices.map { it.to_message },
-        :hub_info => self.hub_info&.to_message,
-        :troubled_followed_groups => self.troubled_followed_groups.map { it.to_message },
+        :troubled_devices => self.troubled_devices.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::TroubledDevices::TroubledDevice) },
+        :hub_info => self.hub_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::TroubledDevices::HubInfo) },
+        :troubled_followed_groups => self.troubled_followed_groups.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::TroubledDevices::TroubledFollowedGroup) },
       }.compact
     end
 
@@ -79,8 +79,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device => self.device&.to_message,
-          :troubled_alarm => self.troubled_alarm&.to_message,
+          :device => self.device&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::HubNotificationSource) },
+          :troubled_alarm => self.troubled_alarm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Event::Hub::HubEventQualifier) },
           :arming_restriction => self.arming_restriction&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::TroubledDevices::TroubledDevice::ArmingRestriction.proto(it) },
         }.compact
       end
@@ -131,7 +131,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         {
           :id => self.id,
           :name => self.name,
-          :image_info => self.image_info&.to_message,
+          :image_info => self.image_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::SourceImageInfo) },
         }.compact
       end
     end

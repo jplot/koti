@@ -7,6 +7,7 @@ AllCops:
   Exclude:
     - 'lib/ajax/sdk/cloud/messages.rb'
     - 'lib/ajax/sdk/cloud/messages/**/*'
+    - 'lib/ajax/sdk/cloud/methods.rb'
 
 inherit_mode:
   merge:

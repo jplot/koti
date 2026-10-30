@@ -42,8 +42,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Firmware
     def to_message
       {
         :device_id => self.device_id,
-        :resource_id => self.resource_id&.to_message,
-        :status => self.status&.to_message,
+        :resource_id => self.resource_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::ResourceId) },
+        :status => self.status&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Firmware::DeviceFirmwareUpdate::Status) },
         :is_critical => self.is_critical&.then { ::Ajax::Sdk::Cloud::Encode.wrapper(it) },
       }.compact
     end
@@ -92,12 +92,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Firmware
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :not_started => self.not_started&.to_message,
+          :not_started => self.not_started&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
           :downloading => self.downloading,
-          :downloaded => self.downloaded&.to_message,
-          :installing => self.installing&.to_message,
-          :completed => self.completed&.to_message,
-          :failed => self.failed&.to_message,
+          :downloaded => self.downloaded&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :installing => self.installing&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :completed => self.completed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+          :failed => self.failed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
         }.compact
       end
 

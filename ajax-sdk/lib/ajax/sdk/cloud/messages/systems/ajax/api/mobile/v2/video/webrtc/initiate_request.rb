@@ -45,10 +45,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc
     def to_message
       {
         :video_edge_id => self.video_edge_id,
-        :initial_streams => self.initial_streams.map { it.to_message },
-        :ice_filters => self.ice_filters&.to_message,
+        :initial_streams => self.initial_streams.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::Stream) },
+        :ice_filters => self.ice_filters&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::IceCandidateFilters) },
         :allow_large_rtp_packets => self.allow_large_rtp_packets,
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
       }.compact
     end
   end
@@ -85,8 +85,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc::InitiateWebRtcResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc::InitiateWebRtcResponse::Failure) },
       }.compact
     end
 
@@ -136,10 +136,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :init => self.init&.to_message,
-          :offer => self.offer&.to_message,
-          :new_ice_candidate => self.new_ice_candidate&.to_message,
-          :answer => self.answer&.to_message,
+          :init => self.init&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc::InitiateWebRtcResponse::Success::WebRtcInit) },
+          :offer => self.offer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc::InitiateWebRtcResponse::Success::WebRtcOffer) },
+          :new_ice_candidate => self.new_ice_candidate&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc::InitiateWebRtcResponse::Success::WebRtcNewIceCandidate) },
+          :answer => self.answer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc::InitiateWebRtcResponse::Success::WebRtcAnswer) },
         }.compact
       end
 
@@ -182,8 +182,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc
         def to_message
           {
             :session_id => self.session_id,
-            :ice_servers => self.ice_servers.map { it.to_message },
-            :streams => self.streams.map { it.to_message },
+            :ice_servers => self.ice_servers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::IceServer) },
+            :streams => self.streams.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::Stream) },
           }.compact
         end
       end
@@ -217,7 +217,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :session_description => self.session_description&.to_message,
+            :session_description => self.session_description&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::SessionDescription) },
           }.compact
         end
       end
@@ -251,7 +251,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :session_description => self.session_description&.to_message,
+            :session_description => self.session_description&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::SessionDescription) },
           }.compact
         end
       end
@@ -285,7 +285,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :candidate => self.candidate&.to_message,
+            :candidate => self.candidate&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::IceCandidate) },
           }.compact
         end
       end
@@ -329,10 +329,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :video_edge_not_found => self.video_edge_not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :video_edge_is_offline => self.video_edge_is_offline&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_not_found => self.video_edge_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :video_edge_is_offline => self.video_edge_is_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

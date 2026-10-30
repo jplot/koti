@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :audio_playback_and_download => self.audio_playback_and_download&.to_message,
-        :manage_smart_lock => self.manage_smart_lock&.to_message,
+        :audio_playback_and_download => self.audio_playback_and_download&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy::HubDevicePrivacyPermission::AudioPlaybackAndDownload) },
+        :manage_smart_lock => self.manage_smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy::HubDevicePrivacyPermission::ManageSmartLock) },
       }.compact
     end
 
@@ -118,7 +118,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy
       def to_message
         {
           :enabled => self.enabled,
-          :type => self.type&.to_message,
+          :type => self.type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy::HubDevicePrivacyPermission::ManageSmartLock::PermissionType) },
         }.compact
       end
 
@@ -154,8 +154,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :permanent => self.permanent&.to_message,
-            :temporary_on_alert_received => self.temporary_on_alert_received&.to_message,
+            :permanent => self.permanent&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy::HubDevicePrivacyPermission::ManageSmartLock::PermissionType::Permanent) },
+            :temporary_on_alert_received => self.temporary_on_alert_received&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::Device::Privacy::HubDevicePrivacyPermission::ManageSmartLock::PermissionType::TemporaryOnAlertReceived) },
           }.compact
         end
 

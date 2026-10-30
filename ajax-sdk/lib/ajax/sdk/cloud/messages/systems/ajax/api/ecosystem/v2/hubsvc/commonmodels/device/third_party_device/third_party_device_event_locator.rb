@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :honeywell_loop => self.honeywell_loop&.to_message,
-        :reporting_id => self.reporting_id&.to_message,
+        :honeywell_loop => self.honeywell_loop&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceEventLocator::HoneywellLoop) },
+        :reporting_id => self.reporting_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceEventLocator::ReportingId) },
       }.compact
     end
 
@@ -78,9 +78,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :reporting_id => self.reporting_id&.to_message,
+          :reporting_id => self.reporting_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceId) },
           :loop_number => self.loop_number&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceEventLocator::HoneywellLoop::LoopNumber.proto(it) },
-          :available_loops => self.available_loops.map { it.to_message },
+          :available_loops => self.available_loops.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceEventLocator::HoneywellLoop::HoneywellLoops) },
         }.compact
       end
 
@@ -116,7 +116,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :reporting_id => self.reporting_id&.to_message,
+            :reporting_id => self.reporting_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceId) },
             :loop_numbers => self.loop_numbers.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceEventLocator::HoneywellLoop::LoopNumber.proto(it) },
           }.compact
         end
@@ -277,8 +277,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :honeywell_loop => self.honeywell_loop&.to_message,
-          :reporting_id => self.reporting_id&.to_message,
+          :honeywell_loop => self.honeywell_loop&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceEventLocator::HoneywellLoop::HoneywellLoopSettings) },
+          :reporting_id => self.reporting_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::ThirdPartyDevicePackage::ThirdPartyDeviceEventLocator::ReportingId::ReportingIdSettings) },
         }.compact
       end
 

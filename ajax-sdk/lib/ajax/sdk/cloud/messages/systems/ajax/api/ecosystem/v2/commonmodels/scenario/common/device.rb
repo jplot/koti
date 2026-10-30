@@ -41,10 +41,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :id => self.id&.to_message,
-        :additional_data => self.additional_data.map { it.to_message },
-        :whole => self.whole&.to_message,
-        :channel => self.channel&.to_message,
+        :id => self.id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId) },
+        :additional_data => self.additional_data.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceReference::AdditionalData) },
+        :whole => self.whole&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceReference::WholeDeviceReference) },
+        :channel => self.channel&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceReference::ChannelDeviceReference) },
       }.compact
     end
 
@@ -147,9 +147,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_channels => self.device_channels&.to_message,
-          :grant_access_card_data => self.grant_access_card_data&.to_message,
-          :grant_access_code_data => self.grant_access_code_data&.to_message,
+          :device_channels => self.device_channels&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceReference::DeviceChannels) },
+          :grant_access_card_data => self.grant_access_card_data&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::GrantAccessCardData) },
+          :grant_access_code_data => self.grant_access_code_data&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::GrantAccessCodeData) },
         }.compact
       end
 
@@ -235,9 +235,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_reference => self.device_reference&.to_message,
-        :trigger_capabilities => self.trigger_capabilities.map { it.to_message },
-        :warnings => self.warnings.map { it.to_message },
+        :device_reference => self.device_reference&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceReference) },
+        :trigger_capabilities => self.trigger_capabilities.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceTriggerCapability) },
+        :warnings => self.warnings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceTriggerInfo::Warning) },
       }.compact
     end
 
@@ -270,7 +270,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_operating_mode_has_changed => self.device_operating_mode_has_changed&.to_message,
+          :device_operating_mode_has_changed => self.device_operating_mode_has_changed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceTriggerInfo::Warning::DeviceOperatingModeHasChanged) },
         }.compact
       end
 
@@ -341,9 +341,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_reference => self.device_reference&.to_message,
-        :target_capabilities => self.target_capabilities.map { it.to_message },
-        :warnings => self.warnings.map { it.to_message },
+        :device_reference => self.device_reference&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceReference) },
+        :target_capabilities => self.target_capabilities.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceTargetCapability) },
+        :warnings => self.warnings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceTargetInfo::Warning) },
       }.compact
     end
 
@@ -376,7 +376,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :device_operating_mode_has_changed => self.device_operating_mode_has_changed&.to_message,
+          :device_operating_mode_has_changed => self.device_operating_mode_has_changed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DeviceTargetInfo::Warning::DeviceOperatingModeHasChanged) },
         }.compact
       end
 
@@ -483,21 +483,21 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :temperature => self.temperature&.to_message,
-        :co2 => self.co2&.to_message,
-        :humidity => self.humidity&.to_message,
-        :button_press => self.button_press&.to_message,
-        :smart_lock => self.smart_lock&.to_message,
-        :switch_action => self.switch_action&.to_message,
-        :water_supply => self.water_supply&.to_message,
-        :intrusion_sensors => self.intrusion_sensors&.to_message,
-        :fire_sensors => self.fire_sensors&.to_message,
-        :panic_sensors => self.panic_sensors&.to_message,
-        :leakage_sensors => self.leakage_sensors&.to_message,
-        :aux_sensors => self.aux_sensors&.to_message,
-        :custom_sensors => self.custom_sensors&.to_message,
-        :malfunction_sensors => self.malfunction_sensors&.to_message,
-        :doorbell => self.doorbell&.to_message,
+        :temperature => self.temperature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::ThresholdMetricCapability) },
+        :co2 => self.co2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::ThresholdMetricCapability) },
+        :humidity => self.humidity&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::ThresholdMetricCapability) },
+        :button_press => self.button_press&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::ButtonPressCapability) },
+        :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::SmartLockCapability) },
+        :switch_action => self.switch_action&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::SwitchActionCapability) },
+        :water_supply => self.water_supply&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::WaterSupplyCapability) },
+        :intrusion_sensors => self.intrusion_sensors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::IntrusionSensorsCapability) },
+        :fire_sensors => self.fire_sensors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::FireSensorsCapability) },
+        :panic_sensors => self.panic_sensors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::PanicSensorsCapability) },
+        :leakage_sensors => self.leakage_sensors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::LeakageSensorsCapability) },
+        :aux_sensors => self.aux_sensors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::AuxSensorsCapability) },
+        :custom_sensors => self.custom_sensors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::CustomSensorsCapability) },
+        :malfunction_sensors => self.malfunction_sensors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::MalfunctionSensorsCapability) },
+        :doorbell => self.doorbell&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DoorbellCapability) },
       }.compact
     end
 
@@ -549,12 +549,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :smart_lock => self.smart_lock&.to_message,
-        :switch_action => self.switch_action&.to_message,
-        :water_supply => self.water_supply&.to_message,
-        :dimmer => self.dimmer&.to_message,
-        :play_audio => self.play_audio&.to_message,
-        :blocking_element => self.blocking_element&.to_message,
+        :smart_lock => self.smart_lock&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::SmartLockCapability) },
+        :switch_action => self.switch_action&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::SwitchActionCapability) },
+        :water_supply => self.water_supply&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::WaterSupplyCapability) },
+        :dimmer => self.dimmer&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::DimmerCapability) },
+        :play_audio => self.play_audio&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::PlayAudioCapability) },
+        :blocking_element => self.blocking_element&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::BlockingElementCapability) },
       }.compact
     end
 

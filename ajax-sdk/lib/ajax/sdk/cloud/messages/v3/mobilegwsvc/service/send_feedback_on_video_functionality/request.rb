@@ -42,9 +42,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sen
     def to_message
       {
         :video_edge_id => self.video_edge_id,
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :text => self.text,
-        :detection_feedback_details => self.detection_feedback_details&.to_message,
+        :detection_feedback_details => self.detection_feedback_details&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SendFeedbackOnVideoFunctionality::SendFeedbackOnVideoFunctionalityRequest::DetectionFeedbackDetails) },
       }.compact
     end
 
@@ -101,7 +101,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Sen
           :expected => self.expected&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SendFeedbackOnVideoFunctionality::SendFeedbackOnVideoFunctionalityRequest::DetectionResult.proto(it) },
           :actual => self.actual&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SendFeedbackOnVideoFunctionality::SendFeedbackOnVideoFunctionalityRequest::DetectionResult.proto(it) },
           :detection_feedback => self.detection_feedback&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::DetectionFeedbackType.proto(it) },
-          :time_range => self.time_range&.to_message,
+          :time_range => self.time_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::TimestampRange) },
           :channel_id => self.channel_id,
           :timestamp => self.timestamp&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
           :video_source_type => self.video_source_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::VideoSourceType.proto(it) },

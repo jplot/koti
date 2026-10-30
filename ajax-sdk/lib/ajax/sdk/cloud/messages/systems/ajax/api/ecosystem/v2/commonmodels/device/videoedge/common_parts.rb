@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :ethernet => self.ethernet&.to_message,
+        :ethernet => self.ethernet&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::NetworkConfiguration) },
       }.compact
     end
   end
@@ -100,7 +100,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :users => self.users.map { it.to_message },
+        :users => self.users.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::VideoLocalUsersPartSettings::VideoLocalUser) },
       }.compact
     end
 
@@ -141,7 +141,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
         {
           :name => self.name,
           :password => self.password,
-          :permissions => self.permissions&.to_message,
+          :permissions => self.permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::LocalUserPermissions) },
         }.compact
       end
     end
@@ -210,7 +210,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :logo => self.logo&.to_message,
+        :logo => self.logo&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::LedPartSettings::LogoLed) },
       }.compact
     end
 
@@ -312,7 +312,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :fan_speed_settings => self.fan_speed_settings&.to_message,
+        :fan_speed_settings => self.fan_speed_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::FanSpeedSettings) },
       }.compact
     end
   end
@@ -403,8 +403,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
         :onvif_user_auth_enabled => self.onvif_user_auth_enabled,
         :onvif_http_port => self.onvif_http_port,
         :rtsp_http_port => self.rtsp_http_port,
-        :users => self.users.map { it.to_message },
-        :onvif_ports => self.onvif_ports&.to_message,
+        :users => self.users.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::OnvifConnectionPartSettings::OnvifUser) },
+        :onvif_ports => self.onvif_ports&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::OnvifConnectionPartSettings::OnvifPorts) },
       }.compact
     end
 
@@ -521,8 +521,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :chime => self.chime&.to_message,
-        :siren_mode => self.siren_mode&.to_message,
+        :chime => self.chime&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ChimePartSettings::Chime) },
+        :siren_mode => self.siren_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ChimePartSettings::SirenMode) },
       }.compact
     end
 
@@ -561,9 +561,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :off => self.off&.to_message,
-          :mechanical => self.mechanical&.to_message,
-          :digital => self.digital&.to_message,
+          :off => self.off&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ChimePartSettings::Chime::OffMode) },
+          :mechanical => self.mechanical&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ChimePartSettings::Chime::MechanicalMode) },
+          :digital => self.digital&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::ChimePartSettings::Chime::DigitalMode) },
         }.compact
       end
 
@@ -800,7 +800,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :settings => self.settings.map { it.to_message },
+        :settings => self.settings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::NotificationPartSettings::NotificationSettingsEntry) },
         :cooldown_period => self.cooldown_period&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         :monitoring_state => self.monitoring_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::VideoNotificationMonitoringState.proto(it) },
         :object_detection_duration => self.object_detection_duration&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::VideoNotificationObjectDetectionDuration.proto(it) },
@@ -845,7 +845,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
         {
           :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::VideoNotificationType.proto(it) },
           :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::VideoNotificationState.proto(it) },
-          :notification_alert_settings => self.notification_alert_settings&.to_message,
+          :notification_alert_settings => self.notification_alert_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::NotificationPartSettings::NotificationSettingsEntry::NotificationAlertSettings) },
         }.compact
       end
 
@@ -918,7 +918,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Vid
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :settings => self.settings.map { it.to_message },
+        :settings => self.settings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Videoedge::DetectorSettings) },
       }.compact
     end
   end

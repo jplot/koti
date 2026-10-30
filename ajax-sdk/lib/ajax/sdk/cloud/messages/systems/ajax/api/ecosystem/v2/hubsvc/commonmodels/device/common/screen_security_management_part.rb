@@ -60,7 +60,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         :security_management_enabled => self.security_management_enabled,
         :group_ids => self.group_ids,
         :pre_authorization_enabled => self.pre_authorization_enabled,
-        :authorization_confirmation => self.authorization_confirmation&.to_message,
+        :authorization_confirmation => self.authorization_confirmation&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenSecurityManagementPart::AuthorizationConfirmation) },
         :available_easy_armed_mode_change_types => self.available_easy_armed_mode_change_types.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenSecurityManagementPart::EasyArmedModeChangeType.proto(it) },
         :easy_armed_mode_change_type => self.easy_armed_mode_change_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenSecurityManagementPart::EasyArmedModeChangeType.proto(it) },
         :easy_armed_mode_change_warnings => self.easy_armed_mode_change_warnings.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenSecurityManagementPart::EasyArmedModeChangeWarning.proto(it) },
@@ -178,9 +178,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :security_management_enabled => self.security_management_enabled,
-          :group_ids_settings => self.group_ids_settings&.to_message,
+          :group_ids_settings => self.group_ids_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenSecurityManagementPart::GroupIdsSettings) },
           :pre_authorization_enabled => self.pre_authorization_enabled,
-          :authorization_confirmation => self.authorization_confirmation&.to_message,
+          :authorization_confirmation => self.authorization_confirmation&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenSecurityManagementPart::AuthorizationConfirmation) },
           :easy_armed_mode_change_type => self.easy_armed_mode_change_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ScreenSecurityManagementPart::EasyArmedModeChangeType.proto(it) },
           :arming_without_code_enabled => self.arming_without_code_enabled,
         }.compact

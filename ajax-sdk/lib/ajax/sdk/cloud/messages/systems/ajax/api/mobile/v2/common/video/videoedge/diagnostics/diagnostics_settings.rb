@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Di
       {
         :log_max_bytes => self.log_max_bytes,
         :root_level => self.root_level&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Diagnostics::LogLevel.proto(it) },
-        :module_levels => self.module_levels.map { it.to_message },
+        :module_levels => self.module_levels.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Diagnostics::LoggingSettings::ModuleLogLevel) },
       }.compact
     end
 
@@ -112,7 +112,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Di
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :logging_settings => self.logging_settings&.to_message,
+        :logging_settings => self.logging_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Diagnostics::LoggingSettings) },
       }.compact
     end
   end

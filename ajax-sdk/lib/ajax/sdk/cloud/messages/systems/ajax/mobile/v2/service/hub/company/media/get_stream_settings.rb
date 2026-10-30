@@ -77,8 +77,8 @@ module Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Media
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :error => self.error&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Media::GetStreamSettingsResponse::Success) },
+        :error => self.error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Media::GetStreamSettingsResponse::Error) },
       }.compact
     end
 
@@ -119,7 +119,7 @@ module Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Media
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :stream_settings => self.stream_settings&.to_message,
+          :stream_settings => self.stream_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::SurveillanceCameraStreamSettings) },
         }.compact
       end
     end
@@ -153,7 +153,7 @@ module Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Media
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :internal_error => self.internal_error&.to_message,
+          :internal_error => self.internal_error&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::InternalError) },
         }.compact
       end
 

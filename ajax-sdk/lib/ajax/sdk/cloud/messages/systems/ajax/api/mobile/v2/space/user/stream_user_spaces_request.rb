@@ -62,8 +62,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User::StreamUserSpacesResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User::StreamUserSpacesResponse::Failure) },
       }.compact
     end
 
@@ -107,8 +107,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :initial_state => self.initial_state&.to_message,
-          :lite_space_event => self.lite_space_event&.to_message,
+          :initial_state => self.initial_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User::StreamUserSpacesResponse::InitialState) },
+          :lite_space_event => self.lite_space_event&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User::StreamUserSpacesResponse::LiteSpaceEvent) },
         }.compact
       end
 
@@ -145,7 +145,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :spaces => self.spaces.map { it.to_message },
+          :spaces => self.spaces.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::LiteSpace) },
         }.compact
       end
     end
@@ -189,9 +189,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
       def to_message
         {
           :space_id => self.space_id,
-          :lite_space_created => self.lite_space_created&.to_message,
-          :lite_space_updated => self.lite_space_updated&.to_message,
-          :lite_space_removed => self.lite_space_removed&.to_message,
+          :lite_space_created => self.lite_space_created&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User::StreamUserSpacesResponse::LiteSpaceCreated) },
+          :lite_space_updated => self.lite_space_updated&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User::StreamUserSpacesResponse::LiteSpaceUpdated) },
+          :lite_space_removed => self.lite_space_removed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User::StreamUserSpacesResponse::LiteSpaceRemoved) },
         }.compact
       end
 
@@ -228,7 +228,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :lite_space => self.lite_space&.to_message,
+          :lite_space => self.lite_space&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::LiteSpace) },
         }.compact
       end
     end
@@ -291,9 +291,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
         {
           :id => self.id,
           :sorting_key => self.sorting_key,
-          :profile => self.profile&.to_message,
+          :profile => self.profile&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceProfile) },
           :security_state => self.security_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::DisplayedSpaceSecurityState.proto(it) },
-          :security_state_v2 => self.security_state_v2&.to_message,
+          :security_state_v2 => self.security_state_v2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security::DisplayedSpaceSecurityStateV2) },
           :hub_id => self.hub_id,
           :new_notifications_count => self.new_notifications_count,
           :malfunctions_count => self.malfunctions_count,

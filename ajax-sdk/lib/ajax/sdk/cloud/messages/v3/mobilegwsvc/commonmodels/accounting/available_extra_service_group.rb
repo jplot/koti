@@ -59,7 +59,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :id => self.id,
         :name => self.name,
         :lokalise_id => self.lokalise_id,
-        :item => self.item.map { it.to_message },
+        :item => self.item.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailableExtraServiceGroup::AvailableExtraServicesGroupItem) },
         :order => self.order,
         :max_target_count_to_assign => self.max_target_count_to_assign,
         :category => self.category&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::Category.proto(it) },
@@ -101,7 +101,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
       def to_message
         {
           :order => self.order,
-          :service => self.service&.to_message,
+          :service => self.service&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::AvailableExtraService) },
         }.compact
       end
     end

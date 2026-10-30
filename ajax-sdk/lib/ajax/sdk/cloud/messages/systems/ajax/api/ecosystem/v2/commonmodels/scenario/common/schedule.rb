@@ -47,12 +47,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :all_week => self.all_week&.to_message,
-        :selected_days => self.selected_days&.to_message,
-        :weekend => self.weekend&.to_message,
-        :weekdays => self.weekdays&.to_message,
-        :all_day => self.all_day&.to_message,
-        :fixed_interval => self.fixed_interval&.to_message,
+        :all_week => self.all_week&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::AllWeek) },
+        :selected_days => self.selected_days&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::SelectedDays) },
+        :weekend => self.weekend&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::Weekend) },
+        :weekdays => self.weekdays&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::Weekdays) },
+        :all_day => self.all_day&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::AllDay) },
+        :fixed_interval => self.fixed_interval&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Common::FixedInterval) },
       }.compact
     end
 
@@ -122,8 +122,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::C
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :start_time => self.start_time&.to_message,
-        :end_time => self.end_time&.to_message,
+        :start_time => self.start_time&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Type::TimeOfDay) },
+        :end_time => self.end_time&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Type::TimeOfDay) },
       }.compact
     end
   end

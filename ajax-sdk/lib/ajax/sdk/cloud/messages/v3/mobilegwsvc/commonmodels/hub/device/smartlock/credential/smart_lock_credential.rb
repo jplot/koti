@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :id => self.id,
         :name => self.name,
         :enabled => self.enabled,
-        :entry_code => self.entry_code&.to_message,
-        :contactless_key => self.contactless_key&.to_message,
+        :entry_code => self.entry_code&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Smartlock::Credential::SmartLockCredential::EntryCode) },
+        :contactless_key => self.contactless_key&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Hub::Device::Smartlock::Credential::SmartLockCredential::ContactlessKey) },
       }.compact
     end
 

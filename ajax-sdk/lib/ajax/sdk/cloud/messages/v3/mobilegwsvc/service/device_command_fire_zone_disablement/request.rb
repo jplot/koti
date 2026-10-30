@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :en54_disablement_endpoints => self.en54_disablement_endpoints.map { it.to_message },
+        :en54_disablement_endpoints => self.en54_disablement_endpoints.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandFireZoneDisablement::FireZoneCommandDisablementRequest::DisablementEntry) },
       }.compact
     end
 

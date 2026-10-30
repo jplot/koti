@@ -50,7 +50,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
         :id => self.id,
         :name => self.name,
         :enabled => self.enabled,
-        :points => self.points.map { it.to_message },
+        :points => self.points.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Point2f) },
         :direction => self.direction&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Video::Videoedge::Channel::Detection::LineCrossingDirection.proto(it) },
         :object_classes => self.object_classes.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::ObjectClass.proto(it) },
       }.compact

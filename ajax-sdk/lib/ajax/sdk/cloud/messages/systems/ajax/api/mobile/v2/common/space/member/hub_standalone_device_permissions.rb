@@ -47,7 +47,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member
         :hub_id => self.hub_id,
         :hub_permissions => self.hub_permissions.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::HubStandaloneDevicePermission.proto(it) },
         :hub_restore_after_alarm_permissions => self.hub_restore_after_alarm_permissions.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::HubRestoreAfterAlarmPermission.proto(it) },
-        :photo_on_demand_device_permissions => self.photo_on_demand_device_permissions.map { it.to_message },
+        :photo_on_demand_device_permissions => self.photo_on_demand_device_permissions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::PhotoOnDemandDevicePermissions) },
         :hub_permissions_extended => self.hub_permissions_extended.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Member::HubStandaloneDevicePermissionExtended.proto(it) },
       }.compact
     end

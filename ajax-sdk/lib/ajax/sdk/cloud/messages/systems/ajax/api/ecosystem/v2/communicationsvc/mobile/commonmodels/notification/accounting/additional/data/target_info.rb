@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         :id => self.id,
         :name => self.name,
         :room_name => self.room_name,
-        :additional_info => self.additional_info&.to_message,
+        :additional_info => self.additional_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Accounting::Additional::Data::AdditionalTargetInfo) },
       }.compact
     end
   end

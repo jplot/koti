@@ -16,6 +16,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- A client method for each of the app's 608 gRPC methods (`Cloud::Methods`), named after its path
+  (`stream_light_devices`, `space_security_arm_group`), with YARD and RBS: it builds its typed request
+  before sending, and Steep rejects a wrong keyword, type or enum symbol in calling code.
 - Typed values for every cloud message the app's methods use, generated from the shipped schemas
   (`Cloud::Messages`, 5,828 `Data` classes and 907 enum modules, loaded on first use), with their RBS;
   `rake generate` rewrites them and `rake generate:check` fails when they drift.

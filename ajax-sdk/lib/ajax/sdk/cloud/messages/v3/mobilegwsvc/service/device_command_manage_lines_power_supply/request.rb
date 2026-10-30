@@ -36,7 +36,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
     def to_message
       {
         :hub_id => self.hub_id,
-        :actions => self.actions.map { it.to_message },
+        :actions => self.actions.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandManageLinesPowerSupply::DeviceCommandManageLinesPowerSupplyRequest::Action) },
       }.compact
     end
 

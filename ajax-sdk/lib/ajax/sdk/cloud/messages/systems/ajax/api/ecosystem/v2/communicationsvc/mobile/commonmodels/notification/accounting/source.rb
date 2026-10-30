@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Accounting::AccountingNotificationSourceType.proto(it) },
         :id => self.id,
         :name => self.name,
-        :source_info => self.source_info&.to_message,
-        :image_info => self.image_info&.to_message,
+        :source_info => self.source_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Accounting::AccountingNotificationSourceInfo) },
+        :image_info => self.image_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::SourceImageInfo) },
       }.compact
     end
   end

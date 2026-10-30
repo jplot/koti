@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Upd
         :first_name => self.first_name,
         :last_name => self.last_name,
         :locale => self.locale,
-        :image => self.image&.to_message,
+        :image => self.image&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::ImageIdValue) },
       }.compact
     end
   end

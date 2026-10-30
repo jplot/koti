@@ -51,7 +51,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device
         :room_id => self.room_id,
         :non_zombie_channels_count => self.non_zombie_channels_count,
         :type => self.type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::About::About::Type.proto(it) },
-        :channels => self.channels.map { it.to_message },
+        :channels => self.channels.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::VideoEdge::Channel) },
         :service_state => self.service_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::ServiceState.proto(it) },
       }.compact
     end

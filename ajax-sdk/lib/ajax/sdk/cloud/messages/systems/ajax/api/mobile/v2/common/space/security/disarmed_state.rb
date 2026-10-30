@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Security
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :not_ready_to_arm => self.not_ready_to_arm&.to_message,
-        :ready_to_arm => self.ready_to_arm&.to_message,
-        :disarmed => self.disarmed&.to_message,
+        :not_ready_to_arm => self.not_ready_to_arm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+        :ready_to_arm => self.ready_to_arm&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
+        :disarmed => self.disarmed&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
       }.compact
     end
 

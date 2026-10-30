@@ -48,7 +48,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Fin
         :video_edge_id => self.video_edge_id,
         :channel_id => self.channel_id,
         :metadata_type => self.metadata_type,
-        :timestamp_range => self.timestamp_range&.to_message,
+        :timestamp_range => self.timestamp_range&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::TimestampRange) },
       }.compact
     end
   end

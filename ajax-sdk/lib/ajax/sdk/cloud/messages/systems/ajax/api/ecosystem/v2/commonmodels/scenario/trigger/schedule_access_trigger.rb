@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :entries => self.entries.map { it.to_message },
-        :options => self.options&.to_message,
+        :entries => self.entries.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScheduleAccessTrigger::ScheduleAccessTriggerEntry) },
+        :options => self.options&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScheduleAccessTrigger::Options) },
       }.compact
     end
 
@@ -78,10 +78,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::T
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :start_time => self.start_time&.to_message,
-          :end_time => self.end_time&.to_message,
+          :start_time => self.start_time&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Type::TimeOfDay) },
+          :end_time => self.end_time&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Type::TimeOfDay) },
           :days => self.days.map { ::Ajax::Sdk::Cloud::Messages::Google::Type::DayOfWeek.proto(it) },
-          :options => self.options&.to_message,
+          :options => self.options&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::Trigger::ScheduleAccessTrigger::ScheduleAccessTriggerEntryOptions) },
         }.compact
       end
     end

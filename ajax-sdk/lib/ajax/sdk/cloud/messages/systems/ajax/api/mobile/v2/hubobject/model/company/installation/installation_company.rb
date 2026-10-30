@@ -41,8 +41,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::I
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :company_info => self.company_info&.to_message,
-        :permissions => self.permissions&.to_message,
+        :company_info => self.company_info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company::CompanyInfo) },
+        :permissions => self.permissions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::HubPermissions) },
         :permissions_expired_at => self.permissions_expired_at&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
         :hub_user_index => self.hub_user_index,
       }.compact

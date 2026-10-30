@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Hubobject::Model::Company
       {
         :hex_id => self.hex_id,
         :name => self.name&.then { ::Ajax::Sdk::Cloud::Encode.wrapper(it) },
-        :logo => self.logo&.to_message,
+        :logo => self.logo&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Images) },
       }.compact
     end
   end

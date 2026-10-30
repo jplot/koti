@@ -32,7 +32,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :entries => self.entries.map { it.to_message },
+        :entries => self.entries.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::OsdConfigurationList::OsdConfiguration) },
       }.compact
     end
 
@@ -68,8 +68,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :position_configuration => self.position_configuration&.to_message,
-          :text_configuration => self.text_configuration&.to_message,
+          :position_configuration => self.position_configuration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::OsdConfigurationList::OsdConfiguration::PositionConfiguration) },
+          :text_configuration => self.text_configuration&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::OsdConfigurationList::OsdConfiguration::TextConfiguration) },
         }.compact
       end
 
@@ -151,10 +151,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :plain_text => self.plain_text&.to_message,
-            :time_text => self.time_text&.to_message,
-            :date_time_text => self.date_time_text&.to_message,
-            :date_text => self.date_text&.to_message,
+            :plain_text => self.plain_text&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::OsdConfigurationList::OsdConfiguration::TextConfiguration::PlainTextConfig) },
+            :time_text => self.time_text&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::OsdConfigurationList::OsdConfiguration::TextConfiguration::TimeTextConfig) },
+            :date_time_text => self.date_time_text&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::OsdConfigurationList::OsdConfiguration::TextConfiguration::DateTimeTextConfig) },
+            :date_text => self.date_text&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::OsdConfigurationList::OsdConfiguration::TextConfiguration::DateTextConfig) },
             :font_size => self.font_size&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::OsdFontSize.proto(it) },
           }.compact
         end

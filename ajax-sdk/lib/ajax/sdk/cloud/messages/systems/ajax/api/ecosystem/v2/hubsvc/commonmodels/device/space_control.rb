@@ -68,19 +68,19 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_profile_part => self.device_profile_part&.to_message,
-        :assigned_extender_part => self.assigned_extender_part&.to_message,
-        :cms_device_index_part => self.cms_device_index_part&.to_message,
-        :bypass_part => self.bypass_part&.to_message,
-        :device_migration_status_part => self.device_migration_status_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
-        :siren_triggers => self.siren_triggers&.to_message,
-        :associated_member_part => self.associated_member_part&.to_message,
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :associated_group_id => self.associated_group_id&.to_message,
-        :common_button_part => self.common_button_part&.to_message,
-        :device_common_capabilities_part => self.device_common_capabilities_part&.to_message,
-        :device_telemetry_part => self.device_telemetry_part&.to_message,
+        :device_profile_part => self.device_profile_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceProfilePart) },
+        :assigned_extender_part => self.assigned_extender_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AssignedExtenderPart) },
+        :cms_device_index_part => self.cms_device_index_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CmsDeviceIndexPart) },
+        :bypass_part => self.bypass_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::BypassPart) },
+        :device_migration_status_part => self.device_migration_status_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceMigrationStatusPart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBatteryWithoutCharging) },
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
+        :associated_member_part => self.associated_member_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart) },
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :associated_group_id => self.associated_group_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AssociatedGroupId) },
+        :common_button_part => self.common_button_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonManageButtonPart) },
+        :device_common_capabilities_part => self.device_common_capabilities_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceCommonCapabilitiesPart) },
+        :device_telemetry_part => self.device_telemetry_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTelemetryPart) },
       }.compact
     end
   end
@@ -150,19 +150,19 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :device_profile_part => self.device_profile_part&.to_message,
-        :assigned_extender_part => self.assigned_extender_part&.to_message,
-        :cms_device_index_part => self.cms_device_index_part&.to_message,
-        :bypass_part => self.bypass_part&.to_message,
-        :device_migration_status_part => self.device_migration_status_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
-        :siren_triggers => self.siren_triggers&.to_message,
-        :associated_member_part => self.associated_member_part&.to_message,
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :associated_group_id => self.associated_group_id&.to_message,
-        :common_button_part => self.common_button_part&.to_message,
-        :device_common_capabilities_part => self.device_common_capabilities_part&.to_message,
-        :device_telemetry_part => self.device_telemetry_part&.to_message,
+        :device_profile_part => self.device_profile_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceProfilePart) },
+        :assigned_extender_part => self.assigned_extender_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AssignedExtenderPart) },
+        :cms_device_index_part => self.cms_device_index_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CmsDeviceIndexPart) },
+        :bypass_part => self.bypass_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::BypassPart) },
+        :device_migration_status_part => self.device_migration_status_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceMigrationStatusPart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBatteryWithoutCharging) },
+        :siren_triggers => self.siren_triggers&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::SirenTriggers) },
+        :associated_member_part => self.associated_member_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::AssociatedMemberPart) },
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :associated_group_id => self.associated_group_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AssociatedGroupId) },
+        :common_button_part => self.common_button_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonManageButtonPart) },
+        :device_common_capabilities_part => self.device_common_capabilities_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceCommonCapabilitiesPart) },
+        :device_telemetry_part => self.device_telemetry_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceTelemetryPart) },
       }.compact
     end
   end

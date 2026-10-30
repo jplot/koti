@@ -51,8 +51,8 @@ module Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::ResponsiblePerson
         :facility_id => self.facility_id,
         :first_name => self.first_name,
         :last_name => self.last_name,
-        :phone_numbers => self.phone_numbers.map { it.to_message },
-        :email_addresses => self.email_addresses.map { it.to_message },
+        :phone_numbers => self.phone_numbers.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::PhoneNumber) },
+        :email_addresses => self.email_addresses.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Common::EmailAddress) },
       }.compact
     end
   end

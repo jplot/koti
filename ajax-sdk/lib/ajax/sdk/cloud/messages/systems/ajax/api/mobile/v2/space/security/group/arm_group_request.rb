@@ -38,7 +38,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Security::Group
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :space_locator => self.space_locator&.to_message,
+        :space_locator => self.space_locator&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::SpaceLocator) },
         :group_id => self.group_id,
         :ignore_alarms => self.ignore_alarms,
       }.compact
@@ -77,8 +77,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Security::Group
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Security::Group::ArmSpaceGroupResponse::Failure) },
       }.compact
     end
 
@@ -164,22 +164,22 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Security::Group
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
-          :space_not_found => self.space_not_found&.to_message,
-          :group_not_found => self.group_not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :another_transition_is_in_progress => self.another_transition_is_in_progress&.to_message,
-          :already_in_the_requested_security_state => self.already_in_the_requested_security_state&.to_message,
-          :illegal_space_security_mode => self.illegal_space_security_mode&.to_message,
-          :hub_offline => self.hub_offline&.to_message,
-          :hub_busy => self.hub_busy&.to_message,
-          :hub_blocked_by_service_provider => self.hub_blocked_by_service_provider&.to_message,
-          :hub_alarm_reset_required => self.hub_alarm_reset_required&.to_message,
-          :hub_detected_malfunctions => self.hub_detected_malfunctions&.to_message,
-          :space_locked => self.space_locked&.to_message,
-          :action_is_limited_in_empty_space => self.action_is_limited_in_empty_space&.to_message,
-          :hub_not_allowed_to_perform_command => self.hub_not_allowed_to_perform_command&.to_message,
-          :space_in_service_mode => self.space_in_service_mode&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_not_found => self.space_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :group_not_found => self.group_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :another_transition_is_in_progress => self.another_transition_is_in_progress&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :already_in_the_requested_security_state => self.already_in_the_requested_security_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :illegal_space_security_mode => self.illegal_space_security_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_offline => self.hub_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_busy => self.hub_busy&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::HubBusyError) },
+          :hub_blocked_by_service_provider => self.hub_blocked_by_service_provider&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_alarm_reset_required => self.hub_alarm_reset_required&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_detected_malfunctions => self.hub_detected_malfunctions&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::HubDetectedMalfunctionsError) },
+          :space_locked => self.space_locked&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::SpaceLockedError) },
+          :action_is_limited_in_empty_space => self.action_is_limited_in_empty_space&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_not_allowed_to_perform_command => self.hub_not_allowed_to_perform_command&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :space_in_service_mode => self.space_in_service_mode&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

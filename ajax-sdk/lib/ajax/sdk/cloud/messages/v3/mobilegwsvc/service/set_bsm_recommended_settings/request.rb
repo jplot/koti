@@ -44,7 +44,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
         :space_id => self.space_id,
         :hub_id => self.hub_id,
         :deactivation_type => self.deactivation_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetBsmRecommendedSettings::SetBsmRecommendedSettingsRequest::DeactivationType.proto(it) },
-        :set_bsm_recommended_settings => self.set_bsm_recommended_settings&.to_message,
+        :set_bsm_recommended_settings => self.set_bsm_recommended_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetBsmRecommendedSettings::SetBsmRecommendedSettingsRequest::SetBsmRecommendedSettings) },
       }.compact
     end
 

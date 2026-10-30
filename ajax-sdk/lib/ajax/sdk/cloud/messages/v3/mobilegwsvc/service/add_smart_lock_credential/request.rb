@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Add
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :device_type => self.device_type&.to_message,
-        :credential => self.credential&.to_message,
+        :device_type => self.device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :credential => self.credential&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::AddSmartLockCredential::AddSmartLockCredentialRequest::SmartLockCredentialToAdd) },
       }.compact
     end
 
@@ -84,8 +84,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Add
       def to_message
         {
           :name => self.name,
-          :entry_code => self.entry_code&.to_message,
-          :contactless_key => self.contactless_key&.to_message,
+          :entry_code => self.entry_code&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::AddSmartLockCredential::AddSmartLockCredentialRequest::SmartLockCredentialToAdd::EntryCode) },
+          :contactless_key => self.contactless_key&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::AddSmartLockCredential::AddSmartLockCredentialRequest::SmartLockCredentialToAdd::ContactlessKey) },
         }.compact
       end
 

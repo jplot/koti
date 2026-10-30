@@ -4,6 +4,7 @@ require 'simplecov'
 SimpleCov.start do
   skip '/spec/'
   skip %r{\Alib/ajax/sdk/cloud/messages}
+  skip %r{\Alib/ajax/sdk/cloud/methods\.rb}
   # A live run exercises only the paths a real hub can answer read-only: it would fail the thresholds.
   unless ENV['AJAX_LIVE'] == '1'
     minimum_coverage 95

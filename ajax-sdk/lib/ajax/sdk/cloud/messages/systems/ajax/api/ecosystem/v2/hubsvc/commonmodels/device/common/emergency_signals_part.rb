@@ -107,7 +107,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :emergency_buttons_on_control_panel_enabled => self.emergency_buttons_on_control_panel_enabled,
-          :emergency_button_types => self.emergency_button_types.map { it.to_message },
+          :emergency_button_types => self.emergency_button_types.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::EmergencySignalsPart::EmergencySignalsPartSettings::EmergencyButtonTypePatch) },
           :accidental_press_protection_enabled => self.accidental_press_protection_enabled,
         }.compact
       end

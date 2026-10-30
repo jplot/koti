@@ -56,7 +56,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::De
         :channel_guid => self.channel_guid,
         :enabled => self.enabled,
         :state => self.state.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::DetectorState.proto(it) },
-        :settings => self.settings&.to_message,
+        :settings => self.settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::DetectorSettings) },
       }.compact
     end
   end
@@ -90,7 +90,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::De
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :pir_radar => self.pir_radar&.to_message,
+        :pir_radar => self.pir_radar&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::PirRadarCapabilities) },
       }.compact
     end
   end
@@ -124,7 +124,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::De
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :available_radar_maps => self.available_radar_maps.map { it.to_message },
+        :available_radar_maps => self.available_radar_maps.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::RadarOperatingMap) },
       }.compact
     end
   end
@@ -167,10 +167,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::De
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :fake_settings => self.fake_settings&.to_message,
-        :motion_settings => self.motion_settings&.to_message,
-        :object_settings => self.object_settings&.to_message,
-        :pir_settings => self.pir_settings&.to_message,
+        :fake_settings => self.fake_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::FakeDetectorSettings) },
+        :motion_settings => self.motion_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::MotionDetectorSettings) },
+        :object_settings => self.object_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::ObjectDetectorSettings) },
+        :pir_settings => self.pir_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::PirDetectorSettings) },
       }.compact
     end
 
@@ -210,8 +210,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::De
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :pir_details_sensitivity => self.pir_details_sensitivity&.to_message,
-        :pir_radar_settings => self.pir_radar_settings&.to_message,
+        :pir_details_sensitivity => self.pir_details_sensitivity&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::PirDetectorSettings::PirDetailsSensitivity) },
+        :pir_radar_settings => self.pir_radar_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::PirDetectorSettings::PirRadarSettings) },
       }.compact
     end
 
@@ -281,7 +281,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::De
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :radar_operating_map => self.radar_operating_map&.to_message,
+          :radar_operating_map => self.radar_operating_map&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::RadarOperatingMap) },
         }.compact
       end
     end
@@ -328,7 +328,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::De
     def to_message
       {
         :radar_operating_mode => self.radar_operating_mode&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::RadarOperatingMode.proto(it) },
-        :map => self.map&.to_message,
+        :map => self.map&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Mask) },
       }.compact
     end
   end
@@ -400,7 +400,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::De
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :mask => self.mask&.to_message,
+        :mask => self.mask&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::MotionDetectorSettings::Mask) },
       }.compact
     end
 
@@ -490,8 +490,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::De
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :zone_mask => self.zone_mask&.to_message,
-        :class_settings => self.class_settings.map { it.to_message },
+        :zone_mask => self.zone_mask&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Mask) },
+        :class_settings => self.class_settings.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Detector::ObjectDetectorSettings::ClassSettings) },
       }.compact
     end
 

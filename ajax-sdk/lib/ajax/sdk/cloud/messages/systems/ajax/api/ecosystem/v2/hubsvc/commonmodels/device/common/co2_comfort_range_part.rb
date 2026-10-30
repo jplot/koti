@@ -40,7 +40,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       {
         :min_comfort_co2 => self.min_comfort_co2,
         :max_comfort_co2 => self.max_comfort_co2,
-        :co2_comfort_limits => self.co2_comfort_limits&.to_message,
+        :co2_comfort_limits => self.co2_comfort_limits&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::Co2ComfortRangePart::Co2ComfortLimits) },
       }.compact
     end
 

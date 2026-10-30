@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
       }.compact
     end
   end
@@ -73,8 +73,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_fibra_part => self.common_fibra_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
       }.compact
     end
   end
@@ -111,8 +111,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
       }.compact
     end
   end
@@ -149,8 +149,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
       }.compact
     end
   end
@@ -187,8 +187,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
       }.compact
     end
   end
@@ -225,8 +225,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
       }.compact
     end
   end
@@ -263,8 +263,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
       }.compact
     end
   end
@@ -301,8 +301,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_fibra_part => self.common_fibra_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
       }.compact
     end
   end
@@ -339,8 +339,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_fibra_part => self.common_fibra_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
       }.compact
     end
   end
@@ -377,8 +377,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
       }.compact
     end
   end
@@ -415,8 +415,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_fibra_part => self.common_fibra_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
       }.compact
     end
   end
@@ -453,8 +453,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_fibra_part => self.common_fibra_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_fibra_part => self.common_fibra_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonFibraPart) },
       }.compact
     end
   end
@@ -491,8 +491,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.to_message,
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
+        :arm_prevention_override_permissions_part => self.arm_prevention_override_permissions_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::ArmPreventionOverridePermissionsPart) },
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
       }.compact
     end
   end

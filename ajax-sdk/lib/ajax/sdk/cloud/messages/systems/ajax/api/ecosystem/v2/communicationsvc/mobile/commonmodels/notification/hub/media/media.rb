@@ -39,8 +39,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     def to_message
       {
         :expirationTime => self.expirationTime&.then { ::Ajax::Sdk::Cloud::Encode.time(it) },
-        :images => self.images.map { it.to_message },
-        :audio => self.audio.map { it.to_message },
+        :images => self.images.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Media::HubNotificationMedia::Image) },
+        :audio => self.audio.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Media::HubNotificationMedia::Audio) },
       }.compact
     end
 

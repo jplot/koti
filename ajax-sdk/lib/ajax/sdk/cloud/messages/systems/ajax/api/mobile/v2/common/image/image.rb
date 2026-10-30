@@ -81,7 +81,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :images => self.images.map { it.to_message },
+        :images => self.images.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Image::Image) },
         :image_id => self.image_id,
       }.compact
     end

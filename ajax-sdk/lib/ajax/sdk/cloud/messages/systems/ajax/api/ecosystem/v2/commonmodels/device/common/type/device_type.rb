@@ -38,9 +38,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Com
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :hub_device_type => self.hub_device_type&.to_message,
-        :video_edge_type => self.video_edge_type&.to_message,
-        :smart_lock_type => self.smart_lock_type&.to_message,
+        :hub_device_type => self.hub_device_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::Type::HubDeviceType) },
+        :video_edge_type => self.video_edge_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::Type::VideoEdgeType) },
+        :smart_lock_type => self.smart_lock_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::Type::SmartLockType) },
       }.compact
     end
 

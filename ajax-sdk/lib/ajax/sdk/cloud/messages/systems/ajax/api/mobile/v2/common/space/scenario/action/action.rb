@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Act
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :change_arming_state => self.change_arming_state&.to_message,
-        :switch_state => self.switch_state&.to_message,
+        :change_arming_state => self.change_arming_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::ChangeArmingStateAction) },
+        :switch_state => self.switch_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Scenario::Action::SwitchStateAction) },
       }.compact
     end
 

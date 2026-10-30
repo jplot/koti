@@ -85,7 +85,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :indication_config => self.indication_config&.to_message,
+          :indication_config => self.indication_config&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Lifequality::LifeQualityLedIndicationPart::LifeQualityIndicationPartSettings::IndicationConfig) },
         }.compact
       end
 

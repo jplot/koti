@@ -46,7 +46,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       {
         :antimasking => self.antimasking&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonMaskingPart::Antimasking.proto(it) },
         :is_masked_status => self.is_masked_status&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonMaskingPart::IsMaskedStatus.proto(it) },
-        :masking_sensitivity => self.masking_sensitivity&.to_message,
+        :masking_sensitivity => self.masking_sensitivity&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::MaskingSensitivity) },
         :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonMaskingPart::Capability.proto(it) },
         :icing_detect => self.icing_detect&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonMaskingPart::IcingDetect.proto(it) },
       }.compact
@@ -88,7 +88,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
       def to_message
         {
           :antimasking => self.antimasking&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonMaskingPart::Antimasking.proto(it) },
-          :masking_sensitivity => self.masking_sensitivity&.to_message,
+          :masking_sensitivity => self.masking_sensitivity&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::MaskingSensitivity) },
           :icing_detect => self.icing_detect&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonMaskingPart::IcingDetect.proto(it) },
         }.compact
       end

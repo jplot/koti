@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamBukhoorSelection::StreamBukhoorSelectionResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamBukhoorSelection::StreamBukhoorSelectionResponse::Failure) },
       }.compact
     end
 
@@ -77,7 +77,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :supported_objects => self.supported_objects.map { it.to_message },
+          :supported_objects => self.supported_objects.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamBukhoorSelection::StreamBukhoorSelectionResponse::Success::SupportedObject) },
         }.compact
       end
 
@@ -113,8 +113,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :single_object => self.single_object&.to_message,
-            :device_with_sensors => self.device_with_sensors&.to_message,
+            :single_object => self.single_object&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamBukhoorSelection::StreamBukhoorSelectionResponse::Success::SupportedObject::SingleObject) },
+            :device_with_sensors => self.device_with_sensors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamBukhoorSelection::StreamBukhoorSelectionResponse::Success::SupportedObject::ObjectWithSensors) },
           }.compact
         end
 
@@ -157,7 +157,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           def to_message
             {
               :object_id => self.object_id_,
-              :object_type => self.object_type&.to_message,
+              :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
               :selected => self.selected,
             }.compact
           end
@@ -205,10 +205,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           def to_message
             {
               :object_id => self.object_id_,
-              :object_type => self.object_type&.to_message,
-              :sensors_1 => self.sensors_1&.to_message,
-              :sensors_2 => self.sensors_2&.to_message,
-              :sensors_3 => self.sensors_3&.to_message,
+              :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+              :sensors_1 => self.sensors_1&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamBukhoorSelection::StreamBukhoorSelectionResponse::Success::SupportedObject::ObjectWithSensors::Sensor) },
+              :sensors_2 => self.sensors_2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamBukhoorSelection::StreamBukhoorSelectionResponse::Success::SupportedObject::ObjectWithSensors::Sensor) },
+              :sensors_3 => self.sensors_3&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamBukhoorSelection::StreamBukhoorSelectionResponse::Success::SupportedObject::ObjectWithSensors::Sensor) },
             }.compact
           end
 
@@ -282,7 +282,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

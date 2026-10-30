@@ -68,9 +68,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
         :times_to_make_call_after_alarm => self.times_to_make_call_after_alarm&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         :call_trigger_type => self.call_trigger_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart::CallTriggerType.proto(it) },
         :available_device_alarm_categories => self.available_device_alarm_categories.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Alarm::DeviceAlarmCategory.proto(it) },
-        :any_device_with_alarm_category => self.any_device_with_alarm_category&.to_message,
-        :available_trigger_devices_with_alarms => self.available_trigger_devices_with_alarms.map { it.to_message },
-        :specific_device_with_alarms => self.specific_device_with_alarms&.to_message,
+        :any_device_with_alarm_category => self.any_device_with_alarm_category&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart::AnyDeviceWithAlarmCategory) },
+        :available_trigger_devices_with_alarms => self.available_trigger_devices_with_alarms.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart::DeviceWithAlarms) },
+        :specific_device_with_alarms => self.specific_device_with_alarms&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart::SpecificDeviceWithAlarms) },
         :call_after_tamper_alarm => self.call_after_tamper_alarm,
         :call_maximum_duration => self.call_maximum_duration&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
       }.compact
@@ -154,7 +154,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
           :call_only_after_alarm => self.call_only_after_alarm,
           :times_to_make_call_after_alarm => self.times_to_make_call_after_alarm&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
           :call_trigger_type => self.call_trigger_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart::CallTriggerType.proto(it) },
-          :call_trigger => self.call_trigger&.to_message,
+          :call_trigger => self.call_trigger&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart::CallTrigger) },
           :call_after_tamper_alarm => self.call_after_tamper_alarm,
           :call_maximum_duration => self.call_maximum_duration&.then { ::Ajax::Sdk::Cloud::Encode.duration(it) },
         }.compact
@@ -193,8 +193,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :any_device_with_alarm_category => self.any_device_with_alarm_category&.to_message,
-          :specific_device_with_alarms => self.specific_device_with_alarms&.to_message,
+          :any_device_with_alarm_category => self.any_device_with_alarm_category&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart::AnyDeviceWithAlarmCategory) },
+          :specific_device_with_alarms => self.specific_device_with_alarms&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart::SpecificDeviceWithAlarms) },
         }.compact
       end
 
@@ -265,7 +265,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :devices_with_alarms => self.devices_with_alarms.map { it.to_message },
+          :devices_with_alarms => self.devices_with_alarms.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::TelephonyCallOptionsPart::DeviceWithAlarms) },
         }.compact
       end
     end
@@ -306,8 +306,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       def to_message
         {
           :device_id => self.device_id,
-          :object_type => self.object_type&.to_message,
-          :device_alarms => self.device_alarms.map { it.to_message },
+          :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+          :device_alarms => self.device_alarms.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Alarm::DeviceAlarm) },
         }.compact
       end
     end

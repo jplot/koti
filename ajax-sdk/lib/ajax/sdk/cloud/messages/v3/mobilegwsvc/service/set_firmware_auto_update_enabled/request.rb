@@ -43,8 +43,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Set
       {
         :space_id => self.space_id,
         :enabled => self.enabled,
-        :device_id => self.device_id&.to_message,
-        :all_devices_in_space => self.all_devices_in_space&.to_message,
+        :device_id => self.device_id&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Common::DeviceId) },
+        :all_devices_in_space => self.all_devices_in_space&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::SetFirmwareAutoUpdateEnabled::SetFirmwareAutoUpdateEnabledRequest::AllDevicesInSpace) },
       }.compact
     end
 

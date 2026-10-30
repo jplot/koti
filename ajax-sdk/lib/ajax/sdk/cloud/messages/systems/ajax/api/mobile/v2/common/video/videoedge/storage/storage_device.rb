@@ -70,13 +70,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::St
         :model => self.model,
         :serial => self.serial,
         :size_total => self.size_total,
-        :status => self.status&.to_message,
-        :info => self.info&.to_message,
+        :status => self.status&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Storage::StorageDeviceStatus) },
+        :info => self.info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Storage::StorageDeviceInfo) },
         :size_used => self.size_used,
         :temperature => self.temperature,
-        :disk_write_errors => self.disk_write_errors&.to_message,
+        :disk_write_errors => self.disk_write_errors&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Storage::DiskWriteErrors) },
         :media_type => self.media_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Storage::StorageMediaType.proto(it) },
-        :port_number => self.port_number&.to_message,
+        :port_number => self.port_number&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Storage::StorageDevicePortNumber) },
       }.compact
     end
   end

@@ -47,8 +47,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
         :hysteresis_state => self.hysteresis_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::HumiditySensitivityPart::HumidityHysteresisState.proto(it) },
         :hysteresis_time => self.hysteresis_time,
         :hysteresis_threshold => self.hysteresis_threshold,
-        :hysteresis_time_limits => self.hysteresis_time_limits&.to_message,
-        :hysteresis_threshold_limits => self.hysteresis_threshold_limits&.to_message,
+        :hysteresis_time_limits => self.hysteresis_time_limits&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::HumiditySensitivityPart::HumidityHysteresisTimeLimits) },
+        :hysteresis_threshold_limits => self.hysteresis_threshold_limits&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::HumiditySensitivityPart::HumidityHysteresisThresholdLimits) },
       }.compact
     end
 

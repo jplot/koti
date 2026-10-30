@@ -28,6 +28,19 @@ module Schema
     # An enum and its values, each as its protobuf name and its short symbol, in the order of the descriptor.
     Enum = Data.define(:full_name, :constant, :file, :values)
 
+    Call = Data.define(:path, :type, :name, :request, :response)
+
+    # A method of methods.tsv: its gRPC path, its call type, its Ruby name, and its request and response {Message}s.
+    class Call
+      # @param row [Array(String, String, String, String)] a line of methods.tsv: path, call type, request, response
+      # @return [Call]
+      def self.from(row, model)
+        path, kind, request, response = row
+        new(path:, type: kind.to_sym, name: Naming.method_name(path), request: model.type(request),
+            response: model.type(response))
+      end
+    end
+
     # The Ruby names of protobuf ones.
     module Naming
       RESERVED = [*Data.public_instance_methods, :raw, :to_message].freeze
@@ -39,6 +52,16 @@ module Schema
 
       # @return [String] +stream_light_devices+ as +StreamLightDevices+
       def camelize(segment) = segment.split('_').map { it[0].to_s.upcase + it[1..].to_s }.join
+
+      # Words split as Client#read? splits them: the words the read-only rule judges end the name.
+      #
+      # @return [Symbol] +…StreamLightDevicesService/execute+ as +stream_light_devices+,
+      #   +…SpaceSecurityService/armGroup+ as +space_security_arm_group+
+      def method_name(path)
+        service, method = path.delete_prefix('/').split('/')
+        words = [service.to_s.split('.').last.to_s.delete_suffix('Service'), *(method unless method == 'execute')]
+        words.map { it.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase }.join('_').to_sym
+      end
 
       # The prefix is the longest one ending in +_+ that every value shares, or every value but 0 when 0 shares none.
       #
@@ -157,6 +180,7 @@ module Schema
         @types = {}
         Google::Protobuf::FileDescriptorSet.decode(descriptors).file.each { index(it) }
         @entries = @types.filter_map { |name, type| [name, type.descriptor] if map_entry?(type.descriptor) }.to_h
+        @rpcs = rpcs
         @roots = rpcs.flat_map { it.last(2) }.uniq.sort
         @reached = reach(@roots)
         @modules = {}
@@ -167,6 +191,9 @@ module Schema
 
       # @return [Array<Enum>] in the order of the descriptors
       def enums = @enums ||= generated(Google::Protobuf::EnumDescriptorProto).map { enum(it) }
+
+      # @return [Array<Call>] the methods of methods.tsv, in its order
+      def calls = @calls ||= @rpcs.map { Call.from(it, self) }
 
       # @return [Array<String>] the .proto files holding a generated type
       def files = (messages + enums).map(&:file).uniq.sort

@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :whitelist => self.whitelist&.to_message,
-        :allowed_for_everyone => self.allowed_for_everyone&.to_message,
+        :whitelist => self.whitelist&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Media::MediaVisibility::Whitelist) },
+        :allowed_for_everyone => self.allowed_for_everyone&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Media::MediaVisibility::AllowedForEveryone) },
       }.compact
     end
 

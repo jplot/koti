@@ -73,8 +73,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware::StartDeviceFirmwareUpdateResponse::Failure) },
       }.compact
     end
 
@@ -134,12 +134,12 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware
       def to_message
         {
           :message => self.message,
-          :illegal_argument => self.illegal_argument&.to_message,
-          :hub_illegal_state => self.hub_illegal_state&.to_message,
-          :hub_offline => self.hub_offline&.to_message,
-          :update_not_found => self.update_not_found&.to_message,
-          :permission_denied => self.permission_denied&.to_message,
-          :job_objects_limit_reached => self.job_objects_limit_reached&.to_message,
+          :illegal_argument => self.illegal_argument&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :hub_illegal_state => self.hub_illegal_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware::StartDeviceFirmwareUpdateResponse::Failure::HubIllegalStateError) },
+          :hub_offline => self.hub_offline&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :update_not_found => self.update_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :permission_denied => self.permission_denied&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
+          :job_objects_limit_reached => self.job_objects_limit_reached&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 
@@ -179,7 +179,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware
         def to_message
           {
             :rejection_reason => self.rejection_reason&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware::StartDeviceFirmwareUpdateResponse::Failure::HubIllegalStateError::RejectionReason.proto(it) },
-            :source => self.source&.to_message,
+            :source => self.source&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware::StartDeviceFirmwareUpdateResponse::Failure::HubIllegalStateError::Source) },
           }.compact
         end
 
@@ -223,7 +223,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Firmware
             {
               :device_hex_id => self.device_hex_id,
               :device_type => self.device_type,
-              :device_type_v2 => self.device_type_v2&.to_message,
+              :device_type_v2 => self.device_type_v2&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
             }.compact
           end
         end

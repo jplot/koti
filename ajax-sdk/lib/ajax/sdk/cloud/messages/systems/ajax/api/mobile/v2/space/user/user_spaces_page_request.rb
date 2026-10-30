@@ -39,7 +39,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
     def to_message
       {
         :limit => self.limit,
-        :pagination => self.pagination&.to_message,
+        :pagination => self.pagination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Pagination) },
         :search_phrase => self.search_phrase,
       }.compact
     end
@@ -77,8 +77,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User::FindUserSpacesWithPaginationResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User::FindUserSpacesWithPaginationResponse::Failure) },
       }.compact
     end
 
@@ -122,8 +122,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :spaces => self.spaces.map { it.to_message },
-          :pagination => self.pagination&.to_message,
+          :spaces => self.spaces.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::LiteSpace) },
+          :pagination => self.pagination&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Pagination) },
         }.compact
       end
     end
@@ -157,7 +157,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::User
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

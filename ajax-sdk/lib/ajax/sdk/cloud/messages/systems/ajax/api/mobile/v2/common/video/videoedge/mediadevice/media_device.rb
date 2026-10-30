@@ -63,11 +63,11 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Me
         :family => self.family,
         :model => self.model,
         :enabled => self.enabled,
-        :info => self.info&.to_message,
+        :info => self.info&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::MediaDeviceInfo) },
         :state => self.state.map { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::MediaDeviceState.proto(it) },
-        :connection_settings => self.connection_settings&.to_message,
-        :capabilities => self.capabilities&.to_message,
-        :device_settings => self.device_settings&.to_message,
+        :connection_settings => self.connection_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::ConnectionSettings) },
+        :capabilities => self.capabilities&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::MediaDeviceCapabilities) },
+        :device_settings => self.device_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::MediaDeviceSettings) },
         :permanent => self.permanent,
       }.compact
     end

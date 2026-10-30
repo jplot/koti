@@ -68,8 +68,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       def to_message
         {
           :capabilities => self.capabilities.map { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubSimPart::Capability.proto(it) },
-          :sim_one => self.sim_one&.to_message,
-          :sim_two => self.sim_two&.to_message,
+          :sim_one => self.sim_one&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubSimPart::SimCard) },
+          :sim_two => self.sim_two&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubSimPart::SimCard) },
           :imei => self.imei,
         }.compact
       end
@@ -108,7 +108,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       def to_message
         {
           :is_active => self.is_active,
-          :phone_number => self.phone_number&.to_message,
+          :phone_number => self.phone_number&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubSimPart::PhoneNumber) },
         }.compact
       end
     end
@@ -146,7 +146,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
       def to_message
         {
           :known => self.known,
-          :unknown => self.unknown&.to_message,
+          :unknown => self.unknown&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Google::Protobuf::Empty) },
         }.compact
       end
 
@@ -195,8 +195,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Hub
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :sim_one => self.sim_one&.to_message,
-        :sim_two => self.sim_two&.to_message,
+        :sim_one => self.sim_one&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubSimPartSettings::SimSetting) },
+        :sim_two => self.sim_two&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::HubPackage::Common::HubSimPartSettings::SimSetting) },
       }.compact
     end
 

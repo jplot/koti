@@ -73,8 +73,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Monitoring
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Monitoring::FindMonitoringCompaniesResponse::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Monitoring::FindMonitoringCompaniesResponse::Failure) },
       }.compact
     end
 
@@ -118,8 +118,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Monitoring
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :available_monitoring_companies_block => self.available_monitoring_companies_block&.to_message,
-          :space_monitoring_companies_block => self.space_monitoring_companies_block&.to_message,
+          :available_monitoring_companies_block => self.available_monitoring_companies_block&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Monitoring::FindMonitoringCompaniesResponse::Success::AvailableMonitoringCompaniesBlock) },
+          :space_monitoring_companies_block => self.space_monitoring_companies_block&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Monitoring::FindMonitoringCompaniesResponse::Success::SpaceMonitoringCompaniesBlock) },
         }.compact
       end
 
@@ -152,7 +152,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Monitoring
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :companies => self.companies.map { it.to_message },
+            :companies => self.companies.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company::SpaceMonitoringCompany) },
           }.compact
         end
       end
@@ -186,7 +186,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Monitoring
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :companies => self.companies.map { it.to_message },
+            :companies => self.companies.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Company::SpaceMonitoringCompany) },
           }.compact
         end
       end
@@ -221,7 +221,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Company::Monitoring
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :bad_request => self.bad_request&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response::DefaultError) },
         }.compact
       end
 

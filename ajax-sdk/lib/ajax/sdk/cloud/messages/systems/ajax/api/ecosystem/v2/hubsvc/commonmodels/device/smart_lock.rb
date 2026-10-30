@@ -65,18 +65,18 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Dev
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :common_jeweller_part => self.common_jeweller_part&.to_message,
-        :smart_lock_part => self.smart_lock_part&.to_message,
-        :smart_lock_yale_part => self.smart_lock_yale_part&.to_message,
-        :common_wings_part => self.common_wings_part&.to_message,
-        :device_battery => self.device_battery&.to_message,
-        :language_part => self.language_part&.to_message,
-        :authentication_on_action_part => self.authentication_on_action_part&.to_message,
-        :device_chimes => self.device_chimes&.to_message,
-        :device_event_settings => self.device_event_settings&.to_message,
-        :door_open_too_long_event_settings_part => self.door_open_too_long_event_settings_part&.to_message,
-        :permitted_users_count_part => self.permitted_users_count_part&.to_message,
-        :smart_lock_yale_voice_language_part => self.smart_lock_yale_voice_language_part&.to_message,
+        :common_jeweller_part => self.common_jeweller_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonJewellerPart) },
+        :smart_lock_part => self.smart_lock_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockPart) },
+        :smart_lock_yale_part => self.smart_lock_yale_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockYalePart) },
+        :common_wings_part => self.common_wings_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonWingsPart) },
+        :device_battery => self.device_battery&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceBatteryWithoutCharging) },
+        :language_part => self.language_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::LanguagePart) },
+        :authentication_on_action_part => self.authentication_on_action_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::AuthenticationOnActionPart) },
+        :device_chimes => self.device_chimes&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DeviceChimes) },
+        :device_event_settings => self.device_event_settings&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::CommonEventSettingsPart) },
+        :door_open_too_long_event_settings_part => self.door_open_too_long_event_settings_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::DoorOpenTooLongEventSettingsPart) },
+        :permitted_users_count_part => self.permitted_users_count_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Common::PermittedUsersCountPart) },
+        :smart_lock_yale_voice_language_part => self.smart_lock_yale_voice_language_part&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::Device::Smartlock::SmartLockYaleVoiceLanguagePart) },
       }.compact
     end
   end

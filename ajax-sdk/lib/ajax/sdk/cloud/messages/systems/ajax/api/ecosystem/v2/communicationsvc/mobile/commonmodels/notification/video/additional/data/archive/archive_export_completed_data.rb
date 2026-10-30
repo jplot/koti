@@ -58,9 +58,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile:
         :export_id => self.export_id,
         :member_id => self.member_id,
         :member_user_name => self.member_user_name,
-        :visibility => self.visibility&.to_message,
-        :export_prepared_metadata => self.export_prepared_metadata&.to_message,
-        :export_failed_metadata => self.export_failed_metadata&.to_message,
+        :visibility => self.visibility&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Media::VideoMediaVisibility) },
+        :export_prepared_metadata => self.export_prepared_metadata&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Additional::Data::Archive::ArchiveExportCompletedData::ExportPreparedMetadata) },
+        :export_failed_metadata => self.export_failed_metadata&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Video::Additional::Data::Archive::ArchiveExportCompletedData::ExportFailedMetadata) },
       }.compact
     end
 

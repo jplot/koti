@@ -35,8 +35,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :success => self.success&.to_message,
-        :failure => self.failure&.to_message,
+        :success => self.success&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success) },
+        :failure => self.failure&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Failure) },
       }.compact
     end
 
@@ -80,8 +80,8 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
       def to_message
         {
-          :snapshot => self.snapshot&.to_message,
-          :updates => self.updates&.to_message,
+          :snapshot => self.snapshot&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::Snapshot) },
+          :updates => self.updates&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::Updates) },
         }.compact
       end
 
@@ -114,7 +114,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :fire_zones => self.fire_zones.map { it.to_message },
+            :fire_zones => self.fire_zones.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::Snapshot::FireZoneSnapshot) },
           }.compact
         end
 
@@ -169,13 +169,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
           def to_message
             {
               :fire_zone_id_hex => self.fire_zone_id_hex,
-              :fire_zone_state => self.fire_zone_state&.to_message,
-              :fire_alarm_state => self.fire_alarm_state&.to_message,
-              :test_state => self.test_state&.to_message,
-              :disablement_state => self.disablement_state&.to_message,
-              :fault_state => self.fault_state&.to_message,
-              :double_knock_state => self.double_knock_state&.to_message,
-              :delays_activation_state => self.delays_activation_state&.to_message,
+              :fire_zone_state => self.fire_zone_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::FireZoneState) },
+              :fire_alarm_state => self.fire_alarm_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::FireAlarmState) },
+              :test_state => self.test_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::TestState) },
+              :disablement_state => self.disablement_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::DisablementState) },
+              :fault_state => self.fault_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::FaultState) },
+              :double_knock_state => self.double_knock_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::DoubleKnockState) },
+              :delays_activation_state => self.delays_activation_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::DelaysActivationState) },
             }.compact
           end
         end
@@ -210,7 +210,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
         def to_message
           {
-            :updates => self.updates.map { it.to_message },
+            :updates => self.updates.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::Update) },
           }.compact
         end
       end
@@ -266,13 +266,13 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         def to_message
           {
             :fire_zone_id_hex => self.fire_zone_id_hex,
-            :fire_zone_state => self.fire_zone_state&.to_message,
-            :fire_alarm_state => self.fire_alarm_state&.to_message,
-            :test_state => self.test_state&.to_message,
-            :disablement_state => self.disablement_state&.to_message,
-            :fault_state => self.fault_state&.to_message,
-            :double_knock_state => self.double_knock_state&.to_message,
-            :delays_activation_state => self.delays_activation_state&.to_message,
+            :fire_zone_state => self.fire_zone_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::FireZoneState) },
+            :fire_alarm_state => self.fire_alarm_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::FireAlarmState) },
+            :test_state => self.test_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::TestState) },
+            :disablement_state => self.disablement_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::DisablementState) },
+            :fault_state => self.fault_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::FaultState) },
+            :double_knock_state => self.double_knock_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::DoubleKnockState) },
+            :delays_activation_state => self.delays_activation_state&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::DelaysActivationState) },
           }.compact
         end
 
@@ -351,7 +351,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         def to_message
           {
             :state => self.state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::FireAlarmState::State.proto(it) },
-            :fire_alarm_details => self.fire_alarm_details&.to_message,
+            :fire_alarm_details => self.fire_alarm_details&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::FireAlarmState::FireAlarmDetails) },
           }.compact
         end
 
@@ -504,7 +504,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
         def to_message
           {
             :disablement_zone_state => self.disablement_zone_state&.then { ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::DisablementState::State.proto(it) },
-            :disablement_parts_state => self.disablement_parts_state.map { it.to_message },
+            :disablement_parts_state => self.disablement_parts_state.map { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamFireZoneV2::StreamFireZoneResponseV2::Success::DisablementState::DisablementPartState) },
             :disablement_count => self.disablement_count,
           }.compact
         end
@@ -745,10 +745,10 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Str
       def to_message
         {
           :message => self.message,
-          :bad_request => self.bad_request&.to_message,
-          :hub_not_found => self.hub_not_found&.to_message,
-          :illegal_argument => self.illegal_argument&.to_message,
-          :request_timeout => self.request_timeout&.to_message,
+          :bad_request => self.bad_request&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :hub_not_found => self.hub_not_found&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :illegal_argument => self.illegal_argument&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
+          :request_timeout => self.request_timeout&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Error) },
         }.compact
       end
 

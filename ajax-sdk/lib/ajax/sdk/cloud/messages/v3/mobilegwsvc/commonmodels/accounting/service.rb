@@ -41,9 +41,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :feature => self.feature&.to_message,
-        :package => self.package&.to_message,
-        :current_service_agreement => self.current_service_agreement&.to_message,
+        :feature => self.feature&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Accounting::Feature) },
+        :package => self.package&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::Package) },
+        :current_service_agreement => self.current_service_agreement&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Accounting::CurrentServiceAgreement) },
         :max_target_count_to_assign => self.max_target_count_to_assign,
       }.compact
     end

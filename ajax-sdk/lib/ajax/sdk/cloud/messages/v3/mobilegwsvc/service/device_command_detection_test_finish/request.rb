@@ -46,9 +46,9 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
       {
         :hub_id => self.hub_id,
         :device_id => self.device_id,
-        :object_type => self.object_type&.to_message,
-        :hub_detection_zone_test_finish => self.hub_detection_zone_test_finish&.to_message,
-        :device_detection_zone_test_finish => self.device_detection_zone_test_finish&.to_message,
+        :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
+        :hub_detection_zone_test_finish => self.hub_detection_zone_test_finish&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandDetectionTestFinish::DeviceCommandDetectionTestFinishRequest::HubDetectionZoneTestFinish) },
+        :device_detection_zone_test_finish => self.device_detection_zone_test_finish&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandDetectionTestFinish::DeviceCommandDetectionTestFinishRequest::DeviceDetectionZoneTestFinish) },
       }.compact
     end
 
@@ -126,7 +126,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::Dev
         {
           :hub_id => self.hub_id,
           :device_id => self.device_id,
-          :object_type => self.object_type&.to_message,
+          :object_type => self.object_type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         }.compact
       end
     end

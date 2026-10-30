@@ -41,7 +41,7 @@ module Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels
     # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
     def to_message
       {
-        :type => self.type&.to_message,
+        :type => self.type&.then { ::Ajax::Sdk::Cloud::Encode.message(it, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels::ObjectType) },
         :hub_color => self.hub_color&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::DeviceColor.proto(it) },
         :hub_label => self.hub_label&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space::Device::DeviceLabel.proto(it) },
         :box_type => self.box_type&.then { ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Hub::HubBoxType.proto(it) },

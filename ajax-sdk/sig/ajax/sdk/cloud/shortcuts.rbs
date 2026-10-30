@@ -1,0 +1,117 @@
+module Ajax
+  module Sdk
+    module Cloud
+      class LifeQualityHistory < Data
+        type item = ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataItem
+        type answer = ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataResponse
+        type series = Hash[Time, (Float | Range[Float])?]
+
+        attr_reader temperature: series
+        attr_reader humidity: series
+        attr_reader co2: series
+
+        def self.new: (temperature: series, humidity: series, co2: series) -> LifeQualityHistory
+        def self.from: (answer answer) -> LifeQualityHistory
+        def self.series: (Hash[Integer, item] values) -> series
+        def self.bucket: (item item) -> (Float | Range[Float])?
+      end
+
+      module Shortcuts : Methods
+        module SERVICE = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service
+        module LOCATOR = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Locator
+        module HUBSVC = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels
+        module SPACE = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
+
+        type target = { hub_id: String, device_id: String }
+        type switched = { hub_id: String, device_id: String, device_type: HUBSVC::ObjectType, channels: Array[Integer] }
+        type shutter = { hub_id: String, device_id: String, device_type: HUBSVC::ObjectType }
+        type bypass = :engineering_sensor | :engineering_tamper | :one_time_sensor | :one_time_tamper
+        type security_mode = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::Security::SetSecurityModeRequest::SecurityMode::value
+        type location = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::PressPanicButtonRequest::Location
+        type step = ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataDiscreteness::value
+        type update = HUBSVC::Device::Update
+
+        module Targets : Methods
+          private
+
+          def hub_target: (Device device) -> target
+          def hub_id_of: (Device device) -> String
+          def exact_type: (Device device) -> HUBSVC::ObjectType
+          def family_type: (Symbol family) -> HUBSVC::ObjectType
+          def space_of: (String space_id) -> SPACE::SpaceLocator
+          def hub_of: (String space_id, String hub_id) -> LOCATOR::DeviceLocator
+          def first_of: [T] (Enumerator[T, nil] stream) -> T
+        end
+
+        module Outputs : Methods
+          include Targets
+
+          module ROLLER = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::DeviceCommandRollerShutterControl
+          FAMILIES: Hash[Symbol, Symbol]
+
+          def turn_on: (Device device, ?channel: Integer) -> nil
+          def turn_off: (Device device, ?channel: Integer) -> nil
+          def set_brightness: (Device device, Integer percent) -> nil
+          def open_shutter: (Device device) -> nil
+          def close_shutter: (Device device) -> nil
+          def move_shutter: (Device device, Integer percent) -> nil
+          def stop_shutter: (Device device) -> nil
+          def lock: (Device device) -> nil
+          def unlock: (Device device) -> nil
+          def unlatch: (Device device) -> nil
+
+          private
+
+          def switched: (Device device, Integer channel) -> switched
+          def switch_family: (Device device) -> Symbol?
+          def shutter: (Device device) -> shutter
+          def hub_lock?: (Device device) -> bool
+          def hub_lock: (Device device) -> switched
+          def cloud_lock: (Device device, :lock | :unlock | :unlatch action) -> nil
+        end
+
+        module Protection : Methods
+          include Targets
+
+          def bypass: (Device device, ?tamper_only: bool, ?once: bool) -> nil
+          def unbypass: (Device device, ?once: bool) -> nil
+          def arm_group: (String space_id, String group_id, ?ignore_alarms: bool) -> nil
+          def disarm_group: (String space_id, String group_id) -> nil
+          def set_security_mode: (String space_id, security_mode mode) -> nil
+          def panic: (String space_id, ?location: location?) -> nil
+          def mute: (Device device) -> nil
+          def mute_fire_detectors: (String hub_id, ?except_triggered: bool) -> nil
+          def reset_fire_alarm: (String hub_id) -> nil
+
+          private
+
+          def bypass_kind: (bool tamper_only, bool once) -> bypass
+        end
+
+        module Details : Methods
+          include Targets
+
+          def device_details: (Device device) -> HUBSVC::Device::HubDevice?
+          def hub_details: (String space_id, String hub_id) -> ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Device::Info::DeviceInfo?
+          def update_device_settings: (Device device, *update updates) -> SERVICE::UpdateHubDevice::UpdateHubDeviceResponse::Success
+          def rename: (Device device, String name) -> SERVICE::UpdateHubDevice::UpdateHubDeviceResponse::Success
+          def update_hub_settings: (String space_id, String hub_id, *update updates) -> SERVICE::UpdateDevice::UpdateDeviceResponse::Success
+          def scenarios: (String space_id) -> Array[::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Commonmodels::Scenario::LightScenario]
+          def enable_scenario: (String space_id, String scenario_id) -> nil
+          def disable_scenario: (String space_id, String scenario_id) -> nil
+          def rooms: (String space_id) -> Array[SPACE::Room::Room]
+          def groups: (String space_id) -> Array[SPACE::Security::Group::Group]
+          def life_quality_history: (Device device, from: Time, to: Time, ?step: step, ?time_zone: String) -> LifeQualityHistory
+
+          private
+
+          def space_snapshot: (String space_id) -> SPACE::Space?
+        end
+
+        include Outputs
+        include Protection
+        include Details
+      end
+    end
+  end
+end

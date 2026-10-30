@@ -109,7 +109,7 @@ RSpec.describe Schema::Generate::Model do
     subject(:shipped) { described_class.load(File.expand_path('../../../lib/ajax/sdk/cloud/schemas', __dir__)) }
 
     it 'generates every message reachable from the methods' do
-      expect(shipped.messages.size).to eq(5828)
+      expect(shipped.messages.size).to eq(5832)
     end
 
     it 'gives every type a distinct constant' do
@@ -125,8 +125,8 @@ RSpec.describe Schema::Generate::Model do
         .to eq(%i[stream_light_devices space_security_arm_group])
     end
 
-    it 'gives the 608 methods distinct names' do
-      expect(shipped.calls.map(&:name).uniq.size).to eq(608)
+    it 'gives the 609 methods distinct names' do
+      expect(shipped.calls.map(&:name).uniq.size).to eq(609)
     end
   end
 end

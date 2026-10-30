@@ -57,6 +57,40 @@ module Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Response
     def to_message = {}
   end
 
+  # +systems.ajax.api.mobile.v2.common.response.IllegalStateError+, from +systems/ajax/api/mobile/v2/common/response/response.proto+.
+  #
+  # @!attribute [r] message
+  #   @return [String] field 1, +string+
+  # @!attribute [r] raw
+  #   @return [Hash{Symbol=>Object}] the message as google-protobuf's +to_h+ gave it
+  IllegalStateError = ::Data.define(:message, :raw)
+
+  class IllegalStateError
+    DEFAULTS = { :message => '', :raw => {}.freeze }.freeze
+    private_constant :DEFAULTS
+
+    # The members of each oneof, by the name of its reader.
+    ONEOFS = {}.freeze
+
+    # @param hash [Hash{Symbol=>Object}] the message as google-protobuf's +to_h+ gives it
+    # @return [IllegalStateError]
+    def self.from(hash)
+      new(
+        :message => hash.fetch(:message, ''),
+        :raw => hash
+      )
+    end
+
+    def initialize(**fields) = super(**DEFAULTS, **fields)
+
+    # @return [Hash{Symbol=>Object}] the message as google-protobuf takes it
+    def to_message
+      {
+        :message => self.message,
+      }.compact
+    end
+  end
+
   # +systems.ajax.api.mobile.v2.common.response.InternalError+, from +systems/ajax/api/mobile/v2/common/response/response.proto+.
   #
   # @!attribute [r] message

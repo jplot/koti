@@ -5280,6 +5280,7 @@ module Ajax
                 module Response
                   autoload :Success, "#{__dir__}/messages/systems/ajax/api/mobile/v2/common/response/response.rb"
                   autoload :DefaultError, "#{__dir__}/messages/systems/ajax/api/mobile/v2/common/response/response.rb"
+                  autoload :IllegalStateError, "#{__dir__}/messages/systems/ajax/api/mobile/v2/common/response/response.rb"
                   autoload :InternalError, "#{__dir__}/messages/systems/ajax/api/mobile/v2/common/response/response.rb"
                   autoload :CompanyOnHubNotFoundError, "#{__dir__}/messages/systems/ajax/api/mobile/v2/common/response/response.rb"
                   autoload :PermissionDeniedError, "#{__dir__}/messages/systems/ajax/api/mobile/v2/common/response/response.rb"
@@ -6217,6 +6218,8 @@ module Ajax
                 module Company
                   # Package +systems.ajax.mobile.v2.service.hub.company.media+.
                   module Media
+                    autoload :CapturePhotoOnDemandRequest, "#{__dir__}/messages/systems/ajax/mobile/v2/service/hub/company/media/caputre_photo.rb"
+                    autoload :CapturePhotoOnDemandResponse, "#{__dir__}/messages/systems/ajax/mobile/v2/service/hub/company/media/caputre_photo.rb"
                     autoload :GetStreamSettingsRequest, "#{__dir__}/messages/systems/ajax/mobile/v2/service/hub/company/media/get_stream_settings.rb"
                     autoload :GetStreamSettingsResponse, "#{__dir__}/messages/systems/ajax/mobile/v2/service/hub/company/media/get_stream_settings.rb"
                   end
@@ -7546,6 +7549,8 @@ module Ajax
           'systems.ajax.api.mobile.v2.video.webrtc.SendWebRtcOfferResponse' => 'Api::Mobile::V2::Video::Webrtc::SendWebRtcOfferResponse',
           'systems.ajax.api.mobile.v2.video.webrtc.SuggestNewWebRtcIceCandidateRequest' => 'Api::Mobile::V2::Video::Webrtc::SuggestNewWebRtcIceCandidateRequest',
           'systems.ajax.api.mobile.v2.video.webrtc.SuggestNewWebRtcIceCandidateResponse' => 'Api::Mobile::V2::Video::Webrtc::SuggestNewWebRtcIceCandidateResponse',
+          'systems.ajax.mobile.v2.service.hub.company.media.CapturePhotoOnDemandRequest' => 'Mobile::V2::Service::Hub::Company::Media::CapturePhotoOnDemandRequest',
+          'systems.ajax.mobile.v2.service.hub.company.media.CapturePhotoOnDemandResponse' => 'Mobile::V2::Service::Hub::Company::Media::CapturePhotoOnDemandResponse',
           'systems.ajax.mobile.v2.service.hub.company.media.GetStreamSettingsRequest' => 'Mobile::V2::Service::Hub::Company::Media::GetStreamSettingsRequest',
           'systems.ajax.mobile.v2.service.hub.company.media.GetStreamSettingsResponse' => 'Mobile::V2::Service::Hub::Company::Media::GetStreamSettingsResponse',
           'systems.ajax.mobile.v2.service.hub.company.privacy.ChangePhotoOnDemandCompanyAccessRequest' => 'Mobile::V2::Service::Hub::Company::Privacy::ChangePhotoOnDemandCompanyAccessRequest',

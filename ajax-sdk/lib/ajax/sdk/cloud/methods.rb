@@ -4153,6 +4153,13 @@ module Ajax
         # @raise [RefusedError] when the gateway answers a failure
         def webrtc_suggest_new_ice_candidate(**request) = call('/systems.ajax.api.mobile.v2.video.webrtc.WebrtcService/suggestNewIceCandidate', ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Webrtc::SuggestNewWebRtcIceCandidateRequest.new(**request))
 
+        # +/systems.ajax.mobile.v2.service.hub.company.media.PhotoOnDemandService/capturePhoto+, a unary call.
+        #
+        # @param request [Hash{Symbol=>Object}] the members of {Messages::Mobile::V2::Service::Hub::Company::Media::CapturePhotoOnDemandRequest}
+        # @return [Messages::Api::Mobile::V2::Common::Response::Success]
+        # @raise [RefusedError] when the gateway answers a failure
+        def photo_on_demand_capture_photo(**request) = call('/systems.ajax.mobile.v2.service.hub.company.media.PhotoOnDemandService/capturePhoto', ::Ajax::Sdk::Cloud::Messages::Mobile::V2::Service::Hub::Company::Media::CapturePhotoOnDemandRequest.new(**request))
+
         # +/systems.ajax.mobile.v2.service.hub.company.media.SurveillanceCamerasService/getStreamSettings+, a unary call.
         #
         # @param request [Hash{Symbol=>Object}] the members of {Messages::Mobile::V2::Service::Hub::Company::Media::GetStreamSettingsRequest}

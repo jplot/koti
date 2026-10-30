@@ -11,7 +11,8 @@ module Schema
       def qualify(name, source)
         return unless name
 
-        source[/^import ([\w.]+\.#{name});/, 1] || [source[/^package ([\w.]+);/, 1], name].compact.join('.')
+        imported = source[/^import ([\w.]+\.#{Regexp.escape(name)});/, 1]
+        imported || [source[/^package ([\w.]+);/, 1], name].compact.join('.')
       end
     end
   end

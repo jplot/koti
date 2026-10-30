@@ -11,8 +11,8 @@ module Schema
       SERVICE_NAME = /SERVICE_NAME = "([^"]+)"/
       GRPC_CLASS = /final class (\w+GrpcKt)/
       METHOD = /\.e = \w+\.([abcd]);\s*\n\s*\w+\.\w+ = \w+\.\w+\(([^,]+),\s*"(\w+)"\)/
-      REQUEST = /(\w+) \w+ = \1\.getDefaultInstance\(\)/
-      RESPONSE = /\.d = new \w+\((\w+)\.getDefaultInstance\(\)\)/
+      REQUEST = /([\w$]+) \w+ = \1\.getDefaultInstance\(\)/
+      RESPONSE = /\.d = new \w+\(([\w$]+)\.getDefaultInstance\(\)\)/
 
       module_function
 
@@ -34,12 +34,15 @@ module Schema
           position = match.end(0)
           next unless (service = service(match[2].strip, service_names))
 
-          window = source[position, 400]
+          window = declarations(source, position)
           classes = [REQUEST, RESPONSE].map { message(window, it, source) }
           rows << [service, match[3], CALL_TYPES.fetch(match[1]), *classes]
         end
         rows
       end
+
+      # A method's classes sit anywhere before the next one: capturePhoto declares its response 416 characters on.
+      def declarations(source, from) = source[from...(METHOD.match(source, from)&.begin(0) || source.size)]
 
       def message(window, pattern, source) = JavaNames.qualify(window[pattern, 1], source)
 

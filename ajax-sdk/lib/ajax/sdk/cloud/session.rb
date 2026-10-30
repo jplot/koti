@@ -38,10 +38,12 @@ module Ajax
 
         # Signs in with the password hash, then with the TOTP code when two-factor is required.
         #
+        # @param expired [String, nil] the session token the gateway refused: another thread that already replaced
+        #   it leaves nothing to do
         # @return [void]
         # @raise [AuthenticationError] when the gateway refuses the login
-        def login
-          @mutex.synchronize { sign_in_flow }
+        def login(expired = @token)
+          @mutex.synchronize { sign_in_flow if @token == expired }
         end
 
         # @return [Hash{String=>String}] the app metadata, plus the session metadata once logged in

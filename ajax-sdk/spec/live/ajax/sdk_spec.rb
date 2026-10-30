@@ -47,6 +47,14 @@ RSpec.describe 'Ajax cloud', :live do # rubocop:disable RSpec/DescribeClass -- i
     expect { cloud.arm(space.id) }.to raise_error(Ajax::Sdk::Cloud::ReadOnlyError)
   end
 
+  it 'follows the space live, then closes every stream', :aggregate_failures do
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+    expect(cloud.events(space.id).first(1)).to contain_exactly(be_an(Ajax::Sdk::Cloud::Event))
+    expect(Process.clock_gettime(Process::CLOCK_MONOTONIC) - started).to be < 30
+    expect(Thread.list.map(&:name).grep(/\Aajax-feed-/)).to be_empty
+  end
+
   it 'reads the rooms and the groups of a space', :aggregate_failures do
     expect(unless_refused { cloud.rooms(space.id) }).to all(have_attributes(id: be_a(String), name: be_a(String)))
     expect(unless_refused { cloud.groups(space.id) }).to all(have_attributes(id: be_a(String)))

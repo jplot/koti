@@ -7,6 +7,7 @@ require_relative 'session'
 require_relative 'resources'
 require_relative 'methods'
 require_relative 'shortcuts'
+require_relative 'feed'
 
 module Ajax
   module Sdk
@@ -171,11 +172,12 @@ module Ajax
 
         def authenticating(retriable = -> { true })
           @session.ensure_login
-          yield(@session.metadata)
+          metadata = @session.metadata
+          yield(metadata)
         rescue GRPC::Unauthenticated
           raise unless retriable.call
 
-          @session.login
+          @session.login(metadata&.fetch('client-session-token', nil))
           yield(@session.metadata)
         end
       end

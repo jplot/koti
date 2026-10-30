@@ -18,6 +18,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `events(space_id)`: one feed of `Event`s (space, security, groups, rooms, devices, notifications) for a
+  space, from four streams that reopen on their own and catch up on what they missed; `Cloud::Tracker`
+  keeps the `SpaceState` behind it.
 - Every page of a space's notifications: `notifications` takes `older_than:` or `newer_than:` (a
   notification's new `token`) and adds the notifications grouped under an offline one (`parent_id`);
   `notification_history` reads every page lazily, each most recent first.

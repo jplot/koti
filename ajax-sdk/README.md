@@ -216,10 +216,11 @@ nil. They send what the app 3.59 sends, which differs from what one would guess 
 - `stream_hub_device` and `update_hub_device` do not cover relays, sockets, light switches or valves: their
   settings have no known path. A fire alarm resets through the cloud only on an EN54 hub.
 
-Verified so far: the reads `rooms`, `current_member`, `hub_details` and `device_details`, against the real cloud and read-only;
-`groups` answered an empty list. No shortcut that writes has been tried on a real device, and none has met a shutter, lock,
-dimmer, valve, LifeQuality or EN54 device. The gateway refuses `scenarios` to the live specs' account
-(`ReadError`, `:permission_denied`), which lacks `scenario_edit`: the app would not offer it either.
+Verified so far: the reads `rooms`, `current_member`, `hub_details` and `device_details`, against the real
+cloud and read-only; `groups` answered an empty list. No shortcut that writes has been tried on a real device,
+and none has met a shutter, lock, dimmer, valve, LifeQuality or EN54 device. The gateway refuses `scenarios`
+to the live specs' account (`ReadError`, `:permission_denied`), which has neither `scenario_edit` nor wide
+`manage_automation_scenarios`: the app would not offer it either.
 
 ## Permissions
 
@@ -230,39 +231,43 @@ app reads to offer only what the account may do. A plain user or an admin is its
 me = cloud.current_member(space.id).user_current_member
 me.role                          # => :user
 me.space_permissions.permissions # => [:arm, :disarm, :structure_visibility, ...]
-me.devices_permissions.filter_map(&:hub_permissions).first.hub_permissions # => [:set_state_commands, ...]
+me.devices_permissions.filter_map(&:hub_permissions).first&.hub_permissions # => [:set_state_commands, ...]
 ```
 
 The app 3.59 checks these in the screen, menu item or button that offers an action, then sends without
-checking again; the SDK does not check them either. The gateway is what refuses, with `CommandError` or
-`ReadError` and `:permission_denied`. What the app checks for each shortcut:
+checking again; the SDK does not check them either and leaves the answer to the gateway, whose refusal is a
+`CommandError` or `ReadError` with `:permission_denied`. Whether it refuses what the app would not offer is
+known only for `scenarios`. What the app checks, read on the screen that offers each action (other ways in
+were not all followed):
 
-| Shortcut | What the app checks |
+| Action | What the app checks |
 |---|---|
 | `arm`, `disarm`, `arm_night`, `disarm_night` | nothing: it never reads `arm` or `night_mode_arm_disarm` |
 | `arm_group`, `disarm_group` | the group's `group_permissions` entry is `:enabled`; it lists no other group |
-| `set_security_mode` | space `groups_edit`, the space disarmed |
+| `set_security_mode` | space `groups_edit`; the space disarmed, the hub online and not busy |
 | `panic` | space `panic_button` |
-| `turn_on`, `turn_off`, `set_brightness` | hub `set_state_commands`, the device online and not bypassed |
+| `turn_on`, `turn_off`, `set_brightness` | hub `set_state_commands`; the device online and not bypassed |
 | the shutter shortcuts | nothing |
-| `bypass`, `unbypass` | space `device_edit`, the space disarmed; with `once: true`, hub `one_time_bypass` (or `device_edit`, by an app feature flag) |
+| `bypass`, `unbypass` | space `device_edit`; the hub online, the space disarmed. A device that does not report to the monitoring station, with the wide feature on: also wide `manage_non_monitored_devices`, the device online, armed or not. With `once: true`: hub `one_time_bypass` (or `device_edit`, by an app feature flag), the hub online, the space disarmed; while arming with malfunctions, `one_time_bypass` alone |
 | `lock`, `unlock`, `unlatch` | the lock's own entry, permanent or not yet expired: `manage_lock` in `smart_lock_permissions` (a cloud lock), `manage_smart_lock` in `hub_device_user_privacy_permissions` (a lock of the hub) |
-| `mute` | every permission the detector's mute button lists in `required_permissions`: its group `:enabled`, hub `mute_fire_protect`, hub `set_state_commands` |
+| `mute` | each item the detector's mute button lists in `required_permissions`: `:groups`, its group `:enabled`; `:mute`, hub `mute_fire_protect`; `:home_automation`, hub `set_state_commands`. An account with no entry for the hub passes the last two |
 | `mute_fire_detectors` | role `:admin`, or hub `mute_fire_protect` unless the account is a plain user and the hub's apartment mode is on |
 | `reset_fire_alarm` | the reset button `stream_fire_control` sends is enabled; at access level 2, also hub `en54_access_level_2` (`hub_permissions_extended`) |
-| `rename` | space `device_edit` or wide `rename_devices`; the space disarmed, the hub and the device online |
-| `update_device_settings` | space `device_edit`, the space disarmed; the room needs `has_system_settings_permissions` or wide `manage_rooms` |
-| `update_hub_settings` | `has_system_settings_permissions` for most settings, hub `en54_access_level_2` for EN54 ones; the space disarmed |
-| `scenarios` | space `scenario_edit` or wide `manage_automation_scenarios` |
-| `enable_scenario`, `disable_scenario` | nothing on the member: the scenario's `view_state` (inactive, with `insufficient_permissions`) |
+| `rename` | space `device_edit` or wide `rename_devices`; the hub and the device online, the space disarmed unless the device does not report to the monitoring station |
+| `update_device_settings` | space `device_edit`; the hub online, the space disarmed. The room needs `has_system_settings_permissions` or wide `manage_rooms`, the firmware hub `fw_updates_commands` |
+| `update_hub_settings` | per setting, with the space disarmed and the hub online and not busy: `has_system_settings_permissions` for most, hub `en54_access_level_2` for EN54 ones, hub `hub_adv_params` and role `:admin` (or a Pro or an employee) for the server connection loss, `settings_edit` and role `:admin` (or a Pro or an employee) for the geofence |
+| `scenarios` | space `scenario_edit` or wide `manage_automation_scenarios`; the hub online and not busy, the space disarmed unless the wide feature is on |
+| `enable_scenario`, `disable_scenario` | nothing on the member: the scenario's `view_state`, which any inactive state disables (`insufficient_permissions` is one) |
 | `devices`, `rooms` | space `structure_visibility` |
 | `groups` | it lists only the groups whose entry is `:enabled` |
 | `notifications` | `notification_info.are_notifications_accessible`, never `event_visibility` |
-| `photo_on_demand_capture_photo` | the device's entry in the hub's `photo_on_demand_device_permissions`: always, while armed, or after an alarm until `capture_photo_available_until` |
+| `photo_on_demand_capture_photo` | the device's entry in the hub's `photo_on_demand_device_permissions`: always, while armed, or after an alarm until `capture_photo_available_until`; the device not bypassed |
 
-Wide permissions (`wide_space_permissions`) count only with the hub feature `wide_access_first_iteration`.
-The role grants nothing by itself: an admin passes these checks through the permissions the gateway sends
-it, except that `:admin` alone may mute every fire detector.
+Wide permissions count only with the hub feature `wide_access_first_iteration`. A plain user or an admin has
+the `wide_space_permissions` the gateway sends; the app gives a Pro or an employee all of them when it has
+`has_system_settings_permissions`. The role grants no permission by itself: an admin passes these checks
+through the permissions the gateway sends it, except that `:admin` alone may mute every fire detector, and
+the two hub settings above need it on top of their permission.
 
 ## Any method
 

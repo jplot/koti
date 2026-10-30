@@ -9,6 +9,8 @@ module Miele
 
       @fab: String?
 
+      @local: Connection::Local
+
       @device_type: Symbol?
 
       @protocol_version: Integer?
@@ -76,6 +78,8 @@ module Miele
       def get: (String path) -> resource
 
       private
+
+      def channel: () -> Connection::Local
 
       def device: (String resource) -> resource
 

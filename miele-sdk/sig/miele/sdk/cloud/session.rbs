@@ -36,6 +36,8 @@ module Miele
 
         attr_reader token: Token?
 
+        attr_reader organization: Locales::Organization
+
         def initialize: (Locales::Organization organization, ?clock: ^() -> Time, ?sleeper: _Sleeper) -> void
 
         def login: () -> Token

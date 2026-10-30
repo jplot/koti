@@ -18,6 +18,7 @@ module Miele
       def initialize(host, sleeper: method(:sleep))
         @host = host
         @sleeper = sleeper
+        @local = Connection.local(host)
       end
 
       # @return [String] fabrication number, which names the appliance in every device path
@@ -122,11 +123,9 @@ module Miele
       def dop2(unit, attribute, idx1: nil, idx2: nil)
         path = dop2_path(unit, attribute)
         path += "?idx1=#{idx1.to_i}&idx2=#{idx2.to_i}" unless idx1.nil? && idx2.nil?
-        Dop2.decode(Connection.request(host, :get, path).body)
+        Dop2.decode(channel.request(:get, path).body)
       end
 
-      # The reference pads every DOP2 write to 32 bytes; shorter ones were never tried on an appliance.
-      #
       # @param leaf [Dop2::Leaf]
       # @param with_index [Boolean] whether its indexes also go in the path, as the app's hood and coffee
       #   modules write; its oven, dishwasher and laundry modules leave them in the body only
@@ -135,7 +134,7 @@ module Miele
       def write_dop2(leaf, with_index: false)
         path = dop2_path(leaf.unit, leaf.attribute)
         path += "?idx1=#{leaf.idx1}&idx2=#{leaf.idx2}" if with_index
-        Connection.request(host, :put, path, body: Dop2.encode(leaf).ljust(32, ' '))
+        channel.request(:put, path, body: Dop2.encode(leaf), kind: :dop2)
       end
 
       # Sends a Dop1 request, which hoods in +ProtocolVersion+ 2 answer instead of DOP2.
@@ -144,7 +143,7 @@ module Miele
       # @return [String] the hood's answer: +{"Response": hex}+ to a read
       # @api public
       def dop1(request)
-        Connection.request(host, :post, "/Devices/#{fab}/DOP/", body: JSON.generate(Request: request)).body
+        channel.request(:post, "/Devices/#{fab}/DOP/", body: JSON.generate(Request: request)).body
       end
 
       # @param level [Integer] 0 (off) to 3, 4 (boost) or 5 (interval)
@@ -186,9 +185,12 @@ module Miele
       # @return [Hash{String=>Object}]
       # @raise [Error] see {Connection.request}
       # @api public
-      def get(path) = JSON.parse(Connection.request(host, :get, path).body)
+      def get(path) = JSON.parse(channel.request(:get, path).body)
 
       private
+
+      # @return [Connection::Local]
+      def channel = @local
 
       # @param resource [String]
       # @return [Hash{String=>Object}]
@@ -197,7 +199,7 @@ module Miele
       # @param request [Schema::DeviceState]
       # @return [Connection::Response]
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
-      def command(request) = Connection.request(host, :put, "/Devices/#{fab}/State", body: request.to_json)
+      def command(request) = channel.request(:put, "/Devices/#{fab}/State", body: request.to_json)
 
       # @param request [Schema::DeviceState]
       # @return [void]

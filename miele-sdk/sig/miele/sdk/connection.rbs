@@ -16,6 +16,16 @@ module Miele
         def self.new: (status: Integer, body: String) -> Response
       end
 
+      class Local < Data
+        attr_reader host: String
+
+        def self.new: (host: String) -> Local
+
+        def request: (Symbol method, String path, ?body: String?, ?kind: Symbol, **untyped) -> Response
+      end
+
+      def self?.local: (String host) -> Local
+
       def self?.request: (String host, Symbol method, String path, ?body: String?) -> Response
 
       def self?.credentials: () -> [String, String]

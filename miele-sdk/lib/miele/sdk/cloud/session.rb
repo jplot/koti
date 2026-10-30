@@ -54,6 +54,9 @@ module Miele
         # @return [Token, nil] the current token, nil before a login
         attr_reader :token
 
+        # @return [Locales::Organization]
+        attr_reader :organization
+
         # @param organization [Locales::Organization] the account's organization
         # @param clock [#call] gives the current time
         # @param sleeper [#call] waits the given number of seconds

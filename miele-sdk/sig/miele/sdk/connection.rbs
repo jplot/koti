@@ -30,6 +30,8 @@ module Miele
 
       def self?.credentials: () -> [String, String]
 
+      def self?.household: () -> Array[String?]
+
       def self?.sign: (Net::HTTPRequest request, String host, String plaintext, String group_id, String key) -> Net::HTTPRequest
 
       def self?.encrypt: (Net::HTTPRequest request, String content_type, String key, String signature,

@@ -56,6 +56,35 @@ module Miele
     # @api public
     def self.appliance(host) = Appliance.new(host)
 
+    # @return [Array<Appliance>] the appliances paired with the Miele account, reached by their module's name
+    # @raise [ConfigurationError] without an account
+    # @api public
+    def self.appliances
+      channel = cloud or raise ConfigurationError, 'the Miele account is needed to list its appliances'
+      channel.devices.map { Appliance.new(it.host, fab: it.fab, module_host: it.host) }
+    end
+
+    # @return [Cloud::Channel, nil] the Miele account's cloud, nil without an e-mail or a saved token
+    # @raise [ConfigurationError] without a country
+    # @api public
+    def self.cloud
+      return @cloud if @cloud
+      return unless config.email || config.cloud_token
+
+      country = config.country or raise ConfigurationError, 'country is needed to reach the Miele cloud'
+      @cloud = Cloud::Channel.new(Cloud::Session.new(Cloud::Locales.organization(country)))
+    end
+
+    # Changes the settings; the next request reaches the cloud with them.
+    #
+    # @yieldparam config [Configuration::Settings]
+    # @return [void]
+    # @api public
+    def self.configure(&)
+      super
+      @cloud = nil
+    end
+
     # Streams the changes the appliances push, until the block breaks or raises.
     #
     # @param hosts [Array<String>] addresses of the appliances to listen to

@@ -11,6 +11,10 @@ module Miele
 
       @local: Connection::Local
 
+      @module_host: String?
+
+      @in_cloud: Array[String]
+
       @device_type: Symbol?
 
       @protocol_version: Integer?
@@ -21,7 +25,7 @@ module Miele
 
       attr_reader host: String
 
-      def initialize: (String host, ?sleeper: _Sleeper) -> void
+      def initialize: (String host, ?sleeper: _Sleeper, ?fab: String?, ?module_host: String?) -> void
 
       def fab: () -> String
 
@@ -79,7 +83,11 @@ module Miele
 
       private
 
-      def channel: () -> Connection::Local
+      def send_request: (Symbol method, String path, ?body: String?, ?kind: Symbol) -> Connection::Response
+
+      def cloud_request: (Symbol method, String path, String? body, Symbol kind, String? resource) -> Connection::Response
+
+      def module_host: () -> String?
 
       def device: (String resource) -> resource
 

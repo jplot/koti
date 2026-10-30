@@ -36,6 +36,18 @@ RSpec.describe Ajax::Sdk::Cloud::Client, '#server_stream' do
     end
   end
 
+  context 'when a message is a failure' do
+    let(:gateway) do
+      FakeGateway.start(devices, count: 100, pause: 0.05, first: [{ success: {} }, { failure: { bad_request: {} } }])
+    end
+
+    it 'raises and closes the call on the server', :aggregate_failures do
+      expect { client.server_stream(devices, { space_id: 's1' }) { nil } }
+        .to raise_error(Ajax::Sdk::Cloud::ReadError, 'bad_request')
+      expect(gateway.closed.pop(timeout: 1)).to be(true)
+    end
+  end
+
   context 'when the caller leaves early' do
     let(:count) { 100 }
     let(:pause) { 0.05 }

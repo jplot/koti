@@ -2,6 +2,7 @@
 
 require 'rspec/core/rake_task'
 require 'rubocop/rake_task'
+require_relative 'schema/generate'
 
 RSpec::Core::RakeTask.new(:spec)
 RuboCop::RakeTask.new
@@ -27,4 +28,17 @@ task :steep do
   sh 'steep check'
 end
 
-task default: %i[rubocop spec yard:undocumented rbs:validate steep]
+desc 'Write the typed values of the cloud messages from lib/ajax/sdk/cloud/schemas/'
+task :generate do
+  puts "wrote #{Schema::Generate.write(__dir__).size} files"
+end
+
+namespace :generate do
+  desc 'Fail when the generated values differ from what lib/ajax/sdk/cloud/schemas/ gives'
+  task :check do
+    stale = Schema::Generate.check(__dir__)
+    abort "Generated files differ, run rake generate:\n#{stale.join("\n")}" if stale.any?
+  end
+end
+
+task default: %i[generate:check rubocop spec yard:undocumented rbs:validate steep]

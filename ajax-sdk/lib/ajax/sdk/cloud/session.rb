@@ -2,20 +2,20 @@
 
 require 'digest'
 require 'rotp'
+require_relative 'values'
 
 module Ajax
   module Sdk
     module Cloud
       # Holds the account's login session: it signs in with the password hash, answers the two-factor
       # challenge when the gateway asks for it, keeps the session token and user id, and builds the
-      # metadata the gateway expects on every call. Login answers arrive as Hashes (see {Client}).
+      # metadata the gateway expects on every call. Login answers arrive whole, success and failure (see {Client}).
       class Session
         GATEWAY = 'systems.ajax.api.ecosystem.v3.mobilegwsvc.service'
         PASSWORD = "/#{GATEWAY}.login_by_password.LoginByPasswordService/execute".freeze
         TOTP = "/#{GATEWAY}.login_by_totp.LoginByTotpService/execute".freeze
-        ROLE = :USER_ROLE_USER
-        REASONS = %i[invalid_credentials account_locked account_not_confirmed invalid_totp bad_request].freeze
-        private_constant :GATEWAY, :PASSWORD, :TOTP, :ROLE, :REASONS
+        LOGIN = Messages::Api::Ecosystem::V3::Mobilegwsvc::Service
+        private_constant :GATEWAY, :PASSWORD, :TOTP, :LOGIN
 
         # @param client [Client] the gRPC client used to send the login calls
         # @param settings [Configuration::Settings]
@@ -58,9 +58,9 @@ module Ajax
         def sign_in_flow
           require_credentials
           failure = sign_in(PASSWORD, password_request) or return
-          return two_factor(failure.dig(:two_fa_required, :request_id)) if failure[:two_fa_required]
+          return two_factor(failure.two_fa_required.request_id) if failure.two_fa_required
 
-          raise AuthenticationError.new(reason(failure), "login refused, #{failure[:attempts_left]} attempts left")
+          raise AuthenticationError.new(reason(failure), "login refused, #{failure.attempts_left} attempts left")
         end
 
         def require_credentials
@@ -76,18 +76,18 @@ module Ajax
           login_with_totp(request_id)
         end
 
-        # @return [Hash, nil] the failure Hash, or nil once the session is accepted
+        # @return [Data, nil] the failure, or nil once the session is accepted
         def sign_in(path, request)
           answer = @client.authenticate(path, request, app_metadata)
-          return accept(answer[:success]) if answer[:success]
+          return accept(answer.success) if answer.success
 
-          answer[:failure]
+          answer.failure
         end
 
         def login_with_totp(request_id, sent = nil)
           code = totp_code(sent)
           failure = sign_in(TOTP, totp_request(request_id, code)) or return
-          return login_with_totp(request_id, code) if failure[:invalid_totp] && sent.nil?
+          return login_with_totp(request_id, code) if failure.invalid_totp && sent.nil?
 
           raise AuthenticationError.new(reason(failure), 'two-factor login refused')
         end
@@ -102,22 +102,25 @@ module Ajax
         end
 
         def accept(success)
-          @token = success[:session_token].unpack1('H*').upcase
-          @user_id = success.dig(:lite_account, :user_hex_id)
+          @token = success.session_token.unpack1('H*').upcase
+          @user_id = success.lite_account&.user_hex_id
           nil
         end
 
         def password_request
-          { email: @settings.email, password_sha256_hash: password_hash, user_role: ROLE }
+          LOGIN::LoginByPassword::LoginByPasswordRequest.new(email: @settings.email.to_s, user_role: :user,
+                                                             password_sha256_hash: password_hash)
         end
 
-        def totp_request(request_id, totp) = { email: @settings.email, user_role: ROLE, request_id:, totp: }
+        def totp_request(request_id, totp)
+          LOGIN::LoginByTotp::LoginByTotpRequest.new(email: @settings.email.to_s, user_role: :user, request_id:, totp:)
+        end
 
         def password_hash
           @settings.password_sha256 || Digest::SHA256.hexdigest(@settings.password.to_s)
         end
 
-        def reason(failure) = (REASONS & failure.keys).first || :bad_request
+        def reason(failure) = failure.error || :bad_request
 
         def app_metadata
           { 'client-device-id' => @settings.client_device_id, 'client-device-model' => @settings.client_device_model,

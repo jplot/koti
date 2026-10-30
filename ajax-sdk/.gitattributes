@@ -1,0 +1,4 @@
+lib/ajax/sdk/cloud/messages.rb linguist-generated
+lib/ajax/sdk/cloud/messages/** linguist-generated
+sig/ajax/sdk/cloud/messages.rbs linguist-generated
+sig/ajax/sdk/cloud/messages/** linguist-generated

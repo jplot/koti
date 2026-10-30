@@ -2,6 +2,7 @@
 
 require 'grpc'
 require_relative 'schemas'
+require_relative 'values'
 require_relative 'session'
 require_relative 'resources'
 
@@ -14,9 +15,10 @@ module Ajax
       # +UNAUTHENTICATED+ answer, logs in again and retries the call once (a stream, only before its
       # first message).
       #
-      # Responses come back as plain Hashes: google-protobuf's field readers misbehave on messages
-      # decoded against a private descriptor pool, but +to_h+ is reliable, so every response is turned
-      # into a Hash right after decoding.
+      # Responses come back as the typed values of {Messages}, built from +to_h+: google-protobuf's field
+      # readers misbehave on messages decoded against a private descriptor pool, but +to_h+ is reliable. A
+      # response whose +success+ shares a oneof with its +failure+ gives its success, or raises {ReadError} or
+      # {CommandError} with the failure.
       class Client
         include Resources
 
@@ -40,25 +42,27 @@ module Ajax
         # @return [String] a description that never prints the account's secrets
         def inspect = "#<#{self.class.name} gateway=#{@settings.grpc_host}>"
 
-        # Sends +request+ (a Hash) on +path+, choosing the call kind from the method table.
+        # Sends +request+ on +path+, choosing the call kind from the method table.
         #
         # @param path [String] a gRPC path, +/<service>/<method>+
-        # @param request [Hash] the request message as a Hash
-        # @return [Hash, Enumerator, nil] the response Hash; for a stream, an Enumerator, or nil when
-        #   read through the block
+        # @param request [Hash, Data, Google::Protobuf::AbstractMessage] the request message as a Hash, a
+        #   generated value or a google-protobuf message
+        # @return [Data, Enumerator, nil] the response, or its success; for a stream, an Enumerator, or nil
+        #   when read through the block
+        # @raise [ReadError, CommandError] when the gateway answers a failure: a read raises {ReadError}
         def call(path, request = {}, &)
           public_send(Schemas.rpc(path).type, path, request, &)
         end
 
-        # @return [Hash] the single response message
+        # @return [Data] the single response message, or its success
         def unary(path, request = {})
           refuse_write(path)
-          authenticating { |md| invoke(:request_response, path, message(path, request), md) }
+          authenticating { |md| settle(path, invoke(:request_response, path, message(path, request), md)) }
         end
 
         # Leaving the stream before its end, through +break+ or an Enumerator's +first+, cancels the call.
         #
-        # @yieldparam message [Hash] each response message
+        # @yieldparam message [Data] each response message, or its success
         # @return [Enumerator, nil] an Enumerator of the messages when no block is given
         def server_stream(path, request = {}, &)
           refuse_write(path)
@@ -67,14 +71,14 @@ module Ajax
           stream(:server_streamer, path, message(path, request), &)
         end
 
-        # @param requests [Array<Hash>] the request messages
-        # @return [Hash] the single response message
+        # @param requests [Array<Hash, Data>] the request messages
+        # @return [Data] the single response message, or its success
         def client_stream(path, requests)
           refuse_write(path)
-          authenticating { |md| invoke(:client_streamer, path, requests.map { |request| message(path, request) }, md) }
+          authenticating { |md| settle(path, invoke(:client_streamer, path, requests.map { message(path, it) }, md)) }
         end
 
-        # @yieldparam message [Hash] each response message
+        # @yieldparam message [Data] each response message, or its success
         # @return [Enumerator, nil] an Enumerator of the messages when no block is given
         def bidi(path, requests, &)
           refuse_write(path)
@@ -86,7 +90,7 @@ module Ajax
         # Sends a unary call without the login retry, so {Session} can log in without recursing.
         #
         # @api private
-        # @return [Hash] the response message
+        # @return [Data] the response message, whole
         def authenticate(path, request, metadata)
           invoke(:request_response, path, message(path, request), metadata)
         end
@@ -112,7 +116,7 @@ module Ajax
 
         def invoke(kind, path, request, metadata)
           deadline = Time.now + @settings.read_timeout
-          decode(path, stub.public_send(kind, path, request, encoder(path), IDENTITY, metadata:, deadline:))
+          value(path, stub.public_send(kind, path, request, encoder(path), IDENTITY, metadata:, deadline:))
         end
 
         # Logs in again only before the first message: a retry after it would replay what was yielded.
@@ -120,7 +124,7 @@ module Ajax
           fresh = true
           relay = lambda do |bytes|
             fresh = false
-            block.call(decode(path, bytes))
+            block.call(settle(path, value(path, bytes)))
           end
           authenticating(-> { fresh }) do |metadata|
             stub.public_send(kind, path, request, encoder(path), IDENTITY, metadata:, &relay)
@@ -130,12 +134,19 @@ module Ajax
 
         def encoder(path) = Schemas.message(Schemas.rpc(path).request).method(:encode)
 
-        def decode(path, bytes) = Schemas.message(Schemas.rpc(path).response).decode(bytes).to_h
+        def value(path, bytes)
+          response = Schemas.rpc(path).response
+          Messages.type(response).from(Schemas.message(response).decode(bytes).to_h)
+        end
 
         def message(path, request)
           klass = Schemas.message(Schemas.rpc(path).request)
-          request.is_a?(klass) ? request : klass.new(request)
+          return request if request.is_a?(klass)
+
+          klass.new(request.respond_to?(:to_message) ? request.to_message : request)
         end
+
+        def settle(path, value) = Outcome.settle(value, read?(path) ? ReadError : CommandError)
 
         def refuse_write(path)
           return if !read_only? || read?(path)

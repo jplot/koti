@@ -1,0 +1,38 @@
+module Ajax
+  module Sdk
+    module Cloud
+      module Enum : Module
+        def from: (Symbol | Integer | nil value) -> (Symbol | Integer)
+        def proto: (Symbol | Integer value) -> (Symbol | Integer)
+        def default: () -> Symbol
+
+        private
+
+        def values: () -> Hash[Symbol, Symbol]
+      end
+
+      module Outcome
+        def self.settle: (untyped value, singleton(RefusedError) error) -> untyped
+        def self.refusal: (untyped problem) -> Symbol
+
+        def success: () -> untyped
+        def problem: () -> untyped
+      end
+
+      module Messages
+        interface _Generated
+          def from: (Hash[Symbol, untyped] hash) -> untyped
+          def new: (**untyped) -> untyped
+        end
+
+        def self.type: (String full_name) -> _Generated
+      end
+
+      module Encode
+        def self?.time: (Time time) -> Hash[Symbol, Integer]
+        def self?.duration: (Float seconds) -> Hash[Symbol, Integer]
+        def self?.wrapper: (untyped value) -> Hash[Symbol, untyped]
+      end
+    end
+  end
+end

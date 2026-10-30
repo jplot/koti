@@ -130,7 +130,34 @@ cloud.call("/systems.ajax.api.mobile.v2.space.SpaceService/findUserSpacesWithPag
 ```
 
 `#call` picks the call kind (unary, server stream, …) from the table; `#unary`, `#server_stream`,
-`#client_stream` and `#bidi` are the direct accessors. Responses are Hashes.
+`#client_stream` and `#bidi` are the direct accessors. A request is a Hash, a generated value or a
+google-protobuf message; a Hash names enum values as protobuf does (`:USER_ROLE_USER`), a value by
+their short symbols (`:user`).
+
+Responses come back as values generated from the app's schemas, under `Ajax::Sdk::Cloud::Messages`:
+a `Data` class per message (5,828) and a module per enum (907), each loaded on its first use, with YARD
+and RBS signatures that Steep checks.
+
+- A message is a value whose members are its fields, plus `raw`, the Hash google-protobuf decoded;
+  `to_message` gives the Hash back. A field the cloud leaves out holds its protobuf default (`0`, `''`,
+  `false`, `[]`, `{}`); a sub-message, a oneof member or an `optional` field is nil instead.
+- An enum value is a short symbol without the prefix its values share (`:ok` for `BATTERY_STATE_OK`,
+  `:unspecified` for 0), or the number of a value the app 3.59 does not know.
+- A oneof gives the name of the member that is set through a reader named after it.
+- A `Timestamp` becomes a `Time` in UTC, a `Duration` a Float of seconds, a wrapper (`StringValue`…)
+  what it holds.
+
+A response whose `success` shares a oneof with its `failure` (or `error`), as 584 of the 608 methods
+have, is unwrapped:
+`call` returns the success, or raises `ReadError` for a read and `CommandError` for anything else. The
+error's `reason` is the member of the failure that is set (`:hub_offline`), or `:refused` when the
+answer holds neither member; `details` is what that member holds and `failure` the whole failure, so an
+arming refused for `:hub_detected_malfunctions` carries the devices in trouble.
+
+```ruby
+page = cloud.call('/systems.ajax.api.mobile.v2.space.SpaceService/findUserSpacesWithPagination')
+page.spaces.map { it.profile&.name }
+```
 
 A stream yields each message to the block, or returns an Enumerator without one; leaving it early
 (`break`, `first`) closes the call. Streams have no deadline, every other call waits at most
@@ -148,6 +175,7 @@ cloud.server_stream(path, { space_id: space.id }).first
   `:account_locked`, `:invalid_totp`, …).
 - `Cloud::CommandError(reason)` — the hub refused a command.
 - `Cloud::ReadError(reason)` — the gateway refused a read.
+  Both are `Cloud::RefusedError`s, with the `failure` the gateway answered and its `details`.
 - `Cloud::ReadOnlyError` — a command was blocked because the client is read-only.
 - `Cloud::UnknownMethodError` / `Cloud::UnknownMessageError` — an unknown path or message name.
 - `Sia::FrameError` — a frame is not valid DC-09 (`Sia::Message.parse`); the receiver stays silent on it.

@@ -45,3 +45,19 @@ does not use it.
 From the app and the pysiaalarm commit above, they write the same `methods.tsv` and `codes.tsv`, and
 a `descriptors.pb.gz` holding the same bytes once decompressed: the gzip header carries the time of
 the run.
+
+## Generated values
+
+`generate/` writes the typed values of the cloud messages from `lib/ajax/sdk/cloud/schemas/` alone: a
+`Data` class per message the 608 methods reach and a module per enum they use, one Ruby file in
+`lib/ajax/sdk/cloud/messages/` and one RBS file in `sig/ajax/sdk/cloud/messages/` per `.proto`, and
+`messages.rb`, which declares the package modules, an `autoload` for each type and the value class of
+each request and response. The files are never edited by hand: change the generator, then run
+
+```sh
+bundle exec rake generate
+```
+
+`bundle exec rake` starts with `generate:check`, which fails and lists the files a fresh generation
+would add, remove or change. Steep reads the generated RBS but not the generated Ruby; RuboCop and
+SimpleCov leave both out.

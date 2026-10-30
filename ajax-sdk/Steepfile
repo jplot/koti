@@ -3,5 +3,7 @@
 target :lib do
   signature 'sig'
   check 'lib'
+  # Generated: Steep reads their RBS. Checking their Ruby as well took 5.5 min instead of 8 s on the app 3.59 schemas.
+  ignore 'lib/ajax/sdk/cloud/messages.rb', 'lib/ajax/sdk/cloud/messages'
   library 'singleton', 'openssl', 'socket', 'zlib', 'digest', 'securerandom', 'time'
 end

@@ -135,7 +135,7 @@ method (its service, for an `…/execute` path), which ends its Ruby name, start
 
 | Shortcut | What it sends |
 |---|---|
-| `turn_on(device, channel: 1)`, `turn_off` | `device_command_device_on` / `_off`, with the family type the app sends: `light_switch`, `socket_base`, `water_stop_base`, `relay_fibra_base`, `transmitter_fibra_base`, or `relay` with no channel |
+| `turn_on(device, channel: 1)`, `turn_off` | `device_command_device_on` / `_off`, with the family type the app sends: `light_switch`, `socket_base` or `water_stop_base` by the device's channels; `relay` with no channel, `relay_fibra_base` or `transmitter_fibra_base` by its kind |
 | `set_brightness(device, percent)` | `device_command_brightness`: 1 to 100, relative, on the first channel |
 | `open_shutter`, `close_shutter`, `stop_shutter(device)`, `move_shutter(device, percent)` | `device_command_roller_shutter_control`: the opening, 100 open and 0 closed, or stop |
 | `bypass(device, tamper_only: false, once: false)`, `unbypass(device, once: false)` | `device_command_device_bypass` |
@@ -146,7 +146,7 @@ method (its service, for an `…/execute` path), which ends its Ruby name, start
 | `mute(device)` | `device_command_sound_off`: the detector's own alarm, and external ones when its `mute_command` says so |
 | `mute_fire_detectors(hub_id, except_triggered: false)` | `device_command_mute_all_fire_detectors` (`_except_triggered`) |
 | `reset_fire_alarm(hub_id)` | `hub_command_en54_hub_action` |
-| `device_details(device)`, `hub_details(space_id, hub_id)` | the first message of `stream_hub_device`, `stream_device_info` |
+| `device_details(device)`, `hub_details(space_id, hub_id)` | the first message of `stream_hub_device`, `stream_device_info`; a device whose type the app does not open this way (a hub, for example) raises `ReadError` `:refused` |
 | `update_device_settings(device, *updates)`, `rename(device, name)`, `update_hub_settings(space_id, hub_id, *updates)` | `update_hub_device`, `update_device`; they return the success, which may say the change waits for a press on the device |
 | `scenarios(space_id)`, `enable_scenario` / `disable_scenario(space_id, scenario_id)` | `stream_light_scenarios`, `set_scenario_state` |
 | `rooms(space_id)`, `groups(space_id)` | the first message of `space_stream` |
@@ -157,12 +157,13 @@ commands. A device the shortcut does not fit raises `ArgumentError` before anyth
 nil. They send what the app 3.59 sends, which differs from what one would guess in three places:
 
 - The app never sends a slat command and never reads `SlatPosition`, so there is no slat shortcut.
-- To turn a device on or off, it sends the type of its family, not the device's exact type.
+- To turn a device on or off, it sends the type of its family, not the device's exact type. It always turns
+  a legacy relay in impulse mode on; `turn_off` sends off to it anyway.
 - `stream_hub_device` and `update_hub_device` do not cover relays, sockets, light switches or valves: their
   settings have no known path. A fire alarm resets through the cloud only on an EN54 hub.
 
-Verified so far: the reads `rooms`, `groups`, `hub_details` and `device_details`, against the real cloud
-and read-only. No shortcut that writes has been tried on a real device, and none has met a shutter, lock,
+Verified so far: the reads `rooms`, `hub_details` and `device_details`, against the real cloud and read-only;
+`groups` answered an empty list. No shortcut that writes has been tried on a real device, and none has met a shutter, lock,
 dimmer, valve, LifeQuality or EN54 device. The gateway refuses `scenarios` to an account whose role is a
 plain user (`ReadError`, `:permission_denied`), as the live specs' account is.
 

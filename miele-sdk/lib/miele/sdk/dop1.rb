@@ -15,6 +15,9 @@ module Miele
       RUN_ON_TIMES = [0, 5, 15].freeze
       private_constant :RUN_ON_TIMES
 
+      SETTING_VERSION = 1
+      private_constant :SETTING_VERSION
+
       module_function
 
       # @param object_id [String] four hex digits
@@ -52,11 +55,13 @@ module Miele
         request(object_id: '1400', type: WRITE, section:)
       end
 
-      # @param pf_id [Integer] programming function id (40010: grease filter, 40011: charcoal filter)
+      # @param pf_id [Integer] programming function id (40010, 40011: the current grease and charcoal filter limits)
       # @return [String]
       # @raise [ArgumentError]
       # @api public
-      def setting(pf_id) = request(object_id: '1201', type: READ, section: [0, unsigned(pf_id, 16)].pack('Cn'))
+      def setting(pf_id)
+        request(object_id: '1201', type: READ, section: [SETTING_VERSION, unsigned(pf_id, 16)].pack('Cn'))
+      end
 
       # @param pf_id [Integer] programming function id
       # @param value [Integer] unsigned 32-bit value
@@ -64,21 +69,19 @@ module Miele
       # @raise [ArgumentError]
       # @api public
       def write_setting(pf_id, value)
-        request(object_id: '1201', type: WRITE, section: [0, unsigned(pf_id, 16), unsigned(value, 32)].pack('CnN'))
+        section = [SETTING_VERSION, unsigned(pf_id, 16), unsigned(value, 32)].pack('CnN')
+        request(object_id: '1201', type: WRITE, section:)
       end
 
-      # The framing before a setting's section varies, so the value is the
-      # u32 that follows the echoed id, wherever that id sits.
+      # The answer is the object id, the message type and the acknowledgement (8 hex digits), then the read
+      # section: version (1 byte), programming function id (2), value (4), minimum (4) and maximum (4).
       #
       # @param response [String] hex of the +Response+ the hood answers
-      # @param pf_id [Integer]
-      # @return [Integer, nil] nil when the hood does not echo the id
+      # @return [Integer, nil] nil when the answer is too short to hold a value
       # @api public
-      def setting_value(response, pf_id)
-        id = Crypto.hex([pf_id].pack('n'))
-        at = (0..(response.size - 28)).step(2).find { response[it, 4] == id } or return
-        digits = response[at + 4, 8] #: String
-        digits.to_i(16)
+      def setting_value(response)
+        digits = response[14, 8].to_s
+        digits.size == 8 ? digits.to_i(16) : nil
       end
 
       # @param value [Integer]

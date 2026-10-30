@@ -7,6 +7,8 @@ module Miele
 
       RUN_ON_TIMES: Array[Integer]
 
+      SETTING_VERSION: Integer
+
       def self?.request: (object_id: String, type: String, section: String) -> String
 
       def self?.fan_level: (Integer level) -> String
@@ -19,7 +21,7 @@ module Miele
 
       def self?.write_setting: (Integer pf_id, Integer value) -> String
 
-      def self?.setting_value: (String response, Integer pf_id) -> Integer?
+      def self?.setting_value: (String response) -> Integer?
 
       def self?.unsigned: (Integer value, Integer bits) -> Integer
     end

@@ -30,7 +30,7 @@ RSpec.describe Miele::Sdk::Appliance do
     appliance.main_light = true
     appliance.write_setting(40_010, 0)
     requests = fake.requests.select { it.verb == 'POST' }.map { JSON.parse(it.body).fetch('Request') }
-    expect(requests).to eq(%w[8E0602000005 14000200020104000000000000FFFF0000 12010200009C4A00000000])
+    expect(requests).to eq(%w[8E0602000005 14000200020104000000000000FFFF0000 12010200019C4A00000000])
   end
 
   context 'when the hood answers 400' do

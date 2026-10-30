@@ -22,20 +22,23 @@ RSpec.describe Miele::Sdk::Dop1 do
       .to eq(%w[14000200020104000000000000FFFF0000 1400020002010000000000000000000000])
   end
 
-  it 'builds the setting requests' do
-    expect([described_class.setting(40_010), described_class.write_setting(40_010, 3)])
-      .to eq(%w[12010100009C4A 12010200009C4A00000003])
+  it 'reads a setting with structure version 1' do
+    expect(described_class.setting(40_012)).to eq('12010100019C4C')
+  end
+
+  it 'writes a setting with structure version 1' do
+    expect(described_class.write_setting(40_012, 1)).to eq('12010200019C4C00000001')
   end
 
   it 'rejects a setting value wider than 32 bits' do
     expect { described_class.write_setting(40_010, 1 << 32) }.to raise_error(ArgumentError)
   end
 
-  it 'reads a setting value after its echoed id' do
-    expect(described_class.setting_value('12011100009C4A000000030000000000000005', 40_010)).to eq(3)
+  it 'reads the value at its fixed place in the answer' do
+    expect(described_class.setting_value('12011100 019C4C 00000005 00000000 000000FF'.delete(' '))).to eq(5)
   end
 
-  it 'finds no value in a response without the echoed id' do
-    expect(described_class.setting_value('120111020002', 40_010)).to be_nil
+  it 'finds no value in an answer too short to hold one' do
+    expect(described_class.setting_value('120111020002')).to be_nil
   end
 end

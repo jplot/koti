@@ -10,7 +10,7 @@ module Miele
 
         def check_settings!: (Hash[Symbol, untyped] settings) -> void
 
-        def write_dop2_selection: () { (untyped para) -> untyped } -> void
+        def write_dop2_selection: () { (untyped para, untyped source) -> untyped } -> void
 
         def with_appliance_values: (untyped select, untyped context) -> untyped
 

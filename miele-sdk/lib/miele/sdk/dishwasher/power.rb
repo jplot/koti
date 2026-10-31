@@ -54,14 +54,6 @@ module Miele
 
         private
 
-        # @param at [Time] a time of day
-        # @param now [Time]
-        # @return [Time] that time today, or tomorrow once it has passed, as GetTimeOffsetToNow takes it
-        def next_time(at, now)
-          target = Time.new(now.year, now.month, now.day) + (((at.hour * 60) + at.min) * 60)
-          target < now ? target + 86_400 : target
-        end
-
         # @param select [Data] 2/1577
         # @param bits [Integer] the supported start modes
         # @param target [Time]

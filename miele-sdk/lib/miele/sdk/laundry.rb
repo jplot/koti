@@ -8,6 +8,7 @@ module Miele
       include Commands
       include Selection
       include Parameters
+      include DelayedStart
 
       # What a Dop1 laundry appliance reports of its program: its +ExtendedState+ past the first 3 bytes, and
       # +State+ for the temperature and spin speed.

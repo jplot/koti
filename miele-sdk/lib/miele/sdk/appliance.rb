@@ -238,6 +238,14 @@ module Miele
         write_dop2(leaf.with(fields: leaf.fields.merge(1 => request)))
       end
 
+      # @param at [Time] a time of day
+      # @param now [Time]
+      # @return [Time] that time today, or tomorrow once it has passed, as the app's delayed starts take it
+      def next_time(at, now)
+        target = Time.new(now.year, now.month, now.day) + (((at.hour * 60) + at.min) * 60)
+        target < now ? target + 86_400 : target
+      end
+
       # @param klass [Class] a generated Dop1 object
       # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects
       def dop1_object(klass)

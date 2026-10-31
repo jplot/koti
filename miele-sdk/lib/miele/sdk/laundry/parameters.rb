@@ -28,7 +28,7 @@ module Miele
           check_settings!(settings)
           return write_dop1_selection(dop1_parameters(dop1_object(dop1_objects.fetch(:write)), settings)) unless dop2?
 
-          write_dop2_selection { dop2_parameters(it, settings) }
+          write_dop2_selection { |para, _| dop2_parameters(para, settings) }
         end
 
         private
@@ -43,13 +43,14 @@ module Miele
         end
 
         # @yieldparam para [Data] the +selection_para+ with the appliance's current values
+        # @yieldparam source [Data] its counterpart in 2/1574
         # @yieldreturn [Data] the one to write
         # @return [void]
         def write_dop2_selection
           context = object(Objects::Laundry::GlobalPsContext, [2, 1574, 0, 1])
           modify(Objects::Laundry::GlobalPsSelect, [2, 1577, 0, 0]) do |select|
             select = with_appliance_values(select, context)
-            select.with(para_member => yield(select.public_send(para_member)))
+            select.with(para_member => yield(select.public_send(para_member), program_para(context)))
           end
         end
 

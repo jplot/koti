@@ -5,6 +5,7 @@ module Miele
       include Commands
       include Selection
       include Parameters
+      include DelayedStart
 
       class Reading < Data
         attr_reader load: Integer?

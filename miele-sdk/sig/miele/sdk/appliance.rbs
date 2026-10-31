@@ -98,6 +98,8 @@ module Miele
 
       def dop2_user_request: (Integer id) -> void
 
+      def next_time: (Time at, Time now) -> Time
+
       def dop1_object: (untyped klass) -> untyped
 
       def require!: (untyped condition, String reason) -> void

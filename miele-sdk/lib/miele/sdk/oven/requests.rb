@@ -138,9 +138,8 @@ module Miele
         # @param requests [Array<Integer>]
         # @return [Integer]
         def stop_request(state, context, requests)
-          current = oven_state(state, context, requests)
-          return 2 unless %i[waiting_for_start running paused end].include?(current)
-          return 2 if current == :paused && state.program_id == 72 && info?(198)
+          return 2 unless started?(state, context)
+          return 2 if oven_state(state, context, requests) == :paused && state.program_id == 72 && info?(198)
 
           [55, 56, 57].find { requests.include?(it) } || 2
         end

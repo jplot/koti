@@ -10,9 +10,6 @@ module Miele
         NOW = 0xFFFF_FFFF_FFFF_FFFF
         private_constant :NOW
 
-        STATUSES_FOR_MOBILE_START = %i[running pause waiting_to_start end_programmed].freeze
-        private_constant :STATUSES_FOR_MOBILE_START
-
         # @param prog_id [Integer, Symbol] a value of +GLOBAL_EnumPrgId+
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, or without remote control
@@ -116,9 +113,6 @@ module Miele
 
         private
 
-        # The app allows it under remote control, or by mobile start while the oven runs, pauses, waits or has
-        # ended (IsUserAllowedToModifyFunctionParametersRule).
-        #
         # @param id [Integer] a +GLOBAL_PS_SelectionParaCA+ attribute
         # @param type [Symbol] its wire type
         # @param value [Object]
@@ -127,11 +121,25 @@ module Miele
         # @raise [ActionUnavailableError]
         def set_parameter(id, type, value, context: nil)
           require_dop2!
-          state = self.state
-          mobile_start = state.mobile_start? && STATUSES_FOR_MOBILE_START.include?(state.status)
-          require!(under_remote_control?(state) || mobile_start,
-                   'the oven takes parameters only under remote control, or by mobile start once a program runs')
+          require_parameters_allowed!
           write_parameter(selected_program(context || program_context), id, type, value)
+        end
+
+        # IsUserAllowedToModifyFunctionParametersRule: remote control and a program on the oven (1/1585), and
+        # mobile start too once the program has started, or for program 361.
+        #
+        # @return [void]
+        # @raise [ActionUnavailableError]
+        def require_parameters_allowed!
+          state = self.state
+          device = context
+          shown = device.prog_attributes_cca&.prog_id
+          prog_id = shown ? Objects::Oven::GlobalEnumPrgId.to_i(shown) : 0
+          require!(under_remote_control?(state), 'the oven takes parameters only under remote control')
+          require!(prog_id.positive?, 'the oven shows no program')
+          return unless prog_id == 361 || started?(state, device)
+
+          require!(state.mobile_start?, 'the oven takes parameters only by mobile start once a program has started')
         end
 
         # @param context [Objects::Oven::GlobalPsContext] 1/1574

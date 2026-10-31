@@ -10,9 +10,15 @@ module Miele
         FUNCTIONAL_PROGRAM_TYPES = [2, 3, 4, 5, 7, 8, 38, 50].freeze
         APP_STATES = { on: :on, waiting_to_start: :waiting_for_start, running: :running, pause: :paused,
                        end_programmed: :end }.freeze
-        private_constant :INFO_QUERY_DOOR_PHASES, :FUNCTIONAL_PROGRAM_TYPES, :APP_STATES
+        STARTED = %i[waiting_for_start running paused end].freeze
+        private_constant :INFO_QUERY_DOOR_PHASES, :FUNCTIONAL_PROGRAM_TYPES, :APP_STATES, :STARTED
 
         private
+
+        # @param state [State]
+        # @param context [Objects::Oven::GlobalDeviceContext]
+        # @return [Boolean]
+        def started?(state, context) = STARTED.include?(oven_state(state, context, offered(context)))
 
         # @param state [State]
         # @param context [Objects::Oven::GlobalDeviceContext]

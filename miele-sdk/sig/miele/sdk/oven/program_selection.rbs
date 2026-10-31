@@ -4,8 +4,6 @@ module Miele
       module ProgramSelection : Appliance
         NOW: Integer
 
-        STATUSES_FOR_MOBILE_START: Array[Symbol]
-
         def select_program: (Integer | Symbol prog_id) -> void
 
         def target_temperature=: (Integer | Float celsius) -> void
@@ -40,7 +38,13 @@ module Miele
 
         def set_parameter: (Integer id, Symbol type, untyped value, ?context: Objects::Oven::GlobalPsContext?) -> void
 
+        def require_parameters_allowed!: () -> void
+
         def under_remote_control?: (?State state) -> bool?
+
+        def context: () -> Objects::Oven::GlobalDeviceContext
+
+        def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
 
         def require_dop2!: () -> void
 

@@ -46,6 +46,8 @@ module Miele
 
         def info?: (Integer id) -> bool
 
+        def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
+
         def oven_state: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Symbol?
 
         def stop_dop1: () -> void

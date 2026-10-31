@@ -7,7 +7,8 @@ RSpec.describe Miele::Sdk::Oven do
   let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 13, 'ProtocolVersion' => 4) }
   let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 0] } }
   let(:fake) do
-    served = { 'State' => JSON.generate(state), 'DOP2/1/1574?idx1=0&idx2=1' => program_context }
+    served = { 'State' => JSON.generate(state), 'DOP2/1/1574?idx1=0&idx2=1' => program_context,
+               'DOP2/1/1585' => device_context }
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
@@ -26,6 +27,10 @@ RSpec.describe Miele::Sdk::Oven do
     dop2_leaf(1, 1574, { 4 => dop2_field(:struct, { 13 => dop2_field(:struct, start_at) }),
                          7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
   end
+
+  def device_prog_id = 13
+
+  def device_context = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, { 28 => dop2_field(:e16, device_prog_id) }) })
 
   def written = fake.requests.select { it.verb == 'PUT' }.map { [it.path, it.body.unpack1('H*')] }
 
@@ -80,11 +85,36 @@ RSpec.describe Miele::Sdk::Oven do
   end
 
   context 'with mobile start while the oven runs' do
-    let(:state) { { 'Status' => 5, 'RemoteEnable' => [0, 0, 1] } }
+    let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] } }
 
     it 'lets a mobile start change a parameter while the oven runs' do
       oven.grill_level = 2
       expect(written.map(&:last)).to eq([parameter(1, :u8, 2)])
+    end
+  end
+
+  context 'without mobile start while the oven runs' do
+    let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 0] } }
+
+    it 'refuses a parameter while the oven runs without mobile start', :aggregate_failures do
+      expect { oven.grill_level = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError, /mobile start/)
+      expect(written).to be_empty
+    end
+  end
+
+  context 'with mobile start but no remote control' do
+    let(:state) { { 'Status' => 5, 'RemoteEnable' => [0, 0, 1] } }
+
+    it 'refuses a parameter without remote control, mobile start or not' do
+      expect { oven.grill_level = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError, /remote control/)
+    end
+  end
+
+  context 'with no program on the oven' do
+    def device_prog_id = 0
+
+    it 'refuses a parameter when the oven shows ProgId 0' do
+      expect { oven.target_temperature = 180 }.to raise_error(Miele::Sdk::ActionUnavailableError, /program/)
     end
   end
 
@@ -108,11 +138,11 @@ RSpec.describe Miele::Sdk::Oven do
       end
     end
     let(:cloud) do
-      leaf = program_context
+      leaves = { '1/1574?idx1=0&idx2=1' => program_context, '1/1585' => device_context }
       FakeCloud.start do |request|
         next unless request.path.include?('/DOP2/')
 
-        request.verb == 'GET' ? [200, {}, leaf] : [204, {}, '']
+        request.verb == 'GET' ? [200, {}, leaves.fetch(request.path.split('/DOP2/').last)] : [204, {}, '']
       end
     end
 

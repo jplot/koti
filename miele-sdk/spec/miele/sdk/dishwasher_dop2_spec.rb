@@ -190,6 +190,14 @@ RSpec.describe Miele::Sdk::Dishwasher do
       .to eq([select(0, 0, prog: 13, type: 2, mode: 1, extras: extras(1 => true, 4 => true, 5 => true))])
   end
 
+  it 'refuses extras when 2/1577 carries none, sending nothing', :aggregate_failures do
+    para = { 1 => dop2_field(:u64, 0), 2 => dop2_field(:u8, 0) }
+    leaves['2/1577?idx1=0&idx2=0'] = dop2_leaf(2, 1577, { 1 => dop2_field(:e16, 0), 4 => dop2_field(:struct, para) })
+    leaves['2/1574?idx1=0&idx2=0'] = context(0)
+    expect { dishwasher.set_extras(:express) }.to raise_error(ArgumentError)
+    expect(written).to be_empty
+  end
+
   it 'switches AutoDos on 2/105 at 20052' do
     leaves['2/105?idx1=20052&idx2=1'] =
       dop2_leaf(2, 105, { 1 => dop2_field(:e16, 20_052), 4 => dop2_field(:i16, 0) }, idx1: 20_052, idx2: 1)

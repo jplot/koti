@@ -5,13 +5,15 @@ RSpec.describe Miele::Sdk::TumbleDryer do
 
   let(:fab) { '000123456789' }
   let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 2, 'ProtocolVersion' => 4) }
+  let(:leaves) { {} }
   let(:fake) do
+    served = leaves
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate('Status' => 3, 'RemoteEnable' => [15, 0, 1])]
       in { verb: 'GET', path: %r{/DOP2/2/1574} } then [200, {}, ps_context]
-      in { verb: 'GET', path: %r{/DOP2/2/1577} } then [200, {}, select]
+      in { verb: 'GET', path: %r{/DOP2/2/1577} } then [200, {}, served.fetch(1577) { select }]
       in { verb: 'POST', body: /"86020100"/ } then [200, {}, JSON.generate(Response: "86021101#{status}")]
       in { verb: 'POST' } then [200, {}, '{"Response":"86021201"}']
       else [204, {}, '']
@@ -56,6 +58,12 @@ RSpec.describe Miele::Sdk::TumbleDryer do
       dryer.set_parameters(drying_level: :iron_dry)
       expect(written.last.last).to eq(select(prog: 5, type: 2, moisture: 4, eco: true))
     end
+  end
+
+  it 'refuses extras when 2/1577 carries none, sending nothing', :aggregate_failures do
+    leaves[1577] = dop2_leaf(2, 1577, { 1 => dop2_field(:e16, 0), 5 => struct({ 3 => dop2_field(:u16, 4) }) })
+    expect { dryer.set_parameters(extras: [:eco]) }.to raise_error(ArgumentError)
+    expect(written).to be_empty
   end
 
   it 'writes iron dry as its flag on any other dryer' do

@@ -107,6 +107,13 @@ RSpec.describe Miele::Sdk::WashingMachine do
     end
   end
 
+  it 'refuses extras or TwinDos containers 2/1577 does not carry, sending nothing', :aggregate_failures do
+    leaves[1577] = wm_select(0, 0, { 19 => dop2_field(:u32, 0) })
+    expect { washer.set_parameters(extras: [:eco]) }.to raise_error(ArgumentError)
+    expect { washer.set_parameters(twin_dos: [1, 2]) }.to raise_error(ArgumentError)
+    expect(written).to be_empty
+  end
+
   it 'refuses a parameter or an extra the app does not write on this washer', :aggregate_failures do
     expect { washer.set_parameters(master_care: 1) }.to raise_error(ArgumentError)
     expect { washer.set_parameters(extras: [:short]) }.to raise_error(ArgumentError)

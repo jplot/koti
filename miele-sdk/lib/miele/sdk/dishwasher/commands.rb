@@ -77,7 +77,7 @@ module Miele
         #   and +:special_dry+ on DOP2, +:short+, +:eco+, +:dry+, +:intensive_low+, +:soak+, +:prerinse+ and
         #   +:additional_drying+ on Dop1, as the model takes them
         # @return [void]
-        # @raise [ArgumentError] for an extra the app does not write on this model
+        # @raise [ArgumentError] for an extra the app does not write on this model, or when 2/1577 carries none
         # @api public
         def set_extras(*selected)
           handled = EXTRAS.fetch(extras_kind)
@@ -187,8 +187,13 @@ module Miele
 
           mode = context.context_para_dw&.delayed_start_mode&.current_value || 2
           select.with(selection_para_dw: para.with(delayed_start_mode: mode, delayed_start: 0,
-                                                   prog_extras: para.prog_extras.with(**extras)))
+                                                   prog_extras: read_extras(para).with(**extras)))
         end
+
+        # @param para [Data] 2/1577's +selection_para_dw+
+        # @return [Data] its +prog_extras+
+        # @raise [ArgumentError] when it carries none
+        def read_extras(para) = para.prog_extras || raise(ArgumentError, 'this dishwasher carries no extras in 2/1577')
 
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher

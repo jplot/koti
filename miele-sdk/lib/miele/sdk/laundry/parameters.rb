@@ -79,11 +79,14 @@ module Miele
           para.with(**values.reject { |member, value| value.nil? || para.public_send(member).nil? })
         end
 
-        # @param extras [Data]
+        # @param extras [Data, nil]
         # @param selected [Array<Symbol>]
         # @param names [Array<Symbol>] the extras the app writes, each only where 2/1577 carries it
         # @return [Data]
+        # @raise [ArgumentError] when 2/1577 carries no extras
         def chosen(extras, selected, names)
+          raise ArgumentError, 'extras: 2/1577 carries none' if extras.nil?
+
           values = names.reject { extras.public_send(it).nil? }.to_h { [it, selected.include?(it)] }
           extras.with(**values)
         end

@@ -68,6 +68,8 @@ module Miele
         def dop2_parameters(para, settings)
           para = para.with(extras: chosen(para.extras, settings[:extras], DOP2_EXTRAS)) if settings.key?(:extras)
           if settings.key?(:twin_dos)
+            raise ArgumentError, 'twin_dos: 2/1577 carries no auto_dosing' unless para.auto_dosing
+
             para = para.with(auto_dosing: para.auto_dosing.with(container: settings[:twin_dos]))
           end
           para.with(**with_temperature(dop2_values(settings, para), settings))

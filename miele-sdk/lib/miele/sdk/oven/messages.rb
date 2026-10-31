@@ -24,6 +24,15 @@ module Miele
           end
           Dop2::Leaf.new(unit: 2, attribute: 1577, idx1: 0, idx2: 0, fields:)
         end
+
+        # UserRequestMessage, 2/1583.
+        #
+        # @param id [Integer] a value of +GLOBAL_EnumUserRequestId+
+        # @return [Dop2::Leaf]
+        def user_request(id)
+          Dop2::Leaf.new(unit: 2, attribute: 1583, idx1: 0, idx2: 0,
+                         fields: { 1 => Dop2::Field.new(type: :e16, value: id) })
+        end
       end
     end
   end

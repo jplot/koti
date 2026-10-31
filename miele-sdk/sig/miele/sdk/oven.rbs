@@ -2,6 +2,8 @@ module Miele
   module Sdk
     class Oven < Appliance
       include ProgramSelection
+      include Requests
+      include OvenState
 
       def power_on: () -> void
 
@@ -33,7 +35,11 @@ module Miele
 
       def under_remote_control?: (?State state) -> bool?
 
+      def dop2?: () -> bool
+
       def require_dop2!: () -> void
+
+      def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
 
       def power_leaf: (Integer state) -> Dop2::Leaf
 

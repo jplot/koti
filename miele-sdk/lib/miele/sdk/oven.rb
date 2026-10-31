@@ -6,6 +6,8 @@ module Miele
     # 15, 31, 39 and 45).
     class Oven < Appliance
       include ProgramSelection
+      include Requests
+      include OvenState
 
       # Switches the appliance on as the app's oven module does, waking it first when it sleeps. The app's
       # other families switch on in their own way.
@@ -86,9 +88,7 @@ module Miele
 
       # @return [Array<Integer>] the user requests the oven offers now, numbered as the app numbers them
       # @api public
-      def supported_requests
-        Array(context.supported_user_requests).map { Objects::Oven::GlobalEnumUserRequestId.to_i(it) }
-      end
+      def supported_requests = offered(context)
 
       private
 
@@ -96,9 +96,18 @@ module Miele
       # @return [Boolean] remote control without local control
       def under_remote_control?(state = self.state) = state.remote_control? && !state.local_control?
 
+      # @return [Boolean]
+      def dop2? = [3, 4].include?(protocol_version)
+
       # @return [void]
       # @raise [ActionUnavailableError] on a Dop1 oven, which the app only stops
-      def require_dop2! = require!([3, 4].include?(protocol_version), 'a Dop1 oven only stops, as in the app')
+      def require_dop2! = require!(dop2?, 'a Dop1 oven only stops, as in the app')
+
+      # @param context [Objects::Oven::GlobalDeviceContext] 1/1585
+      # @return [Array<Integer>]
+      def offered(context)
+        Array(context.supported_user_requests).map { Objects::Oven::GlobalEnumUserRequestId.to_i(it) }
+      end
 
       # @param parameter [Symbol] a member of +GLOBAL_PS_ContextParaCA+, in hundredths of °C
       # @return [Float, nil]

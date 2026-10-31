@@ -81,7 +81,7 @@ module Miele
         # @param time [Time, :now]
         # @api public
         def start_at=(time)
-          set_parameter(13, :u64, time == :now ? NOW : Integer(time))
+          set_parameter(13, :u64, unix_time(time))
         end
 
         # @param time [Time]
@@ -131,9 +131,31 @@ module Miele
           mobile_start = state.mobile_start? && STATUSES_FOR_MOBILE_START.include?(state.status)
           require!(under_remote_control?(state) || mobile_start,
                    'the oven takes parameters only under remote control, or by mobile start once a program runs')
-          attributes = (context || program_context).prog_attributes_cca
-          prog_id = attributes&.prog_id || raise(ActionUnavailableError, 'no program is selected')
-          write_dop2(Messages.ps_select(Objects::Oven::GlobalEnumPrgId.to_i(prog_id), 2, [id, type, value]))
+          write_parameter(selected_program(context || program_context), id, type, value)
+        end
+
+        # @param context [Objects::Oven::GlobalPsContext] 1/1574
+        # @return [Integer] the ProgId of the selected program
+        # @raise [ActionUnavailableError] when no program is selected
+        def selected_program(context)
+          prog_id = context.prog_attributes_cca&.prog_id || raise(ActionUnavailableError, 'no program is selected')
+          Objects::Oven::GlobalEnumPrgId.to_i(prog_id)
+        end
+
+        # @param prog_id [Integer]
+        # @param id [Integer] a +GLOBAL_PS_SelectionParaCA+ attribute
+        # @param type [Symbol] its wire type
+        # @param value [Object]
+        # @return [void]
+        def write_parameter(prog_id, id, type, value) = write_dop2(Messages.ps_select(prog_id, 2, [id, type, value]))
+
+        # @param time [Time, :now]
+        # @return [Integer] Unix seconds, all ones for now
+        def unix_time(time)
+          case time
+          in :now then NOW
+          in Time then time.to_i
+          end
         end
       end
     end

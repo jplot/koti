@@ -43,6 +43,12 @@ module Miele
         def under_remote_control?: (?State state) -> bool?
 
         def require_dop2!: () -> void
+
+        def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
+
+        def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
+
+        def unix_time: (Time | :now time) -> Integer
       end
     end
   end

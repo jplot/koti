@@ -47,6 +47,8 @@ module Miele
 
       def temp_control_of: (State state, Integer number) -> TempControl
 
+      def degrees: (Array[Integer]? values) -> Integer
+
       def run_on: (untyped fan) -> Integer
     end
   end

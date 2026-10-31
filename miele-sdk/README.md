@@ -303,7 +303,7 @@ hob.zones            # => [#<data Zone number=1, level=6.0, heat=nil, booster=2,
 hob.main_state       # => :running; internal_state names State's InternalState as the app does
 hob.minute_minder    # => 130, in seconds
 hob.power_doubling?  # and stop_and_go?
-hob.temp_control     # => #<data TempControl zone=2, level=:two, target_reached=true, target=120.0, current=95.0>
+hob.temp_control     # => #<data TempControl zone=2, level=:two, target_reached=true, target=120, current=95>
 hob.fan              # => #<data Fan level=2, run_on=301>, nil for a hob without one
 ```
 

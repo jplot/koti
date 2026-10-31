@@ -87,7 +87,13 @@ RSpec.describe Miele::Sdk::Hob do
     temperatures = { 'TargetTemperature' => [12_000], 'Temperature' => [9_500] }
     serve({ 7 => 2 << 1, 13 => 0b0010_0000, 57 => 0b0001_1000 }, 62, temperatures)
     expect(hob.temp_control).to eq(described_class::TempControl.new(zone: 2, level: :two, target_reached: true,
-                                                                    target: 120.0, current: 95.0))
+                                                                    target: 120, current: 95))
+  end
+
+  it 'reads TempControl in whole degrees, 0 where there is none, as the app does' do
+    temperatures = { 'TargetTemperature' => [12_050], 'Temperature' => [-32_768] }
+    serve({ 7 => 2 << 1, 13 => 0b0010_0000, 57 => 0b0001_1000 }, 62, temperatures)
+    expect(hob.temp_control).to have_attributes(target: 120, current: 0)
   end
 
   it 'numbers the zones of a FlexControl hob from their controls' do

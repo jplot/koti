@@ -32,9 +32,9 @@ module Miele
       # @!attribute [r] target_reached
       #   @return [Boolean]
       # @!attribute [r] target
-      #   @return [Float, nil] °C
+      #   @return [Integer] whole °C, 0 where the hob reports none
       # @!attribute [r] current
-      #   @return [Float, nil] °C
+      #   @return [Integer] whole °C, 0 where the hob reports none
       TempControl = Data.define(:zone, :level, :target_reached, :target, :current)
 
       # The fan of a hob with vapour extraction.

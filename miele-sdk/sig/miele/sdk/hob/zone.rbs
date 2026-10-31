@@ -21,10 +21,10 @@ module Miele
         attr_reader zone: Integer
         attr_reader level: Symbol
         attr_reader target_reached: bool
-        attr_reader target: Float?
-        attr_reader current: Float?
+        attr_reader target: Integer
+        attr_reader current: Integer
 
-        def self.new: (Integer zone, Symbol level, bool target_reached, Float? target, Float? current) -> TempControl
+        def self.new: (Integer zone, Symbol level, bool target_reached, Integer target, Integer current) -> TempControl
                     | (zone: Integer, level: Symbol, target_reached: bool, target: Float?, current: Float?) -> TempControl
       end
 

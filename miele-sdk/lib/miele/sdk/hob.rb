@@ -124,8 +124,14 @@ module Miele
         setting = state.extended_state.temp_control.public_send(:"kochstelle_#{number}")
         level = Objects::Hob::BenutzereinstellungTempcontrolEnum.to_i(setting.benutzereinstellung)
         TempControl.new(number, TEMP_CONTROL_LEVELS.fetch(level, :none), setting.zieltemperatur == :erreicht,
-                        state.target_temperatures.first, state.temperatures.first)
+                        degrees(state.raw['TargetTemperature']), degrees(state.raw['Temperature']))
       end
+
+      # MapTempControl: whole degrees, truncated, and 0 where the hob reports none.
+      #
+      # @param values [Array<Integer>, nil] hundredths of a degree
+      # @return [Integer]
+      def degrees(values) = Array(values).first.to_i.then { it.positive? ? it / 100 : 0 }
 
       # AddFanData builds TimeSpan(0, minutes, the byte named hours): that byte counts seconds.
       #

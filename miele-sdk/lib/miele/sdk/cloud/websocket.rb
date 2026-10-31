@@ -28,7 +28,7 @@ module Miele
         KEEP_ALIVE = 30
         WATCHDOG = 60
         ERROR_RECONNECT = 6
-        FAILURES = [Error, EOFError, IOError, SystemCallError, OpenSSL::SSL::SSLError].freeze
+        FAILURES = [Error, SocketError, EOFError, IOError, SystemCallError, OpenSSL::SSL::SSLError].freeze
         private_constant :KEEP_ALIVE, :WATCHDOG, :ERROR_RECONNECT, :FAILURES
 
         # @param session [Session] its organization's rest host names the websocket,

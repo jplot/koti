@@ -44,6 +44,17 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     expect(waits).to eq([6])
   end
 
+  it "tries again 6 s later when the cloud's name does not resolve", :aggregate_failures do
+    calls = 0
+    allow(Socket).to receive(:tcp).and_wrap_original do |tcp, *args, **options|
+      raise Socket::ResolutionError, 'getaddrinfo: nodename nor servname provided' if (calls += 1) == 1
+
+      tcp.call(*args, **options)
+    end
+    expect(first_messages(2).map(&:body)).to eq(['{"Status":1}', '{"Status":5}'])
+    expect(waits).to eq([6])
+  end
+
   it 'refetches the followed resources on each connection, once each, delivering them first', :aggregate_failures do
     received = first_messages(4)
     expect(fetched).to eq(['/Devices/000123456789/State'] * 2)

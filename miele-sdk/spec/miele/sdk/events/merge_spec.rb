@@ -19,6 +19,18 @@ RSpec.describe Miele::Sdk::Events::Merge do
     end
   end
 
+  def counting(produced)
+    Object.new.tap do |source|
+      source.define_singleton_method(:each) do |&block|
+        3.times do |number|
+          block.call(number)
+          produced << number
+        end
+        sleep
+      end
+    end
+  end
+
   it 'merges local and cloud events on the calling thread', :aggregate_failures do
     received = []
     merge.each do |event|
@@ -34,6 +46,17 @@ RSpec.describe Miele::Sdk::Events::Merge do
     merge.each.first
     expect([closed.pop, closed.pop]).to contain_exactly(:local, :cloud)
     expect(Thread.list.size).to eq(threads)
+  end
+
+  it 'reads a single source on a thread of its own, so that a slow block does not hold it back' do
+    produced = []
+    seen = nil
+    described_class.new([counting(produced)]).each do |number|
+      sleep 0.2
+      seen = produced.dup
+      break if number.zero?
+    end
+    expect(seen).to eq([0, 1, 2])
   end
 
   it 'raises in the calling thread what a source raises' do

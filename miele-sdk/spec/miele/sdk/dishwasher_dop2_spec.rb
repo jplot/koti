@@ -104,6 +104,21 @@ RSpec.describe Miele::Sdk::Dishwasher do
       dishwasher.pause
       expect(written.map(&:last)).to eq([user_request(3).last])
     end
+
+    it 'refuses a delayed start, as the app does', :aggregate_failures do
+      expect { dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30)) }
+        .to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(written).to be_empty
+    end
+  end
+
+  context 'when its program is selected without mobile start' do
+    let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 0], 'StandbyState' => 1 } }
+
+    it 'refuses a delayed start, as the app does' do
+      expect { dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30)) }
+        .to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
   end
 
   context 'when paused under mobile start' do

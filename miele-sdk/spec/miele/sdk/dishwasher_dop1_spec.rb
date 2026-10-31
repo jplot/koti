@@ -58,10 +58,9 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(dop1_requests).to eq(['89060100010d4200'])
   end
 
-  it 'delays the start on 8909 in minutes and hours, sending no start request after' do
-    allow(Time).to receive(:now).and_return(Time.new(2026, 10, 31, 20, 0, 30))
-    dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
-    expect(dop1_requests).to eq(['89090200011e0101'])
+  it 'refuses a delayed start while the program runs, as the app does' do
+    expect { dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30)) }
+      .to raise_error(Miele::Sdk::ActionUnavailableError)
   end
 
   context 'when its program is selected' do
@@ -70,6 +69,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
     it 'opens the door under mobile start' do
       dishwasher.open_door
       expect(dop1_requests).to eq(['140402000102'])
+    end
+
+    it 'delays the start on 8909 in minutes and hours, sending no start request after' do
+      allow(Time).to receive(:now).and_return(Time.new(2026, 10, 31, 20, 0, 30))
+      dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
+      expect(dop1_requests).to eq(['89090200011e0101'])
     end
   end
 

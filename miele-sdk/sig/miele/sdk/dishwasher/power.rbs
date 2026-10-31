@@ -22,6 +22,10 @@ module Miele
 
         def status: (State state) -> Integer
 
+        def mobile?: (State state) -> bool
+
+        def require_start_time!: () -> void
+
         def standby: (State state) -> Integer
 
         def locked_in?: (State state) -> bool

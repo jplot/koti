@@ -42,8 +42,11 @@ module Miele
         #
         # @param at [Time] its time of day; the next one if it has passed today
         # @return [void]
+        # @raise [ActionUnavailableError] unless a program is selected (Status 3) under mobile start, as the app's
+        #   ProgramStartFinishAtRule allows
         # @api public
         def start_delayed(at)
+          require_start_time!
           now = Time.now
           return dop1_start_delayed(minutes_until(next_time(at, now), now)) unless dop2?
 
@@ -53,6 +56,13 @@ module Miele
         end
 
         private
+
+        # @return [void]
+        # @raise [ActionUnavailableError]
+        def require_start_time!
+          state = self.state
+          require!(mobile?(state) && status(state) == 3, 'only a selected program takes a start time')
+        end
 
         # @param target [Time]
         # @param now [Time]

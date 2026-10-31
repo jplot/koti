@@ -1,0 +1,174 @@
+# frozen_string_literal: true
+
+RSpec.describe Miele::Sdk::CoolingAppliance do
+  subject(:fridge) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }) }
+
+  let(:fab) { '000123456789' }
+  let(:waits) { [] }
+  let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 21, 'ProtocolVersion' => 201) }
+  let(:resources) do
+    { 'State' => { 'Status' => 5 },
+      'Cooling' => { 'ZoneCounter' => 2, 'PresentationType' => 3,
+                     'EcoMode' => { 'Value' => 2, 'SetValues' => [1, 2] },
+                     'Party' => { 'Value' => 2, 'SetValues' => [] } },
+      'Cooling/1' => { 'ZoneState' => { 'Value' => 1, 'Type' => 20, 'Position' => 3 }, 'Fan' => { 'Value' => 2 },
+                       'SuperMode' => { 'Value' => 2, 'SetValues' => [1, 2] }, 'VarioCool' => { 'Value' => 2 } },
+      'Cooling/2' => { 'ZoneState' => { 'Value' => 1, 'Type' => 19, 'Position' => 1 } } }
+  end
+  let(:fake) do
+    served = resources
+    FakeAppliance.start do |request|
+      path = request.path.delete_prefix("/Devices/#{fab}/")
+      case request
+      in { path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
+      in { verb: 'GET' } then [200, {}, JSON.generate(served.fetch(path))]
+      else served.fetch(path) { [204, {}, ''] }
+      end
+    end
+  end
+
+  before { connect_to(fake) }
+
+  after { fake.stop }
+
+  def written
+    fake.requests.reject { it.verb == 'GET' }.map do |request|
+      [request.verb, request.path.delete_prefix("/Devices/#{fab}/"), JSON.parse(request.body)]
+    end
+  end
+
+  def freezer = fridge.zones.find { it.number == 1 }
+
+  it 'sets a zone target in hundredths of a degree, on its number' do
+    fridge.set_target(freezer, -18)
+    expect(written).to eq([['PUT', 'Cooling/1/TargetTemp', { 'Value' => -1800 }]])
+  end
+
+  it 'sets the super mode duration first on protocol 201, then waits half a second', :aggregate_failures do
+    fridge.set_super_mode(freezer, true)
+    expect(written).to eq([['PUT', 'Cooling/1/SuperModeDuration', { 'Value' => 720 }],
+                           ['PUT', 'Cooling/1/SuperMode', { 'Value' => 1, 'SetValues' => [1, 2] }]])
+    expect(waits).to eq([0.5])
+  end
+
+  it 'sets the super mode even when the duration write fails, as the app does' do
+    resources['Cooling/1/SuperModeDuration'] = [500, {}, '']
+    fridge.set_super_mode(freezer, false)
+    expect(written.last).to eq(['PUT', 'Cooling/1/SuperMode', { 'Value' => 2, 'SetValues' => [1, 2] }])
+  end
+
+  it 'switches the fan on the zone position and VarioCool on its rank' do
+    fridge.set_fan(freezer, true)
+    fridge.set_vario_cool(freezer, true)
+    expect(written).to eq([['PUT', 'Cooling/3/Fan', { 'Value' => 1, 'SetValues' => [1, 2] }],
+                           ['PUT', 'Cooling/2/VarioCool', { 'Value' => 1 }]])
+  end
+
+  it 'refuses a fan or VarioCool on a zone without one', :aggregate_failures do
+    fridge_zone = fridge.zones.find { it.number == 2 }
+    expect { fridge.set_fan(fridge_zone, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.set_vario_cool(fridge_zone, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
+  it 'sets a mode by its name in the Cooling API, only when the appliance lists values for it', :aggregate_failures do
+    fridge.set_mode(:eco, true)
+    expect { fridge.set_mode(:party, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.set_mode(:holiday, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to eq([['PUT', 'Cooling/EcoMode', { 'Value' => 1 }]])
+  end
+
+  it 'sets the ice maker, the door alarm delay, PerfectFresh and the humidifier' do
+    fridge.ice_maker = false
+    fridge.door_alarm_delay = 180
+    fridge.perfect_fresh = 2
+    fridge.humidifier = 1
+    expect(written.map { it[1..] }).to eq([['Cooling/IceMaker', { 'Value' => 2 }],
+                                           ['Cooling/DoorAlarmTime', { 'Value' => 180 }],
+                                           ['Cooling/PerfectFresh', { 'Value' => 2 }],
+                                           ['Cooling/Humidifier', { 'Value' => 1 }]])
+  end
+
+  it 'refuses a light, an ambient light or a humidity level on a fridge-freezer', :aggregate_failures do
+    expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  end
+
+  context 'with a fridge, which has no ice maker' do
+    let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 19, 'ProtocolVersion' => 201) }
+
+    it 'refuses the ice maker' do
+      expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+  end
+
+  context 'with a Liebherr KWTUS wine unit on protocol 203' do
+    let(:ident) do
+      Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 34, 'ProtocolVersion' => 203,
+                                                    'DeviceIdentLabel' => { 'TechType' => 'KWTUS 6000' })
+    end
+
+    it 'lights it through State, and sets its humidity level' do
+      fridge.light = true
+      fridge.humidity = :high
+      expect(written).to eq([['PUT', 'State/Light', { 'Light' => 1 }],
+                             ['PUT', 'Cooling/HumidityControl', { 'Value' => 3 }]])
+    end
+  end
+
+  context 'with a Liebherr wine unit on protocol 203' do
+    let(:ident) do
+      Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 32, 'ProtocolVersion' => 203,
+                                                    'DeviceIdentLabel' => { 'TechType' => 'WT 6000' })
+    end
+
+    it 'sets its ambient light level on Cooling/Light' do
+      fridge.ambient_light_mode = 4
+      expect(written).to eq([['PUT', 'Cooling/Light', { 'Value' => 4 }]])
+    end
+  end
+
+  context 'with a BSH wine unit' do
+    let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 32, 'ProtocolVersion' => 200) }
+
+    it 'lights it through AmbientLightState and sets its ambient light mode' do
+      fridge.light = false
+      fridge.ambient_light_mode = 2
+      expect(written).to eq([['PUT', 'Cooling/AmbientLightState', { 'Value' => 2, 'SetValues' => [1, 2] }],
+                             ['PUT', 'Cooling/AmbientLightMode', { 'Value' => 2 }]])
+    end
+  end
+
+  context 'with a Rioja wine unit, which has a presentation light' do
+    let(:ident) do
+      Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 32, 'ProtocolVersion' => 203,
+                                                    'DeviceIdentLabel' => { 'TechType' => 'KWT 4154 UG' })
+    end
+
+    it 'switches the presentation light and sets a zone intensity on its rank' do
+      fridge.presentation_light = true
+      fridge.set_presentation_light_intensity(freezer, 0)
+      expect(written).to eq([['PUT', 'Cooling/PresentationLight', { 'Value' => 1 }],
+                             ['PUT', 'Cooling/2/PresentationLightIntensity', { 'Value' => 0 }]])
+    end
+  end
+
+  context 'with an Opcode fridge-freezer' do
+    let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 21, 'ProtocolVersion' => 1) }
+
+    before do
+      resources['State'] = { 'Status' => 5, 'Temperature' => [500, -1800], 'TargetTemperature' => [400, -1800] }
+    end
+
+    it "sets a target through Oc85 in whole °C, as 16-bit two's complement" do
+      fridge.set_target(fridge.zones.last, -18)
+      expect(written).to eq([['POST', 'Oc85/', { 'Request' => '10000617000200FFEE' }]])
+    end
+
+    it 'switches super freezing with ProcessAction 4' do
+      fridge.set_super_mode(fridge.zones.last, true)
+      expect(written).to eq([['PUT', 'State/ProcessAction', { 'ProcessAction' => 4 }]])
+    end
+  end
+end

@@ -9,7 +9,7 @@ RSpec.describe Miele::Sdk::Appliance do
     FakeAppliance.start do |request|
       case request.path
       when '/Devices/' then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
-      when %r{/DOP2?/} then [404, {}, '']
+      when %r{/DOP2?/|/State/} then [404, {}, '']
       else [200, {}, '{"Status":5}']
       end
     end
@@ -19,6 +19,7 @@ RSpec.describe Miele::Sdk::Appliance do
       case request.path
       when %r{\A/V2/Devices/\d+/DOP2/} then [200, {}, leaf]
       when %r{\A/V2/Devices/\d+/DOP/} then FakeCloud.json('Response' => '8E0111000000')
+      when %r{\A/V2/Devices/\d+/State/} then FakeCloud.json({})
       when '/V2/Devices' then FakeCloud.json([{ host: 'Miele-0000000000000000.local.', devices: [{ mac: fab }] }])
       when '/V2/GroupKeyId/'
         FakeCloud.json([{ groupId: FakeAppliance::GROUP_ID, groupKey: FakeAppliance::GROUP_KEY }])
@@ -61,6 +62,17 @@ RSpec.describe Miele::Sdk::Appliance do
   it 'keeps a local 404 without a cloud account' do
     Miele::Sdk.configure { it.email = nil }
     expect { appliance.dop2(2, 1586) }.to raise_error(Miele::Sdk::NotFoundError)
+  end
+
+  it 'keeps reading State locally once a State member goes to the cloud', :aggregate_failures do
+    ident = Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 20, 'ProtocolVersion' => 1)
+    freezer = Miele::Sdk::CoolingAppliance.new('127.0.0.1', ident:)
+    zone = Miele::Sdk::CoolingAppliance::Zone.new(number: 1, position: 1, rank: 1, type: :freezer, enabled: true,
+                                                  temperature: nil, target: nil, super_mode: false, fan: nil,
+                                                  vario_cool: nil)
+    freezer.set_super_mode(zone, true)
+    expect(freezer.state.status).to eq(:running)
+    expect(through_cloud).to eq(["/V2/Devices/#{fab}/State/ProcessAction"])
   end
 
   it 'reads State locally when the appliance serves it', :aggregate_failures do

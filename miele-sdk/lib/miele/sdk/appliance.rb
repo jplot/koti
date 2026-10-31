@@ -170,7 +170,8 @@ module Miele
 
       private
 
-      # Local first: a resource the appliance answers 404 to goes, for good, to the cloud when an account is set.
+      # Local first: a resource the appliance answers 404 to goes, for good, to the cloud when an account is set. A
+      # member of +State+ counts on its own: a fridge's +State/ProcessAction+ may be cloud-only while +State+ is not.
       #
       # @param method [Symbol]
       # @param path [String]
@@ -178,7 +179,7 @@ module Miele
       # @param kind [Symbol] +:json+ or +:dop2+
       # @return [Connection::Response]
       def send_request(method, path, body: nil, kind: :json)
-        resource = path[%r{\A/Devices/\d+/([^/?]+)}, 1]
+        resource = path[%r{\A/Devices/\d+/(State/[^/?]+|[^/?]+)}, 1]
         return cloud_request(method, path, body, kind, resource) if @in_cloud.include?(resource)
 
         @local.request(method, path, body:, kind:)

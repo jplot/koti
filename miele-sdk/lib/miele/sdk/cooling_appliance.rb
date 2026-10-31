@@ -7,6 +7,7 @@ module Miele
     # appliance (0 and 1) shows its zones in +State+.
     class CoolingAppliance < Appliance
       include Zones
+      include Commands
 
       # A zone as the app shows it.
       #
@@ -102,7 +103,7 @@ module Miele
       # @return [Symbol, nil] +:low+, +:medium+ or +:high+ on a KWTUS or Rioja wine unit, nil otherwise or while off
       # @api public
       def humidity
-        return unless (rioja? || tech_type.to_s.include?('KWTUS')) && on?
+        return unless (rioja? || kwtus?) && on?
 
         { 1 => :low, 2 => :medium, 3 => :high }[cooling.dig('HumidityControl', 'Value')]
       end
@@ -127,6 +128,12 @@ module Miele
 
       # @return [Boolean] the KWT 4, KWTS 4 and KWNS 4 wine units, which the app names Rioja
       def rioja? = ['KWTS 4', 'KWT 4', 'KWNS 4'].any? { tech_type.to_s.include?(it) }
+
+      # @return [Boolean]
+      def kwtus? = tech_type.to_s.include?('KWTUS')
+
+      # @return [Boolean] a KWTUS or Rioja wine unit, but the KWT 4584 E
+      def presentation_light? = (kwtus? || rioja?) && !tech_type.to_s.include?('KWT 4584 E')
 
       # @return [Boolean] a wine unit lit through +State+: Opcode, or protocol 201 or 203
       def state_light? = opcode? || [201, 203].include?(protocol_version)

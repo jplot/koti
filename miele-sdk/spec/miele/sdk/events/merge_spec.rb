@@ -49,11 +49,10 @@ RSpec.describe Miele::Sdk::Events::Merge do
   end
 
   it 'reads a single source on a thread of its own, so that a slow block does not hold it back' do
-    produced = []
+    produced = Queue.new
     seen = nil
     described_class.new([counting(produced)]).each do |number|
-      sleep 0.2
-      seen = produced.dup
+      seen = Array.new(3) { produced.pop }
       break if number.zero?
     end
     expect(seen).to eq([0, 1, 2])

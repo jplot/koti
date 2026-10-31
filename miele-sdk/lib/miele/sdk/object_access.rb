@@ -30,7 +30,7 @@ module Miele
                    with_index:)
       end
 
-      # Reads an object, changes it and writes it back where it was read, as the app writes most objects.
+      # The app writes most objects back where it read them.
       #
       # @param klass [Class] a generated DOP2 class
       # @param address [Array<Integer, nil>] as {#object} takes it
@@ -40,9 +40,7 @@ module Miele
       # @return [void]
       # @raise [ArgumentError] when a changed member was not read: nothing is written
       # @api public
-      def modify(klass, address, with_index: false)
-        write_object(yield(object(klass, address)), address, with_index:)
-      end
+      def modify(klass, address, with_index: false) = write_object(yield(object(klass, address)), address, with_index:)
 
       private
 

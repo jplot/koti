@@ -46,6 +46,8 @@ module Miele
 
       def supervision: () -> Schema::SuperVision
 
+      def supervise: (String device, show: bool) -> void
+
       def info: () -> resource
 
       def host_info: () -> resource

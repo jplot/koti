@@ -70,6 +70,16 @@ module Miele
       # @api public
       def supervision = Schema::SuperVision.from(device('SuperVision'))
 
+      # Con@ctivity One: the app writes +Show+ alone and leaves +Signal+ out (UpdateConactivityOneSettingsHelper).
+      #
+      # @param device [String] the fabrication number of the appliance this one shows
+      # @param show [Boolean]
+      # @return [void]
+      # @api public
+      def supervise(device, show:)
+        send_request(:put, "/Devices/#{fab}/SuperVision/#{device}", body: JSON.generate('Show' => show))
+      end
+
       # @return [Hash{String=>Object}] the communication module's +/Info+
       # @api public
       def info = get('/Info')

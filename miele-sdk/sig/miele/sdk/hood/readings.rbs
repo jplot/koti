@@ -67,6 +67,18 @@ module Miele
                     | (active: bool, interval: Integer) -> ColorFlow
       end
 
+      COLOR_FLOW_INTERVALS: Array[Integer]
+
+      class ConnectivityPlus < Data
+        attr_reader available: bool?
+        attr_reader activated: bool?
+        attr_reader available_sources: Array[String]?
+        attr_reader sources: Array[String]?
+
+        def self.new: (bool? available, bool? activated, Array[String]? available_sources, Array[String]? sources) -> ConnectivityPlus
+                    | (available: bool?, activated: bool?, available_sources: Array[String]?, sources: Array[String]?) -> ConnectivityPlus
+      end
+
       module Readings : Appliance
         DEHUMIDIFICATION_MODES: Hash[Integer, Symbol]
 
@@ -95,6 +107,8 @@ module Miele
         def grease_melting: () -> GreaseMelting?
 
         def auto_refresh_supported?: () -> bool?
+
+        def connectivity_plus: () -> ConnectivityPlus?
 
         def color_flow: () -> ColorFlow?
 

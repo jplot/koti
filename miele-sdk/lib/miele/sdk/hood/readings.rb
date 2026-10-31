@@ -75,6 +75,22 @@ module Miele
       #   @return [Integer] seconds
       ColorFlow = Data.define(:active, :interval)
 
+      # Seconds between two colours (ColorFlowInterval).
+      COLOR_FLOW_INTERVALS = [5, 10, 20].freeze
+      private_constant :COLOR_FLOW_INTERVALS
+
+      # Con@ctivity Plus, which makes the hood follow hobs.
+      #
+      # @!attribute [r] available
+      #   @return [Boolean, nil]
+      # @!attribute [r] activated
+      #   @return [Boolean, nil]
+      # @!attribute [r] available_sources
+      #   @return [Array<String>, nil] the fabrication numbers of the hobs it can follow
+      # @!attribute [r] sources
+      #   @return [Array<String>, nil] those it follows
+      ConnectivityPlus = Data.define(:available, :activated, :available_sources, :sources)
+
       # What the app's hood module reads from ExtendedState (DopDeviceStateMapper). An Opcode hood (protocol 1)
       # has a shorter ExtendedState and gives its fan and light in State (OpCodeDeviceStateMapper).
       module Readings
@@ -154,13 +170,31 @@ module Miele
           dop_extended&.then { functions(it)[0] == 1 && !tech_type.to_s.match?(NO_AUTO_REFRESH) }
         end
 
-        # @return [ColorFlow, nil] nil when the hood has none (404)
+        # @return [ConnectivityPlus, nil] nil when +services+ has none
+        # @api public
+        def connectivity_plus
+          plus = services['ConnectivityPlus']
+          return unless plus
+
+          ConnectivityPlus.new(available: plus['available'], activated: plus['activated'],
+                               available_sources: plus['availableSourceDeviceIds'], sources: plus['sourceDeviceIds'])
+        end
+
+        # A DOP2 hood answering 500 has none either, and an interval the app does not know reads 10
+        # (ColorFlowDop2Source, ColorFlowIntervalMapper).
+        #
+        # @return [ColorFlow, nil] nil when the hood has none
         # @api public
         def color_flow
+          return if opcode?
+
           served = device('ColorFlow')
-          ColorFlow.new(served.fetch('active'), served.fetch('intervalDurationSeconds'))
+          interval = served.fetch('intervalDurationSeconds')
+          ColorFlow.new(served.fetch('active'), COLOR_FLOW_INTERVALS.include?(interval) ? interval : 10)
         rescue NotFoundError
           nil
+        rescue ResponseError => e
+          raise unless e.status == 500 && protocol_version != 2
         end
 
         private

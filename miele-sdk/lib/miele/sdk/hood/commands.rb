@@ -104,6 +104,31 @@ module Miele
           path == :dop1 ? write_setting(40_023, value) : write_sf(9007, value)
         end
 
+        # @param active [Boolean]
+        # @param interval [Integer] 5, 10 or 20 seconds
+        # @return [void]
+        # @raise [ArgumentError] for another interval
+        # @raise [ActionUnavailableError] when the hood has no ColorFlow
+        # @api public
+        def configure_color_flow(active:, interval: 10)
+          raise ArgumentError, "no ColorFlow interval #{interval}" unless COLOR_FLOW_INTERVALS.include?(interval)
+
+          require!(color_flow, 'the hood has no ColorFlow')
+          body = JSON.generate('active' => active, 'intervalDurationSeconds' => interval)
+          send_request(:put, "/Devices/#{fab}/ColorFlow", body:)
+        end
+
+        # @param activated [Boolean]
+        # @param sources [Array<String>] the fabrication numbers of the hobs it follows
+        # @return [void]
+        # @raise [ActionUnavailableError] when the hood does not offer Con@ctivity Plus
+        # @api public
+        def configure_connectivity_plus(activated:, sources:)
+          require!(connectivity_plus&.available, 'the hood offers no Con@ctivity Plus')
+          body = JSON.generate('activated' => activated, 'sourceDeviceIds' => sources)
+          send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
+        end
+
         # A Dop1 or Opcode hood wakes when its State is written back, the light as it is; DOP2 takes
         # +DeviceAction+ 2 (DefaultWakeUpAction).
         #

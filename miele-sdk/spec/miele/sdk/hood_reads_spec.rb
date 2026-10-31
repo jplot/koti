@@ -97,12 +97,22 @@ RSpec.describe Miele::Sdk::Hood do
 
   it 'reads ColorFlow, nil when the hood answers 404', :aggregate_failures do
     expect(hood.color_flow).to be_nil
-    resources['ColorFlow'] = [200, {}, '{"active":true,"intervalDurationSeconds":10}']
-    expect(hood.color_flow).to eq(described_class::ColorFlow.new(active: true, interval: 10))
+    resources['ColorFlow'] = [200, {}, '{"active":true,"intervalDurationSeconds":20}']
+    expect(hood.color_flow).to eq(described_class::ColorFlow.new(active: true, interval: 20))
+  end
+
+  it 'reads an interval the app does not know as 10 seconds, as its mapper does' do
+    resources['ColorFlow'] = [200, {}, '{"active":true,"intervalDurationSeconds":15}']
+    expect(hood.color_flow.interval).to eq(10)
   end
 
   context 'with a DOP2 hood' do
     let(:protocol) { 4 }
+
+    it 'reads a 500 on ColorFlow as having none, as the app does for DOP2' do
+      resources['ColorFlow'] = [500, {}, '']
+      expect(hood.color_flow).to be_nil
+    end
 
     it 'reads its values little-endian, and its ambient light from bits 2 and 8', :aggregate_failures do
       serve(16 => [0xC8, 0x00], 34 => [0x04, 0x01], 12 => [0x00, 0x40])

@@ -26,7 +26,15 @@ module Miele
 
         def auto_refresh=: (bool on) -> void
 
+        def configure_color_flow: (active: bool, ?interval: Integer) -> void
+
+        def color_flow: () -> ColorFlow?
+
+        def configure_connectivity_plus: (activated: bool, sources: Array[String]) -> void
+
         def wake: () -> void
+
+        def connectivity_plus: () -> ConnectivityPlus?
 
         def fan_settable?: () -> bool?
 

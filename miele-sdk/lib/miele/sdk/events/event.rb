@@ -28,11 +28,17 @@ module Miele
         # @param content [Object]
         # @param source [Symbol]
         def initialize(fab:, resource:, content:, source: :local) = super
-        # @return [Schema::DeviceIdentification, Schema::DeviceState] {#content} as a typed value: the
-        #   identification for +/Ident/+, else the state, of which +/State/Light/+ and +/State/Status/+
-        #   push only +Light+ or +Status+
+
+        # @return [Schema::DeviceIdentification, Schema::DeviceState, nil] {#content} as a typed value: the
+        #   identification for +/Ident/+, the state for +/State/+, of which +/State/Light/+ and +/State/Status/+
+        #   push only +Light+ or +Status+; nil for a DOP2 leaf or the device list
         # @api public
-        def attributes = (resource == '/Ident/' ? Schema::DeviceIdentification : Schema::DeviceState).from(content)
+        def attributes
+          case resource
+          when '/Ident/' then Schema::DeviceIdentification.from(content)
+          when %r{\A/State/} then Schema::DeviceState.from(content)
+          end
+        end
       end
     end
   end

@@ -16,4 +16,10 @@ RSpec.describe Miele::Sdk::Events::Event do
     expect(event('/Ident/', { 'DeviceType' => 18, 'ProtocolVersion' => 2 }).attributes)
       .to be_a(Miele::Sdk::Schema::DeviceIdentification).and(have_attributes(device_type: 18, protocol_version: 2))
   end
+
+  it 'has no typed value for a DOP2 leaf or the device list the cloud pushes' do
+    leaf = Miele::Sdk::Dop2::Leaf.new(unit: 2, attribute: 1586, idx1: 0, idx2: 0, fields: [])
+    expect([event('/DOP2/2/1586/', leaf).attributes, event('/Devices/', [{ 'Fab' => '000111222333' }]).attributes])
+      .to eq([nil, nil])
+  end
 end

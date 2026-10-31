@@ -13,7 +13,7 @@ module Miele
 
         def initialize: (fab: String?, resource: String, content: untyped, ?source: Symbol) -> void
 
-        def attributes: () -> (Schema::DeviceIdentification | Schema::DeviceState)
+        def attributes: () -> (Schema::DeviceIdentification | Schema::DeviceState)?
       end
     end
   end

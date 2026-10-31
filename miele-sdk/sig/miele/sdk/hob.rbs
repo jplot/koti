@@ -1,0 +1,6 @@
+module Miele
+  module Sdk
+    class Hob < Appliance
+    end
+  end
+end

@@ -37,5 +37,8 @@ module Miele
 
     # The appliance refused a command.
     class RemoteControlDisabledError < ResponseError; end
+
+    # An action the appliance does not offer now, refused before anything is sent, as the Miele app refuses it.
+    class ActionUnavailableError < Error; end
   end
 end

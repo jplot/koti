@@ -1,0 +1,6 @@
+module Miele
+  module Sdk
+    class WashingMachine < Appliance
+    end
+  end
+end

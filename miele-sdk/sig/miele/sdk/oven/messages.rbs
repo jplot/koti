@@ -1,0 +1,15 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module Messages
+        NOTIFICATIONS: Hash[Symbol, Integer]
+
+        def self?.ps_select: (Integer prog_id, Integer selection_type, ?[Integer, Symbol, untyped]? parameter) -> Dop2::Leaf
+
+        def self?.user_request: (Integer id) -> Dop2::Leaf
+
+        def self?.acknowledge: (Integer unit, Symbol type, Integer id, Integer option) -> Dop2::Leaf
+      end
+    end
+  end
+end

@@ -1,0 +1,31 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module OvenState
+        INFO_QUERY_DOOR_PHASES: Array[Integer]
+
+        FUNCTIONAL_PROGRAM_TYPES: Array[Integer]
+
+        APP_STATES: Hash[Symbol, Symbol]
+
+        STARTED: Array[Symbol]
+
+        private
+
+        def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
+
+        def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
+
+        def oven_state: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Symbol?
+
+        def waiting_state: (Integer? phase, bool startable) -> Symbol
+
+        def held_state: (Integer? phase, bool startable) -> Symbol
+
+        def phase: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
+
+        def functional?: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> bool
+      end
+    end
+  end
+end

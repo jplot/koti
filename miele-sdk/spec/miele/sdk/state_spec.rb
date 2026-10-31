@@ -183,8 +183,12 @@ RSpec.describe Miele::Sdk::State do
       expect(extended(:hob_induction, 2, '000005').geraetespezifische_informationen.kurzzeit_minuten).to eq(5)
     end
 
+    it 'decodes a Dop1 oven ExtendedState after its first 3 bytes, as the app does' do
+      expect(extended(:oven, 2, "aabbcc#{'00' * 9}03").grillstufe).to eq(3)
+    end
+
     it 'gives nil where the app reads ExtendedState otherwise, or finds none', :aggregate_failures do
-      expect(extended(:oven, 2, '00')).to be_nil
+      expect(extended(:oven, 4, '00')).to be_nil
       expect(extended(:hood, 2, '')).to be_nil
     end
   end

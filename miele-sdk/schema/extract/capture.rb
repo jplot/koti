@@ -22,7 +22,7 @@ module Schema
         end
       end
 
-      def read(hosts) = hosts.to_h { [it, appliance(Miele::Sdk.appliance(it))] }
+      def read(hosts) = hosts.to_h { [it, appliance(Miele::Sdk::Appliance.new(it))] }
 
       def write(path, hosts)
         File.open(path, 'w', 0o600) do |file|

@@ -78,6 +78,32 @@ Miele appliances only answer queries sent from the mDNS port, so the query leave
 5353, shared with the system's own responder. It is sent again after 1 and 3 seconds, since
 Wi-Fi drops multicast packets; the default 4-second window fits three queries.
 
+## Families
+
+`Miele::Sdk.appliance(host)` reads `Ident` once and returns the class of the appliance's family,
+by device type and protocol version as the Miele app's family modules claim them.
+`Miele::Sdk.appliances` does the same from the ident the account lists, without reading it.
+
+| Class | Device types | Protocol versions |
+|---|---|---|
+| `Miele::Sdk::Oven` | 12, 13, 15, 31, 39, 45 | 2, 3, 4 |
+| `Miele::Sdk::Hood` | 18 | 1 to 4 |
+| `Miele::Sdk::Hob` | 14, 27, 28 | 1, 2, 4 |
+| `Miele::Sdk::Dishwasher` | 7, and 8 for a model starting with PG81 | 2 to 4 (8: 2) |
+| `Miele::Sdk::WashingMachine` | 1, 3, 24 | 1 to 4 |
+| `Miele::Sdk::TumbleDryer` | 2, 4 | 1 to 4 |
+| `Miele::Sdk::CoffeeMaker` | 17 | 2 to 4 |
+| `Miele::Sdk::CoolingAppliance` | 19, 20, 21, 32, 33, 34, 68 | 0, 1, 200, 201, 203 |
+| `Miele::Sdk::WarmingDrawer` | 25 | 2 |
+
+Any other appliance is a plain `Miele::Sdk::Appliance`. Each class reads and writes what
+`Appliance` does; ovens and hoods add what their app modules send, and the other families will get
+theirs. Every appliance takes a new name, written to `Ident` as the app writes it:
+
+```ruby
+oven.name = 'Cuisine'
+```
+
 ## Reading
 
 ```ruby
@@ -159,11 +185,13 @@ done.
 `power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app's oven module does; its other families
 switch on in their own way, which will come with them. An appliance asleep answers 500:
 like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, giving up
-after three attempts where the app sets no limit. `power_off` writes 1 to the same leaf.
+after three attempts where the app sets no limit. `power_off` writes 1 to the same leaf and takes a
+500 as done, as the app does. Both belong to `Miele::Sdk::Oven`.
 
 Starting, stopping or pausing a program, and the light, take a different request in each family
 of the app: a user request on DOP2 leaf 2/1583 for DOP2 appliances, `ProcessAction` for Dop1
-dishwashers and laundry appliances, and no light at all for ovens. They will come back per family.
+dishwashers and laundry appliances, and no light at all for ovens. Ovens have theirs (see
+[Ovens](#ovens)); the other families will get theirs.
 
 ## DOP2
 
@@ -207,6 +235,71 @@ sends them.
 A value out of range raises `ArgumentError` before anything is sent. `Miele::Sdk::Dop1` builds
 the requests, and `hood.dop1(request)` sends any other one.
 
+## Ovens
+
+`Miele::Sdk::Oven` reads and acts as the app's oven module does. Its DOP2 reads come as
+[typed objects](#typed-objects):
+
+```ruby
+oven.context                # 1/1585: the program, its phase, the requests the oven offers
+oven.supported_requests     # => [1, 2, 59], numbered as the app numbers them
+oven.program_context        # 1/1574: the selected program and its parameters
+oven.target_temperature     # => 180.0 °C, nil when no program sets it; core_target_temperature too
+oven.notifications          # 1/131: infos, messages, errors, queries; 1/392 with second_cavity: true
+oven.program_groups         # 1/1599: the programs the oven offers
+oven.own_programs           # 1/109, along the app's chain of instances
+oven.program_steps          # the running own program (2/213) and its steps (2/214)
+oven.second_cavity_context  # 1/391, a double oven's second cavity
+```
+
+A Dop1 oven (`ProtocolVersion` 2) gives its readings in `state.extended_state`.
+
+```ruby
+oven.select_program(13)          # a GLOBAL_EnumPrgId value, or its symbol
+oven.target_temperature = 180    # °C
+oven.duration = 1800             # seconds
+oven.start_at = :now             # or a Time; end_at= takes a Time
+oven.set_options(pre_heating: true, keep_warm: true)
+oven.start                       # an automatic program: start(at: time), now by default
+oven.stop
+oven.acknowledge(:query, 4, option: 12)  # or query.id and one of query.ack_options
+```
+
+The other parameters are `core_target_temperature=`, `moisture=`, `grill_level=`,
+`microwave_power=`, `browning=`, `doneness=`, `steam_bursts=` and `steam_burst_times=` (up to three
+times in seconds), and the other requests `continue_cooking`, `steam_burst` and
+`stop_keeping_warm`.
+
+Each of these actions makes the checks the app's rules make before it, and raises
+`Miele::Sdk::ActionUnavailableError` without sending anything when one fails:
+
+- A Dop1 oven only stops, through `ProcessAction` 2, and only during a function, own or automatic
+  program.
+- Selecting a program needs remote control without local control. The app's rule that also weighs
+  the oven's state has not been traced to the selection, so the SDK leaves it to the oven.
+- A parameter needs remote control without local control and a program on the oven, and a mobile
+  start too once the program has started (waiting, running, paused or ended) or for program 361.
+  `duration = 0` first moves the start to its minimum, as the app does.
+- `start` refuses a program that requires a duration not set yet. It first writes the parameters
+  the program requires and the user has not confirmed, with the values they show, then sends
+  request 1, or 113 when the oven does not offer 1. An automatic program starts by writing its
+  start time instead; another program takes `start_at=` beforehand, and `start(at:)` raises
+  `ArgumentError` for it.
+- `stop` needs one of requests 2, 55, 56 and 57 offered, no pyrolysis abort running, and remote
+  control without local control. A program not started yet takes 2, a started one the first of
+  55, 56 and 57 the oven offers, started as the app derives its oven state.
+- `continue_cooking` needs the oven to offer it (baking or cooking), `steam_burst` request 59
+  offered, and `stop_keeping_warm` message 20 shown.
+- A double oven's second cavity takes no action but `acknowledge(…, second_cavity: true)`.
+
+The app then waits until the oven shows the change; the SDK returns once the oven accepts the
+write, and `program_context` or `notifications` show what follows. Three app behaviours rest on
+that wait and are left out: the switch-off that answers queries 4, 5, 21 and 27 as they appear,
+the raise of doneness or browning by one step after `continue_cooking` (write it with `doneness=`
+or `browning=`), and the required parameters written once a selected program shows (`start`
+writes them). None of these writes has been sent to a real oven: their bytes follow the app's
+code, and the reads have run against a real oven through the cloud.
+
 ## Typed objects
 
 The objects behind DOP2 leaves and Dop1 requests come typed, generated from the Miele app's own
@@ -234,16 +327,19 @@ hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the f
 - An attribute the leaf lacks reads nil. `write_object` writes back the attributes as read, each
   changed member in the wire type it was read in, and raises `ArgumentError` for a member it did not
   read, as the app's setters do.
+- `modify(klass, address) { |value| value.with(…) }` reads an object, lets the block change it and
+  writes it back at that address.
 - A Dop1 object decodes its sections, bit fields and byte order (`from(bytes)`), and `to_bytes`
   gives what a write section sends.
 - `state.extended_state` decodes `ExtendedState` into the object the app builds from it: the hood's
-  by `ProtocolVersion` (1 to 4), and the Dop1 and Opcode hob's. It is nil for the other
-  families, which read it otherwise, and when the appliance serves none, as they do switched off.
+  by `ProtocolVersion` (1 to 4), the Dop1 and Opcode hob's, and the Dop1 oven's. It is nil for the
+  other families, which read it otherwise, and when the appliance serves none, as they do switched
+  off.
 
 Only the objects the app's family modules use are generated: 402 DOP2 classes, 468 Dop1 classes and
-336 enums from the app 4.19.0. One has been read from an appliance, the oven's
-`GlobalDeviceContext` through the cloud; the hood and hob tried served an empty `ExtendedState`,
-being off.
+336 enums from the app 4.19.0. Three have been read from an appliance through the cloud, the oven's
+`GlobalDeviceContext`, `GlobalPsContext` and `GlobalNtfctnShow`; the hood and hob tried served an
+empty `ExtendedState`, being off.
 
 ## Cloud
 
@@ -347,6 +443,7 @@ heating; follow such an appliance by reading its `state` at intervals.
 | `Miele::Sdk::ResponseError` | the appliance answers with an error status; carries `status` |
 | `Miele::Sdk::NotFoundError` | the appliance does not serve that resource, or the GroupID is not its own (a `ResponseError`) |
 | `Miele::Sdk::RemoteControlDisabledError` | the appliance refuses a command (a `ResponseError`) |
+| `Miele::Sdk::ActionUnavailableError` | a check the app makes before an action fails: nothing is sent |
 | `Miele::Sdk::Dop2::DecodeError` | a DOP2 leaf has an unknown type or ends too early |
 
 All of them inherit from `Miele::Sdk::Error`. A value out of range raises `ArgumentError` before

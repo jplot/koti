@@ -1,0 +1,17 @@
+module Miele
+  module Sdk
+    module ExtendedState
+      OVENS: Array[Symbol]
+
+      EXTENDED_STATES: ::Hash[[::Symbol, ::Integer], [::String, ::Integer, ::Integer, ::Symbol?]]
+
+      def raw: () -> Hash[String, untyped]
+
+      def device_type: () -> Symbol
+
+      def protocol_version: () -> Integer?
+
+      def extended_state: () -> untyped
+    end
+  end
+end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::Appliance do
-  subject(:appliance) { Miele::Sdk.appliance('127.0.0.1') }
+  subject(:appliance) { described_class.new('127.0.0.1') }
 
   let(:fab) { '000123456789' }
   let(:ident) { { 'DeviceType' => 13, 'DeviceIdentLabel' => { 'FabNumber' => fab } } }

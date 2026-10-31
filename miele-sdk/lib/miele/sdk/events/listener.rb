@@ -18,7 +18,7 @@ module Miele
         def initialize(hosts:, mdns_address: '224.0.0.251', mdns_port: 5353)
           raise ArgumentError, 'no appliance to listen to' if hosts.empty?
 
-          @appliances = hosts.map { Sdk.appliance(it) }
+          @appliances = hosts.map { Appliance.new(it) }
           @mdns_address = mdns_address
           @mdns_port = mdns_port
           @fab = Sdk.config.listener_fab

@@ -1,0 +1,73 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module Requests : Appliance
+        REQUIRED_PARAMETERS: Hash[Symbol, [Integer, Symbol]]
+
+        PYROLYSIS_ABORTS: Array[Integer]
+
+        def start: (?at: Time | :now) -> void
+
+        def stop: () -> void
+
+        def continue_cooking: () -> void
+
+        def steam_burst: () -> void
+
+        def stop_keeping_warm: () -> void
+
+        def context: () -> Objects::Oven::GlobalDeviceContext
+
+        def program_context: () -> Objects::Oven::GlobalPsContext
+
+        def notifications: (?second_cavity: bool) -> Objects::Oven::GlobalNtfctnShow
+
+        def supported_requests: () -> Array[Integer]
+
+        private
+
+        def user_request: (Integer id, String reason) { () -> boolish } -> void
+
+        def continue_cooking?: () -> bool
+
+        def require_duration!: (Objects::Oven::GlobalPsContext context) -> void
+
+        def start_automatic: (Integer prog_id, Objects::Oven::GlobalPsContext context, Time | :now at) -> void
+
+        def automatic?: (Objects::Oven::GlobalPsContext context) -> bool
+
+        def write_required_parameters: (Integer prog_id, Objects::Oven::GlobalPsContext context) -> void
+
+        def unconfirmed?: (Symbol name, untyped value) -> bool
+
+        def mask: (untyped value) -> Integer
+
+        def stoppable?: (Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> bool
+
+        def stop_request: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Integer
+
+        def shows?: (Symbol type, Integer id) -> bool
+
+        def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
+
+        def oven_state: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Symbol?
+
+        def stop_dop1: () -> void
+
+        def dop2?: () -> bool
+
+        def require_dop2!: () -> void
+
+        def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
+
+        def under_remote_control?: (?State state) -> bool?
+
+        def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
+
+        def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
+
+        def unix_time: (Time | :now time) -> Integer
+      end
+    end
+  end
+end

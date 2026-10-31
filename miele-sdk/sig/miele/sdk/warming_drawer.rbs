@@ -1,0 +1,6 @@
+module Miele
+  module Sdk
+    class WarmingDrawer < Appliance
+    end
+  end
+end

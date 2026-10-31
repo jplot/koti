@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Miele::Sdk::Appliance do
+RSpec.describe Miele::Sdk::Oven do
   subject(:appliance) { described_class.new('127.0.0.1', sleeper: ->(seconds) { naps << seconds }) }
 
   let(:fab) { '000123456789' }
@@ -57,6 +57,11 @@ RSpec.describe Miele::Sdk::Appliance do
       appliance.power_on
       expect(puts_sent).to eq(%w[DOP2/2/1586 State DOP2/2/1586])
       expect(naps).to eq([3])
+    end
+
+    it 'switches off despite a 500, as the app does', :aggregate_failures do
+      expect { appliance.power_off }.not_to raise_error
+      expect(puts_sent).to eq(['DOP2/2/1586'])
     end
   end
 

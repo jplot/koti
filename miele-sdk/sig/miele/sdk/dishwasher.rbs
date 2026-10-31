@@ -1,0 +1,6 @@
+module Miele
+  module Sdk
+    class Dishwasher < Appliance
+    end
+  end
+end

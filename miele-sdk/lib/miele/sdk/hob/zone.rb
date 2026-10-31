@@ -101,7 +101,7 @@ module Miele
         #
         # @param time [Integer] an +Endzeit+ or a DOP2 duration: hours in bits 0 to 7, minutes in 8 to 13
         # @return [Integer, nil] seconds
-        def timer(time) = (((time & 0xFF) * 3600) + (((time >> 8) & 0x3F) * 60) unless time.zero?)
+        def timer(time) = (((time & 0xFF) * 3600) + (((time >> 8) & 0x3F) * 60)).nonzero?
 
         # The app numbers the zones of a hob with zone controls from them (+Topfdaten+), and gives the others
         # the lowest numbers left.

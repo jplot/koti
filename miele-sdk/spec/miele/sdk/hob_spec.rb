@@ -38,6 +38,11 @@ RSpec.describe Miele::Sdk::Hob do
                              zone(2, level: nil, heat: :residual1, bridged: true, temp_control: true), zone(3)])
   end
 
+  it 'reads no timer where the end time only gives its kind, as the app does' do
+    serve(7 => 1 << 1, 28 => [0xC0, 0x00])
+    expect(hob.zones.first.timer).to be_nil
+  end
+
   it 'reads half steps when the hob doubles its levels' do
     serve(6 => 0b1_0000, 7 => 1 << 1, 8 => 4)
     expect(hob.zones.map(&:level)).to eq([2.5])

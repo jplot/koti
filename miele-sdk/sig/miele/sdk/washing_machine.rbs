@@ -1,7 +1,13 @@
 module Miele
   module Sdk
     class WashingMachine < Appliance
+      DOP2_EXTRAS: Array[Symbol]
+      DOP1_EXTRAS: Hash[Symbol, Symbol]
+      STAINS: Hash[Symbol, [Integer, Symbol]]
+
       include Laundry
+      include Parameters
+      include Dop1Parameters
 
       def twin_dos: () -> untyped
 

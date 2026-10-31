@@ -5,6 +5,7 @@ module Miele
     # A tumble dryer, which the Miele app's laundry module handles (device types 2 and 4).
     class TumbleDryer < Appliance
       include Laundry
+      include Parameters
 
       private
 

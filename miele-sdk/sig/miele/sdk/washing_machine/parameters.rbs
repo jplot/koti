@@ -1,0 +1,37 @@
+module Miele
+  module Sdk
+    class WashingMachine < Appliance
+      module Parameters : Appliance
+        COPIED: Hash[Symbol, Array[Symbol]]
+        WASHER_DRYER_COPIED: Hash[Symbol, Array[Symbol]]
+        DOP2_MEMBERS: Hash[Symbol, Symbol]
+
+        private
+
+        def para_member: () -> Symbol
+
+        def parameter_names: () -> Array[Symbol]
+
+        def setting_choices: () -> Hash[Symbol, Array[Symbol]]
+
+        def appliance_values: (untyped para, untyped source) -> untyped
+
+        def with_dosing: (untyped para, untyped source) -> untyped
+
+        def dop2_parameters: (untyped para, Hash[Symbol, untyped] settings) -> untyped
+
+        def dop2_values: (Hash[Symbol, untyped] settings, untyped para) -> Hash[Symbol, untyped]
+
+        def dop2_conversions: (Hash[Symbol, untyped] settings) -> Hash[Symbol, untyped]
+
+        def with_temperature: (Hash[Symbol, untyped] values, Hash[Symbol, untyped] settings) -> Hash[Symbol, untyped]
+
+        def dop2?: () -> bool
+
+        def copied: (untyped para, untyped source, Hash[Symbol, Array[Symbol]] map) -> untyped
+
+        def chosen: (untyped extras, Array[Symbol] selected, Array[Symbol] names) -> untyped
+      end
+    end
+  end
+end

@@ -1,0 +1,24 @@
+module Miele
+  module Sdk
+    class WashingMachine < Appliance
+      module Dop1Parameters : Appliance
+        DOP1_MEMBERS: Hash[Symbol, Symbol]
+        ECO_TEMPERATURES: Hash[Integer, Integer]
+
+        private
+
+        def dop1_parameters: (untyped current, Hash[Symbol, untyped] settings) -> untyped
+
+        def dop1_values: (Hash[Symbol, untyped] settings) -> Hash[Symbol, untyped]
+
+        def dop1_temperature: (Integer temperature, bool? eco) -> Integer
+
+        def dop1_bits: (Hash[Symbol, untyped] settings) -> Hash[Symbol, Integer]
+
+        def bits: (untyped field, untyped source, Hash[Symbol, Integer] changes) -> untyped
+
+        def blank: (untyped klass) -> untyped
+      end
+    end
+  end
+end

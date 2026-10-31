@@ -7,6 +7,7 @@ module Miele
       include Rules
       include Commands
       include Selection
+      include Parameters
 
       # What a Dop1 laundry appliance reports of its program: its +ExtendedState+ past the first 3 bytes, and
       # +State+ for the temperature and spin speed.

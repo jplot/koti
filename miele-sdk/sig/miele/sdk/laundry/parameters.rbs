@@ -1,0 +1,45 @@
+module Miele
+  module Sdk
+    module Laundry
+      DRYING_LEVELS: Hash[Symbol, Integer]
+
+      module Parameters : Appliance
+        def set_parameters: (**untyped settings) -> void
+
+        private
+
+        def check_settings!: (Hash[Symbol, untyped] settings) -> void
+
+        def write_dop2_selection: () { (untyped para) -> untyped } -> void
+
+        def with_appliance_values: (untyped select, untyped context) -> untyped
+
+        def copied: (untyped para, untyped source, Hash[Symbol, Array[Symbol]] map) -> untyped
+
+        def chosen: (untyped extras, Array[Symbol] selected, Array[Symbol] names) -> untyped
+
+        def status: (State state) -> Integer
+
+        def dop2?: () -> bool
+
+        def dop1_objects: () -> Hash[Symbol, untyped]
+
+        def write_dop1_selection: (untyped section) -> void
+
+        def program_para: (Objects::Laundry::GlobalPsContext context) -> untyped
+
+        def para_member: () -> Symbol
+
+        def parameter_names: () -> Array[Symbol]
+
+        def setting_choices: () -> Hash[Symbol, Array[Symbol]]
+
+        def appliance_values: (untyped para, untyped source) -> untyped
+
+        def dop2_parameters: (untyped para, Hash[Symbol, untyped] settings) -> untyped
+
+        def dop1_parameters: (untyped current, Hash[Symbol, untyped] settings) -> untyped
+      end
+    end
+  end
+end

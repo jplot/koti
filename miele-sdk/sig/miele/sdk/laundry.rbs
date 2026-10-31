@@ -4,6 +4,7 @@ module Miele
       include Rules
       include Commands
       include Selection
+      include Parameters
 
       class Reading < Data
         attr_reader load: Integer?

@@ -8,7 +8,7 @@ module Miele
     module ObjectAccess : _Dop2Access
       def object: (untyped klass, ?::Array[::Integer?] address) -> untyped
 
-      def write_object: (untyped value, ?::Array[::Integer?] address, ?with_index: bool) -> void
+      def write_object: (untyped value, ::Array[::Integer?] address, ?with_index: bool) -> void
 
       private
 

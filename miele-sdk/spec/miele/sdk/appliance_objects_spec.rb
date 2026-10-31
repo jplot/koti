@@ -4,6 +4,7 @@ RSpec.describe Miele::Sdk::Appliance do
   subject(:appliance) { described_class.new('127.0.0.1') }
 
   let(:fab) { '000123456789' }
+  let(:klass) { Miele::Sdk::Objects::Dishwasher::GlobalPsSelect }
   let(:select) { ['000f00020629000000000001000107000a'].pack('H*') }
   let(:fake) do
     leaf = select
@@ -22,11 +23,15 @@ RSpec.describe Miele::Sdk::Appliance do
 
   def sent = fake.requests.map { "#{it.verb} #{it.path.delete_prefix("/Devices/#{fab}/")}" }
 
-  it 'reads and writes through the appliance with the class address', :aggregate_failures do
-    value = appliance.object(Miele::Sdk::Objects::Oven::GlobalPsSelect)
-    appliance.write_object(value.with(prog_id: :ba_auto_heissluft))
+  it "reads and writes the dishwasher's program selection where the app does", :aggregate_failures do
+    appliance.write_object(appliance.object(klass).with(prog_id: :dw_prg_intensiv), [2, 1577, 0, 0])
     expect(sent.last(2)).to eq(['GET DOP2/2/1577?idx1=0&idx2=0', 'PUT DOP2/2/1577'])
-    expect(fake.requests.last.body.unpack1('H*')).to eq('000f000206290000000000010001070002')
+    expect(fake.requests.last.body.unpack1('H*')).to eq('000f000206290000000000010001070001')
+  end
+
+  it 'writes only at an address it is given, the app writing some objects elsewhere than it reads them' do
+    value = appliance.object(klass)
+    expect { appliance.write_object(value) }.to raise_error(ArgumentError)
   end
 
   it 'reads at an address given in place of the one the app computes' do

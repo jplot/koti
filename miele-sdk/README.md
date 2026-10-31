@@ -220,17 +220,17 @@ steps = oven.object(Miele::Sdk::Objects::Oven::GlobalOpProgramInfoCA)  # 2/213, 
 steps.amount_of_steps  # => 3
 steps.infos1           # => [:beliebige_ebene, 65000]: a value the app does not know stays a number
 
-select = oven.object(Miele::Sdk::Objects::Oven::GlobalPsSelect)
-oven.write_object(select.with(selection_type: :parametrization))
+select = dishwasher.object(Miele::Sdk::Objects::Dishwasher::GlobalPsSelect)       # 2/1577, idx 0/0
+dishwasher.write_object(select.with(prog_id: :dw_prg_intensiv), [2, 1577, 0, 0])  # where the app writes it back
 
 hood.object(Miele::Sdk::Objects::Hood::GlobalSfValue, [2, 105, 9001, 1])  # an index the app computes
 hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the fan level, as the app reads it
 ```
 
 - `ADDRESSES` lists where the app reads or writes a DOP2 object: `[unit, attribute]` when it sends
-  no index, else `[unit, attribute, idx1, idx2]`, nil for an index it computes. `object` and
-  `write_object` take the first unless given another, and raise `ArgumentError` while an index is
-  left to compute.
+  no index, else `[unit, attribute, idx1, idx2]`, nil for an index it computes. `object` reads at
+  the first unless given another; `write_object` writes only where it is told, the app writing some
+  objects elsewhere than it reads them. Both raise `ArgumentError` while an index is left to compute.
 - An attribute the leaf lacks reads nil. `write_object` writes back the attributes as read, each
   changed member in the wire type it was read in, and raises `ArgumentError` for a member it did not
   read, as the app's setters do.

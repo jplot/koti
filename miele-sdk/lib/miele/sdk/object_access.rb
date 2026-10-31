@@ -16,13 +16,15 @@ module Miele
         klass.from(dop2(unit, attribute, idx1:, idx2:).fields)
       end
 
+      # The app writes some objects elsewhere than it reads them: the hood reads 2/426 at idx 0/0, writes it at 0/1.
+      #
       # @param value [Data] a generated DOP2 value, read with {#object} then changed with +with+
-      # @param address [Array<Integer, nil>] as {#object} takes it
+      # @param address [Array<Integer, nil>] where the app writes it, from +ADDRESSES+
       # @param with_index [Boolean] as {Appliance#write_dop2} takes it
       # @return [void]
       # @raise [ArgumentError] when the address leaves an index to compute, or a changed member was not read
       # @api public
-      def write_object(value, address = value.class::ADDRESSES.first, with_index: false)
+      def write_object(value, address, with_index: false)
         unit, attribute, idx1, idx2 = settled(address)
         write_dop2(Dop2::Leaf.new(unit:, attribute:, idx1: idx1.to_i, idx2: idx2.to_i, fields: value.to_fields),
                    with_index:)

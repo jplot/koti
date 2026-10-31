@@ -1,0 +1,49 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module ProgramSelection : Appliance
+        NOW: Integer
+
+        STATUSES_FOR_MOBILE_START: Array[Symbol]
+
+        def select_program: (Integer | Symbol prog_id) -> void
+
+        def target_temperature=: (Integer | Float celsius) -> void
+
+        def core_target_temperature=: (Integer | Float celsius) -> void
+
+        def moisture=: (Integer level) -> void
+
+        def grill_level=: (Integer level) -> void
+
+        def microwave_power=: (Integer level) -> void
+
+        def browning=: (Integer level) -> void
+
+        def doneness=: (Integer level) -> void
+
+        def steam_bursts=: (Integer count) -> void
+
+        def steam_burst_times=: (Array[Integer] seconds) -> void
+
+        def start_at=: (Time | :now time) -> void
+
+        def end_at=: (Time time) -> void
+
+        def duration=: (Integer seconds) -> void
+
+        def program_context: () -> Objects::Oven::GlobalPsContext
+
+        def set_options: (?rapid_heating: bool?, ?pre_heating: bool?, ?crisp: bool?, ?rapid_cooling: bool?, ?keep_warm: bool?) -> void
+
+        private
+
+        def set_parameter: (Integer id, Symbol type, untyped value, ?context: Objects::Oven::GlobalPsContext?) -> void
+
+        def under_remote_control?: (?State state) -> bool?
+
+        def require_dop2!: () -> void
+      end
+    end
+  end
+end

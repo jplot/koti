@@ -1,0 +1,9 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module Messages
+        def self?.ps_select: (Integer prog_id, Integer selection_type, ?[Integer, Symbol, untyped]? parameter) -> Dop2::Leaf
+      end
+    end
+  end
+end

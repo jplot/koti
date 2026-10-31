@@ -75,7 +75,14 @@ class FakeAppliance
     body = cipher.empty? ? '' : Miele::Sdk::Crypto.decrypt(key:, signature:, ciphertext: cipher)
     lines = [verb, "#{headers['host']}#{path}", headers.fetch('content-type', ''), headers['accept'], headers['date']]
     verified = Miele::Sdk::Crypto.signature(key:, lines:, body:) == signature
-    Request.new(verb:, path:, headers:, body: body.rstrip, verified:)
+    Request.new(verb:, path:, headers:, body: unpadded(body, path), verified:)
+  end
+
+  # A DOP2 body ends where its size says: its last bytes may be NULs, which rstrip would take for padding.
+  def unpadded(body, path)
+    return body.rstrip unless path.include?('/DOP2/') && body.bytesize >= 2
+
+    body.byteslice(0, 2 + body.unpack1('n'))
   end
 
   def write_response(socket, status, headers, plaintext)

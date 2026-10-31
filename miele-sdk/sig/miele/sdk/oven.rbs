@@ -1,6 +1,8 @@
 module Miele
   module Sdk
     class Oven < Appliance
+      include ProgramSelection
+
       def power_on: () -> void
 
       def power_off: () -> void
@@ -28,6 +30,10 @@ module Miele
       private
 
       def celsius: (Symbol parameter) -> Float?
+
+      def under_remote_control?: (?State state) -> bool?
+
+      def require_dop2!: () -> void
 
       def power_leaf: (Integer state) -> Dop2::Leaf
 

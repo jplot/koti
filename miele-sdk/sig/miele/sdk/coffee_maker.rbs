@@ -1,0 +1,6 @@
+module Miele
+  module Sdk
+    class CoffeeMaker < Appliance
+    end
+  end
+end

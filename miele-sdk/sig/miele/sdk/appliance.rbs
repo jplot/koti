@@ -27,7 +27,10 @@ module Miele
 
       attr_reader host: String
 
-      def initialize: (String host, ?sleeper: _Sleeper, ?fab: String?, ?module_host: String?) -> void
+      def self.for: (String host, ?ident: Schema::DeviceIdentification?, **untyped) -> Appliance
+
+      def initialize: (String host, ?sleeper: _Sleeper, ?fab: String?, ?module_host: String?,
+                       ?ident: Schema::DeviceIdentification?) -> void
 
       def fab: () -> String
 
@@ -59,27 +62,15 @@ module Miele
 
       def state: () -> State
 
+      def name=: (String name) -> void
+
       def wake: () -> void
-
-      def power_on: () -> void
-
-      def power_off: () -> void
 
       def dop2: (Integer unit, Integer attribute, ?idx1: Integer?, ?idx2: Integer?) -> Dop2::Leaf
 
       def write_dop2: (Dop2::Leaf leaf, ?with_index: bool) -> void
 
       def dop1: (String request) -> String
-
-      def fan_level=: (Integer level) -> void
-
-      def fan_run_on_time=: (Integer minutes) -> void
-
-      def main_light=: (bool on) -> void
-
-      def setting: (Integer pf_id) -> Integer?
-
-      def write_setting: (Integer pf_id, Integer value) -> void
 
       def get: (String path) -> resource
 
@@ -88,6 +79,8 @@ module Miele
       def send_request: (Symbol method, String path, ?body: String?, ?kind: Symbol) -> Connection::Response
 
       def cloud_request: (Symbol method, String path, String? body, Symbol kind, String? resource) -> Connection::Response
+
+      def identity: () -> Schema::DeviceIdentification
 
       def module_host: () -> String?
 
@@ -100,10 +93,6 @@ module Miele
       def tolerating_no_op: () { () -> untyped } -> void
 
       def dop2_path: (Integer unit, Integer attribute) -> String
-
-      def power_leaf: (Integer state) -> Dop2::Leaf
-
-      def rouse: () -> void
     end
   end
 end

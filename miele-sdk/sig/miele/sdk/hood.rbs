@@ -1,0 +1,15 @@
+module Miele
+  module Sdk
+    class Hood < Appliance
+      def fan_level=: (Integer level) -> void
+
+      def fan_run_on_time=: (Integer minutes) -> void
+
+      def main_light=: (bool on) -> void
+
+      def setting: (Integer pf_id) -> Integer?
+
+      def write_setting: (Integer pf_id, Integer value) -> void
+    end
+  end
+end

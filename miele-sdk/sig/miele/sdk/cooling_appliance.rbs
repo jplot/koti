@@ -1,0 +1,6 @@
+module Miele
+  module Sdk
+    class CoolingAppliance < Appliance
+    end
+  end
+end

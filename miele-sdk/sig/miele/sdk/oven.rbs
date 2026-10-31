@@ -1,0 +1,15 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      def power_on: () -> void
+
+      def power_off: () -> void
+
+      private
+
+      def power_leaf: (Integer state) -> Dop2::Leaf
+
+      def rouse: () -> void
+    end
+  end
+end

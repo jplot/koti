@@ -16,11 +16,22 @@ module Miele
       attr_reader :host
 
       # @param host [String] address or +.local+ name of the appliance
+      # @param ident [Schema::DeviceIdentification, nil] its identity, read from it when not given
+      # @return [Appliance] an instance of its family's class
+      # @api public
+      def self.for(host, ident: nil, **)
+        probe = new(host, **)
+        Families.claim(ident ||= probe.ident).new(host, **, ident:, fab: probe.fab)
+      end
+
+      # @param host [String] address or +.local+ name of the appliance
       # @param sleeper [#call] waits the given number of seconds
       # @param fab [String, nil] its fabrication number, when already known
       # @param module_host [String, nil] the mDNS name of its Wi-Fi module, which the cloud routes Dop1 by
-      def initialize(host, sleeper: method(:sleep), fab: nil, module_host: nil)
+      # @param ident [Schema::DeviceIdentification, nil] its identity, which gives its type and protocol without a read
+      def initialize(host, sleeper: method(:sleep), fab: nil, module_host: nil, ident: nil)
         @host = host
+        @identity = ident
         @sleeper = sleeper
         @fab = fab
         @module_host = module_host
@@ -73,11 +84,11 @@ module Miele
 
       # @return [Symbol] +DeviceType+ of {#ident} named by {Catalog::DEVICE_TYPES}, or +:unknown+
       # @api public
-      def device_type = @device_type ||= Catalog::DEVICE_TYPES.fetch(ident.device_type, :unknown)
+      def device_type = @device_type ||= Catalog::DEVICE_TYPES.fetch(identity.device_type, :unknown)
 
       # @return [Integer, nil] +ProtocolVersion+ of {#ident}: 2 on Dop1 appliances, 3 or 4 on DOP2 ones
       # @api public
-      def protocol_version = @protocol_version ||= ident.protocol_version
+      def protocol_version = @protocol_version ||= identity.protocol_version
 
       # @return [Symbol] {#protocol_version} named by {Catalog::PROTOCOLS}, or +:unknown+
       # @api public
@@ -85,37 +96,23 @@ module Miele
 
       # @return [String, nil] +TechType+ of {#ident}'s device label, the model name
       # @api public
-      def tech_type = @tech_type ||= ident.device_ident_label&.tech_type
+      def tech_type = @tech_type ||= identity.device_ident_label&.tech_type
 
       # @return [State]
       # @api public
       def state = State.new(device('State'), device_type, protocol_version:, tech_type:)
+
+      # @param name [String] the name the Miele app shows
+      # @api public
+      def name=(name)
+        send_request(:put, "/Devices/#{fab}/Ident", body: JSON.generate(DeviceName: name))
+      end
 
       # Wakes the appliance from standby.
       #
       # @return [void]
       # @api public
       def wake = change(Schema::DeviceState.new(device_action: 2))
-
-      # Switches the appliance on as the app's oven module does, waking it first when it sleeps. The app's
-      # other families switch on in their own way.
-      #
-      # @return [void]
-      # @raise [ResponseError] if the appliance still refuses after three attempts
-      # @api public
-      def power_on
-        3.times do |attempt|
-          rouse if attempt.positive?
-          return write_dop2(power_leaf(4))
-        rescue ResponseError => e
-          raise unless e.status == 500 && attempt < 2
-        end
-      end
-
-      # @return [void]
-      # @raise [ResponseError] if the appliance refuses
-      # @api public
-      def power_off = write_dop2(power_leaf(1))
 
       # Without an index, the read is the one the app's live observation sends; its one-shot reads give
       # +idx1: 0, idx2: 0+ and its polls +idx1: 0, idx2: 1+.
@@ -153,39 +150,6 @@ module Miele
         send_request(:post, "/Devices/#{fab}/DOP/", body: JSON.generate(Request: request)).body
       end
 
-      # @param level [Integer] 0 (off) to 3, 4 (boost) or 5 (interval)
-      # @raise [ArgumentError] if the level is out of range
-      # @api public
-      def fan_level=(level)
-        tolerating_no_op { dop1(Dop1.fan_level(level)) }
-      end
-
-      # @param minutes [Integer] 0, 5 or 15
-      # @raise [ArgumentError] for any other duration
-      # @api public
-      def fan_run_on_time=(minutes)
-        tolerating_no_op { dop1(Dop1.fan_run_on_time(minutes)) }
-      end
-
-      # @param on [Boolean]
-      # @api public
-      def main_light=(on)
-        tolerating_no_op { dop1(Dop1.main_light(on)) }
-      end
-
-      # @param pf_id [Integer] programming function id: 40010 and 40011 are the current grease and charcoal filter
-      #   limits; writing 1 to 40012 or 40013 resets their operating hours
-      # @return [Integer, nil] nil when the hood does not expose that setting
-      # @api public
-      def setting(pf_id) = Dop1.setting_value(JSON.parse(dop1(Dop1.setting(pf_id))).fetch('Response'))
-
-      # @param pf_id [Integer] programming function id
-      # @param value [Integer] unsigned 32-bit value
-      # @return [void]
-      # @raise [ArgumentError] if the id or the value is out of range
-      # @api public
-      def write_setting(pf_id, value) = tolerating_no_op { dop1(Dop1.write_setting(pf_id, value)) }
-
       # Reads any JSON resource.
       #
       # @param path [String] absolute path
@@ -221,6 +185,9 @@ module Miele
         cloud.request(method, path, body:, kind:, host: resource == 'DOP' ? module_host : nil)
       end
 
+      # @return [Schema::DeviceIdentification]
+      def identity = @identity ||= ident
+
       # @return [String, nil]
       def module_host = @module_host ||= Sdk.cloud&.devices&.find { it.fab == fab }&.host
 
@@ -250,28 +217,6 @@ module Miele
 
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"
-
-      # The appliance state on 2/1586: 4 switches on, 1 off.
-      #
-      # @param state [Integer]
-      # @return [Dop2::Leaf]
-      def power_leaf(state)
-        Dop2::Leaf.new(unit: 2, attribute: 1586, idx1: 0, idx2: 0,
-                       fields: { 1 => Dop2::Field.new(type: :e8, value: state) })
-      end
-
-      # A sleeping appliance answers 500 to the state write; the app then sends DeviceAction 2, waits 3 s and
-      # tries again, with no limit: three attempts here.
-      #
-      # @return [void]
-      def rouse
-        begin
-          wake
-        rescue ResponseError
-          nil
-        end
-        @sleeper.call(3)
-      end
     end
   end
 end

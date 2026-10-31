@@ -26,6 +26,16 @@ require_relative 'sdk/events/listener'
 require_relative 'sdk/events/server'
 require_relative 'sdk/object_access'
 require_relative 'sdk/appliance'
+require_relative 'sdk/oven'
+require_relative 'sdk/hood'
+require_relative 'sdk/hob'
+require_relative 'sdk/dishwasher'
+require_relative 'sdk/washing_machine'
+require_relative 'sdk/tumble_dryer'
+require_relative 'sdk/coffee_maker'
+require_relative 'sdk/cooling_appliance'
+require_relative 'sdk/warming_drawer'
+require_relative 'sdk/families'
 require_relative 'sdk/cloud/http'
 require_relative 'sdk/cloud/locales'
 require_relative 'sdk/cloud/token'
@@ -58,16 +68,19 @@ module Miele
     def self.discover(timeout: 4, address: '224.0.0.251', port: 5353) = Discovery.discover(timeout:, address:, port:)
 
     # @param host [String] address or +.local+ name of the appliance
-    # @return [Appliance]
+    # @return [Appliance] an instance of its family's class, such as an {Oven}
     # @api public
-    def self.appliance(host) = Appliance.new(host)
+    def self.appliance(host) = Appliance.for(host)
 
     # @return [Array<Appliance>] the appliances paired with the Miele account, reached by their module's name
     # @raise [ConfigurationError] without an account
     # @api public
     def self.appliances
       channel = cloud or raise ConfigurationError, 'the Miele account is needed to list its appliances'
-      channel.devices.map { Appliance.new(it.host, fab: it.fab, module_host: it.host) }
+      channel.devices.map do |device|
+        ident = device.ident&.then { Schema::DeviceIdentification.from(it) }
+        Families.claim(ident).new(device.host, fab: device.fab, module_host: device.host, ident:)
+      end
     end
 
     # @return [Cloud::Channel, nil] the Miele account's cloud, nil without an e-mail or a saved token

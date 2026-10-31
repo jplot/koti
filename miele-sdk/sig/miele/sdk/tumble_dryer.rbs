@@ -1,0 +1,6 @@
+module Miele
+  module Sdk
+    class TumbleDryer < Appliance
+    end
+  end
+end

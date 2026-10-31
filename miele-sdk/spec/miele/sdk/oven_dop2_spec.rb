@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Miele::Sdk::Appliance do
+RSpec.describe Miele::Sdk::Oven do
   subject(:appliance) { described_class.new('127.0.0.1', sleeper: ->(seconds) { naps << seconds }) }
 
   let(:fab) { '000123456789' }

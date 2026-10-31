@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Miele::Sdk::Appliance do
-  subject(:appliance) { Miele::Sdk.appliance('127.0.0.1') }
+RSpec.describe Miele::Sdk::Hood do
+  subject(:appliance) { described_class.new('127.0.0.1') }
 
   let(:fab) { '000123456789' }
   let(:dop1_answer) { [200, {}, '{"Response":"12011100009C4A000000030000000000000005"}'] }

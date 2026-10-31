@@ -1,0 +1,11 @@
+module Miele
+  module Sdk
+    module Families
+      CLAIMS: Array[[Class, Array[Integer], Array[Integer], Regexp?]]
+
+      def self.claim: (Schema::DeviceIdentification? ident) -> Class
+
+      def self.claims?: ([Class, Array[Integer], Array[Integer], Regexp?] claim, Schema::DeviceIdentification ident) -> bool
+    end
+  end
+end

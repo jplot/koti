@@ -745,9 +745,9 @@ the other resources. A module without a fabrication number is named by its `mac-
 Each message is acknowledged as the app does, a keep-alive goes out every 30 s, and the websocket
 reconnects 6 s after an error or a close, and at once after a minute without a message, each time
 with the session's current token, renewed when the cloud refuses it. An account the cloud refuses
-ends the stream with `AuthenticationError`. A read or write that stalls, even in the middle of a
-frame, gives up after `read_timeout` and reconnects. It connects directly, without the environment's
-proxy.
+ends the stream with `AuthenticationError`. A frame that stops halfway counts as silence: when the
+minute runs out, it reconnects at once, as the app's library does. A handshake that stalls gives up
+after a minute. It connects directly, without the environment's proxy.
 
 It has run against the live cloud with a French account. The cloud pushes its messages as `POST`
 requests behind a `CloudConnect: sc-data-…` header, the device list first, then `State` changes;

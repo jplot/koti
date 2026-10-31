@@ -185,18 +185,21 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
 
     context 'when a frame stops halfway' do
       subject(:websocket) do
-        described_class.new(session, sleeper: ->(seconds) { raise stop, seconds.to_s })
+        times = [0.0]
+        described_class.new(session, clock: -> { times.shift || 59.8 },
+                                     sleeper: ->(seconds) { raise stop, seconds.to_s })
       end
 
       let(:script) do
-        ->(connection, _index) { connection.send_raw(FakeWebsocket.frame(2, message('CC1', '{}'))[0, 10]) }
+        lambda do |connection, index|
+          bytes = FakeWebsocket.frame(2, message("CC#{index}", '{}'))
+          connection.send_raw(index == 1 ? bytes[0, 10] : bytes)
+        end
       end
       let(:stop) { Class.new(StandardError) }
 
-      before { Miele::Sdk.configure { it.read_timeout = 0.2 } }
-
-      it 'gives up after the read timeout and tries again 6 s later' do
-        expect { Timeout.timeout(5) { first_messages(1) } }.to raise_error(stop, '6')
+      it 'gives up when the watchdog would and reconnects at once, as the app does' do
+        expect(Timeout.timeout(5) { first_messages(1) }.map(&:body)).to eq(['{}'])
       end
     end
 

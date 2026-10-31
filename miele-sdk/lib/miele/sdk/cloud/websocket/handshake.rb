@@ -32,13 +32,12 @@ module Miele
             raise
           end
 
-          # A stalled handshake or frame would hang past the watchdog: every TLS read and write gives up after
-          # +read_timeout+.
+          # The watchdog only starts once connected: a stalled handshake gives up after its minute all the same.
           #
           # @param tcp [Socket]
           # @return [OpenSSL::SSL::SSLSocket]
           def tls(tcp)
-            tcp.timeout = Sdk.config.read_timeout
+            tcp.timeout = WATCHDOG
             context = OpenSSL::SSL::SSLContext.new
             context.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
             socket = OpenSSL::SSL::SSLSocket.new(tcp, context)

@@ -38,6 +38,8 @@ module Miele
 
         def connection: () { (Message message) -> void } -> Integer
 
+        def wait_after: (Exception error) -> Integer
+
         def refetch: () { (Message message) -> void } -> void
 
         def listen: (untyped socket) { (Message message) -> void } -> Symbol?

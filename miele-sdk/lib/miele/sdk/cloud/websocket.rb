@@ -88,9 +88,19 @@ module Miele
           refetch(&)
           listen(socket, &) == :silent ? 0 : ERROR_RECONNECT
         rescue *FAILURES => e
-          e.is_a?(Malformed) ? STREAM_RETRY : ERROR_RECONNECT
+          wait_after(e)
         ensure
           close(socket) if socket
+        end
+
+        # @param error [Exception] what ended the connection
+        # @return [Integer] the seconds to wait: none when a frame outlived the watchdog, as when no message came
+        def wait_after(error)
+          case error
+          when Malformed then STREAM_RETRY
+          when IO::TimeoutError then 0
+          else ERROR_RECONNECT
+          end
         end
 
         # SendFreshRequest and SendFreshRequestUponReconnect: the app reads each followed resource on every
@@ -118,7 +128,7 @@ module Miele
             keep_alive = wait(socket, keep_alive, silence)
             return :silent unless keep_alive
 
-            opcode, payload = read_frame(socket)
+            opcode, payload = read_frame(socket, [silence - @clock.call, 0].max)
             return if opcode == CLOSE
 
             silence = @clock.call + WATCHDOG if [CONTINUATION, TEXT, BINARY].include?(opcode)

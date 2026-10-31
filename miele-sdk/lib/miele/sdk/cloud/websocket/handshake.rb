@@ -17,7 +17,7 @@ module Miele
 
           private
 
-          # @return [IO] the open connection
+          # @return [IO] the open connection, closed again when the handshake fails
           # @raise [ConnectionError] unless the cloud switches protocols with the key's answer
           def connect
             token = @session.current
@@ -27,6 +27,9 @@ module Miele
             socket.write(request(key, token))
             check(socket, key, token)
             socket
+          rescue StandardError
+            tcp&.close
+            raise
           end
 
           # @param tcp [Socket]

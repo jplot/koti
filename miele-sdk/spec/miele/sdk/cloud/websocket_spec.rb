@@ -163,6 +163,15 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     it 'tries again 6 s later, as the app does' do
       expect { first_messages(1) }.to raise_error(stop)
     end
+
+    it 'closes the connection it opened', :aggregate_failures do
+      sockets = []
+      allow(Socket).to receive(:tcp).and_wrap_original do |tcp, *args, **options|
+        tcp.call(*args, **options).tap { sockets << it }
+      end
+      expect { first_messages(1) }.to raise_error(stop)
+      expect(sockets).to contain_exactly(be_closed)
+    end
   end
 
   context 'with TLS' do

@@ -90,7 +90,7 @@ module Miele
         # @return [Hash{Symbol=>Integer}]
         def dop2_conversions(settings)
           { spin_speed: settings[:spin_speed]&.div(10),
-            stains_selection: settings[:stains]&.sum { STAINS.fetch(it).first },
+            stains_selection: settings[:stains]&.map { STAINS.fetch(it).first }&.reduce(0, :|),
             residual_moisture: Laundry::DRYING_LEVELS[settings[:drying_level]] }.compact
         end
 

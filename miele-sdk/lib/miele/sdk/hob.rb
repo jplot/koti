@@ -127,7 +127,7 @@ module Miele
                         degrees(state.raw['TargetTemperature']), degrees(state.raw['Temperature']))
       end
 
-      # MapTempControl: whole degrees, truncated, and 0 where the hob reports none.
+      # As the app's MapTempControl.
       #
       # @param values [Array<Integer>, nil] hundredths of a degree
       # @return [Integer]

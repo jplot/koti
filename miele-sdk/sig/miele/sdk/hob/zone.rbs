@@ -26,7 +26,7 @@ module Miele
         attr_reader current: Integer
 
         def self.new: (Integer zone, Symbol level, bool target_reached, Integer target, Integer current) -> TempControl
-                    | (zone: Integer, level: Symbol, target_reached: bool, target: Float?, current: Float?) -> TempControl
+                    | (zone: Integer, level: Symbol, target_reached: bool, target: Integer, current: Integer) -> TempControl
       end
 
       class Fan < Data

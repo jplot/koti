@@ -18,6 +18,6 @@ module Miele
 
     def self.configure: () { (Configuration::Settings) -> void } -> void
 
-    def self.events: (hosts: Array[String]) ?{ (Events::Event) -> void } -> untyped
+    def self.events: (?hosts: Array[String], ?cloud: Cloud::Channel?) ?{ (Events::Event) -> void } -> untyped
   end
 end

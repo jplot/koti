@@ -1,0 +1,21 @@
+module Miele
+  module Sdk
+    module Events
+      class Merge
+        @sources: Array[untyped]
+
+        def initialize: (Array[untyped] sources) -> void
+
+        def each: () ?{ (Event event) -> void } -> untyped
+
+        private
+
+        def merged: () { (Event event) -> void } -> untyped
+
+        def feed: (untyped source, Thread::Queue queue) -> void
+
+        def take: (Thread::Queue queue) -> Event
+      end
+    end
+  end
+end

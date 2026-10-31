@@ -24,6 +24,8 @@ require_relative 'sdk/events/identity'
 require_relative 'sdk/events/request'
 require_relative 'sdk/events/enrollment'
 require_relative 'sdk/events/listener'
+require_relative 'sdk/events/cloud_stream'
+require_relative 'sdk/events/merge'
 require_relative 'sdk/events/server'
 require_relative 'sdk/object_access'
 require_relative 'sdk/appliance'
@@ -148,12 +150,22 @@ module Miele
       CLOUD.synchronize { @cloud = nil }
     end
 
-    # Streams the changes the appliances push, until the block breaks or raises.
+    # Streams the changes the appliances push, to this host and through the Miele cloud, until the block breaks
+    # or raises.
     #
-    # @param hosts [Array<String>] addresses of the appliances to listen to
+    # @param hosts [Array<String>] addresses of the appliances to listen to on the network
+    # @param cloud [Cloud::Channel, nil] the account to follow through its websocket, the configured one by default
     # @yieldparam event [Events::Event]
     # @return [Enumerator::Lazy<Events::Event>, Object] the events without a block
+    # @raise [ArgumentError] without hosts or an account
     # @api public
-    def self.events(hosts:, &) = Events::Listener.new(hosts:).each(&)
+    def self.events(hosts: [], cloud: self.cloud, &)
+      raise ArgumentError, 'no appliance to listen to, nor a Miele account' if hosts.empty? && cloud.nil?
+
+      sources = [] #: Array[untyped]
+      sources << Events::Listener.new(hosts:) unless hosts.empty?
+      sources << Events::CloudStream.new(cloud) if cloud
+      Events::Merge.new(sources).each(&)
+    end
   end
 end

@@ -4,11 +4,14 @@ module Miele
       DEVICE_TYPE: Integer
 
       class Event < Data
-        attr_reader fab: String
+        attr_reader fab: String?
         attr_reader resource: String
-        attr_reader content: Hash[String, untyped]
+        attr_reader content: untyped
+        attr_reader source: Symbol
 
-        def self.new: (fab: String, resource: String, content: Hash[String, untyped]) -> Event
+        def self.new: (fab: String?, resource: String, content: untyped, ?source: Symbol) -> Event
+
+        def initialize: (fab: String?, resource: String, content: untyped, ?source: Symbol) -> void
 
         def attributes: () -> (Schema::DeviceIdentification | Schema::DeviceState)
       end

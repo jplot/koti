@@ -64,6 +64,18 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   selection, parameters, delayed start, answers to messages, power off, wake, the anti-crease
   setting and TwinDos filling levels. None of it has run against a real appliance.
 - `NotAcceptedError`, for a Dop1 write the appliance acknowledges with anything but success.
+- Coffee makers as the app's coffee module drives them: the variant, typed reads of the contexts,
+  notifications, cleaning, descaling, features, profiles and drinks, and the CVA6000's Dop1 state;
+  switching on and off, brewing a drink for one or two cups and with a double shot, Barista,
+  stopping, answers to notifications, the CVA6000's light, profiles and drink settings. None of it
+  has run against a real coffee maker.
+- Fridges, freezers and wine units as the app's refrigeration module drives them, on the Cooling API
+  and Opcode: zones, modes, alarms, ice maker, light, PerfectFresh, humidity and door alarm delay;
+  zone targets, super modes, fan, VarioCool, modes, ice maker, lights, humidity, PerfectFresh,
+  humidifier and door alarm delay. None of it has run against a real appliance.
+- Warming drawers as the app's drawer module drives them: their state, programs and cup warm-up;
+  switching on and off, program, temperature and remaining time, and the cup warm-up source. None of
+  it has run against a real drawer.
 
 - Typed values of the DOP2 and Dop1 objects the Miele app uses, generated from its classes under
   `Miele::Sdk::Objects::<Family>`: `Appliance#object` and `#write_object` at the addresses the app

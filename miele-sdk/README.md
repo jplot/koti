@@ -482,6 +482,112 @@ Not traced: the order of the bits behind the Dop1 `washing`, `drying` and `eco` 
 phase the app's screen waits for before it offers 12144; and the values a WMV96 shows from 8202
 (its capsule dosing among them), which `readings` leaves to `selection`.
 
+## Coffee makers
+
+`Miele::Sdk::CoffeeMaker` reads and acts as the app's coffee module does. It has never been tested
+on an appliance: every read and write follows the app's code.
+
+```ruby
+coffee.variant           # => :cva_ref2; :cm7, :cm6f, :cva, :cva6000 or :unknown, as the app tells them apart
+coffee.program_context   # 1574 at 0/1, on unit 2 for a CM7 and 1 for the others; context (0/8), notifications
+coffee.combi_state       # 2/1586
+coffee.cleaning          # 2/289; descaling, features, device_ident; nil on a CM7
+coffee.profiles          # 1/109 from the standard profile 24812 along the chain; none on a CM7
+coffee.drink(24_005)     # 2/261 at idx1 = the drink's id; drink_limits(24_005) reads 2/331
+coffee.device_state      # a CVA6000's Dop1 1000; usage_counters reads 8D00
+```
+
+```ruby
+coffee.brew(24_005, two_cups: true)   # double_shot: true too
+coffee.start_barista
+coffee.stop
+coffee.acknowledge(:query, 3, option: 2)   # :information or :query with its id; the others the option alone
+coffee.power_on                            # and power_off
+coffee.light = true                        # a CVA6000 only
+coffee.create_profile('Anna')              # rename_profile, delete_profile
+coffee.edit_drink(24_037, amount: 50, temperature: 2, pre_brewing: 1, bean_sort: 2)
+coffee.rename_drink(24_037, 'Mein Kaffee')
+```
+
+A DOP2 coffee maker writes 2/1586 as read to switch on and off, waking first when it answers 500,
+and its other objects as the app's ModifyDop2Message does: back where they were read, the index
+read at as the header's attribute. A CVA6000 takes Dop1 1101 to switch on and off and 1100 to
+stop, and its light by writing back its whole `State`. `brew` and `start_barista` follow the app's
+drink rule: mobile start, no information or query shown, no drink, Barista or care program running.
+Two cups or a double shot also need the software ids the app requires, Barista its listing among
+the special beverages of 1/1599, and `delete_profile` coffee profiles in 2/348. A CM7 takes no
+profile, drink or Barista action, and a CVA6000 brews nothing and acknowledges nothing, as in the
+app.
+
+Left out: tasting, saving a tasted drink, and resetting a drink or a profile, whose values the app
+derives through helpers not traced; the drink tables that limit two cups or a double shot to some
+drinks; and the waits the app keeps after switching on or off. The CVA6000's switch-off ignores the
+information its dashboard checks.
+
+## Cooling appliances
+
+`Miele::Sdk::CoolingAppliance` (fridges, freezers and wine units) reads and acts as the app's
+refrigeration module does. It has never been tested on an appliance: every read and write follows
+the app's code. Protocols 200 (BSH), 201 and 203 (Liebherr) serve the JSON `Cooling` resource, an
+Opcode appliance (0 and 1) its zones in `State`.
+
+```ruby
+fridge.zones             # => [#<data Zone number=1, position=1, rank=1, type=:fridge, temperature=5.0, target=4.0, …>]
+fridge.temperature_unit  # => :celsius or :fahrenheit
+fridge.modes             # => { eco: #<data Mode on=false, editable=true>, … }
+fridge.alarms            # => [:dust_filter], filters and the ice maker at 3, demo mode at 1
+fridge.ice_maker         # light, perfect_fresh, humidity, door_alarm_delay (seconds); cooling for the rest
+```
+
+```ruby
+zone = fridge.zones.first
+fridge.set_target(zone, 4)        # whole degrees in the appliance's unit
+fridge.set_super_mode(zone, true) # set_fan, set_vario_cool
+fridge.set_mode(:eco, true)       # :party, :holiday, :sabbath, :child_proof
+fridge.ice_maker = false          # light=, ambient_light_mode=, presentation_light=, humidity=,
+                                  # perfect_fresh=, humidifier=, door_alarm_delay=
+```
+
+The app reads no zone while the appliance is off and shows no zone temperature on protocol 200.
+It addresses a zone's target and super mode by its number, its fan by its position and VarioCool
+and presentation light by its rank. On protocol 201 the super mode first gets a duration of 720,
+whatever that write answers, then waits 500 ms. An Opcode appliance takes its target through
+`Oc85`, in whole °C, and its super mode as `ProcessAction` on `State/ProcessAction`. The app reads
+no `RemoteEnable` and checks nothing before these writes; the SDK refuses what the app shows no
+control for, such as an ice maker the appliance lacks or a mode it lists no values for, and a
+`State` member such as `State/ProcessAction` goes to the cloud on its own.
+
+Left out: the app's retries of an Opcode target and its waits after some writes; the screen rules
+that hide zone controls during a failure or a holiday or Sabbath mode; and typed reads of zone
+alarms, target ranges and the ambient and presentation light state, which `cooling` gives raw. Not
+traced: whether an appliance serves `Cooling`, `Oc85` and the `State` members locally, what
+`10000617000` and the duration of 720 mean, and how a °F appliance reports its temperatures.
+
+## Warming drawers
+
+`Miele::Sdk::WarmingDrawer` reads and acts as the app's drawer module does. It has never been
+tested on an appliance: every read and write follows the app's code.
+
+```ruby
+drawer.drawer_state          # => :programmed; an open door shows over off, on, running and paused
+drawer.programs              # Dop1 9788: #<data Program id=1, min_hours=1, max_hours=4, temperatures=[30, …]>
+drawer.power_on              # and power_off: Dop1 1101
+drawer.select_program(1)     # 1 cups, 2 plates, 3 food, 4 low-temperature cooking: Dop1 9781
+drawer.target_temperature = 70
+drawer.remaining_time = 135  # minutes, kept to the program's maximum; 0 resets it
+drawer.cups_warm_up_source = '000111111111'   # a coffee maker the drawer lists; nil to stop
+```
+
+Each action makes the check of the app's rule for it. Switching on needs mobile start without local
+control; a program needs remote control and mobile start without local control, the drawer on,
+running or off; a temperature mobile start without local control and one of the program's five
+steps; a remaining time remote control and mobile start without local control while the program is
+set or runs (Status 3 to 6). A temperature re-sends the remaining time, and a remaining time the
+target, as the app writes them. `NotAcceptedError` reports an Ack other than 1.
+
+Left out: the cup warm-up's check that its source is a coffee maker by its ident, Con@ctivity One
+machines, and typed reads of the drawer's temperatures and times, which `State` gives raw.
+
 ## Typed objects
 
 The objects behind DOP2 leaves and Dop1 requests come typed, generated from the Miele app's own

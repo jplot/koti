@@ -259,6 +259,23 @@ module Miele
       # @return [Rational] seconds since 1970 on the local wall clock
       def wall_clock(time) = time.to_r + time.utc_offset
 
+      # @param klass [Class] a generated Dop1 write section
+      # @return [Data] all its bytes 0, as the app allocates it
+      def blank(klass) = klass.from("\0" * klass::LENGTH)
+
+      # The app accepts only Ack 1, characters 6 and 7 of the answer.
+      #
+      # @param klass [Class] a generated Dop1 object
+      # @param section [Data] one of its write sections
+      # @param type [String] {Dop1::READ} or {Dop1::WRITE}, as the app sends that object
+      # @return [void]
+      # @raise [NotAcceptedError] for any other Ack
+      def write_dop1_object(klass, section, type:)
+        request = Dop1.request(object_id: klass::ID, type:, section: section.to_bytes)
+        ack = JSON.parse(dop1(request)).fetch('Response')[6, 2]
+        raise NotAcceptedError, "the appliance answered Ack #{ack.inspect}" unless ack.to_i == 1
+      end
+
       # @param klass [Class] a generated Dop1 object
       # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects
       def dop1_object(klass)

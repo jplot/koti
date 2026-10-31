@@ -49,8 +49,6 @@ module Miele
 
       def dryer?: () -> bool
 
-      def blank: (untyped klass) -> untyped
-
       def program_para: (Objects::Laundry::GlobalPsContext context) -> untyped
 
       def dop2_door: (Objects::Laundry::GlobalDeviceContext context) -> (Symbol | Integer)

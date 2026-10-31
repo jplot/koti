@@ -20,16 +20,12 @@ module Miele
 
         private
 
-        # The app accepts only Ack 1, characters 6 and 7 of the answer.
+        # The app sends it with the read request type.
         #
         # @param section [Data] the washer's or the dryer's write section
         # @return [void]
-        # @raise [NotAcceptedError] for any other Ack
-        def write_dop1_selection(section)
-          request = Dop1.request(object_id: dop1_objects.fetch(:write)::ID, type: Dop1::READ, section: section.to_bytes)
-          ack = JSON.parse(dop1(request)).fetch('Response')[6, 2]
-          raise NotAcceptedError, "the appliance answered Ack #{ack.inspect}" unless ack.to_i == 1
-        end
+        # @raise [NotAcceptedError] when the appliance refuses it
+        def write_dop1_selection(section) = write_dop1_object(dop1_objects.fetch(:write), section, type: Dop1::READ)
       end
     end
   end

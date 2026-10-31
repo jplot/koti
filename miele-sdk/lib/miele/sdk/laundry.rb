@@ -100,10 +100,6 @@ module Miele
       # @return [Boolean]
       def dryer? = is_a?(TumbleDryer)
 
-      # @param klass [Class] a generated Dop1 write section
-      # @return [Data] all its bytes 0, as the app allocates it
-      def blank(klass) = klass.from("\0" * klass::LENGTH)
-
       # @param context [Objects::Laundry::GlobalPsContext] 2/1574
       # @return [Data, nil] the dryer's parameters, or the washer's and the washer-dryer's
       def program_para(context) = dryer? ? context.context_para_td : context.context_para_wm

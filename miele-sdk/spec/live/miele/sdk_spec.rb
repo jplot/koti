@@ -34,6 +34,13 @@ RSpec.describe Miele::Sdk, :live do
     end
   end
 
+  it "reads the hood and hob ExtendedState as the app's Dop1 objects, nil when they serve none" do
+    states = appliances.select { %i[hood hob_highlight hob_induction hob_gas].include?(it.device_type) }.map(&:state)
+    skip 'no hood or hob among MIELE_HOSTS' if states.empty?
+    decoded = states.map { [it.raw['ExtendedState'].to_s.empty?, it.extended_state] }
+    expect(decoded).to all(satisfy { |empty, value| empty ? value.nil? : value.is_a?(Data) })
+  end
+
   def unknown_keys(type, data, path)
     own = type.extension_member ? [] : (data.keys - type.json_keys.values).map { "#{path} has #{it}" }
     own + type.nested_members.flat_map do |member, nested_type|
@@ -108,6 +115,12 @@ RSpec.describe Miele::Sdk, :live do
       oven = cloud.devices.find { ovens.include?(it.ident&.fetch('DeviceType', nil)) } or skip 'no oven in this account'
       leaf = Miele::Sdk::Dop2.decode(cloud.request(:get, "/Devices/#{oven.fab}/DOP2/1/1585").body)
       expect([leaf.unit, leaf.attribute]).to eq([1, 1585])
+    end
+
+    it 'reads the oven DeviceContext as a typed value, through the cloud' do
+      oven = appliances.find { it.device_type.start_with?('oven') } or skip 'no oven among MIELE_HOSTS'
+      expect(oven.object(Miele::Sdk::Objects::Oven::GlobalDeviceContext))
+        .to be_a(Miele::Sdk::Objects::Oven::GlobalDeviceContext)
     end
 
     it 'reads the household key from the cloud and signs locally with it', :aggregate_failures do

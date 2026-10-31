@@ -31,12 +31,12 @@ module Miele
         end
 
         # @return [void]
-        # @raise [ActionUnavailableError] unless a coffee maker but a CM7 lists Barista among its special beverages
-        #   and could dispense a drink now
+        # @raise [ActionUnavailableError] unless a CM6F, CVA or Ref2 that lists Barista among its special beverages
+        #   is on (Status 2 or 3) under remote control without local control, runs no program and shows no
+        #   information
         # @api public
         def start_barista
-          require!(gen7? && barista?, 'the coffee maker offers no Barista')
-          require_dispensable!
+          require!(barista_entry?(state), 'the coffee maker cannot start Barista now')
           modify_dop2(family::GlobalPsSelect, 2, 1577, 0, 1) { it.with(prog_id: BARISTA, selection_type: 0) }
         end
 
@@ -73,12 +73,25 @@ module Miele
           state.remote_control? == true && state.local_control? != true && state.mobile_start? == true
         end
 
+        # BaristaAssistantEntryPointRule; the start page's further message check is not traced.
+        #
+        # @param state [State]
+        # @return [Boolean]
+        def barista_entry?(state)
+          %i[cm6f cva cva_ref2].include?(variant) && [2, 3].include?(state.raw['Status']) &&
+            state.remote_control? == true && state.local_control? != true && program_id.zero? && !informed? &&
+            barista?
+        end
+
         # @return [Boolean] any information or query with an id
         def notified?
-          shown = notifications
-          infos = shown.infos.to_a.map { notified_id(family::GlobalEnumNtfctnInfoId, it.id) }
-          queries = shown.queries.to_a.map { notified_id(family::GlobalEnumNtfctnQueryId, it.id) }
-          (infos + queries).any?(&:positive?)
+          queries = notifications.queries.to_a.map { notified_id(family::GlobalEnumNtfctnQueryId, it.id) }
+          informed? || queries.any?(&:positive?)
+        end
+
+        # @return [Boolean] any information with an id
+        def informed?
+          notifications.infos.to_a.any? { notified_id(family::GlobalEnumNtfctnInfoId, it.id).positive? }
         end
 
         # @param enum [Module]

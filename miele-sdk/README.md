@@ -512,15 +512,16 @@ coffee.rename_drink(24_037, 'Mein Kaffee')
 A DOP2 coffee maker writes 2/1586 as read to switch on and off, waking first when it answers 500,
 and its other objects as the app's ModifyDop2Message does: back where they were read, the index
 read at as the header's attribute. A CVA6000 takes Dop1 1101 to switch on and off and 1100 to
-stop, and its light by writing back its whole `State`. `brew` and `start_barista` follow the app's
-drink rule: mobile start, no information or query shown, no drink, Barista or care program running.
-Two cups or a double shot also need the software ids the app requires, Barista its listing among
-the special beverages of 1/1599, and `delete_profile` coffee profiles in 2/348. A CM7 takes no
-profile, drink or Barista action, and a CVA6000 brews nothing and acknowledges nothing, as in the
-app.
+stop, and its light by writing back its whole `State`. `brew` follows the app's drink rule: mobile
+start, no information or query shown, no drink, Barista or care program running; two cups or a
+double shot also need the software ids the app requires. `start_barista` follows the app's Barista
+entry: a CM6F, CVA or Ref2 that lists it among the special beverages of 1/1599, on under remote
+control without local control, no program running and no information shown. `delete_profile` needs
+coffee profiles in 2/348, and only custom profiles are renamed or deleted. A CM7 takes no profile,
+drink or Barista action, and a CVA6000 brews nothing and acknowledges nothing, as in the app.
 
 Left out: tasting, saving a tasted drink, and resetting a drink or a profile, whose values the app
-derives through helpers not traced; the drink tables that limit two cups or a double shot to some
+derives through helpers not traced; the message check of the app's Barista start page; the drink tables that limit two cups or a double shot to some
 drinks; and the waits the app keeps after switching on or off. The CVA6000's switch-off ignores the
 information its dashboard checks.
 

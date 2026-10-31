@@ -17,7 +17,13 @@ module Miele
 
         def mobile_start_on?: (State state) -> bool
 
+        def barista_entry?: (State state) -> bool
+
         def notified?: () -> bool
+
+        def informed?: () -> bool
+
+        def program_id: (?untyped context) -> Integer
 
         def notified_id: (untyped enum, (Integer | Symbol)? id) -> Integer
 

@@ -116,6 +116,24 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(written).to eq([['DOP2/2/1577?idx1=0&idx2=1', select(24_407, 0, attribute: 0)]])
   end
 
+  context 'when the coffee maker lists Barista' do
+    before do
+      group = { 1 => dop2_field(:u16, 24_400), 4 => dop2_field(:u32_array, [0x80]) }
+      served[[1, 1599, 0, 1]] = dop2_leaf(1, 1599, { 1 => dop2_field(:struct_array, [group]) }, idx2: 1)
+    end
+
+    it "starts Barista without mobile start, as the app's entry point allows" do
+      served['State'] = { 'Status' => 2, 'RemoteEnable' => [15, 0, 0] }
+      coffee.start_barista
+      expect(written.size).to eq(1)
+    end
+
+    it 'refuses Barista while any program runs' do
+      served[[1, 1574, 0, 1]] = ps_context(24_500, 0)
+      expect { coffee.start_barista }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+  end
+
   it 'stops with request 2 on 2/1583 at 0/1, the header naming idx1' do
     coffee.stop
     expect(written).to eq([['DOP2/2/1583?idx1=0&idx2=1', dop2_leaf(2, 0, { 1 => dop2_field(:e16, 2) }, idx2: 1)]])

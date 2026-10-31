@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::Cloud::Websocket do
-  subject(:websocket) { described_class.new(session, url: "#{fake.url}/websocket/V2/Devices/") }
+  subject(:websocket) { described_class.new(session) }
 
-  let(:session) { instance_double(Miele::Sdk::Cloud::Session, authorization: 'Bearer token', language: 'en-FR') }
+  let(:session) do
+    organization = instance_double(Miele::Sdk::Cloud::Locales::Organization, rest: fake.url.sub('ws', 'http'))
+    instance_double(Miele::Sdk::Cloud::Session, authorization: 'Bearer token', language: 'en-FR', organization:)
+  end
   let(:fake) { FakeWebsocket.start(&script) }
   let(:script) { ->(connection, _index) { connection.send_binary(message('CC1', '{"Status":5}')) } }
 
@@ -96,7 +99,7 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
   context 'when the cloud sends nothing for a while' do
     subject(:websocket) do
       times = [0.0]
-      described_class.new(session, url: "#{fake.url}/websocket/V2/Devices/", clock: -> { times.shift || 100.0 })
+      described_class.new(session, clock: -> { times.shift || 45.0 })
     end
 
     let(:script) do
@@ -109,15 +112,20 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     it 'keeps the connection alive with an unsolicited pong every 30 s, as .NET does' do
       first_messages(1)
       fake.stop
-      expect(fake.connections.first.frames.select { it.opcode == 10 }.map(&:payload)).to eq(['', '', ''])
+      expect(fake.connections.first.frames.select { it.opcode == 10 }.map(&:payload)).to eq([''])
     end
   end
 
   context 'when the cloud answers the handshake with another key' do
-    let(:fake) { FakeWebsocket.start(accept: 'wrong', &script) }
+    subject(:websocket) do
+      described_class.new(session, sleeper: ->(_seconds) { raise stop })
+    end
 
-    it 'refuses the connection' do
-      expect { first_messages(1) }.to raise_error(Miele::Sdk::ConnectionError)
+    let(:fake) { FakeWebsocket.start(accept: 'wrong', &script) }
+    let(:stop) { Class.new(StandardError) }
+
+    it 'tries again 6 s later, as the app does' do
+      expect { first_messages(1) }.to raise_error(stop)
     end
   end
 end

@@ -8,10 +8,12 @@ module Miele
     module Cloud
       # The Miele cloud websocket as the app's Websocket.Client speaks it: every resource the account pushes,
       # each acknowledged, the connection kept alive with an unsolicited pong every 30 s, as .NET does with a
-      # KeepAliveInterval alone.
+      # KeepAliveInterval alone. It reconnects as the app configures the library: 6 s after an error, at once
+      # after a minute without a message.
       class Websocket
         include Handshake
         include Frames
+        include Messages
 
         # A pushed resource.
         #
@@ -24,74 +26,104 @@ module Miele
         Message = Data.define(:path, :headers, :body)
 
         KEEP_ALIVE = 30
-        SEPARATOR = "\r\n\r\n"
-        private_constant :KEEP_ALIVE, :SEPARATOR
+        WATCHDOG = 60
+        ERROR_RECONNECT = 6
+        FAILURES = [Error, EOFError, IOError, SystemCallError, OpenSSL::SSL::SSLError].freeze
+        private_constant :KEEP_ALIVE, :WATCHDOG, :ERROR_RECONNECT, :FAILURES
 
-        # @param session [Session]
-        # @param url [String] the cloud's websocket, +wss://{rest host}/websocket/V2/Devices/+ by default
+        # @param session [Session] its organization's rest host names the websocket,
+        #   +wss://{host}/websocket/V2/Devices/+
+        # @param follow [Array<String>] resources read again on each connection, as +/Devices/{fab}/State+
+        # @param fetch [#call] reads one of them, the cloud channel by default
         # @param clock [#call] seconds, monotonic
-        def initialize(session, url: nil, clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) })
+        # @param sleeper [#call] waits the given number of seconds
+        def initialize(session, follow: [], fetch: nil, clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) },
+                       sleeper: method(:sleep))
           @session = session
-          @url = URI(url || "#{session.organization.rest.sub(/\Ahttp/, 'ws')}/websocket/V2/Devices/")
+          @url = URI("#{session.organization.rest.sub(/\Ahttp/, 'ws')}/websocket/V2/Devices/")
+          @follow = follow
+          @fetch = fetch || ->(path) { Channel.new(session).request(:get, path).body }
           @clock = clock
+          @sleeper = sleeper
         end
 
-        # @yieldparam message [Message]
+        # Reconnects until the block breaks, which closes the connection.
+        #
+        # @yieldparam message [Message] a pushed resource, or one read again on connecting
         # @return [void]
-        # @raise [ConnectionError] when the cloud refuses the connection
-        # @raise [EOFError] when it closes it
         # @api public
         def each(&)
-          socket = connect
-          listen(socket, &)
-        ensure
-          close(socket) if socket
+          loop do
+            wait = connection(&)
+            @sleeper.call(wait) if wait.positive?
+          end
         end
 
         private
 
-        # @param socket [IO]
+        # @yieldparam message [Message]
+        # @return [Integer] the seconds to wait before connecting again
+        def connection(&)
+          socket = connect
+          refetch(&)
+          listen(socket, &) == :silent ? 0 : ERROR_RECONNECT
+        rescue *FAILURES
+          ERROR_RECONNECT
+        ensure
+          close(socket) if socket
+        end
+
+        # SendFreshRequest and SendFreshRequestUponReconnect: the app reads each followed resource on every
+        # connection; one that fails is left out.
+        #
         # @yieldparam message [Message]
         # @return [void]
+        def refetch
+          @follow.each do |path|
+            body = @fetch.call(path)
+          rescue Error
+            next
+          else
+            yield Message.new(path: "/V2#{path}", headers: {}, body:)
+          end
+        end
+
+        # @param socket [IO]
+        # @yieldparam message [Message]
+        # @return [Symbol, nil] +:silent+ when no message came for a minute, nil when the cloud closes
         def listen(socket, &)
           buffer = ''.b
-          due = @clock.call + KEEP_ALIVE
+          keep_alive, silence = deadlines
           loop do
-            due = alive(socket, due)
+            keep_alive = wait(socket, keep_alive, silence)
+            return :silent unless keep_alive
+
             opcode, payload = read_frame(socket)
             return if opcode == CLOSE
 
+            silence = @clock.call + WATCHDOG if [CONTINUATION, TEXT, BINARY].include?(opcode)
             buffer = receive(socket, opcode, payload, buffer, &)
           end
         end
 
-        # The app acknowledges each message it parses.
-        #
-        # @param socket [IO]
-        # @param opcode [Integer]
-        # @param payload [String]
-        # @param buffer [String] what is left of the previous frames
-        # @yieldparam message [Message]
-        # @return [String] what is left now
-        def receive(socket, opcode, payload, buffer)
-          write_frame(socket, PONG, payload) if opcode == PING
-          return buffer unless [CONTINUATION, TEXT, BINARY].include?(opcode)
-
-          parse(buffer + payload) do |header, message|
-            write_frame(socket, TEXT, "#{header}#{SEPARATOR}HTTP/1.1 204 No Content#{SEPARATOR}")
-            yield message
-          end
-        end
+        # @param now [Float]
+        # @return [Array(Float, Float)] when the next keep-alive is due and when the watchdog gives up
+        def deadlines(now = @clock.call) = [now + KEEP_ALIVE, now + WATCHDOG]
 
         # @param socket [IO]
-        # @param due [Float] when the next keep-alive is due
-        # @return [Float] the next one once a frame is ready
-        def alive(socket, due)
-          until readable?(socket, due - @clock.call)
+        # @param keep_alive [Float] when the next keep-alive is due
+        # @param silence [Float] when the watchdog gives up
+        # @return [Float, nil] the next keep-alive once a frame is ready, nil once the watchdog gives up
+        def wait(socket, keep_alive, silence)
+          loop do
+            now = @clock.call
+            return if now >= silence
+            return keep_alive if readable?(socket, [keep_alive, silence].min - now)
+            next if @clock.call < keep_alive
+
             write_frame(socket, PONG, '')
-            due += KEEP_ALIVE
+            keep_alive += KEEP_ALIVE
           end
-          due
         end
 
         # @param socket [IO]
@@ -101,52 +133,6 @@ module Miele
           return true if socket.respond_to?(:pending) && socket.pending.positive?
 
           !socket.to_io.wait_readable([timeout, 0].max).nil?
-        end
-
-        # @param buffer [String]
-        # @yieldparam header [String] the CloudConnectHeader
-        # @yieldparam message [Message]
-        # @return [String] what is left
-        def parse(buffer)
-          loop do
-            header, text, rest = split(buffer)
-            return buffer unless header && text && rest
-
-            yield header, message(text)
-            buffer = rest
-          end
-        end
-
-        # WebsocketMessageParser: the CloudConnectHeader, the HTTP head, then +Content-Length+ bytes of body; a
-        # partial message waits in the buffer.
-        #
-        # @param buffer [String]
-        # @return [Array(String, String, String), nil] the header, the HTTP message and what follows
-        def split(buffer)
-          cloud_end = buffer.index(SEPARATOR)
-          head_end = cloud_end && buffer.index(SEPARATOR, cloud_end + 4)
-          return unless cloud_end && head_end
-
-          ending = head_end + 4 + content_length(buffer[cloud_end...head_end])
-          return if buffer.bytesize < ending
-
-          [buffer[0...cloud_end].to_s, buffer[(cloud_end + 4)...ending].to_s, buffer[ending..].to_s]
-        end
-
-        # @param head [String, nil]
-        # @return [Integer] its +Content-Length+, 0 without one
-        def content_length(head) = head.to_s[/Content-Length: (\d+)/, 1].to_i
-
-        # @param text [String] the HTTP head, a blank line and the body
-        # @return [Message]
-        def message(text)
-          head, body = text.split(SEPARATOR, 2)
-          line, *fields = head.to_s.split("\r\n")
-          headers = fields.to_h do |field|
-            name, value = field.split(': ', 2)
-            [name.to_s, value.to_s]
-          end
-          Message.new(path: line.to_s.split[1].to_s, headers:, body: body.to_s)
         end
 
         # @param socket [IO]

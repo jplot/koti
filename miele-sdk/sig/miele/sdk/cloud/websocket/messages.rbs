@@ -1,0 +1,25 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Websocket
+        module Messages
+          include Frames
+
+          SEPARATOR: String
+
+          private
+
+          def receive: (untyped socket, Integer opcode, String payload, String buffer) { (Message message) -> void } -> String
+
+          def parse: (String buffer) { (String header, Message message) -> void } -> String
+
+          def split: (String buffer) -> [String, String, String]?
+
+          def content_length: (String? head) -> Integer
+
+          def message: (String text) -> Message
+        end
+      end
+    end
+  end
+end

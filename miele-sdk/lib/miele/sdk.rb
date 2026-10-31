@@ -72,6 +72,7 @@ require_relative 'sdk/cloud/session'
 require_relative 'sdk/cloud/channel'
 require_relative 'sdk/cloud/websocket/frames'
 require_relative 'sdk/cloud/websocket/handshake'
+require_relative 'sdk/cloud/websocket/messages'
 require_relative 'sdk/cloud/websocket'
 
 # Namespace of the koti SDKs for the Miele ecosystem.

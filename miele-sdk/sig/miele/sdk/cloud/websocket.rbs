@@ -4,6 +4,7 @@ module Miele
       class Websocket
         include Handshake
         include Frames
+        include Messages
 
         class Message < Data
           attr_reader path: String
@@ -14,33 +15,35 @@ module Miele
         end
 
         KEEP_ALIVE: Integer
-        SEPARATOR: String
+        WATCHDOG: Integer
+        ERROR_RECONNECT: Integer
+        FAILURES: Array[singleton(Exception)]
 
         @session: Session
         @url: URI::Generic
+        @follow: Array[String]
+        @fetch: ^(String path) -> String
         @clock: ^() -> Float
+        @sleeper: ^(Numeric seconds) -> untyped
 
-        def initialize: (Session session, ?url: String?, ?clock: ^() -> Float) -> void
+        def initialize: (Session session, ?follow: Array[String], ?fetch: (^(String path) -> String)?,
+                         ?clock: ^() -> Float, ?sleeper: ^(Numeric seconds) -> untyped) -> void
 
         def each: () { (Message message) -> void } -> void
 
         private
 
-        def listen: (untyped socket) { (Message message) -> void } -> void
+        def connection: () { (Message message) -> void } -> Integer
 
-        def alive: (untyped socket, Float due) -> Float
+        def refetch: () { (Message message) -> void } -> void
+
+        def listen: (untyped socket) { (Message message) -> void } -> Symbol?
+
+        def deadlines: (?Float now) -> [Float, Float]
+
+        def wait: (untyped socket, Float keep_alive, Float silence) -> Float?
 
         def readable?: (untyped socket, Float timeout) -> bool
-
-        def receive: (untyped socket, Integer opcode, String payload, String buffer) { (Message message) -> void } -> String
-
-        def parse: (String buffer) { (String header, Message message) -> void } -> String
-
-        def split: (String buffer) -> [String, String, String]?
-
-        def content_length: (String? head) -> Integer
-
-        def message: (String text) -> Message
 
         def close: (untyped socket) -> void
       end

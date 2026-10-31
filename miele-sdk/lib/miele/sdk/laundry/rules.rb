@@ -44,16 +44,25 @@ module Miele
           [2, 3].include?(status(state)) ? requests - [2] : requests
         end
 
-        # The app drops request 8 while the delayed-start mode 2/1574 shows is 0; a Dop1 appliance lists it only
-        # with a start time.
+        # The app drops request 8 while the delayed-start mode is 0; a Dop1 appliance lists it only with a start
+        # time.
         #
         # @param requests [Array<Integer>]
         # @return [Array<Integer>]
         def without_unset_delay(requests)
           return requests unless dop2? && requests.include?(8)
 
-          mode = program_para(program_context)&.delayed_start_mode&.current_value
-          mode.to_i.zero? ? requests - [8] : requests
+          delay_mode.zero? ? requests - [8] : requests
+        end
+
+        # The app takes mode 1 where 2/1574 lacks the mode, the start time or the program's attributes.
+        #
+        # @return [Integer] the delayed-start mode
+        def delay_mode
+          context = program_context
+          para = program_para(context)
+          mode = para&.delayed_start_mode
+          mode && para&.delayed_start && context.prog_attributes_dwtdwm ? mode.current_value.to_i : 1
         end
 
         # @param context [Objects::Laundry::GlobalDeviceContext]

@@ -16,6 +16,8 @@ module Miele
 
         def without_unset_delay: (Array[Integer] requests) -> Array[Integer]
 
+        def delay_mode: () -> Integer
+
         def raw_requests: (Objects::Laundry::GlobalDeviceContext context) -> Array[Integer]
 
         def process_state: (Objects::Laundry::GlobalDeviceContext context) -> Integer

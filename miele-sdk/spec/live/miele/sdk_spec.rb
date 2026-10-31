@@ -80,13 +80,18 @@ RSpec.describe Miele::Sdk, :live do
     let(:ovens) { [12, 13, 15, 31, 39, 45] }
 
     before do
-      account = %w[MIELE_EMAIL MIELE_PASSWORD MIELE_COUNTRY]
-      skip "set #{account.join(', ')}" unless account.all? { ENV.key?(it) }
+      skip 'set MIELE_COUNTRY' unless ENV.key?('MIELE_COUNTRY')
       described_class.configure do |config|
-        config.email = ENV.fetch('MIELE_EMAIL')
-        config.password = ENV.fetch('MIELE_PASSWORD')
         config.country = ENV.fetch('MIELE_COUNTRY')
+        config.email = ENV.fetch('MIELE_EMAIL', nil)
+        config.password = ENV.fetch('MIELE_PASSWORD', nil)
+        config.token_file = ENV.fetch('MIELE_TOKEN_FILE', nil)
+        config.ciam_client_id = ENV.fetch('MIELE_CIAM_CLIENT_ID', nil)
       end
+      cloud or skip 'set MIELE_EMAIL or MIELE_TOKEN_FILE'
+      cloud.session.authorization
+    rescue Miele::Sdk::ConfigurationError => e
+      skip e.message
     end
 
     it 'logs in and lists the account appliances' do

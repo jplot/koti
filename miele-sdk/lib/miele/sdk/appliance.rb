@@ -170,7 +170,8 @@ module Miele
 
       private
 
-      # Local first: a resource the appliance answers 404 to goes, for good, to the cloud when an account is set.
+      # Local first: a resource the appliance answers 404 to goes, for good, to the cloud when an account is set. A
+      # member of +State+ counts on its own: a fridge's +State/ProcessAction+ may be cloud-only while +State+ is not.
       #
       # @param method [Symbol]
       # @param path [String]
@@ -178,7 +179,7 @@ module Miele
       # @param kind [Symbol] +:json+ or +:dop2+
       # @return [Connection::Response]
       def send_request(method, path, body: nil, kind: :json)
-        resource = path[%r{\A/Devices/\d+/([^/?]+)}, 1]
+        resource = path[%r{\A/Devices/\d+/(State/[^/?]+|[^/?]+)}, 1]
         return cloud_request(method, path, body, kind, resource) if @in_cloud.include?(resource)
 
         @local.request(method, path, body:, kind:)
@@ -257,6 +258,23 @@ module Miele
       # @param time [Time]
       # @return [Rational] seconds since 1970 on the local wall clock
       def wall_clock(time) = time.to_r + time.utc_offset
+
+      # @param klass [Class] a generated Dop1 write section
+      # @return [Data] all its bytes 0, as the app allocates it
+      def blank(klass) = klass.from("\0" * klass::LENGTH)
+
+      # The app accepts only Ack 1, characters 6 and 7 of the answer.
+      #
+      # @param klass [Class] a generated Dop1 object
+      # @param section [Data] one of its write sections
+      # @param type [String] {Dop1::READ} or {Dop1::WRITE}, as the app sends that object
+      # @return [void]
+      # @raise [NotAcceptedError] for any other Ack
+      def write_dop1_object(klass, section, type:)
+        request = Dop1.request(object_id: klass::ID, type:, section: section.to_bytes)
+        ack = JSON.parse(dop1(request)).fetch('Response')[6, 2]
+        raise NotAcceptedError, "the appliance answered Ack #{ack.inspect}" unless ack.to_i == 1
+      end
 
       # @param klass [Class] a generated Dop1 object
       # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects

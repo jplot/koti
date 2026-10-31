@@ -104,6 +104,10 @@ module Miele
 
       def wall_clock: (Time time) -> Rational
 
+      def blank: (untyped klass) -> untyped
+
+      def write_dop1_object: (untyped klass, untyped section, type: String) -> void
+
       def dop1_object: (untyped klass) -> untyped
 
       def require!: (untyped condition, String reason) -> void

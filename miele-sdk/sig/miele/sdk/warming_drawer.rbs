@@ -1,6 +1,25 @@
 module Miele
   module Sdk
     class WarmingDrawer < Appliance
+      include Commands
+
+      class Program < Data
+        attr_reader id: Integer
+        attr_reader min_hours: Integer
+        attr_reader max_hours: Integer
+        attr_reader temperatures: Array[Integer]
+
+        def self.new: (id: Integer, min_hours: Integer, max_hours: Integer, temperatures: Array[Integer]) -> Program
+      end
+
+      STATES: Hash[Integer, Symbol]
+      SECTIONS: Array[Symbol]
+
+      def drawer_state: (?State state) -> Symbol
+
+      def programs: () -> Array[Program]
+
+      def cups_warm_up: () -> Hash[String, untyped]?
     end
   end
 end

@@ -1,6 +1,56 @@
 module Miele
   module Sdk
     class CoffeeMaker < Appliance
+      include Commands
+      include Brewing
+      include Profiles
+
+      CM6F: Array[String]
+      PREFIXES: Hash[Symbol, Array[String]]
+      STANDARD_PROFILE: Integer
+      LAST_PROFILE: Integer
+
+      def variant: () -> Symbol
+
+      def combi_state: () -> untyped
+
+      def program_context: () -> untyped
+
+      def context: () -> untyped
+
+      def notifications: () -> untyped
+
+      def cleaning: () -> Objects::CoffeeGen7::GlobalCleaningInformationCO?
+
+      def descaling: () -> Objects::CoffeeGen7::GlobalDescalingInformationCO?
+
+      def features: () -> Objects::CoffeeGen7::GlobalFeatureList?
+
+      def device_ident: () -> Objects::CoffeeGen7::GlobalDeviceIdent?
+
+      def drink: (Integer id) -> Objects::CoffeeGen7::GlobalDrinkconfDrinkData?
+
+      def drink_limits: (Integer id) -> Objects::CoffeeGen7::GlobalDrinkconfDrinkThresholds?
+
+      def profiles: () -> Hash[Integer, Objects::CoffeeGen7::GlobalOpProgramName]
+
+      def device_state: () -> Objects::CoffeeGen7::DeviceState?
+
+      def usage_counters: () -> Objects::CoffeeGen7::ServiceExtCVAUsageCounter?
+
+      private
+
+      def dop2?: () -> bool
+
+      def dop2_variant: (String type) -> Symbol
+
+      def gen7?: () -> bool
+
+      def family: () -> untyped
+
+      def unit: () -> Integer
+
+      def gen7_object: (untyped klass, Array[Integer] address) -> untyped
     end
   end
 end

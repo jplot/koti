@@ -1,0 +1,41 @@
+module Miele
+  module Sdk
+    class WarmingDrawer < Appliance
+      module Commands : Appliance
+        def power_on: () -> void
+
+        def power_off: () -> void
+
+        def select_program: (Integer id) -> void
+
+        def target_temperature=: (Integer celsius) -> void
+
+        def remaining_time=: (Integer minutes) -> void
+
+        def cups_warm_up_source=: (String? coffee_maker) -> void
+
+        private
+
+        def switchable?: (State state) -> bool
+
+        def controllable?: (State state) -> bool
+
+        def write_device_action: (Integer action) -> void
+
+        def write_process_data: (Integer program, Integer minutes, Integer celsius) -> void
+
+        def program: (State state) -> Program?
+
+        def remaining_minutes: (State state) -> Integer
+
+        def target_celsius: (State state) -> Integer
+
+        def drawer_state: (?State state) -> Symbol
+
+        def programs: () -> Array[Program]
+
+        def cups_warm_up: () -> Hash[String, untyped]?
+      end
+    end
+  end
+end

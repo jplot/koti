@@ -1,0 +1,44 @@
+module Miele
+  module Sdk
+    class CoffeeMaker < Appliance
+      module Profiles : Appliance
+        FIRST_CUSTOM: Integer
+        CUSTOM_PROFILES: Range[Integer]
+        DRINKS: Range[Integer]
+        AMOUNTS: Array[Integer]
+
+        def create_profile: (String name) -> void
+
+        def rename_profile: (Integer id, String name) -> void
+
+        def delete_profile: (Integer id) -> void
+
+        def edit_drink: (Integer id, amount: Integer, temperature: Integer, pre_brewing: Integer, ?bean_sort: Integer?) -> void
+
+        def rename_drink: (Integer id, String name) -> void
+
+        private
+
+        def require_profiles!: () -> void
+
+        def require_custom!: (Integer id) -> void
+
+        def profile_slots: () -> Integer
+
+        def write_profile: (Integer id, **untyped values) -> void
+
+        def brew_speed: (untyped drink) -> Integer
+
+        def variant: () -> Symbol
+
+        def gen7?: () -> bool
+
+        def profiles: () -> Hash[Integer, Objects::CoffeeGen7::GlobalOpProgramName]
+
+        def features: () -> Objects::CoffeeGen7::GlobalFeatureList?
+
+        def modify_dop2: (untyped klass, Integer unit, Integer attribute, Integer idx1, Integer idx2) { (untyped value) -> untyped } -> void
+      end
+    end
+  end
+end

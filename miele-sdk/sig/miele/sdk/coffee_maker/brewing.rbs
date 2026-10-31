@@ -1,0 +1,60 @@
+module Miele
+  module Sdk
+    class CoffeeMaker < Appliance
+      module Brewing : Appliance
+        BARISTA: Integer
+        ONE_TOUCH_IDS: Hash[Symbol, [Integer, Integer]]
+
+        def brew: (Integer | Symbol drink, ?two_cups: bool, ?double_shot: bool) -> void
+
+        def start_barista: () -> void
+
+        private
+
+        def write_drink: (Integer | Symbol drink, bool two_cups, bool double_shot) -> void
+
+        def require_dispensable!: () -> void
+
+        def mobile_start_on?: (State state) -> bool
+
+        def barista_entry?: (State state) -> bool
+
+        def notified?: () -> bool
+
+        def informed?: () -> bool
+
+        def program_id: () -> Integer
+
+        def notified_id: (untyped enum, (Integer | Symbol)? id) -> Integer
+
+        def busy?: (untyped program) -> bool
+
+        def dispensing?: (Integer id, Integer phase) -> bool
+
+        def care?: (Integer id) -> bool
+
+        def one_touch?: () -> bool
+
+        def main_id: (Integer unit) -> Integer
+
+        def barista?: () -> bool
+
+        def variant: () -> Symbol
+
+        def dop2?: () -> bool
+
+        def gen7?: () -> bool
+
+        def family: () -> untyped
+
+        def program_context: () -> untyped
+
+        def combi_state: () -> untyped
+
+        def notifications: () -> untyped
+
+        def modify_dop2: (untyped klass, Integer unit, Integer attribute, Integer idx1, Integer idx2) { (untyped value) -> untyped } -> void
+      end
+    end
+  end
+end

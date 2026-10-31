@@ -1,0 +1,64 @@
+module Miele
+  module Sdk
+    class CoolingAppliance < Appliance
+      module Commands : Appliance
+        SUPER_MODE_ACTIONS: Hash[Symbol, [Integer, Integer]]
+        HUMIDITY: Hash[Symbol, Integer]
+
+        def set_target: (Zone zone, Integer degrees) -> void
+
+        def set_super_mode: (Zone zone, bool on) -> void
+
+        def set_fan: (Zone zone, bool on) -> void
+
+        def set_vario_cool: (Zone zone, bool on) -> void
+
+        def set_mode: (Symbol name, bool on) -> void
+
+        def ice_maker=: (bool on) -> void
+
+        def light=: (bool on) -> void
+
+        def ambient_light_mode=: (Integer value) -> void
+
+        def presentation_light=: (bool on) -> void
+
+        def set_presentation_light_intensity: (Zone zone, Integer value) -> void
+
+        def humidity=: (Symbol level) -> void
+
+        def perfect_fresh=: (Integer value) -> void
+
+        def humidifier=: (Integer value) -> void
+
+        def door_alarm_delay=: (Integer seconds) -> void
+
+        private
+
+        def put: (String resource, String member, **untyped body) -> void
+
+        def switch: (bool on) -> Hash[Symbol, untyped]
+
+        def write_super_mode_duration: (Zone zone) -> void
+
+        def process_action: (Zone zone, bool on) -> Integer
+
+        def opcode?: () -> bool
+
+        def modes: () -> Hash[Symbol, Mode]
+
+        def ice_maker?: () -> bool
+
+        def wine?: () -> bool
+
+        def rioja?: () -> bool
+
+        def kwtus?: () -> bool
+
+        def state_light?: () -> bool
+
+        def presentation_light?: () -> bool
+      end
+    end
+  end
+end

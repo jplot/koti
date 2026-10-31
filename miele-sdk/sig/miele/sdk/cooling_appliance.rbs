@@ -1,6 +1,78 @@
 module Miele
   module Sdk
     class CoolingAppliance < Appliance
+      include Zones
+      include Commands
+
+      class Zone < Data
+        attr_reader number: Integer
+        attr_reader position: Integer
+        attr_reader rank: Integer?
+        attr_reader type: Symbol
+        attr_reader enabled: bool
+        attr_reader temperature: Float?
+        attr_reader target: Float?
+        attr_reader super_mode: bool?
+        attr_reader fan: bool?
+        attr_reader vario_cool: bool?
+
+        def self.new: (number: Integer, position: Integer, rank: Integer?, type: Symbol, enabled: bool,
+                       temperature: Float?, target: Float?, super_mode: bool?, fan: bool?, vario_cool: bool?) -> Zone
+
+        def with: (?number: Integer, ?position: Integer, ?rank: Integer?, ?type: Symbol, ?enabled: bool,
+                   ?temperature: Float?, ?target: Float?, ?super_mode: bool?, ?fan: bool?, ?vario_cool: bool?) -> Zone
+      end
+
+      class Mode < Data
+        attr_reader on: bool
+        attr_reader editable: bool
+
+        def self.new: (on: bool, editable: bool) -> Mode
+      end
+
+      MODES: Hash[Symbol, String]
+
+      ALARMS: Hash[Symbol, [String, Integer]]
+
+      def cooling: () -> Hash[String, untyped]
+
+      def temperature_unit: () -> Symbol?
+
+      def modes: () -> Hash[Symbol, Mode]
+
+      def alarms: () -> Array[Symbol]
+
+      def ice_maker: () -> Symbol?
+
+      def door_alarm_delay: () -> Integer?
+
+      def light: () -> Symbol?
+
+      def perfect_fresh: () -> Integer?
+
+      def humidity: () -> Symbol?
+
+      private
+
+      def on?: (?State state) -> bool
+
+      def opcode?: () -> bool
+
+      def cooling_api?: () -> bool
+
+      def ice_maker?: () -> bool
+
+      def wine?: () -> bool
+
+      def rioja?: () -> bool
+
+      def kwtus?: () -> bool
+
+      def presentation_light?: () -> bool
+
+      def state_light?: () -> bool
+
+      def mode: (Hash[String, untyped] value) -> Mode
     end
   end
 end

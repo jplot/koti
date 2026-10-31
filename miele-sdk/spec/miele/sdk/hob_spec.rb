@@ -55,6 +55,15 @@ RSpec.describe Miele::Sdk::Hob do
     expect(hob.fan).to eq(described_class::Fan.new(level: 2, run_on: 301))
   end
 
+  it 'reads a fan only on the hobs the app gives one, of 88, 128 or 159 bytes', :aggregate_failures do
+    serve({ 62 => 2, 64 => 5, 65 => 1 }, 78)
+    expect(hob.fan).to be_nil
+    serve({}, 58)
+    expect(hob.fan).to be_nil
+    serve({ 62 => 2, 64 => 5, 65 => 1 }, 106)
+    expect(hob.fan).to eq(described_class::Fan.new(level: 2, run_on: 301))
+  end
+
   it 'reads the minute minder, power doubling and Stop&Go', :aggregate_failures do
     serve(0 => 13, 1 => 10, 2 => 2, 6 => 0b0100)
     expect([hob.minute_minder, hob.power_doubling?, hob.stop_and_go?]).to eq([130, false, true])

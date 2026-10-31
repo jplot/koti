@@ -16,10 +16,10 @@ module Miele
                      10 => 9 }.freeze
       DOP2_MAIN_STATES = { on: :stand_by, off: :off, running: :running, failure: :failure, locked: :locked,
                            service: :service }.freeze
-      # The app tells a hob's kind by the length of its ExtendedState, 22 zeros ahead: 84 bytes for a plain hob.
-      PLAIN_LENGTH = 84
+      # The app tells a hob's kind by the length of its ExtendedState, 22 zeros ahead: only these have a fan.
+      FAN_LENGTHS = [88, 128, 159].freeze
       ZONE_CONTROL_LENGTHS = [128, 159].freeze
-      private_constant :INTERNAL_STATES, :TEMP_CONTROL_LEVELS, :FAN_LEVELS, :DOP2_MAIN_STATES, :PLAIN_LENGTH,
+      private_constant :INTERNAL_STATES, :TEMP_CONTROL_LEVELS, :FAN_LEVELS, :DOP2_MAIN_STATES, :FAN_LENGTHS,
                        :ZONE_CONTROL_LENGTHS
 
       # @return [Symbol, Integer, nil] +:stand_by+, +:running+, +:failure+, +:service+, +:off+, +:locked+ or
@@ -74,13 +74,13 @@ module Miele
         temp_control_of(state, zone.number) if zone && (1..6).cover?(zone.number)
       end
 
-      # @return [Fan, nil] nil for a hob without one (0xFF), a plain hob, or an Opcode or DOP2 hob, as in the app
+      # @return [Fan, nil] nil for a hob without one (0xFF or another length), or an Opcode or DOP2 hob, as in the app
       # @api public
       def fan
         return unless protocol_version == 2
 
         state = self.state
-        return if state.extended_state.nil? || padded_length(state) == PLAIN_LENGTH
+        return unless state.extended_state && FAN_LENGTHS.include?(padded_length(state))
 
         fan = state.extended_state.luefter
         raw = Objects::Hob::LuefterstufeEnum0002.to_i(fan.luefterstufe)

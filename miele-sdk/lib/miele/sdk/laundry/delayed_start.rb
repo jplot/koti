@@ -31,7 +31,7 @@ module Miele
         # @param target [Time]
         # @param now [Time]
         # @return [Integer] whole minutes, 0 once passed
-        def offset_minutes(target, now) = target < now ? 0 : ((target - (now - 60)) / 60).floor
+        def offset_minutes(target, now) = target < now ? 0 : ((wall_clock(target) - wall_clock(now) + 60) / 60).floor
 
         # The app takes the first of modes 1 and 32 (minutes), 2 and 8 (local seconds since 1970) the appliance
         # shows, current or supported; with none it leaves the start as copied.
@@ -47,7 +47,7 @@ module Miele
           mode = MODES.find { modes.anybits?(it) }
           return para unless mode
 
-          start = [1, 32].include?(mode) ? offset_minutes(target, now) : target.to_i + target.utc_offset
+          start = [1, 32].include?(mode) ? offset_minutes(target, now) : wall_clock(target).to_i
           para.with(delayed_start_mode: mode, delayed_start: start)
         end
 

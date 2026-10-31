@@ -88,6 +88,32 @@ RSpec.describe Miele::Sdk::WashingMachine do
     end
   end
 
+  context 'when the clocks have gone back an hour today' do
+    around do |example|
+      zone = ENV.fetch('TZ', nil)
+      ENV['TZ'] = 'Europe/Paris'
+      example.run
+    ensure
+      ENV['TZ'] = zone
+    end
+
+    before { allow(Time).to receive(:now).and_return(Time.new(2026, 10, 25, 4, 0, 0)) }
+
+    it 'counts the minutes on the wall clock, as the app does' do
+      washer.start_delayed(Time.new(2026, 10, 25, 7, 0))
+      expect(written.first).to eq(['DOP2/2/1577', select(28, 2, 181, 1)])
+    end
+
+    context 'when the washer counts only to a time' do
+      let(:shown) { { requests: [1, 2], supported: 8, current: 0 } }
+
+      it 'sends the wall-clock time of the day' do
+        washer.start_delayed(Time.new(2026, 10, 25, 7, 0))
+        expect(written.first).to eq(['DOP2/2/1577', select(28, 2, Time.utc(2026, 10, 25, 7).to_i, 8)])
+      end
+    end
+  end
+
   context 'when its program runs' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] } }
     let(:shown) { { requests: [2, 3], supported: 3, current: 0 } }

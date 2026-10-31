@@ -14,6 +14,8 @@ module Miele
 
         private
 
+        def minutes_until: (Time target, Time now) -> Integer
+
         def delayed: (untyped select, Integer bits, Time target, Time now) -> untyped
 
         def require_dop2!: () -> void

@@ -242,9 +242,21 @@ module Miele
       # @param now [Time]
       # @return [Time] that time today, or tomorrow once it has passed, as the app's delayed starts take it
       def next_time(at, now)
-        target = Time.new(now.year, now.month, now.day) + (((at.hour * 60) + at.min) * 60)
-        target < now ? target + 86_400 : target
+        today = on_day(now, at)
+        today < now ? on_day(Time.new(now.year, now.month, now.day, 12) + 86_400, at) : today
       end
+
+      # @param day [Time] any time of that day; noon plus 86 400 s is tomorrow even on a DST day
+      # @param at [Time] a time of day
+      # @return [Time] that time of day on the day's wall clock
+      def on_day(day, at) = Time.new(day.year, day.month, day.day, at.hour, at.min)
+
+      # The app counts delays on the wall clock, as .NET's DateTime subtracts: on the day the clocks go back,
+      # 04:00 to 07:00 is 180 minutes.
+      #
+      # @param time [Time]
+      # @return [Rational] seconds since 1970 on the local wall clock
+      def wall_clock(time) = time.to_r + time.utc_offset
 
       # @param klass [Class] a generated Dop1 object
       # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects

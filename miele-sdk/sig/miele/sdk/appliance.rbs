@@ -100,6 +100,10 @@ module Miele
 
       def next_time: (Time at, Time now) -> Time
 
+      def on_day: (Time day, Time at) -> Time
+
+      def wall_clock: (Time time) -> Rational
+
       def dop1_object: (untyped klass) -> untyped
 
       def require!: (untyped condition, String reason) -> void

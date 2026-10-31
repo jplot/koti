@@ -45,7 +45,7 @@ module Miele
         # @api public
         def start_delayed(at)
           now = Time.now
-          return dop1_start_delayed(((next_time(at, now) - now) / 60.0).ceil) unless dop2?
+          return dop1_start_delayed(minutes_until(next_time(at, now), now)) unless dop2?
 
           bits = program_context.context_para_dw&.delayed_start_mode&.supported_bits.to_i
           modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 1, 2]) { delayed(it, bits, next_time(at, now), now) }
@@ -53,6 +53,11 @@ module Miele
         end
 
         private
+
+        # @param target [Time]
+        # @param now [Time]
+        # @return [Integer] wall-clock minutes, rounded up as the app's GetTimeOffsetToNow rounds them
+        def minutes_until(target, now) = ((wall_clock(target) - wall_clock(now)) / 60).ceil
 
         # @param select [Data] 2/1577
         # @param bits [Integer] the supported start modes
@@ -64,9 +69,9 @@ module Miele
           return select if para.nil? || bits.zero?
 
           mode, start = if COUNTDOWN_BITS.include?(bits)
-                          [1, ((target - now) / 60.0).ceil]
+                          [1, minutes_until(target, now)]
                         else
-                          [2, target.to_i + target.utc_offset]
+                          [2, wall_clock(target).to_i]
                         end
           select.with(selection_type: 2, selection_para_dw: para.with(delayed_start_mode: mode, delayed_start: start))
         end

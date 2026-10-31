@@ -132,6 +132,33 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(written.first.last).to eq(select(1, 2, type: 2, mode: 2, start: target.to_i + target.utc_offset))
   end
 
+  context 'when the clocks have gone back an hour today' do
+    around do |example|
+      zone = ENV.fetch('TZ', nil)
+      ENV['TZ'] = 'Europe/Paris'
+      example.run
+    ensure
+      ENV['TZ'] = zone
+    end
+
+    before do
+      allow(Time).to receive(:now).and_return(Time.new(2026, 10, 25, 4, 0, 0))
+      leaves['2/1577?idx1=1&idx2=2'] = select(1, 2)
+    end
+
+    it 'counts the minutes on the wall clock, as the app does' do
+      leaves['2/1574?idx1=0&idx2=1'] = context(1, bits: 33)
+      dishwasher.start_delayed(Time.new(2026, 10, 25, 7, 0))
+      expect(written.first.last).to eq(select(1, 2, type: 2, mode: 1, start: 180))
+    end
+
+    it 'sends the wall-clock time of the day' do
+      leaves['2/1574?idx1=0&idx2=1'] = context(1, bits: 2)
+      dishwasher.start_delayed(Time.new(2026, 10, 25, 7, 0))
+      expect(written.first.last).to eq(select(1, 2, type: 2, mode: 2, start: Time.utc(2026, 10, 25, 7).to_i))
+    end
+  end
+
   it 'selects a program on 2/1577 with selection type 0' do
     leaves['2/1577?idx1=0&idx2=0'] = select(0, 0)
     dishwasher.select_program(28)

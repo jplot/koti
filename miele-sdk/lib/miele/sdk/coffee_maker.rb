@@ -9,6 +9,7 @@ module Miele
     class CoffeeMaker < Appliance
       include Commands
       include Brewing
+      include Profiles
 
       CM6F = %w[CM6360 CM6160 CM6560].freeze
       # The app tests Ref2's CVA73 and CVA74 before CVA7.

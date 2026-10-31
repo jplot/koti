@@ -3,6 +3,7 @@ module Miele
     class CoffeeMaker < Appliance
       include Commands
       include Brewing
+      include Profiles
 
       CM6F: Array[String]
       PREFIXES: Hash[Symbol, Array[String]]

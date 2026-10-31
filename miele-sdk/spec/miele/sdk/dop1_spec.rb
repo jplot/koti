@@ -2,7 +2,7 @@
 
 RSpec.describe Miele::Sdk::Dop1 do
   it 'builds the fan level request' do
-    expect(described_class.fan_level(2)).to eq('8E01020000FF0200')
+    expect(described_class.fan_level(2)).to eq('8E01020000ff0200')
   end
 
   it 'rejects a fan level above 5' do
@@ -10,7 +10,7 @@ RSpec.describe Miele::Sdk::Dop1 do
   end
 
   it 'builds the run-on time request' do
-    expect(described_class.fan_run_on_time(15)).to eq('8E060200000F')
+    expect(described_class.fan_run_on_time(15)).to eq('8E060200000f')
   end
 
   it 'rejects a run-on time of 10 minutes' do
@@ -19,15 +19,15 @@ RSpec.describe Miele::Sdk::Dop1 do
 
   it 'builds the main light request' do
     expect([described_class.main_light(true), described_class.main_light(false)])
-      .to eq(%w[14000200020104000000000000FFFF0000 1400020002010000000000000000000000])
+      .to eq(%w[14000200020104000000000000ffff0000 1400020002010000000000000000000000])
   end
 
   it 'reads a setting with structure version 1' do
-    expect(described_class.setting(40_012)).to eq('12010100019C4C')
+    expect(described_class.setting(40_012)).to eq('12010100019c4c')
   end
 
   it 'writes a setting with structure version 1' do
-    expect(described_class.write_setting(40_012, 1)).to eq('12010200019C4C00000001')
+    expect(described_class.write_setting(40_012, 1)).to eq('12010200019c4c00000001')
   end
 
   it 'rejects a setting value wider than 32 bits' do

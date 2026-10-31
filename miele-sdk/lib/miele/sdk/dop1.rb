@@ -20,12 +20,14 @@ module Miele
 
       module_function
 
+      # The app spells the object id in upper case and the section in lower case (Convert.ToString(b, 16)).
+      #
       # @param object_id [String] four hex digits
       # @param type [String] {READ} or {WRITE}
       # @param section [String] packed section
       # @return [String]
       # @api public
-      def request(object_id:, type:, section:) = "#{object_id}#{type}00#{Crypto.hex(section)}"
+      def request(object_id:, type:, section:) = "#{object_id}#{type}00#{section.unpack1('H*')}"
 
       # @param level [Integer] 0 (off) to 3, 4 (boost) or 5 (interval)
       # @return [String]

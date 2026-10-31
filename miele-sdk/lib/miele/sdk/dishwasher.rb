@@ -110,13 +110,6 @@ module Miele
       # @param value [Integer, nil]
       # @return [Float] divided by 10 and rounded to a tenth, as the app does
       def tenths(value) = (value.to_i / 10.0).round(1).to_f
-
-      # @param klass [Class] a generated Dop1 object
-      # @return [Data] read with an empty section, as the app reads it
-      def dop1_object(klass)
-        answer = JSON.parse(dop1(Dop1.request(object_id: klass::ID, type: Dop1::READ, section: ''))).fetch('Response')
-        klass.from([answer[8..]].pack('H*'))
-      end
     end
   end
 end

@@ -1,6 +1,13 @@
 module Miele
   module Sdk
     class WashingMachine < Appliance
+      include Laundry
+
+      def twin_dos: () -> untyped
+
+      private
+
+      def dop1_objects: () -> Hash[Symbol, untyped]
     end
   end
 end

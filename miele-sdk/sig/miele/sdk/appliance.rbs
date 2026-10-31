@@ -96,6 +96,8 @@ module Miele
 
       def dop2_path: (Integer unit, Integer attribute) -> String
 
+      def dop1_object: (untyped klass) -> untyped
+
       def require!: (untyped condition, String reason) -> void
     end
   end

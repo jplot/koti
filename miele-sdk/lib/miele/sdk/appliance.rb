@@ -228,6 +228,13 @@ module Miele
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"
 
+      # @param klass [Class] a generated Dop1 object
+      # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects
+      def dop1_object(klass)
+        answer = JSON.parse(dop1(Dop1.request(object_id: klass::ID, type: Dop1::READ, section: ''))).fetch('Response')
+        klass.from([answer[8..]].pack('H*'))
+      end
+
       # @param condition [Object] what the app checks before the action
       # @param reason [String] what is missing
       # @return [void]

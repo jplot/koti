@@ -53,8 +53,6 @@ module Miele
       def pg81?: () -> bool
 
       def tenths: (untyped value) -> Float
-
-      def dop1_object: (untyped klass) -> untyped
     end
   end
 end

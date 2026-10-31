@@ -11,8 +11,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - **Breaking:** `start`, `stop`, `pause`, `light_on` and `light_off` are gone from `Appliance`: the
   Miele app sends them differently in each family, and they come back that way, ovens first.
-- **Breaking:** a hood's `fan_level=` refuses while its screen is pushed in, and `wake` writes back a
-  Dop1 or Opcode hood's light instead of `DeviceAction` 2, as the app does.
+- **Breaking:** a hood's `fan_level=` refuses while its screen is pushed in, and asks to `wake` a hood
+  that is off; `wake` writes back a Dop1 or Opcode hood's light instead of `DeviceAction` 2, as the
+  app does.
+- **Breaking:** `Dop1` requests spell their section in lower-case hex, as the app writes them.
 - **Breaking:** `Miele::Sdk.appliance` and `Miele::Sdk.appliances` return the class of each
   appliance's family. The hood's `fan_level=`, `fan_run_on_time=`, `main_light=`, `setting` and
   `write_setting` moved to `Hood`, and `power_on` and `power_off` to `Oven`.
@@ -26,7 +28,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Requests to the account's cloud (`/V2`, MCS login and renewal) name a language (`Accept-Language`),
   without which it answers 500.
-- Dop1 sections go out in lower-case hex, as the app writes them.
 - `power_on` and `power_off` send what the app's oven module sends, without the 2/1583 opcode
   fallback taken from ha-miele-at-lan, and `power_off` takes a 500 as done, as the app does.
 - Dop1 settings go out with structure version 1, and the README's filter example resets the

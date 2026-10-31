@@ -3,8 +3,8 @@
 module Miele
   module Sdk
     # Requests of Dop1, the protocol hoods in +ProtocolVersion+ 2 answer at
-    # +POST /Devices/{fab}/DOP/+: an object id, a request type, then the
-    # object's packed section, as uppercase hex.
+    # +POST /Devices/{fab}/DOP/+: an object id and a request type in upper-case
+    # hex, then the object's packed section in lower case.
     module Dop1
       # Request type that reads an object.
       READ = '01'

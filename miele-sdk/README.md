@@ -238,8 +238,8 @@ hood.wake
 ```
 
 The reads come from `ExtendedState`, which a hood serves only while it is on: they read nil while
-it is off. An Opcode hood gives its fan level and light in `State`. A light reports its dimmer as
-the hood does, from 0 to 65535.
+it is off, except an Opcode hood's fan level and light, which come from `State`. A light reports
+its dimmer as the hood does, from 0 to 65535.
 
 The app picks each action by protocol, and so does the SDK; a protocol 3 hood drives its fan and
 lights as an Opcode one:
@@ -261,7 +261,7 @@ The Dop1-only ones are `configure_ambient_light(mode:, rgb:, brightness:, colour
 An action the hood's protocol has not raises `Miele::Sdk::ActionUnavailableError`, and so does one
 the hood does not support (ambient light, dehumidification, grease melting, auto refresh,
 fragrance), as the app hides it, and the fan while the hood's screen is pushed in, as the app
-refuses it. The Opcode fan level goes out twice, half a second apart, as the app sends it. `wake`
+refuses it. A hood that is off does not say what it supports: those actions ask to `wake` it first. The Opcode fan level goes out twice, half a second apart, as the app sends it. `wake`
 writes back the light of a Dop1 or Opcode hood that is off, and sends `DeviceAction` 2 to a DOP2
 one, as the app wakes them.
 

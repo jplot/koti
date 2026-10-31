@@ -3,6 +3,8 @@ module Miele
     class CoffeeMaker < Appliance
       module Profiles : Appliance
         FIRST_CUSTOM: Integer
+        CUSTOM_PROFILES: Range[Integer]
+        DRINKS: Range[Integer]
         AMOUNTS: Array[Integer]
 
         def create_profile: (String name) -> void
@@ -18,6 +20,8 @@ module Miele
         private
 
         def require_profiles!: () -> void
+
+        def require_custom!: (Integer id) -> void
 
         def profile_slots: () -> Integer
 

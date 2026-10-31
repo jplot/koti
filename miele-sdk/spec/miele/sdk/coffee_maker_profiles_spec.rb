@@ -80,6 +80,19 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
                            ['DOP2/1/109?idx1=24813&idx2=0', as_written(profile(24_813, 'Anna'), 24_813)]])
   end
 
+  it 'renames and deletes custom profiles only, as the app offers them', :aggregate_failures do
+    served[[2, 348, 0, 0]] = dop2_leaf(2, 348, { 132 => dop2_field(:struct, { 29 => dop2_field(:bool, true) }) })
+    expect { coffee.rename_profile(24_812, 'Ben') }.to raise_error(ArgumentError)
+    expect { coffee.delete_profile(24_812) }.to raise_error(ArgumentError)
+    expect(written).to be_empty
+  end
+
+  it 'refuses a blank drink name or a drink no profile holds', :aggregate_failures do
+    expect { coffee.rename_drink(24_037, ' ') }.to raise_error(ArgumentError)
+    expect { coffee.rename_drink(23_999, 'Kaffee') }.to raise_error(ArgumentError)
+    expect(written).to be_empty
+  end
+
   it 'deletes a profile only when its features list coffee profiles', :aggregate_failures do
     expect { coffee.delete_profile(24_813) }.to raise_error(Miele::Sdk::ActionUnavailableError)
     feature_co = { 29 => dop2_field(:bool, true) }

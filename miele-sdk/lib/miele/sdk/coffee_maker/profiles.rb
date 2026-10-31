@@ -7,8 +7,11 @@ module Miele
       # 2/261 at idx1 = the profile's or the drink's id, through ModifyDop2Message.
       module Profiles
         FIRST_CUSTOM = 24_813
+        CUSTOM_PROFILES = (FIRST_CUSTOM..24_822)
+        # The 32 drinks of each profile from the standard one on.
+        DRINKS = (24_000..24_351)
         AMOUNTS = [0, 17, 33, 50, 67, 83, 100].freeze
-        private_constant :FIRST_CUSTOM, :AMOUNTS
+        private_constant :FIRST_CUSTOM, :CUSTOM_PROFILES, :DRINKS, :AMOUNTS
 
         # The app takes the first id its profile chain leaves free: 4 on a CM6160, 8 on another CM6F, 10 otherwise.
         #
@@ -25,14 +28,14 @@ module Miele
                                  type: 10)
         end
 
-        # @param id [Integer]
+        # @param id [Integer] a custom profile, 24813 to 24822
         # @param name [String]
         # @return [void]
-        # @raise [ArgumentError] for a blank name, another profile's, or Miele in any case
+        # @raise [ArgumentError] for another profile, a blank name, another profile's, or Miele in any case
         # @raise [ActionUnavailableError] on a CM7 or CVA6000
         # @api public
         def rename_profile(id, name)
-          require_profiles!
+          require_custom!(id)
           taken = profiles.except(id).values.map(&:name)
           if name.strip.empty? || taken.include?(name) || name.upcase == 'MIELE'
             raise ArgumentError, "#{name.inspect} is blank, taken or reserved"
@@ -43,12 +46,13 @@ module Miele
 
         # The app clears the name and marks the profile active.
         #
-        # @param id [Integer]
+        # @param id [Integer] a custom profile, 24813 to 24822
         # @return [void]
+        # @raise [ArgumentError] for another profile
         # @raise [ActionUnavailableError] on a CM7 or CVA6000, or unless 2/348 lists coffee profiles
         # @api public
         def delete_profile(id)
-          require_profiles!
+          require_custom!(id)
           require!([true, 1].include?(features&.feature_co&.has_coffee_profiles),
                    'the coffee maker lists no coffee profiles to delete')
           write_profile(id, name: '', active: true, clear_list: false)
@@ -80,13 +84,18 @@ module Miele
         # The app names a drink only on a CVA and outside the standard profile.
         #
         # @param id [Integer] the drink's program id
-        # @param name [String]
+        # @param name [String] not blank, as the app writes no other
         # @return [void]
+        # @raise [ArgumentError] for a blank name, or a drink no profile holds
         # @raise [ActionUnavailableError] on another coffee maker, or for a drink of the standard profile
         # @api public
         def rename_drink(id, name)
-          profile = STANDARD_PROFILE + ((id - 24_000) / 32)
-          require!(gen7? && variant == :cva && profile != STANDARD_PROFILE, 'the app names no such drink')
+          if name.strip.empty? || !DRINKS.cover?(id)
+            raise ArgumentError, "#{name.inspect} is blank, or #{id} no profile's drink"
+          end
+
+          profile = STANDARD_PROFILE + ((id - DRINKS.first) / 32)
+          require!(variant == :cva && profile != STANDARD_PROFILE, 'the app names no such drink')
           write_profile(id, active: true, clear_list: false, display_position: 255, name:)
         end
 
@@ -95,6 +104,14 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError]
         def require_profiles! = require!(gen7?, 'the app keeps no profiles or drinks on this coffee maker')
+
+        # @param id [Integer]
+        # @return [void]
+        # @raise [ArgumentError] for the standard profile or none
+        def require_custom!(id)
+          require_profiles!
+          raise ArgumentError, "#{id} is not a custom profile" unless CUSTOM_PROFILES.cover?(id)
+        end
 
         # @return [Integer]
         def profile_slots

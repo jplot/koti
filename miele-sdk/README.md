@@ -210,8 +210,10 @@ the requests, and `hood.dop1(request)` sends any other one.
 ## Cloud
 
 After pairing, the Miele app reaches the appliances only through the Miele cloud, and some Wi-Fi
-modules serve no DOP2 locally (EK057 and EK039W answer 404). Given the account, the SDK uses the
-cloud where an appliance does not answer locally.
+modules serve no DOP2 locally (EK057 and EK039W answer 404). Given the account (an e-mail, a saved
+`cloud_token` or an existing `token_file`), the SDK uses the cloud where an appliance does not answer
+locally. A cloud built from the copy the app bundles, when the locales did not answer, is not kept: the
+next call asks them again.
 
 ```ruby
 Miele::Sdk.configure do |config|

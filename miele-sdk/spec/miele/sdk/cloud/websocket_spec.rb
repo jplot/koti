@@ -183,6 +183,23 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
       end
     end
 
+    context 'when a frame stops halfway' do
+      subject(:websocket) do
+        described_class.new(session, sleeper: ->(seconds) { raise stop, seconds.to_s })
+      end
+
+      let(:script) do
+        ->(connection, _index) { connection.send_raw(FakeWebsocket.frame(2, message('CC1', '{}'))[0, 10]) }
+      end
+      let(:stop) { Class.new(StandardError) }
+
+      before { Miele::Sdk.configure { it.read_timeout = 0.2 } }
+
+      it 'gives up after the read timeout and tries again 6 s later' do
+        expect { Timeout.timeout(5) { first_messages(1) } }.to raise_error(stop, '6')
+      end
+    end
+
     context 'when two messages come in one record' do
       let(:script) do
         lambda do |connection, _index|

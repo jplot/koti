@@ -29,7 +29,7 @@ module Miele
 
         private
 
-        def exchange: (Symbol method, String path, String? body, Symbol kind, String? host) -> Http::Response
+        def exchange: (Token token, Symbol method, String path, String? body, Hash[String, String] headers) -> Http::Response
 
         def refuse: (Integer status, Symbol method) -> bot
       end

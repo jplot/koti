@@ -54,6 +54,26 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
       .to eq(['appToken saved', 'appToken renewed'])
   end
 
+  context 'when two requests in flight get 401 with the same token' do
+    let(:cloud) do
+      FakeCloud.start(threaded: true) do |request|
+        case request.path
+        when '/V2/AppTokenRefresh' then FakeCloud.json(appToken: 'renewed', appTokenValidity: Time.now.to_i + 3600)
+        when %r{/V2/Devices/(\d+)/State}
+          next FakeCloud.json({}) unless request.headers['authorization'] == 'appToken saved'
+
+          sleep 0.5 if Regexp.last_match(1) == '2'
+          [401, {}, '']
+        end
+      end
+    end
+
+    it 'renews the token once' do
+      %w[1 2].map { |id| Thread.new { channel.request(:get, "/Devices/#{id}/State") } }.each(&:join)
+      expect(seen('/V2/AppTokenRefresh').size).to eq(1)
+    end
+  end
+
   it 'raises NotFoundError for a resource the cloud does not serve' do
     answers << [404, {}, '']
     expect { channel.request(:get, "/Devices/#{fab}/Ident") }.to raise_error(Miele::Sdk::NotFoundError)

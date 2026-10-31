@@ -19,7 +19,16 @@ module Miele
         #     password)
         # @!attribute [r] ciam_endpoints
         #   @return [Hash{String=>String}] the +authorize+, +token+ and +logout+ addresses of CIAM
-        Organization = Data.define(:iso, :rest, :ciam, :ciam_endpoints)
+        # @!attribute [r] bundled
+        #   @return [Boolean] whether it comes from the copy the app bundles, which may be out of date
+        Organization = Data.define(:iso, :rest, :ciam, :ciam_endpoints, :bundled)
+
+        # A Miele sales organization.
+        class Organization
+          # @param bundled [Boolean]
+          # @param fields [Hash] the other members
+          def initialize(bundled: false, **fields) = super
+        end
 
         # The copy the app falls back on when the cloud does not answer, reduced by +schema/extract/locales.rb+.
         BUNDLED = "#{__dir__}/locales.json".freeze
@@ -72,7 +81,7 @@ module Miele
         # @api private
         def bundled(country)
           entry = JSON.parse(File.read(BUNDLED)).find { it['countries'].include?(country) } or unknown(country)
-          organization_of(entry['iso'], entry['rest'], entry['ciam'], entry['ciam_endpoints'])
+          organization_of(entry['iso'], entry['rest'], entry['ciam'], entry['ciam_endpoints']).with(bundled: true)
         end
 
         # The app adds +https://+ only to a host that has no scheme.

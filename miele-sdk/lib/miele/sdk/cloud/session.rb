@@ -73,10 +73,13 @@ module Miele
 
         # @return [String] the +Authorization+ header, after a login or a renewal when one is due
         # @api public
-        def authorization
-          current = @token || @mutex.synchronize { @token || login }
-          current = renew(current) if current.due?(@clock.call)
-          "#{current.scheme} #{current.value}"
+        def authorization = current.then { "#{it.scheme} #{it.value}" }
+
+        # @return [Token] the token to send, after a login or a renewal when one is due
+        # @api public
+        def current
+          token = @token || @mutex.synchronize { @token || login }
+          token.due?(@clock.call) ? renew(token) : token
         end
 
         # Renews the token unless another thread already did since +expired+ was read.
@@ -174,7 +177,11 @@ module Miele
 
         # @param type [String]
         # @return [String]
-        def endpoint(type) = @organization.ciam_endpoints.fetch(type)
+        def endpoint(type)
+          @organization.ciam_endpoints.fetch(type) do
+            raise ConfigurationError, "no CIAM #{type} address for #{@organization.iso}"
+          end
+        end
       end
     end
   end

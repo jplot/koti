@@ -7,8 +7,13 @@ module Miele
           attr_reader rest: String
           attr_reader ciam: bool
           attr_reader ciam_endpoints: Hash[String, String]
+          attr_reader bundled: bool
 
-          def self.new: (iso: String, rest: String, ciam: bool, ciam_endpoints: Hash[String, String]) -> Organization
+          def self.new: (iso: String, rest: String, ciam: bool, ciam_endpoints: Hash[String, String], ?bundled: bool) -> Organization
+
+          def initialize: (?bundled: bool, **untyped fields) -> void
+
+          def with: (?iso: String, ?rest: String, ?ciam: bool, ?ciam_endpoints: Hash[String, String], ?bundled: bool) -> Organization
         end
 
         BUNDLED: String

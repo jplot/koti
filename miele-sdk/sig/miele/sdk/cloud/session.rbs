@@ -32,6 +32,8 @@ module Miele
 
         def authorization: () -> String
 
+        def current: () -> Token
+
         def renew: (Token expired) -> Token
 
         private

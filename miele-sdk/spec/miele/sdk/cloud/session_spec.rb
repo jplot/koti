@@ -111,6 +111,28 @@ RSpec.describe Miele::Sdk::Cloud::Session do
     expect(described_class.new(organization).token.value).to eq('token-1')
   end
 
+  it 'renews a CIAM token past 90 % of its life, with the refresh form', :aggregate_failures do
+    Miele::Sdk.configure { it.ciam_client_id = 'com.example.app' }
+    session.exchange('code-1')
+    times << (now + 3060)
+    expect { session.authorization }.not_to(change { posts('/fr/token').size })
+    times << (now + 3250)
+    session.authorization
+    expect(URI.decode_www_form(posts('/fr/token').last.body).to_h)
+      .to include('grant_type' => 'refresh_token', 'refresh_token' => 'refresh-1', 'client_secret' => '')
+  end
+
+  it 'refuses a CIAM renewal without a token address' do
+    token = Miele::Sdk::Cloud::Token.new(value: 'jwt', refresh: 'r', scheme: 'Bearer', created_at: now - 3500,
+                                         expires_at: now + 100)
+    Miele::Sdk.configure do |config|
+      config.cloud_token = token.to_json
+      config.ciam_client_id = 'com.example.app'
+    end
+    bare = described_class.new(organization.with(ciam: true, ciam_endpoints: {}))
+    expect { bare.authorization }.to raise_error(Miele::Sdk::ConfigurationError, /token/)
+  end
+
   it 'refuses CIAM without a client id' do
     expect { session.authorize_url }.to raise_error(Miele::Sdk::ConfigurationError, /ciam_client_id/)
   end

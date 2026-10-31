@@ -43,6 +43,9 @@ module Miele
   module Sdk
     extend Configuration
 
+    CLOUD = Mutex.new
+    private_constant :CLOUD
+
     # Finds Miele@home appliances on the local network.
     #
     # @param timeout [Numeric] seconds to listen (default: 4, time for queries at 0, 1 and 3 seconds)
@@ -69,11 +72,22 @@ module Miele
     # @raise [ConfigurationError] without a country
     # @api public
     def self.cloud
-      return @cloud if @cloud
-      return unless config.email || config.cloud_token
+      CLOUD.synchronize do
+        return @cloud if @cloud
+        return unless account?
 
-      country = config.country or raise ConfigurationError, 'country is needed to reach the Miele cloud'
-      @cloud = Cloud::Channel.new(Cloud::Session.new(Cloud::Locales.organization(country)))
+        country = config.country or raise ConfigurationError, 'country is needed to reach the Miele cloud'
+        channel = Cloud::Channel.new(Cloud::Session.new(Cloud::Locales.organization(country)))
+        # A copy taken when the locales did not answer may be out of date: the next call asks them again.
+        channel.session.organization.bundled ? channel : (@cloud = channel)
+      end
+    end
+
+    # @return [Boolean] whether an e-mail, a saved token or a token file gives an account
+    # @api private
+    def self.account?
+      file = config.token_file
+      !(config.email || config.cloud_token || (file && File.exist?(file))).nil?
     end
 
     # Changes the settings; the next request reaches the cloud with them.
@@ -83,7 +97,7 @@ module Miele
     # @api public
     def self.configure(&)
       super
-      @cloud = nil
+      CLOUD.synchronize { @cloud = nil }
     end
 
     # Streams the changes the appliances push, until the block breaks or raises.

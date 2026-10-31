@@ -40,11 +40,10 @@ module Miele
         # @raise [ConnectionError] if the cloud cannot be reached
         # @api public
         def request(method, path, body: nil, kind: :json, host: nil)
-          answer = exchange(method, path, body, kind, host)
-          if answer.status == 401
-            @session.renew(@session.token || raise(AuthenticationError, 'the Miele cloud refused the account'))
-            answer = exchange(method, path, body, kind, host)
-          end
+          headers = { 'Content-Type' => (TYPES.fetch(kind) if body), 'Host' => host&.delete_suffix('.') }.compact
+          used = @session.current
+          answer = exchange(used, method, path, body, headers)
+          answer = exchange(@session.renew(used), method, path, body, headers) if answer.status == 401
           refuse(answer.status, method) unless answer.status.between?(200, 299)
           Connection::Response.new(status: answer.status, body: answer.body)
         end
@@ -76,10 +75,8 @@ module Miele
         private
 
         # @return [Http::Response]
-        def exchange(method, path, body, kind, host)
-          headers = { 'Authorization' => @session.authorization }
-          headers['Content-Type'] = TYPES.fetch(kind) if body
-          headers['Host'] = host.delete_suffix('.') if host
+        def exchange(token, method, path, body, headers)
+          headers = { 'Authorization' => "#{token.scheme} #{token.value}", **headers }
           Http.request(method, "#{@session.organization.rest}/V2#{path}", headers:, body:)
         end
 

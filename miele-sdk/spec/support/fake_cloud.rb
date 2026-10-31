@@ -10,10 +10,11 @@ class FakeCloud
 
   attr_reader :port
 
-  def self.start(&handler) = new(handler || ->(_request) {}).tap(&:start)
+  def self.start(threaded: false, &handler) = new(handler || ->(_request) {}, threaded:).tap(&:start)
 
-  def initialize(handler)
+  def initialize(handler, threaded:)
     @handler = handler
+    @threaded = threaded
     @requests = []
     @mutex = Mutex.new
   end
@@ -38,7 +39,10 @@ class FakeCloud
   private
 
   def accept_loop
-    loop { serve(@server.accept) }
+    loop do
+      socket = @server.accept
+      @threaded ? Thread.new { serve(socket) } : serve(socket)
+    end
   rescue IOError
     nil
   end

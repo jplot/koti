@@ -270,26 +270,34 @@ The other parameters are `core_target_temperature=`, `moisture=`, `grill_level=`
 times in seconds), and the other requests `continue_cooking`, `steam_burst` and
 `stop_keeping_warm`.
 
-Each action makes the checks the app makes before sending, and raises
+Each of these actions makes the checks the app's rules make before it, and raises
 `Miele::Sdk::ActionUnavailableError` without sending anything when one fails:
 
-- A Dop1 oven only stops, through `ProcessAction` 2, and only while it runs a program.
-- Selecting a program needs remote control without local control. A parameter needs a selected
-  program, and the same control or a mobile start while the oven runs, pauses, waits or has ended.
+- A Dop1 oven only stops, through `ProcessAction` 2, and only during a function, own or automatic
+  program.
+- Selecting a program needs remote control without local control. The app's rule that also weighs
+  the oven's state has not been traced to the selection, so the SDK leaves it to the oven.
+- A parameter needs remote control without local control and a program on the oven, and a mobile
+  start too once the program has started (waiting, running, paused or ended) or for program 361.
+  `duration = 0` first moves the start to its minimum, as the app does.
 - `start` refuses a program that requires a duration not set yet. It first writes the parameters
   the program requires and the user has not confirmed, with the values they show, then sends
   request 1, or 113 when the oven does not offer 1. An automatic program starts by writing its
-  start time instead.
+  start time instead; another program takes `start_at=` beforehand, and `start(at:)` raises
+  `ArgumentError` for it.
 - `stop` needs one of requests 2, 55, 56 and 57 offered, no pyrolysis abort running, and remote
   control without local control. A program not started yet takes 2, a started one the first of
   55, 56 and 57 the oven offers, started as the app derives its oven state.
+- `continue_cooking` needs the oven to offer it (baking or cooking), `steam_burst` request 59
+  offered, and `stop_keeping_warm` message 20 shown.
 - A double oven's second cavity takes no action but `acknowledge(…, second_cavity: true)`.
 
 The app then waits until the oven shows the change; the SDK returns once the oven accepts the
-write, and `program_context` or `notifications` show what follows. Two app behaviours rest on that
-wait and are left out: the switch-off that answers queries 4, 5, 21 and 27 as they appear, and the
-raise of doneness or browning by one step after `continue_cooking` (write it with `doneness=` or
-`browning=`). None of these writes has been sent to a real oven: their bytes follow the app's
+write, and `program_context` or `notifications` show what follows. Three app behaviours rest on
+that wait and are left out: the switch-off that answers queries 4, 5, 21 and 27 as they appear,
+the raise of doneness or browning by one step after `continue_cooking` (write it with `doneness=`
+or `browning=`), and the required parameters written once a selected program shows (`start`
+writes them). None of these writes has been sent to a real oven: their bytes follow the app's
 code, and the reads have run against a real oven through the cloud.
 
 ## Typed objects
@@ -324,8 +332,9 @@ hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the f
 - A Dop1 object decodes its sections, bit fields and byte order (`from(bytes)`), and `to_bytes`
   gives what a write section sends.
 - `state.extended_state` decodes `ExtendedState` into the object the app builds from it: the hood's
-  by `ProtocolVersion` (1 to 4), and the Dop1 and Opcode hob's. It is nil for the other
-  families, which read it otherwise, and when the appliance serves none, as they do switched off.
+  by `ProtocolVersion` (1 to 4), the Dop1 and Opcode hob's, and the Dop1 oven's. It is nil for the
+  other families, which read it otherwise, and when the appliance serves none, as they do switched
+  off.
 
 Only the objects the app's family modules use are generated: 402 DOP2 classes, 468 Dop1 classes and
 336 enums from the app 4.19.0. Three have been read from an appliance through the cloud, the oven's

@@ -172,15 +172,17 @@ RSpec.describe Miele::Sdk::Oven do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 12, 'ProtocolVersion' => 2) }
 
     it 'stops a Dop1 oven through State' do
-      resources['State'] = JSON.generate('Status' => 5, 'ProgramID' => 13, 'ProgramType' => 1)
+      resources['State'] = JSON.generate('Status' => 5, 'ProgramID' => 13, 'ProgramType' => 0)
       oven.stop
       request = fake.requests.last
       expect([request.verb, request.path, JSON.parse(request.body)])
         .to eq(['PUT', "/Devices/#{fab}/State", { 'ProcessAction' => 2 }])
     end
 
-    it 'refuses to stop a Dop1 oven running no program', :aggregate_failures do
+    it 'refuses to stop a Dop1 oven running no program, or a cleaning', :aggregate_failures do
       resources['State'] = JSON.generate('Status' => 2, 'ProgramID' => 0, 'ProgramType' => 0)
+      expect { oven.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources['State'] = JSON.generate('Status' => 5, 'ProgramID' => 13, 'ProgramType' => 3)
       expect { oven.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
       expect(written).to be_empty
     end

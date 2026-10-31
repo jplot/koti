@@ -167,12 +167,13 @@ module Miele
           Array(shown).any? { it.id && NOTIFICATION_IDS.fetch(type).to_i(it.id) == id }
         end
 
-        # The app's Dop1 rule asks for a program and ignores +RemoteEnable+.
+        # The app's Dop1 rule asks for a program of raw type 0, 1 or 2 (function, own, automatic) and ignores
+        # +RemoteEnable+.
         #
         # @return [void]
         def stop_dop1
           state = self.state
-          require!(state.program_id.to_i.positive? && [1, 2, 3].include?(state.raw['ProgramType']),
+          require!(state.program_id.to_i.positive? && [0, 1, 2].include?(state.raw['ProgramType']),
                    'the oven runs no program')
           command(Schema::DeviceState.new(process_action: 2))
         end

@@ -1,7 +1,8 @@
 # miele-sdk
 
 Unofficial Ruby SDK for Miele@home appliances. It talks to them on the local network with the
-household key, without any cloud service.
+household key and, where an appliance does not answer there, through the Miele cloud, as the Miele
+app does.
 
 > **Unofficial.** This gem is not affiliated with, endorsed by or sponsored by Miele.
 > Miele and Miele@home are trademarks of Miele & Cie. KG.
@@ -11,6 +12,7 @@ household key, without any cloud service.
 - Ruby 4.0 or later; no runtime dependency outside the standard library.
 - Appliances with a Miele@home Wi-Fi module, already added to a household with the Miele app, on
   the same network as the host running the SDK.
+- For the cloud, which is optional: the Miele account the appliances were added with.
 
 The SDK does not add appliances to a household, update their firmware, or touch their Wi-Fi
 settings.
@@ -44,6 +46,12 @@ end
 | `listener_port` | `18082` | port the event listener binds |
 | `listener_fab` | `000999` and six digits from the host name | identity of this host as a household peer |
 | `advertise_address` | the local address that routes to the appliances | address announced for pushed events |
+| `country` | — | ISO code of the Miele account's country, which picks its cloud |
+| `email` / `password` | — | the account, in countries that log in by e-mail and password |
+| `ciam_client_id` | — | OAuth client id of the Miele app, in countries that log in through CIAM |
+| `token_file` | — | where the account's token is kept between runs (mode 0600) |
+| `cloud_token` | — | a token saved from `token.to_json`, to start without logging in |
+| `locales_host` | `https://rest-eu.domestic.miele-iot.com` | where the app reads each country's cloud |
 
 ### The household key
 
@@ -198,6 +206,55 @@ sends them.
 
 A value out of range raises `ArgumentError` before anything is sent. `Miele::Sdk::Dop1` builds
 the requests, and `hood.dop1(request)` sends any other one.
+
+## Cloud
+
+After pairing, the Miele app reaches the appliances only through the Miele cloud, and some Wi-Fi
+modules serve no DOP2 locally (EK057 and EK039W answer 404). Given the account, the SDK uses the
+cloud where an appliance does not answer locally.
+
+```ruby
+Miele::Sdk.configure do |config|
+  config.country = 'FR'
+  config.token_file = File.expand_path('~/.config/koti/miele-token.json')
+  config.ciam_client_id = ENV.fetch('MIELE_CIAM_CLIENT_ID')  # CIAM countries
+  config.email = ENV.fetch('MIELE_EMAIL')                     # MCS countries
+  config.password = ENV.fetch('MIELE_PASSWORD')
+end
+
+Miele::Sdk.appliances      # the account's appliances, reached by the name of their module
+oven.dop2(1, 1585)         # 404 locally, so through the cloud, and so is every later DOP2 request
+```
+
+**Local first.** An appliance sends every request locally. When it answers 404 and an account is
+set, the request goes to the cloud under `/V2`, and every later one for the same resource of that
+appliance (DOP2, Dop1, `State`…) goes there directly; a Dop1 request names the module in `Host`, as
+the app does. Without an account nothing changes. With an account and neither `group_id` nor
+`group_key`, the local channel signs with the household key the account holds (`/V2/GroupKeyId/`).
+
+**Logging in.** The SDK reads the cloud of the account's country and how its accounts log in where
+the app reads them (`/V3/Locales` on `locales_host`), or from the copy the app bundles when they do
+not answer. Then:
+
+- **MCS** (e-mail and password): it logs in and renews the token past half its life.
+- **CIAM** (a web page; France since October 2026): log in once in a browser.
+
+  ```ruby
+  session = Miele::Sdk.cloud.session
+  puts session.authorize_url  # open it and log in
+  session.exchange(code)      # the code of the miele://oauth2-code/?code=… address the page then opens
+  ```
+
+  The browser cannot open that `miele://` address: take the code from the address it shows, or from
+  the network tab of its developer tools. The token is renewed past 90 % of its life. Keep it in
+  `token_file` so that the next run starts from it.
+
+`ciam_client_id` is the Miele app's OAuth client id (`MA.Constants.CdcKeys.ClientId` in
+`Miele.Modules.Authentication`); the gem does not ship it. The cloud client follows the
+environment's proxy settings; the local one never does.
+
+The cloud channel has not run against the live cloud yet: France switched to CIAM before the first
+login.
 
 ## Events
 

@@ -241,8 +241,9 @@ hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the f
   families, which read it otherwise, and when the appliance serves none, as they do switched off.
 
 Only the objects the app's family modules use are generated: 402 DOP2 classes, 468 Dop1 classes and
-336 enums from the app 4.19.0. None has been read from an appliance yet: the hood and hob tried
-served an empty `ExtendedState`, being off, and the oven serves DOP2 only through the cloud.
+336 enums from the app 4.19.0. One has been read from an appliance, the oven's
+`GlobalDeviceContext` through the cloud; the hood and hob tried served an empty `ExtendedState`,
+being off.
 
 ## Cloud
 
@@ -292,8 +293,9 @@ not answer. Then:
 `Miele.Modules.Authentication`); the gem does not ship it. The cloud client follows the
 environment's proxy settings; the local one never does.
 
-The cloud channel has not run against the live cloud yet: France switched to CIAM before the first
-login.
+The cloud channel has run against the live cloud with a French account: the CIAM code exchange, the
+saved token, the account's appliances, their states, the household key, and the DOP2 leaves of an
+oven that serves none locally. The token's renewal and MCS logins have not run yet.
 
 ## Events
 

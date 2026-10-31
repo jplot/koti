@@ -30,6 +30,8 @@ module Miele
 
         def exchange: (String code) -> Token
 
+        def language: () -> String
+
         def authorization: () -> String
 
         def current: () -> Token
@@ -46,7 +48,9 @@ module Miele
 
         def ciam_refresh: (Token expired) -> Token
 
-        def post: (String url, String body, String type, ?authorization: String?) -> Hash[String, untyped]
+        def mcs_post: (String url, String body, ?Hash[String, String] headers) -> Hash[String, untyped]
+
+        def post: (String url, String body, String type, ?Hash[String, String] headers) -> Hash[String, untyped]
 
         def mcs_token: (Hash[String, untyped] answer) -> Token
 

@@ -76,7 +76,8 @@ module Miele
 
         # @return [Http::Response]
         def exchange(token, method, path, body, headers)
-          headers = { 'Authorization' => "#{token.scheme} #{token.value}", **headers }
+          headers = { 'Authorization' => "#{token.scheme} #{token.value}", 'Accept-Language' => @session.language,
+                      **headers }
           Http.request(method, "#{@session.organization.rest}/V2#{path}", headers:, body:)
         end
 

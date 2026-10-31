@@ -34,6 +34,11 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     expect(seen("/V2/Devices/#{fab}/State").first.headers['authorization']).to eq('appToken saved')
   end
 
+  it 'names a language, without which the cloud answers 500' do
+    channel.request(:get, "/Devices/#{fab}/State")
+    expect(seen("/V2/Devices/#{fab}/State").first.headers['accept-language']).to eq('en-FR')
+  end
+
   it 'sends a DOP2 write unpadded as vnd.miele.v1+dop2' do
     bytes = ['000e0002063200000000000100010404'].pack('H*')
     channel.request(:put, "/Devices/#{fab}/DOP2/2/1586", body: bytes, kind: :dop2)

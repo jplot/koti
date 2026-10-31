@@ -10,22 +10,23 @@ module Miele
         attr_reader cookware: bool
         attr_reader bridged: bool
         attr_reader temp_control: bool
+        attr_reader secondary: bool
 
         def self.new: (Integer number, Float? level, Symbol? heat, Integer booster, Integer? timer, bool cookware,
-                       bool bridged, bool temp_control) -> Zone
+                       bool bridged, bool temp_control, bool secondary) -> Zone
                     | (number: Integer, level: Float?, heat: Symbol?, booster: Integer, timer: Integer?, cookware: bool,
-                       bridged: bool, temp_control: bool) -> Zone
+                       bridged: bool, temp_control: bool, secondary: bool) -> Zone
       end
 
       class TempControl < Data
         attr_reader zone: Integer
         attr_reader level: Symbol
         attr_reader target_reached: bool
-        attr_reader target: Float?
-        attr_reader current: Float?
+        attr_reader target: Integer
+        attr_reader current: Integer
 
-        def self.new: (Integer zone, Symbol level, bool target_reached, Float? target, Float? current) -> TempControl
-                    | (zone: Integer, level: Symbol, target_reached: bool, target: Float?, current: Float?) -> TempControl
+        def self.new: (Integer zone, Symbol level, bool target_reached, Integer target, Integer current) -> TempControl
+                    | (zone: Integer, level: Symbol, target_reached: bool, target: Integer, current: Integer) -> TempControl
       end
 
       class Fan < Data
@@ -48,6 +49,10 @@ module Miele
         def raw_level: (untyped general, Integer number) -> Integer
 
         def level: (Integer raw, bool doubling) -> Float?
+
+        def flexed: (Array[Zone] zones) -> Array[Zone]
+
+        def secondary_of: (Array[Zone] pair) -> Zone?
 
         def timer: (Integer time) -> Integer?
 

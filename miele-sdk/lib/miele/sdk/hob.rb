@@ -16,11 +16,12 @@ module Miele
                      10 => 9 }.freeze
       DOP2_MAIN_STATES = { on: :stand_by, off: :off, running: :running, failure: :failure, locked: :locked,
                            service: :service }.freeze
-      # The app tells a hob's kind by the length of its ExtendedState, 22 zeros ahead: 84 bytes for a plain hob.
-      PLAIN_LENGTH = 84
+      # The app tells a hob's kind by the length of its ExtendedState, 22 zeros ahead: only these have a fan.
+      FAN_LENGTHS = [88, 128, 159].freeze
       ZONE_CONTROL_LENGTHS = [128, 159].freeze
-      private_constant :INTERNAL_STATES, :TEMP_CONTROL_LEVELS, :FAN_LEVELS, :DOP2_MAIN_STATES, :PLAIN_LENGTH,
-                       :ZONE_CONTROL_LENGTHS
+      NO_FLEX_ZONE_LENGTH = 159
+      private_constant :INTERNAL_STATES, :TEMP_CONTROL_LEVELS, :FAN_LEVELS, :DOP2_MAIN_STATES, :FAN_LENGTHS,
+                       :ZONE_CONTROL_LENGTHS, :NO_FLEX_ZONE_LENGTH
 
       # @return [Symbol, Integer, nil] +:stand_by+, +:running+, +:failure+, +:service+, +:off+, +:locked+ or
       #   +:stop_and_go+; +:off+ when the hob serves no ExtendedState
@@ -41,7 +42,10 @@ module Miele
         return dop2_zones if dop2?
 
         state = self.state
-        state.extended_state ? numbered_zones(state).sort_by(&:number) : []
+        return [] unless state.extended_state
+
+        zones = numbered_zones(state).sort_by(&:number)
+        padded_length(state) == NO_FLEX_ZONE_LENGTH ? zones : flexed(zones)
       end
 
       # @return [Integer, nil] seconds left on the minute minder
@@ -74,13 +78,13 @@ module Miele
         temp_control_of(state, zone.number) if zone && (1..6).cover?(zone.number)
       end
 
-      # @return [Fan, nil] nil for a hob without one (0xFF), a plain hob, or an Opcode or DOP2 hob, as in the app
+      # @return [Fan, nil] nil for a hob without one (0xFF or another length), or an Opcode or DOP2 hob, as in the app
       # @api public
       def fan
         return unless protocol_version == 2
 
         state = self.state
-        return if state.extended_state.nil? || padded_length(state) == PLAIN_LENGTH
+        return unless state.extended_state && FAN_LENGTHS.include?(padded_length(state))
 
         fan = state.extended_state.luefter
         raw = Objects::Hob::LuefterstufeEnum0002.to_i(fan.luefterstufe)
@@ -120,8 +124,14 @@ module Miele
         setting = state.extended_state.temp_control.public_send(:"kochstelle_#{number}")
         level = Objects::Hob::BenutzereinstellungTempcontrolEnum.to_i(setting.benutzereinstellung)
         TempControl.new(number, TEMP_CONTROL_LEVELS.fetch(level, :none), setting.zieltemperatur == :erreicht,
-                        state.target_temperatures.first, state.temperatures.first)
+                        degrees(state.raw['TargetTemperature']), degrees(state.raw['Temperature']))
       end
+
+      # As the app's MapTempControl.
+      #
+      # @param values [Array<Integer>, nil] hundredths of a degree
+      # @return [Integer]
+      def degrees(values) = Array(values).first.to_i.then { it.positive? ? it / 100 : 0 }
 
       # AddFanData builds TimeSpan(0, minutes, the byte named hours): that byte counts seconds.
       #
@@ -137,7 +147,7 @@ module Miele
         [1, 2].map do |number|
           raw = extended&.public_send(:"power_level_zone#{number}").to_i
           duration = extended&.public_send(:"duration_zone#{number}").to_i
-          Zone.new(number, level(raw, true), HEATS[raw], 0, timer(duration), false, false, false)
+          Zone.new(number, level(raw, true), HEATS[raw], 0, timer(duration), false, false, false, false)
         end
       end
     end

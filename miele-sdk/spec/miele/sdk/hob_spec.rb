@@ -29,13 +29,39 @@ RSpec.describe Miele::Sdk::Hob do
 
   def zone(number, **values)
     described_class::Zone.new(number:, level: 0.0, heat: nil, booster: 0, timer: nil, cookware: false, bridged: false,
-                              temp_control: false).with(**values)
+                              temp_control: false, secondary: false).with(**values)
   end
 
   it 'reads each zone from ExtendedState as the app does' do
     serve(7 => 3 << 1, 8 => 6, 9 => 0b1000_1000, 28 => [30, 1], 11 => 101, 13 => 0b0011_0000)
     expect(hob.zones).to eq([zone(1, level: 6.0, booster: 2, timer: 5400, cookware: true),
                              zone(2, level: nil, heat: :residual1, bridged: true, temp_control: true), zone(3)])
+  end
+
+  it 'reads no timer where the end time only gives its kind, as the app does' do
+    serve(7 => 1 << 1, 28 => [0xC0, 0x00])
+    expect(hob.zones.first.timer).to be_nil
+  end
+
+  it 'shares a timer between two bridged zones, but not on a 159-byte hob, as the app does', :aggregate_failures do
+    bridged = { 7 => 2 << 1, 10 => 0b1_0000, 13 => 0b1_0000, 28 => [30, 1] }
+    serve(bridged)
+    expect(hob.zones.map(&:timer)).to eq([5400, 5400])
+    serve(bridged, 137)
+    expect(hob.zones.map(&:timer)).to eq([5400, nil])
+  end
+
+  it 'gives a bridged pair the timer of its second zone when the first has none' do
+    serve(7 => 2 << 1, 10 => 0b1_0000, 13 => 0b1_0000, 32 => [30, 1])
+    expect(hob.zones.map(&:timer)).to eq([5400, 5400])
+  end
+
+  it 'marks the zone of a bridged pair the app hides: the one not boosted, else the second', :aggregate_failures do
+    bridged = { 7 => 2 << 1, 10 => 0b1_0000, 13 => 0b1_0000 }
+    serve(bridged)
+    expect(hob.zones.map(&:secondary)).to eq([false, true])
+    serve(bridged.merge(12 => 0b0100_0000))
+    expect(hob.zones.map(&:secondary)).to eq([true, false])
   end
 
   it 'reads half steps when the hob doubles its levels' do
@@ -55,6 +81,15 @@ RSpec.describe Miele::Sdk::Hob do
     expect(hob.fan).to eq(described_class::Fan.new(level: 2, run_on: 301))
   end
 
+  it 'reads a fan only on the hobs the app gives one, of 88, 128 or 159 bytes', :aggregate_failures do
+    serve({ 62 => 2, 64 => 5, 65 => 1 }, 78)
+    expect(hob.fan).to be_nil
+    serve({}, 58)
+    expect(hob.fan).to be_nil
+    serve({ 62 => 2, 64 => 5, 65 => 1 }, 106)
+    expect(hob.fan).to eq(described_class::Fan.new(level: 2, run_on: 301))
+  end
+
   it 'reads the minute minder, power doubling and Stop&Go', :aggregate_failures do
     serve(0 => 13, 1 => 10, 2 => 2, 6 => 0b0100)
     expect([hob.minute_minder, hob.power_doubling?, hob.stop_and_go?]).to eq([130, false, true])
@@ -65,7 +100,13 @@ RSpec.describe Miele::Sdk::Hob do
     temperatures = { 'TargetTemperature' => [12_000], 'Temperature' => [9_500] }
     serve({ 7 => 2 << 1, 13 => 0b0010_0000, 57 => 0b0001_1000 }, 62, temperatures)
     expect(hob.temp_control).to eq(described_class::TempControl.new(zone: 2, level: :two, target_reached: true,
-                                                                    target: 120.0, current: 95.0))
+                                                                    target: 120, current: 95))
+  end
+
+  it 'reads TempControl in whole degrees, 0 where there is none, as the app does' do
+    temperatures = { 'TargetTemperature' => [12_050], 'Temperature' => [-32_768] }
+    serve({ 7 => 2 << 1, 13 => 0b0010_0000, 57 => 0b0001_1000 }, 62, temperatures)
+    expect(hob.temp_control).to have_attributes(target: 120, current: 0)
   end
 
   it 'numbers the zones of a FlexControl hob from their controls' do
@@ -91,6 +132,12 @@ RSpec.describe Miele::Sdk::Hob do
       resources['DOP2/2/256'] = dop2_leaf(2, 256, { 1 => dop2_field(:e8, 5), 31 => dop2_field(:struct, extended) })
       expect(hob.zones).to eq([zone(1, level: 2.5, timer: 5400), zone(2)])
       expect(hob.main_state).to eq(:running)
+    end
+
+    it 'reads no timer from a duration that only gives its kind' do
+      extended = { 28 => dop2_field(:u16, 0xC000) }
+      resources['DOP2/2/256'] = dop2_leaf(2, 256, { 1 => dop2_field(:e8, 5), 31 => dop2_field(:struct, extended) })
+      expect(hob.zones.first.timer).to be_nil
     end
   end
 end

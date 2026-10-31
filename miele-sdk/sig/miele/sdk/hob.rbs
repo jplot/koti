@@ -11,9 +11,11 @@ module Miele
 
       DOP2_MAIN_STATES: Hash[Symbol, Symbol]
 
-      PLAIN_LENGTH: Integer
+      FAN_LENGTHS: Array[Integer]
 
       ZONE_CONTROL_LENGTHS: Array[Integer]
+
+      NO_FLEX_ZONE_LENGTH: Integer
 
       def main_state: () -> (Symbol | Integer)?
 
@@ -44,6 +46,8 @@ module Miele
       def dop2_zones: () -> Array[Zone]
 
       def temp_control_of: (State state, Integer number) -> TempControl
+
+      def degrees: (Array[Integer]? values) -> Integer
 
       def run_on: (untyped fan) -> Integer
     end

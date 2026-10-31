@@ -303,7 +303,7 @@ hob.zones            # => [#<data Zone number=1, level=6.0, heat=nil, booster=2,
 hob.main_state       # => :running; internal_state names State's InternalState as the app does
 hob.minute_minder    # => 130, in seconds
 hob.power_doubling?  # and stop_and_go?
-hob.temp_control     # => #<data TempControl zone=2, level=:two, target_reached=true, target=120.0, current=95.0>
+hob.temp_control     # => #<data TempControl zone=2, level=:two, target_reached=true, target=120, current=95>
 hob.fan              # => #<data Fan level=2, run_on=301>, nil for a hob without one
 ```
 
@@ -311,7 +311,9 @@ The app only reads a hob: its actions are Cook Assist commands through the Miele
 SDK leaves out. Zones follow the app: only those the hob declares, zone 5 in fourth place while it
 heats on a four-zone hob, numbered from their controls on a hob that has zone controls, a level in
 half steps when the hob doubles its levels, residual heat and keep warm in `heat`, and the end time
-as a duration. A DOP2 hob shows zones 1 and 2, as in the app. A hob serves `ExtendedState` only
+as a duration. Two bridged zones side by side share one timer, and `secondary` marks the one the
+app's screen hides, except on the hobs whose `ExtendedState` the app pads to 159 bytes. A DOP2 hob
+shows zones 1 and 2, as in the app. A hob serves `ExtendedState` only
 while it is on; the one tried was off, so the zones have not been read from a real hob.
 
 ## Ovens

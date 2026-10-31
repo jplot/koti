@@ -26,6 +26,7 @@ require_relative 'sdk/events/server'
 require_relative 'sdk/appliance'
 require_relative 'sdk/cloud/http'
 require_relative 'sdk/cloud/locales'
+require_relative 'sdk/cloud/token'
 require_relative 'sdk/cloud/session'
 require_relative 'sdk/cloud/channel'
 

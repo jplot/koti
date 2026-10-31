@@ -9,42 +9,6 @@ module Miele
     module Cloud
       # The Miele account's token, obtained and renewed the way the Miele app does it.
       class Session
-        # An access token.
-        #
-        # @!attribute [r] value
-        #   @return [String]
-        # @!attribute [r] refresh
-        #   @return [String] what renews it: the token itself on MCS, a refresh token on CIAM
-        # @!attribute [r] scheme
-        #   @return [String] +appToken+ (MCS) or +Bearer+ (CIAM), the scheme of the +Authorization+ header
-        # @!attribute [r] created_at
-        #   @return [Time]
-        # @!attribute [r] expires_at
-        #   @return [Time]
-        Token = Data.define(:value, :refresh, :scheme, :created_at, :expires_at)
-
-        # An access token, which the caller may save and give back.
-        class Token
-          # @param json [String] from {#to_json}
-          # @return [Token]
-          def self.from_json(json)
-            fields = JSON.parse(json)
-            new(value: fields.fetch('value'), refresh: fields.fetch('refresh'), scheme: fields.fetch('scheme'),
-                created_at: Time.at(fields.fetch('created_at')), expires_at: Time.at(fields.fetch('expires_at')))
-          end
-
-          # @return [String] the token, to save and give back through +cloud_token+
-          def to_json(*)
-            JSON.generate(value:, refresh:, scheme:, created_at: created_at.to_i, expires_at: expires_at.to_i)
-          end
-
-          # The app renews an MCS token past half its life, a CIAM one past 90 % of it.
-          #
-          # @param now [Time]
-          # @return [Boolean]
-          def due?(now) = now >= created_at + ((expires_at - created_at) * (scheme == 'Bearer' ? 0.9 : 0.5))
-        end
-
         REDIRECT = 'miele://oauth2-code/'
         private_constant :REDIRECT
 
@@ -65,8 +29,7 @@ module Miele
           @clock = clock
           @sleeper = sleeper
           @mutex = Mutex.new
-          saved = Sdk.config.cloud_token
-          @token = saved && Token.from_json(saved)
+          @token = Token.saved
         end
 
         # Logs in with the account's e-mail and password (MCS).
@@ -76,13 +39,18 @@ module Miele
         # @raise [AuthenticationError] if the cloud refuses them
         # @api public
         def login
+          if @organization.ciam
+            raise ConfigurationError, "#{@organization.iso} accounts log in through CIAM: open authorize_url, " \
+                                      'then give the code to exchange'
+          end
+
           config = Sdk.config
           email = config.email
           password = config.password
           raise ConfigurationError, 'email and password are needed to log in' unless email && password
 
           url = "#{@organization.rest}/V3/Login?org=#{@organization.iso}"
-          @token = mcs_token(post(url, JSON.generate(email:, password:), 'application/json'))
+          @token = mcs_token(post(url, JSON.generate(email:, password:), 'application/json')).save
         end
 
         # @return [String] the page that gives a CIAM code once the account logs in on it
@@ -100,7 +68,7 @@ module Miele
         # @api public
         def exchange(code)
           form = URI.encode_www_form(grant_type: 'authorization_code', code:, redirect_uri: REDIRECT, client_id:)
-          @token = ciam_token(post(endpoint('token'), form, 'application/x-www-form-urlencoded'))
+          @token = ciam_token(post(endpoint('token'), form, 'application/x-www-form-urlencoded')).save
         end
 
         # @return [String] the +Authorization+ header, after a login or a renewal when one is due
@@ -118,7 +86,7 @@ module Miele
         # @api public
         def renew(expired)
           @mutex.synchronize do
-            @token = refreshed(expired) if @token.equal?(expired)
+            @token = refreshed(expired).save if @token.equal?(expired)
             @token or raise AuthenticationError, 'no token to renew'
           end
         end

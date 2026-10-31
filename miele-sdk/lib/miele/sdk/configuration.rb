@@ -56,8 +56,13 @@ module Miele
         # @return [String, nil] OAuth client id of the Miele app, for the countries that log in through CIAM
         attr_accessor :ciam_client_id
 
-        # @return [String, nil] a token saved from {Cloud::Session::Token#to_json}, to start without logging in
+        # @return [String, nil] a token saved from {Cloud::Token#to_json}, to start without logging in
         attr_accessor :cloud_token
+
+        # A CIAM login needs a browser, so a program that restarts keeps its token there.
+        #
+        # @return [String, nil] file the session reads its token from and writes each new one to (mode 0600)
+        attr_accessor :token_file
 
         # @return [String] where the app reads the cloud of each country (default:
         #   +https://rest-eu.domestic.miele-iot.com+)

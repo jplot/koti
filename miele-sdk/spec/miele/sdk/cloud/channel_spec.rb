@@ -15,8 +15,8 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
   end
 
   before do
-    token = Miele::Sdk::Cloud::Session::Token.new(value: 'saved', refresh: 'saved', scheme: 'appToken',
-                                                  created_at: Time.now, expires_at: Time.now + 3600)
+    token = Miele::Sdk::Cloud::Token.new(value: 'saved', refresh: 'saved', scheme: 'appToken',
+                                         created_at: Time.now, expires_at: Time.now + 3600)
     Miele::Sdk.configure { it.cloud_token = token.to_json }
   end
 

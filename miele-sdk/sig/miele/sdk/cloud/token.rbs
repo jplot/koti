@@ -1,0 +1,25 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Token < Data
+        attr_reader value: String
+        attr_reader refresh: String
+        attr_reader scheme: String
+        attr_reader created_at: Time
+        attr_reader expires_at: Time
+
+        def self.new: (value: String, refresh: String, scheme: String, created_at: Time, expires_at: Time) -> Token
+
+        def self.from_json: (String json) -> Token
+
+        def self.saved: () -> Token?
+
+        def save: () -> Token
+
+        def to_json: (*untyped) -> String
+
+        def due?: (Time now) -> bool
+      end
+    end
+  end
+end

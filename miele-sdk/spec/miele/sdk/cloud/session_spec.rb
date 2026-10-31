@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'tmpdir'
+
 RSpec.describe Miele::Sdk::Cloud::Session do
   subject(:session) do
     described_class.new(organization, clock: -> { times.last }, sleeper: ->(seconds) { naps << seconds })
@@ -95,13 +97,27 @@ RSpec.describe Miele::Sdk::Cloud::Session do
     )
   end
 
+  it 'asks for a CIAM code instead of logging in where the country logs in through CIAM' do
+    ciam = organization.with(ciam: true)
+    expect { described_class.new(ciam).authorization }
+      .to raise_error(Miele::Sdk::ConfigurationError, /authorize_url/)
+  end
+
+  it 'saves every new token to the token file and starts from it', :aggregate_failures do
+    path = File.join(Dir.mktmpdir, 'token.json')
+    Miele::Sdk.configure { it.token_file = path }
+    session.authorization
+    expect([File.stat(path).mode & 0o777, JSON.parse(File.read(path))['value']]).to eq([0o600, 'token-1'])
+    expect(described_class.new(organization).token.value).to eq('token-1')
+  end
+
   it 'refuses CIAM without a client id' do
     expect { session.authorize_url }.to raise_error(Miele::Sdk::ConfigurationError, /ciam_client_id/)
   end
 
   it 'restores a saved token' do
-    token = described_class::Token.new(value: 'saved', refresh: 'saved', scheme: 'appToken', created_at: now,
-                                       expires_at: now + 3600)
+    token = Miele::Sdk::Cloud::Token.new(value: 'saved', refresh: 'saved', scheme: 'appToken', created_at: now,
+                                         expires_at: now + 3600)
     Miele::Sdk.configure { it.cloud_token = token.to_json }
     expect([session.authorization, posts('/V3/Login?org=FR')]).to eq(['appToken saved', []])
   end

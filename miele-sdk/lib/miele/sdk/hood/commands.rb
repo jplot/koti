@@ -18,7 +18,7 @@ module Miele
         def fan_level=(level)
           raise ArgumentError, "fan level #{level} is out of 0..5" unless FAN_LEVELS.cover?(level)
 
-          require!(fan_settable?, 'the fan cannot be set while the screen is pushed in')
+          require_reading!(fan_settable?, 'the fan cannot be set while the screen is pushed in')
           case route(:fan)
           when :dop1 then tolerating_no_op { dop1(Dop1.fan_level(level)) }
           when :opcode then opcode_twice("10000608010#{level}000000")
@@ -58,7 +58,8 @@ module Miele
         # @api public
         def ambient_light=(on)
           path = route(:fan)
-          require!(path != :opcode && lights&.ambient&.exists, 'the hood has no ambient light the app switches')
+          require!(path != :opcode, 'an Opcode hood has no ambient light the app switches')
+          require_reading!(lights&.ambient&.exists, 'the hood has no ambient light')
           request = on ? 20_001 : 20_002
           path == :dop1 ? dop1_ambient_light(on) : dop2_user_request(request)
         end
@@ -89,7 +90,7 @@ module Miele
           value = FRAGRANCE_SETTINGS.fetch(action) { raise ArgumentError, "no fragrance action #{action.inspect}" }
           return dop1_fragrance(action) if route(:setting) == :dop1
 
-          require!(extended&.then { second_functions(it)[5] == 1 }, 'the hood has no fragrance')
+          require_reading!(extended&.then { second_functions(it)[5] == 1 }, 'the hood has no fragrance')
           write_sf(9009, value)
         end
 
@@ -99,7 +100,7 @@ module Miele
         # @api public
         def auto_refresh=(on)
           path = route(:setting)
-          require!(auto_refresh_supported?, 'the hood has no auto refresh')
+          require_reading!(auto_refresh_supported?, 'the hood has no auto refresh')
           value = on ? 1 : 0
           path == :dop1 ? write_setting(40_023, value) : write_sf(9007, value)
         end
@@ -159,6 +160,17 @@ module Miele
           sources = yield Array(plus&.sources)
           body = JSON.generate('activated' => sources.any?, 'sourceDeviceIds' => sources)
           send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
+        end
+
+        # The hood serves +ExtendedState+, and so what it supports, only while it is on.
+        #
+        # @param value [Boolean, nil] read from +ExtendedState+, nil when it serves none
+        # @param reason [String] why the hood refuses when the value is false
+        # @return [void]
+        # @raise [ActionUnavailableError]
+        def require_reading!(value, reason)
+          require!(!value.nil?, 'the hood is off and serves no ExtendedState: wake it first')
+          require!(value, reason)
         end
 
         # @param pf_id [Integer] its Dop1 setting

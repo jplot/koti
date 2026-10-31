@@ -92,6 +92,12 @@ RSpec.describe Miele::Sdk::Hood do
   context 'when the hood is off' do
     let(:state) { { 'Status' => 1, 'Light' => 2, 'ExtendedState' => '' } }
 
+    it 'asks to wake a hood that is off before what depends on its state', :aggregate_failures do
+      [-> { hood.fan_level = 2 }, -> { hood.grease_melting = true }, -> { hood.auto_refresh = true }]
+        .each { expect(&it).to raise_error(Miele::Sdk::ActionUnavailableError, /wake/) }
+      expect(writes).to be_empty
+    end
+
     it 'wakes a sleeping Dop1 hood by writing back its Light' do
       hood.wake
       request = fake.requests.last

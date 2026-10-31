@@ -50,6 +50,8 @@ module Miele
 
         def reset_filter: (Integer pf_id, Integer request, String opcode_request) -> void
 
+        def require_reading!: (bool? value, String reason) -> void
+
         def update_connectivity_plus: () { (Array[String] sources) -> Array[String] } -> void
 
         def route: (Symbol kind) -> Symbol

@@ -41,6 +41,8 @@ module Miele
 
         def require_feature!: (bool? supported, String reason) -> void
 
+        def require_reading!: (bool? value, String reason) -> void
+
         def require_ambient_light!: () -> void
 
         def write_section: (untyped object, **Integer values) -> void

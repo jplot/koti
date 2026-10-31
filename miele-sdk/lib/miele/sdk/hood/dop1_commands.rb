@@ -105,7 +105,7 @@ module Miele
         # @raise [ActionUnavailableError]
         def require_feature!(supported, reason)
           require_dop1!
-          require!(supported, reason)
+          require_reading!(supported, reason)
         end
 
         # @return [void]

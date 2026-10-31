@@ -58,6 +58,18 @@ RSpec.describe Schema::Extract::Objects do
     )
   end
 
+  it 'writes the pieces a write section sends, the bit field it holds included' do
+    name = 'Miele.Modules.Dishwasher.ApplianceCommunication.ApplianceData.DW.DOP.' \
+           'SmartControl_GSD_Programmwahl_Setzen/SettingsWriteSection'
+    expect(layouts.dop1.fetch(name)['write_bytes']).to eq([[0, 1], [1, 1], [2, 2]])
+  end
+
+  it 'takes the byte order of a write section the app builds alone' do
+    name = 'Miele.Modules.Hoods.ApplianceCommunication.ApplianceData.ServiceDataExt_Lueftersteuerung/' \
+           'ServiceDataExt_LueftersteuerungWriteSection'
+    expect(layouts.dop1.fetch(name)['endian']).to eq('msb')
+  end
+
   it 'finds an address from each call-site idiom' do
     found = Schema::Extract::Objects::Addresses.new(classes, layouts.dop2).find
     expect(found.transform_keys { it.split('.').last }).to include(

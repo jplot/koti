@@ -28,11 +28,14 @@ module Schema
 
         def id = method('get_Dop1ObjectId')&.body&.filter_map { it[/ldstr\s+"([^"]*)"/, 1] }&.first
 
-        # The app passes 1 (most significant byte first) or 0 to Dop1Object's constructor.
+        # The app passes 1 (most significant byte first) or 0 to its base's constructor: from (data, offset, length),
+        # or from the parameterless constructor of a write section it builds alone (the hood's 8E01 one: 2 bytes, 1).
         def endian
-          ctor = @klass.procedures.find { it.name == '.ctor' && it.header.match?(/int32 offset,\s*int32 length\)/) }
-          index = ctor&.body&.index { it.match?(/::\.ctor\(uint8\[\],/) } or return
-          { 1 => 'msb', 0 => 'lsb' }[Layouts.constant(ctor.body[index - 1].to_s)]
+          call = "#{IlModel.bare(@klass.extends)}::.ctor(uint8[],"
+          @klass.procedures.select { it.name == '.ctor' }.filter_map do |ctor|
+            index = ctor.body.index { it.include?(call) } or next
+            { 1 => 'msb', 0 => 'lsb' }[Layouts.constant(ctor.body[index - 1].to_s)]
+          end.first
         end
 
         # Sections and arrays the constructors create, each with the constants pushed since the previous call.
@@ -90,9 +93,17 @@ module Schema
 
         def write_bytes
           body = method('GenerateWriteBytes')&.body or return
-          body.each_index.select { body[it].include?('GetSubArray') }.map do |index|
-            Layouts.constants(body[[0, index - 4].max...index]).last(2)
-          end
+          body.each_index.filter_map { piece(body, it) }
+        end
+
+        # A slice of the bytes, or the bytes of a section: the dishwasher's 8906 and laundry's 8201 append their
+        # extras bit fields.
+        def piece(body, index)
+          return Layouts.constants(body[[0, index - 4].max...index]).last(2) if body[index].include?('GetSubArray')
+
+          type = body[index][/call\s+instance\s+class\s+(\S+)\s+\S+::get_\w+\(\)/, 1] or return
+          section = parts.find { it['type'] == IlModel.bare(type) }
+          [section.fetch('offset'), section.fetch('length')]
         end
       end
     end

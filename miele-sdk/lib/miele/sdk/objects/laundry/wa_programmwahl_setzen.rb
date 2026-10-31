@@ -96,10 +96,10 @@ module Miele
             include Dop1Value
 
             # Its byte order, nil when its reader gives it.
-            ENDIAN = nil
+            ENDIAN = :lsb
 
             # The pieces of its bytes the app's GenerateWriteBytes sends: offset and length.
-            WRITE_BYTES = [[0, 1].freeze, [1, 2].freeze, [3, 1].freeze, [4, 1].freeze, [5, 2].freeze, [7, 1].freeze, [8, 1].freeze, [9, 1].freeze, [10, 1].freeze, [11, 1].freeze, [12, 1].freeze, [13, 4].freeze].freeze
+            WRITE_BYTES = [[0, 1].freeze, [1, 2].freeze, [3, 1].freeze, [4, 1].freeze, [5, 2].freeze, [7, 1].freeze, [8, 1].freeze, [9, 1].freeze, [10, 1].freeze, [11, 1].freeze, [12, 1].freeze, [13, 4].freeze, [17, 4].freeze, [21, 4].freeze].freeze
 
             # The kind, offset and layout of each member.
             MEMBERS = {

@@ -52,7 +52,7 @@ RSpec.describe Miele::Sdk::Objects do
     end
 
     it "writes a Dop1 write section as the app's GenerateWriteBytes" do
-      expect(selection.settings_write.with(programm_id: :programm_eco).to_bytes).to eq([1, 3].pack('C2'))
+      expect(selection.settings_write.with(programm_id: :programm_eco).to_bytes).to eq([1, 3, 0x05, 0x80].pack('C4'))
     end
   end
 

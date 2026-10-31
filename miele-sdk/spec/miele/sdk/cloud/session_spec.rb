@@ -52,6 +52,25 @@ RSpec.describe Miele::Sdk::Cloud::Session do
       .to eq(['POST', 'application/json', { 'email' => 'koti@example.com', 'password' => 'secret' }])
   end
 
+  context 'when a kill lands in the middle of a renewal' do
+    let(:naps) { Thread::SizedQueue.new(1).tap { it << :taken } }
+
+    before do
+      Miele::Sdk.configure { it.token_file = File.join(Dir.mktmpdir, 'token.json') }
+      half_life_later
+      renewals.push([500, {}, ''])
+    end
+
+    it 'finishes the renewal before the thread stops' do
+      renewing = Thread.new { session.authorization }
+      Timeout.timeout(5) { Thread.pass until naps.num_waiting == 1 }
+      renewing.kill
+      naps.pop
+      renewing.join
+      expect(JSON.parse(File.read(Miele::Sdk.config.token_file))['value']).to eq('renewed')
+    end
+  end
+
   context 'when the MCS token is past half its life' do
     before { half_life_later }
 

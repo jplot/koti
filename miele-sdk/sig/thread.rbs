@@ -1,0 +1,4 @@
+# The core signature leaves out the block the method runs.
+class Thread
+  def self.handle_interrupt: [T] (Hash[untyped, Symbol] hash) { () -> T } -> T | ...
+end

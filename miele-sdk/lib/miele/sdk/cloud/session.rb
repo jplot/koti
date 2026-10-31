@@ -89,19 +89,23 @@ module Miele
           token.due?(@clock.call) ? renew(token) : token
         end
 
-        # Renews the token unless another thread already did since +expired+ was read.
+        # Renews the token unless another thread already did since +expired+ was read. A stopped event stream
+        # kills its thread: the kill waits for the renewal, which the cloud may have done already, and for its
+        # file, which it would leave empty.
         #
         # @param expired [Token]
         # @return [Token]
         # @api public
-        def renew(expired)
-          @mutex.synchronize do
-            @token = refreshed(expired).save if @token.equal?(expired)
-            @token or raise AuthenticationError, 'no token to renew'
-          end
-        end
+        def renew(expired) = Thread.handle_interrupt(Object => :never) { @mutex.synchronize { replaced(expired) } }
 
         private
+
+        # @param expired [Token]
+        # @return [Token]
+        def replaced(expired)
+          @token = refreshed(expired).save if @token.equal?(expired)
+          @token or raise AuthenticationError, 'no token to renew'
+        end
 
         # Like the app: three attempts a second apart, and a new login when the cloud refuses the renewal.
         #

@@ -51,6 +51,11 @@ RSpec.describe Miele::Sdk::Hob do
     expect(hob.zones.map(&:timer)).to eq([5400, nil])
   end
 
+  it 'gives a bridged pair the timer of its second zone when the first has none' do
+    serve(7 => 2 << 1, 10 => 0b1_0000, 13 => 0b1_0000, 32 => [30, 1])
+    expect(hob.zones.map(&:timer)).to eq([5400, 5400])
+  end
+
   it 'marks the zone of a bridged pair the app hides: the one not boosted, else the second', :aggregate_failures do
     bridged = { 7 => 2 << 1, 10 => 0b1_0000, 13 => 0b1_0000 }
     serve(bridged)
@@ -127,6 +132,12 @@ RSpec.describe Miele::Sdk::Hob do
       resources['DOP2/2/256'] = dop2_leaf(2, 256, { 1 => dop2_field(:e8, 5), 31 => dop2_field(:struct, extended) })
       expect(hob.zones).to eq([zone(1, level: 2.5, timer: 5400), zone(2)])
       expect(hob.main_state).to eq(:running)
+    end
+
+    it 'reads no timer from a duration that only gives its kind' do
+      extended = { 28 => dop2_field(:u16, 0xC000) }
+      resources['DOP2/2/256'] = dop2_leaf(2, 256, { 1 => dop2_field(:e8, 5), 31 => dop2_field(:struct, extended) })
+      expect(hob.zones.first.timer).to be_nil
     end
   end
 end

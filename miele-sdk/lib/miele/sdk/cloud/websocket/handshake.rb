@@ -17,7 +17,7 @@ module Miele
 
           private
 
-          # @return [IO] the open connection
+          # @return [IO] the open connection, closed again when the handshake fails
           # @raise [ConnectionError] unless the cloud switches protocols with the key's answer
           def connect
             token = @session.current
@@ -26,12 +26,17 @@ module Miele
             key = [SecureRandom.random_bytes(16)].pack('m0')
             socket.write(request(key, token))
             check(socket, key, token)
-            socket
+            connected = socket
+          ensure
+            tcp&.close unless connected
           end
 
+          # The watchdog only starts once connected: a stalled handshake gives up after its minute all the same.
+          #
           # @param tcp [Socket]
           # @return [OpenSSL::SSL::SSLSocket]
           def tls(tcp)
+            tcp.timeout = WATCHDOG
             context = OpenSSL::SSL::SSLContext.new
             context.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
             socket = OpenSSL::SSL::SSLSocket.new(tcp, context)

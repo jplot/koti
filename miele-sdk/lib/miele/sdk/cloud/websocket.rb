@@ -8,8 +8,8 @@ module Miele
     module Cloud
       # The Miele cloud websocket as the app's Websocket.Client speaks it: every resource the account pushes,
       # each acknowledged, the connection kept alive with an unsolicited pong every 30 s, as .NET does with a
-      # KeepAliveInterval alone. It reconnects as the app configures the library: 6 s after an error, at once
-      # after a minute without a message.
+      # KeepAliveInterval alone. It reconnects as the app does: 6 s after an error, 3 s after a message it cannot
+      # parse, at once after a minute without a message.
       class Websocket
         include Handshake
         include Frames
@@ -28,9 +28,12 @@ module Miele
         KEEP_ALIVE = 30
         WATCHDOG = 60
         ERROR_RECONNECT = 6
+        # The app's message stream starts again 3 s after a message it cannot parse (RetryWhen), and its library
+        # reconnects 6 s after any other error (ErrorReconnectTimeout).
+        STREAM_RETRY = 3
         FAILURES = [ConnectionError, ResponseError, SocketError, EOFError, IOError, SystemCallError,
                     OpenSSL::SSL::SSLError].freeze
-        private_constant :KEEP_ALIVE, :WATCHDOG, :ERROR_RECONNECT, :FAILURES
+        private_constant :KEEP_ALIVE, :WATCHDOG, :ERROR_RECONNECT, :STREAM_RETRY, :FAILURES
 
         # @param session [Session] its organization's rest host names the websocket,
         #   +wss://{host}/websocket/V2/Devices/+
@@ -84,10 +87,20 @@ module Miele
           socket = connect
           refetch(&)
           listen(socket, &) == :silent ? 0 : ERROR_RECONNECT
-        rescue *FAILURES
-          ERROR_RECONNECT
+        rescue *FAILURES => e
+          wait_after(e)
         ensure
           close(socket) if socket
+        end
+
+        # @param error [Exception] what ended the connection
+        # @return [Integer] the seconds to wait: none when a frame outlived the watchdog, as when no message came
+        def wait_after(error)
+          case error
+          when Malformed then STREAM_RETRY
+          when IO::TimeoutError then 0
+          else ERROR_RECONNECT
+          end
         end
 
         # SendFreshRequest and SendFreshRequestUponReconnect: the app reads each followed resource on every
@@ -115,7 +128,7 @@ module Miele
             keep_alive = wait(socket, keep_alive, silence)
             return :silent unless keep_alive
 
-            opcode, payload = read_frame(socket)
+            opcode, payload = read_frame(socket, [silence - @clock.call, 0].max)
             return if opcode == CLOSE
 
             silence = @clock.call + WATCHDOG if [CONTINUATION, TEXT, BINARY].include?(opcode)
@@ -163,7 +176,7 @@ module Miele
         # @return [void]
         def close(socket)
           write_frame(socket, CLOSE, '')
-        rescue IOError, SystemCallError
+        rescue IOError, SystemCallError, OpenSSL::SSL::SSLError
           nil
         ensure
           socket.close

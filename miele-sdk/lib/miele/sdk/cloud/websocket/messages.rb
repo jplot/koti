@@ -12,6 +12,10 @@ module Miele
           SEPARATOR = "\r\n\r\n"
           private_constant :SEPARATOR
 
+          # A message the app's parser refuses.
+          class Malformed < ConnectionError; end
+          private_constant :Malformed
+
           private
 
           # The app acknowledges each message it parses.
@@ -62,12 +66,18 @@ module Miele
             [buffer[0...cloud_end].to_s, buffer[(cloud_end + 4)...ending].to_s, buffer[ending..].to_s]
           end
 
+          # The app matches the header whatever its case, and a message without it breaks its stream.
+          #
           # @param head [String, nil]
-          # @return [Integer] its +Content-Length+, 0 without one
-          def content_length(head) = head.to_s[/Content-Length: (\d+)/, 1].to_i
+          # @return [Integer] its +Content-Length+
+          # @raise [Malformed] without one
+          def content_length(head)
+            length = head.to_s[/Content-Length: (\d+)/i, 1] or raise Malformed, 'a message has no Content-Length'
+            length.to_i
+          end
 
           # @param text [String] the HTTP head, a blank line and the body
-          # @return [Message]
+          # @return [Message] its path without trailing slashes, which the app trims before routing
           def message(text)
             head, body = text.split(SEPARATOR, 2)
             line, *fields = head.to_s.split("\r\n")
@@ -75,7 +85,7 @@ module Miele
               name, value = field.split(': ', 2)
               [name.to_s, value.to_s]
             end
-            Message.new(path: line.to_s.split[1].to_s, headers:, body: body.to_s)
+            Message.new(path: line.to_s.split[1].to_s.sub(%r{/+\z}, ''), headers:, body: body.to_s)
           end
         end
       end

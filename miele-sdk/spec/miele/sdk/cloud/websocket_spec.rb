@@ -18,6 +18,24 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
       "Content-Length: #{body.bytesize}\r\n\r\n#{body}"
   end
 
+  def opened_sockets
+    Queue.new.tap do |sockets|
+      allow(Socket).to receive(:tcp).and_wrap_original do |tcp, *args, **options|
+        tcp.call(*args, **options).tap { sockets << it }
+      end
+    end
+  end
+
+  def failing_close
+    allow(Socket).to receive(:tcp).and_wrap_original do |tcp, *args, **options|
+      tcp.call(*args, **options).tap do |socket|
+        allow(socket).to receive(:write).and_wrap_original do |write, bytes|
+          bytes.getbyte(0) == 0x88 ? raise(OpenSSL::SSL::SSLError, 'bad record mac') : write.call(bytes)
+        end
+      end
+    end
+  end
+
   def first_messages(count)
     received = []
     websocket.each do |message|
@@ -41,6 +59,41 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
       path: '/V2/Devices/000123456789/State',
       headers: { 'Content-Type' => 'application/json', 'Content-Length' => '12' }, body: '{"Status":5}'
     )])
+  end
+
+  context 'when the pushed path ends with a slash' do
+    let(:script) do
+      ->(connection, _index) { connection.send_binary(message('CC1', '{}', path: '/V2/Devices/000123456789/State/')) }
+    end
+
+    it 'trims it, as the app does' do
+      expect(first_messages(1).map(&:path)).to eq(['/V2/Devices/000123456789/State'])
+    end
+  end
+
+  context 'when the cloud writes content-length in lower case' do
+    let(:script) do
+      lambda do |connection, _index|
+        connection.send_binary("CC1\r\n\r\nPOST /V2/Devices HTTP/1.1\r\ncontent-length: 2\r\n\r\n[]")
+      end
+    end
+
+    it 'reads the body all the same, as the app does' do
+      expect(first_messages(1).map(&:body)).to eq(['[]'])
+    end
+  end
+
+  context 'when a message has no Content-Length' do
+    subject(:websocket) do
+      described_class.new(session, sleeper: ->(seconds) { raise stop, seconds.to_s })
+    end
+
+    let(:script) { ->(connection, _index) { connection.send_binary("CC1\r\n\r\nPOST /V2/Devices HTTP/1.1\r\n\r\n[]") } }
+    let(:stop) { Class.new(StandardError) }
+
+    it 'drops the connection and tries again 3 s later, as the app retries its stream' do
+      expect { first_messages(1) }.to raise_error(stop, '3')
+    end
   end
 
   context 'when a message comes split across frames' do
@@ -73,6 +126,11 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     it 'parses both' do
       expect(first_messages(2).map(&:body)).to eq(['{"Status":5}', '{"Status":1}'])
     end
+  end
+
+  it 'ends the connection quietly when its CLOSE frame cannot go out over TLS' do
+    failing_close
+    expect(first_messages(1).size).to eq(1)
   end
 
   it 'acknowledges each message with its CloudConnectHeader, as the app does' do
@@ -128,6 +186,12 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     it 'tries again 6 s later, as the app does' do
       expect { first_messages(1) }.to raise_error(stop)
     end
+
+    it 'closes the connection it opened', :aggregate_failures do
+      sockets = opened_sockets
+      expect { first_messages(1) }.to raise_error(stop)
+      expect([sockets.size, sockets.pop]).to match([1, be_closed])
+    end
   end
 
   context 'with TLS' do
@@ -136,6 +200,26 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     before do
       allow(OpenSSL::SSL::SSLContext).to receive(:new).and_wrap_original do |new, *args|
         new.call(*args).tap { it.cert_store = FakeCertificate.trust_store }
+      end
+    end
+
+    context 'when a frame stops halfway' do
+      subject(:websocket) do
+        times = [0.0]
+        described_class.new(session, clock: -> { times.shift || 59.8 },
+                                     sleeper: ->(seconds) { raise stop, seconds.to_s })
+      end
+
+      let(:script) do
+        lambda do |connection, index|
+          bytes = FakeWebsocket.frame(2, message("CC#{index}", '{}'))
+          connection.send_raw(index == 1 ? bytes[0, 10] : bytes)
+        end
+      end
+      let(:stop) { Class.new(StandardError) }
+
+      it 'gives up when the watchdog would and reconnects at once, as the app does' do
+        expect(Timeout.timeout(5) { first_messages(1) }.map(&:body)).to eq(['{}'])
       end
     end
 
@@ -169,6 +253,23 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
 
     it 'ends with that error instead of trying again' do
       expect { first_messages(1) }.to raise_error(Miele::Sdk::AuthenticationError, 'refused')
+    end
+  end
+
+  context 'when its thread is killed in the handshake' do
+    let(:silent) { TCPServer.new('127.0.0.1', 0) }
+    let(:session) do
+      organization = instance_double(Miele::Sdk::Cloud::Locales::Organization, rest: "http://127.0.0.1:#{silent.addr[1]}")
+      token = Miele::Sdk::Cloud::Token.new(value: 'token', refresh: nil, scheme: 'Bearer', created_at: 0, expires_at: 1)
+      instance_double(Miele::Sdk::Cloud::Session, current: token, language: 'en-FR', organization:)
+    end
+
+    it 'closes the connection it opened' do
+      sockets = opened_sockets
+      connecting = Thread.new { websocket.each { nil } }
+      Timeout.timeout(5) { silent.accept.wait_readable }
+      connecting.kill.join
+      expect(sockets.pop).to be_closed
     end
   end
 

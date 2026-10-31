@@ -7,6 +7,9 @@ module Miele
 
           SEPARATOR: String
 
+          class Malformed < ConnectionError
+          end
+
           private
 
           def receive: (untyped socket, Integer opcode, String payload, String buffer) { (Message message) -> void } -> String

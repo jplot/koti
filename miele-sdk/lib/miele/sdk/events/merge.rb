@@ -3,8 +3,9 @@
 module Miele
   module Sdk
     module Events
-      # Several event sources at once: each runs on a thread of its own and their events reach the calling
-      # thread. When the block breaks or raises, the threads stop and each source cleans up.
+      # Event sources, each read on a thread of its own, even alone: a slow block then holds back neither the
+      # cloud websocket's keep-alive nor its reads. Their events reach the calling thread. When the block breaks
+      # or raises, the threads stop and each source cleans up.
       class Merge
         # @param sources [Array<#each>] such as a {Listener} and a {CloudStream}
         def initialize(sources)
@@ -17,7 +18,6 @@ module Miele
         # @api public
         def each(&)
           return to_enum(:each).lazy unless block_given?
-          return @sources.fetch(0).each(&) if @sources.one?
 
           merged(&)
         end

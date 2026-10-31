@@ -40,6 +40,8 @@ module Miele
 
         private
 
+        def replaced: (Token expired) -> Token
+
         def refreshed: (Token expired) -> Token
 
         def three_times: () { () -> Token } -> Token

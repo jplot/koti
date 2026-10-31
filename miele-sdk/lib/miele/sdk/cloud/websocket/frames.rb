@@ -19,10 +19,15 @@ module Miele
 
           private
 
+          # Websocket.Client's watchdog counts from the last whole message: a frame cut short ends with it.
+          #
           # @param socket [IO]
+          # @param timeout [Float] the seconds the whole frame may take
           # @return [Array(Integer, String)] the opcode and the payload
           # @raise [EOFError] when the cloud closes the connection
-          def read_frame(socket)
+          # @raise [IO::TimeoutError] when the frame takes longer
+          def read_frame(socket, timeout)
+            socket.to_io.timeout = timeout
             first, second = exactly(socket, 2).bytes
             size = extended(socket, second.to_i & 0x7F)
             mask = second.to_i.anybits?(0x80) ? exactly(socket, 4).bytes : nil

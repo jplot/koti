@@ -15,7 +15,7 @@ module Miele
 
           private
 
-          def read_frame: (untyped socket) -> [Integer, String]
+          def read_frame: (untyped socket, Float | Integer timeout) -> [Integer, String]
 
           def extended: (untyped socket, Integer size) -> Integer
 

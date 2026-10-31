@@ -36,6 +36,13 @@ RSpec.describe Miele::Sdk::Events::CloudStream do
     expect { stream }.not_to raise_error
   end
 
+  it 'sends CLOSE when a merged stream stops it while it waits' do
+    pushes << push('/V2/Devices/000123456789/State', '{}')
+    Miele::Sdk::Events::Merge.new([stream]).each.first
+    fake.stop
+    expect(fake.connections.first.frames.map(&:opcode)).to eq([1, 8])
+  end
+
   it 'streams a cloud State change as an event' do
     pushes << push('/V2/Devices/000123456789/State', '{"Status":5}')
     expect(first_events(1)).to eq([event('000123456789', '/State/', { 'Status' => 5 })])

@@ -28,6 +28,8 @@ class FakeWebsocket
 
     def send_ping(payload) = @socket.write(FakeWebsocket.frame(9, payload))
 
+    def send_raw(bytes) = @socket.write(bytes)
+
     def drop = @socket.close
 
     def dropped? = @socket.closed?

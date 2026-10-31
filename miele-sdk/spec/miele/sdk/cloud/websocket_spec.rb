@@ -130,6 +130,36 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     end
   end
 
+  context 'with TLS' do
+    let(:fake) { FakeWebsocket.start(tls: true, &script) }
+
+    before do
+      allow(OpenSSL::SSL::SSLContext).to receive(:new).and_wrap_original do |new, *args|
+        new.call(*args).tap { it.cert_store = FakeCertificate.trust_store }
+      end
+    end
+
+    context 'when two messages come in one record' do
+      let(:script) do
+        lambda do |connection, _index|
+          connection.send_together(message('CC1', '{"Status":5}'), message('CC2', '{"Status":6}'))
+        end
+      end
+
+      it 'reads both without waiting for more' do
+        expect(Timeout.timeout(5) { first_messages(2) }.map(&:body)).to eq(['{"Status":5}', '{"Status":6}'])
+      end
+    end
+
+    context 'when a message comes in the record of the handshake answer' do
+      let(:fake) { FakeWebsocket.start(tls: true, greeting: message('CC0', '{"Status":4}')) }
+
+      it 'reads it without waiting for more' do
+        expect(Timeout.timeout(5) { first_messages(1) }.map(&:body)).to eq(['{"Status":4}'])
+      end
+    end
+  end
+
   context 'when the account is refused' do
     subject(:websocket) do
       described_class.new(session, sleeper: ->(_seconds) { raise 'reconnected' })

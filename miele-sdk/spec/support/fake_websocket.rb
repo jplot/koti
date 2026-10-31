@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 require 'digest'
+require 'openssl'
 require 'socket'
 
-# A local ws:// server standing in for the Miele cloud websocket. Each connection answers the handshake, runs the
-# spec's script with a Connection to send frames, then keeps every frame the client sends until it closes.
+# A local ws:// or wss:// server standing in for the Miele cloud websocket. Each connection answers the handshake,
+# runs the spec's script with a Connection to send frames, then keeps every frame the client sends until it closes.
 class FakeWebsocket
   GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
   Frame = Data.define(:opcode, :payload)
@@ -23,6 +24,8 @@ class FakeWebsocket
 
     def send_continuation(bytes) = send_binary(bytes, opcode: 0)
 
+    def send_together(*messages) = @socket.write(messages.map { FakeWebsocket.frame(2, it) }.join)
+
     def send_ping(payload) = @socket.write(FakeWebsocket.frame(9, payload))
 
     def drop = @socket.close
@@ -39,7 +42,9 @@ class FakeWebsocket
 
   attr_reader :connections
 
-  def self.start(accept: nil, refuse: 0, &script) = new(accept, refuse, script).tap(&:start)
+  def self.start(accept: nil, refuse: 0, tls: false, greeting: nil, &script)
+    new(script, accept:, refuse:, tls:, greeting:).tap(&:start)
+  end
 
   def self.frame(opcode, payload, fin: true)
     head = [(fin ? 0x80 : 0) | opcode].pack('C')
@@ -71,23 +76,25 @@ class FakeWebsocket
     socket.read(size == 126 ? 2 : 8).unpack1(size == 126 ? 'n' : 'Q>')
   end
 
-  def initialize(accept, refuse, script)
+  def initialize(script, accept:, refuse:, tls:, greeting:)
+    @script = script || ->(_connection, _index) {}
     @accept = accept
     @refuse = refuse
-    @script = script || ->(_connection, _index) {}
+    @tls = tls
+    @greeting = greeting
     @connections = []
   end
 
   def start
     @server = TCPServer.new('127.0.0.1', 0)
     @thread = Thread.new do
-      loop { serve(@server.accept) }
+      loop { serve(secure(@server.accept)) }
     rescue IOError
       nil
     end
   end
 
-  def url = "ws://127.0.0.1:#{@server.addr[1]}"
+  def url = "#{@tls ? 'wss' : 'ws'}://127.0.0.1:#{@server.addr[1]}"
 
   def stop
     @server.close
@@ -110,9 +117,19 @@ class FakeWebsocket
     socket.close unless socket.closed?
   end
 
+  def secure(socket)
+    return socket unless @tls
+
+    context = OpenSSL::SSL::SSLContext.new
+    context.cert = FakeCertificate.certificate
+    context.key = FakeCertificate.key
+    OpenSSL::SSL::SSLSocket.new(socket, context).tap { it.sync_close = true }.accept
+  end
+
   def respond(socket, request)
-    socket.write("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n" \
-                 "Sec-WebSocket-Accept: #{@accept || accept(request)}\r\n\r\n")
+    head = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n" \
+           "Sec-WebSocket-Accept: #{@accept || accept(request)}\r\n\r\n"
+    socket.write(@greeting ? head + FakeWebsocket.frame(2, @greeting) : head)
   end
 
   def handshake_request(socket)

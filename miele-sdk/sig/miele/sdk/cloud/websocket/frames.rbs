@@ -9,6 +9,9 @@ module Miele
           CLOSE: Integer
           PING: Integer
           PONG: Integer
+          CHUNK: Integer
+
+          @input: String
 
           private
 

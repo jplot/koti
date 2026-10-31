@@ -14,7 +14,8 @@ module Miele
           CLOSE = 8
           PING = 9
           PONG = 10
-          private_constant :CONTINUATION, :TEXT, :BINARY, :CLOSE, :PING, :PONG
+          CHUNK = 16_384
+          private_constant :CONTINUATION, :TEXT, :BINARY, :CLOSE, :PING, :PONG, :CHUNK
 
           private
 
@@ -66,13 +67,11 @@ module Miele
 
           # @param socket [IO]
           # @param count [Integer]
-          # @return [String]
+          # @return [String] the next +count+ bytes, from what was read past the previous frame first
           # @raise [EOFError]
           def exactly(socket, count)
-            bytes = socket.read(count)
-            raise EOFError, 'the cloud websocket closed' if bytes.nil? || bytes.bytesize < count
-
-            bytes
+            @input << socket.readpartial(CHUNK) while @input.bytesize < count
+            @input.slice!(0, count).to_s
           end
         end
       end

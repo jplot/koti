@@ -3,7 +3,7 @@ module Miele
     module Cloud
       class Websocket
         include Handshake
-        include Frames
+        # Frames comes through Messages: included twice, its @input is declared twice.
         include Messages
 
         class Message < Data

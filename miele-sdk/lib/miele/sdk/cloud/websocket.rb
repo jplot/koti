@@ -80,6 +80,7 @@ module Miele
         # @yieldparam message [Message]
         # @return [Integer] the seconds to wait before connecting again
         def connection(&)
+          @input = ''.b
           socket = connect
           refetch(&)
           listen(socket, &) == :silent ? 0 : ERROR_RECONNECT
@@ -142,13 +143,20 @@ module Miele
           end
         end
 
+        # OpenSSL::Buffering keeps what it reads past a frame where neither +pending+ nor the socket shows it: a
+        # read that does not block takes it first.
+        #
         # @param socket [IO]
         # @param timeout [Float]
         # @return [Boolean]
         def readable?(socket, timeout)
-          return true if socket.respond_to?(:pending) && socket.pending.positive?
+          return true unless @input.empty?
 
-          !socket.to_io.wait_readable([timeout, 0].max).nil?
+          chunk = socket.read_nonblock(CHUNK, exception: false)
+          return !socket.to_io.wait_readable([timeout, 0].max).nil? if chunk.is_a?(Symbol)
+
+          @input << chunk.to_s # nil once the cloud closes, which the next read raises
+          true
         end
 
         # @param socket [IO]

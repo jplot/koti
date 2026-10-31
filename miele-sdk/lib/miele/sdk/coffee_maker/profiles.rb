@@ -53,7 +53,7 @@ module Miele
         # @api public
         def delete_profile(id)
           require_custom!(id)
-          require!([true, 1].include?(features&.feature_co&.has_coffee_profiles),
+          require!(features&.feature_co&.has_coffee_profiles == true,
                    'the coffee maker lists no coffee profiles to delete')
           write_profile(id, name: '', active: true, clear_list: false)
         end

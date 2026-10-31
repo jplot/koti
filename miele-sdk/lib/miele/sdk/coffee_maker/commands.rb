@@ -23,7 +23,7 @@ module Miele
         # @api public
         def power_on
           state = self.state
-          return write_dop1_action(Objects::CoffeeGen7::DeviceAction, 2) if dop1_switch?(state, [1])
+          return write_device_action(2) if dop1_switch?(state, [1])
 
           require!(variant != :unknown && switchable?(state, [1]), 'the coffee maker cannot be switched on now')
           combi = read_combi_state
@@ -40,7 +40,7 @@ module Miele
         # @api public
         def power_off
           state = self.state
-          return write_dop1_action(Objects::CoffeeGen7::DeviceAction, 3) if dop1_switch?(state, SWITCH_OFF_STATUSES)
+          return write_device_action(3) if dop1_switch?(state, SWITCH_OFF_STATUSES)
 
           require!(switchable?(state, [2, 3]) && program_id != Brewing::BARISTA,
                    'the coffee maker cannot be switched off now')
@@ -67,7 +67,9 @@ module Miele
           return modify_dop2(family::GlobalUserReqRequest, 2, 1583, 0, 1) { it.with(request: 2) } if dop2?
 
           require!(dop1_switch?(state, [5]), 'the coffee maker runs no drink to stop')
-          write_dop1_action(Objects::CoffeeGen7::ProcessActionCva, 2)
+          klass = Objects::CoffeeGen7::ProcessActionCva
+          section = blank(klass::ProcessActionWriteSection).with(struktur_version: 1, action: 2)
+          write_dop1_object(klass, section, type: Dop1::WRITE)
         end
 
         # @param type [Symbol] +:information+, +:message+, +:query+, +:warning+ or +:error+
@@ -120,19 +122,18 @@ module Miele
         # @return [Integer]
         def status(state) = state.raw['Status'].to_i
 
-        # @param context [Data, nil] the program context
-        # @return [Integer] its +ProgId+, 0 without one
-        def program_id(context = program_context)
-          id = context&.prog_attributes_cca&.prog_id
+        # @return [Integer] the +ProgId+ of the program context, 0 without one
+        def program_id
+          id = program_context&.prog_attributes_cca&.prog_id
           id.nil? ? 0 : family::GlobalEnumPrgId.to_i(id)
         end
 
-        # @param klass [Class] +DeviceAction+ (1101) or +ProcessActionCva+ (1100)
-        # @param action [Integer]
+        # @param action [Integer] 2 on, 3 off
         # @return [void]
-        def write_dop1_action(klass, action)
-          section = klass.constants.map { klass.const_get(it) }.find { it.is_a?(Class) && it.const_defined?(:LENGTH) }
-          write_dop1_object(klass, blank(section).with(struktur_version: 1, action:), type: Dop1::WRITE)
+        def write_device_action(action)
+          klass = Objects::CoffeeGen7::DeviceAction
+          section = blank(klass::DeviceActionWriteSection).with(struktur_version: 1, action:)
+          write_dop1_object(klass, section, type: Dop1::WRITE)
         end
 
         # ModifyDop2ObjectAsync: the app writes back where it read, with idx1 as the header's attribute and as

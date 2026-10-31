@@ -26,9 +26,9 @@ module Miele
 
         def status: (State state) -> Integer
 
-        def program_id: (?untyped context) -> Integer
+        def program_id: () -> Integer
 
-        def write_dop1_action: (untyped klass, Integer action) -> void
+        def write_device_action: (Integer action) -> void
 
         def modify_dop2: (untyped klass, Integer unit, Integer attribute, Integer idx1, Integer idx2) { (untyped value) -> untyped } -> void
 

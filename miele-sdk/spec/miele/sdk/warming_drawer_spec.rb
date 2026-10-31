@@ -29,7 +29,6 @@ RSpec.describe Miele::Sdk::WarmingDrawer do
 
   after { fake.stop }
 
-  # Per program: suggested °C, minimum and maximum hours, minimum and maximum °C, five steps.
   def settings
     programs = [[40, 1, 4, 30, 50, 30, 35, 40, 45, 50], [60, 1, 6, 50, 80, 50, 60, 70, 75, 80],
                 [65, 1, 3, 60, 85, 60, 65, 70, 80, 85], [80, 1, 12, 70, 90, 70, 75, 80, 85, 90]]

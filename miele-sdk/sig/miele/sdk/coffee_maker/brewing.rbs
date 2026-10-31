@@ -23,7 +23,7 @@ module Miele
 
         def informed?: () -> bool
 
-        def program_id: (?untyped context) -> Integer
+        def program_id: () -> Integer
 
         def notified_id: (untyped enum, (Integer | Symbol)? id) -> Integer
 

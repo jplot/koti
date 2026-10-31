@@ -3,9 +3,8 @@
 module Miele
   module Sdk
     # A coffee maker, which the Miele app's coffee module handles (device type 17): a CM7, CM6F, CVA or CVA Ref2
-    # over DOP2, and a CVA6000 over Dop1. A CM7 reads its objects on unit 2 from the +CoffeeCm7+ family, the
-    # others on unit 1 from +CoffeeGen7+; the app reads a CM7 no cleaning, descaling, feature, ident, profile or
-    # drink.
+    # over DOP2, and a CVA6000 over Dop1. A CM7 reads +CoffeeCm7+ objects on unit 2, the others +CoffeeGen7+ on
+    # unit 1, and the app reads a CM7 no cleaning, descaling, feature, ident, profile or drink.
     class CoffeeMaker < Appliance
       include Commands
       include Brewing

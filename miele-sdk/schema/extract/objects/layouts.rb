@@ -48,7 +48,8 @@ module Schema
 
         # @return [Hash{String=>Hash}] by class name: assembly, object id, endianness, sections, arrays and fields
         def dop1
-          @classes.select { dop1?(it) }.to_h { [it.name, Dop1Layout.new(it, @by_name).to_h] }
+          own = @classes.select { dop1?(it) }.to_h { [it.name, Dop1Layout.new(it, @by_name).to_h] }
+          own.to_h { |name, layout| [name, with_base(own, name, layout)] }
         end
 
         # @return [Hash{String=>Hash}] by enum name: assembly and values
@@ -95,6 +96,16 @@ module Schema
           when 17..31 then 'array'
           else 'scalar'
           end
+        end
+
+        # The hood's ExtendedDopDeviceState is its DeviceState read MSB, and ExtendedDop2DeviceState the same read LSB
+        # with two more sections.
+        def with_base(layouts, name, layout)
+          base_name = IlModel.bare(@by_name[name].extends)
+          base = layouts[base_name] or return layout
+          base = with_base(layouts, base_name, base)
+          layout.merge(%w[sections arrays fields].to_h { [it, base[it] + layout[it]] },
+                       'id' => layout['id'] || base['id'], 'endian' => layout['endian'] || base['endian'])
         end
 
         def dop1?(klass)

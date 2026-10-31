@@ -6,23 +6,128 @@ module Miele
   module Sdk
     module Objects
       module Hob
-        # +ExtendedDeviceState+, a part of a Dop1 object of the app's +hob+ module.
+        # +ExtendedDeviceState+, Dop1 object 1000 of the app's +hob+ module.
         #
+        # @!attribute [r] struktur_version
+        #   @return [Objects::Hob::DeviceState::StrukturVersionSection, nil] bytes 0, 1 long
+        # @!attribute [r] hauptzustand_des_geraetes_extern
+        #   @return [Objects::Hob::DeviceState::HauptzustandDesGeraetesExternSection, nil] bytes 1, 1 long
+        # @!attribute [r] fernbedienung
+        #   @return [Objects::Hob::DeviceState::FernbedienungSection, nil] bytes 2, 1 long
+        # @!attribute [r] hauptzustand_des_geraetes_intern_geraetetypspez
+        #   @return [Objects::Hob::DeviceState::HauptzustandDesGeraetesInternGeraetetypspezSection, nil] bytes 3, 1 long
+        # @!attribute [r] programmtyp
+        #   @return [Objects::Hob::DeviceState::ProgrammtypSection, nil] bytes 4, 1 long
+        # @!attribute [r] programm_id
+        #   @return [Objects::Hob::DeviceState::ProgrammIdSection, nil] bytes 5, 2 long
+        # @!attribute [r] programmphase
+        #   @return [Objects::Hob::DeviceState::ProgrammphaseSection, nil] bytes 7, 2 long
+        # @!attribute [r] start_minuten
+        #   @return [Objects::Hob::DeviceState::StartMinutenSection, nil] bytes 9, 1 long
+        # @!attribute [r] startzeit_stunden
+        #   @return [Objects::Hob::DeviceState::StartzeitStundenSection, nil] bytes 10, 1 long
+        # @!attribute [r] rest_minuten
+        #   @return [Objects::Hob::DeviceState::RestMinutenSection, nil] bytes 11, 1 long
+        # @!attribute [r] restzeit_stunden
+        #   @return [Objects::Hob::DeviceState::RestzeitStundenSection, nil] bytes 12, 1 long
+        # @!attribute [r] temperatur1
+        #   @return [Objects::Hob::DeviceState::Temperatur1Section, nil] bytes 13, 2 long
+        # @!attribute [r] temperatur2
+        #   @return [Objects::Hob::DeviceState::Temperatur2Section, nil] bytes 15, 2 long
+        # @!attribute [r] temperatur3
+        #   @return [Objects::Hob::DeviceState::Temperatur3Section, nil] bytes 17, 2 long
+        # @!attribute [r] temperatur4
+        #   @return [Objects::Hob::DeviceState::Temperatur4Section, nil] bytes 19, 2 long
+        # @!attribute [r] meldungen
+        #   @return [Objects::Hob::DeviceState::MeldungenSection, nil] bytes 21, 1 long
+        # @!attribute [r] geraetespezifische_informationen
+        #   @return [Objects::Hob::DeviceState::GeraetespezifischeInformationenSection, nil] bytes 22, 56 long
+        # @!attribute [r] temp_control
+        #   @return [Objects::Hob::DeviceState::TempControlSection, nil] bytes 78, 6 long
+        # @!attribute [r] luefter
+        #   @return [Objects::Hob::DeviceState::LuefterSection, nil] bytes 84, 4 long
+        # @!attribute [r] kochfeldabmessung
+        #   @return [Objects::Hob::DeviceState::KochfeldabmessungSection, nil] bytes 88, 2 long
+        # @!attribute [r] topfdaten_1
+        #   @return [Objects::Hob::DeviceState::Topfdaten1Section, nil] bytes 90, 6 long
+        # @!attribute [r] topfdaten_2
+        #   @return [Objects::Hob::DeviceState::Topfdaten2Section, nil] bytes 96, 6 long
+        # @!attribute [r] topfdaten_3
+        #   @return [Objects::Hob::DeviceState::Topfdaten3Section, nil] bytes 102, 6 long
+        # @!attribute [r] topfdaten_4
+        #   @return [Objects::Hob::DeviceState::Topfdaten4Section, nil] bytes 108, 6 long
+        # @!attribute [r] topfdaten_5
+        #   @return [Objects::Hob::DeviceState::Topfdaten5Section, nil] bytes 114, 6 long
+        # @!attribute [r] topfdaten_6
+        #   @return [Objects::Hob::DeviceState::Topfdaten6Section, nil] bytes 120, 6 long
+        # @!attribute [r] restwaerme
+        #   @return [Objects::Hob::DeviceState::RestwaermeSection, nil] bytes 126, 2 long
+        # @!attribute [r] timer_pot_1
+        #   @return [Objects::Hob::DeviceState::TimerPot1Section, nil] bytes 128, 4 long
+        # @!attribute [r] timer_pot_2
+        #   @return [Objects::Hob::DeviceState::TimerPot2Section, nil] bytes 132, 4 long
+        # @!attribute [r] timer_pot_3
+        #   @return [Objects::Hob::DeviceState::TimerPot3Section, nil] bytes 136, 4 long
+        # @!attribute [r] timer_pot_4
+        #   @return [Objects::Hob::DeviceState::TimerPot4Section, nil] bytes 140, 4 long
+        # @!attribute [r] timer_pot_5
+        #   @return [Objects::Hob::DeviceState::TimerPot5Section, nil] bytes 144, 4 long
+        # @!attribute [r] timer_pot_6
+        #   @return [Objects::Hob::DeviceState::TimerPot6Section, nil] bytes 148, 4 long
+        # @!attribute [r] location_info
+        #   @return [Objects::Hob::DeviceState::LocationInfoSection, nil] bytes 152, 7 long
         # @!attribute [r] bytes
         #   @return [String] the bytes as read
         # @!attribute [r] endian
         #   @return [Symbol, nil] +:msb+ or +:lsb+
-        ExtendedDeviceState = ::Data.define(:bytes, :endian)
+        ExtendedDeviceState = ::Data.define(:struktur_version, :hauptzustand_des_geraetes_extern, :fernbedienung, :hauptzustand_des_geraetes_intern_geraetetypspez, :programmtyp, :programm_id, :programmphase, :start_minuten, :startzeit_stunden, :rest_minuten, :restzeit_stunden, :temperatur1, :temperatur2, :temperatur3, :temperatur4, :meldungen, :geraetespezifische_informationen, :temp_control, :luefter, :kochfeldabmessung, :topfdaten_1, :topfdaten_2, :topfdaten_3, :topfdaten_4, :topfdaten_5, :topfdaten_6, :restwaerme, :timer_pot_1, :timer_pot_2, :timer_pot_3, :timer_pot_4, :timer_pot_5, :timer_pot_6, :location_info, :bytes, :endian)
 
         class ExtendedDeviceState
           extend Dop1Class
           include Dop1Value
 
+          # The object's id in a Dop1 request.
+          ID = "1000"
+
           # Its byte order, nil when its reader gives it.
-          ENDIAN = nil
+          ENDIAN = :msb
 
           # The kind, offset and layout of each member.
           MEMBERS = {
+            struktur_version: [:section, 0, 1, "Hob::DeviceState::StrukturVersionSection"].freeze,
+            hauptzustand_des_geraetes_extern: [:section, 1, 1, "Hob::DeviceState::HauptzustandDesGeraetesExternSection"].freeze,
+            fernbedienung: [:section, 2, 1, "Hob::DeviceState::FernbedienungSection"].freeze,
+            hauptzustand_des_geraetes_intern_geraetetypspez: [:section, 3, 1, "Hob::DeviceState::HauptzustandDesGeraetesInternGeraetetypspezSection"].freeze,
+            programmtyp: [:section, 4, 1, "Hob::DeviceState::ProgrammtypSection"].freeze,
+            programm_id: [:section, 5, 2, "Hob::DeviceState::ProgrammIdSection"].freeze,
+            programmphase: [:section, 7, 2, "Hob::DeviceState::ProgrammphaseSection"].freeze,
+            start_minuten: [:section, 9, 1, "Hob::DeviceState::StartMinutenSection"].freeze,
+            startzeit_stunden: [:section, 10, 1, "Hob::DeviceState::StartzeitStundenSection"].freeze,
+            rest_minuten: [:section, 11, 1, "Hob::DeviceState::RestMinutenSection"].freeze,
+            restzeit_stunden: [:section, 12, 1, "Hob::DeviceState::RestzeitStundenSection"].freeze,
+            temperatur1: [:section, 13, 2, "Hob::DeviceState::Temperatur1Section"].freeze,
+            temperatur2: [:section, 15, 2, "Hob::DeviceState::Temperatur2Section"].freeze,
+            temperatur3: [:section, 17, 2, "Hob::DeviceState::Temperatur3Section"].freeze,
+            temperatur4: [:section, 19, 2, "Hob::DeviceState::Temperatur4Section"].freeze,
+            meldungen: [:section, 21, 1, "Hob::DeviceState::MeldungenSection"].freeze,
+            geraetespezifische_informationen: [:section, 22, 56, "Hob::DeviceState::GeraetespezifischeInformationenSection"].freeze,
+            temp_control: [:section, 78, 6, "Hob::DeviceState::TempControlSection"].freeze,
+            luefter: [:section, 84, 4, "Hob::DeviceState::LuefterSection"].freeze,
+            kochfeldabmessung: [:section, 88, 2, "Hob::DeviceState::KochfeldabmessungSection"].freeze,
+            topfdaten_1: [:section, 90, 6, "Hob::DeviceState::Topfdaten1Section"].freeze,
+            topfdaten_2: [:section, 96, 6, "Hob::DeviceState::Topfdaten2Section"].freeze,
+            topfdaten_3: [:section, 102, 6, "Hob::DeviceState::Topfdaten3Section"].freeze,
+            topfdaten_4: [:section, 108, 6, "Hob::DeviceState::Topfdaten4Section"].freeze,
+            topfdaten_5: [:section, 114, 6, "Hob::DeviceState::Topfdaten5Section"].freeze,
+            topfdaten_6: [:section, 120, 6, "Hob::DeviceState::Topfdaten6Section"].freeze,
+            restwaerme: [:section, 126, 2, "Hob::DeviceState::RestwaermeSection"].freeze,
+            timer_pot_1: [:section, 128, 4, "Hob::DeviceState::TimerPot1Section"].freeze,
+            timer_pot_2: [:section, 132, 4, "Hob::DeviceState::TimerPot2Section"].freeze,
+            timer_pot_3: [:section, 136, 4, "Hob::DeviceState::TimerPot3Section"].freeze,
+            timer_pot_4: [:section, 140, 4, "Hob::DeviceState::TimerPot4Section"].freeze,
+            timer_pot_5: [:section, 144, 4, "Hob::DeviceState::TimerPot5Section"].freeze,
+            timer_pot_6: [:section, 148, 4, "Hob::DeviceState::TimerPot6Section"].freeze,
+            location_info: [:section, 152, 7, "Hob::DeviceState::LocationInfoSection"].freeze,
           }.freeze
         end
       end

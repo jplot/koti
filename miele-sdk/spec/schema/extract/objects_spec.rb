@@ -50,6 +50,14 @@ RSpec.describe Schema::Extract::Objects do
       .to include(include('name' => 'Topfgroeße_erkannt_Variokochzone_1', 'kind' => 'bits'))
   end
 
+  it 'gives a Dop1 object the parts of the object it extends' do
+    hood = 'Miele.Modules.Hoods.ApplianceCommunication.ApplianceData'
+    expect(layouts.dop1.fetch("#{hood}.ExtendedDopDeviceState")).to include(
+      'id' => '1000', 'endian' => 'msb',
+      'sections' => [include('type' => "#{hood}.DeviceState/Struktur_VersionSection", 'offset' => 0, 'length' => 1)]
+    )
+  end
+
   it 'finds an address from each call-site idiom' do
     found = Schema::Extract::Objects::Addresses.new(classes, layouts.dop2).find
     expect(found.transform_keys { it.split('.').last }).to include(

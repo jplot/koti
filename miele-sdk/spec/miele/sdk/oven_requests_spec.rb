@@ -66,6 +66,12 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([user_request(113)])
   end
 
+  it 'refuses a start time for a program that is not automatic', :aggregate_failures do
+    serve([1])
+    expect { oven.start(at: Time.at(1_700_000_000)) }.to raise_error(ArgumentError)
+    expect(written).to be_empty
+  end
+
   it 'starts an automatic program by writing its start time, now unless given' do
     serve([1], type: 3)
     oven.start

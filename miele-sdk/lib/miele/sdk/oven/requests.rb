@@ -20,12 +20,14 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, with no program selected, or when the program requires a
         #   duration not set yet
+        # @raise [ArgumentError] for a time given to a program that is not automatic, which takes +start_at=+
         # @api public
         def start(at: :now)
           require_dop2!
           context = program_context
           prog_id = selected_program(context)
           return start_automatic(prog_id, context, at) if automatic?(context)
+          raise ArgumentError, 'only an automatic program starts at a given time; set start_at= first' if at != :now
 
           require_duration!(context)
           write_required_parameters(prog_id, context)

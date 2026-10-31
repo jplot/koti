@@ -26,10 +26,9 @@ module Miele
             key = [SecureRandom.random_bytes(16)].pack('m0')
             socket.write(request(key, token))
             check(socket, key, token)
-            socket
-          rescue StandardError
-            tcp&.close
-            raise
+            connected = socket
+          ensure
+            tcp&.close unless connected
           end
 
           # The watchdog only starts once connected: a stalled handshake gives up after its minute all the same.

@@ -18,6 +18,14 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
       "Content-Length: #{body.bytesize}\r\n\r\n#{body}"
   end
 
+  def opened_sockets
+    Queue.new.tap do |sockets|
+      allow(Socket).to receive(:tcp).and_wrap_original do |tcp, *args, **options|
+        tcp.call(*args, **options).tap { sockets << it }
+      end
+    end
+  end
+
   def first_messages(count)
     received = []
     websocket.each do |message|
@@ -165,12 +173,9 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     end
 
     it 'closes the connection it opened', :aggregate_failures do
-      sockets = []
-      allow(Socket).to receive(:tcp).and_wrap_original do |tcp, *args, **options|
-        tcp.call(*args, **options).tap { sockets << it }
-      end
+      sockets = opened_sockets
       expect { first_messages(1) }.to raise_error(stop)
-      expect(sockets).to contain_exactly(be_closed)
+      expect([sockets.size, sockets.pop]).to match([1, be_closed])
     end
   end
 
@@ -233,6 +238,23 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
 
     it 'ends with that error instead of trying again' do
       expect { first_messages(1) }.to raise_error(Miele::Sdk::AuthenticationError, 'refused')
+    end
+  end
+
+  context 'when its thread is killed in the handshake' do
+    let(:silent) { TCPServer.new('127.0.0.1', 0) }
+    let(:session) do
+      organization = instance_double(Miele::Sdk::Cloud::Locales::Organization, rest: "http://127.0.0.1:#{silent.addr[1]}")
+      token = Miele::Sdk::Cloud::Token.new(value: 'token', refresh: nil, scheme: 'Bearer', created_at: 0, expires_at: 1)
+      instance_double(Miele::Sdk::Cloud::Session, current: token, language: 'en-FR', organization:)
+    end
+
+    it 'closes the connection it opened' do
+      sockets = opened_sockets
+      connecting = Thread.new { websocket.each { nil } }
+      Timeout.timeout(5) { silent.accept.wait_readable }
+      connecting.kill.join
+      expect(sockets.pop).to be_closed
     end
   end
 

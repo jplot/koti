@@ -1,12 +1,14 @@
 module Miele
   module Sdk
     class Dishwasher < Appliance
-      module Dop2Commands : Appliance
+      module Commands : Appliance
         REDESIGNED: Array[String]
 
         EXTRAS: Hash[Symbol, Array[Symbol]]
 
         SETTINGS: Array[Integer]
+
+        ACTIONS: Hash[Symbol, [Integer, Integer]]
 
         def start: () -> void
 
@@ -38,7 +40,15 @@ module Miele
 
         def settable?: (Integer id) -> bool
 
-        def stop_with: (Symbol request, Integer id) -> void
+        def stop_with: (Symbol request) -> void
+
+        def run: (State state, Symbol name) -> void
+
+        def dop1_process_action: (State state, Integer action) -> void
+
+        def dop1_select: (Integer | Symbol prog_id) -> void
+
+        def dop1_extras: (Array[Symbol] selected) -> void
 
         def checked_state: () -> State
 

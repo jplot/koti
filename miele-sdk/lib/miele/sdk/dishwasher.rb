@@ -5,7 +5,8 @@ module Miele
     # A dishwasher, which the Miele app's dishwasher module handles (device types 7, and 8 on PG81 models).
     class Dishwasher < Appliance
       include Rules
-      include Dop2Commands
+      include Commands
+      include Dop1Commands
       include Power
 
       # What a Dop1 dishwasher uses now.

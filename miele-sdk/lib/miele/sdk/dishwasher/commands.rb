@@ -3,15 +3,20 @@
 module Miele
   module Sdk
     class Dishwasher < Appliance
-      # What the app's dishwasher module writes to a DOP2 dishwasher: each object read, changed and written back
-      # with no index in the path, after the checks of its Mapping rules ({Rules}).
-      module Dop2Commands
+      # The actions of the app's dishwasher module, after the checks of its Mapping rules ({Rules}): on a DOP2
+      # dishwasher each object is read, changed and written back with no index in the path; a Dop1 one takes
+      # +ProcessAction+ and Dop1 objects ({Dop1Commands}).
+      module Commands
         REDESIGNED = %w[G703 G721 G723 G713 G740 G743 G760 G762 G771 G773 G793 G707 G726 G729 G738 G718 G745 G748
                         G749 G765 G767 G776 G778 G779 G798].freeze
         EXTRAS = { redesigned: %i[quick express hot_zone clean dry bottle_clean], pfd10: %i[special_dry],
-                   other: %i[express hot_zone clean dry] }.freeze
+                   other: %i[express hot_zone clean dry],
+                   dop1: %i[short eco dry intensive_low soak prerinse additional_drying] }.freeze
         SETTINGS = [20_078, 20_002, 20_010, 20_028, 20_022, 20_027].freeze
-        private_constant :REDESIGNED, :EXTRAS, :SETTINGS
+        # The DOP2 user request and the Dop1 +ProcessAction+ of each: the app pauses, resumes and stops a Dop1
+        # dishwasher with 2.
+        ACTIONS = { start: [1, 1], pause: [3, 2], resume: [1, 2], stop: [2, 2], cancel: [52, 128] }.freeze
+        private_constant :REDESIGNED, :EXTRAS, :SETTINGS, :ACTIONS
 
         # @return [void]
         # @raise [ActionUnavailableError] unless the app's start rule allows it: no info 700, mobile start, the door
@@ -21,7 +26,7 @@ module Miele
           state = checked_state
           require!(mobile?(state) && !state.door_open? && offered?(:start) && ready?(state),
                    'the dishwasher cannot start now')
-          dop2_user_request(1)
+          run(state, :start)
         end
 
         # @return [void]
@@ -30,7 +35,7 @@ module Miele
         def pause
           state = checked_state
           require!(mobile?(state) && offered?(:pause) && status(state) == 5, 'the dishwasher cannot pause now')
-          dop2_user_request(3)
+          run(state, :pause)
         end
 
         # The app resumes with request 1.
@@ -41,13 +46,13 @@ module Miele
         def resume
           state = checked_state
           require!(mobile?(state) && offered?(:start) && status(state) == 6, 'the dishwasher cannot resume now')
-          dop2_user_request(1)
+          run(state, :resume)
         end
 
         # @return [void]
         # @raise [ActionUnavailableError] see {#cancel}
         # @api public
-        def stop = stop_with(:stop, 2)
+        def stop = stop_with(:stop)
 
         # The app stops or cancels without mobile start, only not locked.
         #
@@ -55,28 +60,30 @@ module Miele
         # @raise [ActionUnavailableError] unless it runs, pauses or waits awake, offers the request and shows no
         #   info 700
         # @api public
-        def cancel = stop_with(:cancel, 52)
+        def cancel = stop_with(:cancel)
 
         # @param prog_id [Integer, Symbol]
         # @return [void]
         # @api public
         def select_program(prog_id)
-          require_dop2!
+          return dop1_select(prog_id) unless dop2?
+
           modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 0, 0]) { it.with(prog_id:, selection_type: 0) }
         end
 
         # Each extra this model writes is set on when named, off otherwise; the others stay as read.
         #
         # @param selected [Array<Symbol>] among +:quick+, +:express+, +:hot_zone+, +:clean+, +:dry+, +:bottle_clean+
-        #   and +:special_dry+, as the model takes them
+        #   and +:special_dry+ on DOP2, +:short+, +:eco+, +:dry+, +:intensive_low+, +:soak+, +:prerinse+ and
+        #   +:additional_drying+ on Dop1, as the model takes them
         # @return [void]
         # @raise [ArgumentError] for an extra the app does not write on this model
         # @api public
         def set_extras(*selected)
           handled = EXTRAS.fetch(extras_kind)
           raise ArgumentError, "no #{(selected - handled).join(', ')} extra here" unless (selected - handled).empty?
+          return dop1_extras(selected) if extras_kind == :dop1
 
-          require_dop2! unless extras_kind == :pfd10
           context = object(Objects::Dishwasher::GlobalPsContext, [2, 1574, 0, 0])
           modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 0, 0]) do |select|
             with_extras(select, context, handled.to_h { [it, selected.include?(it)] })
@@ -122,9 +129,10 @@ module Miele
 
         private
 
-        # @return [Symbol] +:pfd10+, +:redesigned+ or +:other+
+        # @return [Symbol] +:pfd10+, +:dop1+, +:redesigned+ or +:other+
         def extras_kind
           return :pfd10 if pfd10?
+          return :dop1 unless dop2?
 
           REDESIGNED.any? { tech_type.to_s.start_with?(it) } ? :redesigned : :other
         end
@@ -141,20 +149,28 @@ module Miele
         end
 
         # @param request [Symbol]
-        # @param id [Integer]
         # @return [void]
-        def stop_with(request, id)
+        def stop_with(request)
           state = checked_state
           running = [5, 6].include?(status(state)) || (status(state) == 4 && [1, 255].include?(standby(state)))
           require!(!locked_in?(state) && offered?(request) && running, "the dishwasher cannot #{request} now")
-          dop2_user_request(id)
+          run(state, request)
         end
 
+        # @param state [State]
+        # @param name [Symbol] a key of {ACTIONS}
+        # @return [void]
+        def run(state, name)
+          request, process_action = ACTIONS.fetch(name)
+          dop2? ? dop2_user_request(request) : dop1_process_action(state, process_action)
+        end
+
+        # The app reads info 700 from 2/131, on DOP2 only.
+        #
         # @return [State]
-        # @raise [ActionUnavailableError] on a Dop1 dishwasher, or while it shows info 700
+        # @raise [ActionUnavailableError] while a DOP2 dishwasher shows info 700
         def checked_state
-          require_dop2!
-          require_no_info700!
+          require_no_info700! if dop2?
           state
         end
 

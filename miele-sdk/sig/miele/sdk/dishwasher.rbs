@@ -2,7 +2,8 @@ module Miele
   module Sdk
     class Dishwasher < Appliance
       include Rules
-      include Dop2Commands
+      include Commands
+      include Dop1Commands
       include Power
 
       class Consumption < Data

@@ -1,0 +1,41 @@
+module Miele
+  module Sdk
+    class CoolingAppliance < Appliance
+      module Zones : Appliance
+        TYPES: Hash[Integer, Symbol]
+        OPCODE_TYPES: Hash[Integer, Symbol]
+        OPCODE_SUPER_MODES: Hash[Integer, [bool, bool]]
+        OFF: Integer
+        ABSENT: Integer
+
+        def zones: () -> Array[Zone]
+
+        private
+
+        def api_zones: () -> Array[Zone]
+
+        def api_zone: (Integer number, Hash[String, untyped] zone, Hash[String, untyped] listed) -> Zone?
+
+        def zone_position: (Integer? position, Integer number) -> Integer
+
+        def switches: (Hash[String, untyped] zone, Hash[String, untyped] listed) -> [bool?, bool?, bool?]
+
+        def opcode_zones: (State state) -> Array[Zone]
+
+        def opcode_zone: (Integer number, Integer? temperature, Integer? target, State state) -> Zone?
+
+        def opcode_type: (Integer number) -> Symbol
+
+        def opcode_super_mode: (State state, Symbol type) -> bool?
+
+        def degrees: (Integer? value) -> Float?
+
+        def on?: (?State state) -> bool
+
+        def opcode?: () -> bool
+
+        def cooling: () -> Hash[String, untyped]
+      end
+    end
+  end
+end

@@ -5,6 +5,8 @@ module Miele
       include Requests
       include OvenState
 
+      NOTIFICATION_IDS: Hash[Symbol, Objects::Enum]
+
       def power_on: () -> void
 
       def power_off: () -> void
@@ -26,6 +28,8 @@ module Miele
       def target_temperature: () -> Float?
 
       def core_target_temperature: () -> Float?
+
+      def acknowledge: (Symbol type, Integer | Symbol id, option: Integer | Symbol, ?second_cavity: bool) -> void
 
       def supported_requests: () -> Array[Integer]
 

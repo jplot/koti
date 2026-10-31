@@ -9,6 +9,10 @@ module Miele
       include Requests
       include OvenState
 
+      NOTIFICATION_IDS = { info: Objects::Oven::GlobalEnumNtfctnInfoId, message: Objects::Oven::GlobalEnumNtfctnMessageId,
+                           query: Objects::Oven::GlobalEnumNtfctnQueryId }.freeze
+      private_constant :NOTIFICATION_IDS
+
       # Switches the appliance on as the app's oven module does, waking it first when it sleeps. The app's
       # other families switch on in their own way.
       #
@@ -91,6 +95,20 @@ module Miele
       # @return [Float, nil] °C of the core probe, nil when no program sets it
       # @api public
       def core_target_temperature = celsius(:core_temperature)
+
+      # @param type [Symbol] +:info+, +:message+, +:error+ or +:query+, as {#notifications} lists them
+      # @param id [Integer, Symbol] the notification's id
+      # @param option [Integer, Symbol] one of its +ack_options+, a value of +GLOBAL_EnumNTFCTNAckOptions+
+      # @param second_cavity [Boolean] a double oven's second cavity, answered on 5/138
+      # @return [void]
+      # @raise [ActionUnavailableError] on a Dop1 oven
+      # @api public
+      def acknowledge(type, id, option:, second_cavity: false)
+        require_dop2!
+        id = NOTIFICATION_IDS[type]&.to_i(id) || id
+        option = Objects::Oven::GlobalEnumNTFCTNAckOptions.to_i(option)
+        write_dop2(Messages.acknowledge(second_cavity ? 5 : 2, type, id, option))
+      end
 
       # @return [Array<Integer>] the user requests the oven offers now, numbered as the app numbers them
       # @api public

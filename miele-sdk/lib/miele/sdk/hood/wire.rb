@@ -54,14 +54,29 @@ module Miele
         def dop2_user_request(id)
           leaf = dop2(2, 1583, idx1: 0, idx2: 1)
           request = Dop2::Field.new(type: leaf.fields[1]&.type || :e16, value: id)
-          write_dop2(leaf.with(fields: leaf.fields.merge(1 => request)), with_index: true)
+          write_modified(leaf.with(fields: leaf.fields.merge(1 => request)), 1583, 0)
         end
 
         # @param id [Integer] a +GLOBAL_EnumSfId+ value
         # @param value [Integer]
         # @return [void]
         def write_sf(id, value)
-          modify(Objects::Hood::GlobalSfValue, [2, 105, id, 1], with_index: true) { it.with(current_value: value) }
+          leaf = dop2(2, 105, idx1: id, idx2: 1)
+          fields = Objects::Hood::GlobalSfValue.from(leaf.fields).with(current_value: value).to_fields
+          write_modified(leaf.with(fields:), 105, id)
+        end
+
+        # ModifyDop2Message: the app sends the index it read at as the header's attribute, and as both indexes of
+        # an instance read above 0, back where it read with idx2 1.
+        #
+        # @param leaf [Dop2::Leaf] as read, changed
+        # @param attribute [Integer] where it was read, on unit 2
+        # @param index [Integer] the idx1 it was read at
+        # @return [void]
+        def write_modified(leaf, attribute, index)
+          leaf = leaf.with(idx1: index, idx2: index) if leaf.idx1.positive?
+          body = Dop2.encode(leaf.with(attribute: index))
+          send_request(:put, "#{dop2_path(2, attribute)}?idx1=#{index}&idx2=1", body:, kind: :dop2)
         end
       end
     end

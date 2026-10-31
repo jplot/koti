@@ -17,6 +17,8 @@ module Miele
         def dop2_user_request: (Integer id) -> void
 
         def write_sf: (Integer id, Integer value) -> void
+
+        def write_modified: (Dop2::Leaf leaf, Integer attribute, Integer index) -> void
       end
     end
   end

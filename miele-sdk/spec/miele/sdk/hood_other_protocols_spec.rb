@@ -51,11 +51,14 @@ RSpec.describe Miele::Sdk::Hood do
     end
   end
 
-  def user_request(id)
-    ['PUT', 'DOP2/2/1583?idx1=0&idx2=1', dop2_leaf(2, 1583, { 1 => dop2_field(:e16, id) }, idx2: 1).unpack1('H*')]
-  end
+  # ModifyDop2Message sends the index read at as the header's attribute, and as both indexes of an instance read
+  # above 0 (Hoods Implementation 19756-19790).
+  def user_request(id) = ['PUT', 'DOP2/2/1583?idx1=0&idx2=1', format('000f00020000000000010001000107%04x', id)]
 
-  def setting(id, value) = ['PUT', "DOP2/2/105?idx1=#{id}&idx2=1", sf_value(id, value).unpack1('H*')]
+  def setting(id, value)
+    body = format('00140002%<id>04x%<id>04x%<id>04x0002000107%<id>04x000406%<value>04x', id:, value:)
+    ['PUT', "DOP2/2/105?idx1=#{id}&idx2=1", body]
+  end
 
   it "sets the fan level of a DOP2 hood on the app's default message" do
     hood.fan_level = 2

@@ -2,7 +2,7 @@
 
 RSpec.describe Miele::Sdk::Cloud::Websocket do
   subject(:websocket) do
-    described_class.new(session, follow: ['/Devices/000123456789/State'],
+    described_class.new(session, follow: -> { ['/Devices/000123456789/State'] },
                                  fetch: ->(path) { (fetched << path) && '{"Status":1}' },
                                  sleeper: ->(seconds) { waits << seconds })
   end
@@ -108,7 +108,7 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
 
   context 'when a followed resource cannot be read' do
     subject(:websocket) do
-      described_class.new(session, follow: %w[/Devices/1/State /Devices/2/State],
+      described_class.new(session, follow: -> { %w[/Devices/1/State /Devices/2/State] },
                                    fetch: lambda { |path|
                                      raise Miele::Sdk::NotFoundError.new(404, 'gone') if path.include?('/1/')
 

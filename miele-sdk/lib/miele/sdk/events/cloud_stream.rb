@@ -14,7 +14,7 @@ module Miele
 
         # @param channel [Cloud::Channel] the account
         def initialize(channel)
-          follow = channel.devices.map { "/Devices/#{it.fab}/State" }
+          follow = -> { channel.devices.map { "/Devices/#{it.fab}/State" } }
           @websocket = Cloud::Websocket.new(channel.session, follow:,
                                                              fetch: ->(path) { channel.request(:get, path).body })
         end

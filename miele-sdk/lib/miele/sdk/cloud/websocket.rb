@@ -34,12 +34,12 @@ module Miele
 
         # @param session [Session] its organization's rest host names the websocket,
         #   +wss://{host}/websocket/V2/Devices/+
-        # @param follow [Array<String>] resources read again on each connection, as +/Devices/{fab}/State+
+        # @param follow [#call] the resources to read again, called on each connection: +/Devices/{fab}/State+…
         # @param fetch [#call] reads one of them, the cloud channel by default
         # @param clock [#call] seconds, monotonic
         # @param sleeper [#call] waits the given number of seconds
-        def initialize(session, follow: [], fetch: nil, clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) },
-                       sleeper: method(:sleep))
+        def initialize(session, follow: -> { [] }, fetch: nil,
+                       clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }, sleeper: method(:sleep))
           @session = session
           @url = URI("#{session.organization.rest.sub(/\Ahttp/, 'ws')}/websocket/V2/Devices/")
           @follow = follow
@@ -96,7 +96,7 @@ module Miele
         # @yieldparam message [Message]
         # @return [void]
         def refetch
-          @follow.each do |path|
+          @follow.call.each do |path|
             body = @fetch.call(path)
           rescue Error
             next

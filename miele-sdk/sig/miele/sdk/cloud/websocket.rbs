@@ -21,12 +21,12 @@ module Miele
 
         @session: Session
         @url: URI::Generic
-        @follow: Array[String]
+        @follow: ^() -> Array[String]
         @fetch: ^(String path) -> String
         @clock: ^() -> Float
         @sleeper: ^(Numeric seconds) -> untyped
 
-        def initialize: (Session session, ?follow: Array[String], ?fetch: (^(String path) -> String)?,
+        def initialize: (Session session, ?follow: ^() -> Array[String], ?fetch: (^(String path) -> String)?,
                          ?clock: ^() -> Float, ?sleeper: ^(Numeric seconds) -> untyped) -> void
 
         def each: () { (Message message) -> void } -> void

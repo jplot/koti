@@ -31,6 +31,11 @@ RSpec.describe Miele::Sdk::Events::CloudStream do
 
   def event(fab, resource, content) = Miele::Sdk::Events::Event.new(fab:, resource:, content:, source: :cloud)
 
+  it 'reaches the cloud only once it connects' do
+    allow(channel).to receive(:devices).and_raise(Miele::Sdk::ConnectionError, 'offline')
+    expect { stream }.not_to raise_error
+  end
+
   it 'streams a cloud State change as an event' do
     pushes << push('/V2/Devices/000123456789/State', '{"Status":5}')
     expect(first_events(1)).to eq([event('000123456789', '/State/', { 'Status' => 5 })])

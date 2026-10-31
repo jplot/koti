@@ -11,7 +11,7 @@ RSpec.describe Miele::Sdk, :live do
       config.group_key = ENV.fetch('MIELE_GROUP_KEY')
     end
     allow(Miele::Sdk::Connection).to receive(:request).and_wrap_original do |original, host, verb, *rest, **options|
-      raise "live specs are read-only: #{verb.upcase} refused" unless verb == :get
+      raise "live specs are read-only: #{verb.upcase} refused" unless verb == :get || dop1_read?(rest.first, options)
 
       original.call(host, verb, *rest, **options)
     end
@@ -21,6 +21,10 @@ RSpec.describe Miele::Sdk, :live do
 
       original.call(verb, url, **options)
     end
+  end
+
+  def dop1_read?(path, options)
+    path.to_s.end_with?('/DOP/') && JSON.parse(options[:body].to_s)['Request'].to_s[4, 2] == Miele::Sdk::Dop1::READ
   end
 
   it 'discovers the configured appliances' do
@@ -70,6 +74,18 @@ RSpec.describe Miele::Sdk, :live do
   it 'reads each typed resource with the fields the app requires and no key its class lacks' do
     found = appliances.flat_map { typed_resources(it) }.flat_map { |type, data, path| mismatches(type, data, path) }
     expect(found).to be_empty
+  end
+
+  it 'reads the hood as the app does once it serves ExtendedState' do
+    hood = appliances.find { it.is_a?(Miele::Sdk::Hood) } or skip 'no hood among MIELE_HOSTS'
+    pending 'switch the hood on to read it' if hood.state.raw['ExtendedState'].to_s.empty?
+    expect([hood.fan_level, hood.run_on, hood.lights, hood.grease_filter, hood.charcoal_filter]).to all(be)
+  end
+
+  it 'reads the hob as the app does once it serves ExtendedState' do
+    hob = appliances.find { it.is_a?(Miele::Sdk::Hob) } or skip 'no hob among MIELE_HOSTS'
+    pending 'switch the hob on to read it' if hob.state.raw['ExtendedState'].to_s.empty?
+    expect(hob.zones).to all(be_a(Miele::Sdk::Hob::Zone)).and(be_any)
   end
 
   it 'gets a NotFoundError for a dop2 leaf from appliances that serve no DOP2', :aggregate_failures do
@@ -130,6 +146,11 @@ RSpec.describe Miele::Sdk, :live do
         .to match([an_instance_of(objects::GlobalDeviceContext), an_instance_of(objects::GlobalPsContext),
                    an_instance_of(objects::GlobalNtfctnShow)])
       expect(oven.target_temperature).to be_nil.or(be_a(Float))
+    end
+
+    it "reads the hood's ColorFlow and Con@ctivity Plus, nil where it has none" do
+      hood = appliances.find { it.is_a?(Miele::Sdk::Hood) } or skip 'no hood among MIELE_HOSTS'
+      expect([hood.color_flow, hood.connectivity_plus]).to all(be_nil.or(be_a(Data)))
     end
 
     it 'reads the household key from the cloud and signs locally with it', :aggregate_failures do

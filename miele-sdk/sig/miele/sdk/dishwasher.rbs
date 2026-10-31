@@ -1,6 +1,55 @@
 module Miele
   module Sdk
     class Dishwasher < Appliance
+      class Consumption < Data
+        attr_reader energy: Float
+        attr_reader water: Float
+
+        def self.new: (Float energy, Float water) -> Consumption
+                    | (energy: Float, water: Float) -> Consumption
+      end
+
+      REQUESTS: Hash[Integer, Symbol]
+
+      DOP1_REQUESTS: Hash[Integer, Array[Symbol]]
+
+      def context: () -> Objects::Dishwasher::GlobalDeviceContext
+
+      def program_context: () -> Objects::Dishwasher::GlobalPsContext
+
+      def programs: () -> Objects::Dishwasher::GlobalProgramList
+
+      def notifications: () -> Objects::Dishwasher::GlobalNtfctnShow
+
+      def setting: (Integer id) -> Objects::Dishwasher::GlobalSfValue
+
+      def locked?: () -> bool
+
+      def mobile_control?: () -> bool
+
+      def supported_requests: () -> Array[Symbol]
+
+      def program_list: () -> untyped
+
+      def selection: () -> untyped
+
+      def consumption: () -> Consumption?
+
+      def consumables: () -> Hash[String, untyped]
+
+      def statistics: () -> Hash[String, untyped]?
+
+      def latest_program_runs: () -> untyped
+
+      private
+
+      def dop2?: () -> bool
+
+      def pg81?: () -> bool
+
+      def tenths: (untyped value) -> Float
+
+      def dop1_object: (untyped klass) -> untyped
     end
   end
 end

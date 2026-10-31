@@ -65,9 +65,14 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([parameter(13, :u64, 0xFFFF_FFFF_FFFF_FFFF)])
   end
 
-  it 'sets the duration after start at goes to its minimum, as the app does' do
+  it 'sets a duration alone, keeping the start time' do
     oven.duration = 1800
-    expect(written.map(&:last)).to eq([parameter(13, :u64, 1_700_000_000), parameter(12, :u32, 1800)])
+    expect(written.map(&:last)).to eq([parameter(12, :u32, 1800)])
+  end
+
+  it 'moves the start to its minimum before a zero duration, as the app does' do
+    oven.duration = 0
+    expect(written.map(&:last)).to eq([parameter(13, :u64, 1_700_000_000), parameter(12, :u32, 0)])
   end
 
   it 'refuses more than three steam burst times', :aggregate_failures do

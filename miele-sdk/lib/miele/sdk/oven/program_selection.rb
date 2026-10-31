@@ -90,13 +90,13 @@ module Miele
           set_parameter(14, :u64, time.to_i)
         end
 
-        # The app first moves the start to its minimum (SetDurationAction · ResetStartTimeAsync).
+        # The app moves the start to its minimum before a zero duration only (SetDurationAction).
         #
         # @param seconds [Integer]
         # @api public
         def duration=(seconds)
           context = program_context
-          set_parameter(13, :u64, context.context_para_ca&.start_at&.min.to_i, context:)
+          set_parameter(13, :u64, context.context_para_ca&.start_at&.min.to_i, context:) if seconds.zero?
           set_parameter(12, :u32, seconds, context:)
         end
 

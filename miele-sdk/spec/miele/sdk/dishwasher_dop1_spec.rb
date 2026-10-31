@@ -41,6 +41,11 @@ RSpec.describe Miele::Sdk::Dishwasher do
   context 'when its program waits' do
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 1], 'SignalDoor' => false, 'ProgramID' => 13 } }
 
+    it 'stops with ProcessAction 2 though only cancel is offered, as the app does' do
+      dishwasher.stop
+      expect(written.map(&:last)).to eq([state.merge('ProcessAction' => 2)])
+    end
+
     it 'cancels with 128' do
       dishwasher.cancel
       expect(written.map(&:last)).to eq([state.merge('ProcessAction' => 128)])

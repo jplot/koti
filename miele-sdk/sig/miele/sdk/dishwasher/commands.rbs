@@ -40,7 +40,7 @@ module Miele
 
         def settable?: (Integer id) -> bool
 
-        def stop_with: (Symbol request) -> void
+        def stop_with: (Symbol request, *Symbol alternatives) -> void
 
         def run: (State state, Symbol name) -> void
 

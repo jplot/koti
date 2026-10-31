@@ -97,6 +97,16 @@ RSpec.describe Miele::Sdk::Dishwasher do
     end
   end
 
+  context 'when it runs and offers only to cancel' do
+    let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 1 } }
+
+    it "stops all the same, as the app's Stop quick action does" do
+      leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1)
+      dishwasher.stop
+      expect(written.map(&:last)).to eq([user_request(2).last])
+    end
+  end
+
   context 'when it runs under mobile start' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 1 } }
 

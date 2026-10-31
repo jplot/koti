@@ -49,10 +49,12 @@ module Miele
           run(state, :resume)
         end
 
+        # The app's Stop quick action is on while either Stop or Cancel is offered, and sends Stop.
+        #
         # @return [void]
         # @raise [ActionUnavailableError] see {#cancel}
         # @api public
-        def stop = stop_with(:stop)
+        def stop = stop_with(:stop, :cancel)
 
         # The app stops or cancels without mobile start, only not locked.
         #
@@ -149,11 +151,13 @@ module Miele
         end
 
         # @param request [Symbol]
+        # @param alternatives [Array<Symbol>] other requests whose offer allows it
         # @return [void]
-        def stop_with(request)
+        def stop_with(request, *alternatives)
           state = checked_state
           running = [5, 6].include?(status(state)) || (status(state) == 4 && [1, 255].include?(standby(state)))
-          require!(!locked_in?(state) && offered?(request) && running, "the dishwasher cannot #{request} now")
+          offered = [request, *alternatives].any? { offered?(it) }
+          require!(!locked_in?(state) && offered && running, "the dishwasher cannot #{request} now")
           run(state, request)
         end
 

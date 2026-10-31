@@ -698,7 +698,8 @@ set, the account's appliances through the Miele cloud, as the app does. It block
 thread: `source` is `:local` for an appliance's push and `:cloud` for the cloud's, and a change
 both push arrives twice, once from each. Pass `cloud: nil` to listen only locally; without `hosts`
 it listens only to the cloud, and without either it raises `ArgumentError`. When one side fails,
-the stream ends with its error.
+the stream ends with its error. Each side is read on a thread of its own, so a slow block holds back
+neither its reads nor the cloud's keep-alive: the events wait for the block in a queue.
 
 `event.attributes` reads `content` as a typed value: a `DeviceIdentification` for `/Ident/`, a
 `DeviceState` for `/State/`, of which `/State/Light/` and `/State/Status/` fill only `light` or
@@ -744,7 +745,9 @@ the other resources. A module without a fabrication number is named by its `mac-
 Each message is acknowledged as the app does, a keep-alive goes out every 30 s, and the websocket
 reconnects 6 s after an error or a close, and at once after a minute without a message, each time
 with the session's current token, renewed when the cloud refuses it. An account the cloud refuses
-ends the stream with `AuthenticationError`. It connects directly, without the environment's proxy.
+ends the stream with `AuthenticationError`. A read or write that stalls, even in the middle of a
+frame, gives up after `read_timeout` and reconnects. It connects directly, without the environment's
+proxy.
 
 It has run against the live cloud with a French account. The cloud pushes its messages as `POST`
 requests behind a `CloudConnect: sc-data-…` header, the device list first, then `State` changes;

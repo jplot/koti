@@ -33,6 +33,15 @@ module Miele
       LIGHT = { 1 => :on, 2 => :off }.freeze
       private_constant :LIGHT
 
+      # The Dop1 object the app builds from ExtendedState, by device type and ProtocolVersion, and the zero bytes it
+      # puts first. DOP2 hobs (4) are read through DOP2 instead; the other families read their ExtendedState otherwise.
+      EXTENDED_STATES = {
+        [:hood, 1] => ['Hood::ExtendedOpCodeDeviceState', 0], [:hood, 2] => ['Hood::ExtendedDopDeviceState', 22],
+        [:hood, 3] => ['Hood::ExtendedDop2DeviceState', 22], [:hood, 4] => ['Hood::ExtendedDop2DeviceState', 22],
+        **%i[hob_highlight hob_induction hob_gas].product([1, 2]).to_h { [it, ['Hob::ExtendedDeviceState', 22]] }
+      }.freeze
+      private_constant :EXTENDED_STATES
+
       # @return [Hash{String=>Object}] the resource as the appliance served it
       attr_reader :raw
 
@@ -54,6 +63,15 @@ module Miele
         @device_type = device_type
         @protocol_version = protocol_version
         @tech_type = tech_type
+      end
+
+      # @return [Data, nil] +ExtendedState+ as the app reads it, such as an {Objects::Hood::ExtendedDopDeviceState};
+      #   nil for the families that read it otherwise, or when the appliance serves none
+      # @api public
+      def extended_state
+        name, padding = EXTENDED_STATES[[device_type, protocol_version]]
+        hex = raw['ExtendedState'].to_s
+        Objects.const_get(name).from(("\0" * padding) + [hex].pack('H*')) unless name.nil? || hex.empty?
       end
 
       # @return [Schema::DeviceState] {#raw} as a typed value

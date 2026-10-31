@@ -4,3 +4,12 @@ inherit_from: ../.rubocop.yml
 RSpec/Output:
   Exclude:
     - 'spec/fixtures/**/*'
+
+AllCops:
+  Exclude:
+    - 'lib/miele/sdk/objects/families.rb'
+    - 'lib/miele/sdk/objects/*/**/*'
+
+inherit_mode:
+  merge:
+    - Exclude

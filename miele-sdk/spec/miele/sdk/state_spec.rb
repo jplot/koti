@@ -165,4 +165,27 @@ RSpec.describe Miele::Sdk::State do
       expect(described_class.new({ 'ProgramPhase' => 4608 }, device_type).program_phase).to eq(:unknown)
     end
   end
+
+  describe '#extended_state' do
+    def extended(device_type, protocol_version, hex)
+      described_class.new({ 'ExtendedState' => hex }, device_type, protocol_version:).extended_state
+    end
+
+    it 'decodes the hood ExtendedState as the app does' do
+      expect(extended(:hood, 2, '00000002').luefter_1.luefterstufe_luefter_1).to eq(2)
+    end
+
+    it "reads a DOP2 hood's in its byte order, as the app does for ProtocolVersion 3 and 4" do
+      expect([3, 4].map { extended(:hood, it, '00000000000000000102').licht_1_dimm.licht_1 }).to eq([0x0201] * 2)
+    end
+
+    it 'decodes the hob ExtendedState as the app does' do
+      expect(extended(:hob_induction, 2, '000005').geraetespezifische_informationen.kurzzeit_minuten).to eq(5)
+    end
+
+    it 'gives nil where the app reads ExtendedState otherwise, or finds none', :aggregate_failures do
+      expect(extended(:oven, 2, '00')).to be_nil
+      expect(extended(:hood, 2, '')).to be_nil
+    end
+  end
 end

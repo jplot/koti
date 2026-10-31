@@ -80,3 +80,25 @@ It takes `ikdasm`, which comes with Mono (`monodis` fails on some of the app's a
    MIELE_GROUP_ID=… MIELE_GROUP_KEY=… MIELE_HOSTS=host,… bundle exec ruby schema/extract/capture.rb path/to/capture.json
    bundle exec ruby schema/extract/match.rb path/to/il path/to/capture.json
    ```
+
+## Objects
+
+`lib/miele/sdk/objects/objects.json.gz` holds the DOP2 and Dop1 objects the app's family modules
+use, read from the IL of its assemblies: their fields with wire types or byte layouts, the objects
+they extend, and their enums. The classes carry no address: `schema/addresses.tsv` gives where the
+app reads or writes each top-level DOP2 class, one IL citation per row. `rake generate` writes the
+Ruby and RBS of `lib/miele/sdk/objects/` from both, and `rake generate:check`, first in `rake`,
+fails when the committed files differ.
+
+To refresh them from a newer app, print the IL of every `Miele.Modules.*.ApplianceCommunication.*`
+assembly as in steps 1 and 2 below, then:
+
+```sh
+bundle exec ruby schema/extract/objects/extract.rb path/to/il schema/addresses.tsv \
+  lib/miele/sdk/objects/objects.json.gz
+bundle exec rake generate
+```
+
+The extractor prints where the call sites it recognizes give an address the table lacks: each one is
+an address to add with its citation, or one the rules misread. For the app 4.19.0 it prints laundry
+`GLOBAL_ProgramList`, whose row says why.

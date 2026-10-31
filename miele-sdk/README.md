@@ -207,6 +207,43 @@ sends them.
 A value out of range raises `ArgumentError` before anything is sent. `Miele::Sdk::Dop1` builds
 the requests, and `hood.dop1(request)` sends any other one.
 
+## Typed objects
+
+The objects behind DOP2 leaves and Dop1 requests come typed, generated from the Miele app's own
+classes: `Miele::Sdk::Objects::<Family>` (`Oven`, `Hood`, `Hob`, `Dishwasher`, `Laundry`,
+`CoffeeGen7`, `CoffeeCm7`, `Drawer`) holds a `Data` class per object and a module per enum, each
+loaded on its first use. Names follow the app's: `GLOBAL_PS_Select` is `GlobalPsSelect`, its getter
+`ProgId` the member `prog_id`, and the value `GLOBAL_DS_MAINSTATEEXTERN_RUNNING` the symbol `:running`.
+
+```ruby
+steps = oven.object(Miele::Sdk::Objects::Oven::GlobalOpProgramInfoCA)  # 2/213, idx 0/1, as the app polls it
+steps.amount_of_steps  # => 3
+steps.infos1           # => [:beliebige_ebene, 65000]: a value the app does not know stays a number
+
+select = dishwasher.object(Miele::Sdk::Objects::Dishwasher::GlobalPsSelect)       # 2/1577, idx 0/0
+dishwasher.write_object(select.with(prog_id: :dw_prg_intensiv), [2, 1577, 0, 0])  # where the app writes it back
+
+hood.object(Miele::Sdk::Objects::Hood::GlobalSfValue, [2, 105, 9001, 1])  # an index the app computes
+hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the fan level, as the app reads it
+```
+
+- `ADDRESSES` lists where the app reads or writes a DOP2 object: `[unit, attribute]` when it sends
+  no index, else `[unit, attribute, idx1, idx2]`, nil for an index it computes. `object` reads at
+  the first unless given another; `write_object` writes only where it is told, the app writing some
+  objects elsewhere than it reads them. Both raise `ArgumentError` while an index is left to compute.
+- An attribute the leaf lacks reads nil. `write_object` writes back the attributes as read, each
+  changed member in the wire type it was read in, and raises `ArgumentError` for a member it did not
+  read, as the app's setters do.
+- A Dop1 object decodes its sections, bit fields and byte order (`from(bytes)`), and `to_bytes`
+  gives what a write section sends.
+- `state.extended_state` decodes `ExtendedState` into the object the app builds from it: the hood's
+  by `ProtocolVersion` (1 to 4), and the Dop1 and Opcode hob's. It is nil for the other
+  families, which read it otherwise, and when the appliance serves none, as they do switched off.
+
+Only the objects the app's family modules use are generated: 402 DOP2 classes, 468 Dop1 classes and
+336 enums from the app 4.19.0. None has been read from an appliance yet: the hood and hob tried
+served an empty `ExtendedState`, being off, and the oven serves DOP2 only through the cloud.
+
 ## Cloud
 
 After pairing, the Miele app reaches the appliances only through the Miele cloud, and some Wi-Fi
@@ -344,7 +381,8 @@ read from its code.
 
 ```sh
 bundle install
-bundle exec rake   # RuboCop, RSpec, YARD coverage, RBS validation, Steep
+bundle exec rake            # generated files, RuboCop, RSpec, YARD coverage, RBS validation, Steep
+bundle exec rake generate   # rewrites lib/miele/sdk/objects/ from objects.json.gz
 ```
 
 Live specs run against real appliances and never write to them: any request other than `GET` is

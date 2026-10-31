@@ -1,0 +1,81 @@
+module Miele
+  module Sdk
+    module Objects
+      module Enum : ::Module
+        def from: (::Integer number) -> (::Symbol | ::Integer)
+        def to_i: (::Symbol | ::Integer value) -> ::Integer
+
+        private
+
+        def values: () -> ::Hash[::Symbol, ::Integer]
+      end
+
+      module Dop2Class : ::Module
+        def from: (::Hash[::Integer, Dop2::Field] fields) -> untyped
+        def layout: () -> ::Hash[::Symbol, [::Integer, ::Symbol, ::String?]]
+        def new: (**untyped) -> untyped
+      end
+
+      interface _Dop2Value
+        def raw: () -> ::Hash[::Integer, Dop2::Field]
+        def class: () -> untyped
+        def public_send: (::Symbol) -> untyped
+      end
+
+      module Dop2Value : _Dop2Value
+        def to_fields: () -> ::Hash[::Integer, Dop2::Field]
+
+        private
+
+        def written: (::Symbol member, untyped value, ::Array[untyped] spec) -> [::Integer, Dop2::Field]
+      end
+
+      module Dop1Class : ::Module
+        def from: (::String bytes, ?endian: ::Symbol?) -> untyped
+        def layout: () -> ::Hash[::Symbol, ::Array[untyped]]
+        def new: (**untyped) -> untyped
+      end
+
+      interface _Dop1Value
+        def bytes: () -> ::String
+        def endian: () -> ::Symbol?
+        def class: () -> untyped
+        def public_send: (::Symbol) -> untyped
+      end
+
+      module Dop1Value : _Dop1Value
+        def to_bytes: () -> ::String
+        def changed_bytes: () -> ::String
+      end
+
+      module Dop1Bytes
+        DIRECTIVES: ::Hash[::Symbol, ::String]
+        WIDTHS: ::Hash[::Integer, ::String]
+        ORDERS: ::Hash[::Symbol, ::String]
+
+        def self?.read: (::String bytes, ::Symbol? endian, ::Array[untyped] spec) -> untyped
+        def self?.write: (::String out, ::Symbol? endian, untyped value, ::Array[untyped] spec) -> void
+        def self?.enum: (::String? type) -> untyped
+        def self?.number: (::String bytes, ::Symbol? endian, ::String directive, ::Integer offset, ::Integer size) -> ::Integer?
+        def self?.put: (::String out, ::Symbol? endian, ::String directive, ::Integer offset, ::Integer value) -> void
+        def self?.directive: (::String directive, ::Symbol? endian) -> ::String
+        def self?.bits: (::String bytes, ::Symbol? endian, ::Integer offset, ::Integer count) -> ::Integer?
+        def self?.put_bits: (::String out, ::Symbol? endian, ::Integer offset, ::Integer count, ::Integer value) -> void
+        def self?.integer: (::String bytes, ::Symbol? endian) -> ::Integer
+        def self?.section: (::String bytes, ::Symbol? endian, ::Integer offset, ::Integer length, ::String klass) -> untyped
+        def self?.field: (::String bytes, ::Symbol? endian, ::Array[untyped] spec) -> ::Integer?
+        def self?.array: (::String bytes, ::Symbol? endian, ::Integer offset, ::Integer count, ::Integer width) -> ::Array[::Integer?]
+        def self?.put_array: (::String out, ::Symbol? endian, ::Integer offset, ::Array[::Integer] items, ::Integer width) -> void
+        def self?.packed: (::Integer integer, ::Integer size, ::Symbol? endian) -> ::String
+
+        module Plain
+          def self?.from: (::Integer number) -> ::Integer
+          def self?.to_i: (::Integer value) -> ::Integer
+        end
+      end
+
+      def self.read: (untyped value, ::Symbol kind, untyped type) -> untyped
+      def self.write: (untyped value, ::Symbol kind, untyped type) -> untyped
+    end
+  end
+end

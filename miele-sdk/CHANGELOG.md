@@ -27,6 +27,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Typed values of the DOP2 and Dop1 objects the Miele app uses, generated from its classes under
+  `Miele::Sdk::Objects::<Family>`: `Appliance#object` and `#write_object` at the addresses the app
+  uses, and `State#extended_state` for hoods and hobs.
 - The Miele cloud next to the local channel, as the Miele app uses it: the cloud and login system of
   the account's country from the locales the app reads, MCS login or CIAM code exchange, a token
   renewed once across threads and kept in `token_file`, requests under `/V2`, local first and the

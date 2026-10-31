@@ -47,19 +47,34 @@ module Miele
           @sleeper = sleeper
         end
 
-        # Reconnects until the block breaks, which closes the connection.
+        # Reconnects until the block breaks, which closes the connection, or raises, which ends it with that error.
         #
         # @yieldparam message [Message] a pushed resource, or one read again on connecting
         # @return [void]
         # @api public
         def each(&)
-          loop do
-            wait = connection(&)
-            @sleeper.call(wait) if wait.positive?
+          error = catch do |tag|
+            loop do
+              wait = connection { |message| hand_over(message, tag, &) }
+              @sleeper.call(wait) if wait.positive?
+            end
           end
+          raise error
         end
 
         private
+
+        # Carries what the block raises past the rescue that reconnects.
+        #
+        # @param message [Message]
+        # @param tag [Object] the +catch+ of {#each}
+        # @yieldparam message [Message]
+        # @return [void]
+        def hand_over(message, tag)
+          yield message
+        rescue StandardError => e
+          throw tag, e
+        end
 
         # @yieldparam message [Message]
         # @return [Integer] the seconds to wait before connecting again

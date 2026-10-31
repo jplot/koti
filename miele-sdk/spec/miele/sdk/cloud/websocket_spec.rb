@@ -128,4 +128,15 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
       expect { first_messages(1) }.to raise_error(stop)
     end
   end
+
+  context 'when the block raises' do
+    subject(:websocket) do
+      described_class.new(session, sleeper: ->(_seconds) { raise 'reconnected' })
+    end
+
+    it 'ends with that error instead of reconnecting' do
+      failing = ->(message) { raise Miele::Sdk::ConnectionError, message.path }
+      expect { websocket.each(&failing) }.to raise_error(Miele::Sdk::ConnectionError, '/V2/Devices/000123456789/State')
+    end
+  end
 end

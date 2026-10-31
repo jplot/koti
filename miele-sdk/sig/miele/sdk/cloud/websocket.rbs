@@ -33,6 +33,8 @@ module Miele
 
         private
 
+        def hand_over: (Message message, Object tag) { (Message message) -> void } -> void
+
         def connection: () { (Message message) -> void } -> Integer
 
         def refetch: () { (Message message) -> void } -> void

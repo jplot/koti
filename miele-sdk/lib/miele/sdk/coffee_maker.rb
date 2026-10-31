@@ -72,16 +72,17 @@ module Miele
       def drink_limits(id) = gen7_object(Objects::CoffeeGen7::GlobalDrinkconfDrinkThresholds, [2, 331, id, 0])
 
       # The app reads 1/109 from the standard profile on, each instance's idx2 naming the next, until one names
-      # itself or passes the last profile.
+      # itself or passes the last profile, and tells each by its instance's idx1.
       #
-      # @return [Array<Objects::CoffeeGen7::GlobalOpProgramName>] the standard profile first, none on a CM7
+      # @return [Hash{Integer=>Objects::CoffeeGen7::GlobalOpProgramName}] by id, the standard profile first; none
+      #   on a CM7
       # @api public
       def profiles
-        found = [] #: Array[untyped]
+        found = {} #: Hash[Integer, untyped]
         current = STANDARD_PROFILE
         while gen7?
           leaf = dop2(1, 109, idx1: current, idx2: 0)
-          found << Objects::CoffeeGen7::GlobalOpProgramName.from(leaf.fields)
+          found[leaf.idx1] = Objects::CoffeeGen7::GlobalOpProgramName.from(leaf.fields)
           return found if leaf.idx1 == leaf.idx2 || leaf.idx2 == current || leaf.idx2 > LAST_PROFILE
 
           current = leaf.idx2

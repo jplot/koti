@@ -32,7 +32,7 @@ module Miele
 
       def drink_limits: (Integer id) -> Objects::CoffeeGen7::GlobalDrinkconfDrinkThresholds?
 
-      def profiles: () -> Array[Objects::CoffeeGen7::GlobalOpProgramName]
+      def profiles: () -> Hash[Integer, Objects::CoffeeGen7::GlobalOpProgramName]
 
       def device_state: () -> Objects::CoffeeGen7::DeviceState?
 

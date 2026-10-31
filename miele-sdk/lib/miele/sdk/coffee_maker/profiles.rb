@@ -18,7 +18,7 @@ module Miele
         # @api public
         def create_profile(name)
           require_profiles!
-          used = profiles.map { it.program_id.to_i }
+          used = profiles.keys
           id = (FIRST_CUSTOM...(FIRST_CUSTOM + profile_slots)).find { !used.include?(it) }
           require!(id, 'the coffee maker has no free profile')
           write_profile(id.to_i, active: false, name:, clear_list: false, program_id: id, display_position: 255,
@@ -33,7 +33,7 @@ module Miele
         # @api public
         def rename_profile(id, name)
           require_profiles!
-          taken = profiles.reject { it.program_id == id }.map(&:name)
+          taken = profiles.except(id).values.map(&:name)
           if name.strip.empty? || taken.include?(name) || name.upcase == 'MIELE'
             raise ArgumentError, "#{name.inspect} is blank, taken or reserved"
           end

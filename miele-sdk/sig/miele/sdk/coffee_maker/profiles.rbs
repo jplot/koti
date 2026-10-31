@@ -29,7 +29,7 @@ module Miele
 
         def gen7?: () -> bool
 
-        def profiles: () -> Array[Objects::CoffeeGen7::GlobalOpProgramName]
+        def profiles: () -> Hash[Integer, Objects::CoffeeGen7::GlobalOpProgramName]
 
         def features: () -> Objects::CoffeeGen7::GlobalFeatureList?
 

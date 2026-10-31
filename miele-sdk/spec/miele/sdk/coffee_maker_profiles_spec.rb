@@ -34,9 +34,10 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   end
 
   def profile(id, name, following: id, **given)
-    values = { type: 10, display: 255, active: true, clear: false }.merge(given)
-    fields = { 1 => dop2_field(:u16, id), 2 => dop2_field(:e8, values[:type]), 3 => dop2_field(:string, name),
-               4 => dop2_field(:u8, values[:display]), 5 => dop2_field(:bool, values[:active]),
+    values = { program_id: id, type: 10, display: 255, active: true, clear: false }.merge(given)
+    fields = { 1 => dop2_field(:u16, values[:program_id]), 2 => dop2_field(:e8, values[:type]),
+               3 => dop2_field(:string, name), 4 => dop2_field(:u8, values[:display]),
+               5 => dop2_field(:bool, values[:active]),
                6 => dop2_field(:bool, values[:clear]) }
     dop2_leaf(1, 109, fields, idx1: id, idx2: following)
   end
@@ -61,6 +62,12 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   it 'creates a profile on the first free id, inactive, as the app does' do
     coffee.create_profile('Ben')
     expect(written).to eq([['DOP2/1/109?idx1=24814&idx2=0', as_written(profile(24_814, 'Ben', active: false), 24_814)]])
+  end
+
+  it 'tells profiles by the index of their instance, whatever ProgramId says, as the app does' do
+    served[[1, 109, 24_813, 0]] = profile(24_813, 'Anna', following: 24_815, program_id: 0)
+    coffee.create_profile('Ben')
+    expect(written.map(&:first)).to eq(['DOP2/1/109?idx1=24814&idx2=0'])
   end
 
   it 'renames a profile, refusing a blank, taken or Miele name', :aggregate_failures do

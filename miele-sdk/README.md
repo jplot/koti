@@ -492,7 +492,7 @@ coffee.variant           # => :cva_ref2; :cm7, :cm6f, :cva, :cva6000 or :unknown
 coffee.program_context   # 1574 at 0/1, on unit 2 for a CM7 and 1 for the others; context (0/8), notifications
 coffee.combi_state       # 2/1586
 coffee.cleaning          # 2/289; descaling, features, device_ident; nil on a CM7
-coffee.profiles          # 1/109 from the standard profile 24812 along the chain; none on a CM7
+coffee.profiles          # 1/109 from the standard profile 24812 along the chain, by id; none on a CM7
 coffee.drink(24_005)     # 2/261 at idx1 = the drink's id; drink_limits(24_005) reads 2/331
 coffee.device_state      # a CVA6000's Dop1 1000; usage_counters reads 8D00
 ```

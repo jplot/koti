@@ -66,7 +66,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
 
     it 'reads none of what the app reads only on the others', :aggregate_failures do
       expect([coffee.cleaning, coffee.descaling, coffee.features, coffee.device_ident]).to all(be_nil)
-      expect(coffee.profiles).to be_empty
+      expect(coffee.profiles).to eq({})
       expect(dop2_paths).to be_empty
     end
   end
@@ -74,7 +74,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   it 'reads the profiles along their chain from the standard one' do
     leaves[[1, 109, 24_812, 0]] = dop2_leaf(1, 109, { 3 => dop2_field(:string, 'Miele') }, idx1: 24_812, idx2: 24_813)
     leaves[[1, 109, 24_813, 0]] = dop2_leaf(1, 109, { 3 => dop2_field(:string, 'Anna') }, idx1: 24_813, idx2: 24_813)
-    expect(coffee.profiles.map(&:name)).to eq(%w[Miele Anna])
+    expect(coffee.profiles.transform_values(&:name)).to eq(24_812 => 'Miele', 24_813 => 'Anna')
   end
 
   context 'with a CVA6000' do

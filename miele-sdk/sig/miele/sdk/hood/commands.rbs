@@ -30,7 +30,9 @@ module Miele
 
         def color_flow: () -> ColorFlow?
 
-        def configure_connectivity_plus: (activated: bool, sources: Array[String]) -> void
+        def connect_hob: (String hob) -> void
+
+        def disconnect_hob: (String hob) -> void
 
         def wake: () -> void
 
@@ -47,6 +49,8 @@ module Miele
         private
 
         def reset_filter: (Integer pf_id, Integer request, String opcode_request) -> void
+
+        def update_connectivity_plus: () { (Array[String] sources) -> Array[String] } -> void
 
         def route: (Symbol kind) -> Symbol
 

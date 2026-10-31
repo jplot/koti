@@ -281,14 +281,15 @@ hood switched off, serving no `ExtendedState`; Opcode and DOP2 hoods have never 
 
 ```ruby
 hood.connectivity_plus  # => #<data ConnectivityPlus available=true, activated=false, available_sources=[…], sources=[]>
-hood.configure_connectivity_plus(activated: true, sources: ['000111222333'])  # the hobs it follows
+hood.connect_hob('000111222333')    # and disconnect_hob: Con@ctivity Plus follows the hob
 hood.color_flow         # => #<data ColorFlow active=true, interval=10>, nil when the hood has none
 hood.configure_color_flow(active: true, interval: 20)  # 5, 10 or 20 seconds
 hood.supervise('000111222333', show: true)              # Con@ctivity One
 ```
 
-Con@ctivity Plus makes a hood follow hobs; the SDK refuses it unless `services` shows it
-available, as the app hides it. ColorFlow reads 404, and 500 on a DOP2 hood, as none, and an
+Con@ctivity Plus makes a hood follow hobs. As in the app, `connect_hob` and `disconnect_hob` change
+one hob in the list `services` shows and switch Con@ctivity Plus on while one is left; the SDK
+refuses them unless `services` shows it available, as the app hides it. ColorFlow reads 404, and 500 on a DOP2 hood, as none, and an
 interval the app does not know as 10 seconds; the SDK refuses to set it on a hood that has none.
 `supervise` writes `SuperVision/{fab}` of the appliance that shows another one, with `Show` alone:
 the app leaves `Signal` out. ColorFlow and Con@ctivity Plus have been read from a real hood through

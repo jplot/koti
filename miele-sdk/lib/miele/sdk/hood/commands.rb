@@ -118,16 +118,19 @@ module Miele
           send_request(:put, "/Devices/#{fab}/ColorFlow", body:)
         end
 
-        # @param activated [Boolean]
-        # @param sources [Array<String>] the fabrication numbers of the hobs it follows
+        # Con@ctivity Plus: the hood follows one more hob.
+        #
+        # @param hob [String] its fabrication number
         # @return [void]
         # @raise [ActionUnavailableError] when the hood does not offer Con@ctivity Plus
         # @api public
-        def configure_connectivity_plus(activated:, sources:)
-          require!(connectivity_plus&.available, 'the hood offers no Con@ctivity Plus')
-          body = JSON.generate('activated' => activated, 'sourceDeviceIds' => sources)
-          send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
-        end
+        def connect_hob(hob) = update_connectivity_plus { (it + [hob]).uniq }
+
+        # @param hob [String] its fabrication number
+        # @return [void]
+        # @raise [ActionUnavailableError] when the hood does not offer Con@ctivity Plus
+        # @api public
+        def disconnect_hob(hob) = update_connectivity_plus { it - [hob] }
 
         # A Dop1 or Opcode hood wakes when its State is written back, the light as it is; DOP2 takes
         # +DeviceAction+ 2 (DefaultWakeUpAction).
@@ -142,6 +145,21 @@ module Miele
         end
 
         private
+
+        # The app changes one hob in the list +services+ shows and derives +activated+ from what is left
+        # (UpdateConactivityPlusSettingsHelper).
+        #
+        # @yieldparam sources [Array<String>] the hobs followed
+        # @yieldreturn [Array<String>] those to follow
+        # @return [void]
+        # @raise [ActionUnavailableError] when the hood does not offer Con@ctivity Plus
+        def update_connectivity_plus
+          plus = connectivity_plus
+          require!(plus&.available, 'the hood offers no Con@ctivity Plus')
+          sources = yield Array(plus&.sources)
+          body = JSON.generate('activated' => sources.any?, 'sourceDeviceIds' => sources)
+          send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
+        end
 
         # @param pf_id [Integer] its Dop1 setting
         # @param request [Integer] its DOP2 user request

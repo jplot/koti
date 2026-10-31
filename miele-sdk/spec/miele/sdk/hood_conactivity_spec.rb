@@ -36,8 +36,8 @@ RSpec.describe Miele::Sdk::Hood do
                                          ))
   end
 
-  it 'switches Con@ctivity Plus on with the hobs it follows' do
-    hood.configure_connectivity_plus(activated: true, sources: %w[000111222333])
+  it 'follows one more hob, activating Con@ctivity Plus as the app does' do
+    hood.connect_hob('000111222333')
     expect(written).to eq([['PUT', "/Devices/#{fab}/services/ConnectivityPlus",
                             { 'activated' => true, 'sourceDeviceIds' => %w[000111222333] }]])
   end
@@ -61,12 +61,22 @@ RSpec.describe Miele::Sdk::Hood do
     end
   end
 
+  context 'when the hood follows a hob' do
+    let(:plus) { { 'available' => true, 'activated' => true, 'sourceDeviceIds' => %w[000111222333] } }
+
+    it 'stops following it, deactivating Con@ctivity Plus once none is left' do
+      hood.disconnect_hob('000111222333')
+      expect(written).to eq([['PUT', "/Devices/#{fab}/services/ConnectivityPlus",
+                              { 'activated' => false, 'sourceDeviceIds' => [] }]])
+    end
+  end
+
   context 'when the hood does not offer Con@ctivity Plus' do
     let(:plus) { { 'available' => false } }
 
-    it 'refuses to switch it' do
-      expect { hood.configure_connectivity_plus(activated: true, sources: []) }
-        .to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'refuses to follow a hob', :aggregate_failures do
+      expect { hood.connect_hob('000111222333') }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(written).to be_empty
     end
   end
 end

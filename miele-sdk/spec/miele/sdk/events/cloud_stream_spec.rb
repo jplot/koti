@@ -11,8 +11,8 @@ RSpec.describe Miele::Sdk::Events::CloudStream do
   let(:devices) { [] }
   let(:channel) do
     organization = instance_double(Miele::Sdk::Cloud::Locales::Organization, rest: fake.url.sub('ws', 'http'))
-    session = instance_double(Miele::Sdk::Cloud::Session, authorization: 'Bearer token', language: 'en-FR',
-                                                          organization:)
+    token = Miele::Sdk::Cloud::Token.new(value: 'token', refresh: nil, scheme: 'Bearer', created_at: 0, expires_at: 1)
+    session = instance_double(Miele::Sdk::Cloud::Session, current: token, language: 'en-FR', organization:)
     instance_double(Miele::Sdk::Cloud::Channel, session:, devices:)
   end
 

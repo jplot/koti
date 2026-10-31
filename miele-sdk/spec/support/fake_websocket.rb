@@ -39,7 +39,7 @@ class FakeWebsocket
 
   attr_reader :connections
 
-  def self.start(accept: nil, &script) = new(accept, script).tap(&:start)
+  def self.start(accept: nil, refuse: 0, &script) = new(accept, refuse, script).tap(&:start)
 
   def self.frame(opcode, payload, fin: true)
     head = [(fin ? 0x80 : 0) | opcode].pack('C')
@@ -71,8 +71,9 @@ class FakeWebsocket
     socket.read(size == 126 ? 2 : 8).unpack1(size == 126 ? 'n' : 'Q>')
   end
 
-  def initialize(accept, script)
+  def initialize(accept, refuse, script)
     @accept = accept
+    @refuse = refuse
     @script = script || ->(_connection, _index) {}
     @connections = []
   end
@@ -96,10 +97,11 @@ class FakeWebsocket
   private
 
   def serve(socket)
-    request = handshake_request(socket)
-    connection = Connection.new(socket, request)
+    connection = Connection.new(socket, handshake_request(socket))
     @connections << connection
-    respond(socket, request)
+    return socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n") if @connections.size <= @refuse
+
+    respond(socket, connection.request)
     @script.call(connection, @connections.size)
     connection.read_frames
   rescue IOError, Errno::ECONNRESET, Errno::EPIPE

@@ -21,13 +21,18 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     end
   end
 
-  before { allow(session).to receive(:authorization).and_return('Bearer one', 'Bearer two') }
+  before do
+    allow(session).to receive(:current).and_return(token('one'), token('two'))
+    allow(session).to receive(:renew).and_return(token('two'))
+  end
 
   after { fake.stop }
 
   def message(header, body)
     "#{header}\r\n\r\nPUT /V2/Devices/000123456789/State HTTP/1.1\r\nContent-Length: #{body.bytesize}\r\n\r\n#{body}"
   end
+
+  def token(value) = Miele::Sdk::Cloud::Token.new(value:, refresh: nil, scheme: 'Bearer', created_at: 0, expires_at: 1)
 
   def first_messages(count)
     received = []
@@ -42,6 +47,17 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     first_messages(4)
     expect(fake.connections.map { it.request[:headers]['authorization'] }).to eq(['Bearer one', 'Bearer two'])
     expect(waits).to eq([6])
+  end
+
+  context 'when the cloud refuses the token' do
+    let(:fake) { FakeWebsocket.start(refuse: 1, &script) }
+
+    it 'renews it and tries again 6 s later with the new one', :aggregate_failures do
+      first_messages(2)
+      expect(session).to have_received(:renew).with(token('one'))
+      expect(fake.connections.map { it.request[:headers]['authorization'] }).to eq(['Bearer one', 'Bearer two'])
+      expect(waits).to eq([6])
+    end
   end
 
   it "tries again 6 s later when the cloud's name does not resolve", :aggregate_failures do

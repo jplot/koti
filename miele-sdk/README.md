@@ -743,7 +743,8 @@ the other resources. A module without a fabrication number is named by its `mac-
 
 Each message is acknowledged as the app does, a keep-alive goes out every 30 s, and the websocket
 reconnects 6 s after an error or a close, and at once after a minute without a message, each time
-with the session's current token. It connects directly, without the environment's proxy.
+with the session's current token, renewed when the cloud refuses it. An account the cloud refuses
+ends the stream with `AuthenticationError`. It connects directly, without the environment's proxy.
 
 It has run against the live cloud with a French account. The cloud pushes its messages as `POST`
 requests behind a `CloudConnect: sc-data-…` header, the device list first, then `State` changes;

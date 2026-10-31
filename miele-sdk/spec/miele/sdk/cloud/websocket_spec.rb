@@ -5,7 +5,8 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
 
   let(:session) do
     organization = instance_double(Miele::Sdk::Cloud::Locales::Organization, rest: fake.url.sub('ws', 'http'))
-    instance_double(Miele::Sdk::Cloud::Session, authorization: 'Bearer token', language: 'en-FR', organization:)
+    token = Miele::Sdk::Cloud::Token.new(value: 'token', refresh: nil, scheme: 'Bearer', created_at: 0, expires_at: 1)
+    instance_double(Miele::Sdk::Cloud::Session, current: token, language: 'en-FR', organization:)
   end
   let(:fake) { FakeWebsocket.start(&script) }
   let(:script) { ->(connection, _index) { connection.send_binary(message('CC1', '{"Status":5}')) } }
@@ -126,6 +127,18 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
 
     it 'tries again 6 s later, as the app does' do
       expect { first_messages(1) }.to raise_error(stop)
+    end
+  end
+
+  context 'when the account is refused' do
+    subject(:websocket) do
+      described_class.new(session, sleeper: ->(_seconds) { raise 'reconnected' })
+    end
+
+    before { allow(session).to receive(:current).and_raise(Miele::Sdk::AuthenticationError, 'refused') }
+
+    it 'ends with that error instead of trying again' do
+      expect { first_messages(1) }.to raise_error(Miele::Sdk::AuthenticationError, 'refused')
     end
   end
 

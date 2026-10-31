@@ -24,6 +24,9 @@ require_relative 'sdk/events/identity'
 require_relative 'sdk/events/request'
 require_relative 'sdk/events/enrollment'
 require_relative 'sdk/events/listener'
+require_relative 'sdk/events/cloud_stream'
+require_relative 'sdk/events/merge'
+require_relative 'sdk/events/poller'
 require_relative 'sdk/events/server'
 require_relative 'sdk/object_access'
 require_relative 'sdk/appliance'
@@ -70,6 +73,10 @@ require_relative 'sdk/cloud/locales'
 require_relative 'sdk/cloud/token'
 require_relative 'sdk/cloud/session'
 require_relative 'sdk/cloud/channel'
+require_relative 'sdk/cloud/websocket/frames'
+require_relative 'sdk/cloud/websocket/handshake'
+require_relative 'sdk/cloud/websocket/messages'
+require_relative 'sdk/cloud/websocket'
 
 # Namespace of the koti SDKs for the Miele ecosystem.
 module Miele
@@ -144,12 +151,36 @@ module Miele
       CLOUD.synchronize { @cloud = nil }
     end
 
-    # Streams the changes the appliances push, until the block breaks or raises.
+    # Streams the changes the appliances push, to this host and through the Miele cloud, until the block breaks
+    # or raises.
     #
-    # @param hosts [Array<String>] addresses of the appliances to listen to
+    # @param hosts [Array<String>] addresses of the appliances to listen to on the network
+    # @param cloud [Cloud::Channel, nil] the account to follow through its websocket, the configured one by default
     # @yieldparam event [Events::Event]
     # @return [Enumerator::Lazy<Events::Event>, Object] the events without a block
+    # @raise [ArgumentError] without hosts or an account
     # @api public
-    def self.events(hosts:, &) = Events::Listener.new(hosts:).each(&)
+    def self.events(hosts: [], cloud: self.cloud, &)
+      raise ArgumentError, 'no appliance to listen to, nor a Miele account' if hosts.empty? && cloud.nil?
+
+      sources = [] #: Array[untyped]
+      sources << Events::Listener.new(hosts:) unless hosts.empty?
+      sources << Events::CloudStream.new(cloud) if cloud
+      Events::Merge.new(sources).each(&)
+    end
+
+    # Reads a DOP2 object again 3 s after each read ends, as the app polls the leaves the websocket does not
+    # carry, until the block breaks.
+    #
+    # @param appliance [Appliance]
+    # @param klass [Class] a generated DOP2 class
+    # @param address [Array<Integer>] where to read it
+    # @param every [Numeric] seconds between the end of a read and the next
+    # @yieldparam value [Data] the object, the first time and each time it changes
+    # @return [Object] what +break+ returns
+    # @api public
+    def self.poll(appliance, klass, address, every: 3, &)
+      Events::Poller.new(appliance, klass, address, every:).each(&)
+    end
   end
 end

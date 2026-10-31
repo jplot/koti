@@ -117,6 +117,16 @@ RSpec.describe Miele::Sdk, :live do
       skip e.message
     end
 
+    def websocket_connections
+      sockets = []
+      allow(Miele::Sdk::Cloud::Websocket).to receive(:new).and_wrap_original do |new, *args, **options|
+        new.call(*args, **options).tap do |websocket|
+          allow(websocket).to(receive(:connect).and_wrap_original { |connect| connect.call.tap { sockets << it } })
+        end
+      end
+      sockets
+    end
+
     it 'logs in and lists the account appliances' do
       expect(described_class.appliances)
         .to all(have_attributes(fab: match(/\A\d+\z/), host: match(/\.local\.?\z/))).and(be_any)
@@ -160,6 +170,15 @@ RSpec.describe Miele::Sdk, :live do
         config.group_key = nil
       end
       expect(appliances.map(&:device_type)).not_to include(:unknown)
+    end
+
+    it 'follows the account through the cloud websocket for 20 s on one connection, closed at the end',
+       :aggregate_failures do
+      sockets = websocket_connections
+      events = []
+      expect { Timeout.timeout(20) { described_class.events { events << it } } }.to raise_error(Timeout::Error)
+      expect(events.select { it.resource == '/State/' }.map(&:fab)).to include(*cloud.devices.map(&:fab))
+      expect(sockets).to contain_exactly(be_closed)
     end
   end
 end

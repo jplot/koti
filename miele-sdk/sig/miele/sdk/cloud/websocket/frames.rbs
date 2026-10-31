@@ -1,0 +1,33 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Websocket
+        module Frames
+          CONTINUATION: Integer
+          TEXT: Integer
+          BINARY: Integer
+          CLOSE: Integer
+          PING: Integer
+          PONG: Integer
+          CHUNK: Integer
+
+          @input: String
+
+          private
+
+          def read_frame: (untyped socket) -> [Integer, String]
+
+          def extended: (untyped socket, Integer size) -> Integer
+
+          def write_frame: (untyped socket, Integer opcode, String payload) -> void
+
+          def length: (Integer size) -> String
+
+          def unmask: (String payload, Array[Integer] mask) -> String
+
+          def exactly: (untyped socket, Integer count) -> String
+        end
+      end
+    end
+  end
+end

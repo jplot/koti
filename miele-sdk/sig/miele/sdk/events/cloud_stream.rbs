@@ -1,0 +1,21 @@
+module Miele
+  module Sdk
+    module Events
+      class CloudStream
+        PATH: Regexp
+
+        @websocket: Cloud::Websocket
+
+        def initialize: (Cloud::Channel channel) -> void
+
+        def each: () { (Event event) -> void } -> void
+
+        private
+
+        def event: (Cloud::Websocket::Message message) -> Event?
+
+        def content: (String rest, String body) -> untyped
+      end
+    end
+  end
+end

@@ -1,0 +1,18 @@
+module Miele
+  module Sdk
+    module Events
+      class Poller
+        @appliance: Appliance
+        @klass: untyped
+        @address: Array[Integer]
+        @every: Numeric
+        @sleeper: ^(Numeric seconds) -> untyped
+
+        def initialize: (Appliance appliance, untyped klass, Array[Integer] address, ?every: Numeric,
+                         ?sleeper: ^(Numeric seconds) -> untyped) -> void
+
+        def each: () { (untyped value) -> void } -> untyped
+      end
+    end
+  end
+end

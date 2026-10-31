@@ -1,0 +1,54 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Websocket
+        include Handshake
+        # Frames comes through Messages: included twice, its @input is declared twice.
+        include Messages
+
+        class Message < Data
+          attr_reader path: String
+          attr_reader headers: Hash[String, String]
+          attr_reader body: String
+
+          def self.new: (path: String, headers: Hash[String, String], body: String) -> Message
+        end
+
+        KEEP_ALIVE: Integer
+        WATCHDOG: Integer
+        ERROR_RECONNECT: Integer
+        FAILURES: Array[singleton(Exception)]
+
+        @session: Session
+        @url: URI::Generic
+        @follow: ^() -> Array[String]
+        @fetch: ^(String path) -> String
+        @clock: ^() -> Float
+        @sleeper: ^(Numeric seconds) -> untyped
+
+        def initialize: (Session session, ?follow: ^() -> Array[String], ?fetch: (^(String path) -> String)?,
+                         ?clock: ^() -> Float, ?sleeper: ^(Numeric seconds) -> untyped) -> void
+
+        def each: () { (Message message) -> void } -> void
+
+        private
+
+        def hand_over: (Message message, Object tag) { (Message message) -> void } -> void
+
+        def connection: () { (Message message) -> void } -> Integer
+
+        def refetch: () { (Message message) -> void } -> void
+
+        def listen: (untyped socket) { (Message message) -> void } -> Symbol?
+
+        def deadlines: (?Float now) -> [Float, Float]
+
+        def wait: (untyped socket, Float keep_alive, Float silence) -> Float?
+
+        def readable?: (untyped socket, Float timeout) -> bool
+
+        def close: (untyped socket) -> void
+      end
+    end
+  end
+end

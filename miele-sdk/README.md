@@ -688,19 +688,30 @@ oven that serves none locally. The token's renewal and MCS logins have not run y
 hosts = Miele::Sdk.discover.map(&:host)
 
 Miele::Sdk.events(hosts:) do |event|
-  puts "#{event.fab} #{event.resource}: #{event.content}"
+  puts "#{event.source} #{event.fab} #{event.resource}: #{event.content}"
 end
 ```
 
-`Miele::Sdk.events` announces this host over mDNS as a peer of the household, listens on
+`Miele::Sdk.events` follows the appliances at `hosts` on the local network and, when an account is
+set, the account's appliances through the Miele cloud, as the app does. It blocks and yields a
+`Miele::Sdk::Events::Event` (`fab`, `resource`, `content`, `source`) per change, on the calling
+thread: `source` is `:local` for an appliance's push and `:cloud` for the cloud's, and a change
+both push arrives twice, once from each. Pass `cloud: nil` to listen only locally; without `hosts`
+it listens only to the cloud, and without either it raises `ArgumentError`. When one side fails,
+the stream ends with its error.
+
+`event.attributes` reads `content` as a typed value: a `DeviceIdentification` for `/Ident/`, a
+`DeviceState` for `/State/`, of which `/State/Light/` and `/State/Status/` fill only `light` or
+`status`, and nil for what only the cloud pushes. Without a block `events` returns a lazy
+enumerator: iterate it with `each`, `first` or `take`, since an external `next` never reaches the
+end of the stream and leaves the subscriptions in place.
+
+### On the local network
+
+`Miele::Sdk.events(hosts:)` announces this host over mDNS as a peer of the household, listens on
 `listener_port`, and asks each appliance to push its changes to it: it declares this host in the
 appliance's `SuperVision` and subscribes to `/State/`, `/State/Light/`, `/State/Status/` and
-`/Ident/`. It then blocks and yields a `Miele::Sdk::Events::Event` (`fab`, `resource`, `content`)
-per change, on the calling thread. `event.attributes` reads `content` as a typed value: a
-`DeviceIdentification` for `/Ident/`, else a `DeviceState`, of which `/State/Light/` and
-`/State/Status/` fill only `light` or `status`. Without a block it returns a lazy enumerator:
-iterate it with `each`, `first` or `take`, since an external `next` never reaches the end of the
-stream and leaves the subscriptions in place.
+`/Ident/`.
 
 When the block breaks or raises, the subscriptions are deleted and `SuperVision` stops showing
 this host; the peer entry itself stays listed. An appliance that cannot be reached at that point
@@ -720,6 +731,39 @@ Enrollment and withdrawal have run against real appliances, leaving their subscr
 were. Pushes from a real hood and a real hob, which has no `SuperVision`, have been received,
 verified and decoded. A real oven accepted the same subscriptions and never pushed, not even while
 heating; follow such an appliance by reading its `state` at intervals.
+
+### Through the cloud
+
+With an account, `events` opens the cloud's websocket (`/websocket/V2/Devices/` on the account's
+REST host) with the session's token and, on every connection, reads the `State` of each of the
+account's appliances, as the app does. It then yields what the cloud pushes: `/State/` and
+`/Ident/` as JSON, a DOP2 leaf as a `Dop2::Leaf` under `/DOP2/{unit}/{attribute}/`, and the
+account's device list, one entry per Wi-Fi module, under `/Devices/` with a nil `fab`. It skips
+the other resources. A module without a fabrication number is named by its `mac-…` id.
+
+Each message is acknowledged as the app does, a keep-alive goes out every 30 s, and the websocket
+reconnects 6 s after an error or a close, and at once after a minute without a message, each time
+with the session's current token, renewed when the cloud refuses it. An account the cloud refuses
+ends the stream with `AuthenticationError`. It connects directly, without the environment's proxy.
+
+It has run against the live cloud with a French account. The cloud pushes its messages as `POST`
+requests behind a `CloudConnect: sc-data-…` header, the device list first, then `State` changes;
+the SDK reads neither the method nor the header, which it echoes in its acknowledgement. No
+`Ident` or DOP2 push has been seen yet.
+
+### Polling
+
+The app reads again every 3 s the DOP2 leaves the cloud does not push. `Miele::Sdk.poll` does the
+same with a typed object, until the block breaks:
+
+```ruby
+Miele::Sdk.poll(oven, Miele::Sdk::Objects::Oven::GlobalOpProgramInfoCA, [2, 213, 0, 1]) do |steps|
+  puts steps.amount_of_steps
+end
+```
+
+It yields the object on the first read and each time it changes, and reads it again `every:`
+seconds (3 by default) after each read ends. A failed read ends the poll with its error.
 
 ## Errors
 

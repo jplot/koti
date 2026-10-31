@@ -23,6 +23,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Breaking:** `dop2` reads without a query unless given an index, `write_dop2` leaves the
   indexes in the leaf unless given `with_index: true`, and `Dop1.setting_value` takes only the
   hood's answer.
+- **Breaking:** with an account set, `Miele::Sdk.events` also yields the cloud's events; pass
+  `cloud: nil` to keep only the appliances' pushes. `Event` has a fourth member, `source`.
 
 ### Fixed
 
@@ -76,6 +78,13 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Warming drawers as the app's drawer module drives them: their state, programs and cup warm-up;
   switching on and off, program, temperature and remaining time, and the cup warm-up source. None of
   it has run against a real drawer.
+- The account's appliances followed through the Miele cloud's websocket, as the app follows them:
+  the `State` of each read again on every connection, then the `State`, `Ident`, DOP2 leaves and
+  device list the cloud pushes, each acknowledged, the connection kept alive and reconnected as the
+  app does. `Event#source` tells `:local` from `:cloud`, and `Event#attributes` is nil for a DOP2
+  leaf or the device list.
+- `Miele::Sdk.poll`, which reads a typed object again 3 s after each read ends and yields it each
+  time it changes, as the app polls the DOP2 leaves the cloud does not push.
 
 - Typed values of the DOP2 and Dop1 objects the Miele app uses, generated from its classes under
   `Miele::Sdk::Objects::<Family>`: `Appliance#object` and `#write_object` at the addresses the app

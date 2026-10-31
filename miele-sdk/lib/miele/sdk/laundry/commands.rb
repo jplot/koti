@@ -73,8 +73,8 @@ module Miele
         end
 
         # @return [void]
-        # @raise [ActionUnavailableError] unless a DOP2 appliance has finished its program (Status 7) or creases it
-        #   (process state 10 or 13), outside phases 264, 519 and 531
+        # @raise [ActionUnavailableError] unless a DOP2 appliance shows its program done (Status 7) and its process
+        #   state done or anti-crease (10 or 13), outside phases 264, 519 and 531
         # @api public
         def power_off
           state = self.state

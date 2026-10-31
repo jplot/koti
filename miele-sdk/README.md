@@ -385,12 +385,12 @@ code, and the reads have run against a real oven through the cloud.
 tested on an appliance: every read and write follows the app's code.
 
 ```ruby
-dishwasher.context             # 2/1585, read without an index; program_context, programs, notifications
+dishwasher.context             # 2/1585 at idx 0/1; program_context, programs, notifications
 dishwasher.supported_requests  # => [:start, :stop, :start_delay], the app's names; none on a PG81
 dishwasher.setting(20_052)     # 2/105 at an SF id, here AutoDos
 dishwasher.locked?             # a DOP2 dishwasher its owner locked (RemoteEnable 7)
 dishwasher.consumption         # Dop1: #<data Consumption energy=0.8, water=9.4>, in the app's units
-dishwasher.consumables         # from services; statistics and latest_program_runs on DOP2
+dishwasher.consumables         # the Consumables resource; statistics and latest_program_runs on DOP2
 dishwasher.program_list        # Dop1 8905; selection reads 8907
 ```
 
@@ -410,13 +410,15 @@ Each action makes the checks of the app's rule for it and raises `ActionUnavaila
 sending anything when one fails. `start` needs mobile start (and AppSupport bit 4 on DOP2), the door
 closed, request 1 offered and the dishwasher ready (Status 3, or 4 awake); `pause` and `resume` need
 mobile start and a running or paused program; `stop` and `cancel` need no mobile start, only a
-program that runs, pauses or waits awake, the request offered, and a dishwasher not locked. A DOP2
-dishwasher refuses while it shows info 700. A Dop1 dishwasher takes `ProcessAction` on its whole
-`State`, its program and extras on 8906 and its delayed start on 8909.
+program that runs, pauses or waits awake, the request offered, and a dishwasher not locked;
+`start_delayed` needs a program selected (Status 3) under mobile start, the dishwasher not locked. A
+DOP2 dishwasher refuses while it shows info 700. A Dop1 dishwasher takes `ProcessAction` on its
+whole `State`, its program and extras on 8906 and its delayed start on 8909. Delays are counted on
+the wall clock, as the app counts them, so on the day the clocks change they follow the clock.
 
-Not traced, so left to the dishwasher: the app's rule for request 8 (`start_delayed` checks nothing),
-where a Dop1 dishwasher shows info 700, and the units of the Dop1 consumption. The app sends the
-steps of `power_on` and `power_off` again while it watches `State` for 15 s; the SDK sends each once.
+Not traced, so left to the dishwasher: where a Dop1 dishwasher shows info 700, and the units of the
+Dop1 consumption. The app sends the steps of `power_on` and `power_off` again while it watches
+`State` for 15 s; the SDK sends each once.
 
 ## Laundry
 
@@ -451,8 +453,8 @@ washer.twin_dos_levels = [{ number: 1, percent: 50 }]
 The requests follow the app's SupportedRequestsRule: without remote control only stop, no stop while
 a program waits (Status 2 or 3), start only with the door locked, request 8 only while 2/1574 shows a
 start mode, and nothing while the appliance sleeps deeply. A Dop1 appliance offers start under
-remote control (Status 4, or 3 under mobile start without a start time), stop while it runs, and
-never pause; it takes `ProcessAction` alone. `stop_to_edit` also needs a program waiting for its
+remote control (Status 4, or 3 under mobile start without a start time), stop while it waits or
+runs (Status 4 or 5), and never pause; it takes `ProcessAction` alone. `stop_to_edit` also needs a program waiting for its
 start time, `power_off` a DOP2 program done (Status 7, process state 10 or 13) outside phases 264,
 519 and 531, and `wake` a DOP2 model the app wakes (its series letter, from some software id up)
 sleeping deeply.
@@ -465,13 +467,20 @@ the current values 2/1574 shows, as the app does, then writes the parameters giv
 members 2/1577 carries. On Dop1 it reads 8201 or 8602 and writes it back with the read request type
 and the app's encodings (a temperature it has no code for goes out as 0, an eco 40 °C as 39), and
 `NotAcceptedError` reports an Ack other than 1. `start_delayed` lets the appliance choose the mode
-as the app does: whole minutes from a minute before now, or local seconds since 1970, then request
-8; a Dop1 appliance takes `StartTime`, its selection written back, then `ProcessAction` 1.
+as the app does: whole minutes from a minute before now, or local seconds since 1970, both on the
+wall clock, then request 8; a Dop1 appliance takes `StartTime`, its selection written back, then
+`ProcessAction` 1.
 
 Left out: requests 12106 (add laundry) and 12116 (TwinDos care), which the app declares and never
 sends; its limit of three anti-crease extensions; its start time kept until start, for which
 `start_delayed` needs start or request 8 offered. An Opcode appliance selects no program, as in
-the app, and the SDK sends it no parameters, which the app would send it as DOP2.
+the app, and the SDK sends it no parameters, which the app would send it as DOP2. A tumble dryer of
+device type 4 takes the dryer's objects (8602, `selection_para_td`), where the app's parameter copy
+and Dop1 delayed start send it the washer's.
+
+Not traced: the order of the bits behind the Dop1 `washing`, `drying` and `eco` readings; the care
+phase the app's screen waits for before it offers 12144; and the values a WMV96 shows from 8202
+(its capsule dosing among them), which `readings` leaves to `selection`.
 
 ## Typed objects
 

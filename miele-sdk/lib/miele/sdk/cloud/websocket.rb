@@ -176,7 +176,7 @@ module Miele
         # @return [void]
         def close(socket)
           write_frame(socket, CLOSE, '')
-        rescue IOError, SystemCallError
+        rescue IOError, SystemCallError, OpenSSL::SSL::SSLError
           nil
         ensure
           socket.close

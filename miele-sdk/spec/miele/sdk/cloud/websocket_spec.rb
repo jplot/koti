@@ -26,6 +26,16 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     end
   end
 
+  def failing_close
+    allow(Socket).to receive(:tcp).and_wrap_original do |tcp, *args, **options|
+      tcp.call(*args, **options).tap do |socket|
+        allow(socket).to receive(:write).and_wrap_original do |write, bytes|
+          bytes.getbyte(0) == 0x88 ? raise(OpenSSL::SSL::SSLError, 'bad record mac') : write.call(bytes)
+        end
+      end
+    end
+  end
+
   def first_messages(count)
     received = []
     websocket.each do |message|
@@ -116,6 +126,11 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     it 'parses both' do
       expect(first_messages(2).map(&:body)).to eq(['{"Status":5}', '{"Status":1}'])
     end
+  end
+
+  it 'ends the connection quietly when its CLOSE frame cannot go out over TLS' do
+    failing_close
+    expect(first_messages(1).size).to eq(1)
   end
 
   it 'acknowledges each message with its CloudConnectHeader, as the app does' do

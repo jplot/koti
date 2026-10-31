@@ -1,6 +1,8 @@
 module Miele
   module Sdk
     class Hood < Appliance
+      include Readings
+
       def fan_level=: (Integer level) -> void
 
       def fan_run_on_time=: (Integer minutes) -> void

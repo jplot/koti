@@ -1,0 +1,133 @@
+module Miele
+  module Sdk
+    class Hood < Appliance
+      class RunOn < Data
+        attr_reader setting: Integer
+        attr_reader minutes_left: Integer
+
+        def self.new: (Integer setting, Integer minutes_left) -> RunOn
+                    | (setting: Integer, minutes_left: Integer) -> RunOn
+      end
+
+      class Light < Data
+        attr_reader exists: bool
+        attr_reader dimmable: bool
+        attr_reader rgb: bool
+        attr_reader temperature_settable: bool
+        attr_reader dimmer: Integer
+        attr_reader temperature: Integer
+
+        def self.new: (bool exists, bool dimmable, bool rgb, bool temperature_settable, Integer dimmer,
+                       Integer temperature) -> Light
+                    | (exists: bool, dimmable: bool, rgb: bool, temperature_settable: bool, dimmer: Integer,
+                       temperature: Integer) -> Light
+      end
+
+      class Lights < Data
+        attr_reader main: Light
+        attr_reader ambient: Light
+
+        def self.new: (Light main, Light ambient) -> Lights
+                    | (main: Light, ambient: Light) -> Lights
+      end
+
+      class Filter < Data
+        attr_reader threshold: Integer
+        attr_reader hours: Integer
+        attr_reader reached: bool
+
+        def self.new: (Integer threshold, Integer hours, bool reached) -> Filter
+                    | (threshold: Integer, hours: Integer, reached: bool) -> Filter
+      end
+
+      class Dehumidification < Data
+        attr_reader supported: bool
+        attr_reader mode: Symbol
+        attr_reader state: Symbol
+
+        def self.new: (bool supported, Symbol mode, Symbol state) -> Dehumidification
+                    | (supported: bool, mode: Symbol, state: Symbol) -> Dehumidification
+      end
+
+      class GreaseMelting < Data
+        attr_reader supported: bool
+        attr_reader minutes_left: Integer
+        attr_reader threshold: Integer
+        attr_reader hours: Integer
+
+        def self.new: (bool supported, Integer minutes_left, Integer threshold, Integer hours) -> GreaseMelting
+                    | (supported: bool, minutes_left: Integer, threshold: Integer, hours: Integer) -> GreaseMelting
+      end
+
+      class ColorFlow < Data
+        attr_reader active: bool
+        attr_reader interval: Integer
+
+        def self.new: (bool active, Integer interval) -> ColorFlow
+                    | (active: bool, interval: Integer) -> ColorFlow
+      end
+
+      module Readings : Appliance
+        DEHUMIDIFICATION_MODES: Hash[Integer, Symbol]
+
+        DEHUMIDIFICATION_STATES: Hash[Integer, Symbol]
+
+        NO_AUTO_REFRESH: Regexp
+
+        def fan_level: () -> Integer?
+
+        def fan_settable?: () -> bool?
+
+        def booster_2_available?: () -> bool?
+
+        def run_on: () -> RunOn?
+
+        def lights: () -> Lights?
+
+        def grease_filter: () -> Filter?
+
+        def charcoal_filter: () -> Filter?
+
+        def height_position: () -> Integer?
+
+        def dehumidification: () -> Dehumidification?
+
+        def grease_melting: () -> GreaseMelting?
+
+        def auto_refresh_supported?: () -> bool?
+
+        def color_flow: () -> ColorFlow?
+
+        def setting: (Integer pf_id) -> Integer?
+
+        private
+
+        def opcode?: () -> bool
+
+        def extended: () -> untyped
+
+        def dop_extended: () -> untyped
+
+        def functions: (untyped values) -> Integer
+
+        def second_functions: (untyped values) -> Integer
+
+        def dop_run_on: (untyped values) -> RunOn
+
+        def opcode_run_on: (untyped values) -> RunOn
+
+        def run_on_setting: (Integer minutes) -> Integer
+
+        def filter: (Symbol kind, Symbol reached) -> Filter?
+
+        def main_light_state: (untyped values) -> Light
+
+        def ambient_light_state: (untyped values) -> Light
+
+        def ambient_panel?: (Integer bits) -> bool
+
+        def opcode_lights: () -> Lights
+      end
+    end
+  end
+end

@@ -4,6 +4,8 @@ module Miele
   module Sdk
     # A cooker hood, which the Miele app's hood module handles (device type 18).
     class Hood < Appliance
+      include Readings
+
       # @param level [Integer] 0 (off) to 3, 4 (boost) or 5 (interval)
       # @raise [ArgumentError] if the level is out of range
       # @api public

@@ -67,7 +67,7 @@ module Miele
           def content_length(head) = head.to_s[/Content-Length: (\d+)/, 1].to_i
 
           # @param text [String] the HTTP head, a blank line and the body
-          # @return [Message]
+          # @return [Message] its path without trailing slashes, which the app trims before routing
           def message(text)
             head, body = text.split(SEPARATOR, 2)
             line, *fields = head.to_s.split("\r\n")
@@ -75,7 +75,7 @@ module Miele
               name, value = field.split(': ', 2)
               [name.to_s, value.to_s]
             end
-            Message.new(path: line.to_s.split[1].to_s, headers:, body: body.to_s)
+            Message.new(path: line.to_s.split[1].to_s.sub(%r{/+\z}, ''), headers:, body: body.to_s)
           end
         end
       end

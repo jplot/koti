@@ -43,6 +43,16 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     )])
   end
 
+  context 'when the pushed path ends with a slash' do
+    let(:script) do
+      ->(connection, _index) { connection.send_binary(message('CC1', '{}', path: '/V2/Devices/000123456789/State/')) }
+    end
+
+    it 'trims it, as the app does' do
+      expect(first_messages(1).map(&:path)).to eq(['/V2/Devices/000123456789/State'])
+    end
+  end
+
   context 'when a message comes split across frames' do
     let(:script) do
       lambda do |connection, _index|

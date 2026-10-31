@@ -2,6 +2,7 @@ module Miele
   module Sdk
     class State
       include RemoteControl
+      include ExtendedState
 
       class Plate < Data
         attr_reader step: Integer?
@@ -30,10 +31,6 @@ module Miele
       def initialize: (Hash[String, untyped] raw, Symbol device_type, ?protocol_version: Integer?,
                        ?tech_type: String?) -> void
 
-      EXTENDED_STATES: ::Hash[[::Symbol, ::Integer], [::String, ::Integer]]
-
-
-      def extended_state: () -> untyped
 
 
       def attributes: () -> Schema::DeviceState

@@ -62,9 +62,15 @@ module Miele
             [buffer[0...cloud_end].to_s, buffer[(cloud_end + 4)...ending].to_s, buffer[ending..].to_s]
           end
 
+          # The app matches the header whatever its case, and a message without it breaks its stream.
+          #
           # @param head [String, nil]
-          # @return [Integer] its +Content-Length+, 0 without one
-          def content_length(head) = head.to_s[/Content-Length: (\d+)/, 1].to_i
+          # @return [Integer] its +Content-Length+
+          # @raise [ConnectionError] without one
+          def content_length(head)
+            length = head.to_s[/Content-Length: (\d+)/i, 1] or raise ConnectionError, 'a message has no Content-Length'
+            length.to_i
+          end
 
           # @param text [String] the HTTP head, a blank line and the body
           # @return [Message] its path without trailing slashes, which the app trims before routing

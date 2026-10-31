@@ -53,6 +53,31 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     end
   end
 
+  context 'when the cloud writes content-length in lower case' do
+    let(:script) do
+      lambda do |connection, _index|
+        connection.send_binary("CC1\r\n\r\nPOST /V2/Devices HTTP/1.1\r\ncontent-length: 2\r\n\r\n[]")
+      end
+    end
+
+    it 'reads the body all the same, as the app does' do
+      expect(first_messages(1).map(&:body)).to eq(['[]'])
+    end
+  end
+
+  context 'when a message has no Content-Length' do
+    subject(:websocket) do
+      described_class.new(session, sleeper: ->(seconds) { raise stop, seconds.to_s })
+    end
+
+    let(:script) { ->(connection, _index) { connection.send_binary("CC1\r\n\r\nPOST /V2/Devices HTTP/1.1\r\n\r\n[]") } }
+    let(:stop) { Class.new(StandardError) }
+
+    it 'drops the connection and tries again 6 s later, as the app drops its stream' do
+      expect { first_messages(1) }.to raise_error(stop, '6')
+    end
+  end
+
   context 'when a message comes split across frames' do
     let(:script) do
       lambda do |connection, _index|

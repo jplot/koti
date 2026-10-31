@@ -86,8 +86,6 @@ module Miele
           values
         end
 
-        # The spin speed in tens of rpm, the stains as their flags, the drying level as its flag.
-        #
         # @param settings [Hash{Symbol=>Object}]
         # @return [Hash{Symbol=>Integer}]
         def dop2_conversions(settings)
@@ -96,8 +94,6 @@ module Miele
             residual_moisture: Laundry::DRYING_LEVELS[settings[:drying_level]] }.compact
         end
 
-        # TemperatureInfo: 2 for a cold wash, 1 for an eco temperature, 0 otherwise.
-        #
         # @param values [Hash{Symbol=>Object}]
         # @param settings [Hash{Symbol=>Object}]
         # @return [Hash{Symbol=>Object}]

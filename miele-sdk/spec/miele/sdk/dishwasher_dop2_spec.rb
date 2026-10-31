@@ -46,7 +46,7 @@ RSpec.describe Miele::Sdk::Dishwasher do
   def extras(**on) = (1..9).to_h { [it, dop2_field(:bool, on.fetch(it, false))] }
 
   def select(idx1, idx2, **given)
-    values = { prog: 0, type: 0, mode: 0, start: 0, extras: extras }.merge(given)
+    values = { prog: 0, type: 0, mode: 0, start: 0, extras: }.merge(given)
     para = { 1 => dop2_field(:u64, values[:start]), 2 => dop2_field(:u8, values[:mode]),
              3 => dop2_field(:struct, values[:extras]) }
     fields = { 1 => dop2_field(:e16, values[:prog]), 3 => dop2_field(:e8, values[:type]),

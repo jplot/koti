@@ -12,13 +12,12 @@ module Miele
         # waits for the dishwasher between the steps, the SDK reads +State+ again.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] unless it is off, connected, and under remote control
+        # @raise [ActionUnavailableError] unless it is off and under remote control
         # @api public
         def power_on
           require_dop2!
           state = self.state
-          require!(off?(state) && ![10, 255].include?(status(state)) && state.remote_control?,
-                   'the dishwasher cannot be switched on now')
+          require!(off?(state) && state.remote_control?, 'the dishwasher cannot be switched on now')
           wake if standby(state) == 2
           return unless [1, 4].include?(status(self.state))
 

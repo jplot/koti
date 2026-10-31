@@ -4,7 +4,7 @@ module Miele
       include ObjectAccess
 
       interface _Sleeper
-        def call: (Integer seconds) -> untyped
+        def call: (Integer | Float seconds) -> untyped
       end
 
       type resource = Hash[String, untyped]

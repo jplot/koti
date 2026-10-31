@@ -114,7 +114,7 @@ RSpec.describe Miele::Sdk::Hood do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 18, 'ProtocolVersion' => 4) }
 
     it 'refuses a Dop1 action' do
-      expect { hood.fragrance(:start) }.to raise_error(Miele::Sdk::ActionUnavailableError, /Dop1/)
+      expect { hood.grease_melting = true }.to raise_error(Miele::Sdk::ActionUnavailableError, /Dop1/)
     end
   end
 end

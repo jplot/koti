@@ -1,0 +1,23 @@
+module Miele
+  module Sdk
+    class Hood < Appliance
+      module Wire : Appliance
+        ROUTES: Hash[Symbol, Hash[Integer, Symbol]]
+
+        private
+
+        def route: (Symbol kind) -> Symbol
+
+        def opcode: (String request) -> void
+
+        def opcode_twice: (String request) -> void
+
+        def hood_select: (Hash[Integer, Integer] values) -> Dop2::Leaf
+
+        def dop2_user_request: (Integer id) -> void
+
+        def write_sf: (Integer id, Integer value) -> void
+      end
+    end
+  end
+end

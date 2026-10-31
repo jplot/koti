@@ -2,13 +2,9 @@ module Miele
   module Sdk
     class Hood < Appliance
       include Readings
+      include Wire
+      include Commands
       include Dop1Commands
-
-      def fan_level=: (Integer level) -> void
-
-      def fan_run_on_time=: (Integer minutes) -> void
-
-      def main_light=: (bool on) -> void
 
       def setting: (Integer pf_id) -> Integer?
 

@@ -40,5 +40,9 @@ module Miele
 
     # An action the appliance does not offer now, refused before anything is sent, as the Miele app refuses it.
     class ActionUnavailableError < Error; end
+
+    # The appliance answered a Dop1 write with an Ack other than success (1), which the Miele app reports as
+    # settings not accepted.
+    class NotAcceptedError < Error; end
   end
 end

@@ -21,7 +21,16 @@ module Miele
       private
 
       # @return [Hash{Symbol=>Class}]
-      def dop1_objects = { list: Objects::Laundry::WaProgrammliste, selection: Objects::Laundry::WaProgrammwahlLesen }
+      def dop1_objects
+        { list: Objects::Laundry::WaProgrammliste, selection: Objects::Laundry::WaProgrammwahlLesen,
+          write: Objects::Laundry::WaProgrammwahlSetzen }
+      end
+
+      # @param prog_id [Integer, Symbol]
+      # @return [Data] 8201's write section, version 1
+      def dop1_selection(prog_id)
+        blank(Objects::Laundry::WaProgrammwahlSetzen::SettingsWriteSection).with(version: 1, programm_id: prog_id)
+      end
     end
   end
 end

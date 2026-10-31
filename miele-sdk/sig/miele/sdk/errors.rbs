@@ -29,5 +29,8 @@ module Miele
 
     class ActionUnavailableError < Error
     end
+
+    class NotAcceptedError < Error
+    end
   end
 end

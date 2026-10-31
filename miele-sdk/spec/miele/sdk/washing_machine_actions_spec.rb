@@ -15,6 +15,7 @@ RSpec.describe Miele::Sdk::WashingMachine do
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(current)]
       in { verb: 'GET', path: %r{/DOP2/(.+)\z} } then [200, {}, served.fetch(Regexp.last_match(1))]
+      in { verb: 'POST', path: %r{/DOP/\z} } then [200, {}, served.fetch('DOP')]
       else [204, {}, '']
       end
     end
@@ -181,6 +182,13 @@ RSpec.describe Miele::Sdk::WashingMachine do
     end
   end
 
+  it 'selects a program on 2/1577 with selection type 0' do
+    leaves['2/1577?idx1=0&idx2=0'] = dop2_leaf(2, 1577, { 1 => dop2_field(:e16, 0), 3 => dop2_field(:e8, 2) })
+    washer.select_program(28)
+    fields = { 1 => dop2_field(:e16, 28), 3 => dop2_field(:e8, 0) }
+    expect(written).to eq([['PUT', 'DOP2/2/1577', dop2_leaf(2, 1577, fields)]])
+  end
+
   it 'sets the anti-crease setting on 2/105, read at idx1 12037 idx2 0' do
     leaves['2/105?idx1=12037&idx2=0'] =
       dop2_leaf(2, 105, { 1 => dop2_field(:e16, 12_037), 4 => dop2_field(:i16, 0) }, idx1: 12_037)
@@ -198,6 +206,14 @@ RSpec.describe Miele::Sdk::WashingMachine do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 1, 'ProtocolVersion' => 2) }
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1], 'SignalDoor' => false } }
 
+    it "writes a Dop1 washer's program on 8201 and raises on a refused Ack", :aggregate_failures do
+      leaves['DOP'] = '{"Response":"82011201"}'
+      washer.select_program(28)
+      leaves['DOP'] = '{"Response":"82011202"}'
+      expect { washer.select_program(28) }.to raise_error(Miele::Sdk::NotAcceptedError)
+      expect(JSON.parse(written.first.last)).to eq('Request' => "82010100011c00#{'00' * 22}")
+    end
+
     it 'stops with ProcessAction 2 alone and never pauses', :aggregate_failures do
       washer.stop
       expect { washer.pause }.to raise_error(Miele::Sdk::ActionUnavailableError)
@@ -214,6 +230,14 @@ RSpec.describe Miele::Sdk::WashingMachine do
       state['StartTime'] = [1, 30]
       expect(washer.supported_requests).to eq([8])
       expect(written.map { [it[1], JSON.parse(it[2])] }).to eq([['State', { 'ProcessAction' => 1 }]])
+    end
+  end
+
+  context 'with an Opcode washer' do
+    let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 1, 'ProtocolVersion' => 1) }
+
+    it 'refuses to select a program, as the app does' do
+      expect { washer.select_program(28) }.to raise_error(Miele::Sdk::ActionUnavailableError)
     end
   end
 

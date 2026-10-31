@@ -3,6 +3,7 @@ module Miele
     module Laundry : Appliance
       include Rules
       include Commands
+      include Selection
 
       class Reading < Data
         attr_reader load: Integer?
@@ -45,6 +46,8 @@ module Miele
       def dop2?: () -> bool
 
       def dryer?: () -> bool
+
+      def blank: (untyped klass) -> untyped
 
       def program_para: (Objects::Laundry::GlobalPsContext context) -> untyped
 

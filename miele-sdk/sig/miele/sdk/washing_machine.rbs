@@ -10,6 +10,8 @@ module Miele
       private
 
       def dop1_objects: () -> Hash[Symbol, untyped]
+
+      def dop1_selection: (Integer | Symbol prog_id) -> untyped
     end
   end
 end

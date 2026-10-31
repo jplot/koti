@@ -311,7 +311,9 @@ The app only reads a hob: its actions are Cook Assist commands through the Miele
 SDK leaves out. Zones follow the app: only those the hob declares, zone 5 in fourth place while it
 heats on a four-zone hob, numbered from their controls on a hob that has zone controls, a level in
 half steps when the hob doubles its levels, residual heat and keep warm in `heat`, and the end time
-as a duration. A DOP2 hob shows zones 1 and 2, as in the app. A hob serves `ExtendedState` only
+as a duration. Two bridged zones side by side share one timer, and `secondary` marks the one the
+app's screen hides, except on the hobs whose `ExtendedState` the app pads to 159 bytes. A DOP2 hob
+shows zones 1 and 2, as in the app. A hob serves `ExtendedState` only
 while it is on; the one tried was off, so the zones have not been read from a real hob.
 
 ## Ovens

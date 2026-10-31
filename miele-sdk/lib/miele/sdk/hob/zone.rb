@@ -21,7 +21,9 @@ module Miele
       #   @return [Boolean]
       # @!attribute [r] temp_control
       #   @return [Boolean]
-      Zone = Data.define(:number, :level, :heat, :booster, :timer, :cookware, :bridged, :temp_control)
+      # @!attribute [r] secondary
+      #   @return [Boolean] the zone of a bridged pair that the app's screen hides
+      Zone = Data.define(:number, :level, :heat, :booster, :timer, :cookware, :bridged, :temp_control, :secondary)
 
       # TempControl, which keeps a zone at a temperature.
       #
@@ -75,7 +77,7 @@ module Miele
           ends = general.public_send(:"endzeit_kochstelle_#{number}").bytes.unpack1('n')
           Zone.new(number, level(raw, doubling), HEATS[raw], Objects::Hob::BoosterEnum.to_i(info.boosterfunktion),
                    timer(ends), info.topf_erkannt == :aktiviert, hint.kochstellenkoppelung == :aktiviert,
-                   hint.temp_control == :aktiviert)
+                   hint.temp_control == :aktiviert, false)
         end
 
         # @param general [Data]
@@ -103,19 +105,24 @@ module Miele
         # @return [Integer, nil] seconds
         def timer(time) = (((time & 0xFF) * 3600) + (((time >> 8) & 0x3F) * 60)).nonzero?
 
-        # GetFlexZones: the first and second zones, the third and fourth, the fifth and sixth, when both are
-        # bridged, share the first one's timer, or else the second's.
+        # GetFlexZones pairs the zones by place, CheckAndSynchronizeTimerOfCoupledCooktops and
+        # FlagSecondariesInFlexZones then rule on each bridged pair.
         #
         # @param zones [Array<Zone>] in the app's order
         # @return [Array<Zone>]
-        def with_shared_timers(zones)
+        def flexed(zones)
           zones.each_slice(2).flat_map do |pair|
             next pair unless pair.size == 2 && pair.all?(&:bridged)
 
             timer = pair.fetch(0).timer || pair.fetch(1).timer
-            pair.map { it.with(timer:) }
+            secondary = secondary_of(pair)
+            pair.map { it.with(timer:, secondary: it.equal?(secondary)) }
           end
         end
+
+        # @param pair [Array<Zone>] two bridged zones
+        # @return [Zone, nil] the one not boosted when the other is, else the second
+        def secondary_of(pair) = pair.one? { it.booster.positive? } ? pair.find { it.booster.zero? } : pair.fetch(1)
 
         # The app numbers the zones of a hob with zone controls from them (+Topfdaten+), and gives the others
         # the lowest numbers left.

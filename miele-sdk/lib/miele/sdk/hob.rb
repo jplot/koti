@@ -45,7 +45,7 @@ module Miele
         return [] unless state.extended_state
 
         zones = numbered_zones(state).sort_by(&:number)
-        padded_length(state) == NO_FLEX_ZONE_LENGTH ? zones : with_shared_timers(zones)
+        padded_length(state) == NO_FLEX_ZONE_LENGTH ? zones : flexed(zones)
       end
 
       # @return [Integer, nil] seconds left on the minute minder
@@ -147,7 +147,7 @@ module Miele
         [1, 2].map do |number|
           raw = extended&.public_send(:"power_level_zone#{number}").to_i
           duration = extended&.public_send(:"duration_zone#{number}").to_i
-          Zone.new(number, level(raw, true), HEATS[raw], 0, timer(duration), false, false, false)
+          Zone.new(number, level(raw, true), HEATS[raw], 0, timer(duration), false, false, false, false)
         end
       end
     end

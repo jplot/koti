@@ -29,7 +29,7 @@ RSpec.describe Miele::Sdk::Hob do
 
   def zone(number, **values)
     described_class::Zone.new(number:, level: 0.0, heat: nil, booster: 0, timer: nil, cookware: false, bridged: false,
-                              temp_control: false).with(**values)
+                              temp_control: false, secondary: false).with(**values)
   end
 
   it 'reads each zone from ExtendedState as the app does' do
@@ -49,6 +49,14 @@ RSpec.describe Miele::Sdk::Hob do
     expect(hob.zones.map(&:timer)).to eq([5400, 5400])
     serve(bridged, 137)
     expect(hob.zones.map(&:timer)).to eq([5400, nil])
+  end
+
+  it 'marks the zone of a bridged pair the app hides: the one not boosted, else the second', :aggregate_failures do
+    bridged = { 7 => 2 << 1, 10 => 0b1_0000, 13 => 0b1_0000 }
+    serve(bridged)
+    expect(hob.zones.map(&:secondary)).to eq([false, true])
+    serve(bridged.merge(12 => 0b0100_0000))
+    expect(hob.zones.map(&:secondary)).to eq([true, false])
   end
 
   it 'reads half steps when the hob doubles its levels' do

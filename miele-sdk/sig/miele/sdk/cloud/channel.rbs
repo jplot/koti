@@ -1,0 +1,38 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Channel
+        TYPES: Hash[Symbol, String]
+
+        class Device < Data
+          attr_reader fab: String
+          attr_reader host: String
+          attr_reader ident: Hash[String, untyped]?
+          attr_reader state: Hash[String, untyped]?
+
+          def self.new: (fab: String, host: String, ident: Hash[String, untyped]?, state: Hash[String, untyped]?) -> Device
+        end
+
+        @session: Session
+
+        @group: [String, String]?
+
+        attr_reader session: Session
+
+        def initialize: (Session session) -> void
+
+        def request: (Symbol method, String path, ?body: String?, ?kind: Symbol, ?host: String?) -> Connection::Response
+
+        def devices: () -> Array[Device]
+
+        def group: () -> [String, String]
+
+        private
+
+        def exchange: (Token token, Symbol method, String path, String? body, Hash[String, String] headers) -> Http::Response
+
+        def refuse: (Integer status, Symbol method) -> bot
+      end
+    end
+  end
+end

@@ -6,6 +6,18 @@ module Miele
 
     def self.appliance: (String host) -> Appliance
 
+    self.@cloud: Cloud::Channel?
+
+    CLOUD: Thread::Mutex
+
+    def self.account?: () -> bool
+
+    def self.appliances: () -> Array[Appliance]
+
+    def self.cloud: () -> Cloud::Channel?
+
+    def self.configure: () { (Configuration::Settings) -> void } -> void
+
     def self.events: (hosts: Array[String]) ?{ (Events::Event) -> void } -> untyped
   end
 end

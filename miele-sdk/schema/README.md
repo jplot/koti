@@ -28,6 +28,19 @@ them, and finds the app class that reads a resource. The gem itself does not use
 - **No class.** The app has none for `Settings`, `Service`, the appliance's `Update`, `/Info` or
   `/Host`: they stay hashes.
 
+## Locales
+
+`lib/miele/sdk/cloud/locales.json` is the copy of the countries' clouds the app bundles, reduced to
+what a login needs: each organization's code, countries, REST host and CIAM switch and endpoints.
+Its feature settings, API keys among them, stay out. To refresh it from a newer app:
+
+```sh
+monodis --mresources path/to/dlls/Miele.Libraries.Foundation.Platform.dll
+ruby schema/extract/locales.rb \
+  Miele.Libraries.Foundation.Platform.Locales.SalesCompanies.Repository.Bundled.LocalesJson.Production.json \
+  lib/miele/sdk/cloud/locales.json
+```
+
 ## Checking a newer version of the app
 
 It takes `ikdasm`, which comes with Mono (`monodis` fails on some of the app's assemblies).

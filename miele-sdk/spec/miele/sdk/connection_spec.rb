@@ -24,6 +24,13 @@ RSpec.describe Miele::Sdk::Connection do
     expect(JSON.parse(request.body)).to eq('Light' => 1)
   end
 
+  it 'pads a DOP2 body to 32 bytes on the local channel', :aggregate_failures do
+    body = ['000e0002063200000000000100010404'].pack('H*')
+    described_class.local('127.0.0.1').request(:put, '/Devices/000123456789/DOP2/2/1586', body:, kind: :dop2)
+    expect(appliance.requests.last).to have_attributes(verb: 'PUT', verified: true)
+    expect(appliance.requests.last.headers['content-length']).to eq('32')
+  end
+
   context 'when the response is signed with another key' do
     let(:appliance) { FakeAppliance.start(answer_key: 'AB' * 64) { answer } }
 

@@ -1,0 +1,37 @@
+module Miele
+  module Sdk
+    module Cloud
+      module Locales
+        class Organization < Data
+          attr_reader iso: String
+          attr_reader rest: String
+          attr_reader ciam: bool
+          attr_reader ciam_endpoints: Hash[String, String]
+          attr_reader bundled: bool
+
+          def self.new: (iso: String, rest: String, ciam: bool, ciam_endpoints: Hash[String, String], ?bundled: bool) -> Organization
+
+          def initialize: (?bundled: bool, **untyped fields) -> void
+
+          def with: (?iso: String, ?rest: String, ?ciam: bool, ?ciam_endpoints: Hash[String, String], ?bundled: bool) -> Organization
+        end
+
+        BUNDLED: String
+
+        def self?.organization: (String country) -> Organization
+
+        def self?.fetch: (String url) -> Array[Hash[String, untyped]]
+
+        def self?.codes: (Hash[String, untyped] entry) -> Array[String]
+
+        def self?.from_company: (Hash[String, untyped] company) -> Organization
+
+        def self?.bundled: (String country) -> Organization
+
+        def self?.organization_of: (String iso, String rest, bool ciam, Hash[String, String] endpoints) -> Organization
+
+        def self?.unknown: (String country) -> bot
+      end
+    end
+  end
+end

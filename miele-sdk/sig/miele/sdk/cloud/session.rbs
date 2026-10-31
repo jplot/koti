@@ -1,0 +1,61 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Session
+        REDIRECT: String
+
+        SCOPE: String
+
+        @organization: Locales::Organization
+
+        @clock: ^() -> Time
+
+        @sleeper: _Sleeper
+
+        @mutex: Thread::Mutex
+
+        interface _Sleeper
+          def call: (Integer seconds) -> untyped
+        end
+
+        attr_reader token: Token?
+
+        attr_reader organization: Locales::Organization
+
+        def initialize: (Locales::Organization organization, ?clock: ^() -> Time, ?sleeper: _Sleeper) -> void
+
+        def login: () -> Token
+
+        def authorize_url: () -> String
+
+        def exchange: (String code) -> Token
+
+        def authorization: () -> String
+
+        def current: () -> Token
+
+        def renew: (Token expired) -> Token
+
+        private
+
+        def refreshed: (Token expired) -> Token
+
+        def three_times: () { () -> Token } -> Token
+
+        def mcs_refresh: (Token expired) -> Token
+
+        def ciam_refresh: (Token expired) -> Token
+
+        def post: (String url, String body, String type, ?authorization: String?) -> Hash[String, untyped]
+
+        def mcs_token: (Hash[String, untyped] answer) -> Token
+
+        def ciam_token: (Hash[String, untyped] answer) -> Token
+
+        def client_id: () -> String
+
+        def endpoint: (String type) -> String
+      end
+    end
+  end
+end

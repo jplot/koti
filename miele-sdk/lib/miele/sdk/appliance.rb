@@ -15,9 +15,15 @@ module Miele
 
       # @param host [String] address or +.local+ name of the appliance
       # @param sleeper [#call] waits the given number of seconds
-      def initialize(host, sleeper: method(:sleep))
+      # @param fab [String, nil] its fabrication number, when already known
+      # @param module_host [String, nil] the mDNS name of its Wi-Fi module, which the cloud routes Dop1 by
+      def initialize(host, sleeper: method(:sleep), fab: nil, module_host: nil)
         @host = host
         @sleeper = sleeper
+        @fab = fab
+        @module_host = module_host
+        @local = Connection.local(host)
+        @in_cloud = [] #: Array[String]
       end
 
       # @return [String] fabrication number, which names the appliance in every device path
@@ -122,11 +128,9 @@ module Miele
       def dop2(unit, attribute, idx1: nil, idx2: nil)
         path = dop2_path(unit, attribute)
         path += "?idx1=#{idx1.to_i}&idx2=#{idx2.to_i}" unless idx1.nil? && idx2.nil?
-        Dop2.decode(Connection.request(host, :get, path).body)
+        Dop2.decode(send_request(:get, path).body)
       end
 
-      # The reference pads every DOP2 write to 32 bytes; shorter ones were never tried on an appliance.
-      #
       # @param leaf [Dop2::Leaf]
       # @param with_index [Boolean] whether its indexes also go in the path, as the app's hood and coffee
       #   modules write; its oven, dishwasher and laundry modules leave them in the body only
@@ -135,7 +139,7 @@ module Miele
       def write_dop2(leaf, with_index: false)
         path = dop2_path(leaf.unit, leaf.attribute)
         path += "?idx1=#{leaf.idx1}&idx2=#{leaf.idx2}" if with_index
-        Connection.request(host, :put, path, body: Dop2.encode(leaf).ljust(32, ' '))
+        send_request(:put, path, body: Dop2.encode(leaf), kind: :dop2)
       end
 
       # Sends a Dop1 request, which hoods in +ProtocolVersion+ 2 answer instead of DOP2.
@@ -144,7 +148,7 @@ module Miele
       # @return [String] the hood's answer: +{"Response": hex}+ to a read
       # @api public
       def dop1(request)
-        Connection.request(host, :post, "/Devices/#{fab}/DOP/", body: JSON.generate(Request: request)).body
+        send_request(:post, "/Devices/#{fab}/DOP/", body: JSON.generate(Request: request)).body
       end
 
       # @param level [Integer] 0 (off) to 3, 4 (boost) or 5 (interval)
@@ -186,9 +190,37 @@ module Miele
       # @return [Hash{String=>Object}]
       # @raise [Error] see {Connection.request}
       # @api public
-      def get(path) = JSON.parse(Connection.request(host, :get, path).body)
+      def get(path) = JSON.parse(send_request(:get, path).body)
 
       private
+
+      # Local first: a resource the appliance answers 404 to goes, for good, to the cloud when an account is set.
+      #
+      # @param method [Symbol]
+      # @param path [String]
+      # @param body [String, nil]
+      # @param kind [Symbol] +:json+ or +:dop2+
+      # @return [Connection::Response]
+      def send_request(method, path, body: nil, kind: :json)
+        resource = path[%r{\A/Devices/\d+/([^/?]+)}, 1]
+        return cloud_request(method, path, body, kind, resource) if @in_cloud.include?(resource)
+
+        @local.request(method, path, body:, kind:)
+      rescue NotFoundError
+        raise unless resource && !@in_cloud.include?(resource) && Sdk.cloud
+
+        @in_cloud << resource
+        cloud_request(method, path, body, kind, resource)
+      end
+
+      # @return [Connection::Response]
+      def cloud_request(method, path, body, kind, resource)
+        cloud = Sdk.cloud or raise ConfigurationError, 'the Miele account is needed to reach the cloud'
+        cloud.request(method, path, body:, kind:, host: resource == 'DOP' ? module_host : nil)
+      end
+
+      # @return [String, nil]
+      def module_host = @module_host ||= Sdk.cloud&.devices&.find { it.fab == fab }&.host
 
       # @param resource [String]
       # @return [Hash{String=>Object}]
@@ -197,7 +229,7 @@ module Miele
       # @param request [Schema::DeviceState]
       # @return [Connection::Response]
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
-      def command(request) = Connection.request(host, :put, "/Devices/#{fab}/State", body: request.to_json)
+      def command(request) = send_request(:put, "/Devices/#{fab}/State", body: request.to_json)
 
       # @param request [Schema::DeviceState]
       # @return [void]

@@ -1,0 +1,22 @@
+module Miele
+  module Sdk
+    module Cloud
+      module Http
+        REQUESTS: Hash[Symbol, singleton(Net::HTTPRequest)]
+
+        NETWORK_ERRORS: Array[singleton(Exception)]
+
+        class Response < Data
+          attr_reader status: Integer
+          attr_reader body: String
+
+          def self.new: (status: Integer, body: String) -> Response
+        end
+
+        def self?.request: (Symbol method, String url, ?headers: Hash[String, String], ?body: String?) -> Response
+
+        def self?.exchange: (URI::HTTP uri, Net::HTTPRequest request) -> Net::HTTPResponse
+      end
+    end
+  end
+end

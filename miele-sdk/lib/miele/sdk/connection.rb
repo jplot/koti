@@ -30,7 +30,33 @@ module Miele
       #   @return [String] decrypted body, padding spaces included, or empty
       Response = Data.define(:status, :body)
 
+      # The appliance itself as a channel: requests go to it signed and encrypted with the household key.
+      #
+      # @!attribute [r] host
+      #   @return [String] address or +.local+ name of the appliance
+      Local = Data.define(:host)
+
+      # The appliance itself as a channel.
+      class Local
+        # The reference pads every DOP2 write to 32 bytes; shorter ones were never tried on an appliance.
+        #
+        # @param method [Symbol] +:get+, +:put+, +:post+ or +:delete+
+        # @param path [String] absolute path, query included
+        # @param body [String, nil]
+        # @param kind [Symbol] +:json+ or +:dop2+
+        # @return [Response]
+        # @raise [Error] see {Connection.request}
+        def request(method, path, body: nil, kind: :json, **)
+          Connection.request(host, method, path, body: kind == :dop2 ? body&.ljust(32, ' ') : body)
+        end
+      end
+
       module_function
+
+      # @param host [String] address or +.local+ name of the appliance
+      # @return [Local]
+      # @api public
+      def local(host) = Local.new(host:)
 
       # Sends one request to an appliance.
       #
@@ -50,16 +76,23 @@ module Miele
         answer(exchange(host, message), method, key)
       end
 
-      # @return [Array(String, String)] GroupID and GroupKey, as bytes
+      # @return [Array(String, String)] GroupID and GroupKey, as bytes, read from the Miele account when neither is set
       # @raise [ConfigurationError]
       # @api private
       def credentials
-        group_id = Sdk.config.group_id.to_s
-        group_key = Sdk.config.group_key.to_s
+        group_id, group_key = household.map(&:to_s) #: [String, String]
         raise ConfigurationError, 'group_id must be 16 hexadecimal digits' unless group_id.match?(/\A\h{16}\z/)
         raise ConfigurationError, 'group_key must be 128 hexadecimal digits' unless group_key.match?(/\A\h{128}\z/)
 
         [[group_id].pack('H*'), [group_key].pack('H*')]
+      end
+
+      # @return [Array(String, String), Array(nil, nil)] the settings' GroupID and GroupKey, else the account's
+      # @api private
+      def household
+        config = Sdk.config
+        set = [config.group_id, config.group_key]
+        set.none? ? (Sdk.cloud&.group || set) : set
       end
 
       # @param request [Net::HTTPRequest]

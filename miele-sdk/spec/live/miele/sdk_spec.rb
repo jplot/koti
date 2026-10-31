@@ -15,6 +15,12 @@ RSpec.describe Miele::Sdk, :live do
 
       original.call(host, verb, *rest, **options)
     end
+    allow(Miele::Sdk::Cloud::Http).to receive(:request).and_wrap_original do |original, verb, url, **options|
+      account = verb == :post && url.match?(%r{/(V3/Login|V2/AppTokenRefresh)\b})
+      raise "live specs are read-only: #{verb.upcase} refused" unless verb == :get || account
+
+      original.call(verb, url, **options)
+    end
   end
 
   it 'discovers the configured appliances' do
@@ -67,5 +73,50 @@ RSpec.describe Miele::Sdk, :live do
 
   it 'cannot write' do
     expect { appliances.first.wake }.to raise_error(RuntimeError, /read-only: PUT refused/)
+  end
+
+  context 'with the Miele account' do
+    let(:cloud) { described_class.cloud }
+    let(:ovens) { [12, 13, 15, 31, 39, 45] }
+
+    before do
+      skip 'set MIELE_COUNTRY' unless ENV.key?('MIELE_COUNTRY')
+      described_class.configure do |config|
+        config.country = ENV.fetch('MIELE_COUNTRY')
+        config.email = ENV.fetch('MIELE_EMAIL', nil)
+        config.password = ENV.fetch('MIELE_PASSWORD', nil)
+        config.token_file = ENV.fetch('MIELE_TOKEN_FILE', nil)
+        config.ciam_client_id = ENV.fetch('MIELE_CIAM_CLIENT_ID', nil)
+      end
+      cloud or skip 'set MIELE_EMAIL or MIELE_TOKEN_FILE'
+      cloud.session.authorization
+    rescue Miele::Sdk::ConfigurationError => e
+      skip e.message
+    end
+
+    it 'logs in and lists the account appliances' do
+      expect(described_class.appliances)
+        .to all(have_attributes(fab: match(/\A\d+\z/), host: match(/\.local\.?\z/))).and(be_any)
+    end
+
+    it 'reads each appliance state through the cloud' do
+      states = cloud.devices.map { JSON.parse(cloud.request(:get, "/Devices/#{it.fab}/State").body) }
+      expect(states).to all(include('Status'))
+    end
+
+    it 'reads the oven DeviceContext 1/1585 through the cloud' do
+      oven = cloud.devices.find { ovens.include?(it.ident&.fetch('DeviceType', nil)) } or skip 'no oven in this account'
+      leaf = Miele::Sdk::Dop2.decode(cloud.request(:get, "/Devices/#{oven.fab}/DOP2/1/1585").body)
+      expect([leaf.unit, leaf.attribute]).to eq([1, 1585])
+    end
+
+    it 'reads the household key from the cloud and signs locally with it', :aggregate_failures do
+      expect(cloud.group == [ENV.fetch('MIELE_GROUP_ID'), ENV.fetch('MIELE_GROUP_KEY')]).to be(true)
+      described_class.configure do |config|
+        config.group_id = nil
+        config.group_key = nil
+      end
+      expect(appliances.map(&:device_type)).not_to include(:unknown)
+    end
   end
 end

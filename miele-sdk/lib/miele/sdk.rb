@@ -24,6 +24,11 @@ require_relative 'sdk/events/enrollment'
 require_relative 'sdk/events/listener'
 require_relative 'sdk/events/server'
 require_relative 'sdk/appliance'
+require_relative 'sdk/cloud/http'
+require_relative 'sdk/cloud/locales'
+require_relative 'sdk/cloud/token'
+require_relative 'sdk/cloud/session'
+require_relative 'sdk/cloud/channel'
 
 # Namespace of the koti SDKs for the Miele ecosystem.
 module Miele
@@ -38,6 +43,9 @@ module Miele
   module Sdk
     extend Configuration
 
+    CLOUD = Mutex.new
+    private_constant :CLOUD
+
     # Finds Miele@home appliances on the local network.
     #
     # @param timeout [Numeric] seconds to listen (default: 4, time for queries at 0, 1 and 3 seconds)
@@ -51,6 +59,46 @@ module Miele
     # @return [Appliance]
     # @api public
     def self.appliance(host) = Appliance.new(host)
+
+    # @return [Array<Appliance>] the appliances paired with the Miele account, reached by their module's name
+    # @raise [ConfigurationError] without an account
+    # @api public
+    def self.appliances
+      channel = cloud or raise ConfigurationError, 'the Miele account is needed to list its appliances'
+      channel.devices.map { Appliance.new(it.host, fab: it.fab, module_host: it.host) }
+    end
+
+    # @return [Cloud::Channel, nil] the Miele account's cloud, nil without an e-mail or a saved token
+    # @raise [ConfigurationError] without a country
+    # @api public
+    def self.cloud
+      CLOUD.synchronize do
+        return @cloud if @cloud
+        return unless account?
+
+        country = config.country or raise ConfigurationError, 'country is needed to reach the Miele cloud'
+        channel = Cloud::Channel.new(Cloud::Session.new(Cloud::Locales.organization(country)))
+        # A copy taken when the locales did not answer may be out of date: the next call asks them again.
+        channel.session.organization.bundled ? channel : (@cloud = channel)
+      end
+    end
+
+    # @return [Boolean] whether an e-mail, a saved token or a token file gives an account
+    # @api private
+    def self.account?
+      file = config.token_file
+      !(config.email || config.cloud_token || (file && File.exist?(file))).nil?
+    end
+
+    # Changes the settings; the next request reaches the cloud with them.
+    #
+    # @yieldparam config [Configuration::Settings]
+    # @return [void]
+    # @api public
+    def self.configure(&)
+      super
+      CLOUD.synchronize { @cloud = nil }
+    end
 
     # Streams the changes the appliances push, until the block breaks or raises.
     #

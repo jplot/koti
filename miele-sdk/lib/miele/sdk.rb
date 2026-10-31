@@ -26,6 +26,7 @@ require_relative 'sdk/events/enrollment'
 require_relative 'sdk/events/listener'
 require_relative 'sdk/events/cloud_stream'
 require_relative 'sdk/events/merge'
+require_relative 'sdk/events/poller'
 require_relative 'sdk/events/server'
 require_relative 'sdk/object_access'
 require_relative 'sdk/appliance'
@@ -166,6 +167,20 @@ module Miele
       sources << Events::Listener.new(hosts:) unless hosts.empty?
       sources << Events::CloudStream.new(cloud) if cloud
       Events::Merge.new(sources).each(&)
+    end
+
+    # Reads a DOP2 object again 3 s after each read ends, as the app polls the leaves the websocket does not
+    # carry, until the block breaks.
+    #
+    # @param appliance [Appliance]
+    # @param klass [Class] a generated DOP2 class
+    # @param address [Array<Integer>] where to read it
+    # @param every [Numeric] seconds between the end of a read and the next
+    # @yieldparam value [Data] the object, the first time and each time it changes
+    # @return [Object] what +break+ returns
+    # @api public
+    def self.poll(appliance, klass, address, every: 3, &)
+      Events::Poller.new(appliance, klass, address, every:).each(&)
     end
   end
 end

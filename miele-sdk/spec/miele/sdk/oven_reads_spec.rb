@@ -54,4 +54,13 @@ RSpec.describe Miele::Sdk::Oven do
     2.times { leaves["2/214?idx1=#{it}&idx2=1"] = dop2_leaf(2, 214, {}, idx1: it, idx2: 1) }
     expect(oven.program_steps.last.size).to eq(2)
   end
+
+  it 'reads the program groups on 1/1599 and the second cavity on 1/391, as the app polls them', :aggregate_failures do
+    leaves['1/1599?idx1=0&idx2=1'] = dop2_leaf(1, 1599, {}, idx2: 1)
+    leaves['1/391?idx1=0&idx2=1'] = dop2_leaf(1, 391, {}, idx2: 1)
+    expect([oven.program_groups, oven.second_cavity_context])
+      .to match([an_instance_of(Miele::Sdk::Objects::Oven::GlobalProgramGroupsComplete),
+                 an_instance_of(Miele::Sdk::Objects::Oven::GlobalDeviceContext2ndDevice)])
+    expect(dop2_paths).to eq(%w[1/1599?idx1=0&idx2=1 1/391?idx1=0&idx2=1])
+  end
 end

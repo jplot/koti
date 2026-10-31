@@ -10,7 +10,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - **Breaking:** `start`, `stop`, `pause`, `light_on` and `light_off` are gone from `Appliance`: the
-  Miele app sends them differently in each family, and they will come back that way.
+  Miele app sends them differently in each family, and they come back that way, ovens first.
+- **Breaking:** `Miele::Sdk.appliance` and `Miele::Sdk.appliances` return the class of each
+  appliance's family. The hood's `fan_level=`, `fan_run_on_time=`, `main_light=`, `setting` and
+  `write_setting` moved to `Hood`, and `power_on` and `power_off` to `Oven`.
 - **Breaking:** `remote_control?` follows the app for each family and answers nil where the app
   never reads `RemoteEnable`; `mobile_start?` and `local_control?` join it.
 - **Breaking:** `dop2` reads without a query unless given an index, `write_dop2` leaves the
@@ -22,12 +25,21 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Requests to the account's cloud (`/V2`, MCS login and renewal) name a language (`Accept-Language`),
   without which it answers 500.
 - `power_on` and `power_off` send what the app's oven module sends, without the 2/1583 opcode
-  fallback taken from ha-miele-at-lan.
+  fallback taken from ha-miele-at-lan, and `power_off` takes a 500 as done, as the app does.
 - Dop1 settings go out with structure version 1, and the README's filter example resets the
   operating hours (40012) instead of writing the filter limit (40010) to 0.
 - DOP2 fields of every type the app knows decode and encode; strings lose their trailing NULs.
 
 ### Added
+
+- A class per appliance family, chosen by device type and protocol version as the Miele app's
+  family modules claim them, and `Appliance#name=`.
+- Ovens as the app's oven module drives them: typed reads of the device and program contexts,
+  notifications, program groups, own programs and their steps, and the second cavity; program
+  selection, parameters, start, stop, continue cooking, steam burst, the end of keeping warm and
+  answers to notifications, each after the checks the app makes (`ActionUnavailableError`).
+  These writes have not run against a real oven.
+- `Appliance#modify`, which reads a typed object, changes it and writes it back.
 
 - Typed values of the DOP2 and Dop1 objects the Miele app uses, generated from its classes under
   `Miele::Sdk::Objects::<Family>`: `Appliance#object` and `#write_object` at the addresses the app

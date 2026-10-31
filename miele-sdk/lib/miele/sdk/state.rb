@@ -37,7 +37,7 @@ module Miele
       # puts first. DOP2 hobs (4) are read through DOP2 instead; the other families read their ExtendedState otherwise.
       EXTENDED_STATES = {
         [:hood, 1] => ['Hood::ExtendedOpCodeDeviceState', 0], [:hood, 2] => ['Hood::ExtendedDopDeviceState', 22],
-        [:hood, 4] => ['Hood::ExtendedDop2DeviceState', 22],
+        [:hood, 3] => ['Hood::ExtendedDop2DeviceState', 22], [:hood, 4] => ['Hood::ExtendedDop2DeviceState', 22],
         **%i[hob_highlight hob_induction hob_gas].product([1, 2]).to_h { [it, ['Hob::ExtendedDeviceState', 22]] }
       }.freeze
       private_constant :EXTENDED_STATES

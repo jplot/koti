@@ -237,7 +237,7 @@ hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the f
 - A Dop1 object decodes its sections, bit fields and byte order (`from(bytes)`), and `to_bytes`
   gives what a write section sends.
 - `state.extended_state` decodes `ExtendedState` into the object the app builds from it: the hood's
-  by `ProtocolVersion` (1, 2 or 4), and the Dop1 and Opcode hob's. It is nil for the other
+  by `ProtocolVersion` (1 to 4), and the Dop1 and Opcode hob's. It is nil for the other
   families, which read it otherwise, and when the appliance serves none, as they do switched off.
 
 Only the objects the app's family modules use are generated: 402 DOP2 classes, 468 Dop1 classes and

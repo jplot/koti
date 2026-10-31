@@ -175,8 +175,8 @@ RSpec.describe Miele::Sdk::State do
       expect(extended(:hood, 2, '00000002').luefter_1.luefterstufe_luefter_1).to eq(2)
     end
 
-    it "reads a DOP2 hood's in its byte order" do
-      expect(extended(:hood, 4, '00000000000000000102').licht_1_dimm.licht_1).to eq(0x0201)
+    it "reads a DOP2 hood's in its byte order, as the app does for ProtocolVersion 3 and 4" do
+      expect([3, 4].map { extended(:hood, it, '00000000000000000102').licht_1_dimm.licht_1 }).to eq([0x0201] * 2)
     end
 
     it 'decodes the hob ExtendedState as the app does' do

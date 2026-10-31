@@ -36,7 +36,7 @@ module Schema
       end
 
       # The prefix is the longest one ending in +_+ that every value shares, or that the values but 0 share when 0
-      # shares none and two others do. The rest keeps its underscores: the hob tells +Kochstufe_1+ from +Kochstufe_1_+.
+      # shares none. The rest keeps its underscores: the hob tells +Kochstufe_1+ from +Kochstufe_1_+.
       #
       # @param values [Array(String, Integer)] name and number of each value
       # @return [Array<Symbol>] the short symbol of each value
@@ -45,12 +45,15 @@ module Schema
         names = values.map(&:first)
         others = values.reject { it.last.zero? }.map(&:first)
         prefix = common_prefix(names)
-        prefix = common_prefix(others) if prefix.empty? && others.size > 1
+        prefix = common_prefix(others) if prefix.empty?
         distinct!(constant, names.map { snake(it.delete_prefix(prefix)).to_sym })
       end
 
-      # The first and last names in sort order share the prefix every name shares.
+      # The first and last names in sort order share the prefix every name shares. One name shares nothing: 7 enums
+      # have one value (+Version_1+), and 34 one beside 0 (+ohne_Topferkennung+).
       def common_prefix(names)
+        return '' if names.size < 2
+
         first = names.min.to_s
         size = first.each_char.zip(names.max.to_s.each_char).take_while { |left, right| left == right }.size
         first[0, size].to_s[/\A.*_/].to_s

@@ -45,6 +45,11 @@ RSpec.describe Schema::Generate::Model do
     expect(naming.symbols('Hob::TopferkennungsEnum', pot)).to eq(%i[mit_topferkennung ohne_topferkennung])
   end
 
+  it 'keeps the whole name of an enum with one value' do
+    expect(naming.symbols('Dishwasher::SmartControlGsdVersionEnum', [['Version_1', 1]]).map(&:to_s))
+      .to eq(%w[version_1])
+  end
+
   it 'keeps the underscores that tell two enum values apart' do
     values = [['Kochstufe_1', 1], ['Kochstufe_1_', 2], ['Restwaerme_H', 100]]
     expect(naming.symbols('Hob::KochstufeDeviceStateEnum', values).map(&:to_s))

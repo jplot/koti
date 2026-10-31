@@ -1,0 +1,19 @@
+module Miele
+  module Sdk
+    module Laundry
+      module Selection : Appliance
+        def select_program: (Integer | Symbol prog_id) -> void
+
+        private
+
+        def write_dop1_selection: (untyped section) -> void
+
+        def dop2?: () -> bool
+
+        def dop1_objects: () -> Hash[Symbol, untyped]
+
+        def dop1_selection: (Integer | Symbol prog_id) -> untyped
+      end
+    end
+  end
+end

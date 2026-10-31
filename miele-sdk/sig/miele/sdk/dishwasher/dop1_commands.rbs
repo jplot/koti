@@ -1,0 +1,29 @@
+module Miele
+  module Sdk
+    class Dishwasher < Appliance
+      module Dop1Commands : Appliance
+        EXTRA_BITS: Hash[Symbol, Integer]
+
+        def open_door: () -> void
+
+        private
+
+        def dop1_process_action: (State state, Integer action) -> void
+
+        def dop1_select: (Integer | Symbol prog_id) -> void
+
+        def dop1_extras: (Array[Symbol] selected) -> void
+
+        def write_selection: (Integer prog_id, Integer extras) -> void
+
+        def dop1_start_delayed: (Integer minutes) -> void
+
+        def dop2?: () -> bool
+
+        def status: (State state) -> Integer
+
+        def dop1_object: (untyped klass) -> untyped
+      end
+    end
+  end
+end

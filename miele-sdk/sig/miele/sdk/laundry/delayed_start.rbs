@@ -1,0 +1,35 @@
+module Miele
+  module Sdk
+    module Laundry
+      module DelayedStart : Appliance
+        MODES: Array[Integer]
+
+        def start_delayed: (Time at) -> void
+
+        private
+
+        def offset_minutes: (Time target, Time now) -> Integer
+
+        def delayed: (untyped para, untyped source, Time target, Time now) -> untyped
+
+        def dop1_start_delayed: (Time target, Time now) -> void
+
+        def write_start_time: (Integer hours, Integer minutes) -> void
+
+        def supported_requests: () -> Array[Integer]
+
+        def dop2?: () -> bool
+
+        def write_dop2_selection: () { (untyped para, untyped source) -> untyped } -> void
+
+        def start_minutes: (State state) -> Integer
+
+        def write_dop1_selection: (untyped section) -> void
+
+        def dop1_parameters: (untyped current, Hash[Symbol, untyped] settings) -> untyped
+
+        def dop1_objects: () -> Hash[Symbol, untyped]
+      end
+    end
+  end
+end

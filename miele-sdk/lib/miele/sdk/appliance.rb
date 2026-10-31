@@ -228,6 +228,43 @@ module Miele
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"
 
+      # The app reads 2/1583 at 0/0 and writes it back with the request set.
+      #
+      # @param id [Integer]
+      # @return [void]
+      def dop2_user_request(id)
+        leaf = dop2(2, 1583, idx1: 0, idx2: 0)
+        request = Dop2::Field.new(type: leaf.fields[1]&.type || :e16, value: id)
+        write_dop2(leaf.with(fields: leaf.fields.merge(1 => request)))
+      end
+
+      # @param at [Time] a time of day
+      # @param now [Time]
+      # @return [Time] that time today, or tomorrow once it has passed, as the app's delayed starts take it
+      def next_time(at, now)
+        today = on_day(now, at)
+        today < now ? on_day(Time.new(now.year, now.month, now.day, 12) + 86_400, at) : today
+      end
+
+      # @param day [Time] any time of that day; noon plus 86 400 s is tomorrow even on a DST day
+      # @param at [Time] a time of day
+      # @return [Time] that time of day on the day's wall clock
+      def on_day(day, at) = Time.new(day.year, day.month, day.day, at.hour, at.min)
+
+      # The app counts delays on the wall clock, as .NET's DateTime subtracts: on the day the clocks go back,
+      # 04:00 to 07:00 is 180 minutes.
+      #
+      # @param time [Time]
+      # @return [Rational] seconds since 1970 on the local wall clock
+      def wall_clock(time) = time.to_r + time.utc_offset
+
+      # @param klass [Class] a generated Dop1 object
+      # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects
+      def dop1_object(klass)
+        answer = JSON.parse(dop1(Dop1.request(object_id: klass::ID, type: Dop1::READ, section: ''))).fetch('Response')
+        klass.from([answer[8..]].pack('H*'))
+      end
+
       # @param condition [Object] what the app checks before the action
       # @param reason [String] what is missing
       # @return [void]

@@ -96,6 +96,16 @@ module Miele
 
       def dop2_path: (Integer unit, Integer attribute) -> String
 
+      def dop2_user_request: (Integer id) -> void
+
+      def next_time: (Time at, Time now) -> Time
+
+      def on_day: (Time day, Time at) -> Time
+
+      def wall_clock: (Time time) -> Rational
+
+      def dop1_object: (untyped klass) -> untyped
+
       def require!: (untyped condition, String reason) -> void
     end
   end

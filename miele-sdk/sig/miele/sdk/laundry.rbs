@@ -1,0 +1,67 @@
+module Miele
+  module Sdk
+    module Laundry : Appliance
+      include Rules
+      include Commands
+      include Selection
+      include Parameters
+      include DelayedStart
+
+      class Reading < Data
+        attr_reader load: Integer?
+        attr_reader soiling: Integer?
+        attr_reader drying_level: Integer?
+        attr_reader washing: bool
+        attr_reader drying: bool
+        attr_reader eco: bool
+        attr_reader energy: untyped
+        attr_reader water: untyped
+        attr_reader temperature: Integer
+        attr_reader spin_speed: untyped
+
+        def self.new: (Integer? load, Integer? soiling, Integer? drying_level, bool washing, bool drying, bool eco,
+                       untyped energy, untyped water, Integer temperature, untyped spin_speed) -> Reading
+                    | (load: Integer?, soiling: Integer?, drying_level: Integer?, washing: bool, drying: bool, eco: bool,
+                       energy: untyped, water: untyped, temperature: Integer, spin_speed: untyped) -> Reading
+      end
+
+      def context: () -> Objects::Laundry::GlobalDeviceContext
+
+      def program_context: () -> Objects::Laundry::GlobalPsContext
+
+      def notifications: () -> Objects::Laundry::GlobalNtfctnShow
+
+      def anti_crease: () -> Objects::Laundry::GlobalSfValue
+
+      def programs: () -> Array[Objects::Laundry::GlobalProgramList]
+
+      def door: () -> (Symbol | Integer)
+
+      def readings: () -> Reading?
+
+      def program_list: () -> untyped
+
+      def selection: () -> untyped
+
+      private
+
+      def dop2?: () -> bool
+
+      def dryer?: () -> bool
+
+      def blank: (untyped klass) -> untyped
+
+      def program_para: (Objects::Laundry::GlobalPsContext context) -> untyped
+
+      def dop2_door: (Objects::Laundry::GlobalDeviceContext context) -> (Symbol | Integer)
+
+      def dop1_door: (State state) -> Symbol
+
+      def reading: (String bytes, State state) -> Reading
+
+      def temperature: (State state) -> Integer
+
+      def dop1_objects: () -> Hash[Symbol, untyped]
+    end
+  end
+end

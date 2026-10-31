@@ -1,0 +1,41 @@
+module Miele
+  module Sdk
+    class TumbleDryer < Appliance
+      module Parameters : Appliance
+        DOP2_EXTRAS: Array[Symbol]
+        DOP1_EXTRAS: Hash[Symbol, Symbol]
+        COPIED: Hash[Symbol, Array[Symbol]]
+        COPIED_EXTRAS: Hash[Symbol, Array[Symbol]]
+        DOP1_COPIED: Array[Symbol]
+        DOP1_LEVELS: Hash[Symbol, Integer]
+        SMART_BIZ_LEVELS: Hash[Symbol, Integer]
+
+        private
+
+        def para_member: () -> Symbol
+
+        def parameter_names: () -> Array[Symbol]
+
+        def setting_choices: () -> Hash[Symbol, Array[Symbol]]
+
+        def appliance_values: (untyped para, untyped source) -> untyped
+
+        def dop2_parameters: (untyped para, Hash[Symbol, untyped] settings) -> untyped
+
+        def residual_moisture: (Symbol level) -> Integer
+
+        def dop1_parameters: (untyped current, Hash[Symbol, untyped] settings) -> untyped
+
+        def dop1_values: (Hash[Symbol, untyped] settings) -> Hash[Symbol, Integer]
+
+        def dop2?: () -> bool
+
+        def copied: (untyped para, untyped source, Hash[Symbol, Array[Symbol]] map) -> untyped
+
+        def chosen: (untyped extras, Array[Symbol] selected, Array[Symbol] names) -> untyped
+
+        def blank: (untyped klass) -> untyped
+      end
+    end
+  end
+end

@@ -1,0 +1,43 @@
+module Miele
+  module Sdk
+    module Laundry
+      module Rules : Appliance
+        def supported_requests: () -> Array[Integer]
+
+        private
+
+        def status: (State state) -> Integer
+
+        def offered_requests: (State state, Objects::Laundry::GlobalDeviceContext? context) -> Array[Integer]
+
+        def request_inputs: (State state, Objects::Laundry::GlobalDeviceContext? context) -> [Symbol | Integer, Integer, Array[Integer]]
+
+        def allowed_by_state: (Array[Integer] requests, State state) -> Array[Integer]
+
+        def without_unset_delay: (Array[Integer] requests) -> Array[Integer]
+
+        def raw_requests: (Objects::Laundry::GlobalDeviceContext context) -> Array[Integer]
+
+        def process_state: (Objects::Laundry::GlobalDeviceContext context) -> Integer
+
+        def dop1_requests: (State state) -> Array[Integer]
+
+        def programmed?: (State state) -> bool
+
+        def start_minutes: (State state) -> Integer
+
+        def program_context: () -> Objects::Laundry::GlobalPsContext
+
+        def program_para: (Objects::Laundry::GlobalPsContext context) -> untyped
+
+        def dop2?: () -> bool
+
+        def context: () -> Objects::Laundry::GlobalDeviceContext
+
+        def dop2_door: (Objects::Laundry::GlobalDeviceContext context) -> (Symbol | Integer)
+
+        def dop1_door: (State state) -> Symbol
+      end
+    end
+  end
+end

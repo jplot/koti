@@ -1,6 +1,9 @@
 module Miele
   module Sdk
     module Laundry : Appliance
+      include Rules
+      include Commands
+
       class Reading < Data
         attr_reader load: Integer?
         attr_reader soiling: Integer?
@@ -40,6 +43,14 @@ module Miele
       private
 
       def dop2?: () -> bool
+
+      def dryer?: () -> bool
+
+      def program_para: (Objects::Laundry::GlobalPsContext context) -> untyped
+
+      def dop2_door: (Objects::Laundry::GlobalDeviceContext context) -> (Symbol | Integer)
+
+      def dop1_door: (State state) -> Symbol
 
       def reading: (String bytes, State state) -> Reading
 

@@ -190,16 +190,6 @@ module Miele
                                                    prog_extras: para.prog_extras.with(**extras)))
         end
 
-        # The app reads 2/1583 at 0/0 and writes it back with the request set.
-        #
-        # @param id [Integer]
-        # @return [void]
-        def dop2_user_request(id)
-          leaf = dop2(2, 1583, idx1: 0, idx2: 0)
-          request = Dop2::Field.new(type: leaf.fields[1]&.type || :e16, value: id)
-          write_dop2(leaf.with(fields: leaf.fields.merge(1 => request)))
-        end
-
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher
         def require_dop2! = require!(dop2?, 'only a DOP2 dishwasher takes this, as in the app')

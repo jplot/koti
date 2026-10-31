@@ -54,8 +54,6 @@ module Miele
 
         def with_extras: (untyped select, untyped context, Hash[Symbol, bool] extras) -> untyped
 
-        def dop2_user_request: (Integer id) -> void
-
         def require_dop2!: () -> void
 
         def dop2?: () -> bool

@@ -228,6 +228,16 @@ module Miele
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"
 
+      # The app reads 2/1583 at 0/0 and writes it back with the request set.
+      #
+      # @param id [Integer]
+      # @return [void]
+      def dop2_user_request(id)
+        leaf = dop2(2, 1583, idx1: 0, idx2: 0)
+        request = Dop2::Field.new(type: leaf.fields[1]&.type || :e16, value: id)
+        write_dop2(leaf.with(fields: leaf.fields.merge(1 => request)))
+      end
+
       # @param klass [Class] a generated Dop1 object
       # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects
       def dop1_object(klass)

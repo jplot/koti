@@ -1,0 +1,49 @@
+module Miele
+  module Sdk
+    module Laundry
+      module Commands : Appliance
+        WAKEABLE: Hash[Integer, Hash[String, Integer]]
+
+        def start: () -> void
+
+        def stop: () -> void
+
+        def pause: () -> void
+
+        def stop_end_signal: () -> void
+
+        def stop_to_edit: () -> void
+
+        def extend_anti_crease: () -> void
+
+        def wake: () -> void
+
+        def acknowledge: (message: Integer | Symbol, option: Integer | Symbol) -> void
+
+        def power_off: () -> void
+
+        def anti_crease=: (Integer value) -> void
+
+        private
+
+        def run_request: (Integer id) -> void
+
+        def wakeable?: () -> bool
+
+        def finished?: (State state) -> bool
+
+        def dop2?: () -> bool
+
+        def context: () -> Objects::Laundry::GlobalDeviceContext
+
+        def status: (State state) -> Integer
+
+        def offered_requests: (State state, Objects::Laundry::GlobalDeviceContext? context) -> Array[Integer]
+
+        def raw_requests: (Objects::Laundry::GlobalDeviceContext context) -> Array[Integer]
+
+        def process_state: (Objects::Laundry::GlobalDeviceContext context) -> Integer
+      end
+    end
+  end
+end

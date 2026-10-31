@@ -5,6 +5,8 @@ module Miele
 
       def twin_dos: () -> untyped
 
+      def twin_dos_levels=: (Array[Hash[Symbol, Integer]] levels) -> void
+
       private
 
       def dop1_objects: () -> Hash[Symbol, untyped]

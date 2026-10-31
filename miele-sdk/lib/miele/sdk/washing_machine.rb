@@ -11,6 +11,13 @@ module Miele
       # @api public
       def twin_dos = services['TwinDos']
 
+      # @param levels [Array<Hash{Symbol=>Integer}>] each container's +:number+ and filling level in +:percent+
+      # @api public
+      def twin_dos_levels=(levels)
+        body = levels.map { { number: it.fetch(:number), containerFillingLevelPercent: it.fetch(:percent) } }
+        send_request(:post, "/Devices/#{fab}/services/TwinDos", body: JSON.generate(body))
+      end
+
       private
 
       # @return [Hash{Symbol=>Class}]

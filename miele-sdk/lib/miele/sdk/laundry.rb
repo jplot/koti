@@ -4,6 +4,9 @@ module Miele
   module Sdk
     # What the app's laundry module reads from a washing machine, washer-dryer or tumble dryer.
     module Laundry
+      include Rules
+      include Commands
+
       # What a Dop1 laundry appliance reports of its program: its +ExtendedState+ past the first 3 bytes, and
       # +State+ for the temperature and spin speed.
       #
@@ -66,12 +69,7 @@ module Miele
       # @return [Symbol, Integer] +:open+, +:closed+, +:locked+, +:drying_plus+ or +:unknown+, a value the enum
       #   lacks as its number; a Dop1 or Opcode appliance reads +SignalDoor+, false being locked
       # @api public
-      def door
-        return { true => :open, false => :locked }.fetch(state.raw['SignalDoor'], :unknown) unless dop2?
-
-        door = context.device_attributes_dwtdwm&.door_state || :unknown
-        door == :closed && is_a?(TumbleDryer) ? :locked : door
-      end
+      def door = dop2? ? dop2_door(context) : dop1_door(state)
 
       # @return [Reading, nil] nil off Dop1, or without +ExtendedState+
       # @api public
@@ -95,6 +93,24 @@ module Miele
 
       # @return [Boolean]
       def dop2? = [3, 4].include?(protocol_version)
+
+      # @return [Boolean]
+      def dryer? = is_a?(TumbleDryer)
+
+      # @param context [Objects::Laundry::GlobalPsContext] 2/1574
+      # @return [Data, nil] the dryer's parameters, or the washer's and the washer-dryer's
+      def program_para(context) = dryer? ? context.context_para_td : context.context_para_wm
+
+      # @param context [Objects::Laundry::GlobalDeviceContext]
+      # @return [Symbol, Integer]
+      def dop2_door(context)
+        door = context.device_attributes_dwtdwm&.door_state || :unknown
+        door == :closed && dryer? ? :locked : door
+      end
+
+      # @param state [State]
+      # @return [Symbol]
+      def dop1_door(state) = { true => :open, false => :locked }.fetch(state.raw['SignalDoor'], :unknown)
 
       # @param bytes [String] +ExtendedState+ past its first 3 bytes
       # @param state [State]

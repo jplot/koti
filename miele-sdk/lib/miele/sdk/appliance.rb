@@ -217,6 +217,14 @@ module Miele
 
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"
+
+      # @param condition [Object] what the app checks before the action
+      # @param reason [String] what is missing
+      # @return [void]
+      # @raise [ActionUnavailableError] unless +condition+ holds
+      def require!(condition, reason)
+        raise ActionUnavailableError, reason unless condition
+      end
     end
   end
 end

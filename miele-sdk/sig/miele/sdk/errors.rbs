@@ -26,5 +26,8 @@ module Miele
 
     class RemoteControlDisabledError < ResponseError
     end
+
+    class ActionUnavailableError < Error
+    end
   end
 end

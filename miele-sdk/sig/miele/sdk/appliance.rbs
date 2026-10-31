@@ -93,6 +93,8 @@ module Miele
       def tolerating_no_op: () { () -> untyped } -> void
 
       def dop2_path: (Integer unit, Integer attribute) -> String
+
+      def require!: (untyped condition, String reason) -> void
     end
   end
 end

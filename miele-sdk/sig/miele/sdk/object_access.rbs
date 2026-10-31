@@ -10,6 +10,8 @@ module Miele
 
       def write_object: (untyped value, ::Array[::Integer?] address, ?with_index: bool) -> void
 
+      def modify: (untyped klass, ::Array[::Integer?] address, ?with_index: bool) { (untyped value) -> untyped } -> void
+
       private
 
       def settled: (::Array[::Integer?] address) -> [::Integer, ::Integer, ::Integer?, ::Integer?]

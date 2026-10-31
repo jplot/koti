@@ -17,6 +17,7 @@ module Miele
         KEEP_ALIVE: Integer
         WATCHDOG: Integer
         ERROR_RECONNECT: Integer
+        STREAM_RETRY: Integer
         FAILURES: Array[singleton(Exception)]
 
         @session: Session

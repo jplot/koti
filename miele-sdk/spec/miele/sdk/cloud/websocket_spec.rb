@@ -73,8 +73,8 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     let(:script) { ->(connection, _index) { connection.send_binary("CC1\r\n\r\nPOST /V2/Devices HTTP/1.1\r\n\r\n[]") } }
     let(:stop) { Class.new(StandardError) }
 
-    it 'drops the connection and tries again 6 s later, as the app drops its stream' do
-      expect { first_messages(1) }.to raise_error(stop, '6')
+    it 'drops the connection and tries again 3 s later, as the app retries its stream' do
+      expect { first_messages(1) }.to raise_error(stop, '3')
     end
   end
 

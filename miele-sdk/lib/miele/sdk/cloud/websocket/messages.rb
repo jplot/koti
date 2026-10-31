@@ -12,6 +12,10 @@ module Miele
           SEPARATOR = "\r\n\r\n"
           private_constant :SEPARATOR
 
+          # A message the app's parser refuses.
+          class Malformed < ConnectionError; end
+          private_constant :Malformed
+
           private
 
           # The app acknowledges each message it parses.
@@ -66,9 +70,9 @@ module Miele
           #
           # @param head [String, nil]
           # @return [Integer] its +Content-Length+
-          # @raise [ConnectionError] without one
+          # @raise [Malformed] without one
           def content_length(head)
-            length = head.to_s[/Content-Length: (\d+)/i, 1] or raise ConnectionError, 'a message has no Content-Length'
+            length = head.to_s[/Content-Length: (\d+)/i, 1] or raise Malformed, 'a message has no Content-Length'
             length.to_i
           end
 

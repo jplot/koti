@@ -19,7 +19,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Requests to the Miele cloud name a language (`Accept-Language`), without which it answers 500.
+- Requests to the account's cloud (`/V2`, MCS login and renewal) name a language (`Accept-Language`),
+  without which it answers 500.
 - `power_on` and `power_off` send what the app's oven module sends, without the 2/1583 opcode
   fallback taken from ha-miele-at-lan.
 - Dop1 settings go out with structure version 1, and the README's filter example resets the

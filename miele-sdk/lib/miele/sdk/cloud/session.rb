@@ -53,7 +53,8 @@ module Miele
           @token = mcs_token(mcs_post(url, JSON.generate(email:, password:))).save
         end
 
-        # The cloud answers 500 to an MCS request without one; the app sends its language with the account's country.
+        # The cloud answers 500 to an MCS request without one. The app sends its phone's locale; the gem has none
+        # and names English in the account's country.
         #
         # @return [String] the +Accept-Language+ of MCS requests
         # @api private

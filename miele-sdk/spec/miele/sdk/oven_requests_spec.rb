@@ -41,8 +41,13 @@ RSpec.describe Miele::Sdk::Oven do
     resources['State'] = JSON.generate('Status' => status, 'RemoteEnable' => [remote, 0, 0], 'ProgramID' => program_id)
   end
 
-  def serve(requests, type: 1, phase: 0, prog_id: 13, parameters: {})
-    attributes = { 1 => dop2_field(:e16, phase), 10 => dop2_field(:e8, type), 28 => dop2_field(:e16, prog_id) }
+  def attributes(type: 1, phase: 0, prog_id: 13, continue_cooking: 0)
+    { 1 => dop2_field(:e16, phase), 10 => dop2_field(:e8, type), 16 => dop2_field(:e8, continue_cooking),
+      28 => dop2_field(:e16, prog_id) }
+  end
+
+  def serve(requests, parameters: {}, **shown)
+    attributes = attributes(**shown)
     resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, attributes),
                                                     9 => dop2_field(:e16_array, requests) })
     resources['DOP2/1/1574?idx1=0&idx2=1'] =
@@ -138,11 +143,23 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to be_empty
   end
 
-  it 'sends continue cooking, a steam burst and the end of keeping warm as plain requests' do
+  it 'sends continue cooking, a steam burst and the end of keeping warm when the oven offers them' do
+    serve([59], continue_cooking: 1)
+    resources['DOP2/1/131?idx1=0&idx2=1'] =
+      dop2_leaf(1, 131, { 2 => dop2_field(:struct_array, [{ 1 => dop2_field(:e16, 20) }]) }, idx2: 1)
     oven.continue_cooking
     oven.steam_burst
     oven.stop_keeping_warm
     expect(written.map(&:last)).to eq([user_request(72), user_request(59), user_request(68)])
+  end
+
+  it 'refuses the requests the oven does not offer', :aggregate_failures do
+    serve([1, 2])
+    resources['DOP2/1/131?idx1=0&idx2=1'] = dop2_leaf(1, 131, {}, idx2: 1)
+    %i[continue_cooking steam_burst stop_keeping_warm].each do |request|
+      expect { oven.public_send(request) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+    expect(written).to be_empty
   end
 
   context 'with a Dop1 oven' do

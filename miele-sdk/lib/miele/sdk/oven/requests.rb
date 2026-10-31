@@ -49,28 +49,41 @@ module Miele
         # The app then raises the doneness or browning the oven asks for by one step, once the oven has moved on;
         # {ProgramSelection#doneness=} and {ProgramSelection#browning=} write it here.
         #
+        # Offered while 1/1585 shows ContinueCooking 1 or 2, baking or cooking (ContinueProgramOptionRule).
+        #
         # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven
+        # @raise [ActionUnavailableError] on a Dop1 oven, or when not offered
         # @api public
-        def continue_cooking = user_request(72)
+        def continue_cooking = user_request(72, 'the oven offers no continue cooking now') { continue_cooking? }
 
         # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven
+        # @raise [ActionUnavailableError] on a Dop1 oven, or when the oven does not offer request 59
         # @api public
-        def steam_burst = user_request(59)
+        def steam_burst = user_request(59, 'the oven offers no steam burst now') { supported_requests.include?(59) }
 
+        # Offered while 1/131 shows message 20 (OptionsRunningAfterEndRule).
+        #
         # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven
+        # @raise [ActionUnavailableError] on a Dop1 oven, or when the oven is not keeping warm
         # @api public
-        def stop_keeping_warm = user_request(68)
+        def stop_keeping_warm = user_request(68, 'the oven is not keeping warm') { shows?(:message, 20) }
 
         private
 
         # @param id [Integer]
+        # @param reason [String] why the oven does not offer it
+        # @yieldreturn [Boolean] whether it does
         # @return [void]
-        def user_request(id)
+        def user_request(id, reason)
           require_dop2!
+          require!(yield, reason)
           write_dop2(Messages.user_request(id))
+        end
+
+        # @return [Boolean]
+        def continue_cooking?
+          type = context.prog_attributes_cca&.continue_cooking&.then { Objects::Oven::GlobalEnumContinueCookingTypes.to_i(it) }
+          [1, 2].include?(type)
         end
 
         # @param context [Objects::Oven::GlobalPsContext]
@@ -139,15 +152,17 @@ module Miele
         # @return [Integer]
         def stop_request(state, context, requests)
           return 2 unless started?(state, context)
-          return 2 if oven_state(state, context, requests) == :paused && state.program_id == 72 && info?(198)
+          return 2 if oven_state(state, context, requests) == :paused && state.program_id == 72 && shows?(:info, 198)
 
           [55, 56, 57].find { requests.include?(it) } || 2
         end
 
+        # @param type [Symbol] +:info+ or +:message+
         # @param id [Integer]
-        # @return [Boolean] whether 1/131 shows the info
-        def info?(id)
-          Array(notifications.infos).any? { it.id && Objects::Oven::GlobalEnumNtfctnInfoId.to_i(it.id) == id }
+        # @return [Boolean] whether 1/131 shows it
+        def shows?(type, id)
+          shown = type == :info ? notifications.infos : notifications.messages
+          Array(shown).any? { it.id && NOTIFICATION_IDS.fetch(type).to_i(it.id) == id }
         end
 
         # The app's Dop1 rule asks for a program and ignores +RemoteEnable+.

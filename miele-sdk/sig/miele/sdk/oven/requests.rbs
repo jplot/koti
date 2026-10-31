@@ -26,7 +26,9 @@ module Miele
 
         private
 
-        def user_request: (Integer id) -> void
+        def user_request: (Integer id, String reason) { () -> boolish } -> void
+
+        def continue_cooking?: () -> bool
 
         def require_duration!: (Objects::Oven::GlobalPsContext context) -> void
 
@@ -44,7 +46,7 @@ module Miele
 
         def stop_request: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Integer
 
-        def info?: (Integer id) -> bool
+        def shows?: (Symbol type, Integer id) -> bool
 
         def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
 

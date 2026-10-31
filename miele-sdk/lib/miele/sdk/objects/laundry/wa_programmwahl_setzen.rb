@@ -101,6 +101,9 @@ module Miele
             # The pieces of its bytes the app's GenerateWriteBytes sends: offset and length.
             WRITE_BYTES = [[0, 1].freeze, [1, 2].freeze, [3, 1].freeze, [4, 1].freeze, [5, 2].freeze, [7, 1].freeze, [8, 1].freeze, [9, 1].freeze, [10, 1].freeze, [11, 1].freeze, [12, 1].freeze, [13, 4].freeze, [17, 4].freeze, [21, 4].freeze].freeze
 
+            # Its length, to build it empty.
+            LENGTH = 25
+
             # The kind, offset and layout of each member.
             MEMBERS = {
               version: [:u8, 0, 1, "Laundry::WaVersionEnum"].freeze,

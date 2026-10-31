@@ -7,7 +7,11 @@ module Schema
   module Generate
     Dop2Class = Data.define(:family, :name, :constant, :fields, :addresses)
     Dop2Field = Data.define(:member, :index, :kind, :wire, :type)
-    Dop1Class = Data.define(:family, :name, :constant, :id, :endian, :sections, :arrays, :fields, :write, :write_bytes)
+    Dop1Class = Data.define(:family, :name, :constant, :id, :endian, :sections, :arrays, :fields, :write,
+                            :write_bytes) do
+      # The app builds some write sections alone instead of from a read: they need their length to start empty.
+      def length = (write_bytes.map(&:sum).max if write)
+    end
     Dop1Field = Data.define(:member, :kind, :offset, :size, :length, :type)
     Enum = Data.define(:family, :name, :constant, :values)
 

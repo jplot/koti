@@ -11,6 +11,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - **Breaking:** `start`, `stop`, `pause`, `light_on` and `light_off` are gone from `Appliance`: the
   Miele app sends them differently in each family, and they come back that way, ovens first.
+- **Breaking:** a hood's `fan_level=` refuses while its screen is pushed in, and asks to `wake` a hood
+  that is off; `wake` writes back a Dop1 or Opcode hood's light instead of `DeviceAction` 2, as the
+  app does.
+- **Breaking:** `Dop1` requests spell their section in lower-case hex, as the app writes them.
 - **Breaking:** `Miele::Sdk.appliance` and `Miele::Sdk.appliances` return the class of each
   appliance's family. The hood's `fan_level=`, `fan_run_on_time=`, `main_light=`, `setting` and
   `write_setting` moved to `Hood`, and `power_on` and `power_off` to `Oven`.
@@ -32,6 +36,15 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Hoods as the app's hood module drives them, in Opcode, Dop1 and DOP2: typed reads of the fan,
+  run-on, lights, filters, height, dehumidification and grease melting; fan, run-on, lights,
+  filter resets, ambient colours, dehumidification, fragrance, grease melting and auto refresh,
+  each by the protocol the app picks and after the checks it makes. These writes have not run
+  against a real hood.
+- Con@ctivity Plus and One, and ColorFlow.
+- Hobs read as the app reads them: zones, minute minder, power doubling, Stop&Go, TempControl and
+  the fan of a hob with vapour extraction.
+- `LENGTH` on the generated Dop1 write sections the app builds from nothing.
 - A class per appliance family, chosen by device type and protocol version as the Miele app's
   family modules claim them, and `Appliance#name=`.
 - Ovens as the app's oven module drives them: typed reads of the device and program contexts,

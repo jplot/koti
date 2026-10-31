@@ -52,6 +52,9 @@ module Miele
             # The pieces of its bytes the app's GenerateWriteBytes sends: offset and length.
             WRITE_BYTES = [[0, 1].freeze, [1, 2].freeze, [3, 4].freeze].freeze
 
+            # Its length, to build it empty.
+            LENGTH = 7
+
             # The kind, offset and layout of each member.
             MEMBERS = {
               version_der_struktur: [:u8, 0, 1, "Hood::VersionEnum"].freeze,

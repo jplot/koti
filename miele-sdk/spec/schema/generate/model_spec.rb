@@ -90,6 +90,11 @@ RSpec.describe Schema::Generate::Model do
         .to eq(['Hood::ServiceDataExtLueftersteuerung::ServiceDataExtLueftersteuerungSection'])
     end
 
+    it 'gives a write section built alone its length' do
+      section = 'Hood::ServiceDataExtLueftersteuerung::ServiceDataExtLueftersteuerungWriteSection'
+      expect(objects.dop1.find { it.constant == section }.length).to eq(2)
+    end
+
     it 'keeps two getters on one index under two names' do
       expect(oven('GlobalPsAttributesCCA').fields.select { it.index == 5 }.map(&:member))
         .to contain_exactly(:total_remaining_time, :level)

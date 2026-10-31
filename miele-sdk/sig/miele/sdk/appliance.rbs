@@ -4,7 +4,7 @@ module Miele
       include ObjectAccess
 
       interface _Sleeper
-        def call: (Integer seconds) -> untyped
+        def call: (Integer | Float seconds) -> untyped
       end
 
       type resource = Hash[String, untyped]
@@ -45,6 +45,8 @@ module Miele
       def update: () -> resource
 
       def supervision: () -> Schema::SuperVision
+
+      def supervise: (String device, show: bool) -> void
 
       def info: () -> resource
 

@@ -130,7 +130,8 @@ state.light                # => :on
 ```
 
 Hoods add `state.ventilation_step` (0 to 4), hobs `state.plates`, one `Plate` per cooking zone
-(`step`, `remaining_heat`, `remaining_minutes`, `elapsed_minutes`, `timer_seconds`). Unknown
+(`step`, `remaining_heat`, `remaining_minutes`, `elapsed_minutes`, `timer_seconds`), from keys of
+`State` the app does not read for hobs: `hob.zones` reads what it reads (see [Hobs](#hobs)). Unknown
 values read `:unknown`, `state.raw` keeps the resource as served, and `state.attributes` gives it
 as a typed value.
 
@@ -216,24 +217,102 @@ the leaf, as the app's oven, dishwasher and laundry modules do; `with_index: tru
 in the path, as its hood and coffee modules do. Not every Wi-Fi module serves DOP2: EK057 and
 EK039W modules answer 404 to every leaf, so `power_on` raises `Miele::Sdk::NotFoundError` on them.
 
-## Hoods (Dop1)
+## Hoods
 
-Hoods reporting `ProtocolVersion` 2 answer Dop1 requests instead of DOP2.
+`Miele::Sdk::Hood` reads and acts as the app's hood module does, in each protocol the app knows:
+Opcode (1), Dop1 (2) and DOP2 (3 and 4).
 
 ```ruby
 hood = Miele::Sdk.appliance('192.0.2.21')
-hood.fan_level = 2           # 0 (off) to 3, 4 for boost, 5 for interval
-hood.fan_run_on_time = 15    # 0, 5 or 15 minutes
-hood.main_light = true
-hood.setting(40_010)         # the current grease filter limit, nil when the hood does not expose it
-hood.write_setting(40_012, 1)  # resets the grease filter's operating hours (40_013: charcoal)
+hood.fan_level          # => 2: 0 to 3, 4 for boost, 5 for interval, 8 while it adjusts its pressure
+hood.run_on             # => #<data RunOn setting=5, minutes_left=3>
+hood.lights.main        # => #<data Light exists=true, dimmable=true, …, dimmer=32768, temperature=4000>
+hood.grease_filter      # => #<data Filter threshold=200, hours=50, reached=true>; charcoal_filter too
+hood.dehumidification   # also grease_melting, height_position, fan_settable? and auto_refresh_supported?
+
+hood.fan_level = 2         # 0 (off) to 3, 4 for boost, 5 for interval
+hood.fan_run_on_time = 15  # 0, 5 or 15 minutes
+hood.main_light = true     # and ambient_light=
+hood.reset_grease_filter   # and reset_charcoal_filter
+hood.wake
 ```
 
-Settings (programming functions, Dop1 object 1201) go out with structure version 1, as the app
-sends them.
+The reads come from `ExtendedState`, which a hood serves only while it is on: they read nil while
+it is off, except an Opcode hood's fan level and light, which come from `State`. A light reports
+its dimmer as the hood does, from 0 to 65535.
 
-A value out of range raises `ArgumentError` before anything is sent. `Miele::Sdk::Dop1` builds
-the requests, and `hood.dop1(request)` sends any other one.
+The app picks each action by protocol, and so does the SDK; a protocol 3 hood drives its fan and
+lights as an Opcode one:
+
+| Action | Opcode (1) | Dop1 (2) | DOP2 (3) | DOP2 (4) |
+|---|---|---|---|---|
+| Fan level, run-on, main light | Oc85, State | Dop1 | Oc85, State | 2/1577, 2/1583 |
+| Ambient light | — | Dop1 | — | 2/1583 |
+| Filter resets | Oc85 | setting | 2/1583 | 2/1583 |
+| Ambient light while cooking, fragrance, auto refresh | — | setting, 1100 | 2/105 | 2/105 |
+| Ambient colours, dehumidification, silent blower, grease melting | — | Dop1 | — | — |
+
+The Dop1-only ones are `configure_ambient_light(mode:, rgb:, brightness:, colour_temperature:)`,
+`dehumidification =` (`:off` or `:regulated`, the only ones the app writes),
+`dehumidification_silent =`, `grease_melting =` and `grease_melting_at(minutes)`; the others are
+`ambient_light_while_cooking =`, `fragrance(:start)` (also `:stop` and `:miele_program`) and
+`auto_refresh =`.
+
+An action the hood's protocol has not raises `Miele::Sdk::ActionUnavailableError`, and so does one
+the hood does not support (ambient light, dehumidification, grease melting, auto refresh,
+fragrance), as the app hides it, and the fan while the hood's screen is pushed in, as the app
+refuses it. A hood that is off does not say what it supports: those actions ask to `wake` it first. The Opcode fan level goes out twice, half a second apart, as the app sends it. `wake`
+writes back the light of a Dop1 or Opcode hood that is off, and sends `DeviceAction` 2 to a DOP2
+one, as the app wakes them.
+
+Settings (programming functions, Dop1 object 1201) go out with structure version 1 and Dop1
+sections in lower-case hex, as the app sends them. A value out of range raises `ArgumentError`
+before anything is sent. `Miele::Sdk::Dop1` builds the requests, and `hood.dop1(request)` sends any
+other one; `hood.setting(pf_id)` and `hood.write_setting(pf_id, value)` read and write a setting.
+
+Left out: the ambient light's dimming (the app's conversion is not traced), the auto refresh
+schedule, a DOP2 hood's ambient colours, the write that switches a downdraft hood on before its
+ambient light, and the ColorFlow switch-off the app's screen sends once a Dop1 hood's ambient light
+is off. A DOP2 user request or setting is read and written back, as in the app, with the header the
+hood served. None of these writes has been sent to a real hood. The reads have run against a Dop1
+hood switched off, serving no `ExtendedState`; Opcode and DOP2 hoods have never been tried.
+
+## Con@ctivity
+
+```ruby
+hood.connectivity_plus  # => #<data ConnectivityPlus available=true, activated=false, available_sources=[…], sources=[]>
+hood.connect_hob('000111222333')    # and disconnect_hob: Con@ctivity Plus follows the hob
+hood.color_flow         # => #<data ColorFlow active=true, interval=10>, nil when the hood has none
+hood.configure_color_flow(active: true, interval: 20)  # 5, 10 or 20 seconds
+hood.supervise('000111222333', show: true)              # Con@ctivity One
+```
+
+Con@ctivity Plus makes a hood follow hobs. As in the app, `connect_hob` and `disconnect_hob` change
+one hob in the list `services` shows and switch Con@ctivity Plus on while one is left; the SDK
+refuses them unless `services` shows it available, as the app hides it. ColorFlow reads 404, and 500 on a DOP2 hood, as none, and an
+interval the app does not know as 10 seconds; the SDK refuses to set it on a hood that has none.
+`supervise` writes `SuperVision/{fab}` of the appliance that shows another one, with `Show` alone:
+the app leaves `Signal` out. ColorFlow and Con@ctivity Plus have been read from a real hood through
+the cloud.
+
+## Hobs
+
+```ruby
+hob = Miele::Sdk.appliance('192.0.2.22')
+hob.zones            # => [#<data Zone number=1, level=6.0, heat=nil, booster=2, timer=5400, cookware=true, …>]
+hob.main_state       # => :running; internal_state names State's InternalState as the app does
+hob.minute_minder    # => 130, in seconds
+hob.power_doubling?  # and stop_and_go?
+hob.temp_control     # => #<data TempControl zone=2, level=:two, target_reached=true, target=120.0, current=95.0>
+hob.fan              # => #<data Fan level=2, run_on=301>, nil for a hob without one
+```
+
+The app only reads a hob: its actions are Cook Assist commands through the Miele cloud, which the
+SDK leaves out. Zones follow the app: only those the hob declares, zone 5 in fourth place while it
+heats on a four-zone hob, numbered from their controls on a hob that has zone controls, a level in
+half steps when the hob doubles its levels, residual heat and keep warm in `heat`, and the end time
+as a duration. A DOP2 hob shows zones 1 and 2, as in the app. A hob serves `ExtendedState` only
+while it is on; the one tried was off, so the zones have not been read from a real hob.
 
 ## Ovens
 

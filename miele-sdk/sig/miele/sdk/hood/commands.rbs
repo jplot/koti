@@ -1,0 +1,79 @@
+module Miele
+  module Sdk
+    class Hood < Appliance
+      module Commands : Appliance
+        FAN_LEVELS: Range[Integer]
+
+        RUN_ON_TIMES: Array[Integer]
+
+        FRAGRANCE_SETTINGS: Hash[Symbol, Integer]
+
+        def fan_level=: (Integer level) -> void
+
+        def fan_run_on_time=: (Integer minutes) -> void
+
+        def main_light=: (bool on) -> void
+
+        def ambient_light=: (bool on) -> void
+
+        def ambient_light_while_cooking=: (bool on) -> void
+
+        def reset_grease_filter: () -> void
+
+        def reset_charcoal_filter: () -> void
+
+        def fragrance: (Symbol action) -> void
+
+        def auto_refresh=: (bool on) -> void
+
+        def configure_color_flow: (active: bool, ?interval: Integer) -> void
+
+        def color_flow: () -> ColorFlow?
+
+        def connect_hob: (String hob) -> void
+
+        def disconnect_hob: (String hob) -> void
+
+        def wake: () -> void
+
+        def connectivity_plus: () -> ConnectivityPlus?
+
+        def fan_settable?: () -> bool?
+
+        def lights: () -> Lights?
+
+        def auto_refresh_supported?: () -> bool?
+
+        def write_setting: (Integer pf_id, Integer value) -> void
+
+        private
+
+        def reset_filter: (Integer pf_id, Integer request, String opcode_request) -> void
+
+        def require_reading!: (bool? value, String reason) -> void
+
+        def update_connectivity_plus: () { (Array[String] sources) -> Array[String] } -> void
+
+        def route: (Symbol kind) -> Symbol
+
+        def opcode: (String request) -> void
+
+        def opcode_twice: (String request) -> void
+
+        def hood_select: (Hash[Integer, Integer] values) -> Dop2::Leaf
+
+        def dop2_user_request: (Integer id) -> void
+
+        def write_sf: (Integer id, Integer value) -> void
+
+        def dop1_ambient_light: (bool on) -> void
+
+        def dop1_fragrance: (Symbol action) -> void
+
+        def extended: () -> untyped
+
+        def second_functions: (untyped values) -> Integer
+      end
+    end
+  end
+end

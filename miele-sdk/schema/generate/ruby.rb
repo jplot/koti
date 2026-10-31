@@ -113,7 +113,8 @@ module Schema
         id = ["# The object's id in a Dop1 request.", "ID = #{klass.id.inspect}", ''] if klass.id
         if klass.write
           pieces = ['', "# The pieces of its bytes the app's GenerateWriteBytes sends: offset and length.",
-                    "WRITE_BYTES = #{frozen(klass.write_bytes)}"]
+                    "WRITE_BYTES = #{frozen(klass.write_bytes)}", '', '# Its length, to build it empty.',
+                    "LENGTH = #{klass.length}"]
         end
         endian = ['# Its byte order, nil when its reader gives it.', "ENDIAN = #{klass.endian.inspect}"]
         [*id, *endian, *pieces]

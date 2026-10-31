@@ -1,6 +1,51 @@
 module Miele
   module Sdk
     class Hob < Appliance
+      include Zones
+
+      INTERNAL_STATES: Hash[Integer, Symbol]
+
+      TEMP_CONTROL_LEVELS: Hash[Integer, Symbol]
+
+      FAN_LEVELS: Hash[Integer, Integer | Symbol]
+
+      DOP2_MAIN_STATES: Hash[Symbol, Symbol]
+
+      PLAIN_LENGTH: Integer
+
+      ZONE_CONTROL_LENGTHS: Array[Integer]
+
+      def main_state: () -> (Symbol | Integer)?
+
+      def internal_state: () -> Symbol
+
+      def zones: () -> Array[Zone]
+
+      def minute_minder: () -> Integer?
+
+      def power_doubling?: () -> bool?
+
+      def stop_and_go?: () -> bool?
+
+      def temp_control: () -> TempControl?
+
+      def fan: () -> Fan?
+
+      private
+
+      def dop2?: () -> bool
+
+      def numbered_zones: (State state) -> Array[Zone]
+
+      def padded_length: (State state) -> Integer
+
+      def general_flag: (Symbol name) -> bool?
+
+      def dop2_zones: () -> Array[Zone]
+
+      def temp_control_of: (State state, Integer number) -> TempControl
+
+      def run_on: (untyped fan) -> Integer
     end
   end
 end

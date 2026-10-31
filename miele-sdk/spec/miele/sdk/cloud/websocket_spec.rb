@@ -53,6 +53,14 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     end
   end
 
+  context 'when a frame holds more than 125 bytes' do
+    let(:script) { ->(connection, _index) { connection.send_binary(message('CC1', "\"#{'x' * 300}\"")) } }
+
+    it 'reads its two-byte length' do
+      expect(first_messages(1).first.body.bytesize).to eq(302)
+    end
+  end
+
   context 'when two messages come in one frame' do
     let(:script) do
       ->(connection, _index) { connection.send_binary(message('CC1', '{"Status":5}') + message('CC2', '{"Status":1}')) }

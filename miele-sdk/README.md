@@ -379,6 +379,100 @@ or `browning=`), and the required parameters written once a selected program sho
 writes them). None of these writes has been sent to a real oven: their bytes follow the app's
 code, and the reads have run against a real oven through the cloud.
 
+## Dishwashers
+
+`Miele::Sdk::Dishwasher` reads and acts as the app's dishwasher module does. It has never been
+tested on an appliance: every read and write follows the app's code.
+
+```ruby
+dishwasher.context             # 2/1585, read without an index; program_context, programs, notifications
+dishwasher.supported_requests  # => [:start, :stop, :start_delay], the app's names; none on a PG81
+dishwasher.setting(20_052)     # 2/105 at an SF id, here AutoDos
+dishwasher.locked?             # a DOP2 dishwasher its owner locked (RemoteEnable 7)
+dishwasher.consumption         # Dop1: #<data Consumption energy=0.8, water=9.4>, in the app's units
+dishwasher.consumables         # from services; statistics and latest_program_runs on DOP2
+dishwasher.program_list        # Dop1 8905; selection reads 8907
+```
+
+```ruby
+dishwasher.select_program(28)
+dishwasher.set_extras(:express, :dry)       # the extras this model's app writes; ArgumentError for others
+dishwasher.start                            # or start_delayed(time): today's or tomorrow's time of day
+dishwasher.pause                            # resume, stop, cancel
+dishwasher.power_on                         # and power_off, on DOP2
+dishwasher.auto_dos = true                  # write_setting(id, value) on a G38, G58, G7 or PFD10
+dishwasher.acknowledge(info: 700, option: 1)
+dishwasher.leave_abort                      # DOP2
+dishwasher.open_door                        # Dop1, under mobile start with the door closed
+```
+
+Each action makes the checks of the app's rule for it and raises `ActionUnavailableError` without
+sending anything when one fails. `start` needs mobile start (and AppSupport bit 4 on DOP2), the door
+closed, request 1 offered and the dishwasher ready (Status 3, or 4 awake); `pause` and `resume` need
+mobile start and a running or paused program; `stop` and `cancel` need no mobile start, only a
+program that runs, pauses or waits awake, the request offered, and a dishwasher not locked. A DOP2
+dishwasher refuses while it shows info 700. A Dop1 dishwasher takes `ProcessAction` on its whole
+`State`, its program and extras on 8906 and its delayed start on 8909.
+
+Not traced, so left to the dishwasher: the app's rule for request 8 (`start_delayed` checks nothing),
+where a Dop1 dishwasher shows info 700, and the units of the Dop1 consumption. The app sends the
+steps of `power_on` and `power_off` again while it watches `State` for 15 s; the SDK sends each once.
+
+## Laundry
+
+`Miele::Sdk::WashingMachine` (washing machines and washer-dryers) and `Miele::Sdk::TumbleDryer` read
+and act as the app's laundry module does. They have never been tested on an appliance: every read
+and write follows the app's code.
+
+```ruby
+washer.context             # 2/1585, read without an index: door, process state, requests listed
+washer.supported_requests  # => [1, 8], after the app's SupportedRequestsRule
+washer.program_context     # 2/1574; notifications (2/131) and anti_crease (2/105) too
+washer.programs            # 2/1584, page by page as the app reads it
+washer.door                # => :locked; a dryer shows a closed door as locked, as the app does
+washer.readings            # Dop1: #<data Reading load=2, soiling=4, …, temperature=40, spin_speed=1400>
+washer.program_list        # Dop1 8200, a dryer's 8600; selection reads 8202 or 8601
+washer.twin_dos            # the TwinDos trays from services
+```
+
+```ruby
+washer.select_program(28)
+washer.set_parameters(temperature: 40, eco: true, spin_speed: 1400, extras: %i[intensive])
+dryer.set_parameters(drying_level: :cupboard_dry, drying_time: 90, extras: %i[anti_crease])
+washer.start_delayed(Time.new(2026, 11, 1, 6, 30))   # today's or tomorrow's time of day
+washer.start                                         # pause, stop
+washer.stop_end_signal                               # 28; stop_to_edit 12102, extend_anti_crease 12144
+washer.acknowledge(message: 3, option: 1)
+washer.power_off                                     # wake
+washer.anti_crease = 2
+washer.twin_dos_levels = [{ number: 1, percent: 50 }]
+```
+
+The requests follow the app's SupportedRequestsRule: without remote control only stop, no stop while
+a program waits (Status 2 or 3), start only with the door locked, request 8 only while 2/1574 shows a
+start mode, and nothing while the appliance sleeps deeply. A Dop1 appliance offers start under
+remote control (Status 4, or 3 under mobile start without a start time), stop while it runs, and
+never pause; it takes `ProcessAction` alone. `stop_to_edit` also needs a program waiting for its
+start time, `power_off` a DOP2 program done (Status 7, process state 10 or 13) outside phases 264,
+519 and 531, and `wake` a DOP2 model the app wakes (its series letter, from some software id up)
+sleeping deeply.
+
+`set_parameters` needs a program selected (Status 3) under mobile start. A washer takes
+`temperature` (°C, with `eco`), `spin_speed` (rpm), `soiling`, `cap`, `extras`, `stains`,
+`twin_dos`, and on DOP2 `drying_level`, `drying_time` and `program_mode`, or on Dop1 `master_care`;
+a dryer takes `extras`, `drying_level` and `drying_time`. On DOP2 the SDK first copies into 2/1577
+the current values 2/1574 shows, as the app does, then writes the parameters given; it writes only
+members 2/1577 carries. On Dop1 it reads 8201 or 8602 and writes it back with the read request type
+and the app's encodings (a temperature it has no code for goes out as 0, an eco 40 °C as 39), and
+`NotAcceptedError` reports an Ack other than 1. `start_delayed` lets the appliance choose the mode
+as the app does: whole minutes from a minute before now, or local seconds since 1970, then request
+8; a Dop1 appliance takes `StartTime`, its selection written back, then `ProcessAction` 1.
+
+Left out: requests 12106 (add laundry) and 12116 (TwinDos care), which the app declares and never
+sends; its limit of three anti-crease extensions; its start time kept until start, for which
+`start_delayed` needs start or request 8 offered. An Opcode appliance selects no program, as in
+the app, and the SDK sends it no parameters, which the app would send it as DOP2.
+
 ## Typed objects
 
 The objects behind DOP2 leaves and Dop1 requests come typed, generated from the Miele app's own
@@ -523,6 +617,7 @@ heating; follow such an appliance by reading its `state` at intervals.
 | `Miele::Sdk::NotFoundError` | the appliance does not serve that resource, or the GroupID is not its own (a `ResponseError`) |
 | `Miele::Sdk::RemoteControlDisabledError` | the appliance refuses a command (a `ResponseError`) |
 | `Miele::Sdk::ActionUnavailableError` | a check the app makes before an action fails: nothing is sent |
+| `Miele::Sdk::NotAcceptedError` | a Dop1 appliance acknowledges a write with anything but success |
 | `Miele::Sdk::Dop2::DecodeError` | a DOP2 leaf has an unknown type or ends too early |
 
 All of them inherit from `Miele::Sdk::Error`. A value out of range raises `ArgumentError` before

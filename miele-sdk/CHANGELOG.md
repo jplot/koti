@@ -53,6 +53,17 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   answers to notifications, each after the checks the app makes (`ActionUnavailableError`).
   These writes have not run against a real oven.
 - `Appliance#modify`, which reads a typed object, changes it and writes it back.
+- Dishwashers as the app's dishwasher module drives them, in Dop1 and DOP2: typed reads of the
+  device and program contexts, programs, notifications and settings, the Dop1 consumption,
+  consumables and statistics; start, pause, resume, stop, cancel, delayed start, program and
+  extras, power, AutoDos and settings, answers to infos, leaving the abort state and opening the
+  door, each after the checks the app makes. None of it has run against a real dishwasher.
+- Washing machines, washer-dryers and tumble dryers as the app's laundry module drives them, in
+  Opcode, Dop1 and DOP2: typed reads of the contexts, programs page by page, the door, Dop1
+  readings and TwinDos; the user requests after the app's SupportedRequestsRule, program
+  selection, parameters, delayed start, answers to messages, power off, wake, the anti-crease
+  setting and TwinDos filling levels. None of it has run against a real appliance.
+- `NotAcceptedError`, for a Dop1 write the appliance acknowledges with anything but success.
 
 - Typed values of the DOP2 and Dop1 objects the Miele app uses, generated from its classes under
   `Miele::Sdk::Objects::<Family>`: `Appliance#object` and `#write_object` at the addresses the app

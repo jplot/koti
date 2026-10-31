@@ -61,6 +61,12 @@ RSpec.describe Miele::Sdk::Cloud::Session do
       expect([renewal.headers['authorization'], renewal.body]).to eq(['appToken token-1', '{}'])
     end
 
+    it 'names a language on its MCS requests, as the app does' do
+      session.authorization
+      languages = %w[/V3/Login?org=FR /V2/AppTokenRefresh].map { posts(it).first.headers['accept-language'] }
+      expect(languages).to eq(%w[en-FR en-FR])
+    end
+
     it 'renews once when several threads find the same token expired' do
       Array.new(8) { Thread.new { session.authorization } }.each(&:join)
       expect(posts('/V2/AppTokenRefresh').size).to eq(1)

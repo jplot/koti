@@ -50,8 +50,14 @@ module Miele
           raise ConfigurationError, 'email and password are needed to log in' unless email && password
 
           url = "#{@organization.rest}/V3/Login?org=#{@organization.iso}"
-          @token = mcs_token(post(url, JSON.generate(email:, password:), 'application/json')).save
+          @token = mcs_token(mcs_post(url, JSON.generate(email:, password:))).save
         end
+
+        # The cloud answers 500 to an MCS request without one; the app sends its language with the account's country.
+        #
+        # @return [String] the +Accept-Language+ of MCS requests
+        # @api private
+        def language = "en-#{@organization.iso}"
 
         # @return [String] the page that gives a CIAM code once the account logs in on it
         # @raise [ConfigurationError] without +ciam_client_id+
@@ -126,7 +132,7 @@ module Miele
         # @return [Token]
         def mcs_refresh(expired)
           url = "#{@organization.rest}/V2/AppTokenRefresh"
-          mcs_token(post(url, '{}', 'application/json', authorization: "appToken #{expired.value}"))
+          mcs_token(mcs_post(url, '{}', 'Authorization' => "appToken #{expired.value}"))
         end
 
         # @param expired [Token]
@@ -137,15 +143,20 @@ module Miele
           ciam_token(post(endpoint('token'), form, 'application/x-www-form-urlencoded'))
         end
 
+        # @return [Hash{String=>Object}]
+        def mcs_post(url, body, headers = {})
+          post(url, body, 'application/json', { 'Accept-Language' => language, **headers })
+        end
+
         # @param url [String]
         # @param body [String]
         # @param type [String] the +Content-Type+
-        # @param authorization [String, nil]
+        # @param headers [Hash{String=>String}]
         # @return [Hash{String=>Object}]
         # @raise [AuthenticationError] on 401
         # @raise [ResponseError] on any other error status
-        def post(url, body, type, authorization: nil)
-          headers = { 'Content-Type' => type, 'Authorization' => authorization }.compact
+        def post(url, body, type, headers = {})
+          headers = { 'Content-Type' => type, **headers }
           answer = Http.request(:post, url, headers:, body:)
           raise AuthenticationError, 'the Miele cloud refused the account' if answer.status == 401
           unless answer.status.between?(200, 299)

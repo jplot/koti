@@ -58,6 +58,11 @@ RSpec.describe Miele::Sdk::Oven do
       expect(puts_sent).to eq(%w[DOP2/2/1586 State DOP2/2/1586])
       expect(naps).to eq([3])
     end
+
+    it 'switches off despite a 500, as the app does', :aggregate_failures do
+      expect { appliance.power_off }.not_to raise_error
+      expect(puts_sent).to eq(['DOP2/2/1586'])
+    end
   end
 
   context 'when the appliance stays asleep' do

@@ -24,10 +24,16 @@ module Miele
         end
       end
 
+      # The app's SendSwitchOffAsync swallows a 500.
+      #
       # @return [void]
-      # @raise [ResponseError] if the appliance refuses
+      # @raise [ResponseError] if the appliance refuses with another status
       # @api public
-      def power_off = write_dop2(power_leaf(1))
+      def power_off
+        write_dop2(power_leaf(1))
+      rescue ResponseError => e
+        raise unless e.status == 500
+      end
 
       # @return [Objects::Oven::GlobalDeviceContext] 1/1585, read without an index as the app observes it
       # @api public

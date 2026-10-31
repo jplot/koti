@@ -1,0 +1,26 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Websocket
+        module Handshake
+          GUID: String
+
+          @url: URI::Generic
+          @session: Session
+
+          private
+
+          def connect: () -> untyped
+
+          def tls: (Socket tcp) -> OpenSSL::SSL::SSLSocket
+
+          def request: (String key) -> String
+
+          def check: (untyped socket, String key) -> void
+
+          def response_headers: (untyped socket) -> Hash[String, String]
+        end
+      end
+    end
+  end
+end

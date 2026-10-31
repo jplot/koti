@@ -1,0 +1,49 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Websocket
+        include Handshake
+        include Frames
+
+        class Message < Data
+          attr_reader path: String
+          attr_reader headers: Hash[String, String]
+          attr_reader body: String
+
+          def self.new: (path: String, headers: Hash[String, String], body: String) -> Message
+        end
+
+        KEEP_ALIVE: Integer
+        SEPARATOR: String
+
+        @session: Session
+        @url: URI::Generic
+        @clock: ^() -> Float
+
+        def initialize: (Session session, ?url: String?, ?clock: ^() -> Float) -> void
+
+        def each: () { (Message message) -> void } -> void
+
+        private
+
+        def listen: (untyped socket) { (Message message) -> void } -> void
+
+        def alive: (untyped socket, Float due) -> Float
+
+        def readable?: (untyped socket, Float timeout) -> bool
+
+        def receive: (untyped socket, Integer opcode, String payload, String buffer) { (Message message) -> void } -> String
+
+        def parse: (String buffer) { (String header, Message message) -> void } -> String
+
+        def split: (String buffer) -> [String, String, String]?
+
+        def content_length: (String? head) -> Integer
+
+        def message: (String text) -> Message
+
+        def close: (untyped socket) -> void
+      end
+    end
+  end
+end

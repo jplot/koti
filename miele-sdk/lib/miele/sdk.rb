@@ -70,6 +70,9 @@ require_relative 'sdk/cloud/locales'
 require_relative 'sdk/cloud/token'
 require_relative 'sdk/cloud/session'
 require_relative 'sdk/cloud/channel'
+require_relative 'sdk/cloud/websocket/frames'
+require_relative 'sdk/cloud/websocket/handshake'
+require_relative 'sdk/cloud/websocket'
 
 # Namespace of the koti SDKs for the Miele ecosystem.
 module Miele

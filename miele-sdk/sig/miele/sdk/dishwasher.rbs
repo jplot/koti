@@ -1,6 +1,10 @@
 module Miele
   module Sdk
     class Dishwasher < Appliance
+      include Rules
+      include Dop2Commands
+      include Power
+
       class Consumption < Data
         attr_reader energy: Float
         attr_reader water: Float

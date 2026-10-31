@@ -4,6 +4,10 @@ module Miele
   module Sdk
     # A dishwasher, which the Miele app's dishwasher module handles (device types 7, and 8 on PG81 models).
     class Dishwasher < Appliance
+      include Rules
+      include Dop2Commands
+      include Power
+
       # What a Dop1 dishwasher uses now.
       #
       # @!attribute [r] energy
@@ -39,7 +43,7 @@ module Miele
 
       # @return [Boolean] +RemoteEnable+ 7, which only a DOP2 dishwasher reports
       # @api public
-      def locked? = dop2? && state.raw['RemoteEnable']&.first == 7
+      def locked? = locked_in?(state)
 
       # @return [Boolean] +AppSupport+ bit 4 on a DOP2 dishwasher; a Dop1 one always has it
       # @api public

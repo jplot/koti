@@ -1,0 +1,35 @@
+module Miele
+  module Sdk
+    class Dishwasher < Appliance
+      module Power : Appliance
+        COUNTDOWN_BITS: Array[Integer]
+
+        def power_on: () -> void
+
+        def power_off: () -> void
+
+        def start_delayed: (Time at) -> void
+
+        def program_context: () -> Objects::Dishwasher::GlobalPsContext
+
+        private
+
+        def next_time: (Time at, Time now) -> Time
+
+        def delayed: (untyped select, Integer bits, Time target, Time now) -> untyped
+
+        def require_dop2!: () -> void
+
+        def status: (State state) -> Integer
+
+        def standby: (State state) -> Integer
+
+        def locked_in?: (State state) -> bool
+
+        def off?: (State state) -> bool
+
+        def dop2_user_request: (Integer id) -> void
+      end
+    end
+  end
+end

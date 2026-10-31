@@ -1,0 +1,35 @@
+module Miele
+  module Sdk
+    class Dishwasher < Appliance
+      module Rules : Appliance
+        STANDBY_STATES: Array[Integer]
+
+        private
+
+        def status: (State state) -> Integer
+
+        def standby: (State state) -> Integer
+
+        def locked_in?: (State state) -> bool
+
+        def mobile?: (State state) -> bool
+
+        def ready?: (State state) -> bool
+
+        def off?: (State state) -> bool
+
+        def offered?: (Symbol request) -> bool
+
+        def require_no_info700!: () -> void
+
+        def dop2?: () -> bool
+
+        def mobile_control?: () -> bool
+
+        def supported_requests: () -> Array[Symbol]
+
+        def notifications: () -> Objects::Dishwasher::GlobalNtfctnShow
+      end
+    end
+  end
+end

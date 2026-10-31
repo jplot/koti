@@ -1,0 +1,69 @@
+module Miele
+  module Sdk
+    class Dishwasher < Appliance
+      module Dop2Commands : Appliance
+        REDESIGNED: Array[String]
+
+        EXTRAS: Hash[Symbol, Array[Symbol]]
+
+        SETTINGS: Array[Integer]
+
+        def start: () -> void
+
+        def pause: () -> void
+
+        def resume: () -> void
+
+        def stop: () -> void
+
+        def cancel: () -> void
+
+        def select_program: (Integer | Symbol prog_id) -> void
+
+        def set_extras: (*Symbol selected) -> void
+
+        def auto_dos=: (bool on) -> void
+
+        def write_setting: (Integer id, Integer value) -> void
+
+        def leave_abort: () -> void
+
+        def acknowledge: (info: Integer | Symbol, option: Integer | Symbol) -> void
+
+        private
+
+        def extras_kind: () -> Symbol
+
+        def pfd10?: () -> bool
+
+        def settable?: (Integer id) -> bool
+
+        def stop_with: (Symbol request, Integer id) -> void
+
+        def checked_state: () -> State
+
+        def with_extras: (untyped select, untyped context, Hash[Symbol, bool] extras) -> untyped
+
+        def dop2_user_request: (Integer id) -> void
+
+        def require_dop2!: () -> void
+
+        def dop2?: () -> bool
+
+        def status: (State state) -> Integer
+
+        def standby: (State state) -> Integer
+
+        def locked_in?: (State state) -> bool
+
+        def mobile?: (State state) -> bool
+
+        def ready?: (State state) -> bool
+
+        def offered?: (Symbol request) -> bool
+
+        def require_no_info700!: () -> void
+      end
+    end
+  end
+end

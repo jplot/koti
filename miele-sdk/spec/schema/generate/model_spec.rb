@@ -24,6 +24,10 @@ RSpec.describe Schema::Generate::Model do
       .to eq(%i[prog_id struktur_version kfbel_dimmwert remaining_time_s])
   end
 
+  it 'keeps a member the app names _ alone' do
+    expect(naming.member('_')).to eq(:_)
+  end
+
   it 'adds a final _ to a member a value class already has' do
     expect(naming.member('ObjectID')).to eq(:object_id_)
   end

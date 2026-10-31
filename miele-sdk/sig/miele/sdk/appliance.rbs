@@ -1,6 +1,8 @@
 module Miele
   module Sdk
     class Appliance
+      include ObjectAccess
+
       interface _Sleeper
         def call: (Integer seconds) -> untyped
       end

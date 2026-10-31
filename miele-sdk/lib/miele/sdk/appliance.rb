@@ -10,6 +10,8 @@ module Miele
     #   oven = Miele::Sdk.appliance('192.0.2.20')
     #   oven.device_type # => :oven_microwave
     class Appliance
+      include ObjectAccess
+
       # @return [String] address or +.local+ name of the appliance
       attr_reader :host
 

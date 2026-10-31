@@ -1,0 +1,18 @@
+module Miele
+  module Sdk
+    interface _Dop2Access
+      def dop2: (Integer unit, Integer attribute, ?idx1: Integer?, ?idx2: Integer?) -> Dop2::Leaf
+      def write_dop2: (Dop2::Leaf leaf, ?with_index: bool) -> void
+    end
+
+    module ObjectAccess : _Dop2Access
+      def object: (untyped klass, ?::Array[::Integer?] address) -> untyped
+
+      def write_object: (untyped value, ?::Array[::Integer?] address, ?with_index: bool) -> void
+
+      private
+
+      def settled: (::Array[::Integer?] address) -> [::Integer, ::Integer, ::Integer?, ::Integer?]
+    end
+  end
+end

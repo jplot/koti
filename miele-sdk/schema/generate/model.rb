@@ -11,14 +11,15 @@ module Schema
     Dop1Field = Data.define(:member, :kind, :offset, :size, :length, :type)
     Enum = Data.define(:family, :name, :constant, :values)
 
-    # A section or an array of a Dop1 object: a section has a length, an array a count of items of a width.
-    Dop1Part = Data.define(:type, :offset, :length, :computed, :count, :width) do
+    # A section or an array of a Dop1 object, named after its class: a section has a length, an array a count of
+    # items of a width.
+    Dop1Part = Data.define(:member, :type, :offset, :length, :computed, :count, :width) do
       def initialize(length: nil, computed: nil, count: nil, width: nil, **) = super
     end
 
     # The Ruby names of the app's ones.
     module Naming
-      RESERVED = [*Data.public_instance_methods, :raw, :to_fields, :to_bytes].freeze
+      RESERVED = [*Data.public_instance_methods, :raw, :to_fields, :bytes, :endian, :to_bytes].freeze
       GERMAN = { 'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'Ä' => 'Ae', 'Ö' => 'Oe', 'Ü' => 'Ue', 'ß' => 'ss' }.freeze
 
       module_function
@@ -29,9 +30,11 @@ module Schema
       # @return [String] each word capitalized, a word in capitals lowered after its first letter
       def camelize(name) = name.split('_').map { it == it.upcase ? it.capitalize : it[0].upcase + it[1..] }.join
 
+      # The coffee machine names four bit fields +_+ alone: that one stays.
+      #
       # @return [Symbol] the getter in snake_case, with a final +_+ when a value class already has a method of that name
       def member(name)
-        member = snake(name).squeeze('_').delete_prefix('_').delete_suffix('_').to_sym
+        member = snake(name).squeeze('_')[/\A_*(.+?)_*\z/, 1].to_sym
         RESERVED.include?(member) ? :"#{member}_" : member
       end
 
@@ -127,15 +130,23 @@ module Schema
       end
 
       def dop1_class(entry)
+        parts = parts(entry)
+        fields = dop1_fields(entry)
+        members!(entry, [*fields, *parts.values.flatten])
         Dop1Class.new(family: entry['family'], name: entry['name'], constant: constant(entry), id: entry['id'],
-                      endian: entry['endian']&.to_sym, **parts(entry), fields: members!(entry, dop1_fields(entry)),
-                      write: entry['write'], write_bytes: entry['write_bytes'])
+                      endian: entry['endian']&.to_sym, **parts, fields:, write: entry['write'],
+                      write_bytes: entry['write_bytes'])
       end
 
       def parts(entry)
         %w[sections arrays].to_h do |key|
-          [key.to_sym, entry[key].map { Dop1Part.new(**it.transform_keys(&:to_sym), type: type(entry, it)) }]
+          [key.to_sym, entry[key].map { part(entry, it) }]
         end
+      end
+
+      def part(entry, part)
+        member = Naming.member(part['type'].split('/').last.delete_suffix('Section'))
+        Dop1Part.new(**part.transform_keys(&:to_sym), member:, type: type(entry, part))
       end
 
       def dop1_fields(entry)

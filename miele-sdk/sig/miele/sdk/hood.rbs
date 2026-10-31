@@ -2,6 +2,7 @@ module Miele
   module Sdk
     class Hood < Appliance
       include Readings
+      include Dop1Commands
 
       def fan_level=: (Integer level) -> void
 

@@ -1,0 +1,64 @@
+module Miele
+  module Sdk
+    class Hood < Appliance
+      module Dop1Commands : Appliance
+        AMBIENT_MODES: Hash[Symbol, Integer]
+
+        DEHUMIDIFICATION_SETTINGS: Hash[Symbol, Integer]
+
+        FRAGRANCE_ACTIONS: Hash[Symbol, Integer]
+
+        SILENCE_KEPT: Array[Symbol]
+
+        def ambient_light=: (bool on) -> void
+
+        def configure_ambient_light: (mode: Symbol, rgb: [Integer, Integer, Integer], brightness: Integer,
+                                      colour_temperature: Integer) -> void
+
+        def ambient_light_while_cooking=: (bool on) -> void
+
+        def reset_grease_filter: () -> void
+
+        def reset_charcoal_filter: () -> void
+
+        def dehumidification=: (Symbol mode) -> void
+
+        def dehumidification_silent=: (bool silent) -> void
+
+        def fragrance: (Symbol action) -> void
+
+        def grease_melting=: (bool on) -> void
+
+        def grease_melting_at: (Integer minutes) -> void
+
+        def auto_refresh=: (bool on) -> void
+
+        def wake: () -> void
+
+        def lights: () -> Lights?
+
+        def dehumidification: () -> Dehumidification?
+
+        def grease_melting: () -> GreaseMelting?
+
+        def auto_refresh_supported?: () -> bool?
+
+        def setting: (Integer pf_id) -> Integer?
+
+        def write_setting: (Integer pf_id, Integer value) -> void
+
+        private
+
+        def require_dop1!: () -> void
+
+        def require_feature!: (bool? supported, String reason) -> void
+
+        def require_ambient_light!: () -> void
+
+        def write_section: (untyped object, **Integer values) -> void
+
+        def read_drying_slot: () -> untyped
+      end
+    end
+  end
+end

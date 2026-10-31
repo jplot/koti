@@ -123,11 +123,11 @@ module Miele
                         state.target_temperatures.first, state.temperatures.first)
       end
 
-      # The app puts the hours byte in its run-on as seconds (TimeSpan(0, minutes, hours)); the gem reads hours.
+      # AddFanData builds TimeSpan(0, minutes, the byte named hours): that byte counts seconds.
       #
       # @param fan [Data] +Luefter+
       # @return [Integer] seconds
-      def run_on(fan) = (fan.luefter_nachlaufzeit_stunden * 3600) + (fan.luefter_nachlaufzeit_minuten * 60)
+      def run_on(fan) = (fan.luefter_nachlaufzeit_minuten * 60) + fan.luefter_nachlaufzeit_stunden
 
       # FromDop2DeviceStateMapper shows two zones, with half steps.
       #

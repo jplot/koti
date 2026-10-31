@@ -303,7 +303,7 @@ hob.main_state       # => :running; internal_state names State's InternalState a
 hob.minute_minder    # => 130, in seconds
 hob.power_doubling?  # and stop_and_go?
 hob.temp_control     # => #<data TempControl zone=2, level=:two, target_reached=true, target=120.0, current=95.0>
-hob.fan              # => #<data Fan level=2, run_on=3900>, nil for a hob without one
+hob.fan              # => #<data Fan level=2, run_on=301>, nil for a hob without one
 ```
 
 The app only reads a hob: its actions are Cook Assist commands through the Miele cloud, which the

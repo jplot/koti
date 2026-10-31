@@ -52,7 +52,7 @@ RSpec.describe Miele::Sdk::Hob do
     serve({ 62 => 0xFF }, 66)
     expect(hob.fan).to be_nil
     serve({ 62 => 2, 64 => 5, 65 => 1 }, 66)
-    expect(hob.fan).to eq(described_class::Fan.new(level: 2, run_on: 3900))
+    expect(hob.fan).to eq(described_class::Fan.new(level: 2, run_on: 301))
   end
 
   it 'reads the minute minder, power doubling and Stop&Go', :aggregate_failures do

@@ -1,0 +1,45 @@
+module Miele
+  module Sdk
+    class CoffeeMaker < Appliance
+      module Commands : Appliance
+        MESSAGE_TYPES: Hash[Symbol, Symbol?]
+        LIGHT_STATUSES: Array[Integer]
+        SWITCH_OFF_STATUSES: Array[Integer]
+
+        def power_on: () -> void
+
+        def power_off: () -> void
+
+        def light=: (bool on) -> void
+
+        def stop: () -> void
+
+        def acknowledge: (Symbol type, ?(Integer | Symbol)? id, option: Integer | Symbol) -> void
+
+        private
+
+        def read_combi_state: () -> untyped
+
+        def switchable?: (State state) -> bool
+
+        def dop1_switch?: (State state, Array[Integer] statuses) -> bool
+
+        def status: (State state) -> Integer
+
+        def program_id: (?untyped context) -> Integer
+
+        def write_dop1_action: (untyped klass, Integer action) -> void
+
+        def modify_dop2: (untyped klass, Integer unit, Integer attribute, Integer idx1, Integer idx2) { (untyped value) -> untyped } -> void
+
+        def variant: () -> Symbol
+
+        def dop2?: () -> bool
+
+        def family: () -> untyped
+
+        def program_context: () -> untyped
+      end
+    end
+  end
+end

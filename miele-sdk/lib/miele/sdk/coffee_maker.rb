@@ -7,6 +7,9 @@ module Miele
     # others on unit 1 from +CoffeeGen7+; the app reads a CM7 no cleaning, descaling, feature, ident, profile or
     # drink.
     class CoffeeMaker < Appliance
+      include Commands
+      include Brewing
+
       CM6F = %w[CM6360 CM6160 CM6560].freeze
       # The app tests Ref2's CVA73 and CVA74 before CVA7.
       PREFIXES = { cm7: %w[CM7], cva_ref2: %w[CVA74 CVA73], cva: %w[CVA7] }.freeze

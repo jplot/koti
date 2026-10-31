@@ -1,6 +1,9 @@
 module Miele
   module Sdk
     class CoffeeMaker < Appliance
+      include Commands
+      include Brewing
+
       CM6F: Array[String]
       PREFIXES: Hash[Symbol, Array[String]]
       STANDARD_PROFILE: Integer

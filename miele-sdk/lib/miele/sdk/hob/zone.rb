@@ -103,6 +103,20 @@ module Miele
         # @return [Integer, nil] seconds
         def timer(time) = (((time & 0xFF) * 3600) + (((time >> 8) & 0x3F) * 60)).nonzero?
 
+        # GetFlexZones: the first and second zones, the third and fourth, the fifth and sixth, when both are
+        # bridged, share the first one's timer, or else the second's.
+        #
+        # @param zones [Array<Zone>] in the app's order
+        # @return [Array<Zone>]
+        def with_shared_timers(zones)
+          zones.each_slice(2).flat_map do |pair|
+            next pair unless pair.size == 2 && pair.all?(&:bridged)
+
+            timer = pair.fetch(0).timer || pair.fetch(1).timer
+            pair.map { it.with(timer:) }
+          end
+        end
+
         # The app numbers the zones of a hob with zone controls from them (+Topfdaten+), and gives the others
         # the lowest numbers left.
         #

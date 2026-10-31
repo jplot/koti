@@ -43,6 +43,14 @@ RSpec.describe Miele::Sdk::Hob do
     expect(hob.zones.first.timer).to be_nil
   end
 
+  it 'shares a timer between two bridged zones, but not on a 159-byte hob, as the app does', :aggregate_failures do
+    bridged = { 7 => 2 << 1, 10 => 0b1_0000, 13 => 0b1_0000, 28 => [30, 1] }
+    serve(bridged)
+    expect(hob.zones.map(&:timer)).to eq([5400, 5400])
+    serve(bridged, 137)
+    expect(hob.zones.map(&:timer)).to eq([5400, nil])
+  end
+
   it 'reads half steps when the hob doubles its levels' do
     serve(6 => 0b1_0000, 7 => 1 << 1, 8 => 4)
     expect(hob.zones.map(&:level)).to eq([2.5])

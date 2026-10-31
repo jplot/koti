@@ -19,8 +19,9 @@ module Miele
       # The app tells a hob's kind by the length of its ExtendedState, 22 zeros ahead: only these have a fan.
       FAN_LENGTHS = [88, 128, 159].freeze
       ZONE_CONTROL_LENGTHS = [128, 159].freeze
+      NO_FLEX_ZONE_LENGTH = 159
       private_constant :INTERNAL_STATES, :TEMP_CONTROL_LEVELS, :FAN_LEVELS, :DOP2_MAIN_STATES, :FAN_LENGTHS,
-                       :ZONE_CONTROL_LENGTHS
+                       :ZONE_CONTROL_LENGTHS, :NO_FLEX_ZONE_LENGTH
 
       # @return [Symbol, Integer, nil] +:stand_by+, +:running+, +:failure+, +:service+, +:off+, +:locked+ or
       #   +:stop_and_go+; +:off+ when the hob serves no ExtendedState
@@ -41,7 +42,10 @@ module Miele
         return dop2_zones if dop2?
 
         state = self.state
-        state.extended_state ? numbered_zones(state).sort_by(&:number) : []
+        return [] unless state.extended_state
+
+        zones = numbered_zones(state).sort_by(&:number)
+        padded_length(state) == NO_FLEX_ZONE_LENGTH ? zones : with_shared_timers(zones)
       end
 
       # @return [Integer, nil] seconds left on the minute minder

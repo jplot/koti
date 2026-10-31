@@ -70,6 +70,11 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([parameter(13, :u64, 1_700_000_000), parameter(12, :u32, 1800)])
   end
 
+  it 'refuses more than three steam burst times', :aggregate_failures do
+    expect { oven.steam_burst_times = [60, 120, 180, 240] }.to raise_error(ArgumentError)
+    expect(written).to be_empty
+  end
+
   it 'sets the options one by one, keep warm last' do
     oven.set_options(keep_warm: true, rapid_heating: false)
     expect(written.map(&:last)).to eq([parameter(21, :bool, false), parameter(27, :bool, true)])

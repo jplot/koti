@@ -70,8 +70,11 @@ module Miele
         end
 
         # @param seconds [Array<Integer>] up to three times, in seconds
+        # @raise [ArgumentError] for more than three
         # @api public
         def steam_burst_times=(seconds)
+          raise ArgumentError, 'an oven takes up to three steam burst times' if seconds.size > 3
+
           seconds.each_with_index { |time, index| set_parameter(8 + index, :u16, time) }
         end
 

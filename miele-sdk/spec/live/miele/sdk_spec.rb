@@ -16,7 +16,7 @@ RSpec.describe Miele::Sdk, :live do
       original.call(host, verb, *rest, **options)
     end
     allow(Miele::Sdk::Cloud::Http).to receive(:request).and_wrap_original do |original, verb, url, **options|
-      account = verb == :post && url.match?(%r{/(V3/Login|V2/AppTokenRefresh)\b})
+      account = verb == :post && url.match?(%r{/(V3/Login|V2/AppTokenRefresh)\b|/token\z})
       raise "live specs are read-only: #{verb.upcase} refused" unless verb == :get || account
 
       original.call(verb, url, **options)
@@ -121,6 +121,15 @@ RSpec.describe Miele::Sdk, :live do
       oven = appliances.find { it.device_type.start_with?('oven') } or skip 'no oven among MIELE_HOSTS'
       expect(oven.object(Miele::Sdk::Objects::Oven::GlobalDeviceContext))
         .to be_a(Miele::Sdk::Objects::Oven::GlobalDeviceContext)
+    end
+
+    it 'gives the oven its family class and reads it as the app does', :aggregate_failures do
+      oven = described_class.appliances.find { it.is_a?(Miele::Sdk::Oven) } or skip 'no oven in this account'
+      objects = Miele::Sdk::Objects::Oven
+      expect([oven.context, oven.program_context, oven.notifications])
+        .to match([an_instance_of(objects::GlobalDeviceContext), an_instance_of(objects::GlobalPsContext),
+                   an_instance_of(objects::GlobalNtfctnShow)])
+      expect(oven.target_temperature).to be_nil.or(be_a(Float))
     end
 
     it 'reads the household key from the cloud and signs locally with it', :aggregate_failures do

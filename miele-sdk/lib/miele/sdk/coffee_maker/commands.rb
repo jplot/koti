@@ -5,7 +5,7 @@ module Miele
     class CoffeeMaker < Appliance
       # Power, light, stop and acknowledgements as the app's coffee module sends them: a DOP2 coffee maker takes
       # 2/1586 as read, and its other objects through ModifyDop2Message; a CVA6000 takes Dop1 1101 and 1100, and
-      # its light in +State+. The CVA6000 checks are those of the app's dashboard, its only place for them.
+      # its light in +State+, after the checks of the app's dashboard.
       module Commands
         # The notification member each type acknowledges with its id; the others take their option only.
         MESSAGE_TYPES = { information: :info, message: nil, query: :query, warning: nil, error: nil }.freeze
@@ -18,15 +18,14 @@ module Miele
         # 2/1586 again, then waits 1.5 s before it writes it.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] unless the app's switch allows it: off or on, under remote control
-        #   without local control, no Barista running, and a known DOP2 variant; on a CVA6000, off
+        # @raise [ActionUnavailableError] unless off (Status 1) under remote control without local control, a
+        #   known variant on DOP2, as the app's power switch allows it
         # @api public
         def power_on
           state = self.state
           return write_dop1_action(Objects::CoffeeGen7::DeviceAction, 2) if dop1_switch?(state, [1])
 
-          require!(variant != :unknown && switchable?(state) && program_id != Brewing::BARISTA,
-                   'the coffee maker cannot be switched on now')
+          require!(variant != :unknown && switchable?(state, [1]), 'the coffee maker cannot be switched on now')
           combi = read_combi_state
           return if family::GlobalEnumApplianceState.to_i(combi.appliance_state) == 4
 
@@ -35,14 +34,16 @@ module Miele
         end
 
         # @return [void]
-        # @raise [ActionUnavailableError] unless off or on under remote control without local control; on a CVA6000,
-        #   unless on, paused, ended, failed or cancelled
+        # @raise [ActionUnavailableError] unless on (Status 2 or 3) under remote control without local control and
+        #   no Barista running, as the app's power switch allows it; on a CVA6000, unless on, paused, ended, failed
+        #   or cancelled
         # @api public
         def power_off
           state = self.state
           return write_dop1_action(Objects::CoffeeGen7::DeviceAction, 3) if dop1_switch?(state, SWITCH_OFF_STATUSES)
 
-          require!(switchable?(state), 'the coffee maker cannot be switched off now')
+          require!(switchable?(state, [2, 3]) && program_id != Brewing::BARISTA,
+                   'the coffee maker cannot be switched off now')
           modify(family::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
         end
 
@@ -97,9 +98,10 @@ module Miele
         end
 
         # @param state [State]
-        # @return [Boolean] off or on (Status 1 to 3), under remote control without local control
-        def switchable?(state)
-          [1, 2, 3].include?(status(state)) && state.remote_control? == true && state.local_control? != true
+        # @param statuses [Array<Integer>] off (1) to switch on, on (2 and 3) to switch off
+        # @return [Boolean] in one of them, under remote control without local control
+        def switchable?(state, statuses)
+          statuses.include?(status(state)) && state.remote_control? == true && state.local_control? != true
         end
 
         # @param state [State]

@@ -17,7 +17,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     FakeAppliance.start do |request|
       case request
       in { path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
-      in { verb: 'GET', path: %r{/DOP2/2/1586} } if answers.delete(:asleep) then [500, {}, '']
+      in { verb: 'GET', path: %r{/DOP2/} } if answers.delete(:asleep) then [500, {}, '']
       in { verb: 'GET', path: %r{/DOP2/(\d+)/(\d+)\?idx1=(\d+)&idx2=(\d+)\z} }
         key = Regexp.last_match.captures.map(&:to_i)
         [200, {}, answers.fetch(key) { dop2_leaf(key[0], key[1], {}, idx1: key[2], idx2: key[3]) }]
@@ -130,7 +130,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   context 'when it is off' do
     before { served['State'] = { 'Status' => 1, 'RemoteEnable' => [15, 0, 1] } }
 
-    it 'retries switching on after DeviceAction 2 on a 500', :aggregate_failures do
+    it 'wakes a coffee maker that answers 500 to its first DOP2 read, with DeviceAction 2', :aggregate_failures do
       served[:asleep] = true
       served[[2, 1586, 0, 0]] = combi(1, 0)
       coffee.power_on
@@ -138,19 +138,28 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(written.last.last).to eq(combi(4, 0))
       expect(waits).to eq([5, 1.5])
     end
+
+    it 'writes nothing when 2/1586 already shows it on' do
+      served[[2, 1586, 0, 0]] = combi(4, 0)
+      coffee.power_on
+      expect(written).to be_empty
+    end
+
+    it 'refuses to switch off a coffee maker that is off' do
+      expect { coffee.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
   end
 
-  it 'refuses to switch on while Barista runs, or to switch off under local control', :aggregate_failures do
+  it 'refuses to switch off while Barista runs, or under local control, as the app does', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(24_407, 0)
-    expect { coffee.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { coffee.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    served[[1, 1574, 0, 1]] = ps_context(0, 0)
     served['State'] = { 'Status' => 2, 'RemoteEnable' => [7, 0, 1] }
     expect { coffee.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
   end
 
-  it 'writes nothing to switch on a coffee maker already on' do
-    served[[2, 1586, 0, 0]] = combi(4, 0)
-    coffee.power_on
-    expect(written).to be_empty
+  it 'refuses to switch on a coffee maker that is on, as the app switches it off then' do
+    expect { coffee.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
   end
 
   it 'switches off with ApplianceState 1, written as read without an index' do

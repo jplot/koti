@@ -20,7 +20,7 @@ module Miele
 
         def read_combi_state: () -> untyped
 
-        def switchable?: (State state) -> bool
+        def switchable?: (State state, Array[Integer] statuses) -> bool
 
         def dop1_switch?: (State state, Array[Integer] statuses) -> bool
 

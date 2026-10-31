@@ -79,7 +79,7 @@ module Schema
       end
 
       def dop1_constants(klass)
-        pieces = '  WRITE_BYTES: ::Array[::Array[::Integer]]' if klass.write
+        pieces = ['  WRITE_BYTES: ::Array[::Array[::Integer]]', '  LENGTH: ::Integer'] if klass.write
         id = '  ID: ::String' if klass.id
         [*id, '  ENDIAN: ::Symbol?', *pieces, '  MEMBERS: ::Hash[::Symbol, ::Array[untyped]]']
       end

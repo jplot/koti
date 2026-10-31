@@ -77,6 +77,9 @@ module Miele
             # The pieces of its bytes the app's GenerateWriteBytes sends: offset and length.
             WRITE_BYTES = [[0, 1].freeze, [1, 2].freeze, [3, 1].freeze, [4, 1].freeze, [5, 4].freeze, [9, 1].freeze, [10, 2].freeze, [12, 1].freeze, [13, 1].freeze, [14, 1].freeze, [15, 1].freeze, [16, 1].freeze, [17, 1].freeze, [18, 1].freeze].freeze
 
+            # Its length, to build it empty.
+            LENGTH = 19
+
             # The kind, offset and layout of each member.
             MEMBERS = {
               struktur_version: [:u8, 0, 1, "Laundry::VersionEnum"].freeze,

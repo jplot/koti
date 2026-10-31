@@ -24,6 +24,7 @@ module Miele
 
             ENDIAN: ::Symbol?
             WRITE_BYTES: ::Array[::Array[::Integer]]
+            LENGTH: ::Integer
             MEMBERS: ::Hash[::Symbol, ::Array[untyped]]
 
             attr_reader version_der_struktur: (::Miele::Sdk::Objects::Hood::VersionEnum::value | ::Integer)?

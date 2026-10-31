@@ -30,6 +30,7 @@ module Miele
 
             ENDIAN: ::Symbol?
             WRITE_BYTES: ::Array[::Array[::Integer]]
+            LENGTH: ::Integer
             MEMBERS: ::Hash[::Symbol, ::Array[untyped]]
 
             attr_reader version: (::Miele::Sdk::Objects::Dishwasher::SmartControlGsdVersionEnum::value | ::Integer)?

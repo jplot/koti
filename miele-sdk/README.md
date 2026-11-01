@@ -58,10 +58,11 @@ end
 Every request is signed with HMAC-SHA256 and its body encrypted with AES-256, both with the
 household GroupKey; every answer must carry a valid signature too. The GroupID is public: each
 appliance announces it (`Miele::Sdk.discover.first.group_id`). The GroupKey is held by the Miele
-app and by the appliances, and the Miele account gives both, as it gives them to the app:
-`Miele::Sdk.cloud.group` reads them from the cloud (`/V2/GroupKeyId/`). The SDK signs only with the
-`group_id` and `group_key` set, and raises `ConfigurationError` without them. Keep the key secret:
-it controls every appliance of the household.
+app and by the appliances. The Miele account gives the GroupID and the GroupKey, as it gives them
+to the app: `Miele::Sdk.cloud.group` reads them from the cloud (`/V2/GroupKeyId/`). The SDK signs
+only with the `group_id` and `group_key` set, and raises `ConfigurationError` without them (for
+`events`, under the `failures` of a `SubscriptionError`). Keep the key secret: it controls every
+appliance of the household.
 
 ```ruby
 group_id, group_key = Miele::Sdk.cloud.group   # with the account configured, see Cloud

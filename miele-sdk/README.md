@@ -375,7 +375,8 @@ Each of these actions makes the checks the app's rules make before it, and raise
 - `start` refuses a program that requires a duration not set yet. It first writes the parameters
   the program requires and the user has not confirmed, with the values they show, a temperature
   through degrees and back as the app does (3730 writes 3729), then sends request 1, or 113 when
-  the oven does not offer 1. An automatic program starts by writing its
+  the oven does not offer 1. Like the app, it writes every one of them though one is refused, then
+  raises the first refusal without starting. An automatic program starts by writing its
   start time instead; another program takes `start_at=` beforehand, and `start(at:)` raises
   `ArgumentError` for it.
 - `stop` needs one of requests 2, 55, 56 and 57 offered, no pyrolysis abort running, and remote

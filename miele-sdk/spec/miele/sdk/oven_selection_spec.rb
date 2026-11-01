@@ -119,10 +119,10 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to eq(['001300020629000000000002000107000d00030400'])
   end
 
-  it 'keeps the selection when a required parameter is refused, as the app does', :aggregate_failures do
-    program_context(13, parameters: { 6 => required(:u16, 18_000) })
+  it 'writes every required parameter though one is refused, and keeps the selection', :aggregate_failures do
+    program_context(13, parameters: { 6 => required(:u16, 18_000), 7 => required(:u16, 6_000) })
     resources[:put] = [[204, {}, ''], [500, {}, '']]
     expect { oven.select_program(13) }.not_to raise_error
-    expect(written.size).to eq(2)
+    expect(written.drop(1)).to eq([parameter(6, :u16, 18_000), parameter(7, :u16, 6_000)])
   end
 end

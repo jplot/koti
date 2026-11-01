@@ -12,7 +12,7 @@ RSpec.describe Miele::Sdk::Oven do
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: } then [200, {}, served.fetch(path.delete_prefix("/Devices/#{fab}/"))]
-      else [204, {}, '']
+      else served[:put]&.shift || [204, {}, '']
       end
     end
   end
@@ -103,6 +103,13 @@ RSpec.describe Miele::Sdk::Oven do
     serve([1], parameters: { 6 => value(:u16, 2, 3_730), 7 => value(:u16, 2, 230) })
     oven.start
     expect(written.map(&:last)).to eq([parameter(6, :u16, 3_729), parameter(7, :u16, 229), user_request(1)])
+  end
+
+  it 'writes every required parameter, then raises the first refusal without starting', :aggregate_failures do
+    serve([1], parameters: { 6 => value(:u16, 2, 18_000), 7 => value(:u16, 2, 6_000) })
+    resources[:put] = [[500, {}, '']]
+    expect { oven.start }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+    expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(7, :u16, 6_000)])
   end
 
   it 'refuses to start a program whose duration is required but not set', :aggregate_failures do

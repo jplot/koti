@@ -110,17 +110,31 @@ module Miele
           context.prog_attributes_cca&.programtype&.then { Objects::Oven::GlobalEnumProgramTypes.to_i(it) } == 3
         end
 
+        # SetRequiredParametersHelper sends them all at once (Task.WhenAll): a refusal leaves the others sent.
+        #
         # @param prog_id [Integer]
         # @param context [Objects::Oven::GlobalPsContext]
         # @return [void]
+        # @raise [Error] the first refusal, once every one is sent
         def write_required_parameters(prog_id, context)
-          REQUIRED_PARAMETERS.each do |name, (id, type)|
+          refusals = REQUIRED_PARAMETERS.filter_map do |name, (id, type)|
             value = context.context_para_ca&.public_send(name)
             next unless unconfirmed?(name, value)
 
             current = value.current_value
-            write_parameter(prog_id, id, type, TEMPERATURES.include?(name) ? hundredths(current / 100.0) : current)
+            written = TEMPERATURES.include?(name) ? hundredths(current / 100.0) : current
+            refusal { write_parameter(prog_id, id, type, written) }
           end
+          refusals.first&.then { raise it }
+        end
+
+        # @yield a write
+        # @return [Error, nil] its refusal
+        def refusal
+          yield
+          nil
+        rescue Error => e
+          e
         end
 
         # As in the app, a duration out of its bounds stays unwritten.

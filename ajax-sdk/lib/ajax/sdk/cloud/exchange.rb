@@ -6,7 +6,6 @@ module Ajax
       # A bidi call that stays open, as the app holds its WebRTC and cloud archive streams: requests go out in the
       # order they are written, from any thread, while {#each} reads the responses. The call ends when the gateway
       # ends it, when a response is a failure, or at {#close}, which cancels it as the app does; it never half-closes.
-      # Before the first response, an +UNAUTHENTICATED+ answer logs in again and replays every request written.
       class Exchange
         # grpc-ruby joins its writer thread once the gateway ends the call: a writer blocked on an empty queue would
         # hold the call open for good, so it checks the call's status between reads.
@@ -23,7 +22,6 @@ module Ajax
           @message = message
           @lock = Mutex.new
           @queue = Thread::Queue.new
-          @written = [] #: Array[untyped]?
           @started = false
           @closed = false
         end
@@ -37,7 +35,6 @@ module Ajax
           @lock.synchronize do
             raise IOError, 'the exchange is closed' if @closed
 
-            @written&.push(message)
             @queue << message
           end
           self
@@ -79,9 +76,8 @@ module Ajax
         # @yieldreturn [GRPC::ActiveCall::Operation]
         # @return [nil]
         def run
-          queue = renew
           operation = nil #: untyped
-          operation = yield(Enumerator.new { |out| drain(queue, -> { operation&.status }, out) })
+          operation = yield(Enumerator.new { |out| drain(@queue, -> { operation&.status }, out) })
           @lock.synchronize do
             @operation = operation
             return if @closed
@@ -92,23 +88,12 @@ module Ajax
 
         private
 
-        def relay(&block)
-          @client.converse(@path, self) do |message|
-            @lock.synchronize { @written = nil }
-            block.call(message)
-          end
+        def relay(&)
+          @client.converse(@path, self, &)
         rescue GRPC::Cancelled
           raise unless @closed
         ensure
           close
-        end
-
-        def renew
-          @lock.synchronize do
-            @queue = Thread::Queue.new
-            @written.to_a.each { @queue << it }
-            @queue
-          end
         end
 
         def drain(queue, ended, out)
@@ -132,7 +117,7 @@ module Ajax
             Exchange.new(self, path) { message(path, it) }
           end
 
-          # Runs the call of an {Exchange}, logging in again before its first response as {Client#bidi} does.
+          # Runs the call of an {Exchange}.
           #
           # @api private
           # @param path [String] a bidi gRPC path
@@ -140,12 +125,8 @@ module Ajax
           # @yieldparam message [Data] each response message, or its success
           # @return [nil]
           def converse(path, exchange, &block)
-            fresh = true
-            relay = lambda do |bytes|
-              fresh = false
-              block.call(settle(path, value(path, bytes)))
-            end
-            authenticating(-> { fresh }) do |metadata|
+            relay = ->(bytes) { block.call(settle(path, value(path, bytes))) }
+            authenticating do |metadata|
               exchange.run { |requests| operation(path, requests, metadata, relay) }
             end
           end

@@ -164,11 +164,9 @@ RSpec.describe Ajax::Sdk::Cloud::Exchange do
   context 'when the session expires before the first response' do
     let(:calls) { [[:read, GRPC::Unauthenticated.new('expired')], [:read, :read, offer]] }
 
-    it 'logs in again and replays what was written', :aggregate_failures do
-      exchange.write(init).write(answer).each { nil }
-
-      expect(client.session).to have_received(:login).once
-      expect(sent).to eq(%i[init init answer])
+    it 'raises it without replaying what was written', :aggregate_failures do
+      expect { exchange.write(init).write(answer).each { nil } }.to raise_error(GRPC::Unauthenticated)
+      expect(sent).to eq(%i[init])
     end
   end
 

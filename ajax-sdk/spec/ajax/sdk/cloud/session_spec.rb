@@ -101,12 +101,23 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     end
   end
 
-  it 'signs in once when several threads find the same token expired' do
+  it 'signs in again once it forgets a refused session' do
+    renewed_tokens
+    session.ensure_login
+    session.forget(session.metadata['client-session-token'])
+    session.ensure_login
+
+    expect(client).to have_received(:authenticate).twice
+  end
+
+  it 'keeps a session another thread has renewed since the refusal' do
     renewed_tokens
     session.ensure_login
     expired = session.metadata['client-session-token']
-
-    Array.new(4) { Thread.new { session.login(expired) } }.each(&:join)
+    session.forget(expired)
+    session.ensure_login
+    session.forget(expired)
+    session.ensure_login
 
     expect(client).to have_received(:authenticate).twice
   end

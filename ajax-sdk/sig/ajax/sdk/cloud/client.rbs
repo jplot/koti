@@ -42,7 +42,7 @@ module Ajax
         def settle: (String path, untyped value) -> untyped
         def refuse_write: (String path) -> void
         def read?: (String path) -> bool
-        def authenticating: [T] (?^() -> bool retriable) { (Hash[String, String]) -> T } -> T
+        def authenticating: [T] () { (Hash[String, String]) -> T } -> T
       end
     end
   end

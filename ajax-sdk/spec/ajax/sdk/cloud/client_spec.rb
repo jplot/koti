@@ -161,12 +161,12 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
     end
   end
 
-  it 'logs in again and retries once after an Unauthenticated answer' do
-    answers = [-> { raise GRPC::Unauthenticated, 'nope' }, -> { answer(spaces) }]
-    allow(grpc).to receive(:request_response) { answers.shift.call }
+  it 'drops the session the gateway refuses and raises, as the app does', :aggregate_failures do
+    allow(grpc).to receive(:request_response).and_raise(GRPC::Unauthenticated, 'nope')
+    allow(client.session).to receive_messages(metadata: { 'client-session-token' => 'tok' }, forget: nil)
 
-    client.unary(spaces)
-
-    expect(client.session).to have_received(:login).once
+    expect { client.unary(spaces) }.to raise_error(GRPC::Unauthenticated)
+    expect(client.session).to have_received(:forget).with('tok')
+    expect(grpc).to have_received(:request_response).once
   end
 end

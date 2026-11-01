@@ -605,8 +605,9 @@ running or super freezing without a door signal, in Holiday or Sabbath mode; and
 without a door alarm, unless Holiday or Sabbath is on. A failure alarm shows the zones in both
 cases: the ice maker's alarm, a zone's power failure, or a temperature alarm in a freezer zone or a
 wine zone the app counts as one. The super mode is refused only while off, as the app's dashboard
-still offers it in those modes. PerfectFresh is refused on protocol 201 and without a `Step`; the
-humidifier and the door alarm delay without their setting or at a `Value` of -1; the ice maker
+still offers it in those modes. PerfectFresh, the humidifier, the door alarm delay and the ice
+maker are refused at Status 1 or 255; PerfectFresh also on protocol 201 and without a `Step`, the
+humidifier and the door alarm delay without their setting or at a `Value` of -1, and the ice maker
 unless `IceMaker` is 1, 2 or 3. The humidity level and the presentation light's zone intensities
 are refused at Status 1 or 255, in a failure without a door signal, and in Holiday or Sabbath mode;
 the humidity level also needs a `HumidityControl` value other than -1, the intensities a light

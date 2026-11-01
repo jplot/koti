@@ -52,6 +52,8 @@ module Miele
 
         def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
 
+        def hundredths: (Integer | Float celsius) -> Integer
+
         def unix_time: (Time | :now time) -> Integer
       end
     end

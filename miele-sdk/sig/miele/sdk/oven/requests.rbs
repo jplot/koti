@@ -4,6 +4,8 @@ module Miele
       module Requests : Appliance
         REQUIRED_PARAMETERS: Hash[Symbol, [Integer, Symbol]]
 
+        TEMPERATURES: Array[Symbol]
+
         PYROLYSIS_ABORTS: Array[Integer]
 
         def start: (?at: Time | :now) -> void
@@ -67,6 +69,8 @@ module Miele
         def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
 
         def unix_time: (Time | :now time) -> Integer
+
+        def hundredths: (Integer | Float celsius) -> Integer
       end
     end
   end

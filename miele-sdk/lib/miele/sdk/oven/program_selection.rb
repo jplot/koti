@@ -24,13 +24,13 @@ module Miele
         # @raise [ActionUnavailableError] see {#set_parameter}
         # @api public
         def target_temperature=(celsius)
-          set_parameter(6, :u16, (celsius * 100).round)
+          set_parameter(6, :u16, hundredths(celsius))
         end
 
         # @param celsius [Numeric] of the core probe
         # @api public
         def core_target_temperature=(celsius)
-          set_parameter(7, :u16, (celsius * 100).round)
+          set_parameter(7, :u16, hundredths(celsius))
         end
 
         # @param level [Integer]
@@ -159,6 +159,12 @@ module Miele
         # @param value [Object]
         # @return [void]
         def write_parameter(prog_id, id, type, value) = write_dop2(Messages.ps_select(prog_id, 2, [id, type, value]))
+
+        # RawDataForTemperature: conv.u2 of the degrees times 100 truncates, 37.3 °C writing 3729.
+        #
+        # @param celsius [Numeric]
+        # @return [Integer]
+        def hundredths(celsius) = (celsius.to_f * 100).to_i
 
         # @param time [Time, :now]
         # @return [Integer] Unix seconds, all ones for now

@@ -86,6 +86,12 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(12, :u32, 1_800), user_request(1)])
   end
 
+  it 'writes a required temperature through degrees and back, truncated as the app does' do
+    serve([1], parameters: { 6 => value(:u16, 2, 3_730), 7 => value(:u16, 2, 230) })
+    oven.start
+    expect(written.map(&:last)).to eq([parameter(6, :u16, 3_729), parameter(7, :u16, 229), user_request(1)])
+  end
+
   it 'refuses to start a program whose duration is required but not set', :aggregate_failures do
     serve([1], parameters: { 12 => value(:u32, 2, 0xFFFF_FFFF) })
     expect { oven.start }.to raise_error(Miele::Sdk::ActionUnavailableError, /duration/)

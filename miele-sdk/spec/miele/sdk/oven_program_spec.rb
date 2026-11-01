@@ -45,6 +45,13 @@ RSpec.describe Miele::Sdk::Oven do
                             '002200020629000000000004000107000d00030402000205000600071000010006054650']])
   end
 
+  it 'truncates a temperature to hundredths of a degree, as the app does', :aggregate_failures do
+    oven.target_temperature = 37.3
+    oven.core_target_temperature = 37.3
+    expect(written.map(&:last)).to eq(['002200020629000000000004000107000d00030402000205000600071000010006050e91',
+                                       parameter(7, :u16, 3729)])
+  end
+
   it 'selects a program with selection type 0' do
     oven.select_program(13)
     expect(written.map(&:last)).to eq(['001300020629000000000002000107000d00030400'])

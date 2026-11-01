@@ -341,7 +341,7 @@ A Dop1 oven (`ProtocolVersion` 2) gives its readings in `state.extended_state`.
 
 ```ruby
 oven.select_program(13)          # a GLOBAL_EnumPrgId value, or its symbol
-oven.target_temperature = 180    # °C
+oven.target_temperature = 180    # °C, truncated to hundredths as the app does: 37.3 writes 3729
 oven.duration = 1800             # seconds
 oven.start_at = :now             # or a Time; end_at= takes a Time
 oven.set_options(pre_heating: true, keep_warm: true)
@@ -366,8 +366,9 @@ Each of these actions makes the checks the app's rules make before it, and raise
   start too once the program has started (waiting, running, paused or ended) or for program 361.
   `duration = 0` first moves the start to its minimum, as the app does.
 - `start` refuses a program that requires a duration not set yet. It first writes the parameters
-  the program requires and the user has not confirmed, with the values they show, then sends
-  request 1, or 113 when the oven does not offer 1. An automatic program starts by writing its
+  the program requires and the user has not confirmed, with the values they show, a temperature
+  through degrees and back as the app does (3730 writes 3729), then sends request 1, or 113 when
+  the oven does not offer 1. An automatic program starts by writing its
   start time instead; another program takes `start_at=` beforehand, and `start(at:)` raises
   `ArgumentError` for it.
 - `stop` needs one of requests 2, 55, 56 and 57 offered, no pyrolysis abort running, and remote

@@ -11,8 +11,11 @@ module Miele
         REQUIRED_PARAMETERS = { temperature: [6, :u16], core_temperature: [7, :u16], moisture: [2, :u8],
                                 grill_level: [1, :u8], mw_power: [15, :u8], duration: [12, :u32],
                                 browning: [30, :u8], doneness: [31, :u8] }.freeze
+        # BuildProgramParameters hands these to TargetTemperature in degrees, which writes them back truncated: 3730
+        # becomes 3729.
+        TEMPERATURES = %i[temperature core_temperature].freeze
         PYROLYSIS_ABORTS = [324, 325].freeze
-        private_constant :REQUIRED_PARAMETERS, :PYROLYSIS_ABORTS
+        private_constant :REQUIRED_PARAMETERS, :TEMPERATURES, :PYROLYSIS_ABORTS
 
         # An automatic program starts when its start time is written; the app sends no request for it.
         #
@@ -118,7 +121,10 @@ module Miele
         def write_required_parameters(prog_id, context)
           REQUIRED_PARAMETERS.each do |name, (id, type)|
             value = context.context_para_ca&.public_send(name)
-            write_parameter(prog_id, id, type, value.current_value) if unconfirmed?(name, value)
+            next unless unconfirmed?(name, value)
+
+            current = value.current_value
+            write_parameter(prog_id, id, type, TEMPERATURES.include?(name) ? hundredths(current / 100.0) : current)
           end
         end
 

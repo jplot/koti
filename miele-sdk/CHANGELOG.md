@@ -26,8 +26,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Breaking:** `Miele::Sdk.events` takes `cloud:` (`Miele::Sdk.cloud`) to also yield the account's
   events through the cloud. `Event` has a fourth member, `source`.
 - **Breaking:** the events listener no longer prints with `warn` and goes on: an appliance it cannot
-  enroll raises its error, and so does one it cannot withdraw once the block breaks; a push whose
-  signature fails is answered 403 and nothing else.
+  enroll, and once the block breaks those it cannot withdraw, raise a `SubscriptionError` whose
+  `failures` gives the error of each host; a push whose signature fails is answered 403 and nothing
+  else.
 
 ### Fixed
 

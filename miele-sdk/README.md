@@ -806,9 +806,10 @@ appliance's `SuperVision` and subscribes to `/State/`, `/State/Light/`, `/State/
 
 When the block breaks or raises, the subscriptions are deleted and `SuperVision` stops showing this
 host; the peer entry itself stays listed. An appliance that cannot be reached at that point keeps
-its subscriptions, and `events` raises its error once the others are withdrawn, unless an error
-already ended the stream; the next run deletes them, since `listener_fab` does not change. An
-appliance that cannot be enrolled raises its error, once the others are withdrawn.
+its subscriptions, and `events` raises a `Miele::Sdk::SubscriptionError` naming each such host
+(`failures`, by host) once the others are withdrawn, unless an error already ended the stream; the
+next run deletes them, since `listener_fab` does not change. An appliance that cannot be enrolled
+raises a `SubscriptionError` naming it, once the others are withdrawn.
 
 Every push must be signed with the household key, or it is answered 403. The date a push carries is
 not checked: a push captured on the network can be sent again.

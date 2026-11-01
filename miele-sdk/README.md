@@ -739,14 +739,15 @@ Miele::Sdk.configure do |config|
 end
 
 Miele::Sdk.appliances                      # the account's appliances, reached locally by their module's name
-Miele::Sdk.appliances(through_cloud: true) # the same, reached through the cloud
-oven = Miele::Sdk.appliance(host, cloud: Miele::Sdk.cloud)
-oven.dop2(1, 1585)                         # through the cloud, as the app reads it
+ovens = Miele::Sdk.appliances(through_cloud: true).grep(Miele::Sdk::Oven)
+ovens.first.dop2(1, 1585)                  # through the cloud, as the app reads it
 ```
 
 **Which way.** An appliance sends every request locally, and a resource its module does not serve
-raises `NotFoundError`. Given a cloud, it sends every request there instead, under `/V2`; a Dop1
-request names the module in `Host`, as the app does. Which way to reach an appliance is the caller's.
+raises `NotFoundError`. Given a cloud (`Appliance.new(host, fab:, cloud:)`, or `through_cloud: true`),
+it sends every request there instead, under `/V2`; a Dop1 request names the module in `Host`, as the
+app does. Which way to reach an appliance is the caller's. A hood's ColorFlow reads a 404 as none
+only through the cloud, as the app does; locally it raises it.
 With an account and neither `group_id` nor `group_key`, the local channel signs with the household
 key the account holds (`/V2/GroupKeyId/`).
 

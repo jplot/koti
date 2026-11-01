@@ -10,10 +10,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - **Breaking:** an appliance no longer turns to the cloud on its own after a local 404: it is reached
-  locally, raising `NotFoundError`, unless given a cloud (`Appliance.new(host, cloud:)`,
-  `Miele::Sdk.appliance(host, cloud: Miele::Sdk.cloud)`, `Miele::Sdk.appliances(through_cloud: true)`),
-  and then every request goes through it. `Appliance.new` no longer takes `module_host:`: the cloud
-  given lists it.
+  locally, raising `NotFoundError`, unless given a cloud (`Appliance.new(host, fab:, cloud:)` or
+  `Miele::Sdk.appliances(through_cloud: true)`), and then every request goes through it.
+  `Appliance.new` no longer takes `module_host:`: the cloud given lists it. A hood's `color_flow`
+  reads a 404 as none only through the cloud, and raises it locally.
 - **Breaking:** `Oven#select_program` raises the first refusal of a required parameter, or a parameter
   missing from 1/1574, once the program is selected, instead of ignoring it.
 - **Breaking:** `start`, `stop`, `pause`, `light_on` and `light_off` are gone from `Appliance`: the

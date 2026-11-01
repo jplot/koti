@@ -153,7 +153,7 @@ RSpec.describe Miele::Sdk::Oven do
   it 'writes no required parameter while 1/1574 lacks one of the eight, keeps the selection and raises',
      :aggregate_failures do
     program_context(13, parameters: { 6 => required(:u16, 18_000), 15 => nil })
-    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionFailedError)
     expect(written).to eq(['001300020629000000000002000107000d00030400'])
   end
 end

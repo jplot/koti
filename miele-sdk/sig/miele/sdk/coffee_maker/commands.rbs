@@ -33,7 +33,9 @@ module Miele
         def care?: (Integer id) -> bool
 
 
-        def read_combi_state: () -> untyped
+        def switched_on: (Dop2::Leaf leaf) -> Dop2::Leaf?
+
+        def read_combi_state: () -> Dop2::Leaf
 
         def switchable?: (State state, Array[Integer] statuses) -> bool
 

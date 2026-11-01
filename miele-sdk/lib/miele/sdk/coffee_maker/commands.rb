@@ -26,11 +26,11 @@ module Miele
           return write_device_action(2) if dop1_switch?(state, [1])
 
           require!(variant != :unknown && switchable?(state, [1]), 'the coffee maker cannot be switched on now')
-          combi = read_combi_state
-          return if family::GlobalEnumApplianceState.to_i(combi.appliance_state) == 4
+          leaf = switched_on(read_combi_state)
+          return unless leaf
 
           @sleeper.call(1.5)
-          write_object(combi.with(appliance_state: 4), [2, 1586, 0, 0])
+          write_dop2(leaf)
         end
 
         # @return [void]
@@ -127,15 +127,24 @@ module Miele
           raise ArgumentError, "no acknowledge option #{option}"
         end
 
-        # @return [Data] 2/1586 at 0/0
+        # @param leaf [Dop2::Leaf] 2/1586 as read
+        # @return [Dop2::Leaf, nil] it with ApplianceState 4, nil when it shows that already
+        def switched_on(leaf)
+          combi = family::GlobalDeviceCombiState.from(leaf.fields)
+          return if family::GlobalEnumApplianceState.to_i(combi.appliance_state) == 4
+
+          leaf.with(fields: combi.with(appliance_state: 4).to_fields)
+        end
+
+        # @return [Dop2::Leaf] 2/1586 at 0/0, which SwitchOnHelper writes back as read
         def read_combi_state
-          object(family::GlobalDeviceCombiState, [2, 1586, 0, 0])
+          dop2(2, 1586, idx1: 0, idx2: 0)
         rescue ResponseError => e
           raise unless e.status == 500
 
           wake
           @sleeper.call(5)
-          object(family::GlobalDeviceCombiState, [2, 1586, 0, 0])
+          dop2(2, 1586, idx1: 0, idx2: 0)
         end
 
         # @param state [State]

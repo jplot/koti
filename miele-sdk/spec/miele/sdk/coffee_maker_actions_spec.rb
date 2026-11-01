@@ -45,9 +45,9 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     dop2_leaf(unit, 1574, { 7 => struct(attributes.except(*missing)) }, idx2: 1)
   end
 
-  def combi(appliance, operation)
+  def combi(appliance, operation, idx2: 0)
     dop2_leaf(2, 1586, { 1 => dop2_field(:e8, appliance), 2 => dop2_field(:e8, operation),
-                         3 => dop2_field(:e8, 0) })
+                         3 => dop2_field(:e8, 0) }, idx2:)
   end
 
   def software_id(unit, id) = dop2_leaf(unit, 17, { 2 => dop2_field(:struct_array, [{ 1 => dop2_field(:u32, id) }]) })
@@ -197,6 +197,12 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(written.map(&:first)).to eq(%w[State DOP2/2/1586])
       expect(written.last.last).to eq(combi(4, 0))
       expect(waits).to eq([5, 1.5])
+    end
+
+    it 'switches on with the header 2/1586 answered, as the app writes it back' do
+      served[[2, 1586, 0, 0]] = combi(1, 0, idx2: 1)
+      coffee.power_on
+      expect(written.last).to eq(['DOP2/2/1586', combi(4, 0, idx2: 1)])
     end
 
     it 'writes nothing when 2/1586 already shows it on' do

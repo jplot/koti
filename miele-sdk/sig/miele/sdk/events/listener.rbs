@@ -28,9 +28,9 @@ module Miele
 
         def enroll: (Appliance appliance, String callback_host, Integer port) -> void
 
-        def close: () -> void
+        def close: (Exception? error) -> void
 
-        def withdraw: (Appliance appliance) -> void
+        def withdraw: (Appliance appliance) -> Error?
 
         def local_address: () -> String
       end

@@ -70,7 +70,7 @@ module Miele
         def serve(socket)
           socket.timeout = Sdk.config.read_timeout
           request = Request.read(socket) or return
-          plaintext = request.plaintext or return refuse(socket, request)
+          plaintext = request.plaintext or return refuse(socket)
 
           route(socket, request, plaintext)
         rescue Request::Malformed
@@ -91,17 +91,8 @@ module Miele
           end
         end
 
-        # A household request that fails the check is forged, or signed in a way
-        # this SDK does not expect: the warning tells the two apart.
-        #
         # @return [void]
-        def refuse(socket, request)
-          if request.household?
-            warn "miele-sdk: refused a request from #{socket.remote_address.ip_address} " \
-                 "(Host: #{request.headers['host']}): its signature does not match the household key"
-          end
-          reply(socket, 403)
-        end
+        def refuse(socket) = reply(socket, 403)
 
         # The slot comes from the resource rather than a counter, so that
         # connection threads share no state and a renewed subscription keeps its

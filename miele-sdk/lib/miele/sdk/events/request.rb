@@ -94,14 +94,13 @@ module Miele
           nil
         end
 
+        private
+
         # @return [Boolean] whether the request claims the household's GroupID
-        # @api private
         def household?
           group_id = headers['authorization'].to_s.delete_prefix('MieleH256 ').split(':', 2).first.to_s
           [group_id].pack('H*') == Connection.credentials.first
         end
-
-        private
 
         # @return [String, nil] the signature, nil unless the request claims the household and carries one
         def claimed_signature

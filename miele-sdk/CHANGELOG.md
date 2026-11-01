@@ -23,8 +23,12 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Breaking:** `dop2` reads without a query unless given an index, `write_dop2` leaves the
   indexes in the leaf unless given `with_index: true`, and `Dop1.setting_value` takes only the
   hood's answer.
-- **Breaking:** with an account set, `Miele::Sdk.events` also yields the cloud's events; pass
-  `cloud: nil` to keep only the appliances' pushes. `Event` has a fourth member, `source`.
+- **Breaking:** `Miele::Sdk.events` takes `cloud:` (`Miele::Sdk.cloud`) to also yield the account's
+  events through the cloud. `Event` has a fourth member, `source`.
+- **Breaking:** the events listener no longer prints with `warn` and goes on: an appliance it cannot
+  enroll, and once the block breaks those it cannot withdraw, raise a `SubscriptionError` whose
+  `failures` gives the error of each host; a push whose signature fails is answered 403 and nothing
+  else.
 
 ### Fixed
 

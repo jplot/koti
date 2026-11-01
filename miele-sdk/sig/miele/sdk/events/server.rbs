@@ -34,7 +34,7 @@ module Miele
 
         def route: (TCPSocket socket, Request request, String plaintext) -> void
 
-        def refuse: (TCPSocket socket, Request request) -> void
+        def refuse: (TCPSocket socket) -> void
 
         def subscribe: (TCPSocket socket, Request request, String plaintext) -> void
 

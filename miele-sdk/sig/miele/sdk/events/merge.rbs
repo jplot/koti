@@ -14,6 +14,10 @@ module Miele
 
         def feed: (untyped source, Thread::Queue queue) -> void
 
+        def follow: (Thread::Queue queue, Array[Thread] threads) { (Event event) -> void } -> untyped
+
+        def stop: (Thread::Queue queue, Array[Thread] threads, Exception? error) -> void
+
         def take: (Thread::Queue queue) -> Event
       end
     end

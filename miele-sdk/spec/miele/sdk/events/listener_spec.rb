@@ -14,7 +14,8 @@ RSpec.describe Miele::Sdk::Events::Listener do
     sent = callbacks
     refused = refusals
     FakeAppliance.start do |request|
-      next refused[request.verb] if refused.key?(request.verb)
+      refusal = refused[request.verb] || refused[[request.verb, request.headers['host']]]
+      next refusal if refusal
 
       slot = request.path[%r{\A/Subscriptions/(\d+)/\z}, 1]
       case [request.verb, slot]
@@ -89,12 +90,14 @@ RSpec.describe Miele::Sdk::Events::Listener do
     expect { described_class.new(hosts: []) }.to raise_error(ArgumentError, /no appliance/)
   end
 
-  it 'keeps streaming when an appliance cannot be enrolled', :aggregate_failures do
-    pusher = push_state
+  it 'raises when an appliance cannot be enrolled, naming it, the others withdrawn', :aggregate_failures do
     both = described_class.new(hosts: ['127.0.0.1', '::1'], mdns_address: '127.0.0.1', mdns_port: 0)
-    expect { expect(both.each.first.fab).to eq(fab) }.to output(/no events from ::1/).to_stderr
-    pusher.join
+    expect { both.each { nil } }
+      .to raise_error(Miele::Sdk::SubscriptionError) { expect(it.failures.keys).to eq(['::1']) }
+    expect(subscriptions).to eq('1' => cloud)
   end
+
+  def listener_port = URI(JSON.parse(fake.requests.find { it.verb == 'POST' }.body).fetch('Callback')).port
 
   it 'returns a lazy enumerator without a block' do
     expect([listener.each, Miele::Sdk.events(hosts: ['127.0.0.1'])]).to all(be_a(Enumerator::Lazy))
@@ -110,12 +113,45 @@ RSpec.describe Miele::Sdk::Events::Listener do
     end
   end
 
+  context 'when the first of two appliances refuses the withdrawal' do
+    subject(:listener) { described_class.new(hosts: ['127.1', '127.0.0.1'], mdns_address: '127.0.0.1', mdns_port: 0) }
+
+    let(:refusals) { { %w[DELETE 127.1] => [500, {}, ''] } }
+
+    it 'withdraws the other, stops listening, then raises', :aggregate_failures do
+      pusher = push_state
+      expect { listener.each.first }
+        .to raise_error(Miele::Sdk::SubscriptionError) { expect(it.failures.keys).to eq(['127.1']) }
+      expect(subscriptions).to eq('1' => cloud)
+      expect { TCPSocket.new('127.0.0.1', listener_port).close }.to raise_error(Errno::ECONNREFUSED)
+      pusher.join
+    end
+  end
+
   context 'when an appliance refuses the withdrawal' do
     let(:refusals) { { 'DELETE' => [500, {}, ''] } }
 
-    it 'warns that subscriptions stay on it' do
+    it 'raises it once the stream ends, naming the appliance and printing nothing' do
       pusher = push_state
-      expect { listener.each.first }.to output(/subscriptions left on 127\.0\.0\.1: appliance answered 500/).to_stderr
+      expect { listener.each.first }
+        .to raise_error(Miele::Sdk::SubscriptionError, /127\.0\.0\.1.*appliance answered 500/).and output('').to_stderr
+      pusher.join
+    end
+
+    it 'raises it even within a rescue of the caller' do
+      pusher = push_state
+      expect do
+        raise ArgumentError
+      rescue ArgumentError
+        listener.each.first
+      end.to raise_error(Miele::Sdk::SubscriptionError)
+      pusher.join
+    end
+
+    it 'leaves the error that ended the stream to the caller' do
+      pusher = push_state
+      stop = ->(_event) { raise 'stop' }
+      expect { listener.each(&stop) }.to raise_error(RuntimeError, 'stop')
       pusher.join
     end
   end

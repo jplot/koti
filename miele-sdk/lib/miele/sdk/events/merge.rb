@@ -14,7 +14,7 @@ module Miele
 
         # @yieldparam event [Event]
         # @return [Enumerator::Lazy<Event>, Object] the events without a block, else what +break+ returns
-        # @raise [StandardError] what a source raises
+        # @raise [StandardError] what a source raises, or raises as it cleans up once the block breaks
         # @api public
         def each(&)
           return to_enum(:each).lazy unless block_given?
@@ -26,12 +26,35 @@ module Miele
 
         # @yieldparam event [Event]
         # @return [Object] what +break+ returns
-        def merged
+        def merged(&)
           queue = Thread::Queue.new
-          threads = @sources.map { |source| Thread.new { feed(source, queue) } }
+          follow(queue, @sources.map { |source| Thread.new { feed(source, queue) } }, &)
+        end
+
+        # @param queue [Thread::Queue]
+        # @param threads [Array<Thread>]
+        # @yieldparam event [Event]
+        # @return [Object] what +break+ returns
+        def follow(queue, threads)
           loop { yield take(queue) }
+        rescue Exception => e # rubocop:disable Lint/RescueException -- what ended the stream outranks a cleanup
+          error = e
+          raise
         ensure
-          threads&.each(&:kill)&.each(&:join)
+          stop(queue, threads, error)
+        end
+
+        # A source killed when the block breaks still cleans up, and what that raises lands on the queue: it reaches
+        # the caller unless an error already ends the stream.
+        #
+        # @param queue [Thread::Queue]
+        # @param threads [Array<Thread>]
+        # @param error [Exception, nil] what ends the stream
+        # @return [void]
+        def stop(queue, threads, error)
+          threads.each(&:kill).each(&:join)
+          failure = Array.new(queue.size) { queue.pop }.find { it.is_a?(Exception) }
+          raise failure if error.nil? && failure
         end
 
         # @param source [#each]

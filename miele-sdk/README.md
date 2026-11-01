@@ -777,19 +777,19 @@ oven that serves none locally. The token's renewal and MCS logins have not run y
 ```ruby
 hosts = Miele::Sdk.discover.map(&:host)
 
-Miele::Sdk.events(hosts:) do |event|
+Miele::Sdk.events(hosts:, cloud: Miele::Sdk.cloud) do |event|
   puts "#{event.source} #{event.fab} #{event.resource}: #{event.content}"
 end
 ```
 
-`Miele::Sdk.events` follows the appliances at `hosts` on the local network and, when an account is
-set, the account's appliances through the Miele cloud, as the app does. It blocks and yields a
-`Miele::Sdk::Events::Event` (`fab`, `resource`, `content`, `source`) per change, on the calling
-thread: `source` is `:local` for an appliance's push and `:cloud` for the cloud's, and a change
-both push arrives twice, once from each. Pass `cloud: nil` to listen only locally; without `hosts`
-it listens only to the cloud, and without either it raises `ArgumentError`. When one side fails,
-the stream ends with its error. Each side is read on a thread of its own, so a slow block holds back
-neither its reads nor the cloud's keep-alive: the events wait for the block in a queue.
+`Miele::Sdk.events` follows the appliances at `hosts` on the local network and, given `cloud:`
+(`Miele::Sdk.cloud`), the account's appliances through the Miele cloud, as the app does. It blocks
+and yields a `Miele::Sdk::Events::Event` (`fab`, `resource`, `content`, `source`) per change, on the
+calling thread: `source` is `:local` for an appliance's push and `:cloud` for the cloud's, and a
+change both push arrives twice, once from each. Without `cloud:` it listens only locally; without
+`hosts` it listens only to the cloud, and without either it raises `ArgumentError`. When one side
+fails, the stream ends with its error. Each side is read on a thread of its own, so a slow block
+holds back neither its reads nor the cloud's keep-alive: the events wait for the block in a queue.
 
 `event.attributes` reads `content` as a typed value: a `DeviceIdentification` for `/Ident/`, a
 `DeviceState` for `/State/`, of which `/State/Light/` and `/State/Status/` fill only `light` or
@@ -804,14 +804,15 @@ end of the stream and leaves the subscriptions in place.
 appliance's `SuperVision` and subscribes to `/State/`, `/State/Light/`, `/State/Status/` and
 `/Ident/`.
 
-When the block breaks or raises, the subscriptions are deleted and `SuperVision` stops showing
-this host; the peer entry itself stays listed. An appliance that cannot be reached at that point
-keeps its subscriptions, with a warning on stderr; the next run deletes them, since
-`listener_fab` does not change. An appliance that cannot be enrolled is skipped, with a warning.
+When the block breaks or raises, the subscriptions are deleted and `SuperVision` stops showing this
+host; the peer entry itself stays listed. An appliance that cannot be reached at that point keeps
+its subscriptions, and `events` raises a `Miele::Sdk::SubscriptionError` naming each such host
+(`failures`, by host) once the others are withdrawn, unless an error already ended the stream; the
+next run deletes them, since `listener_fab` does not change. An appliance that cannot be enrolled
+raises a `SubscriptionError` naming it, once the others are withdrawn.
 
-Every push must be signed with the household key, or it is refused; a refused request that claims
-the household's GroupID is reported on stderr. The date a push carries is not checked: a push
-captured on the network can be sent again.
+Every push must be signed with the household key, or it is answered 403. The date a push carries is
+not checked: a push captured on the network can be sent again.
 
 The appliances must reach `listener_port` on this host and resolve its name over mDNS. When they
 sit on a network of their own (an IoT VLAN), allow TCP from that network to this host's
@@ -825,7 +826,7 @@ heating; follow such an appliance by reading its `state` at intervals.
 
 ### Through the cloud
 
-With an account, `events` opens the cloud's websocket (`/websocket/V2/Devices/` on the account's
+Given `cloud:`, `events` opens the cloud's websocket (`/websocket/V2/Devices/` on the account's
 REST host) with the session's token and, on every connection, reads the `State` of each of the
 account's appliances, as the app does. It then yields what the cloud pushes: `/State/` and
 `/Ident/` as JSON, a DOP2 leaf as a `Dop2::Leaf` under `/DOP2/{unit}/{attribute}/`, and the

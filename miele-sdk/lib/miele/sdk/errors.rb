@@ -32,6 +32,21 @@ module Miele
       end
     end
 
+    # Appliances the events listener could not enroll, or could not withdraw: these keep its subscriptions until
+    # a later run withdraws them.
+    class SubscriptionError < Error
+      # @return [Hash{String=>Error}] the error of each appliance, by host
+      attr_reader :failures
+
+      # @param action [String] what failed: +enroll+ or +withdraw+
+      # @param failures [Hash{String=>Error}] the error of each appliance, by host
+      # @api public
+      def initialize(action, failures)
+        @failures = failures
+        super("could not #{action} #{failures.map { |host, error| "#{host} (#{error.message})" }.join(', ')}")
+      end
+    end
+
     # The appliance has no such resource.
     class NotFoundError < ResponseError; end
 

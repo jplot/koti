@@ -135,12 +135,17 @@ module Miele
           put('Cooling', 'HumidityControl', Value: HUMIDITY.fetch(level))
         end
 
+        # The app shows PerfectFresh for a +Step+ above 0 compared unsigned, so for any but 0.
+        #
         # @param value [Integer]
         # @return [void]
+        # @raise [ActionUnavailableError] on protocol 201, where the app reads none, or without a +Step+
         # @raise [ArgumentError] off +PerfectFresh+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def perfect_fresh=(value)
-          require_offered!(value, picker(cooling['PerfectFresh']))
+          setting = cooling['PerfectFresh']
+          require!(protocol_version != 201 && !setting.to_h['Step'].to_i.zero?, 'the app shows no PerfectFresh here')
+          require_offered!(value, picker(setting))
           put('Cooling', 'PerfectFresh', Value: value)
         end
 

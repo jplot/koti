@@ -113,6 +113,11 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect(written).to be_empty
   end
 
+  it 'refuses PerfectFresh on protocol 201, where the app reads none', :aggregate_failures do
+    expect { fridge.perfect_fresh = 1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
   it 'refuses a light, an ambient light or a humidity level on a fridge-freezer', :aggregate_failures do
     expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
@@ -126,6 +131,11 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       expect { fridge.perfect_fresh = 3 }.to raise_error(ArgumentError)
       fridge.perfect_fresh = 2
       expect(written).to eq([['PUT', 'Cooling/PerfectFresh', { 'Value' => 2 }]])
+    end
+
+    it 'refuses PerfectFresh without a Step, as the app hides it' do
+      resources['Cooling']['PerfectFresh'] = { 'Value' => 1, 'Min' => 0, 'Max' => 2, 'Step' => 0 }
+      expect { fridge.perfect_fresh = 1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
     end
   end
 

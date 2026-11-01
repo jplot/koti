@@ -8,8 +8,8 @@ module Ajax
       # A TCP server standing as the hub's monitoring station. It answers each frame (ACK, NAK or DUH) and
       # hands each accepted event to the block, after the ACK. Each hub connection runs in its own thread,
       # so the block may be called from several threads at once; an exception it raises ends that
-      # connection's thread, and the connection with it. One address keeps at most 8 connections open: a
-      # ninth closes the oldest.
+      # connection's thread, which Ruby reports as it does for any thread, and the connection with it. One
+      # address keeps at most 8 connections open: a ninth closes the oldest.
       class Receiver
         # The 0LLL length field caps a frame at 4105 bytes; a peer that never sends +\r+ stays bounded.
         LIMIT = 4105
@@ -52,13 +52,19 @@ module Ajax
         def stop
           @server.close
           @acceptor.join
-          @mutex.synchronize { @clients.dup }.each do |socket, (_, thread)|
-            socket.close
-            thread.join
-          end
+          clients = @mutex.synchronize { @clients.dup }
+          clients.each_key(&:close)
+          clients.each_value { |(_, thread)| finish(thread) }
         end
 
         private
+
+        # A block's exception ends its connection's thread, which Ruby reports; stop must still wait for the others.
+        def finish(thread)
+          thread.join
+        rescue StandardError
+          nil
+        end
 
         def accept_loop
           until @server.closed?
@@ -82,16 +88,22 @@ module Ajax
         end
 
         def serve(socket)
-          while (frame = socket.gets("\r", LIMIT))
-            reply, event = answer(frame)
-            socket.write(reply) if reply
-            @handler.call(event) if event
+          while (event = receive(socket))
+            @handler.call(event)
           end
-        rescue IOError, SystemCallError
-          nil
         ensure
           socket.close
           @mutex.synchronize { @clients.delete(socket) }
+        end
+
+        def receive(socket)
+          while (frame = socket.gets("\r", LIMIT))
+            reply, event = answer(frame)
+            socket.write(reply) if reply
+            return event if event
+          end
+        rescue IOError, SystemCallError
+          nil
         end
 
         def answer(frame)

@@ -88,16 +88,58 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
   end
 
   context 'when the block raises' do
-    let(:handler) { ->(event) { event.number == '1' ? raise('handler bug') : events << event } }
+    let(:started) { Queue.new }
+    let(:threads) { Queue.new }
+    let(:handler) do
+      lambda do |event|
+        case event.number
+        when '1' then raise('handler bug')
+        when '2' then raise(IOError, 'handler io')
+        when '3'
+          started << event
+          sleep(0.3)
+          raise('late handler bug')
+        end
+      end
+    end
 
-    it 'leaves the error to the thread of that connection, which it ends', :aggregate_failures do
+    before do
+      allow(Thread).to receive(:new).and_wrap_original do |original, &body|
+        original.call do
+          threads << Thread.current
+          Thread.current.report_on_exception = false
+          body.call
+        end
+      end
+    end
+
+    def raised(number)
       socket = TCPSocket.new('127.0.0.1', receiver.port)
-      expect do
-        socket.write(sia_frame('"SIA-DCS"0010L0#AAA[#AAA|Nri1/BA1]'))
-        expect([socket.gets("\r"), socket.wait_readable(1) && socket.read]).to eq([sia_frame('"ACK"0010L0#AAA[]'), ''])
-      end.to output(/handler bug/).to_stderr
+      socket.write(sia_frame("\"SIA-DCS\"0010L0#AAA[#AAA|Nri1/BA#{number}]"))
+      [socket.gets("\r"), socket.wait_readable(1) && socket.read]
     ensure
       socket&.close
+    end
+
+    it 'leaves the error to the thread of that connection, which it ends', :aggregate_failures do
+      expect(raised(1)).to eq([sia_frame('"ACK"0010L0#AAA[]'), ''])
+      expect { Array.new(2) { threads.pop }.last.join(1) }.to raise_error(RuntimeError, 'handler bug')
+    end
+
+    it 'leaves an IOError of the block to its thread too', :aggregate_failures do
+      expect(raised(2)).to eq([sia_frame('"ACK"0010L0#AAA[]'), ''])
+      expect { Array.new(2) { threads.pop }.last.join(1) }.to raise_error(IOError, 'handler io')
+    end
+
+    it 'closes every connection when a block raises while it stops', :aggregate_failures do
+      first, second = Array.new(2) { |n| TCPSocket.new('127.0.0.1', receiver.port).tap { link_test(it, 30 + n) } }
+      first.write(sia_frame('"SIA-DCS"0011L0#AAA[#AAA|Nri1/BA3]'))
+      started.pop(timeout: 1)
+
+      expect { receiver.stop }.not_to raise_error
+      expect(second.wait_readable(1) && second.read).to eq('')
+    ensure
+      [first, second].each { it&.close }
     end
   end
 

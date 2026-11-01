@@ -9,7 +9,7 @@ RSpec.describe Miele::Sdk::Appliance do
     FakeAppliance.start do |request|
       case request.path
       when '/Devices/' then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
-      when %r{/DOP2?/|/State/} then [404, {}, '']
+      when %r{/DOP2/} then [404, {}, '']
       else [200, {}, '{"Status":5}']
       end
     end
@@ -19,7 +19,7 @@ RSpec.describe Miele::Sdk::Appliance do
       case request.path
       when %r{\A/V2/Devices/\d+/DOP2/} then [200, {}, leaf]
       when %r{\A/V2/Devices/\d+/DOP/} then FakeCloud.json('Response' => '8E0111000000')
-      when %r{\A/V2/Devices/\d+/State/} then FakeCloud.json({})
+      when %r{\A/V2/Devices/\d+/Ident\z} then FakeCloud.json('DeviceType' => 13, 'ProtocolVersion' => 4)
       when '/V2/Devices' then FakeCloud.json([{ host: 'Miele-0000000000000000.local.', devices: [{ mac: fab }] }])
       when '/V2/GroupKeyId/'
         FakeCloud.json([{ groupId: FakeAppliance::GROUP_ID, groupKey: FakeAppliance::GROUP_KEY }])
@@ -44,35 +44,48 @@ RSpec.describe Miele::Sdk::Appliance do
 
   def through_cloud = cloud.requests.map(&:path).grep(%r{\A/V2/Devices/\d})
 
-  it 'reads DOP2 through the cloud when the appliance answers 404 locally', :aggregate_failures do
-    expect(appliance.dop2(2, 1586).fields).to eq(1 => Miele::Sdk::Dop2::Field[:e8, 7])
-    expect(through_cloud).to eq(["/V2/Devices/#{fab}/DOP2/2/1586"])
+  def by_cloud = described_class.new('127.0.0.1', fab:, cloud: Miele::Sdk.cloud)
+
+  it 'raises a local 404, though an account is set', :aggregate_failures do
+    expect { appliance.dop2(2, 1586) }.to raise_error(Miele::Sdk::NotFoundError)
+    expect(through_cloud).to be_empty
   end
 
-  it 'sends the next DOP2 request straight to the cloud' do
-    2.times { appliance.dop2(2, 1586) }
-    expect(fake.requests.count { it.path.include?('/DOP2/') }).to eq(1)
+  it 'reads DOP2 through the cloud it is given, never locally', :aggregate_failures do
+    expect(by_cloud.dop2(2, 1586).fields).to eq(1 => Miele::Sdk::Dop2::Field[:e8, 7])
+    expect(through_cloud).to eq(["/V2/Devices/#{fab}/DOP2/2/1586"])
+    expect(fake.requests).to be_empty
+  end
+
+  it 'needs the fab of an appliance reached through the cloud, which names appliances by it' do
+    expect { described_class.new('127.0.0.1', cloud: Miele::Sdk.cloud) }.to raise_error(ArgumentError, /fab/)
+  end
+
+  it 'builds the family class through the cloud it is given, sending nothing locally', :aggregate_failures do
+    expect(described_class.for('127.0.0.1', fab:, cloud: Miele::Sdk.cloud)).to be_a(Miele::Sdk::Oven)
+    expect(fake.requests).to be_empty
+  end
+
+  it 'reads the module of an appliance reached through the cloud locally, the cloud having no such resource',
+     :aggregate_failures do
+    by_cloud.info
+    expect(fake.requests.map(&:path)).to eq(['/Info'])
+    expect(cloud.requests.map(&:path)).not_to include('/V2/Info')
+  end
+
+  it 'sends Dop1 through the very cloud it is given, naming the module that cloud lists' do
+    channel = instance_double(Miele::Sdk::Cloud::Channel,
+                              devices: [Miele::Sdk::Cloud::Channel::Device.new(fab:, host: 'module.local',
+                                                                               ident: nil, state: nil)])
+    allow(channel).to receive(:request).and_return(Miele::Sdk::Connection::Response.new(200, '{}'))
+    described_class.new('127.0.0.1', fab:, cloud: channel).dop1('8E0101000000')
+    expect(channel).to have_received(:request)
+      .with(:post, "/Devices/#{fab}/DOP/", body: anything, kind: :json, host: 'module.local')
   end
 
   it 'names the module host when Dop1 goes through the cloud' do
-    appliance.dop1('8E0101000000')
+    by_cloud.dop1('8E0101000000')
     expect(cloud.requests.find { it.path.end_with?('/DOP/') }.headers['host']).to eq('Miele-0000000000000000.local')
-  end
-
-  it 'keeps a local 404 without a cloud account' do
-    Miele::Sdk.configure { it.email = nil }
-    expect { appliance.dop2(2, 1586) }.to raise_error(Miele::Sdk::NotFoundError)
-  end
-
-  it 'keeps reading State locally once a State member goes to the cloud', :aggregate_failures do
-    ident = Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 20, 'ProtocolVersion' => 1)
-    freezer = Miele::Sdk::CoolingAppliance.new('127.0.0.1', ident:)
-    zone = Miele::Sdk::CoolingAppliance::Zone.new(number: 1, position: 1, rank: 1, type: :freezer, enabled: true,
-                                                  temperature: nil, target: nil, super_mode: false, fan: nil,
-                                                  vario_cool: nil)
-    freezer.set_super_mode(zone, true)
-    expect(freezer.state.status).to eq(:running)
-    expect(through_cloud).to eq(["/V2/Devices/#{fab}/State/ProcessAction"])
   end
 
   it 'reads State locally when the appliance serves it', :aggregate_failures do
@@ -83,6 +96,17 @@ RSpec.describe Miele::Sdk::Appliance do
   it 'lists appliances from the account' do
     expect(Miele::Sdk.appliances)
       .to contain_exactly(have_attributes(fab:, host: 'Miele-0000000000000000.local.'))
+  end
+
+  it 'reaches the account appliances locally unless asked otherwise' do
+    expect([Miele::Sdk.appliances, Miele::Sdk.appliances(through_cloud: true)].map { it.map(&:through_cloud?) })
+      .to eq([[false], [true]])
+  end
+
+  it 'reaches the account appliances through its cloud when asked', :aggregate_failures do
+    Miele::Sdk.appliances(through_cloud: true).first.dop2(2, 1586)
+    expect(through_cloud).to eq(["/V2/Devices/#{fab}/DOP2/2/1586"])
+    expect(fake.requests).to be_empty
   end
 
   it 'signs locally with the household key read from the cloud', :aggregate_failures do

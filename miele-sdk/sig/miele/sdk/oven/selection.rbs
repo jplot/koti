@@ -14,6 +14,8 @@ module Miele
 
         private
 
+        def write_selected_parameters: (Integer id, Objects::Oven::GlobalPsContext context) -> void
+
         def require_program_writable!: () -> void
 
         def program_writeable?: (Objects::Oven::GlobalDeviceContext device) -> bool

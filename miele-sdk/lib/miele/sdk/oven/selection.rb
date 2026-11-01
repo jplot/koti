@@ -11,27 +11,33 @@ module Miele
         UNWRITABLE_STATES = %i[off not_connected running waiting_for_start].freeze
         private_constant :UNSUPPORTED_QUERIES, :UNWRITABLE_STATES
 
-        # The app only logs a refused required parameter.
-        #
         # @param prog_id [Integer, Symbol] a value of +GLOBAL_EnumPrgId+
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, or when the app's program selection is disabled
-        # @raise [ActionFailedError] when 1/1574 does not show the program within 15 s
+        # @raise [ActionFailedError] when 1/1574 does not show the program within 15 s, or shows it without one of the
+        #   eight parameters; the program stays selected
+        # @raise [Error] the first refusal of a required parameter, once every one is sent; the program stays selected
         # @api public
         def select_program(prog_id)
           require_dop2!
           require_program_writable!
           id = Objects::Oven::GlobalEnumPrgId.to_i(prog_id)
           write_dop2(Messages.ps_select(id, 0))
-          context = shown_program_context(id)
-          begin
-            write_required_parameters(id, context)
-          rescue Error
-            nil
-          end
+          write_selected_parameters(id, shown_program_context(id))
         end
 
         private
+
+        # The program is selected by then, so a parameter 1/1574 lacks is a value missing on the way.
+        #
+        # @param id [Integer]
+        # @param context [Objects::Oven::GlobalPsContext]
+        # @return [void]
+        def write_selected_parameters(id, context)
+          write_required_parameters(id, context)
+        rescue ActionUnavailableError => e
+          raise ActionFailedError, e.message
+        end
 
         # DetermineIsProgramWriteable, which enables the app's program selection.
         #

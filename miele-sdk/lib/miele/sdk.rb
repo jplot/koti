@@ -117,14 +117,16 @@ module Miele
     # @api public
     def self.appliance(host) = Appliance.for(host)
 
-    # @return [Array<Appliance>] the appliances paired with the Miele account, reached by their module's name
+    # @param through_cloud [Boolean] whether to reach them through the account's cloud rather than locally, by the
+    #   name of their module
+    # @return [Array<Appliance>] the appliances paired with the Miele account
     # @raise [ConfigurationError] without an account
     # @api public
-    def self.appliances
+    def self.appliances(through_cloud: false)
       channel = cloud or raise ConfigurationError, 'the Miele account is needed to list its appliances'
       channel.devices.map do |device|
         ident = device.ident&.then { Schema::DeviceIdentification.from(it) }
-        Families.claim(ident).new(device.host, fab: device.fab, module_host: device.host, ident:)
+        Families.claim(ident).new(device.host, fab: device.fab, ident:, cloud: (channel if through_cloud))
       end
     end
 

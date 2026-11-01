@@ -212,21 +212,14 @@ RSpec.describe Miele::Sdk::Oven do
     end
   end
 
-  context 'when the oven serves no DOP2 locally' do
-    let(:fake) do
-      served = { 'State' => JSON.generate(state) }
-      FakeAppliance.start do |request|
-        case request
-        in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
-        in { path: /DOP2/ } then [404, {}, '']
-        in { verb: 'GET', path: } then [200, {}, served.fetch(path.delete_prefix("/Devices/#{fab}/"))]
-        end
-      end
-    end
+  context 'when the oven is reached through the cloud' do
+    subject(:oven) { described_class.new('127.0.0.1', ident:, fab:, cloud: Miele::Sdk.cloud) }
+
     let(:cloud) do
       leaves = { '1/1574?idx1=0&idx2=1' => program_context, '1/1585' => device_context,
                  '1/131?idx1=0&idx2=1' => dop2_leaf(1, 131, {}, idx2: 1) }
       FakeCloud.start do |request|
+        next FakeCloud.json(state) if request.path == "/V2/Devices/#{fab}/State"
         next unless request.path.include?('/DOP2/')
 
         request.verb == 'GET' ? [200, {}, leaves.fetch(request.path.split('/DOP2/').last)] : [204, {}, '']
@@ -244,8 +237,9 @@ RSpec.describe Miele::Sdk::Oven do
 
     after { cloud.stop }
 
-    it 'writes through the cloud when the oven serves no DOP2 locally' do
+    it 'writes through the cloud it is given, never locally', :aggregate_failures do
       oven.target_temperature = 180
+      expect(fake.requests).to be_empty
       device = "/V2/Devices/#{fab}/DOP2"
       expect(cloud.requests.map { [it.verb, it.path] }.last(3))
         .to eq([['GET', "#{device}/1/1574?idx1=0&idx2=1"], ['GET', "#{device}/1/131?idx1=0&idx2=1"],

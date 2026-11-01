@@ -180,10 +180,12 @@ module Miele
                                available_sources: plus['availableSourceDeviceIds'], sources: plus['sourceDeviceIds'])
         end
 
-        # A DOP2 hood answering 500 has none either, and an interval the app does not know reads 10
-        # (ColorFlowDop2Source, ColorFlowIntervalMapper).
+        # The app reads a 404 through the cloud as none, and a 500 from a DOP2 hood too; an interval it does not know
+        # reads 10 (ColorFlowDop2Source, ColorFlowIntervalMapper). A module that does not serve ColorFlow locally
+        # answers 404 as well.
         #
         # @return [ColorFlow, nil] nil when the hood has none
+        # @raise [NotFoundError] when the hood, reached locally, answers 404
         # @api public
         def color_flow
           return if opcode?
@@ -192,7 +194,7 @@ module Miele
           interval = served.fetch('intervalDurationSeconds')
           ColorFlow.new(served.fetch('active'), COLOR_FLOW_INTERVALS.include?(interval) ? interval : 10)
         rescue NotFoundError
-          nil
+          raise unless through_cloud?
         rescue ResponseError => e
           raise unless e.status == 500 && protocol_version != 2
         end

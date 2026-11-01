@@ -11,8 +11,11 @@ module Miele
         REQUIRED_PARAMETERS = { temperature: [6, :u16], core_temperature: [7, :u16], moisture: [2, :u8],
                                 grill_level: [1, :u8], mw_power: [15, :u8], duration: [12, :u32],
                                 browning: [30, :u8], doneness: [31, :u8] }.freeze
+        # BuildProgramParameters hands these to TargetTemperature in degrees, which writes them back truncated: 3730
+        # becomes 3729.
+        TEMPERATURES = %i[temperature core_temperature].freeze
         PYROLYSIS_ABORTS = [324, 325].freeze
-        private_constant :REQUIRED_PARAMETERS, :PYROLYSIS_ABORTS
+        private_constant :REQUIRED_PARAMETERS, :TEMPERATURES, :PYROLYSIS_ABORTS
 
         # An automatic program starts when its start time is written; the app sends no request for it.
         #
@@ -57,11 +60,6 @@ module Miele
         # @raise [ActionUnavailableError] on a Dop1 oven, or when not offered
         # @api public
         def continue_cooking = user_request(72, 'the oven offers no continue cooking now') { continue_cooking? }
-
-        # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or when the oven does not offer request 59
-        # @api public
-        def steam_burst = user_request(59, 'the oven offers no steam burst now') { supported_requests.include?(59) }
 
         # Offered while 1/131 shows message 20 (OptionsRunningAfterEndRule).
         #
@@ -112,14 +110,31 @@ module Miele
           context.prog_attributes_cca&.programtype&.then { Objects::Oven::GlobalEnumProgramTypes.to_i(it) } == 3
         end
 
+        # SetRequiredParametersHelper sends them all at once (Task.WhenAll): a refusal leaves the others sent.
+        #
         # @param prog_id [Integer]
         # @param context [Objects::Oven::GlobalPsContext]
         # @return [void]
+        # @raise [Error] the first refusal, once every one is sent
         def write_required_parameters(prog_id, context)
-          REQUIRED_PARAMETERS.each do |name, (id, type)|
+          refusals = REQUIRED_PARAMETERS.filter_map do |name, (id, type)|
             value = context.context_para_ca&.public_send(name)
-            write_parameter(prog_id, id, type, value.current_value) if unconfirmed?(name, value)
+            next unless unconfirmed?(name, value)
+
+            current = value.current_value
+            written = TEMPERATURES.include?(name) ? hundredths(current / 100.0) : current
+            refusal { write_parameter(prog_id, id, type, written) }
           end
+          refusals.first&.then { raise it }
+        end
+
+        # @yield a write
+        # @return [Error, nil] its refusal
+        def refusal
+          yield
+          nil
+        rescue Error => e
+          e
         end
 
         # As in the app, a duration out of its bounds stays unwritten.
@@ -159,12 +174,12 @@ module Miele
           [55, 56, 57].find { requests.include?(it) } || 2
         end
 
-        # @param type [Symbol] +:info+ or +:message+
-        # @param id [Integer]
-        # @return [Boolean] whether 1/131 shows it
-        def shows?(type, id)
-          shown = type == :info ? notifications.infos : notifications.messages
-          Array(shown).any? { it.id && NOTIFICATION_IDS.fetch(type).to_i(it.id) == id }
+        # @param type [Symbol] +:info+, +:message+ or +:query+
+        # @param ids [Array<Integer>]
+        # @return [Boolean] whether 1/131 shows one of them
+        def shows?(type, *ids)
+          shown = notifications.then { { info: it.infos, message: it.messages, query: it.queries }.fetch(type) }
+          Array(shown).any? { it.id && ids.include?(NOTIFICATION_IDS.fetch(type).to_i(it.id)) }
         end
 
         # The app's Dop1 rule asks for a program of raw type 0, 1 or 2 (function, own, automatic) and ignores

@@ -12,7 +12,7 @@ RSpec.describe Miele::Sdk::Oven do
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: } then [200, {}, served.fetch(path.delete_prefix("/Devices/#{fab}/"))]
-      else [204, {}, '']
+      else served[:put]&.shift || [204, {}, '']
       end
     end
   end
@@ -44,6 +44,24 @@ RSpec.describe Miele::Sdk::Oven do
   def attributes(type: 1, phase: 0, prog_id: 13, continue_cooking: 0)
     { 1 => dop2_field(:e16, phase), 10 => dop2_field(:e8, type), 16 => dop2_field(:e8, continue_cooking),
       28 => dop2_field(:e16, prog_id) }
+  end
+
+  def burst_attributes(type: 2, remaining: 1, bit_field: 0)
+    remaining = { 1 => dop2_field(:u8, 8), 2 => dop2_field(:u8, remaining) }
+    attributes(type:).merge(12 => dop2_field(:struct, remaining), 19 => dop2_field(:u32, bit_field))
+  end
+
+  def serve_burst(count: 1, mask: 9, selected: 13, times: [8, 9, 10], **shown)
+    parameters = times.to_h { [it, value(:u16, 9, 0)] }.merge(18 => value(:u8, mask, count))
+    serve_burst_device(burst_attributes(**shown))
+    resources['DOP2/1/1574?idx1=0&idx2=1'] =
+      dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters),
+                           7 => dop2_field(:struct, attributes(type: 2, prog_id: selected)) }, idx2: 1)
+  end
+
+  def serve_burst_device(shown)
+    resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown),
+                                                    9 => dop2_field(:e16_array, [59]) })
   end
 
   def serve(requests, parameters: {}, **shown)
@@ -84,6 +102,19 @@ RSpec.describe Miele::Sdk::Oven do
                              12 => value(:u32, 2, 1_800, min: 60, max: 3_600), 30 => value(:u8, 0, 2) })
     oven.start
     expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(12, :u32, 1_800), user_request(1)])
+  end
+
+  it 'writes a required temperature through degrees and back, truncated as the app does' do
+    serve([1], parameters: { 6 => value(:u16, 2, 3_730), 7 => value(:u16, 2, 230) })
+    oven.start
+    expect(written.map(&:last)).to eq([parameter(6, :u16, 3_729), parameter(7, :u16, 229), user_request(1)])
+  end
+
+  it 'writes every required parameter, then raises the first refusal without starting', :aggregate_failures do
+    serve([1], parameters: { 6 => value(:u16, 2, 18_000), 7 => value(:u16, 2, 6_000) })
+    resources[:put] = [[500, {}, '']]
+    expect { oven.start }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+    expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(7, :u16, 6_000)])
   end
 
   it 'refuses to start a program whose duration is required but not set', :aggregate_failures do
@@ -149,14 +180,13 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to be_empty
   end
 
-  it 'sends continue cooking, a steam burst and the end of keeping warm when the oven offers them' do
+  it 'sends continue cooking and the end of keeping warm when the oven offers them' do
     serve([59], continue_cooking: 1)
     resources['DOP2/1/131?idx1=0&idx2=1'] =
       dop2_leaf(1, 131, { 2 => dop2_field(:struct_array, [{ 1 => dop2_field(:e16, 20) }]) }, idx2: 1)
     oven.continue_cooking
-    oven.steam_burst
     oven.stop_keeping_warm
-    expect(written.map(&:last)).to eq([user_request(72), user_request(59), user_request(68)])
+    expect(written.map(&:last)).to eq([user_request(72), user_request(68)])
   end
 
   it 'refuses the requests the oven does not offer', :aggregate_failures do
@@ -166,6 +196,49 @@ RSpec.describe Miele::Sdk::Oven do
       expect { oven.public_send(request) }.to raise_error(Miele::Sdk::ActionUnavailableError)
     end
     expect(written).to be_empty
+  end
+
+  context 'with a manual steam burst in a running function' do
+    before do
+      state(5)
+      serve_burst
+    end
+
+    it 'sends a steam burst on unit 2' do
+      oven.steam_burst
+      expect(written).to eq([['DOP2/2/1583', '000f0002062f000000000001000107003b']])
+    end
+
+    it 'sends the last steam burst while it is under way, BitField 16 as the app compares it' do
+      serve_burst(remaining: 0, bit_field: 16)
+      oven.steam_burst
+      expect(written.map(&:last)).to eq([user_request(59)])
+    end
+
+    it 'refuses a burst the app shows no button for', :aggregate_failures do
+      [{ count: 4 }, { mask: 1 }, { selected: 14 }, { remaining: 0 }, { type: 1 }].each do |change|
+        serve_burst(**change)
+        expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      end
+      expect(written).to be_empty
+    end
+
+    it 'refuses a burst without a steam burst time on 1/1574 or a BitField on 1/1585', :aggregate_failures do
+      serve_burst(times: [8, 9])
+      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      serve_burst
+      serve_burst_device(burst_attributes.except(19))
+      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      expect(written).to be_empty
+    end
+
+    it 'refuses a burst to a programmed oven, or without a REST ProgramID', :aggregate_failures do
+      state(3)
+      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      state(5, program_id: 0)
+      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      expect(written).to be_empty
+    end
   end
 
   context 'with a Dop1 oven' do

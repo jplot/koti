@@ -44,5 +44,9 @@ module Miele
     # The appliance answered a Dop1 write with an Ack other than success (1), which the Miele app reports as
     # settings not accepted.
     class NotAcceptedError < Error; end
+
+    # The appliance took an action's write but did not show its effect within the 15 s the Miele app waits for it
+    # (ActionExecutionTimeout), which the app reports as a failed action.
+    class ActionFailedError < Error; end
   end
 end

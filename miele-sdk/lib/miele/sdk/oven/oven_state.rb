@@ -3,13 +3,14 @@
 module Miele
   module Sdk
     class Oven < Appliance
-      # The app's OvenState, as far as a stop depends on it (Sources.DOP2.OvenStateSource): a descaling (326)
-      # never pauses, and an info, a query or the open door holds a program that cannot start.
+      # The app's OvenState, as far as a stop, a selection or a steam burst depends on it
+      # (Sources.DOP2.OvenStateSource): a descaling (326) never pauses, and an info, a query or the open door holds
+      # a program that cannot start.
       module OvenState
         INFO_QUERY_DOOR_PHASES = [10_001, 10_003, 28_116].freeze
         FUNCTIONAL_PROGRAM_TYPES = [2, 3, 4, 5, 7, 8, 38, 50].freeze
-        APP_STATES = { on: :on, waiting_to_start: :waiting_for_start, running: :running, pause: :paused,
-                       end_programmed: :end }.freeze
+        APP_STATES = { off: :off, on: :on, waiting_to_start: :waiting_for_start, running: :running, pause: :paused,
+                       end_programmed: :end, not_connected: :not_connected }.freeze
         STARTED = %i[waiting_for_start running paused end].freeze
         private_constant :INFO_QUERY_DOOR_PHASES, :FUNCTIONAL_PROGRAM_TYPES, :APP_STATES, :STARTED
 

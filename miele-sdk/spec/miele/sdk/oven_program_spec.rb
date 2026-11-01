@@ -23,10 +23,16 @@ RSpec.describe Miele::Sdk::Oven do
   after { fake.stop }
 
   def program_context
-    start_at = { 2 => dop2_field(:u64, 1_700_000_000) }
-    dop2_leaf(1, 1574, { 4 => dop2_field(:struct, { 13 => dop2_field(:struct, start_at) }),
+    microwave = { 1 => dop2_field(:u8, microwave_mask), 2 => dop2_field(:u8, microwave_bits) }
+    parameters = { 13 => dop2_field(:struct, { 2 => dop2_field(:u64, 1_700_000_000) }),
+                   15 => dop2_field(:struct, microwave) }
+    dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters),
                          7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
   end
+
+  def microwave_bits = 0x7F
+
+  def microwave_mask = 9
 
   def device_prog_id = 13
 
@@ -45,9 +51,11 @@ RSpec.describe Miele::Sdk::Oven do
                             '002200020629000000000004000107000d00030402000205000600071000010006054650']])
   end
 
-  it 'selects a program with selection type 0' do
-    oven.select_program(13)
-    expect(written.map(&:last)).to eq(['001300020629000000000002000107000d00030400'])
+  it 'truncates a temperature to hundredths of a degree, as the app does', :aggregate_failures do
+    oven.target_temperature = 37.3
+    oven.core_target_temperature = 37.3
+    expect(written.map(&:last)).to eq(['002200020629000000000004000107000d00030402000205000600071000010006050e91',
+                                       parameter(7, :u16, 3729)])
   end
 
   it 'writes each parameter under the id and wire type the app gives it' do
@@ -58,6 +66,26 @@ RSpec.describe Miele::Sdk::Oven do
                                        parameter(30, :u8, 2), parameter(31, :u8, 1), parameter(18, :u8, 2),
                                        parameter(8, :u16, 60), parameter(9, :u16, 120),
                                        parameter(14, :u64, 1_700_003_600)])
+  end
+
+  it 'writes a microwave power as one bit of those the oven supports, as the app picks it' do
+    oven.microwave_power = 0x10
+    expect(written.map(&:last)).to eq([parameter(15, :u8, 16)])
+  end
+
+  it 'refuses a microwave power that is not a single bit', :aggregate_failures do
+    expect { oven.microwave_power = 3 }.to raise_error(ArgumentError)
+    expect { oven.microwave_power = 600 }.to raise_error(ArgumentError)
+    expect(written).to be_empty
+  end
+
+  context 'with an oven supporting the four lowest microwave powers' do
+    def microwave_bits = 0x0F
+
+    it 'refuses a power bit the oven does not support', :aggregate_failures do
+      expect { oven.microwave_power = 0x10 }.to raise_error(ArgumentError)
+      expect(written).to be_empty
+    end
   end
 
   it 'sends start at now as all ones' do
@@ -90,6 +118,19 @@ RSpec.describe Miele::Sdk::Oven do
 
     it 'refuses a parameter without remote control', :aggregate_failures do
       expect { oven.target_temperature = 180 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(written).to be_empty
+    end
+
+    it 'refuses a microwave power without remote control before looking at its bit' do
+      expect { oven.microwave_power = 3 }.to raise_error(Miele::Sdk::ActionUnavailableError, /remote control/)
+    end
+  end
+
+  context 'with a microwave power the oven does not make readable' do
+    def microwave_mask = 1
+
+    it 'refuses it, as the app then shows no microwave section', :aggregate_failures do
+      expect { oven.microwave_power = 0x10 }.to raise_error(Miele::Sdk::ActionUnavailableError, /microwave/)
       expect(written).to be_empty
     end
   end
@@ -133,6 +174,10 @@ RSpec.describe Miele::Sdk::Oven do
 
     it 'refuses an oven that speaks Dop1' do
       expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionUnavailableError, /Dop1/)
+    end
+
+    it 'refuses a microwave power on a Dop1 oven before looking at its bit' do
+      expect { oven.microwave_power = 3 }.to raise_error(Miele::Sdk::ActionUnavailableError, /Dop1/)
     end
   end
 

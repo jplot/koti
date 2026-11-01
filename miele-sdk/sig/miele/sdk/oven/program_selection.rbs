@@ -4,7 +4,7 @@ module Miele
       module ProgramSelection : Appliance
         NOW: Integer
 
-        def select_program: (Integer | Symbol prog_id) -> void
+        MICROWAVE_BITS: Array[Integer]
 
         def target_temperature=: (Integer | Float celsius) -> void
 
@@ -14,7 +14,7 @@ module Miele
 
         def grill_level=: (Integer level) -> void
 
-        def microwave_power=: (Integer level) -> void
+        def microwave_power=: (Integer bit) -> void
 
         def browning=: (Integer level) -> void
 
@@ -48,9 +48,15 @@ module Miele
 
         def require_dop2!: () -> void
 
+        def supported_powers: (Objects::Oven::GlobalPsContext context) -> Integer
+
+        def mask: (untyped value) -> Integer
+
         def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
 
         def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
+
+        def hundredths: (Integer | Float celsius) -> Integer
 
         def unix_time: (Time | :now time) -> Integer
       end

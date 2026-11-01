@@ -6,6 +6,13 @@ module Miele
     # module per family (+Oven+, +Hood+…) with a Data class per object and a module per enum, each loaded on its
     # first use.
     module Objects
+      NUMERALS = %i[u8 i8 e8 u16 i16 e16 u32 i32 e32 u64 i64 e64].freeze
+      # The wire types the app's GetEnum, GetGeneratedObject, GetEnums and GetGeneratedObjects accept: any other
+      # fails that one attribute.
+      WIRE_TYPES = { enum: NUMERALS, struct: [:struct], enum_array: NUMERALS.map { :"#{it}_array" },
+                     struct_array: [:struct_array] }.freeze
+      private_constant :NUMERALS, :WIRE_TYPES
+
       # Reading and writing of the generated enum modules. Each holds +VALUES+, the number of each short symbol.
       module Enum
         # Three enums give one number two names (+GLOBAL_SUBPPHASE_NONE+ and +…_SUPERIOR_LEVEL+): the first one reads.
@@ -35,7 +42,7 @@ module Miele
         # @return [Data] nil for each attribute the leaf lacks
         def from(fields)
           values = layout.to_h do |member, (index, kind, type)|
-            [member, fields[index]&.then { Objects.read(it.value, kind, type) }]
+            [member, fields[index]&.then { Objects.read(it, kind, type) }]
           end
           new(**values, raw: fields)
         end
@@ -209,16 +216,18 @@ module Miele
                              :packed, :integer
       end
 
-      # @param value [Object] an attribute's value as {Dop2} decodes it
+      # @param field [Dop2::Field] an attribute as {Dop2} decodes it
       # @param kind [Symbol] the kind of its member in +MEMBERS+
       # @param type [String, nil] the member's enum or class, below Objects
-      # @return [Object] the member's value
+      # @return [Object, nil] the member's value, nil when the wire type does not fit the kind
       # @api private
-      def self.read(value, kind, type)
+      def self.read(field, kind, type)
+        return if WIRE_TYPES.key?(kind) && !WIRE_TYPES.fetch(kind).include?(field.type)
+
         case kind
-        when :enum, :struct then const_get(type).from(value)
-        when :enum_array, :struct_array then value.map { const_get(type).from(it) }
-        else value
+        when :enum, :struct then const_get(type).from(field.value)
+        when :enum_array, :struct_array then field.value.map { const_get(type).from(it) }
+        else field.value
         end
       end
 

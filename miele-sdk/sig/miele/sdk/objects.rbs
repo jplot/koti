@@ -1,6 +1,10 @@
 module Miele
   module Sdk
     module Objects
+      NUMERALS: ::Array[::Symbol]
+
+      WIRE_TYPES: ::Hash[::Symbol, ::Array[::Symbol]]
+
       module Enum : ::Module
         def from: (::Integer number) -> (::Symbol | ::Integer)
         def to_i: (::Symbol | ::Integer value) -> ::Integer
@@ -74,7 +78,7 @@ module Miele
         end
       end
 
-      def self.read: (untyped value, ::Symbol kind, untyped type) -> untyped
+      def self.read: (Dop2::Field field, ::Symbol kind, untyped type) -> untyped
       def self.write: (untyped value, ::Symbol kind, untyped type) -> untyped
     end
   end

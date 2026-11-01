@@ -3,34 +3,27 @@
 module Miele
   module Sdk
     class Oven < Appliance
-      # What the app's oven module writes through PsSelectMessage (2/1577): the program, then its parameters one
-      # by one.
+      # What the app's oven module writes through PsSelectMessage (2/1577) once a program is selected: its
+      # parameters, one by one.
       module ProgramSelection
         # +StartAt+ meaning now.
         NOW = 0xFFFF_FFFF_FFFF_FFFF
-        private_constant :NOW
-
-        # @param prog_id [Integer, Symbol] a value of +GLOBAL_EnumPrgId+
-        # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or without remote control
-        # @api public
-        def select_program(prog_id)
-          require_dop2!
-          require!(under_remote_control?, 'the oven selects a program only under remote control')
-          write_dop2(Messages.ps_select(Objects::Oven::GlobalEnumPrgId.to_i(prog_id), 0))
-        end
+        # MicrowavePowers (80 to 1000 W) and MicrowaveSteps (1 to 7): the app's picker offers those of them set in
+        # MwPower's SupportedBits, and writes the one picked.
+        MICROWAVE_BITS = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40].freeze
+        private_constant :NOW, :MICROWAVE_BITS
 
         # @param celsius [Numeric]
         # @raise [ActionUnavailableError] see {#set_parameter}
         # @api public
         def target_temperature=(celsius)
-          set_parameter(6, :u16, (celsius * 100).round)
+          set_parameter(6, :u16, hundredths(celsius))
         end
 
         # @param celsius [Numeric] of the core probe
         # @api public
         def core_target_temperature=(celsius)
-          set_parameter(7, :u16, (celsius * 100).round)
+          set_parameter(7, :u16, hundredths(celsius))
         end
 
         # @param level [Integer]
@@ -45,10 +38,20 @@ module Miele
           set_parameter(1, :u8, level)
         end
 
-        # @param level [Integer]
+        # @param bit [Integer] one bit of the oven's supported microwave powers, such as 0x10 for 600 W
+        # @raise [ActionUnavailableError] see {#set_parameter}, or when the oven shows no microwave power
+        # @raise [ArgumentError] for any other value
         # @api public
-        def microwave_power=(level)
-          set_parameter(15, :u8, level)
+        def microwave_power=(bit)
+          require_dop2!
+          require_parameters_allowed!
+          context = program_context
+          supported = supported_powers(context)
+          unless MICROWAVE_BITS.include?(bit) && supported.anybits?(bit)
+            raise ArgumentError, "#{bit} is not one of the microwave power bits the oven supports (#{supported})"
+          end
+
+          write_parameter(selected_program(context), 15, :u8, bit)
         end
 
         # @param level [Integer]
@@ -145,6 +148,18 @@ module Miele
           require!(state.mobile_start?, 'the oven takes parameters only by mobile start once a program has started')
         end
 
+        # MicrowaveLevelRule gives the app no microwave section while MwPower is not readable.
+        #
+        # @param context [Objects::Oven::GlobalPsContext] 1/1574
+        # @return [Integer] MwPower's SupportedBits
+        # @raise [ActionUnavailableError]
+        def supported_powers(context)
+          power = context.context_para_ca&.mw_power
+          return power.supported_bits.to_i if power && mask(power).anybits?(8)
+
+          raise ActionUnavailableError, 'the oven shows no microwave power'
+        end
+
         # @param context [Objects::Oven::GlobalPsContext] 1/1574
         # @return [Integer] the ProgId of the selected program
         # @raise [ActionUnavailableError] when no program is selected
@@ -159,6 +174,12 @@ module Miele
         # @param value [Object]
         # @return [void]
         def write_parameter(prog_id, id, type, value) = write_dop2(Messages.ps_select(prog_id, 2, [id, type, value]))
+
+        # RawDataForTemperature: conv.u2 of the degrees times 100 truncates, 37.3 °C writing 3729.
+        #
+        # @param celsius [Numeric]
+        # @return [Integer]
+        def hundredths(celsius) = (celsius.to_f * 100).to_i
 
         # @param time [Time, :now]
         # @return [Integer] Unix seconds, all ones for now

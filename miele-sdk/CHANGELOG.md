@@ -66,6 +66,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   selection, parameters, delayed start, answers to messages, power off, wake, the anti-crease
   setting and TwinDos filling levels. None of it has run against a real appliance.
 - `NotAcceptedError`, for a Dop1 write the appliance acknowledges with anything but success.
+- `ActionFailedError`, for an action whose effect the appliance does not show within the app's wait.
 - Coffee makers as the app's coffee module drives them: the variant, typed reads of the contexts,
   notifications, cleaning, descaling, features, profiles and drinks, and the CVA6000's Dop1 state;
   switching on and off, brewing a drink for one or two cups and with a double shot, Barista,

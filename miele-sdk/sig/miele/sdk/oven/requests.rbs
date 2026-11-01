@@ -4,6 +4,8 @@ module Miele
       module Requests : Appliance
         REQUIRED_PARAMETERS: Hash[Symbol, [Integer, Symbol]]
 
+        TEMPERATURES: Array[Symbol]
+
         PYROLYSIS_ABORTS: Array[Integer]
 
         def start: (?at: Time | :now) -> void
@@ -11,8 +13,6 @@ module Miele
         def stop: () -> void
 
         def continue_cooking: () -> void
-
-        def steam_burst: () -> void
 
         def stop_keeping_warm: () -> void
 
@@ -38,6 +38,8 @@ module Miele
 
         def write_required_parameters: (Integer prog_id, Objects::Oven::GlobalPsContext context) -> void
 
+        def refusal: () { () -> void } -> Error?
+
         def unconfirmed?: (Symbol name, untyped value) -> bool
 
         def mask: (untyped value) -> Integer
@@ -46,7 +48,7 @@ module Miele
 
         def stop_request: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Integer
 
-        def shows?: (Symbol type, Integer id) -> bool
+        def shows?: (Symbol type, *Integer ids) -> bool
 
         def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
 
@@ -67,6 +69,8 @@ module Miele
         def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
 
         def unix_time: (Time | :now time) -> Integer
+
+        def hundredths: (Integer | Float celsius) -> Integer
       end
     end
   end

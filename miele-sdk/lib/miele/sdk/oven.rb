@@ -6,7 +6,9 @@ module Miele
     # 15, 31, 39 and 45).
     class Oven < Appliance
       include ProgramSelection
+      include Selection
       include Requests
+      include SteamBurst
       include OvenState
 
       NOTIFICATION_IDS = { info: Objects::Oven::GlobalEnumNtfctnInfoId, message: Objects::Oven::GlobalEnumNtfctnMessageId,
@@ -17,9 +19,11 @@ module Miele
       # other families switch on in their own way.
       #
       # @return [void]
+      # @raise [ActionUnavailableError] on a Dop1 or H2 oven, or without remote control or mobile start
       # @raise [ResponseError] if the appliance still refuses after three attempts
       # @api public
       def power_on
+        require_switch_on!
         3.times do |attempt|
           rouse if attempt.positive?
           return write_dop2(power_leaf(4))
@@ -28,15 +32,20 @@ module Miele
         end
       end
 
-      # The app's SendSwitchOffAsync swallows a 500.
+      # The app's SendSwitchOffAsync swallows a 500 on its write.
       #
       # @return [void]
+      # @raise [ActionUnavailableError] on a Dop1 oven, or without remote control or mobile start, or under local
+      #   control, or not connected
       # @raise [ResponseError] if the appliance refuses with another status
       # @api public
       def power_off
-        write_dop2(power_leaf(1))
-      rescue ResponseError => e
-        raise unless e.status == 500
+        require_switch_off!
+        begin
+          write_dop2(power_leaf(1))
+        rescue ResponseError => e
+          raise unless e.status == 500
+        end
       end
 
       # @return [Objects::Oven::GlobalDeviceContext] 1/1585, read without an index as the app observes it
@@ -138,6 +147,29 @@ module Miele
       def celsius(parameter)
         value = program_context.context_para_ca&.public_send(parameter)
         value&.current_value&.then { it / 100.0 }
+      end
+
+      # IsDiscoveryOven, and the app's offline screen, the loosest of its switch-on paths.
+      #
+      # @return [void]
+      # @raise [ActionUnavailableError]
+      def require_switch_on!
+        require_dop2!
+        require!(!tech_type.to_s.start_with?('H2'), 'the app does not switch on an H2 oven')
+        state = self.state
+        require!(state.remote_control? || state.mobile_start?, 'the oven is not remote enabled')
+      end
+
+      # UpdateEnabledState of the app's settings switch, the loosest of its three switch-off paths.
+      #
+      # @return [void]
+      # @raise [ActionUnavailableError]
+      def require_switch_off!
+        require_dop2!
+        state = self.state
+        require!(under_remote_control?(state) || (!state.remote_control? && state.mobile_start?),
+                 'the oven is not remote enabled, or is under local control')
+        require!(state.status != :not_connected, 'the oven is not connected')
       end
 
       # The appliance state on 2/1586: 4 switches on, 1 off.

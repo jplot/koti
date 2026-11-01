@@ -2,7 +2,9 @@ module Miele
   module Sdk
     class Oven < Appliance
       include ProgramSelection
+      include Selection
       include Requests
+      include SteamBurst
       include OvenState
 
       NOTIFICATION_IDS: Hash[Symbol, Objects::Enum]
@@ -44,6 +46,10 @@ module Miele
       def require_dop2!: () -> void
 
       def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
+
+      def require_switch_on!: () -> void
+
+      def require_switch_off!: () -> void
 
       def power_leaf: (Integer state) -> Dop2::Leaf
 

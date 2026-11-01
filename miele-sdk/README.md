@@ -187,7 +187,11 @@ done.
 switch on in their own way, which will come with them. An appliance asleep answers 500:
 like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, giving up
 after three attempts where the app sets no limit. `power_off` writes 1 to the same leaf and takes a
-500 as done, as the app does. Both belong to `Miele::Sdk::Oven`.
+500 as done, as the app does. Both belong to `Miele::Sdk::Oven` and raise
+`Miele::Sdk::ActionUnavailableError` on a Dop1 oven, which the app does not switch. As the app's
+offline screen offers it, `power_on` needs remote control or mobile start, and refuses an H2 oven;
+as its settings switch offers it, `power_off` needs remote control without local control, or
+mobile start alone, and an oven that is connected (`Status` other than 255).
 
 Starting, stopping or pausing a program, and the light, take a different request in each family
 of the app: a user request on DOP2 leaf 2/1583 for DOP2 appliances, `ProcessAction` for Dop1
@@ -337,7 +341,7 @@ A Dop1 oven (`ProtocolVersion` 2) gives its readings in `state.extended_state`.
 
 ```ruby
 oven.select_program(13)          # a GLOBAL_EnumPrgId value, or its symbol
-oven.target_temperature = 180    # °C
+oven.target_temperature = 180    # °C, truncated to hundredths as the app does: 37.3 writes 3729
 oven.duration = 1800             # seconds
 oven.start_at = :now             # or a Time; end_at= takes a Time
 oven.set_options(pre_heating: true, keep_warm: true)
@@ -349,37 +353,52 @@ oven.acknowledge(:query, 4, option: 12)  # or query.id and one of query.ack_opti
 The other parameters are `core_target_temperature=`, `moisture=`, `grill_level=`,
 `microwave_power=`, `browning=`, `doneness=`, `steam_bursts=` and `steam_burst_times=` (up to three
 times in seconds), and the other requests `continue_cooking`, `steam_burst` and
-`stop_keeping_warm`.
+`stop_keeping_warm`. `microwave_power=` takes one bit, as the app's picker writes it: 0x01 to 0x40
+for 80 to 1000 W (steps 1 to 7 on an oven of `ContinentVariant` 2), among those set in
+`program_context.context_para_ca.mw_power.supported_bits`; any other value raises `ArgumentError`.
+An `mw_power` that is not readable raises `Miele::Sdk::ActionUnavailableError`, the app then
+showing no microwave section.
 
 Each of these actions makes the checks the app's rules make before it, and raises
 `Miele::Sdk::ActionUnavailableError` without sending anything when one fails:
 
 - A Dop1 oven only stops, through `ProcessAction` 2, and only during a function, own or automatic
   program.
-- Selecting a program needs remote control without local control. The app's rule that also weighs
-  the oven's state has not been traced to the selection, so the SDK leaves it to the oven.
+- Selecting a program needs what the app's program selection needs (DetermineIsProgramWriteable):
+  remote control without local control, an oven neither off nor running nor waiting to start, no
+  program on 1/1585 (ProgId 0), and no query 16011 or 16013 on 1/131. The SDK then reads 1/1574
+  every 3 seconds until it shows the program, as the app does, retrying a read refused with other
+  than a 4xx after 1.5^n seconds (the n-th in a row), and writes the parameters the program
+  requires, as `start` does; a refusal of those is ignored, as the app only logs it. When
+  1/1574 has not shown the program within the app's 15 seconds, it raises
+  `Miele::Sdk::ActionFailedError` and writes no parameter.
 - A parameter needs remote control without local control and a program on the oven, and a mobile
   start too once the program has started (waiting, running, paused or ended) or for program 361.
   `duration = 0` first moves the start to its minimum, as the app does.
 - `start` refuses a program that requires a duration not set yet. It first writes the parameters
-  the program requires and the user has not confirmed, with the values they show, then sends
-  request 1, or 113 when the oven does not offer 1. An automatic program starts by writing its
+  the program requires and the user has not confirmed, with the values they show, a temperature
+  through degrees and back as the app does (3730 writes 3729), then sends request 1, or 113 when
+  the oven does not offer 1. Like the app, it writes every one of them though one is refused, then
+  raises the first refusal without starting. An automatic program starts by writing its
   start time instead; another program takes `start_at=` beforehand, and `start(at:)` raises
   `ArgumentError` for it.
 - `stop` needs one of requests 2, 55, 56 and 57 offered, no pyrolysis abort running, and remote
   control without local control. A program not started yet takes 2, a started one the first of
   55, 56 and 57 the oven offers, started as the app derives its oven state.
-- `continue_cooking` needs the oven to offer it (baking or cooking), `steam_burst` request 59
-  offered, and `stop_keeping_warm` message 20 shown.
+- `continue_cooking` needs the oven to offer it (baking or cooking), and `stop_keeping_warm`
+  message 20 shown. `steam_burst` needs what the app's steam burst button needs: request 59
+  offered for a REST `ProgramID`, a manual steam burst (`NumberOfSteamBursts` readable, 1 to 3) in
+  a function 1/1585 and 1/1574 both show, the oven running or paused, and a burst left, or the
+  last one under way (`BitField` 16). Every value the app reads for the button must be there,
+  the three steam burst times and `BitField` among them, or the app shows none.
 - A double oven's second cavity takes no action but `acknowledge(…, second_cavity: true)`.
 
-The app then waits until the oven shows the change; the SDK returns once the oven accepts the
-write, and `program_context` or `notifications` show what follows. Three app behaviours rest on
+The app then waits until the oven shows the change; but for a selection, the SDK returns once the
+oven accepts the write, and `program_context` or `notifications` show what follows. Two app behaviours rest on
 that wait and are left out: the switch-off that answers queries 4, 5, 21 and 27 as they appear,
-the raise of doneness or browning by one step after `continue_cooking` (write it with `doneness=`
-or `browning=`), and the required parameters written once a selected program shows (`start`
-writes them). None of these writes has been sent to a real oven: their bytes follow the app's
-code, and the reads have run against a real oven through the cloud.
+and the raise of doneness or browning by one step after `continue_cooking` (write it with
+`doneness=` or `browning=`). None of these writes has been sent to a real oven: their bytes follow
+the app's code, and the reads have run against a real oven through the cloud.
 
 ## Dishwashers
 
@@ -623,9 +642,10 @@ hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the f
   no index, else `[unit, attribute, idx1, idx2]`, nil for an index it computes. `object` reads at
   the first unless given another; `write_object` writes only where it is told, the app writing some
   objects elsewhere than it reads them. Both raise `ArgumentError` while an index is left to compute.
-- An attribute the leaf lacks reads nil. `write_object` writes back the attributes as read, each
-  changed member in the wire type it was read in, and raises `ArgumentError` for a member it did not
-  read, as the app's setters do.
+- An attribute the leaf lacks reads nil, and so does an enum, a struct or an array of either whose
+  wire type does not fit, as the app fails that one attribute. `write_object` writes back the
+  attributes as read, each changed member in the wire type it was read in, and raises
+  `ArgumentError` for a member it did not read, as the app's setters do.
 - `modify(klass, address) { |value| value.with(…) }` reads an object, lets the block change it and
   writes it back with the header the appliance answered, as the app's dishwasher and laundry modules
   do.
@@ -792,6 +812,7 @@ seconds (3 by default) after each read ends. A failed read ends the poll with it
 | `Miele::Sdk::RemoteControlDisabledError` | the appliance refuses a command (a `ResponseError`) |
 | `Miele::Sdk::ActionUnavailableError` | a check the app makes before an action fails: nothing is sent |
 | `Miele::Sdk::NotAcceptedError` | a Dop1 appliance acknowledges a write with anything but success |
+| `Miele::Sdk::ActionFailedError` | an appliance takes an action's write but does not show its effect within the app's 15 seconds |
 | `Miele::Sdk::Dop2::DecodeError` | a DOP2 leaf has an unknown type or ends too early |
 
 All of them inherit from `Miele::Sdk::Error`. A value out of range raises `ArgumentError` before

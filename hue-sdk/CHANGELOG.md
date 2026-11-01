@@ -9,6 +9,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** entertainment `stream` no longer reads the lights of the area before streaming nor puts them
+  back after it: the bridge leaves them on the last frame.
 - **Breaking:** `events` no longer reconnects, nor sends its request a second time as Net::HTTP would: it reads
   the stream once and raises `ConnectionError` when it breaks. `Events::Stream` takes the `last_event_id:` of
   an earlier stream to resume from; `sleeper:` is gone.
@@ -28,8 +30,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Real-time events through `Hue::Sdk.events` and `Events::Stream`, which resumes from the id of the last
   message read (`Last-Event-ID`).
 - Entertainment streaming over DTLS 1.2 with a pre-shared key (`require 'hue/sdk/entertainment'`,
-  with the `ffi` gem), through the libssl Ruby's OpenSSL extension is linked with; the lights of
-  the area are put back as they were when streaming ends.
+  with the `ffi` gem), through the libssl Ruby's OpenSSL extension is linked with.
 - RBS signatures for the whole public API.
 - Typed values generated from the Hue app's own classes: `attributes` reads a resource as a
   `Hue::Sdk::Schema` value whose signature tells which fields the bridge always sends, and

@@ -250,10 +250,10 @@ Hue::Sdk.EntertainmentConfiguration('5c3e…').stream do |session|
 end
 ```
 
-`stream` starts the configuration, yields a session, then closes the connection, stops the
-configuration and puts its lights back as they were before (on or off, brightness, color), even
-when the block raises: the bridge itself leaves them on the last frame. A frame sets up to 20 channels, each value in
-0.0..1.0; `color_space: :xy` takes x, y and brightness instead of red, green and blue.
+`stream` starts the configuration, yields a session, then closes the connection and stops the
+configuration, even when the block raises. The bridge leaves the lights on the last frame. A frame
+sets up to 20 channels, each value in 0.0..1.0; `color_space: :xy` takes x, y and brightness
+instead of red, green and blue.
 
 Ruby's OpenSSL extension has no DTLS, so the SDK binds through `ffi` the libssl that extension
 is linked with, wherever it is installed. Set `HUE_SDK_LIBSSL` to the path of another libssl

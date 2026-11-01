@@ -26,6 +26,8 @@ module Miele
 
         def rule_shows?: (Symbol name, untyped value, Objects::Oven::GlobalPsContextParaCA? parameters, bool running) -> bool
 
+        def time_shown?: (Symbol name, untyped value, Objects::Oven::GlobalPsContextParaCA? parameters, bool running) -> bool
+
         def duration_allows?: (Objects::Oven::GlobalPsContextParaCA? parameters) -> bool
 
         def duration_set?: (untyped duration) -> bool

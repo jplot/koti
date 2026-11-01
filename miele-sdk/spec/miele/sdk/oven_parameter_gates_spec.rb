@@ -86,6 +86,13 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to eq([12])
   end
 
+  it 'refuses a target temperature while the current one is not above zero, but not a core one', :aggregate_failures do
+    serve(parameters: { 6 => shown_parameter(:u16, 0), 7 => shown_parameter(:u16, 0) })
+    refused(:target_temperature)
+    oven.core_target_temperature = 60
+    expect(written).to eq([7])
+  end
+
   it 'refuses steam bursts whose type the app shows no cell for', :aggregate_failures do
     [0, 8].each do |count|
       serve(parameters: { 18 => shown_parameter(:u8, count) })

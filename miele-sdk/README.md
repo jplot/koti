@@ -380,7 +380,7 @@ Each of these actions makes the checks the app's rules make before it, and raise
   It also needs the section the app shows for it (its Rules.ProgramParameters rule): a value
   readable on 1/1574 (request mask 8); for all but browning and doneness, a function on 1/1585
   (program type 2, 3, 4, 5, 7, 8, 38 or 50) that 1/1574 shows too (ShouldHideProgramParameters);
-  steam bursts of a type 1 to 7; no duration or start time while the oven runs or pauses with a
+  a current target temperature above zero; steam bursts of a type 1 to 7; no duration or start time while the oven runs or pauses with a
   duration set; and no start or end time while a readable duration is unset. Options need that
   function and each option readable.
   `duration = 0` first moves the start to its minimum, as the app does.

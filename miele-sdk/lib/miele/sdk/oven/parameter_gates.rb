@@ -84,8 +84,8 @@ module Miele
           rule_shows?(name, value, parameters, %i[running paused].include?(oven_state(state, device, offered(device))))
         end
 
-        # SteamBurstsRule with the steam burst type cell (SteamBurstType 1 to 7), ProgramDurationRule,
-        # ProgramStartAtRule and ProgramEndAtRule.
+        # TargetTemperatureRule's IsInvalidTargetTemperature, and SteamBurstsRule with the steam burst type cell
+        # (SteamBurstType 1 to 7).
         #
         # @param name [Symbol]
         # @param value [Object] the parameter's +GLOBAL_GenericParameterValue+
@@ -94,12 +94,24 @@ module Miele
         # @return [Boolean]
         def rule_shows?(name, value, parameters, running)
           case name
+          when :temperature then value.current_value.to_i.positive?
           when :steam_bursts then (1..7).cover?(value.current_value)
-          when :duration then !(running && duration_set?(value))
-          when :start_at then !running && duration_allows?(parameters)
-          when :end_at then duration_allows?(parameters)
+          when :duration, :start_at, :end_at then time_shown?(name, value, parameters, running)
           else true
           end
+        end
+
+        # ProgramDurationRule, ProgramStartAtRule and ProgramEndAtRule.
+        #
+        # @param name [Symbol] +:duration+, +:start_at+ or +:end_at+
+        # @param value [Object] the parameter's +GLOBAL_GenericParameterValue+
+        # @param parameters [Objects::Oven::GlobalPsContextParaCA, nil]
+        # @param running [Boolean] OvenState Running or Paused
+        # @return [Boolean]
+        def time_shown?(name, value, parameters, running)
+          return !(running && duration_set?(value)) if name == :duration
+
+          !(running && name == :start_at) && duration_allows?(parameters)
         end
 
         # @param parameters [Objects::Oven::GlobalPsContextParaCA, nil]

@@ -29,30 +29,6 @@ module Miele
 
         private
 
-        # Status 8 stays allowed: the app hides the zones in a failure only without a failure alarm, which the SDK
-        # does not read.
-        #
-        # @param state [State]
-        # @return [void]
-        # @raise [ActionUnavailableError] while the app hides the zones: off, or under its Holiday or Sabbath banner
-        def require_zones_shown!(state = self.state)
-          require!(!shown_off?(state) && !holiday_banner?(state), 'the app shows no zone now')
-        end
-
-        # @param state [State]
-        # @return [Boolean] Status 1, 10 or 255, which the app shows as off or not connected
-        def shown_off?(state) = [1, 10, 255].include?(state.raw['Status'])
-
-        # @param state [State]
-        # @return [Boolean] Holiday or Sabbath mode on while on, running or super freezing (Status 2, 5 or 13)
-        #   without a door signal
-        def holiday_banner?(state)
-          door = state.raw['SignalDoor'] == true && !state.raw['SignalFailure'].nil?
-          return false if door || ![2, 5, 13].include?(state.raw['Status'])
-
-          modes(state).values_at(:holiday, :sabbath).any? { it&.on }
-        end
-
         # @return [Array<Zone>]
         def api_zones
           listed = cooling
@@ -68,16 +44,19 @@ module Miele
         # @param listed [Hash{String=>Object}] +Cooling+
         # @return [Zone, nil]
         def api_zone(number, zone, listed)
-          temperature = zone.dig('Temp', 'Value')
-          return if temperature == ABSENT && protocol_version != 200
+          return unless listed_zone?(zone)
 
           state = zone['ZoneState'] || {}
           super_mode, fan, vario_cool = switches(zone, listed)
           Zone.new(number:, position: zone_position(state['Position'], number), rank: nil,
                    type: TYPES.fetch(state['Type'], :unknown), enabled: state['Value'] == 1,
-                   temperature: protocol_version == 200 ? nil : degrees(temperature),
+                   temperature: protocol_version == 200 ? nil : degrees(zone.dig('Temp', 'Value')),
                    target: degrees(zone.dig('TargetTemp', 'Value')), super_mode:, fan:, vario_cool:)
         end
+
+        # @param zone [Hash{String=>Object}] +Cooling/{n}+
+        # @return [Boolean] whether the app keeps the zone
+        def listed_zone?(zone) = zone.dig('Temp', 'Value') != ABSENT || protocol_version == 200
 
         # @param position [Integer, nil] +ZoneState.Position+
         # @param number [Integer]

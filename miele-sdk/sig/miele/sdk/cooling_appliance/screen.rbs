@@ -1,0 +1,37 @@
+module Miele
+  module Sdk
+    class CoolingAppliance < Appliance
+      module Screen : Appliance
+        private
+
+        def require_zones_shown!: (?State state) -> void
+
+        def zones_shown?: (State state) -> bool
+
+        def app_state: (State state) -> Symbol
+
+        def shown_off?: (State state) -> bool
+
+        def door_signal: (State state) -> Integer
+
+        def holiday_or_sabbath?: (State state) -> bool
+
+        def failure_alarm?: () -> bool
+
+        def zone_alarm?: (Hash[String, untyped] listed) -> bool
+
+        def freezer_or_wine_unit_zone?: (Array[Hash[String, untyped]] zones, Integer index) -> bool
+
+        def wine_zone?: (Hash[String, untyped]? zone) -> bool
+
+        def modes: (?State state) -> Hash[Symbol, Mode]
+
+        def cooling: () -> Hash[String, untyped]
+
+        def cooling_api?: () -> bool
+
+        def listed_zone?: (Hash[String, untyped] zone) -> bool
+      end
+    end
+  end
+end

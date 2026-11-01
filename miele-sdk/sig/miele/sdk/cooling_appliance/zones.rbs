@@ -12,15 +12,11 @@ module Miele
 
         private
 
-        def require_zones_shown!: (?State state) -> void
-
-        def shown_off?: (State state) -> bool
-
-        def holiday_banner?: (State state) -> bool
-
         def api_zones: () -> Array[Zone]
 
         def api_zone: (Integer number, Hash[String, untyped] zone, Hash[String, untyped] listed) -> Zone?
+
+        def listed_zone?: (Hash[String, untyped] zone) -> bool
 
         def zone_position: (Integer? position, Integer number) -> Integer
 
@@ -43,8 +39,6 @@ module Miele
         def opcode?: () -> bool
 
         def cooling: () -> Hash[String, untyped]
-
-        def modes: (?State state) -> Hash[Symbol, Mode]
       end
     end
   end

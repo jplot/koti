@@ -8,6 +8,7 @@ module Miele
     class CoolingAppliance < Appliance
       include Zones
       include Pickers
+      include Screen
       include Commands
 
       # A zone as the app shows it.

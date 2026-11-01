@@ -100,6 +100,38 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect(written.last).to eq(['PUT', 'Cooling/1/SuperMode', { 'Value' => 1, 'SetValues' => [1, 2] }])
   end
 
+  it 'shows the zones in Holiday mode under an ice maker or a freezer temperature alarm, as the app does' do
+    resources['Cooling'].merge!('Holiday' => { 'Value' => 1 }, 'IceMaker' => { 'Value' => 3 })
+    fridge.set_fan(freezer, true)
+    resources['Cooling']['IceMaker'] = { 'Value' => 1 }
+    resources['Cooling/1']['TempAlarm'] = { 'Value' => 3 }
+    fridge.set_fan(freezer, false)
+    expect(written.size).to eq(2)
+  end
+
+  it 'hides the zones in Holiday mode despite a temperature alarm in a fridge zone, as the app does' do
+    resources['Cooling']['Holiday'] = { 'Value' => 1 }
+    resources['Cooling/2']['TempAlarm'] = { 'Value' => 3 }
+    expect { fridge.set_fan(freezer, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  end
+
+  it 'shows the zones in a failure only with a door alarm or a failure alarm, as the app does', :aggregate_failures do
+    resources['State'] = { 'Status' => 8, 'SignalDoor' => true, 'SignalFailure' => false }
+    expect { fridge.set_fan(freezer, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    resources['State'] = { 'Status' => 8, 'SignalDoor' => true, 'SignalFailure' => true }
+    fridge.set_fan(freezer, true)
+    resources.merge!('State' => { 'Status' => 8 }, 'Cooling/2' => { 'PowerFailAlarm' => { 'Value' => 3 } })
+    fridge.set_fan(freezer, false)
+    expect(written.size).to eq(2)
+  end
+
+  it 'shows the zones in a failure in Sabbath mode, as the app does' do
+    resources['State'] = { 'Status' => 8 }
+    resources['Cooling']['Sabbath'] = { 'Value' => 1 }
+    fridge.set_fan(freezer, true)
+    expect(written.size).to eq(1)
+  end
+
   it 'checks the zones against a single read of State' do
     zone = freezer
     reads = -> { fake.requests.count { it.verb == 'GET' && it.path.end_with?('/State') } }
@@ -155,6 +187,25 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  end
+
+  context 'with four wine zones in Sabbath mode' do
+    before do
+      resources['Cooling'].merge!('ZoneCounter' => 4, 'Sabbath' => { 'Value' => 1 })
+      (1..4).each do |number|
+        resources["Cooling/#{number}"] = { 'ZoneState' => { 'Value' => 1, 'Type' => 32, 'Position' => number },
+                                           'Fan' => {} }
+      end
+    end
+
+    it 'counts a temperature alarm in a wine unit zone, which the third is not when the fourth is wine',
+       :aggregate_failures do
+      resources['Cooling/3']['TempAlarm'] = { 'Value' => 3 }
+      expect { fridge.set_fan(fridge.zones.first, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources['Cooling/2']['TempAlarm'] = { 'Value' => 3 }
+      fridge.set_fan(fridge.zones.first, true)
+      expect(written.size).to eq(1)
+    end
   end
 
   context 'with a BSH fridge-freezer' do

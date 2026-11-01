@@ -3,6 +3,7 @@ module Miele
     class CoolingAppliance < Appliance
       include Zones
       include Pickers
+      include Screen
       include Commands
 
       class Zone < Data

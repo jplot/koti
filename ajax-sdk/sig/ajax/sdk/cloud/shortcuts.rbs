@@ -145,17 +145,15 @@ module Ajax
         module Archive : Methods
           include Targets
 
-          class VIDEO_CONTENT = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentRequest
-          class METADATA_CONTENT = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveMetadataFragmentsContent::StreamCloudArchiveMetadataFragmentsContentRequest
           SERVICES: String
           SOURCES: Hash[Symbol, :cloud_archive | :video_edge_archive]
           EXPORTS: Hash[Symbol, :cloud_archive | :video_edge]
 
           def archive_days: (VideoChannel channel, ?source: :cloud | :device) -> Array[Date]
-          def cloud_fragments: (VideoChannel channel, during: Range[Time], ?quality: :main | :sub) -> Array[Fragment]
-          def cloud_metadata_fragments: (VideoChannel channel, type: String, during: Range[Time]) -> Array[Fragment]
+          def cloud_fragments: (VideoChannel channel, during: Range[Time], ?quality: :main | :sub) -> FragmentList
+          def cloud_metadata_fragments: (VideoChannel channel, type: String, during: Range[Time]) -> FragmentList
           def cloud_archive: (VideoChannel channel, ?quality: :main | :sub) -> CloudArchive
-          def cloud_metadata: (VideoChannel channel, type: String) -> CloudArchive
+          def cloud_metadata: (VideoChannel channel, type: String) -> CloudMetadata
           def export_archive: (VideoChannel channel, Array[Range[Time]] ranges, ?quality: :main | :sub, ?audio: bool,
                                ?source: :cloud | :device) -> String
 

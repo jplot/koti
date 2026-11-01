@@ -384,44 +384,66 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
     end
 
     def calendar
-      start = Time.utc(2026, 10, 1).to_i
-      tz_map = [{ day: { seconds: start + 86_400 }, offsets: [0] },
-                { day: { seconds: start + (3 * 86_400) }, offsets: [0, -3, -2] }]
+      calendar = { start_day: { seconds: Time.utc(2026, 10, 1).to_i }, days: "\x01".b,
+                   tz_map: [{ day: { seconds: Time.utc(2026, 10, 1).to_i }, offsets: [0] }] }
       service = Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service
-      service::GetChannelCalendar::GetChannelCalendarResponse::Success
-        .from({ calendar: { start_day: { seconds: start }, days: "\x01\x01\x00\x01".b, tz_map: } })
+      service::GetChannelCalendar::GetChannelCalendarResponse::Success.from({ calendar: })
     end
 
-    it 'gives the days with recordings as the app reads its calendar', :aggregate_failures do
+    it 'reads the days of the cloud archive, or of the camera with :device', :aggregate_failures do
       replying(calendar)
 
-      expect(client.archive_days(camera, source: :device)).to eq([Date.new(2026, 10, 1), Date.new(2026, 10, 2),
-                                                                  Date.new(2026, 10, 4)])
-      expect(sent.last).to eq(['GetChannelCalendarService/execute',
-                               { **camera_target, source_type: :SOURCE_TYPE_VIDEO_EDGE_ARCHIVE }])
+      expect([client.archive_days(camera), client.archive_days(camera, source: :device)])
+        .to eq([[Date.new(2026, 10, 1)]] * 2)
+      expect(sent.map { it.last[:source_type] }).to eq(%i[SOURCE_TYPE_CLOUD_ARCHIVE SOURCE_TYPE_VIDEO_EDGE_ARCHIVE])
     end
 
-    it 'lists the cloud fragments of a time range, asked in whole seconds', :aggregate_failures do
-      info = Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAllCloudArchiveVideoFragmentsInfo
+    def fragments_info
       fragment = { fragment_id: 42, timestamp: { seconds: 150 }, duration: { seconds: 10 } }
-      replying(info::FindAllCloudArchiveVideoFragmentsInfoResponse::Success.from({ fragments_info: [fragment] }))
-
-      expect(client.cloud_fragments(camera, during: Time.at(100.5)..Time.at(200.5)))
-        .to eq([Ajax::Sdk::Cloud::Fragment.new(id: 42, start: Time.at(150, in: 'UTC'), duration: 10.0)])
-      expect(sent.last.last).to eq({ **camera_target, stream_type: :ST_MAIN,
-                                                      timestamp_range: { min_value: { seconds: 100, nanos: 0 },
-                                                                         max_value: { seconds: 200, nanos: 0 } } })
+      { fragments_info: [fragment], time_zone_map: [{ timestamp: { seconds: 100 }, offset: { seconds: 3600 } }] }
     end
 
-    it 'asks for an archive export, whose file comes as a notification', :aggregate_failures do
+    def fragment_list
+      fragment = Ajax::Sdk::Cloud::Fragment.new(id: 42, start: Time.at(150, in: 'UTC'), duration: 10.0)
+      Ajax::Sdk::Cloud::FragmentList.new(fragments: [fragment], utc_offsets: { Time.at(100, in: 'UTC') => 3600.0 })
+    end
+
+    it 'lists the cloud fragments of a time range, asked in whole seconds, with the UTC offsets', :aggregate_failures do
+      info = Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAllCloudArchiveVideoFragmentsInfo
+      replying(info::FindAllCloudArchiveVideoFragmentsInfoResponse::Success.from(fragments_info))
+      seconds = { min_value: { seconds: 100, nanos: 0 }, max_value: { seconds: 200, nanos: 0 } }
+
+      expect(client.cloud_fragments(camera, during: Time.at(100.5)..Time.at(200.5))).to eq(fragment_list)
+      expect(sent.last.last).to eq({ **camera_target, stream_type: :ST_MAIN, timestamp_range: seconds })
+    end
+
+    it 'lists the metadata fragments of a type', :aggregate_failures do
+      info = Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAllCloudArchiveMetadataFragmentsInfo
+      replying(info::FindAllCloudArchiveMetadataFragmentsInfoResponse::Success.from(fragments_info))
+
+      expect(client.cloud_metadata_fragments(camera, type: 'Figures', during: Time.at(100)..Time.at(200)))
+        .to eq(fragment_list)
+      expect(sent.last).to match(['FindAllCloudArchiveMetadataFragmentsInfoService/execute',
+                                  include(**camera_target, metadata_type: 'Figures')])
+    end
+
+    def exported(**)
       export = Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Archive::ExportArchiveResponse::Success
       replying(export.from({ export_id: 'e1' }))
+      [client.export_archive(camera, [Time.at(100, 250, :millisecond)..Time.at(160)], **), sent.last.last]
+    end
 
-      expect(client.export_archive(camera, [Time.at(100)..Time.at(160)], audio: true)).to eq('e1')
-      expect(sent.last.last).to include(
-        space_locator: { space_id: 'space-1' }, video_edge_id: '0000ABCD', channel_id: 'ch-1', stream_type: :ST_MAIN,
-        with_audio: true, with_figures: false, video_source_type: :VIDEO_SOURCE_TYPE_CLOUD_ARCHIVE
-      )
+    it 'asks for an archive export of the cloud, its ranges to the nanosecond' do
+      range = { min_value: { seconds: 100, nanos: 250_000_000 }, max_value: { seconds: 160, nanos: 0 } }
+
+      expect(exported(audio: true)).to eq(['e1', { space_locator: { space_id: 'space-1' }, video_edge_id: '0000ABCD',
+                                                   channel_id: 'ch-1', export_ranges: [range], stream_type: :ST_MAIN,
+                                                   with_audio: true, with_figures: false,
+                                                   video_source_type: :VIDEO_SOURCE_TYPE_CLOUD_ARCHIVE }])
+    end
+
+    it 'asks for an export of the camera archive with :device' do
+      expect(exported(source: :device).last[:video_source_type]).to eq(:VIDEO_SOURCE_TYPE_VIDEO_EDGE)
     end
 
     def quality_answer
@@ -481,7 +503,8 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
     end
 
     it 'refuses an archive export' do
-      expect { client.export_archive(camera, [Time.at(100)..Time.at(160)]) }.to raise_error(Ajax::Sdk::Cloud::ReadOnlyError)
+      expect { client.export_archive(camera, [Time.at(100)..Time.at(160)]) }
+        .to raise_error(Ajax::Sdk::Cloud::ReadOnlyError)
     end
 
     it 'refuses every command' do

@@ -10,30 +10,53 @@ module Ajax
         def self.from: (untyped info) -> Fragment
       end
 
-      class CloudArchive
-        DAY: Integer
+      class FragmentList < Data
+        attr_reader fragments: Array[Fragment]
+        attr_reader utc_offsets: Hash[Time?, Float?]
 
+        def self.new: (fragments: Array[Fragment], utc_offsets: Hash[Time?, Float?]) -> FragmentList
+        def self.from: (untyped answer) -> FragmentList
+      end
+
+      class CloudContent
         @exchange: Exchange
         @request: untyped
-        @lock: Thread::Mutex
-        @tag: Integer
-
-        type calendar = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::Calendar
-
-        def self.days: (calendar calendar) -> Array[Date]
-        def self.recorded: (calendar calendar) -> Array[Integer]
-        def self.shifted: (Integer day, Array[::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::Calendar::TzEntry] entries) -> Array[Integer]
 
         def initialize: (Exchange exchange, untyped request) -> void
-        def get: (*Integer fragment_ids) -> String
-        def get_part: (Integer fragment_id, Float offset) -> String
         def each: () -> Enumerator[untyped, nil]
                 | () { (untyped) -> void } -> nil
         def close: () -> nil
 
         private
 
-        def ask: (Array[untyped] entries) -> String
+        def ask: (Integer tag, Array[untyped] entries) -> String
+      end
+
+      class CloudArchive < CloudContent
+        class REQUEST = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentRequest
+        DAY: Integer
+
+        type calendar = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::Calendar
+
+        @tag: Integer
+
+        def self.days: (calendar calendar) -> Array[Date]
+        def self.recorded: (calendar calendar) -> Array[Integer]
+        def self.shifted: (Integer day, Array[::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Archive::Calendar::TzEntry] entries) -> Array[Integer]
+
+        def initialize: (Exchange exchange) -> void
+        def get: (*Integer fragment_ids) -> String
+        def get_part: (Integer fragment_id, Float offset) -> String
+        def seek: () -> String
+      end
+
+      class CloudMetadata < CloudContent
+        class REQUEST = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamCloudArchiveMetadataFragmentsContent::StreamCloudArchiveMetadataFragmentsContentRequest
+
+        @tag: Integer
+
+        def initialize: (Exchange exchange) -> void
+        def get: (*Integer fragment_ids) -> String
       end
     end
   end

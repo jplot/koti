@@ -498,13 +498,10 @@ module Ajax
         module Archive
           include Targets
 
-          VIDEO_CONTENT = SERVICE::StreamCloudArchiveVideoFragmentsContent::StreamCloudArchiveVideoFragmentsContentRequest
-          METADATA_CONTENT = SERVICE::StreamCloudArchiveMetadataFragmentsContent::
-                               StreamCloudArchiveMetadataFragmentsContentRequest
           SERVICES = '/systems.ajax.api.ecosystem.v3.mobilegwsvc.service'
           SOURCES = { cloud: :cloud_archive, device: :video_edge_archive }.freeze
           EXPORTS = { cloud: :cloud_archive, device: :video_edge }.freeze
-          private_constant :VIDEO_CONTENT, :METADATA_CONTENT, :SERVICES, :SOURCES, :EXPORTS
+          private_constant :SERVICES, :SOURCES, :EXPORTS
 
           # @param channel [VideoChannel]
           # @param source [Symbol] +:cloud+ for the cloud archive, +:device+ for the camera's or recorder's own
@@ -518,47 +515,47 @@ module Ajax
           # @param channel [VideoChannel]
           # @param during [Range<Time>] the time range, asked to the second as the app does
           # @param quality [Symbol] +:main+ or +:sub+, each stored apart
-          # @return [Array<Fragment>] the cloud archive's video fragments in that range
+          # @return [FragmentList] the cloud archive's video fragments in that range
           # @raise [ReadError] when the gateway refuses the read
           def cloud_fragments(channel, during:, quality: :main)
             find_all_cloud_archive_video_fragments_info(**channel_target(channel), stream_type: quality,
                                                                                    timestamp_range: seconds(during))
-              .fragments_info.map { Fragment.from(it) }
+              .then { FragmentList.from(it) }
           end
 
           # @param channel [VideoChannel]
           # @param type [String] +A+ (activity) or +Figures+ (overlays), the two the app reads
           # @param during [Range<Time>] the time range, asked to the second
-          # @return [Array<Fragment>] the cloud archive's metadata fragments in that range
+          # @return [FragmentList] the cloud archive's metadata fragments in that range
           # @raise [ReadError] when the gateway refuses the read
           def cloud_metadata_fragments(channel, type:, during:)
             find_all_cloud_archive_metadata_fragments_info(**channel_target(channel), metadata_type: type,
                                                                                       timestamp_range: seconds(during))
-              .fragments_info.map { Fragment.from(it) }
+              .then { FragmentList.from(it) }
           end
 
           # @param channel [VideoChannel]
           # @param quality [Symbol] +:main+ or +:sub+
-          # @return [CloudArchive] the addresses of its video fragments, read at {CloudArchive#each}
+          # @return [CloudArchive] the addresses of its video fragments, read at {CloudContent#each}
           def cloud_archive(channel, quality: :main)
-            init = VIDEO_CONTENT::Init.new(**channel_target(channel), stream_type: quality)
+            init = CloudArchive::REQUEST::Init.new(**channel_target(channel), stream_type: quality)
             path = "#{SERVICES}.stream_cloud_archive_video_fragments_content." \
                    'StreamCloudArchiveVideoFragmentsContentService/execute'
-            CloudArchive.new(exchange(path).write(VIDEO_CONTENT.new(init:)), VIDEO_CONTENT)
+            CloudArchive.new(exchange(path).write(CloudArchive::REQUEST.new(init:)))
           end
 
           # @param channel [VideoChannel]
           # @param type [String] +A+ or +Figures+
-          # @return [CloudArchive] the addresses of its metadata fragments, read at {CloudArchive#each}
+          # @return [CloudMetadata] the addresses of its metadata fragments, read at {CloudContent#each}
           def cloud_metadata(channel, type:)
-            init = METADATA_CONTENT::Init.new(**channel_target(channel), metadata_type: type)
+            init = CloudMetadata::REQUEST::Init.new(**channel_target(channel), metadata_type: type)
             path = "#{SERVICES}.stream_cloud_archive_metadata_fragments_content." \
                    'StreamCloudArchiveMetadataFragmentsContentService/execute'
-            CloudArchive.new(exchange(path).write(METADATA_CONTENT.new(init:)), METADATA_CONTENT)
+            CloudMetadata.new(exchange(path).write(CloudMetadata::REQUEST.new(init:)))
           end
 
-          # Asks for an MP4 of the ranges, as the app's export does; the file comes later as a notification whose
-          # {Media#notification_media} holds its address.
+          # Asks for an export of the ranges, as the app's does; the file, which the app saves as MP4, comes later
+          # as a notification whose {Media#notification_media} holds its address.
           #
           # @param channel [VideoChannel]
           # @param ranges [Array<Range<Time>>]

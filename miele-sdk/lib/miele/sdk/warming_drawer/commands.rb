@@ -132,7 +132,7 @@ module Miele
 
         # @param program [Program, nil]
         # @param minutes [Integer]
-        # @return [Integer] the minutes kept to the program's maximum hours
+        # @return [Integer] the minutes kept to the program's maximum hours, which the app takes as 0 without one
         # @raise [ArgumentError] for a time other than 0 under its minimum hours
         def picked_minutes(program, minutes)
           min_hours = program&.min_hours.to_i
@@ -140,7 +140,7 @@ module Miele
             raise ArgumentError, "the app sets 0 or at least #{min_hours} h"
           end
 
-          program ? [minutes, program.max_hours * 60].min : minutes
+          [minutes, program&.max_hours.to_i * 60].min
         end
 
         # @param state [State]

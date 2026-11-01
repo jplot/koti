@@ -141,6 +141,12 @@ RSpec.describe Miele::Sdk::WarmingDrawer do
     expect(requests.grep(/\A9781/)).to eq(%w[97810200010300000041])
   end
 
+  it 'sends only 0 without a program, as the app keeps the time to a maximum of 0' do
+    state(5, [15, 0, 1], 'ProgramID' => 0, 'TargetTemperature' => [6500])
+    drawer.remaining_time = 90
+    expect(requests.last).to eq('97810200010000000041')
+  end
+
   it 'sends 255 as the target when State shows none, as the app does' do
     state(5, [15, 0, 1], 'ProgramID' => 3)
     drawer.remaining_time = 60

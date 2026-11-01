@@ -21,10 +21,12 @@ module Ajax
         def self?.message: (String full_name) -> untyped
         def self?.rpc: (String path) -> Rpc
         def self?.rpcs: () -> Hash[String, Rpc]
+        def self?.descriptor_set: (*String names) -> String
         def self?.load_pool: () -> untyped
         def self?.add_file: (untyped pool, untyped file) -> bool
         def self?.descriptor_bytes: () -> String
         def self?.load_rpcs: () -> Hash[String, Rpc]
+        def self?.with_imports: (String name, Hash[String, untyped] files, Hash[String, untyped] ordered) -> void
       end
     end
   end

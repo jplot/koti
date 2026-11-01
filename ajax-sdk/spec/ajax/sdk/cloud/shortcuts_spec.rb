@@ -355,6 +355,27 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                                { notification_id: 'n1', origin: { space_id: 'space-1' } }])
     end
 
+    def catalogue
+      player = Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer
+      capabilities = { ptz: { flags: [:CAN_PANTILT] }, has_sub_stream: true }
+      capable = { video_capabilities: capabilities, audio_settings: { enabled: true } }
+      channels = [{ id: 'ch-1', **capable }, { id: 'ch-2', video_capabilities: { ptz: { flags: [:UNSPECIFIED] } } },
+                  { id: 'ch-3', video_capabilities: { ptz: { max_presets: 4 } } }]
+      edges = [{ id: '0000ABCD', channels: }]
+      player::StreamVideoPlayerResponse::Success.from({ initial_state: { video_edges: edges } })
+    end
+
+    it 'lists the channels of the space cameras from the player catalogue', :aggregate_failures do
+      replying([catalogue].each)
+      where = { space_id: 'space-1', video_edge_id: '0000ABCD' }
+
+      expect(client.video_channels('space-1').map { it.to_h.except(:raw) })
+        .to eq([{ **where, channel_id: 'ch-1', ptz: true, sub_stream: true, sound: true },
+                { **where, channel_id: 'ch-2', ptz: false, sub_stream: false, sound: false },
+                { **where, channel_id: 'ch-3', ptz: true, sub_stream: false, sound: false }])
+      expect(sent.last).to eq(['StreamVideoPlayerService/execute', { space_id: 'space-1' }])
+    end
+
     def quality_answer
       values = { values_temperature: { 3600 => { value_y: 21.5 } },
                  values_humidity: { 3600 => { value_y_range: { min_value_y: 40.0, max_value_y: 45.0 } } } }

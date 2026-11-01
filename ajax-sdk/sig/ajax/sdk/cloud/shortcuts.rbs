@@ -119,10 +119,30 @@ module Ajax
           def notification_media: (String space_id, String notification_id) -> Enumerator::Lazy[NOTIFICATION::NotificationMedia, untyped]
         end
 
+        module Video : Methods
+          include Targets
+
+          STREAM_WEBRTC: String
+          class REQUEST = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamWebrtc::StreamWebrtcRequest
+          class FILTERS = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::IceCandidateFilters
+
+          def video_channels: (String space_id) -> Array[VideoChannel]
+          def live_video: (String space_id, String video_edge_id, Array[::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc::Stream] streams,
+                           ?allow_large_rtp_packets: bool) -> LiveVideo
+
+          # Provided by Client, used here.
+          def exchange: (String path) -> Exchange
+
+          private
+
+          def every_candidate: () -> FILTERS
+        end
+
         include Outputs
         include Protection
         include Details
         include Media
+        include Video
       end
     end
   end

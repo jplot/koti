@@ -8,6 +8,8 @@ require_relative 'resources'
 require_relative 'methods'
 require_relative 'shortcuts'
 require_relative 'feed'
+require_relative 'exchange'
+require_relative 'live_video'
 
 module Ajax
   module Sdk
@@ -26,6 +28,7 @@ module Ajax
         include Resources
         include Methods
         include Shortcuts
+        include Exchanges
 
         IDENTITY = ->(bytes) { bytes }
         # Under read-only, a method runs only when its name starts with a read word and holds no write one, streams

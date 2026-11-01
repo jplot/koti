@@ -2,7 +2,8 @@
 
 # Plain-text gRPC server standing in for the mobile gateway. A script gives, for each path, the calls it answers in
 # turn: a server stream sends each Hash of its call as a response, raising a gRPC error found among them, then ends,
-# or stays open at +:open+; a unary call answers its one Hash. A stream past the end of its script stays open until
+# or stays open at +:open+; a unary call answers its one Hash. A bidi call plays its steps the same way, and waits
+# for the client's next request at +:read+. A stream past the end of its script stays open until
 # the client leaves or the server stops. +closed+ receives the path of each stream as it closes, and +requests+
 # gives every request received so far, with its path.
 class FakeGateway
@@ -57,6 +58,20 @@ class FakeGateway
     end
   end
 
+  def converse(path, klass, requests)
+    call = @script.fetch(path).shift
+    Enumerator.new do |out|
+      (call || [:open]).each do |step|
+        next stream(klass, [step], out) unless step == :read
+
+        request = requests.next.to_h
+        @lock.synchronize { @requests << [path, request] }
+      end
+    ensure
+      @closed << path
+    end
+  end
+
   def requests = @lock.synchronize { @requests.dup }
 
   private
@@ -91,7 +106,7 @@ class FakeGateway
       self.unmarshal_class_method = :decode
       self.service_name = name
     end
-    paths.each { define_rpc(klass, it) }
+    paths.each { Ajax::Sdk::Cloud::Schemas.rpc(it).type == :bidi ? define_bidi(klass, it) : define_rpc(klass, it) }
     klass
   end
 
@@ -103,5 +118,14 @@ class FakeGateway
     method = path.split('/').last
     klass.rpc(method.to_sym, request, streaming ? klass.stream(answer) : answer)
     klass.define_method(GRPC::GenericService.underscore(method)) { |req, _| gateway.answer(path, answer, req, streaming) }
+  end
+
+  def define_bidi(klass, path)
+    gateway = self
+    table = Ajax::Sdk::Cloud::Schemas.rpc(path)
+    request, answer = [table.request, table.response].map { Ajax::Sdk::Cloud::Schemas.message(it) }
+    method = path.split('/').last
+    klass.rpc(method.to_sym, klass.stream(request), klass.stream(answer))
+    klass.define_method(GRPC::GenericService.underscore(method)) { |reqs, _| gateway.converse(path, answer, reqs) }
   end
 end

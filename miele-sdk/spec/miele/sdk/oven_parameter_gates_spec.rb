@@ -20,6 +20,7 @@ RSpec.describe Miele::Sdk::Oven do
   before do
     connect_to(fake)
     serve
+    resources['DOP2/1/131?idx1=0&idx2=1'] = messages
   end
 
   after { fake.stop }
@@ -31,6 +32,10 @@ RSpec.describe Miele::Sdk::Oven do
     resources['DOP2/1/1574?idx1=0&idx2=1'] =
       dop2_leaf(1, 1574, { 4 => dop2_field(:struct, shown_parameters(parameters)),
                            7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
+  end
+
+  def messages(*ids)
+    dop2_leaf(1, 131, { 2 => dop2_field(:struct_array, ids.map { { 1 => dop2_field(:e16, it) } }) }, idx2: 1)
   end
 
   def setters
@@ -51,6 +56,15 @@ RSpec.describe Miele::Sdk::Oven do
     setters.each { |name, (value)| oven.public_send(:"#{name}=", value) }
     oven.set_options(rapid_heating: true)
     expect(written).to eq([6, 7, 2, 1, 15, 30, 31, 12, 13, 14, 21])
+  end
+
+  it 'refuses every parameter while keeping warm or rapid cooling runs, but not an option', :aggregate_failures do
+    [20, 19].each do |message|
+      resources['DOP2/1/131?idx1=0&idx2=1'] = messages(message)
+      refused(*setters.keys, error: /keeping warm/)
+    end
+    oven.set_options(rapid_heating: true)
+    expect(written).to eq([21])
   end
 
   it 'refuses a parameter whose section the app removes while its value is not readable', :aggregate_failures do

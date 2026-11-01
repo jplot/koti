@@ -8,7 +8,7 @@ RSpec.describe Miele::Sdk::Oven do
   let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 1] } }
   let(:fake) do
     served = { 'State' => JSON.generate(state), 'DOP2/1/1574?idx1=0&idx2=1' => program_context,
-               'DOP2/1/1585' => device_context }
+               'DOP2/1/1585' => device_context, 'DOP2/1/131?idx1=0&idx2=1' => dop2_leaf(1, 131, {}, idx2: 1) }
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
@@ -224,7 +224,8 @@ RSpec.describe Miele::Sdk::Oven do
       end
     end
     let(:cloud) do
-      leaves = { '1/1574?idx1=0&idx2=1' => program_context, '1/1585' => device_context }
+      leaves = { '1/1574?idx1=0&idx2=1' => program_context, '1/1585' => device_context,
+                 '1/131?idx1=0&idx2=1' => dop2_leaf(1, 131, {}, idx2: 1) }
       FakeCloud.start do |request|
         next unless request.path.include?('/DOP2/')
 
@@ -246,8 +247,9 @@ RSpec.describe Miele::Sdk::Oven do
     it 'writes through the cloud when the oven serves no DOP2 locally' do
       oven.target_temperature = 180
       device = "/V2/Devices/#{fab}/DOP2"
-      expect(cloud.requests.map { [it.verb, it.path] }.last(2))
-        .to eq([['GET', "#{device}/1/1574?idx1=0&idx2=1"], ['PUT', "#{device}/2/1577"]])
+      expect(cloud.requests.map { [it.verb, it.path] }.last(3))
+        .to eq([['GET', "#{device}/1/1574?idx1=0&idx2=1"], ['GET', "#{device}/1/131?idx1=0&idx2=1"],
+                ['PUT', "#{device}/2/1577"]])
     end
   end
 end

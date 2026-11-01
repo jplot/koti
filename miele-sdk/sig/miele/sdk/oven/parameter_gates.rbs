@@ -12,6 +12,8 @@ module Miele
 
         AUTOMATIC_TYPES: Array[Integer]
 
+        OPTION_RUNNING_MESSAGES: Array[Integer]
+
         def context: () -> Objects::Oven::GlobalDeviceContext
 
         def program_context: () -> Objects::Oven::GlobalPsContext
@@ -59,6 +61,8 @@ module Miele
         def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
 
         def mask: (untyped value) -> Integer
+
+        def shows?: (Symbol type, *Integer ids) -> bool
       end
     end
   end

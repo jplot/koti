@@ -376,8 +376,9 @@ Each of these actions makes the checks the app's rules make before it, and raise
   `Miele::Sdk::ActionFailedError` and writes no parameter.
 - A parameter needs remote control without local control and a program on the oven, and a mobile
   start too once the program has started (waiting, running, paused or ended) or for program 361.
-  It also needs the section the app shows for it (its Rules.ProgramParameters rule): a value
-  readable on 1/1574 (request mask 8); for all but browning and doneness, a function on 1/1585
+  It also needs the section the app shows for it: none while 1/131 shows message 20 or 19 (keep
+  warm or rapid cooling running after the program); its Rules.ProgramParameters rule then wants a
+  value readable on 1/1574 (request mask 8); for all but browning and doneness, a function on 1/1585
   (program type 2, 3, 4, 5, 7, 8, 38 or 50) that 1/1574 shows too (ShouldHideProgramParameters);
   a current target temperature above zero; no duration or start
   time while the oven runs or pauses with a duration set; and no start or end time while a

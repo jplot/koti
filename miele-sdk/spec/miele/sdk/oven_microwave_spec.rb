@@ -38,7 +38,7 @@ RSpec.describe Miele::Sdk::Oven do
     dop2_leaf(1, 131, { 1 => dop2_field(:struct_array, shown) }, idx2: 1)
   end
 
-  def notifications(*answers) = resources['DOP2/1/131?idx1=0&idx2=1'] = answers
+  def notifications(*answers) = resources['DOP2/1/131?idx1=0&idx2=1'] = [infos, *answers]
 
   def written = fake.requests.select { it.verb == 'PUT' }.map { it.path.delete_prefix("/Devices/#{fab}/") }
 
@@ -61,8 +61,9 @@ RSpec.describe Miele::Sdk::Oven do
   end
 
   it 'raises another refusal of the write at once', :aggregate_failures do
+    notifications
     resources[:put] = [[503, {}, '']]
     expect { oven.microwave_power = 0x10 }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 503')
-    expect(fake.requests.map(&:path)).not_to include(a_string_including('DOP2/1/131'))
+    expect(fake.requests.count { it.path.include?('DOP2/1/131') }).to eq(1)
   end
 end

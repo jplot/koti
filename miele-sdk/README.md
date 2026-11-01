@@ -357,7 +357,9 @@ times in seconds), and the other requests `continue_cooking`, `steam_burst` and
 for 80 to 1000 W (steps 1 to 7 on an oven of `ContinentVariant` 2), among those set in
 `program_context.context_para_ca.mw_power.supported_bits`; any other value raises `ArgumentError`.
 An `mw_power` that is not readable raises `Miele::Sdk::ActionUnavailableError`, the app then
-showing no microwave section.
+showing no microwave section. When the oven answers 500 to the write, the SDK reads 1/131 every 3
+seconds, as the app does, and takes the write as done if info 14 shows within the app's 6 seconds;
+otherwise it raises the 500.
 
 Each of these actions makes the checks the app's rules make before it, and raises
 `Miele::Sdk::ActionUnavailableError` without sending anything when one fails:

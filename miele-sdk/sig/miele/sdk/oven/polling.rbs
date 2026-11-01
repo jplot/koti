@@ -1,0 +1,19 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module Polling : Appliance
+        POLLING_DELAY: Integer
+
+        RETRY_BASE: Float
+
+        private
+
+        def poll: (Integer timeout) { () -> untyped } -> untyped
+
+        def polled: () { () -> untyped } -> [bool, untyped]
+
+        def pause: (Integer failures, Float waited, Integer timeout) -> (Integer | Float)
+      end
+    end
+  end
+end

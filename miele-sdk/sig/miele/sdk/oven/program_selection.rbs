@@ -4,8 +4,6 @@ module Miele
       module ProgramSelection : Appliance
         NOW: Integer
 
-        MICROWAVE_BITS: Array[Integer]
-
         HIDDEN_WITH_PROGRAM: Array[Integer]
 
         def target_temperature=: (Integer | Float celsius) -> void
@@ -15,8 +13,6 @@ module Miele
         def moisture=: (Integer level) -> void
 
         def grill_level=: (Integer level) -> void
-
-        def microwave_power=: (Integer bit) -> void
 
         def browning=: (Integer level) -> void
 
@@ -53,10 +49,6 @@ module Miele
         def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
 
         def require_dop2!: () -> void
-
-        def supported_powers: (Objects::Oven::GlobalPsContext context) -> Integer
-
-        def mask: (untyped value) -> Integer
 
         def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
 

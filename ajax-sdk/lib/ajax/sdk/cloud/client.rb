@@ -9,6 +9,7 @@ require_relative 'methods'
 require_relative 'shortcuts'
 require_relative 'feed'
 require_relative 'exchange'
+require_relative 'live_video'
 
 module Ajax
   module Sdk

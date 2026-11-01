@@ -23,6 +23,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `video_channels(space_id)`, `Streams` and `live_video`: a live WebRTC session with an Ajax camera, whose
+  signaling `LiveVideo` relays between the cloud and a browser in the shapes `RTCPeerConnection` takes.
 - `Schemas.descriptor_set(*names)`: the schemas of the messages a camera's data channel carries
   (`ajax.dcp.v1`, `ajax.video.v1.metadata`), with what they import, for a front that encodes them.
 - `exchange(path)`: a bidi call that stays open while requests are written from any thread, read with

@@ -269,6 +269,54 @@ the `wide_space_permissions` the gateway sends; the app gives a Pro or an employ
 through the permissions the gateway sends it, except that `:admin` alone may mute every fire detector, and
 the two hub settings above need it on top of their permission.
 
+## Live video
+
+An Ajax camera or recorder plays over WebRTC: the browser receives the media itself, and the back-end only
+relays the signaling between it and the cloud. `video_channels(space_id)` lists the channels of the space's
+cameras, `Streams` builds the streams the app asks for, and `live_video` opens the session. This follows the app
+3.59 and was never tested: the koti space has no camera.
+
+```ruby
+channel = cloud.video_channels(space.id).first
+view = Ajax::Sdk::Cloud::Streams::View.new(channel:, number: 1, quality: :main)
+streams = [Ajax::Sdk::Cloud::Streams.live(view, tag: 0), Ajax::Sdk::Cloud::Streams.audio(view, tag: 1)]
+live = cloud.live_video(space.id, channel.video_edge_id, streams)
+
+Thread.new { live.each { |signal| browser.send(signal.to_json) } } # { iceServers: }, the camera's offer, candidates
+live.answer(sdp)                                                   # what the browser sends back
+live.candidate(candidate, sdp_mid:, sdp_mline_index:)
+live.close                                                         # when the browser leaves
+```
+
+`each` gives each signal as the browser takes it: `{ iceServers: }` for its `RTCPeerConnection`, `{ type:, sdp: }`
+for `setRemoteDescription`, `{ candidate:, sdpMid:, sdpMLineIndex: }` for `addIceCandidate`. What the app does,
+which the browser can repeat:
+
+- It builds its peer connection from the ICE servers, with max-bundle, and adds no track or data channel of
+  its own, so it cannot offer first (deduced from the code, not seen on the wire); it answers the far end's
+  offer as it is. Should an offer arrive while one of its own is pending, it rolls its own back.
+- Both sides trickle their candidates, with no end of candidates. Once connected, the app reports it once with
+  `established(latency:, candidate_type:, network:)`, read from its stats: a browser's `srflx` is `:reflexive`,
+  and a `prflx` candidate or an unknown network goes as `:unspecified`.
+- `ask_streams` sends every stream the session carries now, each time the list changes. Once the cloud's init
+  arrives, `each` sends the list once more, as the app does when its signaling is ready; a change made before
+  waits for it. The app ignores the cloud's answer to it, and so does `each`.
+- Talk-back: the audio stream asks for it with `talk_back: true`; the app then adds a send-only audio track in a
+  stream whose id is `voice`, and offers again (`live.offer`). A browser cannot choose a stream id: it would
+  have to rewrite the `a=msid:` line of its offer, which nothing here has tried.
+- One session per camera serves all its channels; the app ends it with `close` after 5 s without a player, and
+  never half-closes it. The far end also opens a data channel on it, for the archive, the timeline and PTZ
+  (see [Camera data channel](#camera-data-channel)).
+- When the session fails (`ReadError`: `:permission_denied`, `:video_edge_is_offline`, `:video_edge_not_found`,
+  `:bad_request`) or the connection drops, the app starts over after a second, gives each try 30 s and waits up
+  to a minute between tries. A back-end decides for itself. A session runs once: after `each` returns, its
+  writes raise `IOError`, and a new session starts over with `live_video`.
+
+Each channel's permissions sit in `current_member(space_id)`, under `devices_permissions`,
+`video_edge_permissions`, `channel_permissions` and `active.permissions`: `:view_live_stream` for live video,
+`:view_archive`, `:sound` for the sound and talk-back, and `:ptz`, which `ptz: true` takes on top of the
+channel's `ptz` capability.
+
 ## Camera data channel
 
 A live or archive session with an Ajax camera (`stream_webrtc`) carries a WebRTC data channel, which the far

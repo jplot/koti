@@ -42,7 +42,7 @@ module Miele
 
       def modes: (?State state) -> Hash[Symbol, Mode]
 
-      def alarms: () -> Array[Symbol]
+      def alarms: (?State state) -> Array[Symbol]
 
       def ice_maker: () -> Symbol?
 

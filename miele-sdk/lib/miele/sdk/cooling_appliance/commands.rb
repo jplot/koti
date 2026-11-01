@@ -115,22 +115,26 @@ module Miele
 
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with one
+        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with one, where the app's presenter light
+        #   section or dashboard quick action shows it
         # @api public
         def presentation_light=(on)
           require!(presentation_light?, 'the appliance has no presentation light')
+          state = self.state
+          require!(presenter_light_shown?(state) || presenter_quick_action?(state),
+                   'the app shows no presentation light now')
           put('Cooling', 'PresentationLight', Value: on ? 1 : 2)
         end
 
         # @param zone [Zone] one of {#zones}
         # @param value [Integer] 0 switches the zone's light off
         # @return [void]
-        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with a presentation light, or while the
-        #   app hides the zones
+        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with a presentation light, while the
+        #   app's presenter light section shows
         # @api public
         def set_presentation_light_intensity(zone, value)
           require!(presentation_light?, 'the appliance has no presentation light')
-          require_zones_shown!
+          require!(presenter_light_shown?(state), 'the app shows no presentation light now')
           put('Cooling', "#{zone.rank}/PresentationLightIntensity", Value: value)
         end
 

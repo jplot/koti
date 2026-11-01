@@ -55,6 +55,40 @@ module Miele
         # @return [Boolean]
         def holiday_or_sabbath?(state) = modes(state).values_at(:holiday, :sabbath).any? { it&.on }
 
+        # PresentationLightStateRule, which shows the presenter light section and, behind it, the intensities.
+        #
+        # @param state [State]
+        # @return [Boolean]
+        def presenter_light_shown?(state)
+          status = state.raw['Status']
+          return false if [1, 255].include?(status) || (status == 8 && door_signal(state).zero?)
+
+          presenter_light_state? && !holiday_or_sabbath?(state)
+        end
+
+        # The dashboard's quick action, which hides only while off or when Holiday or Sabbath leads its notices.
+        #
+        # @param state [State]
+        # @return [Boolean]
+        def presenter_quick_action?(state)
+          return false if shown_off?(state) || !presenter_light_state?
+
+          !holiday_or_sabbath?(state) || notice_before_holiday?(state)
+        end
+
+        # @return [Boolean] +PresentationLight+ at 1 or 2, which the app reads as on or off
+        def presenter_light_state? = [1, 2].include?(cooling.dig('PresentationLight', 'Value'))
+
+        # GetAlarmInfoTypeNotification ranks a failure, filter or door alarm, then Party and Eco, before Holiday.
+        #
+        # @param state [State]
+        # @return [Boolean]
+        def notice_before_holiday?(state)
+          door = [2, 5, 8, 13, 14, 146].include?(state.raw['Status']) && !door_signal(state).zero?
+          door || alarms(state).intersect?(%i[dust_filter air_filter water_filter]) ||
+            modes(state).values_at(:party, :eco).any? { it&.on } || zone_alarm?(cooling)
+        end
+
         # @return [Boolean] the ice maker's alarm or a zone's, which the app reads on the Cooling API alone
         def failure_alarm?
           return false unless cooling_api?

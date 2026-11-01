@@ -274,16 +274,47 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
                                                     'DeviceIdentLabel' => { 'TechType' => 'KWT 4154 UG' })
     end
 
-    it 'refuses a zone intensity in Sabbath mode while running, as the app hides the zones' do
-      resources['Cooling']['Sabbath'] = { 'Value' => 1 }
-      expect { fridge.set_presentation_light_intensity(freezer, 0) }.to raise_error(Miele::Sdk::ActionUnavailableError)
-    end
+    before { resources['Cooling']['PresentationLight'] = { 'Value' => 2 } }
 
     it 'switches the presentation light and sets a zone intensity on its rank' do
       fridge.presentation_light = true
       fridge.set_presentation_light_intensity(freezer, 0)
       expect(written).to eq([['PUT', 'Cooling/PresentationLight', { 'Value' => 1 }],
                              ['PUT', 'Cooling/2/PresentationLightIntensity', { 'Value' => 0 }]])
+    end
+
+    it 'sets a zone intensity with Status 10, where the app still shows its presenter light' do
+      resources['State'] = { 'Status' => 10 }
+      fridge.set_presentation_light_intensity(freezer, 0)
+      expect(written.size).to eq(1)
+    end
+
+    it 'refuses a zone intensity in Sabbath mode, even super cooling, as the app hides its presenter light' do
+      resources['State'] = { 'Status' => 14 }
+      resources['Cooling']['Sabbath'] = { 'Value' => 1 }
+      expect { fridge.set_presentation_light_intensity(freezer, 0) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+
+    it 'refuses the presentation light without a light state, as the app shows none', :aggregate_failures do
+      resources['Cooling']['PresentationLight'] = { 'Value' => 0 }
+      expect { fridge.presentation_light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { fridge.set_presentation_light_intensity(freezer, 0) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+
+    it "switches the light where only the dashboard's quick action shows it, never its intensity",
+       :aggregate_failures do
+      resources['State'] = { 'Status' => 8 }
+      fridge.presentation_light = true
+      expect { fridge.set_presentation_light_intensity(freezer, 0) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources['State'] = { 'Status' => 5 }
+      resources['Cooling'].merge!('Sabbath' => { 'Value' => 1 }, 'DustFilter' => { 'Value' => 3 })
+      fridge.presentation_light = false
+      expect(written.map { it[1] }).to eq(%w[Cooling/PresentationLight Cooling/PresentationLight])
+    end
+
+    it 'refuses the light in Sabbath mode with no notice ranked before it, as the app hides it everywhere' do
+      resources['Cooling']['Sabbath'] = { 'Value' => 1 }
+      expect { fridge.presentation_light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
     end
   end
 

@@ -16,6 +16,14 @@ module Miele
 
         def holiday_or_sabbath?: (State state) -> bool
 
+        def presenter_light_shown?: (State state) -> bool
+
+        def presenter_quick_action?: (State state) -> bool
+
+        def presenter_light_state?: () -> bool
+
+        def notice_before_holiday?: (State state) -> bool
+
         def failure_alarm?: () -> bool
 
         def zone_alarm?: (Hash[String, untyped] listed) -> bool
@@ -25,6 +33,8 @@ module Miele
         def wine_zone?: (Hash[String, untyped]? zone) -> bool
 
         def modes: (?State state) -> Hash[Symbol, Mode]
+
+        def alarms: (?State state) -> Array[Symbol]
 
         def cooling: () -> Hash[String, untyped]
 

@@ -55,6 +55,10 @@ module Miele
 
         def shown_off?: (State state) -> bool
 
+        def presenter_light_shown?: (State state) -> bool
+
+        def presenter_quick_action?: (State state) -> bool
+
         def opcode?: () -> bool
 
         def modes: (?State state) -> Hash[Symbol, Mode]

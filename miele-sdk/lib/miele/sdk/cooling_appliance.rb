@@ -72,10 +72,11 @@ module Miele
         MODES.filter_map { |name, key| [name, mode(listed[key])] if [1, 2].include?(listed.dig(key, 'Value')) }.to_h
       end
 
+      # @param state [State]
       # @return [Array<Symbol>] filter, ice maker and demo alarms, none while off or on Opcode
       # @api public
-      def alarms
-        listed = cooling_api? && on? ? cooling : {} #: Hash[String, untyped]
+      def alarms(state = self.state)
+        listed = cooling_api? && on?(state) ? cooling : {} #: Hash[String, untyped]
         ALARMS.filter_map { |name, (key, value)| name if listed.dig(key, 'Value') == value }
       end
 

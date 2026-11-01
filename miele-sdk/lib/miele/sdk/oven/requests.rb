@@ -61,11 +61,6 @@ module Miele
         # @api public
         def continue_cooking = user_request(72, 'the oven offers no continue cooking now') { continue_cooking? }
 
-        # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or when the oven does not offer request 59
-        # @api public
-        def steam_burst = user_request(59, 'the oven offers no steam burst now') { supported_requests.include?(59) }
-
         # Offered while 1/131 shows message 20 (OptionsRunningAfterEndRule).
         #
         # @return [void]

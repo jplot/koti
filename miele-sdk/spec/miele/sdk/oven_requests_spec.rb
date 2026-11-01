@@ -46,6 +46,19 @@ RSpec.describe Miele::Sdk::Oven do
       28 => dop2_field(:e16, prog_id) }
   end
 
+  def burst_attributes(type: 2, remaining: 1, bit_field: 0)
+    attributes(type:).merge(12 => dop2_field(:struct, { 2 => dop2_field(:u8, remaining) }),
+                            19 => dop2_field(:u32, bit_field))
+  end
+
+  def serve_burst(count: 1, mask: 9, selected: 13, **shown)
+    resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, burst_attributes(**shown)),
+                                                    9 => dop2_field(:e16_array, [59]) })
+    resources['DOP2/1/1574?idx1=0&idx2=1'] =
+      dop2_leaf(1, 1574, { 4 => dop2_field(:struct, { 18 => value(:u8, mask, count) }),
+                           7 => dop2_field(:struct, attributes(type: 2, prog_id: selected)) }, idx2: 1)
+  end
+
   def serve(requests, parameters: {}, **shown)
     attributes = attributes(**shown)
     resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, attributes),
@@ -155,14 +168,13 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to be_empty
   end
 
-  it 'sends continue cooking, a steam burst and the end of keeping warm when the oven offers them' do
+  it 'sends continue cooking and the end of keeping warm when the oven offers them' do
     serve([59], continue_cooking: 1)
     resources['DOP2/1/131?idx1=0&idx2=1'] =
       dop2_leaf(1, 131, { 2 => dop2_field(:struct_array, [{ 1 => dop2_field(:e16, 20) }]) }, idx2: 1)
     oven.continue_cooking
-    oven.steam_burst
     oven.stop_keeping_warm
-    expect(written.map(&:last)).to eq([user_request(72), user_request(59), user_request(68)])
+    expect(written.map(&:last)).to eq([user_request(72), user_request(68)])
   end
 
   it 'refuses the requests the oven does not offer', :aggregate_failures do
@@ -172,6 +184,40 @@ RSpec.describe Miele::Sdk::Oven do
       expect { oven.public_send(request) }.to raise_error(Miele::Sdk::ActionUnavailableError)
     end
     expect(written).to be_empty
+  end
+
+  context 'with a manual steam burst in a running function' do
+    before do
+      state(5)
+      serve_burst
+    end
+
+    it 'sends a steam burst on unit 2' do
+      oven.steam_burst
+      expect(written).to eq([['DOP2/2/1583', '000f0002062f000000000001000107003b']])
+    end
+
+    it 'sends the last steam burst while it is under way, BitField 16 as the app compares it' do
+      serve_burst(remaining: 0, bit_field: 16)
+      oven.steam_burst
+      expect(written.map(&:last)).to eq([user_request(59)])
+    end
+
+    it 'refuses a burst the app shows no button for', :aggregate_failures do
+      [{ count: 4 }, { mask: 1 }, { selected: 14 }, { remaining: 0 }, { type: 1 }].each do |change|
+        serve_burst(**change)
+        expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      end
+      expect(written).to be_empty
+    end
+
+    it 'refuses a burst to a programmed oven, or without a REST ProgramID', :aggregate_failures do
+      state(3)
+      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      state(5, program_id: 0)
+      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      expect(written).to be_empty
+    end
   end
 
   context 'with a Dop1 oven' do

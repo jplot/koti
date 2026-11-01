@@ -1,0 +1,33 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module SteamBurst : Appliance
+        def steam_burst: () -> void
+
+        def context: () -> Objects::Oven::GlobalDeviceContext
+
+        def program_context: () -> Objects::Oven::GlobalPsContext
+
+        private
+
+        def steam_burst?: () -> bool
+
+        def manual_steam_burst?: (Objects::Oven::GlobalDeviceContext device) -> bool
+
+        def function_shown?: (Objects::Oven::GlobalPsAttributesCCA? shown, Objects::Oven::GlobalPsAttributesCCA? selected) -> bool
+
+        def burst_left?: (Objects::Oven::GlobalPsAttributesCCA? shown) -> bool
+
+        def user_request: (Integer id, String reason) { () -> boolish } -> void
+
+        def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
+
+        def oven_state: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Symbol?
+
+        def functional?: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> bool
+
+        def mask: (untyped value) -> Integer
+      end
+    end
+  end
+end

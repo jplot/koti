@@ -4,6 +4,7 @@ module Miele
       include ProgramSelection
       include Selection
       include Requests
+      include SteamBurst
       include OvenState
 
       NOTIFICATION_IDS: Hash[Symbol, Objects::Enum]

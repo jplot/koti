@@ -14,8 +14,6 @@ module Miele
 
         def continue_cooking: () -> void
 
-        def steam_burst: () -> void
-
         def stop_keeping_warm: () -> void
 
         def context: () -> Objects::Oven::GlobalDeviceContext

@@ -16,11 +16,15 @@ module Miele
 
         def api_zone: (Integer number, Hash[String, untyped] zone, Hash[String, untyped] listed) -> Zone?
 
+        def listed_zone?: (Hash[String, untyped] zone) -> bool
+
         def zone_position: (Integer? position, Integer number) -> Integer
 
         def switches: (Hash[String, untyped] zone, Hash[String, untyped] listed) -> [bool?, bool?, bool?]
 
         def opcode_zones: (State state) -> Array[Zone]
+
+        def opcode_zone_count: (State state) -> Integer
 
         def opcode_zone: (Integer number, Integer? temperature, Integer? target, State state) -> Zone?
 

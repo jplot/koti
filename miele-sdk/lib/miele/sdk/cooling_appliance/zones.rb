@@ -44,16 +44,19 @@ module Miele
         # @param listed [Hash{String=>Object}] +Cooling+
         # @return [Zone, nil]
         def api_zone(number, zone, listed)
-          temperature = zone.dig('Temp', 'Value')
-          return if temperature == ABSENT && protocol_version != 200
+          return unless listed_zone?(zone)
 
           state = zone['ZoneState'] || {}
           super_mode, fan, vario_cool = switches(zone, listed)
           Zone.new(number:, position: zone_position(state['Position'], number), rank: nil,
                    type: TYPES.fetch(state['Type'], :unknown), enabled: state['Value'] == 1,
-                   temperature: protocol_version == 200 ? nil : degrees(temperature),
+                   temperature: protocol_version == 200 ? nil : degrees(zone.dig('Temp', 'Value')),
                    target: degrees(zone.dig('TargetTemp', 'Value')), super_mode:, fan:, vario_cool:)
         end
+
+        # @param zone [Hash{String=>Object}] +Cooling/{n}+
+        # @return [Boolean] whether the app keeps the zone
+        def listed_zone?(zone) = zone.dig('Temp', 'Value') != ABSENT || protocol_version == 200
 
         # @param position [Integer, nil] +ZoneState.Position+
         # @param number [Integer]
@@ -75,10 +78,16 @@ module Miele
         # @return [Array<Zone>]
         def opcode_zones(state)
           temperatures = Array(state.raw['Temperature']) #: Array[Integer?]
-          count = { 19 => 1, 20 => 1, 21 => 2 }.fetch(identity.device_type) { temperatures.count { it != ABSENT } }
-          (0...count).filter_map do |index|
+          (0...opcode_zone_count(state)).filter_map do |index|
             opcode_zone(index + 1, temperatures[index], Array(state.raw['TargetTemperature'])[index], state)
           end
+        end
+
+        # @param state [State]
+        # @return [Integer] one or two zones by device type, else as many as the temperatures shown
+        def opcode_zone_count(state)
+          temperatures = Array(state.raw['Temperature']) #: Array[Integer?]
+          { 19 => 1, 20 => 1, 21 => 2 }.fetch(identity.device_type) { temperatures.count { it != ABSENT } }
         end
 
         # @param number [Integer]

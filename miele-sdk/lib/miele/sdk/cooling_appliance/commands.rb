@@ -16,10 +16,16 @@ module Miele
         # @param zone [Zone] one of {#zones}
         # @param degrees [Integer] whole degrees in {#temperature_unit}
         # @return [void]
-        # @raise [ArgumentError] for a fraction of a degree, which the app never sends
+        # @raise [ArgumentError] for a fraction of a degree, which the app never sends, or a value its picker does
+        #   not offer
+        # @raise [ActionUnavailableError] while the app hides the zones
         # @api public
         def set_target(zone, degrees)
           raise ArgumentError, 'the app sets whole degrees' unless degrees.is_a?(Integer)
+
+          state = self.state
+          require_zones_shown!(state)
+          require_offered!(degrees, target_choices(zone, state))
           return put('Cooling', "#{zone.number}/TargetTemp", Value: degrees * 100) unless opcode?
 
           request = "10000617000#{zone.number}00#{format('%04X', degrees & 0xFFFF)}"
@@ -31,10 +37,11 @@ module Miele
         # @param zone [Zone] one of {#zones}, with a super mode
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] for a zone without one
+        # @raise [ActionUnavailableError] for a zone without one, or while the app shows the appliance off
         # @api public
         def set_super_mode(zone, on)
           require!(!zone.super_mode.nil?, 'the zone has no super mode')
+          require!(!shown_off?(state), 'the app offers no super mode while the appliance is off')
           return put('State', 'ProcessAction', ProcessAction: process_action(zone, on)) if opcode?
 
           write_super_mode_duration(zone) if protocol_version == 201
@@ -44,20 +51,22 @@ module Miele
         # @param zone [Zone] one of {#zones}, with a fan
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] for a zone without one
+        # @raise [ActionUnavailableError] for a zone without one, or while the app hides the zones
         # @api public
         def set_fan(zone, on)
           require!(!zone.fan.nil?, 'the zone has no fan')
+          require_zones_shown!
           put('Cooling', "#{zone.position}/Fan", **switch(on))
         end
 
         # @param zone [Zone] one of {#zones}, with VarioCool
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] for a zone without it
+        # @raise [ActionUnavailableError] for a zone without it, or while the app hides the zones
         # @api public
         def set_vario_cool(zone, on)
           require!(!zone.vario_cool.nil?, 'the zone has no VarioCool')
+          require_zones_shown!
           put('Cooling', "#{zone.rank}/VarioCool", Value: on ? 1 : 2)
         end
 
@@ -106,20 +115,26 @@ module Miele
 
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with one
+        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with one, where the app's presenter light
+        #   section or dashboard quick action shows it
         # @api public
         def presentation_light=(on)
           require!(presentation_light?, 'the appliance has no presentation light')
+          state = self.state
+          require!(presenter_light_shown?(state) || presenter_quick_action?(state),
+                   'the app shows no presentation light now')
           put('Cooling', 'PresentationLight', Value: on ? 1 : 2)
         end
 
         # @param zone [Zone] one of {#zones}
         # @param value [Integer] 0 switches the zone's light off
         # @return [void]
-        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with a presentation light
+        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with a presentation light, while the
+        #   app's presenter light section shows
         # @api public
         def set_presentation_light_intensity(zone, value)
           require!(presentation_light?, 'the appliance has no presentation light')
+          require!(presenter_light_shown?(state), 'the app shows no presentation light now')
           put('Cooling', "#{zone.rank}/PresentationLightIntensity", Value: value)
         end
 
@@ -132,24 +147,35 @@ module Miele
           put('Cooling', 'HumidityControl', Value: HUMIDITY.fetch(level))
         end
 
+        # The app shows PerfectFresh for a +Step+ above 0 compared unsigned, so for any but 0.
+        #
         # @param value [Integer]
         # @return [void]
+        # @raise [ActionUnavailableError] on protocol 201, where the app reads none, or without a +Step+
+        # @raise [ArgumentError] off +PerfectFresh+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def perfect_fresh=(value)
+          setting = cooling['PerfectFresh']
+          require!(protocol_version != 201 && !setting.to_h['Step'].to_i.zero?, 'the app shows no PerfectFresh here')
+          require_offered!(value, picker(setting))
           put('Cooling', 'PerfectFresh', Value: value)
         end
 
         # @param value [Integer]
         # @return [void]
+        # @raise [ArgumentError] off +Humidifier+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def humidifier=(value)
+          require_offered!(value, picker(cooling['Humidifier']))
           put('Cooling', 'Humidifier', Value: value)
         end
 
         # @param seconds [Integer]
         # @return [void]
+        # @raise [ArgumentError] off +DoorAlarmTime+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def door_alarm_delay=(seconds)
+          require_offered!(seconds, picker(cooling['DoorAlarmTime']))
           put('Cooling', 'DoorAlarmTime', Value: seconds)
         end
 

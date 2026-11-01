@@ -1,0 +1,31 @@
+module Miele
+  module Sdk
+    class CoolingAppliance < Appliance
+      module Pickers : Appliance
+        OPCODE_TARGETS: Hash[Symbol, Hash[Symbol, Range[Integer]?]]
+        FN_TECH_TYPES: Array[String]
+        KFN_TECH_TYPE: Regexp
+
+        private
+
+        def require_offered!: (Integer value, Array[Integer] choices) -> void
+
+        def target_choices: (Zone zone, State state) -> Array[Integer]
+
+        def api_targets: (Hash[String, untyped] target) -> Array[Integer]
+
+        def picker: (Hash[String, untyped]? setting) -> Array[Integer]
+
+        def opcode_targets: (Zone zone, State state) -> Array[Integer]
+
+        def opcode_target: (Zone zone, State state) -> Integer
+
+        def opcode_subtype: (Zone zone, State state) -> Symbol
+
+        def opcode?: () -> bool
+
+        def opcode_zone_count: (State state) -> Integer
+      end
+    end
+  end
+end

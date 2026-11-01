@@ -7,6 +7,8 @@ module Miele
     # appliance (0 and 1) shows its zones in +State+.
     class CoolingAppliance < Appliance
       include Zones
+      include Pickers
+      include Screen
       include Commands
 
       # A zone as the app shows it.
@@ -62,17 +64,19 @@ module Miele
         cooling.dig('TempUnit', 'Value') == 2 ? :fahrenheit : :celsius
       end
 
+      # @param state [State]
       # @return [Hash{Symbol=>Mode}] the modes the appliance lists, none while off or on Opcode
       # @api public
-      def modes
-        listed = cooling_api? && on? ? cooling : {} #: Hash[String, untyped]
+      def modes(state = self.state)
+        listed = cooling_api? && on?(state) ? cooling : {} #: Hash[String, untyped]
         MODES.filter_map { |name, key| [name, mode(listed[key])] if [1, 2].include?(listed.dig(key, 'Value')) }.to_h
       end
 
+      # @param state [State]
       # @return [Array<Symbol>] filter, ice maker and demo alarms, none while off or on Opcode
       # @api public
-      def alarms
-        listed = cooling_api? && on? ? cooling : {} #: Hash[String, untyped]
+      def alarms(state = self.state)
+        listed = cooling_api? && on?(state) ? cooling : {} #: Hash[String, untyped]
         ALARMS.filter_map { |name, (key, value)| name if listed.dig(key, 'Value') == value }
       end
 

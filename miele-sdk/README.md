@@ -548,7 +548,7 @@ fridge.ice_maker         # light, perfect_fresh, humidity, door_alarm_delay (sec
 
 ```ruby
 zone = fridge.zones.first
-fridge.set_target(zone, 4)        # whole degrees in the appliance's unit
+fridge.set_target(zone, 4)        # whole degrees in the appliance's unit, as the app's picker offers
 fridge.set_super_mode(zone, true) # set_fan, set_vario_cool
 fridge.set_mode(:eco, true)       # :party, :holiday, :sabbath, :child_proof
 fridge.ice_maker = false          # light=, ambient_light_mode=, presentation_light=, humidity=,
@@ -564,11 +564,25 @@ no `RemoteEnable` and checks nothing before these writes; the SDK refuses what t
 control for, such as an ice maker the appliance lacks or a mode it lists no values for, and a
 `State` member such as `State/ProcessAction` goes to the cloud on its own.
 
-Left out: the app's retries of an Opcode target and its waits after some writes; the screen rules
-that hide zone controls during a failure or a holiday or Sabbath mode; and typed reads of zone
-alarms, target ranges and the ambient and presentation light state, which `cooling` gives raw. Not
-traced: whether an appliance serves `Cooling`, `Oc85` and the `State` members locally, what
-`10000617000` and the duration of 720 mean, and how a °F appliance reports its temperatures.
+The SDK sends only what the app's pickers offer, and raises `ArgumentError` for anything else. A
+zone's target is one of its `TargetTemp` `AllValues`, else `Min` to `Max` by `Step`, else its
+current value, each in whole degrees rounded half away from zero as the app shows them. An Opcode
+zone keeps to the app's fixed ranges: 2 to 9 °C for a fridge, -28 to -14 °C for a freezer and 5 to
+20 °C for a wine zone; 3 to 9 and -26 to -15 °C on a KFN 37692 iDE or K 3.473 iD; any zone
+-28 to -15 °C on an FN 30402 i or FN 35402 i; and only its current target in a zone of no known
+kind. PerfectFresh, the humidifier and the door alarm delay keep to `Min` to `Max` by `Step`.
+PerfectFresh is refused on protocol 201 and without a `Step`, where the app shows none. The zone
+controls (target, fan, VarioCool and presentation light intensity) are refused while the app hides
+the zones: off (Status 1, 10 or 255), or on, running or super freezing in Holiday or Sabbath mode
+without a door signal. The super mode is refused only while off, as the app's dashboard still
+offers it in those modes.
+
+Left out: the app's retries of an Opcode target and its waits after some writes; the screen rule
+that hides zone controls during a failure without a failure alarm, as the SDK reads no zone alarm;
+and typed reads of zone alarms, target ranges and the ambient and presentation light state, which
+`cooling` gives raw. Not traced: whether an appliance serves `Cooling`, `Oc85` and the `State`
+members locally, what `10000617000` and the duration of 720 mean, and how a °F appliance reports
+its temperatures.
 
 ## Warming drawers
 
@@ -578,19 +592,22 @@ tested on an appliance: every read and write follows the app's code.
 ```ruby
 drawer.drawer_state          # => :programmed; an open door shows over off, on, running and paused
 drawer.programs              # Dop1 9788: #<data Program id=1, min_hours=1, max_hours=4, temperatures=[30, …]>
-drawer.power_on              # and power_off: Dop1 1101
+drawer.power_on              # from off, finished or idle; power_off from the other states: Dop1 1101
 drawer.select_program(1)     # 1 cups, 2 plates, 3 food, 4 low-temperature cooking: Dop1 9781
 drawer.target_temperature = 70
-drawer.remaining_time = 135  # minutes, kept to the program's maximum; 0 resets it
+drawer.remaining_time = 135  # minutes, from the program's minimum, kept to its maximum; 0 resets it
 drawer.cups_warm_up_source = '000111111111'   # a coffee maker the drawer lists; nil to stop
 ```
 
 Each action makes the check of the app's rule for it. Switching on needs mobile start without local
-control; a program needs remote control and mobile start without local control, the drawer on,
-running or off; a temperature mobile start without local control and one of the program's five
-steps; a remaining time remote control and mobile start without local control while the program is
-set or runs (Status 3 to 6). A temperature re-sends the remaining time, and a remaining time the
-target, as the app writes them. `NotAcceptedError` reports an Ack other than 1.
+control and the drawer off, off with its door open, finished or idle, where the app's switch shows
+off; switching off the same control and the drawer in any other state but not connected; a program
+needs remote control and mobile start without local control, the drawer on, running or off; a
+temperature mobile start without local control and one of the program's five steps; a remaining
+time remote control and mobile start without local control while the program is set or runs
+(Status 3 to 6), and 0 or at least the program's minimum hours, as the app's picker offers. A
+temperature re-sends the remaining time, and a remaining time the target, as the app writes them.
+`NotAcceptedError` reports an Ack other than 1.
 
 Left out: the cup warm-up's check that its source is a coffee maker by its ident, Con@ctivity One
 machines, and typed reads of the drawer's temperatures and times, which `State` gives raw.

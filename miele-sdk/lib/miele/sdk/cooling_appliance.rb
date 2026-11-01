@@ -10,6 +10,7 @@ module Miele
       include Pickers
       include Screen
       include Commands
+      include Settings
 
       # A zone as the app shows it.
       #

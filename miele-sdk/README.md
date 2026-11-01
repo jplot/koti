@@ -187,7 +187,11 @@ done.
 switch on in their own way, which will come with them. An appliance asleep answers 500:
 like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, giving up
 after three attempts where the app sets no limit. `power_off` writes 1 to the same leaf and takes a
-500 as done, as the app does. Both belong to `Miele::Sdk::Oven`.
+500 as done, as the app does. Both belong to `Miele::Sdk::Oven` and raise
+`Miele::Sdk::ActionUnavailableError` on a Dop1 oven, which the app does not switch. As the app's
+offline screen offers it, `power_on` needs remote control or mobile start, and refuses an H2 oven;
+as its settings switch offers it, `power_off` needs remote control without local control, or
+mobile start alone.
 
 Starting, stopping or pausing a program, and the light, take a different request in each family
 of the app: a user request on DOP2 leaf 2/1583 for DOP2 appliances, `ProcessAction` for Dop1

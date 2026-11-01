@@ -17,9 +17,11 @@ module Miele
       # other families switch on in their own way.
       #
       # @return [void]
+      # @raise [ActionUnavailableError] on a Dop1 or H2 oven, or without remote control or mobile start
       # @raise [ResponseError] if the appliance still refuses after three attempts
       # @api public
       def power_on
+        require_switch_on!
         3.times do |attempt|
           rouse if attempt.positive?
           return write_dop2(power_leaf(4))
@@ -28,12 +30,19 @@ module Miele
         end
       end
 
-      # The app's SendSwitchOffAsync swallows a 500.
+      # The app's SendSwitchOffAsync swallows a 500. Its settings switch, the loosest of its three switch-off paths,
+      # takes any RemoteEnableType but None and LocalControl.
       #
       # @return [void]
+      # @raise [ActionUnavailableError] on a Dop1 oven, or without remote control or mobile start, or under local
+      #   control
       # @raise [ResponseError] if the appliance refuses with another status
       # @api public
       def power_off
+        require_dop2!
+        state = self.state
+        require!(under_remote_control?(state) || (!state.remote_control? && state.mobile_start?),
+                 'the oven is not remote enabled, or is under local control')
         write_dop2(power_leaf(1))
       rescue ResponseError => e
         raise unless e.status == 500
@@ -138,6 +147,18 @@ module Miele
       def celsius(parameter)
         value = program_context.context_para_ca&.public_send(parameter)
         value&.current_value&.then { it / 100.0 }
+      end
+
+      # IsDiscoveryOven: the app has no switch-on for an H2 oven. Its offline screen offers the switch-on for any
+      # RemoteEnableType but None.
+      #
+      # @return [void]
+      # @raise [ActionUnavailableError]
+      def require_switch_on!
+        require_dop2!
+        require!(!tech_type.to_s.start_with?('H2'), 'the app does not switch on an H2 oven')
+        state = self.state
+        require!(state.remote_control? || state.mobile_start?, 'the oven is not remote enabled')
       end
 
       # The appliance state on 2/1586: 4 switches on, 1 off.

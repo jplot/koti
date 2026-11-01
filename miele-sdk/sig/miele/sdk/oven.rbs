@@ -45,6 +45,8 @@ module Miele
 
       def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
 
+      def require_switch_on!: () -> void
+
       def power_leaf: (Integer state) -> Dop2::Leaf
 
       def rouse: () -> void

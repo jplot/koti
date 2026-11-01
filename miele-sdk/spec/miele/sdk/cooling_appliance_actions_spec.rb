@@ -89,6 +89,33 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect(written).to be_empty
   end
 
+  it 'refuses zone controls but the super mode in Holiday mode while on, as the app hides the zones',
+     :aggregate_failures do
+    resources['State'] = { 'Status' => 2 }
+    resources['Cooling']['Holiday'] = { 'Value' => 1 }
+    expect { fridge.set_target(freezer, -18) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.set_fan(freezer, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.set_vario_cool(freezer, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    fridge.set_super_mode(freezer, true)
+    expect(written.last).to eq(['PUT', 'Cooling/1/SuperMode', { 'Value' => 1, 'SetValues' => [1, 2] }])
+  end
+
+  it 'refuses every zone control while off with Status 10, which the app reads as off', :aggregate_failures do
+    resources['State'] = { 'Status' => 10 }
+    expect { fridge.set_target(freezer, -18) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.set_super_mode(freezer, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
+  it 'shows the zones in Sabbath mode while super cooling or with the door open, as the app does' do
+    resources['Cooling']['Sabbath'] = { 'Value' => 1 }
+    resources['State'] = { 'Status' => 14 }
+    fridge.set_target(freezer, -18)
+    resources['State'] = { 'Status' => 5, 'SignalDoor' => true, 'SignalFailure' => false }
+    fridge.set_target(freezer, -20)
+    expect(written.map(&:last)).to eq([{ 'Value' => -1800 }, { 'Value' => -2000 }])
+  end
+
   it 'sets a mode by its name in the Cooling API, only when the appliance lists values for it', :aggregate_failures do
     fridge.set_mode(:eco, true)
     expect { fridge.set_mode(:party, true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
@@ -188,6 +215,11 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     let(:ident) do
       Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 32, 'ProtocolVersion' => 203,
                                                     'DeviceIdentLabel' => { 'TechType' => 'KWT 4154 UG' })
+    end
+
+    it 'refuses a zone intensity in Sabbath mode while running, as the app hides the zones' do
+      resources['Cooling']['Sabbath'] = { 'Value' => 1 }
+      expect { fridge.set_presentation_light_intensity(freezer, 0) }.to raise_error(Miele::Sdk::ActionUnavailableError)
     end
 
     it 'switches the presentation light and sets a zone intensity on its rank' do

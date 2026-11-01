@@ -51,6 +51,10 @@ module Miele
 
         def cooling: () -> Hash[String, untyped]
 
+        def require_zones_shown!: (?State state) -> void
+
+        def shown_off?: (State state) -> bool
+
         def opcode?: () -> bool
 
         def modes: () -> Hash[Symbol, Mode]

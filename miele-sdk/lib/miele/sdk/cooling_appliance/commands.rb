@@ -18,10 +18,13 @@ module Miele
         # @return [void]
         # @raise [ArgumentError] for a fraction of a degree, which the app never sends, or a value its picker does
         #   not offer
+        # @raise [ActionUnavailableError] while the app hides the zones
         # @api public
         def set_target(zone, degrees)
           raise ArgumentError, 'the app sets whole degrees' unless degrees.is_a?(Integer)
 
+          state = self.state
+          require_zones_shown!(state)
           require_offered!(degrees, target_choices(zone, state))
           return put('Cooling', "#{zone.number}/TargetTemp", Value: degrees * 100) unless opcode?
 
@@ -34,10 +37,11 @@ module Miele
         # @param zone [Zone] one of {#zones}, with a super mode
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] for a zone without one
+        # @raise [ActionUnavailableError] for a zone without one, or while the app shows the appliance off
         # @api public
         def set_super_mode(zone, on)
           require!(!zone.super_mode.nil?, 'the zone has no super mode')
+          require!(!shown_off?(state), 'the app offers no super mode while the appliance is off')
           return put('State', 'ProcessAction', ProcessAction: process_action(zone, on)) if opcode?
 
           write_super_mode_duration(zone) if protocol_version == 201
@@ -47,20 +51,22 @@ module Miele
         # @param zone [Zone] one of {#zones}, with a fan
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] for a zone without one
+        # @raise [ActionUnavailableError] for a zone without one, or while the app hides the zones
         # @api public
         def set_fan(zone, on)
           require!(!zone.fan.nil?, 'the zone has no fan')
+          require_zones_shown!
           put('Cooling', "#{zone.position}/Fan", **switch(on))
         end
 
         # @param zone [Zone] one of {#zones}, with VarioCool
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] for a zone without it
+        # @raise [ActionUnavailableError] for a zone without it, or while the app hides the zones
         # @api public
         def set_vario_cool(zone, on)
           require!(!zone.vario_cool.nil?, 'the zone has no VarioCool')
+          require_zones_shown!
           put('Cooling', "#{zone.rank}/VarioCool", Value: on ? 1 : 2)
         end
 
@@ -119,10 +125,12 @@ module Miele
         # @param zone [Zone] one of {#zones}
         # @param value [Integer] 0 switches the zone's light off
         # @return [void]
-        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with a presentation light
+        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with a presentation light, or while the
+        #   app hides the zones
         # @api public
         def set_presentation_light_intensity(zone, value)
           require!(presentation_light?, 'the appliance has no presentation light')
+          require_zones_shown!
           put('Cooling', "#{zone.rank}/PresentationLightIntensity", Value: value)
         end
 

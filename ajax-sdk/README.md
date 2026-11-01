@@ -297,9 +297,9 @@ What the app 3.59 does on the channel, never tested here (the koti space has no 
 - **Commands.** `archive_play` (`speed`, 1.0), `archive_pause`, `archive_seek` (`ts`; `economy: true` while
   the user scrubs, then an exact seek 200 ms later), `archive_play_range` (`ts_range` in whole seconds,
   `speed` 0, `loop` false), `archive_reopen` (points a stream at a new `tag`, type, filter and range);
-  `ptz_move` (`speed_x`, `speed_y`), `ptz_zoom` and `ptz_focus` (`speed`, 1 a step, 0 to stop). The app never
-  sends `ptz_stop`, `archive_change_range` or `archive_multi_play_range`; the PTZ home position and presets
-  go through gRPC.
+  `ptz_move` (`speed_x`, `speed_y`), `ptz_zoom` and `ptz_focus` (`speed`, negative to zoom out or focus
+  near; a tap sends 1, then 0 50 ms later, and 0 stops). The app never sends `ptz_stop`,
+  `archive_change_range` or `archive_multi_play_range`, and its PTZ home button does not use the channel.
 - **Camera messages.** `archive_status` (playing or paused, and the position) every `pos_update_interval`;
   `archive_timeline`, whose `seconds` holds a byte per second from `ts_range.min_value`, bit 0 set when that
   second is recorded, to merge or to replace as `update_type` says; `frame_data`, whose frames each hold

@@ -22,16 +22,15 @@ module Miele
 
         def drink_stoppable?: () -> bool
 
-        def remote_stoppable?: () -> bool
-
         def sub_phase_of: (untyped program) -> Integer
+
+        def complete?: (untyped program) -> bool
 
         def phase_of: (untyped program) -> Integer
 
         def dispensing?: (Integer id, Integer phase) -> bool
 
         def care?: (Integer id) -> bool
-
 
         def switched_on: (Dop2::Leaf leaf) -> Dop2::Leaf?
 

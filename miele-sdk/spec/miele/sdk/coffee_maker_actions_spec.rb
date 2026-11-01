@@ -161,6 +161,11 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(written).to be_empty
   end
 
+  it 'stops no drink whose program info lacks a member the app reads' do
+    served[[1, 1574, 0, 1]] = ps_context(24_010, 0, missing: [3])
+    expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  end
+
   it 'stops nothing under local control or during care', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(24_010, 0)
     served['State'] = { 'Status' => 5, 'RemoteEnable' => [7, 0, 1] }
@@ -252,6 +257,14 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       served[[2, 1586, 0, 0]] = combi(2, 8)
       coffee.brew(24_005)
       expect(written.size).to eq(1)
+    end
+
+    it 'stops only its own drinks, 24001 to 24031', :aggregate_failures do
+      served[[2, 1574, 0, 1]] = ps_context(24_100, 0, unit: 2)
+      expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      served[[2, 1574, 0, 1]] = ps_context(24_010, 0, unit: 2)
+      coffee.stop
+      expect(written.map(&:first)).to eq(['DOP2/2/1583?idx1=0&idx2=1'])
     end
 
     it 'refuses option 17, which its acknowledgements stop short of' do

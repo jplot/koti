@@ -65,7 +65,7 @@ module Miele
         # @api public
         def stop
           if dop2?
-            require!(drink_stoppable?, 'the coffee maker runs no drink to stop')
+            require!(drink_stoppable?, 'the coffee maker cannot stop now')
             return modify_dop2(family::GlobalUserReqRequest, 2, 1583, 0, 1) { it.with(request: 2) }
           end
 
@@ -98,21 +98,11 @@ module Miele
         # @return [Boolean]
         def drink_stoppable?
           program = program_context&.prog_attributes_cca
-          return false if program&.prog_id.nil? || !remote_stoppable?
+          state = self.state
+          return false unless complete?(program) && state.remote_control? == true && state.local_control? != true
 
           id = family::GlobalEnumPrgId.to_i(program.prog_id)
           dispensing?(id, phase_of(program)) && sub_phase_of(program) != 24_057 && !care?(id)
-        end
-
-        # IsRemoteStoppable: remote control without local control, which on DOP2 is RemoteEnable 15.
-        #
-        # @return [Boolean]
-        def remote_stoppable? = state.raw.dig('RemoteEnable', 0) == 15
-
-        # @param program [Data] +ProgAttributesCCA+
-        # @return [Integer] its sub-phase, 0 when absent
-        def sub_phase_of(program)
-          program.prog_sub_phase.nil? ? 0 : family::GlobalEnumSubPPhaseId.to_i(program.prog_sub_phase)
         end
 
         # The app's acknowledge mappers throw outside 1 to 17, 1 to 16 on a CM7, before anything is read.

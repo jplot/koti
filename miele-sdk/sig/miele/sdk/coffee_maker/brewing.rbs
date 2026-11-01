@@ -35,6 +35,10 @@ module Miele
 
         def phase_of: (untyped program) -> Integer
 
+        def sub_phase_of: (untyped program) -> Integer
+
+        def complete?: (untyped program) -> bool
+
         def dispensing?: (Integer id, Integer phase) -> bool
 
         def care?: (Integer id) -> bool

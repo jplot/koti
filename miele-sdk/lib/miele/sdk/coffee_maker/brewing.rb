@@ -10,7 +10,7 @@ module Miele
         BARISTA = 24_407
         # Each variant's least software ids (2/17, then 1/17) for two cups or a double shot.
         ONE_TOUCH_IDS = { cm7: [5374, 0], cm6f: [5714, 5713], cva: [6228, 6226], cva_ref2: [6228, 6227] }.freeze
-        # The app's program info source fails, and its drink rule with it, when 1/1574 lacks one of these.
+        # The app's program info source fails, and its drink rule and stop button with it, when 1574 lacks one of these.
         PROGRAM_MEMBERS = %i[prog_id prog_phase prog_sub_phase programtype progress_bar].freeze
         private_constant :ONE_TOUCH_IDS, :PROGRAM_MEMBERS
 
@@ -77,8 +77,7 @@ module Miele
         # @raise [ActionUnavailableError]
         def require_dispensable!
           program = program_context&.prog_attributes_cca
-          read = program && PROGRAM_MEMBERS.none? { program.public_send(it).nil? }
-          require!(read && mobile_start_on?(state) && !notified? && !busy?(program),
+          require!(complete?(program) && mobile_start_on?(state) && !notified? && !busy?(program),
                    'the coffee maker cannot dispense a drink now')
         end
 
@@ -122,8 +121,16 @@ module Miele
         end
 
         # @param program [Data] +ProgAttributesCCA+
-        # @return [Integer] its phase, 0 when absent
-        def phase_of(program) = program.prog_phase.nil? ? 0 : family::GlobalEnumPPhaseId.to_i(program.prog_phase)
+        # @return [Integer]
+        def phase_of(program) = family::GlobalEnumPPhaseId.to_i(program.prog_phase)
+
+        # @param program [Data] +ProgAttributesCCA+
+        # @return [Integer]
+        def sub_phase_of(program) = family::GlobalEnumSubPPhaseId.to_i(program.prog_sub_phase)
+
+        # @param program [Data, nil] +ProgAttributesCCA+
+        # @return [Boolean] whether it carries every member the app reads
+        def complete?(program) = !program.nil? && PROGRAM_MEMBERS.none? { program.public_send(it).nil? }
 
         # @param id [Integer]
         # @param phase [Integer]

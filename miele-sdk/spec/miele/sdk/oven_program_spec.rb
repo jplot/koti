@@ -5,7 +5,7 @@ RSpec.describe Miele::Sdk::Oven do
 
   let(:fab) { '000123456789' }
   let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 13, 'ProtocolVersion' => 4) }
-  let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 0] } }
+  let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 1] } }
   let(:fake) do
     served = { 'State' => JSON.generate(state), 'DOP2/1/1574?idx1=0&idx2=1' => program_context,
                'DOP2/1/1585' => device_context }

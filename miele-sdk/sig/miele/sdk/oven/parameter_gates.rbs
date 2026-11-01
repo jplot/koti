@@ -8,6 +8,10 @@ module Miele
 
         OPTIONS: Hash[Integer, Symbol]
 
+        FIXED_TIME_TYPES: Array[Integer]
+
+        AUTOMATIC_TYPES: Array[Integer]
+
         def context: () -> Objects::Oven::GlobalDeviceContext
 
         def program_context: () -> Objects::Oven::GlobalPsContext
@@ -32,7 +36,15 @@ module Miele
 
         def duration_set?: (untyped duration) -> bool
 
+        def options_cell_enabled?: (State state, Objects::Oven::GlobalDeviceContext device) -> bool
+
+        def parameter_editable?: (Symbol name, State state, Objects::Oven::GlobalDeviceContext device, untyped value) -> bool
+
+        def program_type: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
+
         def readable?: (untyped value) -> bool
+
+        def writable?: (untyped value) -> bool
 
         def require_dop2!: () -> void
 

@@ -93,6 +93,46 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to eq([7])
   end
 
+  it 'refuses a parameter the oven does not make writable', :aggregate_failures do
+    setters.each do |name, (_value, id, type)|
+      current = type == :u8 ? 1 : 1_800
+      serve(parameters: { id => shown_parameter(type, current, mask: 8) })
+      refused(name, error: /change/)
+    end
+    expect(written).to be_empty
+  end
+
+  it 'refuses an option the oven does not make writable', :aggregate_failures do
+    serve(parameters: { 27 => dop2_field(:struct, { 1 => dop2_field(:u8, 8), 2 => dop2_field(:bool, false) }) })
+    expect { oven.set_options(keep_warm: true) }.to raise_error(Miele::Sdk::ActionUnavailableError, /change/)
+    expect(written).to be_empty
+  end
+
+  it 'refuses browning and doneness without mobile start, as the cooking level cells', :aggregate_failures do
+    serve(remote: [15, 0, 0])
+    refused(:browning, :doneness, error: /change/)
+    oven.moisture = 3
+    expect(written).to eq([2])
+  end
+
+  it 'refuses the times of an own or automatic program without mobile start', :aggregate_failures do
+    [2, 3, 4].each do |type|
+      serve(type:, remote: [15, 0, 0])
+      refused(:duration, :start_at, :end_at, error: /change/)
+    end
+    serve(type: 4)
+    oven.duration = 1_800
+    expect(written).to eq([12])
+  end
+
+  it 'refuses the options of an automatic program without mobile start', :aggregate_failures do
+    serve(type: 3, remote: [15, 0, 0])
+    expect { oven.set_options(keep_warm: true) }.to raise_error(Miele::Sdk::ActionUnavailableError, /change/)
+    serve(type: 4, remote: [15, 0, 0])
+    oven.set_options(keep_warm: true)
+    expect(written).to eq([27])
+  end
+
   it 'refuses steam bursts whose type the app shows no cell for', :aggregate_failures do
     [0, 8].each do |count|
       serve(parameters: { 18 => shown_parameter(:u8, count) })

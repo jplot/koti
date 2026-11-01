@@ -380,9 +380,12 @@ Each of these actions makes the checks the app's rules make before it, and raise
   It also needs the section the app shows for it (its Rules.ProgramParameters rule): a value
   readable on 1/1574 (request mask 8); for all but browning and doneness, a function on 1/1585
   (program type 2, 3, 4, 5, 7, 8, 38 or 50) that 1/1574 shows too (ShouldHideProgramParameters);
-  a current target temperature above zero; steam bursts of a type 1 to 7; no duration or start time while the oven runs or pauses with a
-  duration set; and no start or end time while a readable duration is unset. Options need that
-  function and each option readable.
+  a current target temperature above zero; steam bursts of a type 1 to 7; no duration or start
+  time while the oven runs or pauses with a duration set; and no start or end time while a
+  readable duration is unset. Options need that function and each option readable. The cell the
+  app enables needs a writable value (request mask 1), and mobile start too for browning and
+  doneness, for the duration, start and end times of an own or automatic program, and for an
+  automatic program's options.
   `duration = 0` first moves the start to its minimum, as the app does.
 - `start` refuses a program that requires a duration not set yet. It first writes the parameters
   the program requires and the user has not confirmed, with the values they show, a temperature
@@ -409,7 +412,7 @@ The app then waits until the oven shows the change; but for a selection, the SDK
 oven accepts the write, and `program_context` or `notifications` show what follows. Two app behaviours rest on
 that wait and are left out: the switch-off that answers queries 4, 5, 21 and 27 as they appear,
 and the raise of doneness or browning by one step after `continue_cooking` (write it with
-`doneness=` or `browning=`). None of these writes has been sent to a real oven: their bytes follow
+`doneness=` or `browning=`, which take the checks of the app's cooking level cells). None of these writes has been sent to a real oven: their bytes follow
 the app's code, and the reads have run against a real oven through the cloud.
 
 ## Dishwashers

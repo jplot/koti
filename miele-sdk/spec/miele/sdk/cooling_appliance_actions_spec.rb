@@ -290,9 +290,20 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
                                                     'DeviceIdentLabel' => { 'TechType' => 'WT 6000' })
     end
 
+    before do
+      resources['State'] = { 'Status' => 5, 'Light' => 1 }
+      resources['Cooling']['Light'] = { 'Value' => 3 }
+    end
+
     it 'sets its ambient light level on Cooling/Light' do
       fridge.ambient_light_mode = 4
       expect(written).to eq([['PUT', 'Cooling/Light', { 'Value' => 4 }]])
+    end
+
+    it "keeps the ambient light level to the app's seven slider options", :aggregate_failures do
+      expect { fridge.ambient_light_mode = 0 }.to raise_error(ArgumentError)
+      expect { fridge.ambient_light_mode = 8 }.to raise_error(ArgumentError)
+      expect(written).to be_empty
     end
   end
 
@@ -319,6 +330,23 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       resources['Cooling']['Sabbath'] = { 'Value' => 1 }
       expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
       expect(written.size).to eq(1)
+    end
+
+    it 'sets the ambient light mode only with the light on and its section shown, as the app', :aggregate_failures do
+      resources['Cooling']['AmbientLightState'] = { 'Value' => 2 }
+      expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources['Cooling'].merge!('AmbientLightState' => { 'Value' => 1 }, 'Sabbath' => { 'Value' => 1 })
+      expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources['Cooling'].merge!('Sabbath' => { 'Value' => 2 }, 'AmbientLightMode' => nil)
+      expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(written).to be_empty
+    end
+
+    it 'numbers the ambient light modes its picker lists from 1, as the app sends them', :aggregate_failures do
+      resources['Cooling']['AmbientLightMode'] = { 'Value' => 1, 'Min' => 10, 'Max' => 40, 'Step' => 10 }
+      expect { fridge.ambient_light_mode = 10 }.to raise_error(ArgumentError)
+      fridge.ambient_light_mode = 4
+      expect(written).to eq([['PUT', 'Cooling/AmbientLightMode', { 'Value' => 4 }]])
     end
 
     it 'lights it through AmbientLightState and sets its ambient light mode' do

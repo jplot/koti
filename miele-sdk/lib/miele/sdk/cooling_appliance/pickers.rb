@@ -62,6 +62,14 @@ module Miele
           target['Min'].to_i < target['Max'].to_i ? picker(target) : [target['Value']].compact
         end
 
+        # The BSH picker sends its index plus 1, the Liebherr slider its seven options' index plus 1.
+        #
+        # @param key [String] +AmbientLightMode+ or +Light+ in +Cooling+
+        # @return [Array<Integer>]
+        def ambient_light_numbers(key)
+          (1..(key == 'AmbientLightMode' ? picker(cooling[key]).size : 7)).to_a
+        end
+
         # .NET's remainder by a +Step+ of 0 throws, so such a picker offers nothing.
         #
         # @param setting [Hash{String=>Object}, nil] a +Cooling+ setting with +Min+, +Max+ and +Step+

@@ -101,6 +101,14 @@ module Miele
         # @return [Boolean]
         def light_shown?(state) = !light_state(state).zero? && (zones_shown?(state) || quick_action_shown?(state))
 
+        # The light section shows the ambient light where its source reads a setting, and enables it with the
+        # light on.
+        #
+        # @param state [State]
+        # @param key [String] +AmbientLightMode+ or +Light+ in +Cooling+
+        # @return [Boolean]
+        def ambient_light_shown?(state, key) = !cooling[key].nil? && light_state(state) == 1 && zones_shown?(state)
+
         # @param state [State]
         # @return [Integer] 1 on, 2 off, 3 unknown (+State+ without +Light+), 0 none, as LightStateForOpCodeSource
         #   and LightStateForCoolingApiSource read +Light+ and +AmbientLightState+

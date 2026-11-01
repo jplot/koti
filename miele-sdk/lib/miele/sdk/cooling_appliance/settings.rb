@@ -33,15 +33,21 @@ module Miele
           end
         end
 
-        # @param value [Integer] the mode's number on a BSH wine unit, the light's level on a Liebherr one
+        # @param value [Integer] the mode's number on a BSH wine unit, from 1 in its picker's order; the light's
+        #   level on a Liebherr one, 1 to 7
         # @return [void]
-        # @raise [ActionUnavailableError] but on a BSH wine unit, or a protocol 203 one neither KWTUS nor Rioja
+        # @raise [ActionUnavailableError] but on a BSH wine unit, or a protocol 203 one neither KWTUS nor Rioja, with
+        #   the light on and its setting listed, while the app shows its light section
+        # @raise [ArgumentError] for a number or level the app's picker or slider does not offer
         # @api public
         def ambient_light_mode=(value)
           bsh = protocol_version == 200
           require!(wine? && !rioja? && (bsh || (protocol_version == 203 && !kwtus?)),
                    'the app sets no ambient light on this appliance')
-          put('Cooling', bsh ? 'AmbientLightMode' : 'Light', Value: value)
+          key = bsh ? 'AmbientLightMode' : 'Light'
+          require!(ambient_light_shown?(state, key), 'the app shows no ambient light now')
+          require_offered!(value, ambient_light_numbers(key))
+          put('Cooling', key, Value: value)
         end
 
         # @param on [Boolean]

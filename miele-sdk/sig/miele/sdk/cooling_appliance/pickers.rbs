@@ -18,7 +18,11 @@ module Miele
 
         def api_targets: (Hash[String, untyped] target) -> Array[Integer]
 
+        def ambient_light_numbers: (String key) -> Array[Integer]
+
         def picker: (Hash[String, untyped]? setting) -> Array[Integer]
+
+        def cooling: () -> Hash[String, untyped]
 
         def opcode_targets: (Zone zone, State state) -> Array[Integer]
 

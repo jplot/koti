@@ -42,6 +42,10 @@ module Miele
 
         def light_shown?: (State state) -> bool
 
+        def ambient_light_shown?: (State state, String key) -> bool
+
+        def ambient_light_numbers: (String key) -> Array[Integer]
+
         def ice_maker?: () -> bool
 
         def wine?: () -> bool

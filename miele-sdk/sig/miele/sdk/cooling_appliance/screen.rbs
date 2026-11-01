@@ -30,6 +30,8 @@ module Miele
 
         def light_shown?: (State state) -> bool
 
+        def ambient_light_shown?: (State state, String key) -> bool
+
         def light_state: (State state) -> Integer
 
         def notice_before_holiday?: (State state) -> bool

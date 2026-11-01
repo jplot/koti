@@ -23,6 +23,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `take_photo(device)`: a MotionCam's photo on demand, sent as the app names the camera's family;
+  `Notification#image_resource` and `notification_media(space_id, notification_id)` give the photos of a
+  notification and their pre-signed addresses.
 - `current_member(space_id)`: the signed-in account's role and permissions in a space, which the app reads to
   offer only what the account may do; the README lists what the app checks before each shortcut.
 - `events(space_id)`: one feed of `Event`s (space, security, groups, rooms, devices, notifications) for a

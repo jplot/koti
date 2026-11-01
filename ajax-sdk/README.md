@@ -205,6 +205,8 @@ method (its service, for an `…/execute` path), which ends its Ruby name, start
 | `scenarios(space_id)`, `enable_scenario` / `disable_scenario(space_id, scenario_id)` | `stream_light_scenarios`, `set_scenario_state` |
 | `rooms(space_id)`, `groups(space_id)`, `current_member(space_id)` | the first message of `space_stream` |
 | `life_quality_history(device, from:, to:, step: :hour, time_zone: 'UTC')` | `life_quality_data_get_life_quality_data`, as a `LifeQualityHistory`: each measure by the start of its bucket |
+| `take_photo(device)` | `photo_on_demand_capture_photo`, with the camera's family as the app names it: `:cam`, `:cam_outdoor` or `:cam_fibra_base` |
+| `notification_media(space_id, notification_id)` | `notification_log_stream_notification_media`: each state of the notification's media, as an `Enumerator::Lazy` |
 
 Each shortcut calls a named method (below), so Steep checks its request and read-only mode refuses its
 commands. A device the shortcut does not fit raises `ArgumentError` before anything is sent; commands return
@@ -216,11 +218,31 @@ nil. They send what the app 3.59 sends, which differs from what one would guess 
 - `stream_hub_device` and `update_hub_device` do not cover relays, sockets, light switches or valves: their
   settings have no known path. A fire alarm resets through the cloud only on an EN54 hub.
 
-Verified so far: the reads `rooms`, `current_member`, `hub_details` and `device_details`, against the real
+Verified so far: the reads `rooms`, `current_member`, `hub_details`, `device_details` and `notification_media`, against the real
 cloud and read-only; `groups` answered an empty list. No shortcut that writes has been tried on a real device,
 and none has met a shutter, lock, dimmer, valve, LifeQuality or EN54 device. The gateway refuses `scenarios`
 to the live specs' account (`ReadError`, `:permission_denied`), which has neither `scenario_edit` nor wide
 `manage_automation_scenarios`: the app would not offer it either.
+
+### Photos
+
+A MotionCam takes photos on demand, and when it detects motion while armed. Either way they come as a
+notification (`:photo_on_demand…` or `:motion_detected`) whose `image_resource` lists them by status, and
+`notification_media` gives their addresses once they are ready:
+
+```ruby
+cloud.take_photo(camera) # the app's photo on demand button; nothing comes back
+note = cloud.notifications(space.id).find(&:image_resource)
+ready = cloud.notification_media(space.id, note.id).find do |media|
+  media.hub_notification_media&.images&.none? { it.status == :in_progress }
+end
+ready.hub_notification_media.images.map(&:url) # pre-signed https links: a browser shows them as they are
+```
+
+A request or an alarm gives 1 to 5 photos, as the camera's settings say; the app plays a series at 500 ms a
+photo. The links carry their signature and expire (`X-Amz-Expires`), so read them when they are needed; once
+the media itself has expired, `notification_media` raises `ReadError` `:media_expired`. An archive export
+comes the same way, as `archive_export_media`.
 
 ## Permissions
 
@@ -261,7 +283,8 @@ were not all followed):
 | `devices`, `rooms` | space `structure_visibility` |
 | `groups` | it lists only the groups whose entry is `:enabled` |
 | `notifications` | `notification_info.are_notifications_accessible`, never `event_visibility` |
-| `photo_on_demand_capture_photo` | the device's entry in the hub's `photo_on_demand_device_permissions`: always, while armed, or after an alarm until `capture_photo_available_until`; the device not bypassed |
+| `take_photo` | the device's entry in the hub's `photo_on_demand_device_permissions`: always, while armed, or after an alarm until `capture_photo_available_until`; the device not bypassed, and not offline, updating, in a walk test or saving its battery |
+| `notification_media` | the photos' `visibility`: everyone, or a whitelist holding the account's id; an employee also needs the hub's photo viewing action |
 
 Wide permissions count only with the hub feature `wide_access_first_iteration`. A plain user or an admin has
 the `wide_space_permissions` the gateway sends; the app gives a Pro or an employee all of them when it has

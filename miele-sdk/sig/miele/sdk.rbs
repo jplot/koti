@@ -4,7 +4,7 @@ module Miele
 
     def self.discover: (?timeout: Integer | Float, ?address: String, ?port: Integer) -> Array[Discovery::Appliance]
 
-    def self.appliance: (String host) -> Appliance
+    def self.appliance: (String host, ?cloud: Cloud::Channel?) -> Appliance
 
     self.@cloud: Cloud::Channel?
 
@@ -12,7 +12,7 @@ module Miele
 
     def self.account?: () -> bool
 
-    def self.appliances: () -> Array[Appliance]
+    def self.appliances: (?through_cloud: bool) -> Array[Appliance]
 
     def self.cloud: () -> Cloud::Channel?
 

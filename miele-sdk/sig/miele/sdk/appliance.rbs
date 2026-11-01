@@ -15,7 +15,7 @@ module Miele
 
       @module_host: String?
 
-      @in_cloud: Array[String]
+      @cloud: Cloud::Channel?
 
       @device_type: Symbol?
 
@@ -29,8 +29,8 @@ module Miele
 
       def self.for: (String host, ?ident: Schema::DeviceIdentification?, **untyped) -> Appliance
 
-      def initialize: (String host, ?sleeper: _Sleeper, ?fab: String?, ?module_host: String?,
-                       ?ident: Schema::DeviceIdentification?) -> void
+      def initialize: (String host, ?sleeper: _Sleeper, ?fab: String?, ?ident: Schema::DeviceIdentification?,
+                       ?cloud: Cloud::Channel?) -> void
 
       def fab: () -> String
 
@@ -79,8 +79,6 @@ module Miele
       private
 
       def send_request: (Symbol method, String path, ?body: String?, ?kind: Symbol) -> Connection::Response
-
-      def cloud_request: (Symbol method, String path, String? body, Symbol kind, String? resource) -> Connection::Response
 
       def identity: () -> Schema::DeviceIdentification
 

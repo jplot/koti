@@ -27,16 +27,16 @@ module Miele
       # @param host [String] address or +.local+ name of the appliance
       # @param sleeper [#call] waits the given number of seconds
       # @param fab [String, nil] its fabrication number, when already known
-      # @param module_host [String, nil] the mDNS name of its Wi-Fi module, which the cloud routes Dop1 by
       # @param ident [Schema::DeviceIdentification, nil] its identity, which gives its type and protocol without a read
-      def initialize(host, sleeper: method(:sleep), fab: nil, module_host: nil, ident: nil)
+      # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, as the app does once it is paired;
+      #   without one, every request goes to the appliance itself
+      def initialize(host, sleeper: method(:sleep), fab: nil, ident: nil, cloud: nil)
         @host = host
         @identity = ident
         @sleeper = sleeper
         @fab = fab
-        @module_host = module_host
+        @cloud = cloud
         @local = Connection.local(host)
-        @in_cloud = [] #: Array[String]
       end
 
       # @return [String] fabrication number, which names the appliance in every device path
@@ -170,8 +170,7 @@ module Miele
 
       private
 
-      # Local first: a resource the appliance answers 404 to goes, for good, to the cloud when an account is set. A
-      # member of +State+ counts on its own: a fridge's +State/ProcessAction+ may be cloud-only while +State+ is not.
+      # A Dop1 request through the cloud names the module in +Host+, as the app does.
       #
       # @param method [Symbol]
       # @param path [String]
@@ -179,28 +178,16 @@ module Miele
       # @param kind [Symbol] +:json+ or +:dop2+
       # @return [Connection::Response]
       def send_request(method, path, body: nil, kind: :json)
-        resource = path[%r{\A/Devices/\d+/(State/[^/?]+|[^/?]+)}, 1]
-        return cloud_request(method, path, body, kind, resource) if @in_cloud.include?(resource)
+        cloud = @cloud or return @local.request(method, path, body:, kind:)
 
-        @local.request(method, path, body:, kind:)
-      rescue NotFoundError
-        raise unless resource && !@in_cloud.include?(resource) && Sdk.cloud
-
-        @in_cloud << resource
-        cloud_request(method, path, body, kind, resource)
-      end
-
-      # @return [Connection::Response]
-      def cloud_request(method, path, body, kind, resource)
-        cloud = Sdk.cloud or raise ConfigurationError, 'the Miele account is needed to reach the cloud'
-        cloud.request(method, path, body:, kind:, host: resource == 'DOP' ? module_host : nil)
+        cloud.request(method, path, body:, kind:, host: (module_host if path.match?(%r{\A/Devices/\d+/DOP/})))
       end
 
       # @return [Schema::DeviceIdentification]
       def identity = @identity ||= ident
 
-      # @return [String, nil]
-      def module_host = @module_host ||= Sdk.cloud&.devices&.find { it.fab == fab }&.host
+      # @return [String, nil] the mDNS name of its Wi-Fi module, which the cloud routes Dop1 by
+      def module_host = @module_host ||= @cloud&.devices&.find { it.fab == fab }&.host
 
       # @param resource [String]
       # @return [Hash{String=>Object}]

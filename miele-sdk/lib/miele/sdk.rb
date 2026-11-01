@@ -113,18 +113,21 @@ module Miele
     def self.discover(timeout: 4, address: '224.0.0.251', port: 5353) = Discovery.discover(timeout:, address:, port:)
 
     # @param host [String] address or +.local+ name of the appliance
+    # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, such as {.cloud}; locally without one
     # @return [Appliance] an instance of its family's class, such as an {Oven}
     # @api public
-    def self.appliance(host) = Appliance.for(host)
+    def self.appliance(host, cloud: nil) = Appliance.for(host, cloud:)
 
-    # @return [Array<Appliance>] the appliances paired with the Miele account, reached by their module's name
+    # @param through_cloud [Boolean] whether to reach them through the account's cloud rather than locally, by the
+    #   name of their module
+    # @return [Array<Appliance>] the appliances paired with the Miele account
     # @raise [ConfigurationError] without an account
     # @api public
-    def self.appliances
+    def self.appliances(through_cloud: false)
       channel = cloud or raise ConfigurationError, 'the Miele account is needed to list its appliances'
       channel.devices.map do |device|
         ident = device.ident&.then { Schema::DeviceIdentification.from(it) }
-        Families.claim(ident).new(device.host, fab: device.fab, module_host: device.host, ident:)
+        Families.claim(ident).new(device.host, fab: device.fab, ident:, cloud: (channel if through_cloud))
       end
     end
 

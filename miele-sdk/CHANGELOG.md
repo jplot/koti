@@ -10,12 +10,14 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - **Breaking:** an appliance no longer turns to the cloud on its own after a local 404: it is reached
-  locally, raising `NotFoundError`, unless given a cloud (`Appliance.new(host, fab:, cloud:)` or
-  `Miele::Sdk.appliances(through_cloud: true)`), and then every request goes through it.
-  `Appliance.new` no longer takes `module_host:`: the cloud given lists it. A hood's `color_flow`
-  reads a 404 as none only through the cloud, and raises it locally.
-- **Breaking:** `Oven#select_program` raises the first refusal of a required parameter, or a parameter
-  missing from 1/1574, once the program is selected, instead of ignoring it.
+  locally, raising `NotFoundError`, unless given a cloud (`Appliance.for(host, fab:, cloud:)` or
+  `Miele::Sdk.appliances(through_cloud: true)`), and then every request under `/Devices/` goes
+  through it; `through_cloud?` tells which. `Appliance.new` no longer takes `module_host:`: the cloud
+  given lists it. A hood's `color_flow` and `configure_color_flow` read a 404 as none only through
+  the cloud, and raise it locally.
+- **Breaking:** `Oven#select_program` raises, once the program is selected, the first refusal of a
+  required parameter, or an `ActionFailedError` for a parameter missing from 1/1574, instead of
+  ignoring them.
 - **Breaking:** `start`, `stop`, `pause`, `light_on` and `light_off` are gone from `Appliance`: the
   Miele app sends them differently in each family, and they come back that way, ovens first.
 - **Breaking:** a hood's `fan_level=` refuses while its screen is pushed in, and asks to `wake` a hood

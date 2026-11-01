@@ -293,8 +293,9 @@ hood.supervise('000111222333', show: true)              # Con@ctivity One
 
 Con@ctivity Plus makes a hood follow hobs. As in the app, `connect_hob` and `disconnect_hob` change
 one hob in the list `services` shows and switch Con@ctivity Plus on while one is left; the SDK
-refuses them unless `services` shows it available, as the app hides it. ColorFlow reads 404, and 500 on a DOP2 hood, as none, and an
-interval the app does not know as 10 seconds; the SDK refuses to set it on a hood that has none.
+refuses them unless `services` shows it available, as the app hides it. ColorFlow reads a 404
+through the cloud, and a 500 on a DOP2 hood, as none, and an interval the app does not know as 10
+seconds; the SDK refuses to set it on a hood that has none. Locally, its 404 raises `NotFoundError`.
 `supervise` writes `SuperVision/{fab}` of the appliance that shows another one, with `Show` alone:
 the app leaves `Signal` out. ColorFlow and Con@ctivity Plus have been read from a real hood through
 the cloud.
@@ -371,8 +372,9 @@ Each of these actions makes the checks the app's rules make before it, and raise
   program on 1/1585 (ProgId 0), and no query 16011 or 16013 on 1/131. The SDK then reads 1/1574
   every 3 seconds until it shows the program, as the app does, retrying a read refused with other
   than a 4xx after 1.5^n seconds (the n-th in a row), and writes the parameters the program
-  requires, as `start` does: the first refusal of those, or a parameter missing from 1/1574,
-  raises once the program is selected, where the app only logs it. When
+  requires, as `start` does. Where the app only logs it, the first refusal of those raises once
+  the program is selected, and so does a parameter missing from 1/1574, as an
+  `ActionFailedError`. When
   1/1574 has not shown the program within the app's 15 seconds, it raises
   `Miele::Sdk::ActionFailedError` and writes no parameter.
 - A parameter needs remote control without local control and a program on the oven, and a mobile
@@ -609,8 +611,7 @@ and presentation light by its rank. On protocol 201 the super mode first gets a 
 whatever that write answers, then waits 500 ms. An Opcode appliance takes its target through
 `Oc85`, in whole °C, and its super mode as `ProcessAction` on `State/ProcessAction`. The app reads
 no `RemoteEnable` and checks nothing before these writes; the SDK refuses what the app shows no
-control for, such as an ice maker the appliance lacks or a mode it lists no values for. A `State`
-member such as `State/ProcessAction` may answer 404 locally while the cloud serves it.
+control for, such as an ice maker the appliance lacks or a mode it lists no values for.
 
 The SDK sends only what the app's pickers offer, and raises `ArgumentError` for anything else. A
 zone's target is one of its `TargetTemp` `AllValues`, else `Min` to `Max` by `Step`, else its
@@ -744,10 +745,11 @@ ovens.first.dop2(1, 1585)                  # through the cloud, as the app reads
 ```
 
 **Which way.** An appliance sends every request locally, and a resource its module does not serve
-raises `NotFoundError`. Given a cloud (`Appliance.new(host, fab:, cloud:)`, or `through_cloud: true`),
-it sends every request there instead, under `/V2`; a Dop1 request names the module in `Host`, as the
-app does. Which way to reach an appliance is the caller's. A hood's ColorFlow reads a 404 as none
-only through the cloud, as the app does; locally it raises it.
+raises `NotFoundError`. Given a cloud (`Appliance.for(host, fab:, cloud:)`, or `through_cloud: true`),
+it sends every request under `/Devices/` there instead, under `/V2`; a Dop1 request names the module
+in `Host`, as the app does. The module's own resources (`info`, `host_info`, `software_update`) have
+no counterpart in the cloud and are still read from the module. Which way to reach an appliance is
+the caller's. A hood's ColorFlow reads a 404 as none only through the cloud, as the app does.
 With an account and neither `group_id` nor `group_key`, the local channel signs with the household
 key the account holds (`/V2/GroupKeyId/`).
 

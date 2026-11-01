@@ -110,6 +110,7 @@ module Miele
         # @return [void]
         # @raise [ArgumentError] for another interval
         # @raise [ActionUnavailableError] when the hood has no ColorFlow
+        # @raise [NotFoundError] when the hood, reached locally, answers 404
         # @api public
         def configure_color_flow(active:, interval: 10)
           raise ArgumentError, "no ColorFlow interval #{interval}" unless COLOR_FLOW_INTERVALS.include?(interval)

@@ -200,6 +200,12 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError, /no ice maker state/)
   end
 
+  it 'switches an ice maker in alarm, whose switch the app still shows' do
+    resources['Cooling']['IceMaker'] = { 'Value' => 3 }
+    fridge.ice_maker = false
+    expect(written).to eq([['PUT', 'Cooling/IceMaker', { 'Value' => 2 }]])
+  end
+
   it 'refuses the ice maker at Status 1 or 255, as the app hides its switch' do
     [1, 255].each do |status|
       resources['State'] = { 'Status' => status }
@@ -304,6 +310,12 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
       resources.merge!('State' => { 'Status' => 5 }, 'Cooling' => { 'HumidityControl' => { 'Value' => -1 } })
       expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+
+    it 'sets a humidity level in a failure with a door signal, as the app still shows it' do
+      resources['State'] = { 'Status' => 8, 'SignalDoor' => true, 'SignalFailure' => false }
+      fridge.humidity = :low
+      expect(written).to eq([['PUT', 'Cooling/HumidityControl', { 'Value' => 1 }]])
     end
 
     it 'refuses a humidity level off its Min to Max by Step, as the app offers none' do

@@ -15,7 +15,8 @@ module Miele
         # @api public
         def ice_maker=(on)
           require!(settings_listed?(state), 'the app shows no settings at Status 1 or 255')
-          require!(ice_maker? && [1, 2, 3].include?(cooling.dig('IceMaker', 'Value')), 'the app shows no ice maker')
+          require!(ice_maker?, 'the appliance has no ice maker')
+          require!([1, 2, 3].include?(cooling.dig('IceMaker', 'Value')), 'the appliance reports no ice maker state')
           put('Cooling', 'IceMaker', Value: on ? 1 : 2)
         end
 

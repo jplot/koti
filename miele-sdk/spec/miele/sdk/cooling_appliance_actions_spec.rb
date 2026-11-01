@@ -195,9 +195,9 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
 
   it 'refuses the ice maker without a state, as the app hides its switch', :aggregate_failures do
     resources['Cooling']['IceMaker'] = { 'Value' => 0 }
-    expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError, /no ice maker state/)
     resources['Cooling'].delete('IceMaker')
-    expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError, /no ice maker state/)
   end
 
   it 'refuses the ice maker at Status 1 or 255, as the app hides its switch' do
@@ -277,7 +277,7 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 19, 'ProtocolVersion' => 201) }
 
     it 'refuses the ice maker' do
-      expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError, /has no ice maker/)
     end
   end
 

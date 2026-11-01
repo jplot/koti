@@ -10,10 +10,11 @@ module Miele
 
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] on an appliance without an ice maker
+        # @raise [ActionUnavailableError] on an appliance without an ice maker, or whose +IceMaker+ is not 1, 2 or 3,
+        #   where the app hides its switch
         # @api public
         def ice_maker=(on)
-          require!(ice_maker?, 'the appliance has no ice maker')
+          require!(ice_maker? && [1, 2, 3].include?(cooling.dig('IceMaker', 'Value')), 'the app shows no ice maker')
           put('Cooling', 'IceMaker', Value: on ? 1 : 2)
         end
 

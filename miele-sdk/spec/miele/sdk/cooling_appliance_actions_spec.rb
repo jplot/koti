@@ -13,7 +13,8 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
                      'Party' => { 'Value' => 2, 'SetValues' => [] },
                      'DoorAlarmTime' => { 'Value' => 120, 'Min' => 60, 'Max' => 300, 'Step' => 60 },
                      'Humidifier' => { 'Value' => 0, 'Min' => 0, 'Max' => 2, 'Step' => 1 },
-                     'PerfectFresh' => { 'Value' => 1, 'Min' => 0, 'Max' => 2, 'Step' => 1 } },
+                     'PerfectFresh' => { 'Value' => 1, 'Min' => 0, 'Max' => 2, 'Step' => 1 },
+                     'IceMaker' => { 'Value' => 1 } },
       'Cooling/1' => { 'ZoneState' => { 'Value' => 1, 'Type' => 20, 'Position' => 3 }, 'Fan' => { 'Value' => 2 },
                        'SuperMode' => { 'Value' => 2, 'SetValues' => [1, 2] }, 'VarioCool' => { 'Value' => 2 },
                        'TargetTemp' => { 'Value' => -1800, 'Min' => -2400, 'Max' => -1400, 'Step' => 200 } },
@@ -190,6 +191,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect { fridge.humidifier = -1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect { fridge.door_alarm_delay = 60 }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect(written).to be_empty
+  end
+
+  it 'refuses the ice maker without a state, as the app hides its switch', :aggregate_failures do
+    resources['Cooling']['IceMaker'] = { 'Value' => 0 }
+    expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    resources['Cooling'].delete('IceMaker')
+    expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
   end
 
   it 'refuses PerfectFresh on protocol 201, where the app reads none', :aggregate_failures do

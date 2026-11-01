@@ -508,9 +508,7 @@ exchange.close                                # cancels the call, as the app end
 The call ends when the gateway ends it, when a message is a failure (`each` raises it), or at `close`;
 it never half-closes. `write` builds its message at once, so a request the path does not take raises
 there; once `each` has returned, `write` raises `IOError`, and a request written between the gateway's end
-and that return is dropped. An exchange runs once; without a block, `each` returns an Enumerator. Before
-the first message, an expired session logs in again and the call starts over with every request written
-so far.
+and that return is dropped. An exchange runs once; without a block, `each` returns an Enumerator.
 
 ## Errors
 
@@ -520,6 +518,8 @@ so far.
 - `Cloud::ReadError(reason)` — the gateway refused a read.
   Both are `Cloud::RefusedError`s, with the `failure` the gateway answered and its `details`.
 - `Cloud::ReadOnlyError` — a command was blocked because the client is read-only.
+- `GRPC::Unauthenticated` — the gateway no longer takes the session: the client drops it, as the app does,
+  and the next call logs in again.
 - `Cloud::UnknownMethodError` / `Cloud::UnknownMessageError` — an unknown path or message name.
 - `Sia::FrameError` — a frame is not valid DC-09 (`Sia::Message.parse`); the receiver stays silent on it.
 - `ConfigurationError` — a missing or malformed setting: no password, no `sia_account` for `sia_events`,

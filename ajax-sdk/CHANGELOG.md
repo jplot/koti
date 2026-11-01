@@ -19,6 +19,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   and reads back the notifications created since the last one yielded; `sleeper:` is gone.
 - **Breaking:** the SIA receiver no longer rescues an exception of its block to print it with `warn` and
   go on: the exception ends that hub connection's thread, which Ruby reports, and the connection with it.
+- **Breaking:** an `UNAUTHENTICATED` answer no longer logs in again and replays the call: the client drops
+  the session, as the app does, and raises `GRPC::Unauthenticated`; the next call logs in again.
+  `Session#login` no longer takes the refused token, and `Session#forget` drops it.
 - `notifications` reads 20 by default (it read 50), the most the app asks for.
 - **Breaking:** `Device.from` takes the typed `LightDeviceItem` and the `space_id:`.
 - **Breaking:** `call`, `unary`, `server_stream`, `client_stream` and `bidi` return generated values

@@ -129,6 +129,15 @@ RSpec.describe Miele::Sdk::Oven do
     end
   end
 
+  context 'when the oven is not connected' do
+    def state_answer = [200, {}, JSON.generate('Status' => 255, 'RemoteEnable' => [15, 0, 0])]
+
+    it 'does not switch off, as the app disables its settings switch', :aggregate_failures do
+      expect { appliance.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError, /not connected/)
+      expect(puts_sent).to be_empty
+    end
+  end
+
   context 'when State answers 500' do
     def state_answer = [500, {}, '']
 

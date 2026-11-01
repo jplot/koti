@@ -191,7 +191,7 @@ after three attempts where the app sets no limit. `power_off` writes 1 to the sa
 `Miele::Sdk::ActionUnavailableError` on a Dop1 oven, which the app does not switch. As the app's
 offline screen offers it, `power_on` needs remote control or mobile start, and refuses an H2 oven;
 as its settings switch offers it, `power_off` needs remote control without local control, or
-mobile start alone.
+mobile start alone, and an oven that is connected (`Status` other than 255).
 
 Starting, stopping or pausing a program, and the light, take a different request in each family
 of the app: a user request on DOP2 leaf 2/1583 for DOP2 appliances, `ProcessAction` for Dop1

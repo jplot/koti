@@ -36,7 +36,7 @@ module Miele
       #
       # @return [void]
       # @raise [ActionUnavailableError] on a Dop1 oven, or without remote control or mobile start, or under local
-      #   control
+      #   control, or not connected
       # @raise [ResponseError] if the appliance refuses with another status
       # @api public
       def power_off
@@ -161,8 +161,7 @@ module Miele
         require!(state.remote_control? || state.mobile_start?, 'the oven is not remote enabled')
       end
 
-      # The app's settings switch, the loosest of its three switch-off paths, takes any RemoteEnableType but None and
-      # LocalControl.
+      # UpdateEnabledState of the app's settings switch, the loosest of its three switch-off paths.
       #
       # @return [void]
       # @raise [ActionUnavailableError]
@@ -171,6 +170,7 @@ module Miele
         state = self.state
         require!(under_remote_control?(state) || (!state.remote_control? && state.mobile_start?),
                  'the oven is not remote enabled, or is under local control')
+        require!(state.status != :not_connected, 'the oven is not connected')
       end
 
       # The appliance state on 2/1586: 4 switches on, 1 off.

@@ -413,7 +413,7 @@ mobile start and a running or paused program; `stop` needs no mobile start, only
 runs, pauses or waits awake, stop or cancel offered, and a dishwasher not locked; `cancel` follows
 the app's details bar, where it is the second button only while neither pause nor stop comes
 first, from Status 3 to 6, under mobile start, while a program runs or pauses, or while one waits
-under remote control;
+under remote control (the bar's other Cancel, which reverts the selected extras, is left out);
 `start_delayed` needs a program selected (Status 3) under mobile start, the dishwasher not locked. A
 DOP2 dishwasher refuses while it shows info 700. A Dop1 dishwasher takes `ProcessAction` on its
 `State`, as the app's DeviceStateDto keeps it, its program and extras on 8906 and its delayed start
@@ -621,7 +621,8 @@ hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the f
   changed member in the wire type it was read in, and raises `ArgumentError` for a member it did not
   read, as the app's setters do.
 - `modify(klass, address) { |value| value.with(…) }` reads an object, lets the block change it and
-  writes it back at that address.
+  writes it back with the header the appliance answered, as the app's dishwasher and laundry modules
+  do.
 - A Dop1 object decodes its sections, bit fields and byte order (`from(bytes)`), and `to_bytes`
   gives what a write section sends.
 - `state.extended_state` decodes `ExtendedState` into the object the app builds from it: the hood's

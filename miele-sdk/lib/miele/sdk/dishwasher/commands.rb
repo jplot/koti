@@ -55,9 +55,16 @@ module Miele
         # @raise [ActionUnavailableError] unless it runs, pauses or waits awake, offers stop or cancel, is not locked
         #   and shows no info 700
         # @api public
-        def stop = stop_with(:stop, :cancel)
+        def stop
+          state = checked_state
+          running = [5, 6].include?(status(state)) || (status(state) == 4 && [1, 255].include?(standby(state)))
+          offered = offered?(:stop) || offered?(:cancel)
+          require!(!locked_in?(state) && offered && running, 'the dishwasher cannot stop now')
+          run(state, :stop)
+        end
 
-        # The app sends Cancel from its details bar alone (ActionBarComponentsRule), as its second button.
+        # The app sends Cancel as the second button of its details bar (ActionBarComponentsRule). Its other Cancel,
+        # the button that reverts the selected extras when no action is offered, is left out.
         #
         # @return [void]
         # @raise [ActionUnavailableError] unless the bar shows (Status 3 to 6, not asleep waiting to start, not
@@ -155,17 +162,6 @@ module Miele
           return pfd10? if id == 20_064
 
           dop2? && SETTINGS.include?(id) && %w[G38 G58 G7].any? { tech_type.to_s.start_with?(it) }
-        end
-
-        # @param request [Symbol]
-        # @param alternatives [Array<Symbol>] other requests whose offer allows it
-        # @return [void]
-        def stop_with(request, *alternatives)
-          state = checked_state
-          running = [5, 6].include?(status(state)) || (status(state) == 4 && [1, 255].include?(standby(state)))
-          offered = [request, *alternatives].any? { offered?(it) }
-          require!(!locked_in?(state) && offered && running, "the dishwasher cannot #{request} now")
-          run(state, request)
         end
 
         # @param state [State]

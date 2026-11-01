@@ -34,6 +34,7 @@ module Hue
         # @return [void]
         # @raise [AuthenticationError] if no client key is configured
         # @raise [ConnectionError] if the DTLS handshake fails
+        # @raise [ResponseError] if the bridge refuses the start or the stop
         # @api public
         def stream
           config = Sdk.config

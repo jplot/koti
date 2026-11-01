@@ -39,19 +39,43 @@ RSpec.describe Miele::Sdk::WarmingDrawer do
 
   def state(status, remote, **given) = resources['State'] = { 'Status' => status, 'RemoteEnable' => remote, **given }
 
-  it 'switches on and off with 1101, as the app does' do
+  it 'switches on and off with 1101 while idle, as the app does' do
+    state(10, [15, 0, 1])
     drawer.power_on
     drawer.power_off
     expect(requests).to eq(%w[110102000102 110102000103])
   end
 
+  it 'switches on once finished, or off with its door open' do
+    state(7, [15, 0, 1])
+    drawer.power_on
+    state(1, [15, 0, 1], 'SignalDoor' => true)
+    drawer.power_on
+    expect(requests).to eq(%w[110102000102 110102000102])
+  end
+
+  it 'refuses to switch on while on or running, as the app does', :aggregate_failures do
+    expect { drawer.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    state(5, [15, 0, 1])
+    expect { drawer.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(requests).to be_empty
+  end
+
+  it 'refuses to switch off once off or finished, as the app does', :aggregate_failures do
+    state(1, [15, 0, 1])
+    expect { drawer.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    state(7, [15, 0, 1])
+    expect { drawer.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(requests).to be_empty
+  end
+
   it 'raises when the drawer refuses a write' do
     resources['ack'] = '02'
-    expect { drawer.power_on }.to raise_error(Miele::Sdk::NotAcceptedError)
+    expect { drawer.power_off }.to raise_error(Miele::Sdk::NotAcceptedError)
   end
 
   it 'refuses to switch on under local control', :aggregate_failures do
-    state(2, [7, 0, 1])
+    state(1, [7, 0, 1])
     expect { drawer.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect(requests).to be_empty
   end

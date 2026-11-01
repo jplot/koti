@@ -6,12 +6,15 @@ module Miele
       # The actions of the app's drawer module, each after the rule the app enables it by: Dop1 writes on 1101 and
       # 9781, which raise {NotAcceptedError} on an Ack other than 1, and the cup warm-up in +services+.
       module Commands
+        # The app's settings switch shows off, and so offers on, in these states only.
+        #
         # @return [void]
-        # @raise [ActionUnavailableError] without mobile start, under local control, or not connected
+        # @raise [ActionUnavailableError] without mobile start, under local control, or unless off, off with the door
+        #   open, finished or idle
         # @api public
         def power_on
           state = self.state
-          require!(switchable?(state) && !%i[unknown not_connected].include?(drawer_state(state)),
+          require!(switchable?(state) && %i[off off_and_door_open finished idle].include?(drawer_state(state)),
                    'the drawer cannot be switched on now')
           write_device_action(2)
         end
@@ -19,11 +22,13 @@ module Miele
         # The app's settings switch, action bar and dashboard each allow it; the SDK when any of them does.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] without mobile start, under local control, or not connected
+        # @raise [ActionUnavailableError] without mobile start, under local control, or off, off with the door open,
+        #   finished or not connected
         # @api public
         def power_off
           state = self.state
-          require!(switchable?(state) && drawer_state(state) != :not_connected, 'the drawer cannot be switched off now')
+          off = %i[off off_and_door_open finished not_connected].include?(drawer_state(state))
+          require!(switchable?(state) && !off, 'the drawer cannot be switched off now')
           write_device_action(3)
         end
 

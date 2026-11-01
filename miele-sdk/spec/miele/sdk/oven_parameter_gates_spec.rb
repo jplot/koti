@@ -76,6 +76,12 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to be_empty
   end
 
+  it 'sends and reads nothing for no option, even while the app hides the options', :aggregate_failures do
+    serve(type: 1)
+    expect { oven.set_options }.not_to raise_error
+    expect(fake.requests.map(&:path)).not_to include(a_string_including('/DOP2/'))
+  end
+
   it 'refuses an option the oven does not make readable, and writes the others', :aggregate_failures do
     serve(parameters: { 27 => dop2_field(:struct, { 1 => dop2_field(:u8, 1), 2 => dop2_field(:bool, false) }) })
     expect { oven.set_options(keep_warm: true) }.to raise_error(Miele::Sdk::ActionUnavailableError, /hides/)

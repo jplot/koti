@@ -82,6 +82,8 @@ module Miele
         def set_options(rapid_heating: nil, pre_heating: nil, crisp: nil, rapid_cooling: nil, keep_warm: nil)
           options = { 21 => rapid_heating, 24 => pre_heating, 25 => crisp, 26 => rapid_cooling, 27 => keep_warm }
           options = options.compact
+          return if options.empty?
+
           prog_id = selected_program(editable_options(options.keys))
           options.each { |id, on| write_parameter(prog_id, id, :bool, on) }
         end

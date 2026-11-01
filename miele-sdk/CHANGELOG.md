@@ -9,6 +9,13 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** an appliance no longer turns to the cloud on its own after a local 404: it is reached
+  locally, raising `NotFoundError`, unless given a cloud (`Appliance.new(host, cloud:)`,
+  `Miele::Sdk.appliance(host, cloud: Miele::Sdk.cloud)`, `Miele::Sdk.appliances(through_cloud: true)`),
+  and then every request goes through it. `Appliance.new` no longer takes `module_host:`: the cloud
+  given lists it.
+- **Breaking:** `Oven#select_program` raises the first refusal of a required parameter, or a parameter
+  missing from 1/1574, once the program is selected, instead of ignoring it.
 - **Breaking:** `start`, `stop`, `pause`, `light_on` and `light_off` are gone from `Appliance`: the
   Miele app sends them differently in each family, and they come back that way, ovens first.
 - **Breaking:** a hood's `fan_level=` refuses while its screen is pushed in, and asks to `wake` a hood
@@ -96,8 +103,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   uses, and `State#extended_state` for hoods, hobs and Dop1 ovens.
 - The Miele cloud next to the local channel, as the Miele app uses it: the cloud and login system of
   the account's country from the locales the app reads, MCS login or CIAM code exchange, a token
-  renewed once across threads and kept in `token_file`, requests under `/V2`, local first and the
-  cloud on a 404, `Miele::Sdk.appliances`, and the household key read from the account.
+  renewed once across threads and kept in `token_file`, requests under `/V2` for an appliance given
+  the cloud, `Miele::Sdk.appliances`, and the household key read from the account.
 
 - `services`, the lower-case resource the Miele app reads, which EK057 and EK039W modules do not
   serve locally.

@@ -1,8 +1,8 @@
 # miele-sdk
 
 Unofficial Ruby SDK for Miele@home appliances. It talks to them on the local network with the
-household key and, where an appliance does not answer there, through the Miele cloud, as the Miele
-app does.
+household key, or through the Miele cloud when given the account's, as the Miele app does once an
+appliance is paired.
 
 > **Unofficial.** This gem is not affiliated with, endorsed by or sponsored by Miele.
 > Miele and Miele@home are trademarks of Miele & Cie. KG.
@@ -371,7 +371,8 @@ Each of these actions makes the checks the app's rules make before it, and raise
   program on 1/1585 (ProgId 0), and no query 16011 or 16013 on 1/131. The SDK then reads 1/1574
   every 3 seconds until it shows the program, as the app does, retrying a read refused with other
   than a 4xx after 1.5^n seconds (the n-th in a row), and writes the parameters the program
-  requires, as `start` does; a refusal of those is ignored, as the app only logs it. When
+  requires, as `start` does: the first refusal of those, or a parameter missing from 1/1574,
+  raises once the program is selected, where the app only logs it. When
   1/1574 has not shown the program within the app's 15 seconds, it raises
   `Miele::Sdk::ActionFailedError` and writes no parameter.
 - A parameter needs remote control without local control and a program on the oven, and a mobile
@@ -608,8 +609,8 @@ and presentation light by its rank. On protocol 201 the super mode first gets a 
 whatever that write answers, then waits 500 ms. An Opcode appliance takes its target through
 `Oc85`, in whole °C, and its super mode as `ProcessAction` on `State/ProcessAction`. The app reads
 no `RemoteEnable` and checks nothing before these writes; the SDK refuses what the app shows no
-control for, such as an ice maker the appliance lacks or a mode it lists no values for, and a
-`State` member such as `State/ProcessAction` goes to the cloud on its own.
+control for, such as an ice maker the appliance lacks or a mode it lists no values for. A `State`
+member such as `State/ProcessAction` may answer 404 locally while the cloud serves it.
 
 The SDK sends only what the app's pickers offer, and raises `ArgumentError` for anything else. A
 zone's target is one of its `TargetTemp` `AllValues`, else `Min` to `Max` by `Step`, else its
@@ -724,9 +725,9 @@ empty `ExtendedState`, being off.
 
 After pairing, the Miele app reaches the appliances only through the Miele cloud, and some Wi-Fi
 modules serve no DOP2 locally (EK057 and EK039W answer 404). Given the account (an e-mail, a saved
-`cloud_token` or an existing `token_file`), the SDK uses the cloud where an appliance does not answer
-locally. A cloud built from the copy the app bundles, when the locales did not answer, is not kept: the
-next call asks them again.
+`cloud_token` or an existing `token_file`), `Miele::Sdk.cloud` opens its cloud, and an appliance given
+that cloud is reached through it. A cloud built from the copy the app bundles, when the locales did not
+answer, is not kept: the next call asks them again.
 
 ```ruby
 Miele::Sdk.configure do |config|
@@ -737,15 +738,17 @@ Miele::Sdk.configure do |config|
   config.password = ENV.fetch('MIELE_PASSWORD')
 end
 
-Miele::Sdk.appliances      # the account's appliances, reached by the name of their module
-oven.dop2(1, 1585)         # 404 locally, so through the cloud, and so is every later DOP2 request
+Miele::Sdk.appliances                      # the account's appliances, reached locally by their module's name
+Miele::Sdk.appliances(through_cloud: true) # the same, reached through the cloud
+oven = Miele::Sdk.appliance(host, cloud: Miele::Sdk.cloud)
+oven.dop2(1, 1585)                         # through the cloud, as the app reads it
 ```
 
-**Local first.** An appliance sends every request locally. When it answers 404 and an account is
-set, the request goes to the cloud under `/V2`, and every later one for the same resource of that
-appliance (DOP2, Dop1, `State`…) goes there directly; a Dop1 request names the module in `Host`, as
-the app does. Without an account nothing changes. With an account and neither `group_id` nor
-`group_key`, the local channel signs with the household key the account holds (`/V2/GroupKeyId/`).
+**Which way.** An appliance sends every request locally, and a resource its module does not serve
+raises `NotFoundError`. Given a cloud, it sends every request there instead, under `/V2`; a Dop1
+request names the module in `Host`, as the app does. Which way to reach an appliance is the caller's.
+With an account and neither `group_id` nor `group_key`, the local channel signs with the household
+key the account holds (`/V2/GroupKeyId/`).
 
 **Logging in.** The SDK reads the cloud of the account's country and how its accounts log in where
 the app reads them (`/V3/Locales` on `locales_host`), or from the copy the app bundles when they do

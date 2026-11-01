@@ -2,6 +2,7 @@ module Miele
   module Sdk
     class Oven < Appliance
       include ProgramSelection
+      include Selection
       include Requests
       include OvenState
 

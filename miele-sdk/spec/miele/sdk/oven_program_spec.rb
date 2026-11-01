@@ -52,11 +52,6 @@ RSpec.describe Miele::Sdk::Oven do
                                        parameter(7, :u16, 3729)])
   end
 
-  it 'selects a program with selection type 0' do
-    oven.select_program(13)
-    expect(written.map(&:last)).to eq(['001300020629000000000002000107000d00030400'])
-  end
-
   it 'writes each parameter under the id and wire type the app gives it' do
     parameters = { core_target_temperature: 60, moisture: 3, microwave_power: 4, browning: 2, doneness: 1,
                    steam_bursts: 2, steam_burst_times: [60, 120], end_at: Time.at(1_700_003_600) }

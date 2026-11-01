@@ -165,12 +165,12 @@ module Miele
           [55, 56, 57].find { requests.include?(it) } || 2
         end
 
-        # @param type [Symbol] +:info+ or +:message+
-        # @param id [Integer]
-        # @return [Boolean] whether 1/131 shows it
-        def shows?(type, id)
-          shown = type == :info ? notifications.infos : notifications.messages
-          Array(shown).any? { it.id && NOTIFICATION_IDS.fetch(type).to_i(it.id) == id }
+        # @param type [Symbol] +:info+, +:message+ or +:query+
+        # @param ids [Array<Integer>]
+        # @return [Boolean] whether 1/131 shows one of them
+        def shows?(type, *ids)
+          shown = notifications.then { { info: it.infos, message: it.messages, query: it.queries }.fetch(type) }
+          Array(shown).any? { it.id && ids.include?(NOTIFICATION_IDS.fetch(type).to_i(it.id)) }
         end
 
         # The app's Dop1 rule asks for a program of raw type 0, 1 or 2 (function, own, automatic) and ignores

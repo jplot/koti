@@ -4,8 +4,6 @@ module Miele
       module ProgramSelection : Appliance
         NOW: Integer
 
-        def select_program: (Integer | Symbol prog_id) -> void
-
         def target_temperature=: (Integer | Float celsius) -> void
 
         def core_target_temperature=: (Integer | Float celsius) -> void

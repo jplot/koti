@@ -32,5 +32,8 @@ module Miele
 
     class NotAcceptedError < Error
     end
+
+    class ActionFailedError < Error
+    end
   end
 end

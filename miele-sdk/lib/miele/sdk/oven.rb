@@ -6,6 +6,7 @@ module Miele
     # 15, 31, 39 and 45).
     class Oven < Appliance
       include ProgramSelection
+      include Selection
       include Requests
       include OvenState
 

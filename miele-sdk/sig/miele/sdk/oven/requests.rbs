@@ -48,7 +48,7 @@ module Miele
 
         def stop_request: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Integer
 
-        def shows?: (Symbol type, Integer id) -> bool
+        def shows?: (Symbol type, *Integer ids) -> bool
 
         def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
 

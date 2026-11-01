@@ -360,8 +360,13 @@ Each of these actions makes the checks the app's rules make before it, and raise
 
 - A Dop1 oven only stops, through `ProcessAction` 2, and only during a function, own or automatic
   program.
-- Selecting a program needs remote control without local control. The app's rule that also weighs
-  the oven's state has not been traced to the selection, so the SDK leaves it to the oven.
+- Selecting a program needs what the app's program selection needs (DetermineIsProgramWriteable):
+  remote control without local control, an oven neither off nor running nor waiting to start, no
+  program on 1/1585 (ProgId 0), and no query 16011 or 16013 on 1/131. The SDK then reads 1/1574
+  every 3 seconds until it shows the program, as the app does, and writes the parameters the
+  program requires, as `start` does; a refusal of those is ignored, as the app only logs it. When
+  1/1574 has not shown the program within the app's 15 seconds, it raises
+  `Miele::Sdk::ActionFailedError` and writes no parameter.
 - A parameter needs remote control without local control and a program on the oven, and a mobile
   start too once the program has started (waiting, running, paused or ended) or for program 361.
   `duration = 0` first moves the start to its minimum, as the app does.
@@ -378,13 +383,12 @@ Each of these actions makes the checks the app's rules make before it, and raise
   offered, and `stop_keeping_warm` message 20 shown.
 - A double oven's second cavity takes no action but `acknowledge(…, second_cavity: true)`.
 
-The app then waits until the oven shows the change; the SDK returns once the oven accepts the
-write, and `program_context` or `notifications` show what follows. Three app behaviours rest on
+The app then waits until the oven shows the change; but for a selection, the SDK returns once the
+oven accepts the write, and `program_context` or `notifications` show what follows. Two app behaviours rest on
 that wait and are left out: the switch-off that answers queries 4, 5, 21 and 27 as they appear,
-the raise of doneness or browning by one step after `continue_cooking` (write it with `doneness=`
-or `browning=`), and the required parameters written once a selected program shows (`start`
-writes them). None of these writes has been sent to a real oven: their bytes follow the app's
-code, and the reads have run against a real oven through the cloud.
+and the raise of doneness or browning by one step after `continue_cooking` (write it with
+`doneness=` or `browning=`). None of these writes has been sent to a real oven: their bytes follow
+the app's code, and the reads have run against a real oven through the cloud.
 
 ## Dishwashers
 
@@ -794,6 +798,7 @@ seconds (3 by default) after each read ends. A failed read ends the poll with it
 | `Miele::Sdk::RemoteControlDisabledError` | the appliance refuses a command (a `ResponseError`) |
 | `Miele::Sdk::ActionUnavailableError` | a check the app makes before an action fails: nothing is sent |
 | `Miele::Sdk::NotAcceptedError` | a Dop1 appliance acknowledges a write with anything but success |
+| `Miele::Sdk::ActionFailedError` | an appliance takes an action's write but does not show its effect within the app's 15 seconds |
 | `Miele::Sdk::Dop2::DecodeError` | a DOP2 leaf has an unknown type or ends too early |
 
 All of them inherit from `Miele::Sdk::Error`. A value out of range raises `ArgumentError` before

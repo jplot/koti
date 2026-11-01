@@ -1,0 +1,41 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module Selection : Appliance
+        POLLING_DELAY: Integer
+
+        ACTION_TIMEOUT: Integer
+
+        UNSUPPORTED_QUERIES: Array[Integer]
+
+        UNWRITABLE_STATES: Array[Symbol]
+
+        def select_program: (Integer | Symbol prog_id) -> void
+
+        def context: () -> Objects::Oven::GlobalDeviceContext
+
+        def program_context: () -> Objects::Oven::GlobalPsContext
+
+        private
+
+        def require_program_writable!: () -> void
+
+        def program_writeable?: (Objects::Oven::GlobalDeviceContext device) -> bool
+
+        def shown_program_context: (Integer id) -> Objects::Oven::GlobalPsContext
+
+        def require_dop2!: () -> void
+
+        def under_remote_control?: (?State state) -> bool?
+
+        def oven_state: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Symbol?
+
+        def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
+
+        def shows?: (Symbol type, *Integer ids) -> bool
+
+        def write_required_parameters: (Integer prog_id, Objects::Oven::GlobalPsContext context) -> void
+      end
+    end
+  end
+end

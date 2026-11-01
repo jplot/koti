@@ -3,22 +3,12 @@
 module Miele
   module Sdk
     class Oven < Appliance
-      # What the app's oven module writes through PsSelectMessage (2/1577): the program, then its parameters one
-      # by one.
+      # What the app's oven module writes through PsSelectMessage (2/1577) once a program is selected: its
+      # parameters, one by one.
       module ProgramSelection
         # +StartAt+ meaning now.
         NOW = 0xFFFF_FFFF_FFFF_FFFF
         private_constant :NOW
-
-        # @param prog_id [Integer, Symbol] a value of +GLOBAL_EnumPrgId+
-        # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or without remote control
-        # @api public
-        def select_program(prog_id)
-          require_dop2!
-          require!(under_remote_control?, 'the oven selects a program only under remote control')
-          write_dop2(Messages.ps_select(Objects::Oven::GlobalEnumPrgId.to_i(prog_id), 0))
-        end
 
         # @param celsius [Numeric]
         # @raise [ActionUnavailableError] see {#set_parameter}

@@ -137,22 +137,28 @@ module Miele
 
         # @param value [Integer]
         # @return [void]
+        # @raise [ArgumentError] off +PerfectFresh+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def perfect_fresh=(value)
+          require_offered!(value, picker(cooling['PerfectFresh']))
           put('Cooling', 'PerfectFresh', Value: value)
         end
 
         # @param value [Integer]
         # @return [void]
+        # @raise [ArgumentError] off +Humidifier+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def humidifier=(value)
+          require_offered!(value, picker(cooling['Humidifier']))
           put('Cooling', 'Humidifier', Value: value)
         end
 
         # @param seconds [Integer]
         # @return [void]
+        # @raise [ArgumentError] off +DoorAlarmTime+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def door_alarm_delay=(seconds)
+          require_offered!(seconds, picker(cooling['DoorAlarmTime']))
           put('Cooling', 'DoorAlarmTime', Value: seconds)
         end
 

@@ -10,7 +10,10 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     { 'State' => { 'Status' => 5 },
       'Cooling' => { 'ZoneCounter' => 2, 'PresentationType' => 3,
                      'EcoMode' => { 'Value' => 2, 'SetValues' => [1, 2] },
-                     'Party' => { 'Value' => 2, 'SetValues' => [] } },
+                     'Party' => { 'Value' => 2, 'SetValues' => [] },
+                     'DoorAlarmTime' => { 'Value' => 120, 'Min' => 60, 'Max' => 300, 'Step' => 60 },
+                     'Humidifier' => { 'Value' => 0, 'Min' => 0, 'Max' => 2, 'Step' => 1 },
+                     'PerfectFresh' => { 'Value' => 1, 'Min' => 0, 'Max' => 2, 'Step' => 1 } },
       'Cooling/1' => { 'ZoneState' => { 'Value' => 1, 'Type' => 20, 'Position' => 3 }, 'Fan' => { 'Value' => 2 },
                        'SuperMode' => { 'Value' => 2, 'SetValues' => [1, 2] }, 'VarioCool' => { 'Value' => 2 },
                        'TargetTemp' => { 'Value' => -1800, 'Min' => -2400, 'Max' => -1400, 'Step' => 200 } },
@@ -93,21 +96,37 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect(written).to eq([['PUT', 'Cooling/EcoMode', { 'Value' => 1 }]])
   end
 
-  it 'sets the ice maker, the door alarm delay, PerfectFresh and the humidifier' do
+  it 'sets the ice maker, the door alarm delay and the humidifier' do
     fridge.ice_maker = false
     fridge.door_alarm_delay = 180
-    fridge.perfect_fresh = 2
     fridge.humidifier = 1
     expect(written.map { it[1..] }).to eq([['Cooling/IceMaker', { 'Value' => 2 }],
                                            ['Cooling/DoorAlarmTime', { 'Value' => 180 }],
-                                           ['Cooling/PerfectFresh', { 'Value' => 2 }],
                                            ['Cooling/Humidifier', { 'Value' => 1 }]])
+  end
+
+  it "refuses a door alarm delay or a humidifier off the appliance's Min to Max by Step", :aggregate_failures do
+    expect { fridge.door_alarm_delay = 90 }.to raise_error(ArgumentError)
+    expect { fridge.door_alarm_delay = 360 }.to raise_error(ArgumentError)
+    expect { fridge.humidifier = -1 }.to raise_error(ArgumentError)
+    expect { fridge.humidifier = 3 }.to raise_error(ArgumentError)
+    expect(written).to be_empty
   end
 
   it 'refuses a light, an ambient light or a humidity level on a fridge-freezer', :aggregate_failures do
     expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  end
+
+  context 'with a BSH fridge-freezer' do
+    let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 21, 'ProtocolVersion' => 200) }
+
+    it "sets PerfectFresh only to the appliance's Min to Max by Step", :aggregate_failures do
+      expect { fridge.perfect_fresh = 3 }.to raise_error(ArgumentError)
+      fridge.perfect_fresh = 2
+      expect(written).to eq([['PUT', 'Cooling/PerfectFresh', { 'Value' => 2 }]])
+    end
   end
 
   context 'with a fridge, which has no ice maker' do

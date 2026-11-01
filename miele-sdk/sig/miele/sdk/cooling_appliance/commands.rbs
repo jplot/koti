@@ -47,6 +47,10 @@ module Miele
 
         def target_choices: (Zone zone, State state) -> Array[Integer]
 
+        def picker: (Hash[String, untyped]? setting) -> Array[Integer]
+
+        def cooling: () -> Hash[String, untyped]
+
         def opcode?: () -> bool
 
         def modes: () -> Hash[Symbol, Mode]

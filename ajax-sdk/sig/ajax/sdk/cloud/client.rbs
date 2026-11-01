@@ -5,6 +5,7 @@ module Ajax
         include Resources
         include Methods
         include Shortcuts
+        include Exchanges
 
         IDENTITY: ^(String) -> String
         READ_WORDS: Array[String]

@@ -1,0 +1,53 @@
+module Ajax
+  module Sdk
+    module Cloud
+      class Exchange
+        interface _Converser
+          def converse: (String path, Exchange exchange) { (untyped) -> void } -> nil
+        end
+
+        POLL: Float
+
+        @client: _Converser
+        @path: String
+        @lock: Thread::Mutex
+        @queue: Thread::Queue
+        @written: Array[untyped]?
+        @closed: bool
+        @operation: untyped
+
+        def initialize: (_Converser client, String path) -> void
+        def write: (untyped request) -> self
+        def each: () { (untyped) -> void } -> nil
+        def close: () -> nil
+        def run: () { (Enumerator[untyped, void]) -> untyped } -> nil
+
+        private
+
+        def renew: () -> Thread::Queue
+        def drain: (Thread::Queue queue, ^() -> untyped ended, Enumerator::Yielder out) -> void
+      end
+
+      class Client
+        module Exchanges
+          def exchange: (String path) -> Exchange
+          def converse: (String path, Exchange exchange) { (untyped) -> void } -> nil
+
+          private
+
+          def operation: (String path, Enumerator[untyped, void] requests, Hash[String, String] metadata,
+                          ^(String) -> void relay) -> untyped
+
+          # Provided by Client, used here.
+          def refuse_write: (String path) -> void
+          def settle: (String path, untyped value) -> untyped
+          def value: (String path, String bytes) -> untyped
+          def authenticating: [T] (?^() -> bool retriable) { (Hash[String, String]) -> T } -> T
+          def stub: () -> untyped
+          def message: (String path, untyped request) -> untyped
+          def encoder: (String path) -> Method
+        end
+      end
+    end
+  end
+end

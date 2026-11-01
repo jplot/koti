@@ -305,7 +305,8 @@ which the browser can repeat:
   stream whose id is `voice`, and offers again (`live.offer`). A browser cannot choose a stream id: it would
   have to rewrite the `a=msid:` line of its offer, which nothing here has tried.
 - One session per camera serves all its channels; the app ends it with `close` after 5 s without a player, and
-  never half-closes it. The far end also opens a data channel on it, for the archive, the timeline and PTZ.
+  never half-closes it. The far end also opens a data channel on it, for the archive, the timeline and PTZ
+  (see [Camera data channel](#camera-data-channel)).
 - When the session fails (`ReadError`: `:permission_denied`, `:video_edge_is_offline`, `:video_edge_not_found`,
   `:bad_request`) or the connection drops, the app starts over after a second, gives each try 30 s and waits up
   to a minute between tries. A back-end decides for itself. A session runs once: after `each` returns, its

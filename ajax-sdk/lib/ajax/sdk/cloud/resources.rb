@@ -90,17 +90,19 @@ module Ajax
         end
 
         # Follows the space live through one feed of {Event}s: its security, groups, rooms, summary, devices and
-        # notifications, from four streams that reopen on their own. See {Feed}.
+        # notifications, from four streams. The feed ends when one of them ends and raises what breaks one: reopen it
+        # with the same tracker to get the changes made meanwhile, and nothing else. See {Feed}.
         #
         # @param space_id [String]
-        # @param sleeper [#call] waits the given number of seconds before a stream reopens
+        # @param tracker [Tracker] the state kept from an earlier feed of the space, a new one by default
         # @yieldparam event [Event]
         # @return [Enumerator::Lazy<Event>, nil] the events when no block is given
         # @raise [RefusedError] when a stream answers a failure
-        def events(space_id, sleeper: method(:sleep), &)
-          return enum_for(:events, space_id, sleeper:).lazy unless block_given?
+        # @raise [GRPC::BadStatus] when a stream breaks
+        def events(space_id, tracker: Tracker.new(space_id), &)
+          return enum_for(:events, space_id, tracker:).lazy unless block_given?
 
-          Feed.new(self, space_id, sleeper:).each(&)
+          Feed.new(self, space_id, tracker:).each(&)
           nil
         end
 

@@ -57,13 +57,14 @@ module Miele
           set_parameter(18, :u8, count)
         end
 
-        # @param seconds [Array<Integer>] up to three times, in seconds
-        # @raise [ArgumentError] for more than three
+        # The app 4.19.0 never enables its steam burst timer cells: UpdateSteamBurstPicker hands them
+        # isUserAllowedToModifyFunctionParameters false.
+        #
+        # @param _seconds [Array<Integer>] up to three times, in seconds
+        # @raise [ActionUnavailableError] always
         # @api public
-        def steam_burst_times=(seconds)
-          raise ArgumentError, 'an oven takes up to three steam burst times' if seconds.size > 3
-
-          seconds.each_with_index { |time, index| set_parameter(8 + index, :u16, time) }
+        def steam_burst_times=(_seconds)
+          raise ActionUnavailableError, 'the app never lets a steam burst time be set'
         end
 
         # @param time [Time, :now]

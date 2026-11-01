@@ -34,6 +34,8 @@ module Miele
 
         def cooling: () -> Hash[String, untyped]
 
+        def settings_listed?: (State state) -> bool
+
         def presenter_light_shown?: (State state) -> bool
 
         def presenter_quick_action?: (State state) -> bool

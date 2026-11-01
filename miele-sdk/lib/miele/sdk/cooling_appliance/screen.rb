@@ -55,14 +55,18 @@ module Miele
         # @return [Boolean]
         def holiday_or_sabbath?(state) = modes(state).values_at(:holiday, :sabbath).any? { it&.on }
 
+        # The ice maker, humidifier, door alarm and PerfectFresh rules return Empty there, which hides their cells.
+        #
+        # @param state [State]
+        # @return [Boolean] neither at Status 1 nor 255
+        def settings_listed?(state) = ![1, 255].include?(state.raw['Status'])
+
         # The rule PresentationLightStateRule and HumidityControlRule share.
         #
         # @param state [State]
-        # @return [Boolean] neither at Status 1 or 255, nor in a failure without a door signal, nor in Holiday or
-        #   Sabbath mode
+        # @return [Boolean] listed, not in a failure without a door signal, nor in Holiday or Sabbath mode
         def settings_shown?(state)
-          status = state.raw['Status']
-          return false if [1, 255].include?(status) || (status == 8 && door_signal(state).zero?)
+          return false if !settings_listed?(state) || (state.raw['Status'] == 8 && door_signal(state).zero?)
 
           !holiday_or_sabbath?(state)
         end

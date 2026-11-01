@@ -200,6 +200,27 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
   end
 
+  it 'refuses the ice maker at Status 1 or 255, as the app hides its switch' do
+    [1, 255].each do |status|
+      resources['State'] = { 'Status' => status }
+      expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+  end
+
+  it 'refuses the humidifier at Status 1 or 255, as the app hides its cell' do
+    [1, 255].each do |status|
+      resources['State'] = { 'Status' => status }
+      expect { fridge.humidifier = 1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+  end
+
+  it 'refuses the door alarm delay at Status 1 or 255, as the app hides its cell' do
+    [1, 255].each do |status|
+      resources['State'] = { 'Status' => status }
+      expect { fridge.door_alarm_delay = 180 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+  end
+
   it 'refuses PerfectFresh on protocol 201, where the app reads none', :aggregate_failures do
     expect { fridge.perfect_fresh = 1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect(written).to be_empty
@@ -237,6 +258,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       expect { fridge.perfect_fresh = 3 }.to raise_error(ArgumentError)
       fridge.perfect_fresh = 2
       expect(written).to eq([['PUT', 'Cooling/PerfectFresh', { 'Value' => 2 }]])
+    end
+
+    it 'refuses PerfectFresh at Status 1 or 255, as the app hides its cell' do
+      [1, 255].each do |status|
+        resources['State'] = { 'Status' => status }
+        expect { fridge.perfect_fresh = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      end
     end
 
     it 'refuses PerfectFresh without a Step, as the app hides it' do

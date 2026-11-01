@@ -10,10 +10,11 @@ module Miele
 
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] on an appliance without an ice maker, or whose +IceMaker+ is not 1, 2 or 3,
-        #   where the app hides its switch
+        # @raise [ActionUnavailableError] at Status 1 or 255, or on an appliance without an ice maker, or whose
+        #   +IceMaker+ is not 1, 2 or 3, where the app hides its switch
         # @api public
         def ice_maker=(on)
+          require!(settings_listed?(state), 'the app shows no settings at Status 1 or 255')
           require!(ice_maker? && [1, 2, 3].include?(cooling.dig('IceMaker', 'Value')), 'the app shows no ice maker')
           put('Cooling', 'IceMaker', Value: on ? 1 : 2)
         end
@@ -96,10 +97,12 @@ module Miele
         #
         # @param value [Integer]
         # @return [void]
-        # @raise [ActionUnavailableError] on protocol 201, where the app reads none, or without a +Step+
+        # @raise [ActionUnavailableError] at Status 1 or 255, on protocol 201, where the app reads none, or without a
+        #   +Step+
         # @raise [ArgumentError] off +PerfectFresh+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def perfect_fresh=(value)
+          require!(settings_listed?(state), 'the app shows no settings at Status 1 or 255')
           setting = cooling['PerfectFresh']
           require!(protocol_version != 201 && !setting.to_h['Step'].to_i.zero?, 'the app shows no PerfectFresh here')
           require_offered!(value, picker(setting))
@@ -108,10 +111,12 @@ module Miele
 
         # @param value [Integer]
         # @return [void]
-        # @raise [ActionUnavailableError] without +Humidifier+ or at its +Value+ -1, where the app hides the cell
+        # @raise [ActionUnavailableError] at Status 1 or 255, without +Humidifier+ or at its +Value+ -1, where the app
+        #   hides the cell
         # @raise [ArgumentError] off +Humidifier+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def humidifier=(value)
+          require!(settings_listed?(state), 'the app shows no settings at Status 1 or 255')
           setting = cooling['Humidifier']
           require!(setting && setting['Value'] != -1, 'the app shows no humidifier')
           require_offered!(value, picker(setting))
@@ -120,10 +125,12 @@ module Miele
 
         # @param seconds [Integer]
         # @return [void]
-        # @raise [ActionUnavailableError] without +DoorAlarmTime+ or at its +Value+ -1, where the app hides the cell
+        # @raise [ActionUnavailableError] at Status 1 or 255, without +DoorAlarmTime+ or at its +Value+ -1, where the
+        #   app hides the cell
         # @raise [ArgumentError] off +DoorAlarmTime+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def door_alarm_delay=(seconds)
+          require!(settings_listed?(state), 'the app shows no settings at Status 1 or 255')
           setting = cooling['DoorAlarmTime']
           require!(setting && setting['Value'] != -1, 'the app shows no door alarm delay')
           require_offered!(seconds, picker(setting))

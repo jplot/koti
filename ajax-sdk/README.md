@@ -293,19 +293,23 @@ for `setRemoteDescription`, `{ candidate:, sdpMid:, sdpMLineIndex: }` for `addIc
 which the browser can repeat:
 
 - It builds its peer connection from the ICE servers, with max-bundle, and adds no track or data channel of
-  its own, so the first offer comes from the far end; the app answers it as it is. Should an offer arrive while one of
-  its own is pending, it rolls its own back.
+  its own, so it cannot offer first (deduced from the code, not seen on the wire); it answers the far end's
+  offer as it is. Should an offer arrive while one of its own is pending, it rolls its own back.
 - Both sides trickle their candidates, with no end of candidates. Once connected, the app reports it once with
-  `established(latency:, candidate_type:, network:)`, read from its stats.
-- `ask_streams` sends every stream the session carries now, each time the list changes: another quality,
-  another channel, the archive instead of live. The app ignores the cloud's answer to it, and so does `each`.
+  `established(latency:, candidate_type:, network:)`, read from its stats: a browser's `srflx` is `:reflexive`,
+  and a `prflx` candidate or an unknown network goes as `:unspecified`.
+- `ask_streams` sends every stream the session carries now, each time the list changes. Once the cloud's init
+  arrives, `each` sends the list once more, as the app does when its signaling is ready; a change made before
+  waits for it. The app ignores the cloud's answer to it, and so does `each`.
 - Talk-back: the audio stream asks for it with `talk_back: true`; the app then adds a send-only audio track in a
-  stream whose id is `voice`, and offers again (`live.offer`).
+  stream whose id is `voice`, and offers again (`live.offer`). A browser cannot choose a stream id: it would
+  have to rewrite the `a=msid:` line of its offer, which nothing here has tried.
 - One session per camera serves all its channels; the app ends it with `close` after 5 s without a player, and
   never half-closes it. The far end also opens a data channel on it, for the archive, the timeline and PTZ.
 - When the session fails (`ReadError`: `:permission_denied`, `:video_edge_is_offline`, `:video_edge_not_found`,
   `:bad_request`) or the connection drops, the app starts over after a second, gives each try 30 s and waits up
-  to a minute between tries. A back-end decides for itself.
+  to a minute between tries. A back-end decides for itself. A session runs once: after `each` returns, its
+  writes raise `IOError`, and a new session starts over with `live_video`.
 
 Each channel's permissions sit in `current_member(space_id)`, under `devices_permissions`,
 `video_edge_permissions`, `channel_permissions` and `active.permissions`: `:view_live_stream` for live video,

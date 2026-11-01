@@ -6,6 +6,7 @@ module Miele
     # 15, 31, 39 and 45).
     class Oven < Appliance
       include Polling
+      include ParameterGates
       include ProgramSelection
       include MicrowavePower
       include Selection

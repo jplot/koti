@@ -18,8 +18,8 @@ module Miele
         # @raise [ResponseError] if the oven refuses it, but for a 500 followed by info 14 on 1/131 within 6 s
         # @api public
         def microwave_power=(bit)
-          context = shown_parameters(15)
-          supported = supported_powers(context)
+          context = editable_parameters(:microwave_power)
+          supported = context.context_para_ca&.mw_power&.supported_bits.to_i
           unless MICROWAVE_BITS.include?(bit) && supported.anybits?(bit)
             raise ArgumentError, "#{bit} is not one of the microwave power bits the oven supports (#{supported})"
           end
@@ -28,18 +28,6 @@ module Miele
         end
 
         private
-
-        # MicrowaveLevelRule gives the app no microwave section while MwPower is not readable.
-        #
-        # @param context [Objects::Oven::GlobalPsContext] 1/1574
-        # @return [Integer] MwPower's SupportedBits
-        # @raise [ActionUnavailableError]
-        def supported_powers(context)
-          power = context.context_para_ca&.mw_power
-          return power.supported_bits.to_i if power && mask(power).anybits?(8)
-
-          raise ActionUnavailableError, 'the oven shows no microwave power'
-        end
 
         # SelectMicrowaveLevelAsync takes a 500 as done once 1/131 shows info 14, and rethrows it on any failure of
         # that wait.

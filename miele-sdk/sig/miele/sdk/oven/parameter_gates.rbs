@@ -1,0 +1,51 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module ParameterGates : Appliance
+        MEMBERS: Hash[Symbol, Symbol]
+
+        SHOWN_WITH_ANY_PROGRAM: Array[Symbol]
+
+        OPTIONS: Hash[Integer, Symbol]
+
+        def context: () -> Objects::Oven::GlobalDeviceContext
+
+        def program_context: () -> Objects::Oven::GlobalPsContext
+
+        private
+
+        def editable_parameters: (Symbol name) -> Objects::Oven::GlobalPsContext
+
+        def editable_options: (Array[Integer] ids) -> Objects::Oven::GlobalPsContext
+
+        def allowed_parameters: () -> [State, Objects::Oven::GlobalDeviceContext, Objects::Oven::GlobalPsContext]
+
+        def require_parameters_allowed!: (State state, Objects::Oven::GlobalDeviceContext device) -> void
+
+        def parameter_shown?: (Symbol name, State state, Objects::Oven::GlobalDeviceContext device, Objects::Oven::GlobalPsContext selected) -> bool
+
+        def rule_shows?: (Symbol name, untyped value, Objects::Oven::GlobalPsContextParaCA? parameters, bool running) -> bool
+
+        def duration_allows?: (Objects::Oven::GlobalPsContextParaCA? parameters) -> bool
+
+        def duration_set?: (untyped duration) -> bool
+
+        def readable?: (untyped value) -> bool
+
+        def require_dop2!: () -> void
+
+        def under_remote_control?: (?State state) -> bool?
+
+        def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
+
+        def function_shown?: (Objects::Oven::GlobalPsAttributesCCA? shown, Objects::Oven::GlobalPsAttributesCCA? selected) -> bool
+
+        def oven_state: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Symbol?
+
+        def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
+
+        def mask: (untyped value) -> Integer
+      end
+    end
+  end
+end

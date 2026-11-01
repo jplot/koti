@@ -10,19 +10,15 @@ module Miele
 
         private
 
-        def supported_powers: (Objects::Oven::GlobalPsContext context) -> Integer
-
         def write_microwave_power: (Integer prog_id, Integer bit) -> void
 
         def power_message_shown?: () -> bool?
 
-        def shown_parameters: (Integer id, ?Objects::Oven::GlobalPsContext? context) -> Objects::Oven::GlobalPsContext
+        def editable_parameters: (Symbol name) -> Objects::Oven::GlobalPsContext
 
         def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
 
         def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
-
-        def mask: (untyped value) -> Integer
 
         def poll: (Integer timeout) { () -> untyped } -> untyped
 

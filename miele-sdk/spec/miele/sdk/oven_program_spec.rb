@@ -24,8 +24,8 @@ RSpec.describe Miele::Sdk::Oven do
 
   def program_context
     microwave = { 1 => dop2_field(:u8, microwave_mask), 2 => dop2_field(:u8, microwave_bits) }
-    parameters = { 13 => dop2_field(:struct, { 2 => dop2_field(:u64, 1_700_000_000) }),
-                   15 => dop2_field(:struct, microwave) }
+    parameters = shown_parameters(13 => shown_parameter(:u64, 0, min: 1_700_000_000),
+                                  15 => dop2_field(:struct, microwave))
     dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters),
                          7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
   end
@@ -60,9 +60,9 @@ RSpec.describe Miele::Sdk::Oven do
       hidden_parameters.each do |name, value|
         expect { oven.public_send(:"#{name}=", value) }.to raise_error(Miele::Sdk::ActionUnavailableError, /hides/)
       end
+      expect { oven.set_options(keep_warm: true) }.to raise_error(Miele::Sdk::ActionUnavailableError, /hides/)
       oven.browning = 2
-      oven.set_options(keep_warm: true)
-      expect(written.map(&:last)).to eq([parameter(30, :u8, 2), parameter(27, :bool, true)])
+      expect(written.map(&:last)).to eq([parameter(30, :u8, 2)])
     end
   end
 

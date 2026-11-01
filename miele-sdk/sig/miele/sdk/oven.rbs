@@ -2,6 +2,7 @@ module Miele
   module Sdk
     class Oven < Appliance
       include Polling
+      include ParameterGates
       include ProgramSelection
       include MicrowavePower
       include Selection

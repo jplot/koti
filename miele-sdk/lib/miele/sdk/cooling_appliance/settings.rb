@@ -20,10 +20,12 @@ module Miele
 
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] but on a wine unit the app lights
+        # @raise [ActionUnavailableError] but on a wine unit the app lights, where its light section or dashboard
+        #   quick action shows
         # @api public
         def light=(on)
           require!(wine? && !rioja?, 'the app switches no light on this appliance')
+          require!(light_shown?(state), 'the app shows no light switch now')
           if state_light?
             put('State', 'Light', Light: on ? 1 : 2)
           else

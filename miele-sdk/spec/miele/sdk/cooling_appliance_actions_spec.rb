@@ -299,6 +299,28 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
   context 'with a BSH wine unit' do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 32, 'ProtocolVersion' => 200) }
 
+    before do
+      resources['Cooling'].merge!('AmbientLightState' => { 'Value' => 1 },
+                                  'AmbientLightMode' => { 'Value' => 1, 'Min' => 1, 'Max' => 4, 'Step' => 1 })
+    end
+
+    it 'refuses the light without a light state, as the app shows neither its switch nor its quick action' do
+      resources['Cooling'].delete('AmbientLightState')
+      expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+
+    it "switches the light in a failure through the dashboard's quick action, never off or in Sabbath mode alone",
+       :aggregate_failures do
+      resources['State'] = { 'Status' => 8 }
+      fridge.light = true
+      resources['State'] = { 'Status' => 10 }
+      expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources['State'] = { 'Status' => 5 }
+      resources['Cooling']['Sabbath'] = { 'Value' => 1 }
+      expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(written.size).to eq(1)
+    end
+
     it 'lights it through AmbientLightState and sets its ambient light mode' do
       fridge.light = false
       fridge.ambient_light_mode = 2

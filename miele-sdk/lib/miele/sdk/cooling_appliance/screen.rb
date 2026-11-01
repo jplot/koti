@@ -79,18 +79,37 @@ module Miele
           ![nil, -1].include?(cooling.dig('HumidityControl', 'Value')) && settings_shown?(state)
         end
 
-        # The dashboard's quick action, which hides only while off or when Holiday or Sabbath leads its notices.
+        # @param state [State]
+        # @return [Boolean] the presenter light's quick action on the dashboard
+        def presenter_quick_action?(state) = presenter_light_state? && quick_action_shown?(state)
+
+        # The dashboard hides its light quick actions only while off or when Holiday or Sabbath leads its notices.
         #
         # @param state [State]
         # @return [Boolean]
-        def presenter_quick_action?(state)
-          return false if shown_off?(state) || !presenter_light_state?
-
-          !holiday_or_sabbath?(state) || notice_before_holiday?(state)
+        def quick_action_shown?(state)
+          !shown_off?(state) && (!holiday_or_sabbath?(state) || notice_before_holiday?(state))
         end
 
         # @return [Boolean] +PresentationLight+ at 1 or 2, which the app reads as on or off
         def presenter_light_state? = [1, 2].include?(cooling.dig('PresentationLight', 'Value'))
+
+        # The light section shows with the zones on a wine unit, the light's quick action on the dashboard; both
+        # need a light state.
+        #
+        # @param state [State]
+        # @return [Boolean]
+        def light_shown?(state) = !light_state(state).zero? && (zones_shown?(state) || quick_action_shown?(state))
+
+        # @param state [State]
+        # @return [Integer] 1 on, 2 off, 3 unknown (+State+ without +Light+), 0 none, as LightStateForOpCodeSource
+        #   and LightStateForCoolingApiSource read +Light+ and +AmbientLightState+
+        def light_state(state)
+          value = state_light? ? state.raw['Light'] : cooling.dig('AmbientLightState', 'Value')
+          return 3 if value.nil? && state_light?
+
+          [1, 2].include?(value) ? value : 0
+        end
 
         # GetAlarmInfoTypeNotification ranks a failure, filter or door alarm, then Party and Eco, before Holiday.
         #

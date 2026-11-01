@@ -24,7 +24,13 @@ module Miele
 
         def presenter_quick_action?: (State state) -> bool
 
+        def quick_action_shown?: (State state) -> bool
+
         def presenter_light_state?: () -> bool
+
+        def light_shown?: (State state) -> bool
+
+        def light_state: (State state) -> Integer
 
         def notice_before_holiday?: (State state) -> bool
 
@@ -43,6 +49,8 @@ module Miele
         def cooling: () -> Hash[String, untyped]
 
         def cooling_api?: () -> bool
+
+        def state_light?: () -> bool
 
         def listed_zone?: (Hash[String, untyped] zone) -> bool
       end

@@ -40,6 +40,8 @@ module Miele
 
         def humidity_control_shown?: (State state) -> bool
 
+        def light_shown?: (State state) -> bool
+
         def ice_maker?: () -> bool
 
         def wine?: () -> bool

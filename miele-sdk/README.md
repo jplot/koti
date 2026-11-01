@@ -408,8 +408,8 @@ Each of these actions makes the checks the app's rules make before it, and raise
   it reads 1/1574 every 3 seconds until it shows a doneness the oven requires and lets write, else
   such a browning, and writes it one step higher (255 becomes 0, as the app writes a byte),
   without the checks of the cooking level cells, then waits for the oven to cook on. Past the
-  app's 15 seconds it raises `Miele::Sdk::ActionFailedError`, and so it does when 1/1574 lacks the
-  doneness or browning the app reads.
+  app's 15 seconds it raises `Miele::Sdk::ActionFailedError`, and so it does at once when 1/1585
+  shows no program phase or 1/1574 lacks the doneness, browning or ProgId the app reads.
 - `stop_keeping_warm` needs message 20 shown. `steam_burst` needs what the app's steam burst
   button needs: request 59 offered for a REST `ProgramID`, a manual steam burst (`NumberOfSteamBursts` readable, 1 to 3) in
   a function 1/1585 and 1/1574 both show, the oven running or paused, and a burst left, or the

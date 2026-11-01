@@ -16,8 +16,8 @@ module Miele
 
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, or unless the app offers its continue button
-        # @raise [ActionFailedError] when the oven does not cook on within the 15 s the app waits, or 1/1574 lacks
-        #   the doneness or browning the app reads
+        # @raise [ActionFailedError] when the oven does not cook on within the 15 s the app waits, 1/1585 shows no
+        #   program phase, or 1/1574 lacks the doneness, browning or ProgId the app reads
         # @api public
         def continue_cooking
           require_continue_offered!
@@ -64,9 +64,17 @@ module Miele
             program_type(device.prog_attributes_cca) != CLEANING_TYPE
         end
 
+        # The app reads ProgAttributesCCA and ProgPhase with LeftOrThrow, so a missing one fails the action.
+        #
         # @param phases [Array<Integer>]
         # @return [Integer, nil] the ProgPhase 1/1585 shows, when one of them
-        def shown_phase(phases) = phase(context.prog_attributes_cca).then { it if phases.include?(it) }
+        # @raise [ActionFailedError]
+        def shown_phase(phases)
+          shown = phase(context.prog_attributes_cca)
+          raise ActionFailedError, '1/1585 shows no program phase' unless shown
+
+          shown if phases.include?(shown)
+        end
 
         # SetRequiredCookingLevelAsync: it reads 1/1574 until it shows a level, then writes it one step higher.
         #
@@ -75,11 +83,23 @@ module Miele
         def raise_cooking_level(budget)
           found, waited = timed_poll(budget) do
             context = program_context
-            required_cooking_level(context)&.then { [selected_program(context), *it] }
+            required_cooking_level(context)&.then { [written_program(context), *it] }
           end
           prog_id, id, level = found
           write_parameter(prog_id, id, :u8, level) if found
           waited
+        end
+
+        # Dop2WriteHelper.RetrieveProgramIdAsync reads the ProgId with LeftOrThrow, so a missing one fails the action.
+        #
+        # @param context [Objects::Oven::GlobalPsContext] 1/1574
+        # @return [Integer]
+        # @raise [ActionFailedError]
+        def written_program(context)
+          prog_id = context.prog_attributes_cca&.prog_id
+          raise ActionFailedError, '1/1574 shows no ProgId' unless prog_id
+
+          Objects::Oven::GlobalEnumPrgId.to_i(prog_id)
         end
 
         # DetermineCookingLevel: a doneness the oven requires and lets write, else such a browning. It reads both

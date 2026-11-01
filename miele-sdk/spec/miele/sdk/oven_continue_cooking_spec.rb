@@ -40,9 +40,9 @@ RSpec.describe Miele::Sdk::Oven do
 
   def phases(*values, type: 5)
     resources['DOP2/1/1585'] = [0, *values].map do |phase|
-      shown = { 1 => dop2_field(:e16, phase), 10 => dop2_field(:e8, type), 16 => dop2_field(:e8, 1),
+      shown = { 1 => phase&.then { dop2_field(:e16, it) }, 10 => dop2_field(:e8, type), 16 => dop2_field(:e8, 1),
                 28 => dop2_field(:e16, 13) }
-      dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown) })
+      dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown.compact) })
     end
   end
 
@@ -147,6 +147,19 @@ RSpec.describe Miele::Sdk::Oven do
     expect { oven.continue_cooking }.to raise_error(Miele::Sdk::ActionFailedError)
     expect(naps.sum).to be < 15
     expect(written).to eq([user_request(72), parameter(31, 3)])
+  end
+
+  it 'fails at once when 1/1585 shows no program phase, as the app reads it with LeftOrThrow', :aggregate_failures do
+    phases(nil)
+    expect { oven.continue_cooking }.to raise_error(Miele::Sdk::ActionFailedError, /phase/)
+    expect(naps).to be_empty
+  end
+
+  it 'fails when 1/1574 shows no ProgId for the level it writes' do
+    phases(10_000, 28_100)
+    resources['DOP2/1/1574?idx1=0&idx2=1'] =
+      [dop2_leaf(1, 1574, { 4 => dop2_field(:struct, { 30 => level(4, mask: 1), 31 => level(2, mask: 3) }) }, idx2: 1)]
+    expect { oven.continue_cooking }.to raise_error(Miele::Sdk::ActionFailedError, /ProgId/)
   end
 
   it 'fails when 1/1574 has no doneness, as the app reads it first' do

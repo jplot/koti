@@ -44,7 +44,7 @@ module Miele
 
         def phase: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
 
-        def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
+        def written_program: (Objects::Oven::GlobalPsContext context) -> Integer
 
         def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
 

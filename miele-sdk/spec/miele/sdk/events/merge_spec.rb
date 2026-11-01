@@ -42,10 +42,10 @@ RSpec.describe Miele::Sdk::Events::Merge do
   end
 
   it 'stops both sources, their cleanup run, when the block breaks', :aggregate_failures do
-    threads = Thread.list.size
+    threads = Thread.list
     merge.each.first
     expect([closed.pop, closed.pop]).to contain_exactly(:local, :cloud)
-    expect(Thread.list.size).to eq(threads)
+    expect(Thread.list - threads).to be_empty
   end
 
   it 'reads a single source on a thread of its own, so that a slow block does not hold it back' do

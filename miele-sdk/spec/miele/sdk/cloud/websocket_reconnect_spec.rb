@@ -125,12 +125,12 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
     let(:script) { ->(connection, _index) { connection.send_binary(message('CC1', '{"Status":5}')) } }
 
     it 'closes the socket and stops its threads when the block breaks', :aggregate_failures do
-      threads = Thread.list.size
+      threads = Thread.list
       first_messages(2)
-      left = Thread.list.size
+      left = Thread.list - threads
       fake.stop
       expect(fake.connections.first.frames.map(&:opcode)).to eq([1, 8])
-      expect(left).to eq(threads)
+      expect(left).to be_empty
     end
   end
 end

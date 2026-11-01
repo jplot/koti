@@ -365,8 +365,9 @@ Each of these actions makes the checks the app's rules make before it, and raise
 - Selecting a program needs what the app's program selection needs (DetermineIsProgramWriteable):
   remote control without local control, an oven neither off nor running nor waiting to start, no
   program on 1/1585 (ProgId 0), and no query 16011 or 16013 on 1/131. The SDK then reads 1/1574
-  every 3 seconds until it shows the program, as the app does, and writes the parameters the
-  program requires, as `start` does; a refusal of those is ignored, as the app only logs it. When
+  every 3 seconds until it shows the program, as the app does, retrying a read refused with other
+  than a 4xx after 1.5^n seconds (the n-th in a row), and writes the parameters the program
+  requires, as `start` does; a refusal of those is ignored, as the app only logs it. When
   1/1574 has not shown the program within the app's 15 seconds, it raises
   `Miele::Sdk::ActionFailedError` and writes no parameter.
 - A parameter needs remote control without local control and a program on the oven, and a mobile

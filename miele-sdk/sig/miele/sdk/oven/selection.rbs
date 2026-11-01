@@ -6,6 +6,8 @@ module Miele
 
         ACTION_TIMEOUT: Integer
 
+        RETRY_BASE: Float
+
         UNSUPPORTED_QUERIES: Array[Integer]
 
         UNWRITABLE_STATES: Array[Symbol]
@@ -23,6 +25,12 @@ module Miele
         def program_writeable?: (Objects::Oven::GlobalDeviceContext device) -> bool
 
         def shown_program_context: (Integer id) -> Objects::Oven::GlobalPsContext
+
+        def polled_program_context: () -> Objects::Oven::GlobalPsContext?
+
+        def program_shown?: (Objects::Oven::GlobalPsContext context, Integer id) -> bool
+
+        def pause: (Integer failures, Float waited) -> (Integer | Float)
 
         def require_dop2!: () -> void
 

@@ -28,7 +28,10 @@ RSpec.describe Miele::Sdk::Oven do
 
   after { fake.stop }
 
-  def answer(bodies) = [200, {}, bodies.size > 1 ? bodies.shift : bodies.first]
+  def answer(bodies)
+    body = bodies.size > 1 ? bodies.shift : bodies.first
+    body.is_a?(Array) ? body : [200, {}, body]
+  end
 
   def written = fake.requests.select { it.verb == 'PUT' }.map { it.body.unpack1('H*') }
 
@@ -110,6 +113,25 @@ RSpec.describe Miele::Sdk::Oven do
     oven.select_program(13)
     expect(naps).to eq([3, 3])
     expect(written).to eq(['001300020629000000000002000107000d00030400', parameter(6, :u16, 3_729)])
+  end
+
+  it 'reads 1/1574 again 1.5 s after a 500, as the app retries, then writes the parameters', :aggregate_failures do
+    program_context(13, parameters: { 6 => required(:u16, 18_000) })
+    resources['DOP2/1/1574?idx1=0&idx2=1'].unshift([500, {}, ''])
+    oven.select_program(13)
+    expect(naps).to eq([1.5])
+    expect(written).to eq(['001300020629000000000002000107000d00030400', parameter(6, :u16, 18_000)])
+  end
+
+  it "retries refused reads 1.5^n s apart until the app's 15 s are up", :aggregate_failures do
+    resources['DOP2/1/1574?idx1=0&idx2=1'] = [[503, {}, '']]
+    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionFailedError)
+    expect(naps).to eq([1.5, 2.25, 3.375, 5.0625])
+  end
+
+  it 'ends the wait on a read refused with a 4xx, which the app does not retry' do
+    resources['DOP2/1/1574?idx1=0&idx2=1'] = [[404, {}, '']]
+    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::NotFoundError)
   end
 
   it 'gives up after 15 s when 1/1574 never shows the program, writing no parameter', :aggregate_failures do

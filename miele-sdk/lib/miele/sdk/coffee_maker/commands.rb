@@ -26,11 +26,11 @@ module Miele
           return write_device_action(2) if dop1_switch?(state, [1])
 
           require!(variant != :unknown && switchable?(state, [1]), 'the coffee maker cannot be switched on now')
-          combi = read_combi_state
-          return if family::GlobalEnumApplianceState.to_i(combi.appliance_state) == 4
+          leaf = switched_on(read_combi_state)
+          return unless leaf
 
           @sleeper.call(1.5)
-          write_object(combi.with(appliance_state: 4), [2, 1586, 0, 0])
+          write_dop2(leaf)
         end
 
         # @return [void]
@@ -60,10 +60,14 @@ module Miele
         end
 
         # @return [void]
-        # @raise [ActionUnavailableError] on a CVA6000 that runs no drink
+        # @raise [ActionUnavailableError] unless a drink runs, not cancelled, no care program, and on DOP2 under
+        #   remote control without local control
         # @api public
         def stop
-          return modify_dop2(family::GlobalUserReqRequest, 2, 1583, 0, 1) { it.with(request: 2) } if dop2?
+          if dop2?
+            require!(drink_stoppable?, 'the coffee maker cannot stop now')
+            return modify_dop2(family::GlobalUserReqRequest, 2, 1583, 0, 1) { it.with(request: 2) }
+          end
 
           require!(dop1_switch?(state, [5]), 'the coffee maker runs no drink to stop')
           klass = Objects::CoffeeGen7::ProcessActionCva
@@ -76,10 +80,12 @@ module Miele
         # @param option [Integer, Symbol]
         # @return [void]
         # @raise [ActionUnavailableError] on a CVA6000, where the app acknowledges nothing
+        # @raise [ArgumentError] for an option outside 1 to 17, or 1 to 16 on a CM7
         # @api public
         def acknowledge(type, id = nil, option:)
           member = MESSAGE_TYPES.fetch(type) { raise ArgumentError, "no #{type} notification" }
           require!(dop2?, 'the app acknowledges nothing on a CVA6000')
+          require_option!(option)
           modify_dop2(family::GlobalNtfctnAcknowledge, 2, 138, 0, 1) do |ack|
             member ? ack.with(member => id, ack_option: option) : ack.with(ack_option: option)
           end
@@ -87,15 +93,48 @@ module Miele
 
         private
 
-        # @return [Data] 2/1586 at 0/0
+        # ActionProgressBarViewModel shows its stop button for a drink, not cancelled (24057), with no care program.
+        #
+        # @return [Boolean]
+        def drink_stoppable?
+          program = program_context&.prog_attributes_cca
+          state = self.state
+          return false unless complete?(program) && state.remote_control? == true && state.local_control? != true
+
+          id = family::GlobalEnumPrgId.to_i(program.prog_id)
+          dispensing?(id, phase_of(program)) && sub_phase_of(program) != 24_057 && !care?(id)
+        end
+
+        # The app's acknowledge mappers throw outside 1 to 17, 1 to 16 on a CM7, before anything is read.
+        #
+        # @param option [Integer, Symbol]
+        # @return [void]
+        # @raise [ArgumentError]
+        def require_option!(option)
+          last = variant == :cm7 ? 16 : 17
+          return if (1..last).cover?(family::GlobalEnumNTFCTNAckOptions.to_i(option))
+
+          raise ArgumentError, "no acknowledge option #{option}"
+        end
+
+        # @param leaf [Dop2::Leaf] 2/1586 as read
+        # @return [Dop2::Leaf, nil] it with ApplianceState 4, nil when it shows that already
+        def switched_on(leaf)
+          combi = family::GlobalDeviceCombiState.from(leaf.fields)
+          return if family::GlobalEnumApplianceState.to_i(combi.appliance_state) == 4
+
+          leaf.with(fields: combi.with(appliance_state: 4).to_fields)
+        end
+
+        # @return [Dop2::Leaf] 2/1586 at 0/0, which SwitchOnHelper writes back as read
         def read_combi_state
-          object(family::GlobalDeviceCombiState, [2, 1586, 0, 0])
+          dop2(2, 1586, idx1: 0, idx2: 0)
         rescue ResponseError => e
           raise unless e.status == 500
 
           wake
           @sleeper.call(5)
-          object(family::GlobalDeviceCombiState, [2, 1586, 0, 0])
+          dop2(2, 1586, idx1: 0, idx2: 0)
         end
 
         # @param state [State]

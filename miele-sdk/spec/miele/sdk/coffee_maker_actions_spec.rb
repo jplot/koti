@@ -39,14 +39,15 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
 
   def struct(fields) = dop2_field(:struct, fields)
 
-  def ps_context(prog, phase, unit: 1)
-    attributes = { 1 => dop2_field(:e16, phase), 28 => dop2_field(:e16, prog) }
-    dop2_leaf(unit, 1574, { 7 => struct(attributes) }, idx2: 1)
+  def ps_context(prog, phase, unit: 1, missing: [], sub: 0)
+    attributes = { 1 => dop2_field(:e16, phase), 2 => dop2_field(:e16, sub), 3 => struct({}), 10 => dop2_field(:e8, 0),
+                   28 => dop2_field(:e16, prog) }
+    dop2_leaf(unit, 1574, { 7 => struct(attributes.except(*missing)) }, idx2: 1)
   end
 
-  def combi(appliance, operation)
+  def combi(appliance, operation, idx2: 0)
     dop2_leaf(2, 1586, { 1 => dop2_field(:e8, appliance), 2 => dop2_field(:e8, operation),
-                         3 => dop2_field(:e8, 0) })
+                         3 => dop2_field(:e8, 0) }, idx2:)
   end
 
   def software_id(unit, id) = dop2_leaf(unit, 17, { 2 => dop2_field(:struct_array, [{ 1 => dop2_field(:u32, id) }]) })
@@ -70,6 +71,18 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   it 'brews a drink for two cups as the app does, the header naming idx1' do
     coffee.brew(24_005, two_cups: true)
     expect(written).to eq([['DOP2/2/1577?idx1=0&idx2=1', select(24_005, 0, two: true, attribute: 0)]])
+  end
+
+  it 'refuses a drink while 1/1574 lacks a member the app reads', :aggregate_failures do
+    served[[1, 1574, 0, 1]] = ps_context(0, 0, missing: [2])
+    expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
+  it 'refuses program 0 or an id the app does not define, before sending anything', :aggregate_failures do
+    expect { coffee.brew(0) }.to raise_error(ArgumentError)
+    expect { coffee.brew(999_999) }.to raise_error(ArgumentError)
+    expect(written).to be_empty
   end
 
   it 'refuses the double shot the software ids do not allow', :aggregate_failures do
@@ -134,9 +147,43 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     end
   end
 
-  it 'stops with request 2 on 2/1583 at 0/1, the header naming idx1' do
+  it 'stops a running drink with request 2 on 2/1583 at 0/1, the header naming idx1' do
+    served[[1, 1574, 0, 1]] = ps_context(24_010, 0)
     coffee.stop
     expect(written).to eq([['DOP2/2/1583?idx1=0&idx2=1', dop2_leaf(2, 0, { 1 => dop2_field(:e16, 2) }, idx2: 1)]])
+  end
+
+  it 'stops no drink cancelled, done or not a drink, as the app hides its stop button', :aggregate_failures do
+    [ps_context(24_010, 0, sub: 24_057), ps_context(24_010, 10_003), ps_context(24_407, 0)].each do |context|
+      served[[1, 1574, 0, 1]] = context
+      expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+    expect(written).to be_empty
+  end
+
+  it 'stops no drink whose program info lacks a member the app reads' do
+    served[[1, 1574, 0, 1]] = ps_context(24_010, 0, missing: [3])
+    expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  end
+
+  it 'stops nothing under local control or during care', :aggregate_failures do
+    served[[1, 1574, 0, 1]] = ps_context(24_010, 0)
+    served['State'] = { 'Status' => 5, 'RemoteEnable' => [7, 0, 1] }
+    expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    served['State'] = { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] }
+    served[[2, 1586, 0, 0]] = combi(2, 8)
+    expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  end
+
+  it 'refuses an option the app does not map, before reading anything', :aggregate_failures do
+    expect { coffee.acknowledge(:message, option: 0) }.to raise_error(ArgumentError)
+    expect { coffee.acknowledge(:message, option: 18) }.to raise_error(ArgumentError)
+    expect(fake.requests.map(&:path).grep(%r{/DOP2/2/138})).to be_empty
+  end
+
+  it 'acknowledges with the PIN code option, the last the app maps on a Gen7' do
+    coffee.acknowledge(:message, option: :pincode)
+    expect(written.map(&:last)).to eq([acknowledgement(0, 0, 17, attribute: 0)])
   end
 
   it 'acknowledges a query with its id, a message with its option only' do
@@ -155,6 +202,12 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(written.map(&:first)).to eq(%w[State DOP2/2/1586])
       expect(written.last.last).to eq(combi(4, 0))
       expect(waits).to eq([5, 1.5])
+    end
+
+    it 'switches on with the header 2/1586 answered, as the app writes it back' do
+      served[[2, 1586, 0, 0]] = combi(1, 0, idx2: 1)
+      coffee.power_on
+      expect(written.last).to eq(['DOP2/2/1586', combi(4, 0, idx2: 1)])
     end
 
     it 'writes nothing when 2/1586 already shows it on' do
@@ -204,6 +257,18 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       served[[2, 1586, 0, 0]] = combi(2, 8)
       coffee.brew(24_005)
       expect(written.size).to eq(1)
+    end
+
+    it 'stops only its own drinks, 24001 to 24031', :aggregate_failures do
+      served[[2, 1574, 0, 1]] = ps_context(24_100, 0, unit: 2)
+      expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      served[[2, 1574, 0, 1]] = ps_context(24_010, 0, unit: 2)
+      coffee.stop
+      expect(written.map(&:first)).to eq(['DOP2/2/1583?idx1=0&idx2=1'])
+    end
+
+    it 'refuses option 17, which its acknowledgements stop short of' do
+      expect { coffee.acknowledge(:message, option: 17) }.to raise_error(ArgumentError)
     end
 
     it 'refuses to brew while one of its drinks runs' do

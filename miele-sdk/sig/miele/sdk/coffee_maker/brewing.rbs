@@ -5,6 +5,8 @@ module Miele
         BARISTA: Integer
         ONE_TOUCH_IDS: Hash[Symbol, [Integer, Integer]]
 
+        PROGRAM_MEMBERS: Array[Symbol]
+
         def brew: (Integer | Symbol drink, ?two_cups: bool, ?double_shot: bool) -> void
 
         def start_barista: () -> void
@@ -12,6 +14,8 @@ module Miele
         private
 
         def write_drink: (Integer | Symbol drink, bool two_cups, bool double_shot) -> void
+
+        def require_drink!: (Integer | Symbol drink) -> void
 
         def require_dispensable!: () -> void
 
@@ -28,6 +32,12 @@ module Miele
         def notified_id: (untyped enum, (Integer | Symbol)? id) -> Integer
 
         def busy?: (untyped program) -> bool
+
+        def phase_of: (untyped program) -> Integer
+
+        def sub_phase_of: (untyped program) -> Integer
+
+        def complete?: (untyped program) -> bool
 
         def dispensing?: (Integer id, Integer phase) -> bool
 

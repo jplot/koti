@@ -10,7 +10,9 @@ module Miele
         BARISTA = 24_407
         # Each variant's least software ids (2/17, then 1/17) for two cups or a double shot.
         ONE_TOUCH_IDS = { cm7: [5374, 0], cm6f: [5714, 5713], cva: [6228, 6226], cva_ref2: [6228, 6227] }.freeze
-        private_constant :ONE_TOUCH_IDS
+        # The app's program info source fails, and its drink rule and stop button with it, when 1574 lacks one of these.
+        PROGRAM_MEMBERS = %i[prog_id prog_phase prog_sub_phase programtype progress_bar].freeze
+        private_constant :ONE_TOUCH_IDS, :PROGRAM_MEMBERS
 
         # @param drink [Integer, Symbol] its program id
         # @param two_cups [Boolean]
@@ -19,10 +21,12 @@ module Miele
         # @raise [ActionUnavailableError] on a CVA6000, or unless the app's rule allows a drink: mobile start, no
         #   information or query shown, no drink, Barista or care program running; two cups or a double shot also
         #   need the software ids the app requires
-        # @raise [ArgumentError] when 2/1577 carries no coffee parameters
+        # @raise [ArgumentError] for program 0 or an id the app does not define, or when 2/1577 carries no coffee
+        #   parameters
         # @api public
         def brew(drink, two_cups: false, double_shot: false)
           require!(dop2?, 'the app brews nothing on a CVA6000')
+          require_drink!(drink)
           require_dispensable!
           if two_cups || double_shot
             require!(one_touch?, 'the coffee maker takes two cups or a double shot only from newer software')
@@ -59,12 +63,22 @@ module Miele
           end
         end
 
+        # DrinkExtensions.ToGen7ProgramId and ToCm7ProgramId refuse 0 and an id the enum does not define.
+        #
+        # @param drink [Integer, Symbol]
+        # @return [void]
+        # @raise [ArgumentError]
+        def require_drink!(drink)
+          id = family::GlobalEnumPrgId.to_i(drink)
+          raise ArgumentError, "no drink #{drink}" if id.zero? || !family::GlobalEnumPrgId.from(id).is_a?(Symbol)
+        end
+
         # @return [void]
         # @raise [ActionUnavailableError]
         def require_dispensable!
           program = program_context&.prog_attributes_cca
-          dispensable = !program&.prog_id.nil? && mobile_start_on?(state) && !notified? && !busy?(program)
-          require!(dispensable, 'the coffee maker cannot dispense a drink now')
+          require!(complete?(program) && mobile_start_on?(state) && !notified? && !busy?(program),
+                   'the coffee maker cannot dispense a drink now')
         end
 
         # @param state [State]
@@ -103,9 +117,20 @@ module Miele
         # @return [Boolean] a drink, Barista or a care program running
         def busy?(program)
           id = family::GlobalEnumPrgId.to_i(program.prog_id)
-          phase = program.prog_phase.nil? ? 0 : family::GlobalEnumPPhaseId.to_i(program.prog_phase)
-          dispensing?(id, phase) || (gen7? && id == BARISTA) || care?(id)
+          dispensing?(id, phase_of(program)) || (gen7? && id == BARISTA) || care?(id)
         end
+
+        # @param program [Data] +ProgAttributesCCA+
+        # @return [Integer]
+        def phase_of(program) = family::GlobalEnumPPhaseId.to_i(program.prog_phase)
+
+        # @param program [Data] +ProgAttributesCCA+
+        # @return [Integer]
+        def sub_phase_of(program) = family::GlobalEnumSubPPhaseId.to_i(program.prog_sub_phase)
+
+        # @param program [Data, nil] +ProgAttributesCCA+
+        # @return [Boolean] whether it carries every member the app reads
+        def complete?(program) = !program.nil? && PROGRAM_MEMBERS.none? { program.public_send(it).nil? }
 
         # @param id [Integer]
         # @param phase [Integer]

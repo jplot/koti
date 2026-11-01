@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Hue::Sdk::Events::Stream do
-  subject(:stream) { described_class.new(sleeper: method(:record_delay)) }
+  subject(:stream) { described_class.new }
 
-  let(:delays) { [] }
   let(:message) { light_update_message }
   let(:bridge) { FakeBridge.start { |request| answer(request) } }
 
@@ -12,11 +11,6 @@ RSpec.describe Hue::Sdk::Events::Stream do
   after { bridge.stop }
 
   def answer(_request) = [200, { 'Content-Type' => 'text/event-stream' }, message]
-
-  def record_delay(seconds)
-    delays << seconds
-    throw :stop if delays.size == 7
-  end
 
   def take_events(count, &read)
     read ||= :itself.to_proc
@@ -38,42 +32,29 @@ RSpec.describe Hue::Sdk::Events::Stream do
     )
   end
 
-  it 'reconnects with the last event id', :aggregate_failures do
-    take_events(3)
-    expect(bridge.requests.map { it.headers['last-event-id'] }).to eq([nil, '1:0'])
-    expect(delays).to eq([1])
+  it 'reads the stream once, to its end, keeping the id of its last message to resume from', :aggregate_failures do
+    expect(take_events(3).map(&:resource_id)).to eq(%w[l1 l2])
+    expect([bridge.requests.size, stream.last_event_id]).to eq([1, '1:0'])
   end
 
-  it 'waits 1, 2, 4, 8, 16 then 30 seconds while the bridge is unreachable' do
+  it 'resumes from the id it is given' do
+    described_class.new(last_event_id: '1:0').each { nil }
+    expect(bridge.requests.first.headers['last-event-id']).to eq('1:0')
+  end
+
+  it 'raises ConnectionError when the bridge cannot be reached, reconnecting nothing' do
     bridge.down!
-    catch(:stop) { stream.each { nil } }
-    expect(delays).to eq([1, 2, 4, 8, 16, 30, 30])
+    expect { stream.each { nil } }.to raise_error(Hue::Sdk::ConnectionError)
   end
 
-  it 'waits 1 second again once a message arrives' do
-    catch(:stop) { stream.each { nil } }
-    expect(delays).to eq([1] * 7)
-  end
-
-  it 'lets an error raised by the block reach the caller without reconnecting', :aggregate_failures do
+  it 'lets an error raised by the block reach the caller', :aggregate_failures do
     expect { stream.each { File.read('/nonexistent') } }.to raise_error(Errno::ENOENT)
     expect(bridge.requests.size).to eq(1)
-    expect(delays).to be_empty
   end
 
-  context 'when the bridge ends an idle stream' do
-    def answer(_request) = [200, { 'Content-Type' => 'text/event-stream' }, ": hi\n\n"]
-
-    it 'waits 1 second before each reconnection' do
-      catch(:stop) { stream.each { nil } }
-      expect(delays).to eq([1] * 7)
-    end
-  end
-
-  it 'fails at once when the host is not configured', :aggregate_failures do
+  it 'fails at once when the host is not configured' do
     Hue::Sdk.config.host = nil
     expect { stream.each { nil } }.to raise_error(Hue::Sdk::ConnectionError, /host is not configured/)
-    expect(delays).to be_empty
   end
 
   it 'requires an application key', :aggregate_failures do
@@ -85,16 +66,17 @@ RSpec.describe Hue::Sdk::Events::Stream do
   context 'when the bridge drops the stream without closing TLS' do
     def answer(_request) = [200, { 'Content-Type' => 'text/event-stream' }, message, :cut]
 
-    it 'reconnects', :aggregate_failures do
-      expect(take_events(3).map(&:resource_id)).to eq(%w[l1 l2 l1])
-      expect(delays).to eq([1])
+    it 'raises ConnectionError after the events it read, their id kept', :aggregate_failures do
+      found = []
+      expect { stream.each { found << it.resource_id } }.to raise_error(Hue::Sdk::ConnectionError)
+      expect([found, stream.last_event_id]).to eq([%w[l1 l2], '1:0'])
     end
   end
 
   context 'when the bridge rejects the application key' do
     def answer(_request) = [403, { 'Content-Type' => 'application/json' }, '{"errors":[],"data":[]}']
 
-    it 'raises AuthenticationError without reconnecting', :aggregate_failures do
+    it 'raises AuthenticationError', :aggregate_failures do
       expect { stream.each { nil } }.to raise_error(Hue::Sdk::AuthenticationError)
       expect(bridge.requests.size).to eq(1)
     end
@@ -103,7 +85,7 @@ RSpec.describe Hue::Sdk::Events::Stream do
   context 'when the bridge answers another error status' do
     def answer(_request) = [503, { 'Content-Type' => 'application/json' }, '{"errors":[],"data":[]}']
 
-    it 'raises ResponseError without reconnecting' do
+    it 'raises ResponseError' do
       expect { stream.each { nil } }
         .to raise_error(an_instance_of(Hue::Sdk::ResponseError).and(having_attributes(status: 503)))
     end

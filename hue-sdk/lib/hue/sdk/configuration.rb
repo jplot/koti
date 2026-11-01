@@ -41,7 +41,7 @@ module Hue
         # @return [Numeric] seconds to wait for a response (default: 10)
         attr_accessor :read_timeout
 
-        # @return [Numeric] seconds of event stream silence before reconnecting (default: 300)
+        # @return [Numeric] seconds of event stream silence before the stream raises ConnectionError (default: 300)
         attr_accessor :event_read_timeout
 
         # Initializes the settings with their defaults.

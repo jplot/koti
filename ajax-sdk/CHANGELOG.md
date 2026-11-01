@@ -25,6 +25,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - `archive_days`, `cloud_fragments`, `cloud_metadata_fragments`, `cloud_archive`, `cloud_metadata` and
   `export_archive`: a channel's recorded days, the cloud archive's fragments and their addresses, and exports.
+- `take_photo(device)`: a MotionCam's photo on demand, sent as the app names the camera's family;
+  `Notification#image_resource` and `notification_media(space_id, notification_id)` give the photos of a
+  notification and their pre-signed addresses.
 - `video_channels(space_id)`, `Streams` and `live_video`: a live WebRTC session with an Ajax camera, whose
   signaling `LiveVideo` relays between the cloud and a browser in the shapes `RTCPeerConnection` takes.
 - `Schemas.descriptor_set(*names)`: the schemas of the messages a camera's data channel carries

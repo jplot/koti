@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'English'
 require 'socket'
 
 module Miele
@@ -32,7 +31,7 @@ module Miele
         #
         # @yieldparam event [Event]
         # @return [Enumerator::Lazy<Event>, Object] the events without a block, else what +break+ returns
-        # @raise [Error] when an appliance cannot be enrolled, or, once the block breaks, withdrawn
+        # @raise [SubscriptionError] when an appliance cannot be enrolled, or, once the block breaks, withdrawn
         # @api public
         def each(&)
           return to_enum(:each).lazy unless block_given?
@@ -49,8 +48,11 @@ module Miele
             event = @events.pop #: Event
             yield event
           end
+        rescue Exception => e # rubocop:disable Lint/RescueException -- what ended the stream outranks a withdrawal
+          error = e
+          raise
         ensure
-          close($ERROR_INFO)
+          close(error)
         end
 
         # @return [void]
@@ -67,6 +69,8 @@ module Miele
         # @return [void]
         def enroll(appliance, callback_host, port)
           Enrollment.enroll(appliance, our_fab: @fab, callback_host:, port:)
+        rescue Error => e
+          raise SubscriptionError.new('enroll', { appliance.host => e })
         end
 
         # A refused withdrawal must not leave the other appliances enrolled, nor hide the error that ended the
@@ -75,10 +79,10 @@ module Miele
         # @param error [Exception, nil] what ended the stream
         # @return [void]
         def close(error)
-          failures = @appliances.filter_map { withdraw(it) }
+          failures = @appliances.to_h { [it.host, withdraw(it)] }.compact
           @advertiser&.stop
           @server&.stop
-          raise failures.first if error.nil? && failures.any?
+          raise SubscriptionError.new('withdraw', failures) if error.nil? && failures.any?
         end
 
         # @return [Error, nil] why the appliance keeps its subscriptions

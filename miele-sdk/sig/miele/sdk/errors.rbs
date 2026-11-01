@@ -21,6 +21,12 @@ module Miele
       def initialize: (Integer status, ?String message) -> void
     end
 
+    class SubscriptionError < Error
+      attr_reader failures: Hash[String, Error]
+
+      def initialize: (String action, Hash[String, Error] failures) -> void
+    end
+
     class NotFoundError < ResponseError
     end
 

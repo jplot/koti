@@ -167,10 +167,11 @@ module Miele
     # @param cloud [Cloud::Channel, nil] the account to follow through its websocket, as {.cloud} gives it
     # @yieldparam event [Events::Event]
     # @return [Enumerator::Lazy<Events::Event>, Object] the events without a block
-    # @raise [ArgumentError] without hosts or an account
+    # @raise [ArgumentError] without hosts or a cloud
+    # @raise [SubscriptionError] when an appliance cannot be enrolled, or, once the block breaks, withdrawn
     # @api public
     def self.events(hosts: [], cloud: nil, &)
-      raise ArgumentError, 'no appliance to listen to, nor a Miele account' if hosts.empty? && cloud.nil?
+      raise ArgumentError, 'no appliance to listen to, nor a cloud to follow' if hosts.empty? && cloud.nil?
 
       sources = [] #: Array[untyped]
       sources << Events::Listener.new(hosts:) unless hosts.empty?

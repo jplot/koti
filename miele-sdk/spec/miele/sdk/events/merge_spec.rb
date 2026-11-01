@@ -58,6 +58,33 @@ RSpec.describe Miele::Sdk::Events::Merge do
     expect(seen).to eq([0, 1, 2])
   end
 
+  def failing_cleanup
+    Object.new.tap do |source|
+      source.define_singleton_method(:each) do |&block|
+        loop { block.call(:event) && sleep(0.01) }
+      ensure
+        raise Miele::Sdk::ResponseError, 500
+      end
+    end
+  end
+
+  it 'raises what a source raises as it cleans up after the block breaks' do
+    expect { described_class.new([failing_cleanup]).each.first }.to raise_error(Miele::Sdk::ResponseError)
+  end
+
+  it 'leaves the error of the block to the caller over a failed cleanup' do
+    stop = ->(_event) { raise 'stop' }
+    expect { described_class.new([failing_cleanup]).each(&stop) }.to raise_error(RuntimeError, 'stop')
+  end
+
+  it 'leaves a failed cleanup to the caller even within a rescue of the caller' do
+    expect do
+      raise ArgumentError
+    rescue ArgumentError
+      described_class.new([failing_cleanup]).each.first
+    end.to raise_error(Miele::Sdk::ResponseError)
+  end
+
   it 'raises in the calling thread what a source raises' do
     failing = Class.new { def each = raise(Miele::Sdk::ConnectionError, 'gone') }.new
     expect { described_class.new([failing, source(:local)]).each { nil } }

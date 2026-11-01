@@ -1,6 +1,3 @@
-# The English alias of $!, which RBS core declares and its stdlib does not.
-$ERROR_INFO: Exception?
-
 module Miele
   module Sdk
     module Events

@@ -29,9 +29,9 @@ module Miele
 
         def plaintext: () -> String?
 
-        def household?: () -> bool
-
         private
+
+        def household?: () -> bool
 
         def claimed_signature: () -> String?
 

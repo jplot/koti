@@ -90,11 +90,14 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
   context 'when the block raises' do
     let(:handler) { ->(event) { event.number == '1' ? raise('handler bug') : events << event } }
 
-    it 'reports it and keeps serving the hub', :aggregate_failures do
-      frames = [sia_frame('"SIA-DCS"0010L0#AAA[#AAA|Nri1/BA1]'), sia_frame('"SIA-DCS"0011L0#AAA[#AAA|Nri1/BA2]')]
-
-      expect { expect(exchange(*frames).compact.size).to eq(2) }.to output(/handler bug/).to_stderr
-      expect(events.pop(timeout: 1)).to have_attributes(number: '2')
+    it 'leaves the error to the thread of that connection, which it ends', :aggregate_failures do
+      socket = TCPSocket.new('127.0.0.1', receiver.port)
+      expect do
+        socket.write(sia_frame('"SIA-DCS"0010L0#AAA[#AAA|Nri1/BA1]'))
+        expect([socket.gets("\r"), socket.wait_readable(1) && socket.read]).to eq([sia_frame('"ACK"0010L0#AAA[]'), ''])
+      end.to output(/handler bug/).to_stderr
+    ensure
+      socket&.close
     end
   end
 

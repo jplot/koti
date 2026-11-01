@@ -7,9 +7,9 @@ module Ajax
     module Sia
       # A TCP server standing as the hub's monitoring station. It answers each frame (ACK, NAK or DUH) and
       # hands each accepted event to the block, after the ACK. Each hub connection runs in its own thread,
-      # so the block may be called from several threads at once; an exception it raises is reported with
-      # +warn+ and the connection goes on. One address keeps at most 8 connections open: a ninth closes
-      # the oldest.
+      # so the block may be called from several threads at once; an exception it raises ends that
+      # connection's thread, and the connection with it. One address keeps at most 8 connections open: a
+      # ninth closes the oldest.
       class Receiver
         # The 0LLL length field caps a frame at 4105 bytes; a peer that never sends +\r+ stays bounded.
         LIMIT = 4105
@@ -85,20 +85,13 @@ module Ajax
           while (frame = socket.gets("\r", LIMIT))
             reply, event = answer(frame)
             socket.write(reply) if reply
-            deliver(event) if event
+            @handler.call(event) if event
           end
         rescue IOError, SystemCallError
           nil
         ensure
           socket.close
           @mutex.synchronize { @clients.delete(socket) }
-        end
-
-        # The ACK has gone out: a failing block must not cost the hub its connection.
-        def deliver(event)
-          @handler.call(event)
-        rescue StandardError => e
-          warn("ajax-sdk: the SIA event block raised #{e.class}: #{e.message}")
         end
 
         def answer(frame)

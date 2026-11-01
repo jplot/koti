@@ -96,4 +96,9 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     answers << FakeCloud.json([{ groupId: '0123456789ABCDEF', groupKey: 'AB' * 64, devices: [] }])
     expect(channel.group).to eq(['0123456789ABCDEF', 'AB' * 64])
   end
+
+  it 'raises NotFoundError for an account without a household key' do
+    answers << FakeCloud.json([])
+    expect { channel.group }.to raise_error(Miele::Sdk::NotFoundError, /no household key/)
+  end
 end

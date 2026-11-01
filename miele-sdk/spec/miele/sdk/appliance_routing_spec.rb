@@ -109,10 +109,22 @@ RSpec.describe Miele::Sdk::Appliance do
     expect(fake.requests).to be_empty
   end
 
-  it 'signs locally with the household key read from the cloud', :aggregate_failures do
+  it 'asks the cloud nothing for a household key the settings lack, in whole or in part', :aggregate_failures do
+    [[nil, nil], [FakeAppliance::GROUP_ID, nil], [nil, FakeAppliance::GROUP_KEY]].each do |group_id, group_key|
+      Miele::Sdk.configure do |config|
+        config.group_id = group_id
+        config.group_key = group_key
+      end
+      expect { described_class.new('127.0.0.1').state }.to raise_error(Miele::Sdk::ConfigurationError)
+    end
+    expect(cloud.requests.map(&:path)).not_to include('/V2/GroupKeyId/')
+  end
+
+  it 'signs locally with the household key the caller reads from the cloud', :aggregate_failures do
+    group_id, group_key = Miele::Sdk.cloud.group
     Miele::Sdk.configure do |config|
-      config.group_id = nil
-      config.group_key = nil
+      config.group_id = group_id
+      config.group_key = group_key
     end
     expect(appliance.state.status).to eq(:running)
     expect(fake.requests.last.verified).to be(true)

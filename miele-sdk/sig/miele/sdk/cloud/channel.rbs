@@ -15,8 +15,6 @@ module Miele
 
         @session: Session
 
-        @group: [String, String]?
-
         attr_reader session: Session
 
         def initialize: (Session session) -> void

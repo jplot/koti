@@ -76,23 +76,16 @@ module Miele
         answer(exchange(host, message), method, key)
       end
 
-      # @return [Array(String, String)] GroupID and GroupKey, as bytes, read from the Miele account when neither is set
+      # @return [Array(String, String)] GroupID and GroupKey of the settings, as bytes
       # @raise [ConfigurationError]
       # @api private
       def credentials
-        group_id, group_key = household.map(&:to_s) #: [String, String]
+        group_id = Sdk.config.group_id.to_s
+        group_key = Sdk.config.group_key.to_s
         raise ConfigurationError, 'group_id must be 16 hexadecimal digits' unless group_id.match?(/\A\h{16}\z/)
         raise ConfigurationError, 'group_key must be 128 hexadecimal digits' unless group_key.match?(/\A\h{128}\z/)
 
         [[group_id].pack('H*'), [group_key].pack('H*')]
-      end
-
-      # @return [Array(String, String), Array(nil, nil)] the settings' GroupID and GroupKey, else the account's
-      # @api private
-      def household
-        config = Sdk.config
-        set = [config.group_id, config.group_key]
-        set.none? ? (Sdk.cloud&.group || set) : set
       end
 
       # @param request [Net::HTTPRequest]

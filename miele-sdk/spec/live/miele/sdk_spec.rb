@@ -163,13 +163,8 @@ RSpec.describe Miele::Sdk, :live do
       expect([hood.color_flow, hood.connectivity_plus]).to all(be_nil.or(be_a(Data)))
     end
 
-    it 'reads the household key from the cloud and signs locally with it', :aggregate_failures do
+    it 'reads the household key the appliances sign with from the cloud' do
       expect(cloud.group == [ENV.fetch('MIELE_GROUP_ID'), ENV.fetch('MIELE_GROUP_KEY')]).to be(true)
-      described_class.configure do |config|
-        config.group_id = nil
-        config.group_key = nil
-      end
-      expect(appliances.map(&:device_type)).not_to include(:unknown)
     end
 
     it 'follows the account through the cloud websocket for 20 s on one connection, closed at the end',

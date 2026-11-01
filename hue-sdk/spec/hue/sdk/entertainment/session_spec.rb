@@ -48,9 +48,28 @@ RSpec.describe Hue::Sdk::Entertainment::Session do
     expect(socket).to have_received(:write).with(satisfy { it.getbyte(11) == 1 && it.getbyte(14) == 1 })
   end
 
-  it 'stops the configuration when the block raises', :aggregate_failures do
+  it 'closes the socket, then stops the configuration, when the block raises', :aggregate_failures do
+    at_close = []
+    allow(socket).to receive(:close) { at_close << actions }
     expect { configuration.stream { raise 'boom' } }.to raise_error('boom')
+    expect([at_close, actions]).to eq([[%w[start]], %w[start stop]])
+  end
+
+  it 'stops the configuration when the handshake fails', :aggregate_failures do
+    allow(Hue::Sdk::Entertainment::DtlsSocket).to receive(:open).and_raise(Hue::Sdk::ConnectionError, 'handshake')
+    expect { configuration.stream { nil } }.to raise_error(Hue::Sdk::ConnectionError, 'handshake')
     expect(actions).to eq(%w[start stop])
+  end
+
+  context 'when the bridge refuses the start' do
+    let(:bridge) do
+      FakeBridge.serving("PUT /clip/v2/resource/entertainment_configuration/#{id}" => [500, { data: [], errors: [] }])
+    end
+
+    it 'sends no stop', :aggregate_failures do
+      expect { configuration.stream { nil } }.to raise_error(Hue::Sdk::ResponseError)
+      expect(bridge.requests.size).to eq(1)
+    end
   end
 
   it 'requires the client key', :aggregate_failures do

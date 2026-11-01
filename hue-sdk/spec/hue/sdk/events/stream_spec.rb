@@ -47,6 +47,12 @@ RSpec.describe Hue::Sdk::Events::Stream do
     expect { stream.each { nil } }.to raise_error(Hue::Sdk::ConnectionError)
   end
 
+  it 'keeps the id of the last message whose events the block took whole', :aggregate_failures do
+    resumed = described_class.new(last_event_id: '0:9')
+    expect { resumed.each { raise 'stop' if it.resource_id == 'l2' } }.to raise_error('stop')
+    expect(resumed.last_event_id).to eq('0:9')
+  end
+
   it 'lets an error raised by the block reach the caller', :aggregate_failures do
     expect { stream.each { File.read('/nonexistent') } }.to raise_error(Errno::ENOENT)
     expect(bridge.requests.size).to eq(1)
@@ -70,6 +76,15 @@ RSpec.describe Hue::Sdk::Events::Stream do
       found = []
       expect { stream.each { found << it.resource_id } }.to raise_error(Hue::Sdk::ConnectionError)
       expect([found, stream.last_event_id]).to eq([%w[l1 l2], '1:0'])
+    end
+  end
+
+  context 'when the bridge drops the connection before it answers' do
+    def answer(_request) = :drop
+
+    it 'raises ConnectionError without sending the request again', :aggregate_failures do
+      expect { stream.each { nil } }.to raise_error(Hue::Sdk::ConnectionError)
+      expect(bridge.requests.size).to eq(1)
     end
   end
 

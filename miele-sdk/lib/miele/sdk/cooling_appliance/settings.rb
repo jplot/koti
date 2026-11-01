@@ -63,15 +63,19 @@ module Miele
           put('Cooling', 'PresentationLight', Value: on ? 1 : 2)
         end
 
+        # The app sends 0 for a zone switched off, else its seven-option slider's index plus 1.
+        #
         # @param zone [Zone] one of {#zones}
-        # @param value [Integer] 0 switches the zone's light off
+        # @param value [Integer] 0 switches the zone's light off, 1 to 7 sets its level
         # @return [void]
         # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with a presentation light, while the
         #   app's presenter light section shows
+        # @raise [ArgumentError] outside 0 to 7
         # @api public
         def set_presentation_light_intensity(zone, value)
           require!(presentation_light?, 'the appliance has no presentation light')
           require!(presenter_light_shown?(state), 'the app shows no presentation light now')
+          require_offered!(value, (0..7).to_a)
           put('Cooling', "#{zone.rank}/PresentationLightIntensity", Value: value)
         end
 

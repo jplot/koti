@@ -372,6 +372,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
                              ['PUT', 'Cooling/2/PresentationLightIntensity', { 'Value' => 0 }]])
     end
 
+    it "keeps a zone intensity to 0 or the app's seven slider options", :aggregate_failures do
+      expect { fridge.set_presentation_light_intensity(freezer, 8) }.to raise_error(ArgumentError)
+      expect { fridge.set_presentation_light_intensity(freezer, -1) }.to raise_error(ArgumentError)
+      fridge.set_presentation_light_intensity(freezer, 7)
+      expect(written).to eq([['PUT', 'Cooling/2/PresentationLightIntensity', { 'Value' => 7 }]])
+    end
+
     it 'sets a zone intensity with Status 10, where the app still shows its presenter light' do
       resources['State'] = { 'Status' => 10 }
       fridge.set_presentation_light_intensity(freezer, 0)

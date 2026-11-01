@@ -68,15 +68,14 @@ module Hue
         end
       end
 
-      # Follows the event stream of the bridge, reconnecting when it breaks.
+      # Reads the event stream of the bridge once, to its end. It keeps the id of the last message read and sends it
+      # back as +Last-Event-ID+, which the bridge answers with the events it sent meanwhile first.
       class Stream
         PATH = '/eventstream/clip/v2'
-        MAX_DELAY = 30
-        private_constant :PATH, :MAX_DELAY
+        private_constant :PATH
 
         # Carries what the caller's block raised out of Connection.stream, which
-        # would take an Errno from the caller's own code for a network failure
-        # and reconnect, losing the event.
+        # would take an Errno from the caller's own code for a network failure.
         class BlockFailure < StandardError
           # @return [Exception] what the block raised
           attr_reader :error
@@ -90,35 +89,31 @@ module Hue
         end
         private_constant :BlockFailure
 
-        # @param sleeper [#call] waits the given number of seconds before a reconnection
+        # @param last_event_id [String, nil] the {#last_event_id} of an earlier stream, to resume from
         # @api public
-        def initialize(sleeper: method(:sleep))
-          @sleeper = sleeper
-          @last_id = nil
-          @delay = 1
-        end
+        def initialize(last_event_id: nil) = @last_id = last_event_id
 
-        # Blocks and yields every event. After a network failure or the end of
-        # the stream, reconnects after 1, 2, 4, 8, 16 then 30 seconds, back to
-        # 1 second as soon as the bridge answers.
+        # A message the block leaves part-way keeps the id before it, so a stream resumed from that id yields it again.
+        #
+        # @return [String, nil] the id of the last message whose events the block took whole, or the one given
+        # @api public
+        def last_event_id = @last_id
+
+        # Blocks and yields every event until the bridge ends the stream. Called again, it resumes from
+        # {#last_event_id}.
         #
         # @yieldparam event [Event]
         # @return [void]
         # @raise [AuthenticationError] if no application key is configured or the bridge rejects it
-        # @raise [ConnectionError] if no host is configured
+        # @raise [ConnectionError] if no host is configured, the bridge cannot be reached or the stream breaks
         # @raise [TLSError] if the bridge certificate is not trusted
         # @raise [ResponseError] if the bridge answers with another error status
-        # @raise [StandardError] whatever the block raises, without reconnecting
+        # @raise [StandardError] whatever the block raises
         # @api public
         def each(&)
           key = Sdk.config.application_key or raise AuthenticationError, 'application_key is not configured'
           Sdk.config.host or raise ConnectionError, 'host is not configured'
-          loop do
-            follow(key, &)
-            wait
-          rescue ConnectionError
-            wait
-          end
+          follow(key, &)
         rescue BlockFailure => e
           raise e.error, cause: e.error.cause
         end
@@ -132,7 +127,6 @@ module Hue
         def follow(key, &)
           parser = Parser.new
           response = Connection.stream(PATH, headers: headers(key)) do |chunk|
-            @delay = 1
             parser.feed(chunk) { |message| deliver(message, &) }
           end
           refuse(response) unless response.is_a?(Net::HTTPOK)
@@ -157,13 +151,6 @@ module Hue
         # @api private
         def headers(key)
           { 'hue-application-key' => key, 'Accept' => 'text/event-stream', 'Last-Event-ID' => @last_id }.compact
-        end
-
-        # @return [void]
-        # @api private
-        def wait
-          @sleeper.call(@delay)
-          @delay = [@delay * 2, MAX_DELAY].min
         end
 
         # @param data [String] JSON array of event containers

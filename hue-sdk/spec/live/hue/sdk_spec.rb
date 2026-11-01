@@ -48,7 +48,7 @@ RSpec.describe Hue::Sdk, :live do
   end
 
   it 'holds the event stream open' do
-    listener = Thread.new { Hue::Sdk::Events::Stream.new(sleeper: ->(_) { raise 'the stream broke' }).each { nil } }
+    listener = Thread.new { Hue::Sdk::Events::Stream.new.each { nil } }
     expect(listener.join(3)).to be_nil
   ensure
     listener&.kill

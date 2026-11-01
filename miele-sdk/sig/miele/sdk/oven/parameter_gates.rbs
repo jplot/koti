@@ -44,6 +44,8 @@ module Miele
 
         def program_type: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
 
+        def functional?: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> bool
+
         def readable?: (untyped value) -> bool
 
         def writable?: (untyped value) -> bool

@@ -148,6 +148,18 @@ module Miele
         # @return [Boolean]
         def duration_set?(duration) = ![0, 0xFFFF_FFFF].include?(duration.current_value.to_i)
 
+        # ShouldHideProgramParameters negated; its IsLoading is 1/1585 and 1/1574 showing different programs.
+        #
+        # @param shown [Objects::Oven::GlobalPsAttributesCCA, nil] of 1/1585
+        # @param selected [Objects::Oven::GlobalPsAttributesCCA, nil] of 1/1574
+        # @return [Boolean]
+        def function_shown?(shown, selected)
+          prog_id = shown&.prog_id
+          return false unless prog_id && functional?(shown)
+
+          Objects::Oven::GlobalEnumPrgId.to_i(prog_id).positive? && prog_id == selected&.prog_id
+        end
+
         # The section view models enable a cell for a writable value only; the cooking level cells need
         # RemoteEnableType MobileStart, and ReturnCorrectDuration and ReturnCorrectTimePoint make an own or automatic
         # program's times read-only without mobile start.

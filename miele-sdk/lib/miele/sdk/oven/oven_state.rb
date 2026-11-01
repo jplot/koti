@@ -5,7 +5,7 @@ module Miele
     class Oven < Appliance
       # The app's OvenState, as far as a stop, a selection or a steam burst depends on it
       # (Sources.DOP2.OvenStateSource): a descaling (326) never pauses, and an info, a query or the open door holds
-      # a program that cannot start. Its ShouldHideProgramParameters too.
+      # a program that cannot start.
       module OvenState
         INFO_QUERY_DOOR_PHASES = [10_001, 10_003, 28_116].freeze
         FUNCTIONAL_PROGRAM_TYPES = [2, 3, 4, 5, 7, 8, 38, 50].freeze
@@ -53,18 +53,6 @@ module Miele
         # @param attributes [Objects::Oven::GlobalPsAttributesCCA, nil]
         # @return [Integer, nil]
         def phase(attributes) = attributes&.prog_phase&.then { Objects::Oven::GlobalEnumPPhaseId.to_i(it) }
-
-        # ShouldHideProgramParameters negated; its IsLoading is 1/1585 and 1/1574 showing different programs.
-        #
-        # @param shown [Objects::Oven::GlobalPsAttributesCCA, nil] of 1/1585
-        # @param selected [Objects::Oven::GlobalPsAttributesCCA, nil] of 1/1574
-        # @return [Boolean]
-        def function_shown?(shown, selected)
-          prog_id = shown&.prog_id
-          return false unless prog_id && functional?(shown)
-
-          Objects::Oven::GlobalEnumPrgId.to_i(prog_id).positive? && prog_id == selected&.prog_id
-        end
 
         # @param attributes [Objects::Oven::GlobalPsAttributesCCA, nil]
         # @return [Boolean]

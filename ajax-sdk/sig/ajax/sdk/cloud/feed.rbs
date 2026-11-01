@@ -1,14 +1,8 @@
 module Ajax
   module Sdk
     module Cloud
-      interface _Sleeper
-        def call: (Integer seconds) -> untyped
-      end
-
       class Feed
         SOURCES: Array[Symbol]
-        RETRIABLE: Array[singleton(StandardError)]
-        MAX_DELAY: Integer
         PAGE: Integer
         module SPACE = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
         module ORIGIN = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification
@@ -19,26 +13,19 @@ module Ajax
 
         @client: Client
         @space_id: String
-        @sleeper: _Sleeper
         @tracker: Tracker
         @queue: Thread::Queue[untyped]
-        @newest: [Float, String]?
-        @read: bool
 
-        def initialize: (untyped client, String space_id, sleeper: _Sleeper) -> void
+        def initialize: (untyped client, String space_id, tracker: Tracker) -> void
         def each: () { (Event) -> void } -> void
 
         private
 
-        def deliver: (Symbol source, untyped message) { (Event) -> void } -> void
+        def deliver: (Symbol source, untyped message, Array[[Float, String]]? marks) { (Event) -> void } -> void
         def follow: (Symbol source) -> void
-        def receive: (Symbol source) -> bool
-        def listen: (Symbol source) { () -> void } -> void
         def subscribe: (Symbol source) { (untyped) -> void } -> nil
-        def pause: (Integer delay) -> Integer
         def catch_up: () -> void
         def note_newest: () -> void
-        def remember: (Array[[Float, String]] marks) -> [Float, String]?
         def page_marks: (Array[Notification] notifications) -> Array[[Float, String]]
         def stream_marks: (untyped message) -> Array[[Float, String]]
         def created: (Array[Notification] page) -> LOG::StreamNotificationLogResponse::Success

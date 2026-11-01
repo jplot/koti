@@ -15,7 +15,7 @@ RSpec.describe Ajax::Sdk::Cloud::Exchange do
     allow(GRPC::ClientStub).to receive(:new).and_wrap_original do |original, *, **options|
       original.call("127.0.0.1:#{gateway.port}", :this_channel_is_insecure, **options)
     end
-    allow(client.session).to receive_messages(ensure_login: nil, login: nil, metadata: {})
+    allow(client.session).to receive_messages(ensure_login: {}, metadata: {})
     gateway
   end
 
@@ -162,13 +162,11 @@ RSpec.describe Ajax::Sdk::Cloud::Exchange do
   end
 
   context 'when the session expires before the first response' do
-    let(:calls) { [[:read, GRPC::Unauthenticated.new('expired')], [:read, :read, offer]] }
+    let(:calls) { [[:read, GRPC::Unauthenticated.new('expired')]] }
 
-    it 'logs in again and replays what was written', :aggregate_failures do
-      exchange.write(init).write(answer).each { nil }
-
-      expect(client.session).to have_received(:login).once
-      expect(sent).to eq(%i[init init answer])
+    it 'raises it without replaying what was written', :aggregate_failures do
+      expect { exchange.write(init).write(answer).each { nil } }.to raise_error(GRPC::Unauthenticated)
+      expect(sent).to eq(%i[init])
     end
   end
 

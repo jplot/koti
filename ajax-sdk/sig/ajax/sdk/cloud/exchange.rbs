@@ -13,7 +13,6 @@ module Ajax
         @message: ^(untyped) -> untyped
         @lock: Thread::Mutex
         @queue: Thread::Queue
-        @written: Array[untyped]?
         @started: bool
         @closed: bool
         @operation: untyped
@@ -28,8 +27,7 @@ module Ajax
         private
 
         def relay: () { (untyped) -> void } -> nil
-        def renew: () -> Thread::Queue
-        def drain: (Thread::Queue queue, ^() -> untyped ended, Enumerator::Yielder out) -> void
+        def drain: (^() -> untyped ended, Enumerator::Yielder out) -> void
       end
 
       class Client
@@ -46,7 +44,7 @@ module Ajax
           def refuse_write: (String path) -> void
           def settle: (String path, untyped value) -> untyped
           def value: (String path, String bytes) -> untyped
-          def authenticating: [T] (?^() -> bool retriable) { (Hash[String, String]) -> T } -> T
+          def authenticating: [T] () { (Hash[String, String]) -> T } -> T
           def stub: () -> untyped
           def message: (String path, untyped request) -> untyped
           def encoder: (String path) -> Method

@@ -13,7 +13,7 @@ RSpec.describe Ajax::Sdk::Cloud::Methods do
 
   before do
     allow(GRPC::ClientStub).to receive(:new).and_return(grpc)
-    allow(client.session).to receive_messages(ensure_login: nil, login: nil, metadata: {})
+    allow(client.session).to receive_messages(ensure_login: {}, metadata: {})
   end
 
   def answer(path, message = { success: {} })

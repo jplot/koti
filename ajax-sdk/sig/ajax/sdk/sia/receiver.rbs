@@ -26,8 +26,9 @@ module Ajax
 
         def accept_loop: () -> void
         def admit: (TCPSocket socket) -> void
+        def finish: (Thread thread) -> void
         def serve: (TCPSocket socket) -> nil
-        def deliver: (Event event) -> void
+        def receive: (TCPSocket socket) -> Event?
         def answer: (String frame) -> [String?, Event?]
         def timely?: (Time? time) -> bool
       end

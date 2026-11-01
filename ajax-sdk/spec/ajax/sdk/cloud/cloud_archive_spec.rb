@@ -14,7 +14,7 @@ RSpec.describe Ajax::Sdk::Cloud::CloudArchive do
     allow(GRPC::ClientStub).to receive(:new).and_wrap_original do |original, *, **options|
       original.call("127.0.0.1:#{gateway.port}", :this_channel_is_insecure, **options)
     end
-    allow(client.session).to receive_messages(ensure_login: nil, login: nil, metadata: {})
+    allow(client.session).to receive_messages(ensure_login: {}, metadata: {})
   end
 
   after { gateway.stop }

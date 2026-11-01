@@ -76,13 +76,13 @@ module Miele
 
       def get: (String path) -> resource
 
+      def through_cloud?: () -> bool
+
       private
 
       def send_request: (Symbol method, String path, ?body: String?, ?kind: Symbol) -> Connection::Response
 
       def identity: () -> Schema::DeviceIdentification
-
-      def through_cloud?: () -> bool
 
       def module_host: () -> String?
 

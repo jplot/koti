@@ -60,11 +60,12 @@ RSpec.describe Miele::Sdk::Hood do
       expect { hood.configure_color_flow(active: true) }.to raise_error(Miele::Sdk::NotFoundError)
     end
 
-    it 'refuses ColorFlow on a hood the cloud says has none' do
+    it 'refuses ColorFlow on a hood the cloud says has none', :aggregate_failures do
       cloud = instance_double(Miele::Sdk::Cloud::Channel)
       allow(cloud).to receive(:request).and_raise(Miele::Sdk::NotFoundError.new(404))
       reached = described_class.new('127.0.0.1', ident:, fab:, cloud:)
       expect { reached.configure_color_flow(active: true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(cloud).to have_received(:request)
     end
   end
 

@@ -9,7 +9,7 @@ RSpec.describe Miele::Sdk::Appliance do
     FakeAppliance.start do |request|
       case request.path
       when '/Devices/' then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
-      when %r{/DOP2?/|/State/} then [404, {}, '']
+      when %r{/DOP2/} then [404, {}, '']
       else [200, {}, '{"Status":5}']
       end
     end
@@ -19,7 +19,7 @@ RSpec.describe Miele::Sdk::Appliance do
       case request.path
       when %r{\A/V2/Devices/\d+/DOP2/} then [200, {}, leaf]
       when %r{\A/V2/Devices/\d+/DOP/} then FakeCloud.json('Response' => '8E0111000000')
-      when %r{\A/V2/Devices/\d+/State/} then FakeCloud.json({})
+      when %r{\A/V2/Devices/\d+/Ident\z} then FakeCloud.json('DeviceType' => 13, 'ProtocolVersion' => 4)
       when '/V2/Devices' then FakeCloud.json([{ host: 'Miele-0000000000000000.local.', devices: [{ mac: fab }] }])
       when '/V2/GroupKeyId/'
         FakeCloud.json([{ groupId: FakeAppliance::GROUP_ID, groupKey: FakeAppliance::GROUP_KEY }])
@@ -61,6 +61,28 @@ RSpec.describe Miele::Sdk::Appliance do
     expect { described_class.new('127.0.0.1', cloud: Miele::Sdk.cloud) }.to raise_error(ArgumentError, /fab/)
   end
 
+  it 'builds the family class through the cloud it is given, sending nothing locally', :aggregate_failures do
+    expect(described_class.for('127.0.0.1', fab:, cloud: Miele::Sdk.cloud)).to be_a(Miele::Sdk::Oven)
+    expect(fake.requests).to be_empty
+  end
+
+  it 'reads the module of an appliance reached through the cloud locally, the cloud having no such resource',
+     :aggregate_failures do
+    by_cloud.info
+    expect(fake.requests.map(&:path)).to eq(['/Info'])
+    expect(cloud.requests.map(&:path)).not_to include('/V2/Info')
+  end
+
+  it 'sends Dop1 through the very cloud it is given, naming the module that cloud lists' do
+    channel = instance_double(Miele::Sdk::Cloud::Channel,
+                              devices: [Miele::Sdk::Cloud::Channel::Device.new(fab:, host: 'module.local',
+                                                                               ident: nil, state: nil)])
+    allow(channel).to receive(:request).and_return(Miele::Sdk::Connection::Response.new(200, '{}'))
+    described_class.new('127.0.0.1', fab:, cloud: channel).dop1('8E0101000000')
+    expect(channel).to have_received(:request)
+      .with(:post, "/Devices/#{fab}/DOP/", body: anything, kind: :json, host: 'module.local')
+  end
+
   it 'names the module host when Dop1 goes through the cloud' do
     by_cloud.dop1('8E0101000000')
     expect(cloud.requests.find { it.path.end_with?('/DOP/') }.headers['host']).to eq('Miele-0000000000000000.local')
@@ -74,6 +96,11 @@ RSpec.describe Miele::Sdk::Appliance do
   it 'lists appliances from the account' do
     expect(Miele::Sdk.appliances)
       .to contain_exactly(have_attributes(fab:, host: 'Miele-0000000000000000.local.'))
+  end
+
+  it 'reaches the account appliances locally unless asked otherwise' do
+    expect([Miele::Sdk.appliances, Miele::Sdk.appliances(through_cloud: true)].map { it.map(&:through_cloud?) })
+      .to eq([[false], [true]])
   end
 
   it 'reaches the account appliances through its cloud when asked', :aggregate_failures do

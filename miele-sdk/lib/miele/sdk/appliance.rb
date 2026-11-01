@@ -171,9 +171,14 @@ module Miele
       # @api public
       def get(path) = JSON.parse(send_request(:get, path).body)
 
+      # @return [Boolean] whether its +/Devices/+ requests go through the cloud
+      # @api public
+      def through_cloud? = !@cloud.nil?
+
       private
 
-      # A Dop1 request through the cloud names the module in +Host+, as the app does.
+      # The cloud names appliances under +/Devices/+ only: the module's own resources (+/Info+, +/Host+, +/Update/+,
+      # +/Subscriptions/+) are read from the module itself.
       #
       # @param method [Symbol]
       # @param path [String]
@@ -181,16 +186,14 @@ module Miele
       # @param kind [Symbol] +:json+ or +:dop2+
       # @return [Connection::Response]
       def send_request(method, path, body: nil, kind: :json)
-        cloud = @cloud or return @local.request(method, path, body:, kind:)
+        cloud = @cloud if path.start_with?('/Devices/')
+        return @local.request(method, path, body:, kind:) unless cloud
 
         cloud.request(method, path, body:, kind:, host: (module_host if path.match?(%r{\A/Devices/\d+/DOP/})))
       end
 
       # @return [Schema::DeviceIdentification]
       def identity = @identity ||= ident
-
-      # @return [Boolean]
-      def through_cloud? = !@cloud.nil?
 
       # @return [String, nil] the mDNS name of its Wi-Fi module, which the cloud routes Dop1 by
       def module_host = @module_host ||= @cloud&.devices&.find { it.fab == fab }&.host

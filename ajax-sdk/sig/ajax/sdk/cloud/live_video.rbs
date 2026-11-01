@@ -2,8 +2,6 @@ module Ajax
   module Sdk
     module Cloud
       class VideoChannel < Data
-        type player = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer
-
         attr_reader space_id: String
         attr_reader video_edge_id: String
         attr_reader channel_id: String
@@ -16,6 +14,7 @@ module Ajax
                        sound: bool, raw: untyped) -> VideoChannel
         def self.from: (String space_id, ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerVideoEdge video_edge,
                         ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer::PlayerChannel channel) -> VideoChannel
+        def self.ptz?: (::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Videoedge::Mediadevice::VideoCapabilities::Ptz? ptz) -> bool
       end
 
       module Streams
@@ -23,6 +22,8 @@ module Ajax
         module VIDEO = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video
 
         type quality = :main | :sub
+
+        METADATA: Array[String]
 
         class View < Data
           attr_reader channel: VideoChannel
@@ -45,30 +46,33 @@ module Ajax
       class LiveVideo
         class REQUEST = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamWebrtc::StreamWebrtcRequest
         module WEBRTC = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::Webrtc
-        module VIDEO = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video
 
         type signal = Hash[Symbol, untyped]
 
         @exchange: Exchange
+        @streams: Array[WEBRTC::Stream]
+        @ready: bool
+        @lock: Thread::Mutex
 
-        def initialize: (Exchange exchange) -> void
+        def initialize: (Exchange exchange, Array[WEBRTC::Stream] streams) -> void
         def each: () -> Enumerator[signal, nil]
                 | () { (signal) -> void } -> nil
         def answer: (String sdp) -> self
         def offer: (String sdp) -> self
-        def candidate: (String candidate, sdp_mid: String, sdp_mline_index: Integer) -> self
+        def candidate: (String candidate, sdp_mid: String?, sdp_mline_index: Integer?) -> self
         def ask_streams: (Array[WEBRTC::Stream] streams) -> self
-        def established: (latency: Float, candidate_type: VIDEO::IceCandidateType::value,
-                          network: VIDEO::NetworkTechnologyType::value) -> self
+        def established: (latency: Float, candidate_type: ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::IceCandidateType::value,
+                          network: ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video::NetworkTechnologyType::value) -> self
         def close: () -> nil
 
         private
 
+        def ready: () -> void
         def write: (**untyped message) -> self
         def description: (String type, String sdp) -> WEBRTC::SessionDescription
         def signal: (untyped message) -> signal?
         def ice_server: (WEBRTC::IceServer server) -> signal
-        def description_of: (WEBRTC::SessionDescription? found) -> signal?
+        def description_of: (String type, WEBRTC::SessionDescription? found) -> signal?
         def candidate_of: (WEBRTC::IceCandidate? found) -> signal?
       end
     end

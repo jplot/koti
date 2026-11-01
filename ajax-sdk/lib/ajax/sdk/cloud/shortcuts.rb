@@ -439,7 +439,7 @@ module Ajax
           def live_video(space_id, video_edge_id, streams, allow_large_rtp_packets: true)
             init = REQUEST::Init.new(space_locator: space_of(space_id), video_edge_id:, initial_streams: streams,
                                      ice_filters: every_candidate, allow_large_rtp_packets:)
-            LiveVideo.new(exchange(STREAM_WEBRTC).write(REQUEST.new(init:)))
+            LiveVideo.new(exchange(STREAM_WEBRTC).write(REQUEST.new(init:)), streams)
           end
 
           private

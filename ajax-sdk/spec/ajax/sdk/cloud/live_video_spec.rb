@@ -27,7 +27,7 @@ RSpec.describe Ajax::Sdk::Cloud::LiveVideo do
 
   def view = Ajax::Sdk::Cloud::Streams::View.new(channel:, number: 1, quality: :main)
 
-  def stream = Ajax::Sdk::Cloud::Streams.live(view, tag: 0)
+  def stream(tag = 0) = Ajax::Sdk::Cloud::Streams.live(view, tag:)
 
   def sent = gateway.requests.map { |_path, request| request.compact }
 
@@ -37,16 +37,20 @@ RSpec.describe Ajax::Sdk::Cloud::LiveVideo do
 
   def ice = { success: { init: { ice_servers: [server] } } }
 
-  def offer = { success: { offer: { session_description: { type: 'offer', sdp: 'v=0 offer' } } } }
+  def offer = { success: { offer: { session_description: { sdp: 'v=0 offer' } } } }
 
-  def candidate = { success: { new_ice_candidate: { candidate: { sdp: 'candidate:0', sdp_mid: '0' } } } }
+  def answer = { success: { answer: { session_description: { sdp: 'v=0 answer' } } } }
 
-  context 'when the camera offers' do
-    let(:calls) { [[:read, ice, offer, candidate, :read, :read, :read, :read]] }
+  def candidate
+    { success: { new_ice_candidate: { candidate: { sdp: 'candidate:0', sdp_mid: '0', sdp_mline_index: 1 } } } }
+  end
+
+  context 'when the far end offers' do
+    let(:calls) { [[:read, ice, :read, offer, candidate, answer, :read, :read, :read, :read]] }
 
     def answering(live)
-      live.answer('v=0 answer').candidate('candidate:1', sdp_mid: '0', sdp_mline_index: 0)
-      live.established(latency: 0.25, candidate_type: :relay, network: :wifi).ask_streams([stream])
+      live.answer('v=0 mine').candidate('candidate:1', sdp_mid: '0', sdp_mline_index: 1)
+      live.established(latency: 0.25, candidate_type: :relay, network: :wifi).ask_streams([stream, stream(1)])
     end
 
     def relay(live)
@@ -58,21 +62,30 @@ RSpec.describe Ajax::Sdk::Cloud::LiveVideo do
       received
     end
 
-    it 'gives the browser each signal in the shape RTCPeerConnection takes' do
+    it 'gives the browser each signal, typed by the message that carries it' do
       expect(relay(session)).to eq(
-        [{ iceServers: [server] },
-         { type: 'offer', sdp: 'v=0 offer' }, { candidate: 'candidate:0', sdpMid: '0', sdpMLineIndex: 0 }]
+        [{ iceServers: [server] }, { type: 'offer', sdp: 'v=0 offer' },
+         { candidate: 'candidate:0', sdpMid: '0', sdpMLineIndex: 1 }, { type: 'answer', sdp: 'v=0 answer' }]
       )
     end
 
-    it 'sends the browser signals after the init, as the app words them', :aggregate_failures do
+    it 'sends the streams again once the init came, then the browser signals', :aggregate_failures do
       relay(session)
 
       expect(sent.map { it.keys.first })
-        .to eq(%i[init answer new_ice_candidate peer_connection_established ask_streams])
-      expect(sent[1][:answer][:session_description]).to eq({ type: 'answer', sdp: 'v=0 answer' })
-      expect(sent[3][:peer_connection_established]).to include(ice_candidate_type: :ICE_CANDIDATE_TYPE_RELAY,
-                                                               network_technology_type: :NETWORK_TECHNOLOGY_TYPE_WIFI)
+        .to eq(%i[init ask_streams answer new_ice_candidate peer_connection_established ask_streams])
+      expect(sent.select { it[:ask_streams] }.map { it[:ask_streams][:streams].size }).to eq([1, 2])
+    end
+
+    it 'words each browser signal as the app does', :aggregate_failures do
+      relay(session)
+
+      expect(sent[2][:answer][:session_description]).to eq({ type: 'answer', sdp: 'v=0 mine' })
+      expect(sent[3][:new_ice_candidate][:candidate]).to eq({ sdp: 'candidate:1', sdp_mid: '0', sdp_mline_index: 1 })
+      expect(sent[4][:peer_connection_established]).to eq(
+        latency: { nanos: 250_000_000 }, ice_candidate_type: :ICE_CANDIDATE_TYPE_RELAY,
+        network_technology_type: :NETWORK_TECHNOLOGY_TYPE_WIFI
+      )
     end
   end
 
@@ -83,7 +96,7 @@ RSpec.describe Ajax::Sdk::Cloud::LiveVideo do
       session.each { nil }
 
       expect(sent.first[:init]).to include(
-        video_edge_id: '0000ABCD', allow_large_rtp_packets: true,
+        space_locator: { space_id: 's1' }, video_edge_id: '0000ABCD', allow_large_rtp_packets: true,
         initial_streams: [include(id: '1-lm', channel_guid: 'ch-1')],
         ice_filters: include(type_filter: { host: true, reflexive: true, relay: true },
                              protocol_filter: { tcp: true, udp: true })
@@ -94,6 +107,24 @@ RSpec.describe Ajax::Sdk::Cloud::LiveVideo do
       client.live_video('s1', '0000ABCD', [stream], allow_large_rtp_packets: false).each { nil }
 
       expect(sent.first[:init].fetch(:allow_large_rtp_packets, false)).to be(false)
+    end
+  end
+
+  context 'when the streams change before the init came' do
+    let(:calls) { [[:read, ice, :read]] }
+
+    it 'holds the list until then' do
+      exchange = instance_double(Ajax::Sdk::Cloud::Exchange, write: nil)
+      described_class.new(exchange, [stream]).ask_streams([stream, stream(1)])
+
+      expect(exchange).not_to have_received(:write)
+    end
+
+    it 'sends the last list once, when the init comes', :aggregate_failures do
+      session.ask_streams([stream, stream(1)]).each { nil }
+
+      expect(sent.map { it.keys.first }).to eq(%i[init ask_streams])
+      expect(sent.last[:ask_streams][:streams].size).to eq(2)
     end
   end
 
@@ -111,7 +142,22 @@ RSpec.describe Ajax::Sdk::Cloud::LiveVideo do
     let(:calls) { [[:read, { success: { ask_streams_response: { success: {} } } }, offer]] }
 
     it 'leaves the answer out, as the app ignores it' do
-      expect { |probe| session.each(&probe) }.to yield_successive_args({ type: 'offer', sdp: 'v=0 offer' })
+      expect(session.each.to_a).to eq([{ type: 'offer', sdp: 'v=0 offer' }])
+    end
+  end
+
+  context 'when the browser leaves' do
+    let(:calls) { [%i[read open]] }
+
+    it 'ends the session on the gateway', :aggregate_failures do
+      live = session
+      Thread.new do
+        sleep(0.05) until sent.any?
+        live.close
+      end
+
+      expect(live.each { nil }).to be_nil
+      expect(gateway.closed.pop(timeout: 1)).to eq(webrtc)
     end
   end
 

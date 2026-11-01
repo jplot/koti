@@ -41,10 +41,10 @@ module Ajax
         def each(&)
           threads = SOURCES.map { |source| Thread.new { follow(source) }.tap { it.name = "ajax-feed-#{source}" } }
           loop do
-            source, message = @queue.pop
+            source, message, marks = @queue.pop
             break if message == :ended
 
-            deliver(source, message, &)
+            deliver(source, message, marks, &)
           end
         ensure
           threads&.each { it.raise(Stop) }
@@ -53,18 +53,19 @@ module Ajax
 
         private
 
-        def deliver(source, message, &)
+        # A notification counts as read once the caller gets it, so a feed reopened with the tracker reads back the
+        # ones still queued when this one ended.
+        def deliver(source, message, marks, &)
           raise message if message.is_a?(Exception)
 
-          @tracker.apply(source, message).each(&)
+          events = @tracker.apply(source, message)
+          @tracker.remember(marks) if marks
+          events.each(&)
         end
 
         def follow(source)
           catch_up if source == :notifications
-          subscribe(source) do |message|
-            @tracker.remember(stream_marks(message)) if source == :notifications
-            @queue << [source, message]
-          end
+          subscribe(source) { @queue << [source, it, (stream_marks(it) if source == :notifications)] }
           @queue << [source, :ended]
         rescue Stop
           nil
@@ -81,17 +82,18 @@ module Ajax
           end
         end
 
-        # The notification stream has no snapshot. A tracker that has seen none notes the newest notification; one
-        # that has reads back the ones created since, as the app pages: from one outside a group.
+        # The notification stream has no snapshot. The app pages from a notification outside a group.
         def catch_up
-          return note_newest unless @tracker.newest
+          return note_newest unless @tracker.read?
 
+          cursor = @tracker.newest
           loop do
-            page = @client.notifications(@space_id, limit: PAGE, newer_than: @tracker.newest&.last)
-            @queue << [:notifications, created(page.reverse)] unless page.empty?
-            top = page.reject(&:parent_id)
-            @tracker.remember(page_marks(top))
-            break if top.size < PAGE
+            page = @client.notifications(@space_id, limit: PAGE, newer_than: cursor&.last)
+            marks = page_marks(page.reject(&:parent_id))
+            @queue << [:notifications, created(page.reverse), marks] unless page.empty?
+            break if marks.size < PAGE
+
+            cursor = marks.max_by(&:first)
           end
         end
 

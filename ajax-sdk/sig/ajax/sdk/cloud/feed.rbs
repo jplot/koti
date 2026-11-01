@@ -21,7 +21,7 @@ module Ajax
 
         private
 
-        def deliver: (Symbol source, untyped message) { (Event) -> void } -> void
+        def deliver: (Symbol source, untyped message, Array[[Float, String]]? marks) { (Event) -> void } -> void
         def follow: (Symbol source) -> void
         def subscribe: (Symbol source) { (untyped) -> void } -> nil
         def catch_up: () -> void

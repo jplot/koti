@@ -88,12 +88,14 @@ module Ajax
         @space_id: String
         @stores: Hash[Symbol, Hash[untyped, raw]]
         @state: SpaceState?
+        @marks: Array[[Float, String]]?
 
         def initialize: (String space_id) -> void
         def apply: (Symbol source, untyped success) -> Array[Event]
         def state: () -> SpaceState
-        attr_reader newest: [Float, String]?
-        def remember: (Array[[Float, String]] marks) -> [Float, String]?
+        def newest: () -> [Float, String]?
+        def read?: () -> bool
+        def remember: (Array[[Float, String]] marks) -> Array[[Float, String]]
 
         private
 

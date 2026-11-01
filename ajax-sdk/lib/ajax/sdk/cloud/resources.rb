@@ -94,15 +94,16 @@ module Ajax
         # with the same tracker to get the changes made meanwhile, and nothing else. See {Feed}.
         #
         # @param space_id [String]
-        # @param tracker [Tracker] the state kept from an earlier feed of the space, a new one by default
+        # @param tracker [Tracker, nil] the state kept from an earlier feed of the space, for one feed at a time; a new
+        #   one by default
         # @yieldparam event [Event]
         # @return [Enumerator::Lazy<Event>, nil] the events when no block is given
         # @raise [RefusedError] when a stream answers a failure
         # @raise [GRPC::BadStatus] when a stream breaks
-        def events(space_id, tracker: Tracker.new(space_id), &)
+        def events(space_id, tracker: nil, &)
           return enum_for(:events, space_id, tracker:).lazy unless block_given?
 
-          Feed.new(self, space_id, tracker:).each(&)
+          Feed.new(self, space_id, tracker: tracker || Tracker.new(space_id)).each(&)
           nil
         end
 

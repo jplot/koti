@@ -216,7 +216,7 @@ module Ajax
         def initialize(space_id)
           @space_id = space_id
           @stores = { space: {}, security: {}, group: {}, room: {}, device: {}, notification: {} }
-          @newest = nil
+          @marks = nil
         end
 
         # @param source [Symbol] the stream the message came from: +:space+, +:summary+, +:devices+ or
@@ -236,12 +236,16 @@ module Ajax
 
         # @return [Array(Float, String), nil] the time and universal token of the newest notification seen outside a
         #   group, which a feed opened with this tracker reads back from
-        attr_reader :newest
+        def newest = @marks&.first
+
+        # @api private
+        # @return [Boolean] whether a feed has read the notifications of the space with this tracker
+        def read? = !@marks.nil?
 
         # @api private
         # @param marks [Array<Array(Float, String)>] times and universal tokens of notifications seen
         # @return [void]
-        def remember(marks) = @newest = [@newest, *marks].compact.max_by(&:first)
+        def remember(marks) = @marks = ((@marks || []) + marks).max_by(1, &:first)
 
         # @return [SpaceState] the state kept, frozen
         def state

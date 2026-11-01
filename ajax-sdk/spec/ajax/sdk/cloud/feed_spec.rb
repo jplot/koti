@@ -80,12 +80,12 @@ RSpec.describe Ajax::Sdk::Cloud::Feed do
   end
 
   it 'reads back the notifications created meanwhile when reopened with the same tracker', :aggregate_failures do
-    script[notes] = [[log(1)]]
-    script[find] = [{ success: {} }, { success: { notifications: [note(2)] } }]
+    script[notes] = [[log(1), log(2)]]
+    script[find] = [{ success: {} }, { success: { notifications: [note(3)] } }]
     events(tracker).to_a
 
-    expect(events(tracker).find { it.kind == :notification }.key).to eq('n2')
-    expect(requests).to include([find, hash_including(pagination: { backward_pagination_token: 'u1' })])
+    expect(events(tracker).find { it.kind == :notification }.key).to eq('n3')
+    expect(requests).to include([find, hash_including(pagination: { backward_pagination_token: 'u2' })])
   end
 
   it 'reads them back across pages, in the order they happened', :aggregate_failures do
@@ -96,6 +96,33 @@ RSpec.describe Ajax::Sdk::Cloud::Feed do
 
     expect(events(tracker).select { it.kind == :notification }.first(21).map(&:key)).to eq((21..41).map { "n#{it}" })
     expect(requests).to include([find, hash_including(pagination: { backward_pagination_token: 'u40' })])
+  end
+
+  it 'keeps for the next feed the notifications it never yielded' do
+    script[notes] = [[log(1), log(2), :open], []]
+    script[find] = [{ success: {} }, { success: { notifications: [note(2)] } }]
+    events(tracker) do
+      sleep(0.3)
+      break
+    end
+    events(tracker).to_a
+
+    expect(requests).to include([find, hash_including(pagination: { backward_pagination_token: 'u1' })])
+  end
+
+  it 'reads back on reopening a tracker whose space had no notification' do
+    script[notes] = [[], []]
+    script[find] = [{ success: {} }, { success: { notifications: [note(1)] } }]
+    events(tracker).to_a
+
+    expect(events(tracker).to_a.map(&:key)).to eq(['n1'])
+  end
+
+  it 'starts each walk of its enumerator afresh without a tracker' do
+    script[devices] = [[snapshot(100)], [snapshot(100)]]
+    feed = events
+
+    expect([feed.to_a, feed.to_a].map { it.count { it.kind == :device } }).to eq([1, 1])
   end
 
   it 'raises a failed read-back' do

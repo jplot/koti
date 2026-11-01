@@ -76,16 +76,30 @@ module Miele
         # @param option [Integer, Symbol]
         # @return [void]
         # @raise [ActionUnavailableError] on a CVA6000, where the app acknowledges nothing
+        # @raise [ArgumentError] for an option outside 1 to 17, or 1 to 16 on a CM7
         # @api public
         def acknowledge(type, id = nil, option:)
           member = MESSAGE_TYPES.fetch(type) { raise ArgumentError, "no #{type} notification" }
           require!(dop2?, 'the app acknowledges nothing on a CVA6000')
+          require_option!(option)
           modify_dop2(family::GlobalNtfctnAcknowledge, 2, 138, 0, 1) do |ack|
             member ? ack.with(member => id, ack_option: option) : ack.with(ack_option: option)
           end
         end
 
         private
+
+        # The app's acknowledge mappers throw outside 1 to 17, 1 to 16 on a CM7, before anything is read.
+        #
+        # @param option [Integer, Symbol]
+        # @return [void]
+        # @raise [ArgumentError]
+        def require_option!(option)
+          last = variant == :cm7 ? 16 : 17
+          return if (1..last).cover?(family::GlobalEnumNTFCTNAckOptions.to_i(option))
+
+          raise ArgumentError, "no acknowledge option #{option}"
+        end
 
         # @return [Data] 2/1586 at 0/0
         def read_combi_state

@@ -18,6 +18,8 @@ module Miele
 
         private
 
+        def require_option!: (Integer | Symbol option) -> void
+
         def read_combi_state: () -> untyped
 
         def switchable?: (State state, Array[Integer] statuses) -> bool

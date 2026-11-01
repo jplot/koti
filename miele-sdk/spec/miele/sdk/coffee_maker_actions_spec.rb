@@ -152,6 +152,17 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(written).to eq([['DOP2/2/1583?idx1=0&idx2=1', dop2_leaf(2, 0, { 1 => dop2_field(:e16, 2) }, idx2: 1)]])
   end
 
+  it 'refuses an option the app does not map, before reading anything', :aggregate_failures do
+    expect { coffee.acknowledge(:message, option: 0) }.to raise_error(ArgumentError)
+    expect { coffee.acknowledge(:message, option: 18) }.to raise_error(ArgumentError)
+    expect(fake.requests.map(&:path).grep(%r{/DOP2/2/138})).to be_empty
+  end
+
+  it 'acknowledges with the PIN code option, the last the app maps on a Gen7' do
+    coffee.acknowledge(:message, option: :pincode)
+    expect(written.map(&:last)).to eq([acknowledgement(0, 0, 17, attribute: 0)])
+  end
+
   it 'acknowledges a query with its id, a message with its option only' do
     coffee.acknowledge(:query, 3, option: 2)
     coffee.acknowledge(:message, 9, option: 1)
@@ -217,6 +228,10 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       served[[2, 1586, 0, 0]] = combi(2, 8)
       coffee.brew(24_005)
       expect(written.size).to eq(1)
+    end
+
+    it 'refuses option 17, which its acknowledgements stop short of' do
+      expect { coffee.acknowledge(:message, option: 17) }.to raise_error(ArgumentError)
     end
 
     it 'refuses to brew while one of its drinks runs' do

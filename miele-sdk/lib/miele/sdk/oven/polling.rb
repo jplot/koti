@@ -15,7 +15,7 @@ module Miele
 
         private
 
-        # @param timeout [Numeric] the seconds the app waits
+        # @param timeout [Integer] the seconds the app waits
         # @yieldreturn [Object, nil] what a read shows, nil or false to read again
         # @return [Object, nil] the first value the block gives, nil once the timeout is up
         # @raise [ResponseError] for a read refused with a 4xx

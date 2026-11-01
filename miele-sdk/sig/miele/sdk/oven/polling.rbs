@@ -10,7 +10,7 @@ module Miele
 
         private
 
-        def poll: (Integer | Float timeout) { () -> untyped } -> untyped
+        def poll: (Integer timeout) { () -> untyped } -> untyped
 
         def timed_poll: (Integer | Float timeout) { () -> untyped } -> [untyped, Float]
 

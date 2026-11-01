@@ -2,8 +2,6 @@ module Miele
   module Sdk
     class Oven < Appliance
       module Selection : Appliance
-        ACTION_TIMEOUT: Integer
-
         UNSUPPORTED_QUERIES: Array[Integer]
 
         UNWRITABLE_STATES: Array[Symbol]

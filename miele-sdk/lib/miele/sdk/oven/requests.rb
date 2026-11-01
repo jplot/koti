@@ -51,16 +51,6 @@ module Miele
           write_dop2(Messages.user_request(stop_request(state, context, requests)))
         end
 
-        # The app then raises the doneness or browning the oven asks for by one step, once the oven has moved on;
-        # {ProgramSelection#doneness=} and {ProgramSelection#browning=} write it here.
-        #
-        # Offered while 1/1585 shows ContinueCooking 1 or 2, baking or cooking (ContinueProgramOptionRule).
-        #
-        # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or when not offered
-        # @api public
-        def continue_cooking = user_request(72, 'the oven offers no continue cooking now') { continue_cooking? }
-
         # Offered while 1/131 shows message 20 (OptionsRunningAfterEndRule).
         #
         # @return [void]
@@ -78,12 +68,6 @@ module Miele
           require_dop2!
           require!(yield, reason)
           write_dop2(Messages.user_request(id))
-        end
-
-        # @return [Boolean]
-        def continue_cooking?
-          type = context.prog_attributes_cca&.continue_cooking&.then { Objects::Oven::GlobalEnumContinueCookingTypes.to_i(it) }
-          [1, 2].include?(type)
         end
 
         # @param context [Objects::Oven::GlobalPsContext]

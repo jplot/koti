@@ -6,12 +6,10 @@ module Miele
       # What the app's SelectOvenFunctionAction does: the program through PsSelectMessage (2/1577), then, once
       # 1/1574 shows it, the parameters it requires.
       module Selection
-        # The app's ActionExecutionTimeout, in seconds.
-        ACTION_TIMEOUT = 15
         # UnsupportedDop2Notifications.GenericQueryIds.
         UNSUPPORTED_QUERIES = [16_011, 16_013].freeze
         UNWRITABLE_STATES = %i[off not_connected running waiting_for_start].freeze
-        private_constant :ACTION_TIMEOUT, :UNSUPPORTED_QUERIES, :UNWRITABLE_STATES
+        private_constant :UNSUPPORTED_QUERIES, :UNWRITABLE_STATES
 
         # The app only logs a refused required parameter.
         #
@@ -64,8 +62,8 @@ module Miele
         # @return [Objects::Oven::GlobalPsContext] 1/1574 showing it
         # @raise [ActionFailedError]
         def shown_program_context(id)
-          poll(ACTION_TIMEOUT) { program_context.then { it if program_shown?(it, id) } } ||
-            raise(ActionFailedError, "the oven did not show program #{id} within #{ACTION_TIMEOUT} s")
+          poll(Polling::ACTION_TIMEOUT) { program_context.then { it if program_shown?(it, id) } } ||
+            raise(ActionFailedError, "the oven did not show program #{id} within #{Polling::ACTION_TIMEOUT} s")
         end
 
         # @param context [Objects::Oven::GlobalPsContext] 1/1574

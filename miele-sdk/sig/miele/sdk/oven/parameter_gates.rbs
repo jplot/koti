@@ -12,8 +12,6 @@ module Miele
 
         AUTOMATIC_TYPES: Array[Integer]
 
-        OPTION_RUNNING_MESSAGES: Array[Integer]
-
         def context: () -> Objects::Oven::GlobalDeviceContext
 
         def program_context: () -> Objects::Oven::GlobalPsContext
@@ -21,6 +19,8 @@ module Miele
         private
 
         def editable_parameters: (Symbol name) -> Objects::Oven::GlobalPsContext
+
+        def option_running?: () -> bool
 
         def editable_options: (Array[Integer] ids) -> Objects::Oven::GlobalPsContext
 

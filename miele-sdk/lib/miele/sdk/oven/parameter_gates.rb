@@ -17,11 +17,7 @@ module Miele
         # The raw programtypes ConvertProgramType makes Own or Automatic, and Automatic alone.
         FIXED_TIME_TYPES = [2, 3, 4].freeze
         AUTOMATIC_TYPES = [2, 3].freeze
-        # Keep warm and rapid cooling (OptionsRunningAfterEndSource): DetailParameterSectionViewModel and the
-        # temperature sections hide while 1/131 shows one.
-        OPTION_RUNNING_MESSAGES = [20, 19].freeze
-        private_constant :MEMBERS, :SHOWN_WITH_ANY_PROGRAM, :OPTIONS, :FIXED_TIME_TYPES, :AUTOMATIC_TYPES,
-                         :OPTION_RUNNING_MESSAGES
+        private_constant :MEMBERS, :SHOWN_WITH_ANY_PROGRAM, :OPTIONS, :FIXED_TIME_TYPES, :AUTOMATIC_TYPES
 
         private
 
@@ -30,13 +26,18 @@ module Miele
         # @raise [ActionUnavailableError] on a Dop1 oven, or unless the app shows the parameter and lets it change
         def editable_parameters(name)
           state, device, selected = allowed_parameters
-          require!(!shows?(:message, *OPTION_RUNNING_MESSAGES),
-                   "the app hides the #{name} while keeping warm or rapid cooling")
+          require!(!option_running?, "the app hides the #{name} while keeping warm or rapid cooling")
           require!(parameter_shown?(name, state, device, selected), "the app hides the #{name} now")
           value = selected.context_para_ca&.public_send(MEMBERS.fetch(name))
           require!(parameter_editable?(name, state, device, value), "the app does not let the #{name} change now")
           selected
         end
+
+        # IsOptionRunning: OptionsRunningAfterEndSource reads keep warm (message 20) or rapid cooling (19) on 1/131.
+        # DetailParameterSectionViewModel and the temperature sections hide while it holds.
+        #
+        # @return [Boolean]
+        def option_running? = shows?(:message, 20, 19)
 
         # ProgramOptionsRule lists the readable options of a function that 1/1585 and 1/1574 both show.
         #

@@ -178,6 +178,15 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect(written).to be_empty
   end
 
+  it 'refuses the humidifier or the door alarm delay at a Value of -1 or absent, as the app hides their cells',
+     :aggregate_failures do
+    resources['Cooling'].merge!('Humidifier' => { 'Value' => -1, 'Min' => -1, 'Max' => -1, 'Step' => 1 })
+    resources['Cooling'].delete('DoorAlarmTime')
+    expect { fridge.humidifier = -1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.door_alarm_delay = 60 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
   it 'refuses PerfectFresh on protocol 201, where the app reads none', :aggregate_failures do
     expect { fridge.perfect_fresh = 1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect(written).to be_empty

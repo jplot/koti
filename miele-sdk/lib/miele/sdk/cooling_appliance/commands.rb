@@ -163,19 +163,25 @@ module Miele
 
         # @param value [Integer]
         # @return [void]
+        # @raise [ActionUnavailableError] without +Humidifier+ or at its +Value+ -1, where the app hides the cell
         # @raise [ArgumentError] off +Humidifier+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def humidifier=(value)
-          require_offered!(value, picker(cooling['Humidifier']))
+          setting = cooling['Humidifier']
+          require!(setting && setting['Value'] != -1, 'the app shows no humidifier')
+          require_offered!(value, picker(setting))
           put('Cooling', 'Humidifier', Value: value)
         end
 
         # @param seconds [Integer]
         # @return [void]
+        # @raise [ActionUnavailableError] without +DoorAlarmTime+ or at its +Value+ -1, where the app hides the cell
         # @raise [ArgumentError] off +DoorAlarmTime+'s +Min+ to +Max+ by +Step+, which the app's picker offers
         # @api public
         def door_alarm_delay=(seconds)
-          require_offered!(seconds, picker(cooling['DoorAlarmTime']))
+          setting = cooling['DoorAlarmTime']
+          require!(setting && setting['Value'] != -1, 'the app shows no door alarm delay')
+          require_offered!(seconds, picker(setting))
           put('Cooling', 'DoorAlarmTime', Value: seconds)
         end
 

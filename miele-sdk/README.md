@@ -374,6 +374,10 @@ Each of these actions makes the checks the app's rules make before it, and raise
   `Miele::Sdk::ActionFailedError` and writes no parameter.
 - A parameter needs remote control without local control and a program on the oven, and a mobile
   start too once the program has started (waiting, running, paused or ended) or for program 361.
+  The app hides the temperatures, moisture, grill level, microwave power, steam bursts, duration,
+  start and end times unless 1/1585 shows a function (program type 2, 3, 4, 5, 7, 8, 38 or 50)
+  that 1/1574 shows too (ShouldHideProgramParameters), so the SDK refuses them then; browning,
+  doneness and the options stay open.
   `duration = 0` first moves the start to its minimum, as the app does.
 - `start` refuses a program that requires a duration not set yet. It first writes the parameters
   the program requires and the user has not confirmed, with the values they show, a temperature

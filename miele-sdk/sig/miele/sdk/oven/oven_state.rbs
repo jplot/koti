@@ -24,6 +24,8 @@ module Miele
 
         def phase: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
 
+        def function_shown?: (Objects::Oven::GlobalPsAttributesCCA? shown, Objects::Oven::GlobalPsAttributesCCA? selected) -> bool
+
         def functional?: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> bool
       end
     end

@@ -6,6 +6,8 @@ module Miele
 
         MICROWAVE_BITS: Array[Integer]
 
+        HIDDEN_WITH_PROGRAM: Array[Integer]
+
         def target_temperature=: (Integer | Float celsius) -> void
 
         def core_target_temperature=: (Integer | Float celsius) -> void
@@ -38,7 +40,11 @@ module Miele
 
         def set_parameter: (Integer id, Symbol type, untyped value, ?context: Objects::Oven::GlobalPsContext?) -> void
 
-        def require_parameters_allowed!: () -> void
+        def shown_parameters: (Integer id, ?Objects::Oven::GlobalPsContext? context) -> Objects::Oven::GlobalPsContext
+
+        def require_parameters_allowed!: () -> Objects::Oven::GlobalDeviceContext
+
+        def function_shown?: (Objects::Oven::GlobalPsAttributesCCA? shown, Objects::Oven::GlobalPsAttributesCCA? selected) -> bool
 
         def under_remote_control?: (?State state) -> bool?
 

@@ -11,7 +11,11 @@ module Miele
         # MicrowavePowers (80 to 1000 W) and MicrowaveSteps (1 to 7): the app's picker offers those of them set in
         # MwPower's SupportedBits, and writes the one picked.
         MICROWAVE_BITS = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40].freeze
-        private_constant :NOW, :MICROWAVE_BITS
+        # The attributes whose section ShouldHideProgramParameters empties in the app: GrillLevelRule,
+        # TargetMoistureRule, TargetTemperatureRule, TargetCoreTemperatureRule, MicrowaveLevelRule, SteamBurstsRule,
+        # ProgramDurationRule, ProgramStartAtRule and ProgramEndAtRule.
+        HIDDEN_WITH_PROGRAM = [1, 2, 6, 7, 8, 9, 10, 12, 13, 14, 15, 18].freeze
+        private_constant :NOW, :MICROWAVE_BITS, :HIDDEN_WITH_PROGRAM
 
         # @param celsius [Numeric]
         # @raise [ActionUnavailableError] see {#set_parameter}
@@ -43,9 +47,7 @@ module Miele
         # @raise [ArgumentError] for any other value
         # @api public
         def microwave_power=(bit)
-          require_dop2!
-          require_parameters_allowed!
-          context = program_context
+          context = shown_parameters(15)
           supported = supported_powers(context)
           unless MICROWAVE_BITS.include?(bit) && supported.anybits?(bit)
             raise ArgumentError, "#{bit} is not one of the microwave power bits the oven supports (#{supported})"
@@ -126,15 +128,27 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError]
         def set_parameter(id, type, value, context: nil)
+          write_parameter(selected_program(shown_parameters(id, context)), id, type, value)
+        end
+
+        # @param id [Integer] a +GLOBAL_PS_SelectionParaCA+ attribute
+        # @param context [Objects::Oven::GlobalPsContext, nil] 1/1574, read when not given
+        # @return [Objects::Oven::GlobalPsContext] 1/1574
+        # @raise [ActionUnavailableError] on a Dop1 oven, or when the app offers no such parameter now
+        def shown_parameters(id, context = nil)
           require_dop2!
-          require_parameters_allowed!
-          write_parameter(selected_program(context || program_context), id, type, value)
+          device = require_parameters_allowed!
+          selected = context || program_context
+          shown = function_shown?(device.prog_attributes_cca, selected.prog_attributes_cca)
+          require!(shown || !HIDDEN_WITH_PROGRAM.include?(id),
+                   'the app hides this parameter while the oven shows no function, or 1/1574 another program')
+          selected
         end
 
         # IsUserAllowedToModifyFunctionParametersRule: remote control and a program on the oven (1/1585), and
         # mobile start too once the program has started, or for program 361.
         #
-        # @return [void]
+        # @return [Objects::Oven::GlobalDeviceContext] 1/1585
         # @raise [ActionUnavailableError]
         def require_parameters_allowed!
           state = self.state
@@ -143,9 +157,10 @@ module Miele
           prog_id = shown ? Objects::Oven::GlobalEnumPrgId.to_i(shown) : 0
           require!(under_remote_control?(state), 'the oven takes parameters only under remote control')
           require!(prog_id.positive?, 'the oven shows no program')
-          return unless prog_id == 361 || started?(state, device)
-
-          require!(state.mobile_start?, 'the oven takes parameters only by mobile start once a program has started')
+          if prog_id == 361 || started?(state, device)
+            require!(state.mobile_start?, 'the oven takes parameters only by mobile start once a program has started')
+          end
+          device
         end
 
         # MicrowaveLevelRule gives the app no microwave section while MwPower is not readable.

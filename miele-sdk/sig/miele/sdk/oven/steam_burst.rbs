@@ -16,7 +16,7 @@ module Miele
 
         def manual_steam_burst?: (Objects::Oven::GlobalPsAttributesCCA shown) -> bool
 
-        def function_shown?: (Objects::Oven::GlobalPsAttributesCCA shown, Objects::Oven::GlobalPsAttributesCCA? selected) -> bool
+        def function_shown?: (Objects::Oven::GlobalPsAttributesCCA? shown, Objects::Oven::GlobalPsAttributesCCA? selected) -> bool
 
         def burst_left?: (Objects::Oven::GlobalPsAttributesCCA shown) -> bool
 

@@ -36,13 +36,46 @@ RSpec.describe Miele::Sdk::Oven do
 
   def device_prog_id = 13
 
-  def device_context = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, { 28 => dop2_field(:e16, device_prog_id) }) })
+  def device_program_type = 5
+
+  def device_context
+    shown = { 10 => dop2_field(:e8, device_program_type), 28 => dop2_field(:e16, device_prog_id) }
+    dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown) })
+  end
+
+  def hidden_parameters
+    { target_temperature: 180, core_target_temperature: 60, moisture: 3, grill_level: 2, microwave_power: 0x10,
+      steam_bursts: 2, steam_burst_times: [60], duration: 1800, start_at: :now, end_at: Time.at(1_700_003_600) }
+  end
 
   def written = fake.requests.select { it.verb == 'PUT' }.map { [it.path, it.body.unpack1('H*')] }
 
   def parameter(id, type, value)
     dop2_leaf(2, 1577, { 1 => dop2_field(:e16, 13), 3 => dop2_field(:e8, 2), 2 => dop2_field(:u16, id),
                          7 => dop2_field(:struct, { id => dop2_field(type, value) }) }).unpack1('H*')
+  end
+
+  shared_examples 'parameters the app hides' do
+    it 'refuses those the app hides with ShouldHideProgramParameters, and writes the others', :aggregate_failures do
+      hidden_parameters.each do |name, value|
+        expect { oven.public_send(:"#{name}=", value) }.to raise_error(Miele::Sdk::ActionUnavailableError, /hides/)
+      end
+      oven.browning = 2
+      oven.set_options(keep_warm: true)
+      expect(written.map(&:last)).to eq([parameter(30, :u8, 2), parameter(27, :bool, true)])
+    end
+  end
+
+  context 'when 1/1574 shows another program than 1/1585' do
+    def device_prog_id = 14
+
+    it_behaves_like 'parameters the app hides'
+  end
+
+  context 'when 1/1585 shows a program that is not a function' do
+    def device_program_type = 1
+
+    it_behaves_like 'parameters the app hides'
   end
 
   it 'sets the target temperature as the app does' do

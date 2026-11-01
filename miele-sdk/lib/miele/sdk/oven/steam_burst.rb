@@ -44,18 +44,6 @@ module Miele
             [1, 2, 3].include?(count.current_value) && function_shown?(shown, selected.prog_attributes_cca)
         end
 
-        # ShouldHideProgramParameters, whose IsLoading is 1/1585 and 1/1574 showing different programs.
-        #
-        # @param shown [Objects::Oven::GlobalPsAttributesCCA] of 1/1585
-        # @param selected [Objects::Oven::GlobalPsAttributesCCA, nil] of 1/1574
-        # @return [Boolean]
-        def function_shown?(shown, selected)
-          prog_id = shown.prog_id
-          return false unless prog_id && functional?(shown)
-
-          Objects::Oven::GlobalEnumPrgId.to_i(prog_id).positive? && prog_id == selected&.prog_id
-        end
-
         # IsStartButtonVisible compares BitField to 16 as a whole, not as a bit.
         #
         # @param shown [Objects::Oven::GlobalPsAttributesCCA] of 1/1585

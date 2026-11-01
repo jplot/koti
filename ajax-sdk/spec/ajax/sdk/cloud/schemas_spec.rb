@@ -51,4 +51,30 @@ RSpec.describe Ajax::Sdk::Cloud::Schemas do
         .to raise_error(Ajax::Sdk::Cloud::UnknownMessageError, /No.Such.Message/)
     end
   end
+
+  describe '.descriptor_set' do
+    def files(*names) = Google::Protobuf::FileDescriptorSet.decode(described_class.descriptor_set(*names)).file.to_a
+
+    it 'gives the data channel files with what they import, each after its imports', :aggregate_failures do
+      set = files('ajax/dcp/v1/dcp.proto', 'ajax/video/v1/metadata/metadata.proto')
+      names = set.map(&:name)
+
+      expect(names).to include('ajax/dcp/v1/archive.proto', 'ajax/video/v1/types/types.proto',
+                               'google/protobuf/timestamp.proto')
+      expect(set.map { |file| file.dependency.to_a - names.take(names.index(file.name)) }).to all(be_empty)
+      expect(names).to eq(names.uniq)
+    end
+
+    it 'loads into a pool of its own, where a data channel message encodes' do
+      pool = Google::Protobuf::DescriptorPool.new
+      files('ajax/dcp/v1/dcp.proto').each { pool.add_serialized_file(it.to_proto) }
+      client = pool.lookup('ajax.dcp.v1.ClientMsg').msgclass
+
+      expect(client.decode(client.encode(client.new(tag: 3, archive_pause: {}))).tag).to eq(3)
+    end
+
+    it 'raises KeyError for a file the schemas do not hold' do
+      expect { described_class.descriptor_set('no/such.proto') }.to raise_error(KeyError, %r{no/such\.proto})
+    end
+  end
 end

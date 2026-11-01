@@ -47,6 +47,28 @@ module Ajax
           LOCK.synchronize { @rpcs ||= load_rpcs }
         end
 
+        # The schemas of messages that never cross gRPC, for a front that encodes or decodes them itself: those of
+        # a camera's data channel come from +ajax/dcp/v1/dcp.proto+ and +ajax/video/v1/metadata/metadata.proto+.
+        #
+        # @param names [Array<String>] proto file names
+        # @return [String] a serialized +FileDescriptorSet+ of these files and every file they import, each after
+        #   its imports, as protobuf.js +Root.fromDescriptor+ or protoc reads it
+        # @raise [KeyError] for a file the schemas do not hold
+        def descriptor_set(*names)
+          files = Google::Protobuf::FileDescriptorSet.decode(descriptor_bytes).file.to_h { [it.name, it] }
+          ordered = {} #: Hash[String, untyped]
+          names.each { with_imports(it, files, ordered) }
+          Google::Protobuf::FileDescriptorSet.encode(Google::Protobuf::FileDescriptorSet.new(file: ordered.values))
+        end
+
+        def with_imports(name, files, ordered)
+          return if ordered.key?(name)
+
+          file = files.fetch(name)
+          file.dependency.each { with_imports(it, files, ordered) }
+          ordered[name] = file
+        end
+
         # Adds every file of the shipped FileDescriptorSet, retrying the ones whose dependencies are
         # not in the pool yet, until no further progress is made.
         def load_pool
@@ -76,7 +98,7 @@ module Ajax
           end
         end
 
-        private_class_method :load_pool, :add_file, :descriptor_bytes, :load_rpcs
+        private_class_method :load_pool, :add_file, :descriptor_bytes, :load_rpcs, :with_imports
       end
     end
   end

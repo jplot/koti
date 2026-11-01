@@ -46,7 +46,8 @@ RSpec.describe Miele::Sdk::Oven do
   def program_context(*prog_ids, parameters: {})
     resources['DOP2/1/1574?idx1=0&idx2=1'] = prog_ids.map do |prog_id|
       attributes = { 28 => dop2_field(:e16, prog_id) }
-      dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters), 7 => dop2_field(:struct, attributes) }, idx2: 1)
+      dop2_leaf(1, 1574, { 4 => dop2_field(:struct, oven_parameters(parameters)),
+                           7 => dop2_field(:struct, attributes) }, idx2: 1)
     end
   end
 
@@ -146,5 +147,11 @@ RSpec.describe Miele::Sdk::Oven do
     resources[:put] = [[204, {}, ''], [500, {}, '']]
     expect { oven.select_program(13) }.not_to raise_error
     expect(written.drop(1)).to eq([parameter(6, :u16, 18_000), parameter(7, :u16, 6_000)])
+  end
+
+  it 'writes no required parameter while 1/1574 lacks one of the eight, and keeps the selection' do
+    program_context(13, parameters: { 6 => required(:u16, 18_000), 15 => nil })
+    oven.select_program(13)
+    expect(written).to eq(['001300020629000000000002000107000d00030400'])
   end
 end

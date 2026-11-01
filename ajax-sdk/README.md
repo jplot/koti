@@ -69,8 +69,8 @@ device on the network cannot make up an event, but a device placed between the h
 replay or alter frames: DC-09 encrypts without authenticating.
 
 `Ajax::Sdk::Sia::Receiver` is the server itself, for running it under your own supervision; its block
-may be called from several threads at once, one per hub connection, and an exception it raises is
-reported with `warn` without closing the connection.
+may be called from several threads at once, one per hub connection, and an exception it raises ends
+that connection's thread, and the connection with it.
 
 ## Reading
 
@@ -136,6 +136,9 @@ cloud.events(space.id) do |event|
 end
 
 cloud.events(space.id).first(10) # without a block: a lazy Enumerator
+
+tracker = Ajax::Sdk::Cloud::Tracker.new(space.id)
+cloud.events(space.id, tracker:) { |event| … } # the same tracker again: only what changed meanwhile
 ```
 
 `events` follows one space through four streams of the gateway, each in its own thread: the space (its
@@ -154,15 +157,15 @@ change:
 `state` is the whole space once the message that brought the change is applied. The first messages give every
 item as an addition.
 
-A stream that breaks (unavailable, deadline, internal, unauthenticated…) or ends reopens 1, 2, 4, 8, 16 then
-30 seconds later, back to 1 second at its first message, forever. A snapshot after a reopening is compared
-with what was kept, so the changes made meanwhile come out as events, and nothing else. The notification
-stream has no snapshot: before it first opens, its thread notes the newest notification; before each
-reopening, it reads back page by page the ones created since, waiting and retrying like the stream when that
-read fails too. One created between that read and the reopening can be missed. A failure the gateway answers
-(a refusal) is raised, and so is any other error. An exception in the block, `break`, or `first(n)` stops the
-four threads and closes their calls; an Enumerator walked with `next` keeps them running. The queue between
-the threads and the caller has no limit: a block slower than the streams makes it grow.
+The feed ends when one of the four streams ends, and raises what breaks one (unavailable, deadline, internal,
+unauthenticated…) or a failure the gateway answers (a refusal); whether and when to follow the space again is
+the caller's. With the same `tracker:`, a feed compares each snapshot with what the tracker kept, so the
+changes made meanwhile come out as events, and nothing else. The notification stream has no snapshot: a tracker
+that has seen none notes the newest notification, and one that has reads back, page by page, the ones created
+since, before the stream opens; one created between that read and the stream can be missed. An exception in
+the block, `break`, or `first(n)` stops the four threads and closes their calls; an Enumerator walked with
+`next` keeps them running. The queue between the threads and the caller has no limit: a block slower than the
+streams makes it grow.
 
 Not followed: the cloud smart locks' own stream, a roller shutter's movement, and the app's trouble, offline
 and low-battery lists; their lasting state is already in the devices.

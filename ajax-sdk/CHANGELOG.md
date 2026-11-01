@@ -14,6 +14,11 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** `events` no longer reopens its streams: the feed ends with the first stream that ends and
+  raises what breaks one. It takes a `tracker:` to reopen with, which reports only the changes made meanwhile
+  and reads back the notifications created since; `sleeper:` is gone.
+- **Breaking:** an exception of the SIA receiver's block ends that hub connection instead of being printed
+  with `warn`.
 - `notifications` reads 20 by default (it read 50), the most the app asks for.
 - **Breaking:** `Device.from` takes the typed `LightDeviceItem` and the `space_id:`.
 - **Breaking:** `call`, `unary`, `server_stream`, `client_stream` and `bidi` return generated values

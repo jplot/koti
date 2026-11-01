@@ -215,9 +215,11 @@ block it returns a lazy enumerator.
 
 The stream is read once: `events` returns when the bridge ends it, and raises
 `Hue::Sdk::ConnectionError` when the bridge cannot be reached or drops it, as it does to a stream
-idle for 5 minutes. Whether and when to follow the bridge again is the caller's. A stream opened
-with the id of the last message an earlier one read gets the events sent meanwhile
-(`Last-Event-ID`):
+idle for 5 minutes. Whether and when to follow the bridge again is the caller's. An
+`Events::Stream` keeps the id of the last message whose events the block took whole, so a message
+the block left part-way comes again. A stream opened with that id, or the same stream's `each`
+called again, sends it as `Last-Event-ID`, and the bridge first sends the events of the gap: on
+2026-11-01 it sent at once an event from a 2-minute gap.
 
 ```ruby
 stream = Hue::Sdk::Events::Stream.new(last_event_id: previous&.last_event_id)

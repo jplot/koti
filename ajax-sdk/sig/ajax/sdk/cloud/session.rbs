@@ -15,8 +15,8 @@ module Ajax
 
         def initialize: (Client client, Configuration::Settings settings) -> void
         def inspect: () -> String
-        def ensure_login: () -> void
-        def login: (?String? expired) -> void
+        def ensure_login: () -> Hash[String, String]
+        def forget: (String? expired) -> void
         def metadata: () -> Hash[String, String]
 
         private

@@ -18,8 +18,8 @@ module Ajax
       # Talks to the Ajax mobile gateway over gRPC. It resolves a path to its request and response
       # messages through {Schemas}, sends the call of the right kind, and attaches the app and session
       # metadata the gateway expects. One {Session} rides along: the client logs in lazily and, on an
-      # +UNAUTHENTICATED+ answer, logs in again and retries the call once (a stream, only before its
-      # first message).
+      # +UNAUTHENTICATED+ answer, drops the session, as the app does, and raises the error; the next call
+      # logs in again.
       #
       # Responses come back as the typed values of {Messages}, built from +to_h+: google-protobuf's field
       # readers misbehave on messages decoded against a private descriptor pool, but +to_h+ is reliable. A
@@ -100,7 +100,7 @@ module Ajax
           stream(:bidi_streamer, path, requests, &)
         end
 
-        # Sends a unary call without the login retry, so {Session} can log in without recursing.
+        # Sends a unary call without logging in first, so {Session} can log in without recursing.
         #
         # @api private
         # @return [Data] the response message, whole
@@ -132,14 +132,9 @@ module Ajax
           value(path, stub.public_send(kind, path, request, encoder(path), IDENTITY, metadata:, deadline:))
         end
 
-        # Logs in again only before the first message: a retry after it would replay what was yielded.
         def stream(kind, path, request, &block)
-          fresh = true
-          relay = lambda do |bytes|
-            fresh = false
-            block.call(settle(path, value(path, bytes)))
-          end
-          authenticating(-> { fresh }) do |metadata|
+          relay = ->(bytes) { block.call(settle(path, value(path, bytes))) }
+          authenticating do |metadata|
             stub.public_send(kind, path, request, encoder(path), IDENTITY, metadata:, &relay)
             nil
           end
@@ -174,15 +169,12 @@ module Ajax
           READ_WORDS.include?(words.first) && !words.intersect?(WRITE_WORDS)
         end
 
-        def authenticating(retriable = -> { true })
-          @session.ensure_login
-          metadata = @session.metadata
+        def authenticating
+          metadata = @session.ensure_login
           yield(metadata)
         rescue GRPC::Unauthenticated
-          raise unless retriable.call
-
-          @session.login(metadata&.fetch('client-session-token', nil))
-          yield(@session.metadata)
+          @session.forget(metadata&.fetch('client-session-token', nil))
+          raise
         end
       end
     end

@@ -32,8 +32,7 @@ module Miele
         end
       end
 
-      # The app's SendSwitchOffAsync swallows a 500. Its settings switch, the loosest of its three switch-off paths,
-      # takes any RemoteEnableType but None and LocalControl.
+      # The app's SendSwitchOffAsync swallows a 500 on its write.
       #
       # @return [void]
       # @raise [ActionUnavailableError] on a Dop1 oven, or without remote control or mobile start, or under local
@@ -41,13 +40,12 @@ module Miele
       # @raise [ResponseError] if the appliance refuses with another status
       # @api public
       def power_off
-        require_dop2!
-        state = self.state
-        require!(under_remote_control?(state) || (!state.remote_control? && state.mobile_start?),
-                 'the oven is not remote enabled, or is under local control')
-        write_dop2(power_leaf(1))
-      rescue ResponseError => e
-        raise unless e.status == 500
+        require_switch_off!
+        begin
+          write_dop2(power_leaf(1))
+        rescue ResponseError => e
+          raise unless e.status == 500
+        end
       end
 
       # @return [Objects::Oven::GlobalDeviceContext] 1/1585, read without an index as the app observes it
@@ -161,6 +159,18 @@ module Miele
         require!(!tech_type.to_s.start_with?('H2'), 'the app does not switch on an H2 oven')
         state = self.state
         require!(state.remote_control? || state.mobile_start?, 'the oven is not remote enabled')
+      end
+
+      # The app's settings switch, the loosest of its three switch-off paths, takes any RemoteEnableType but None and
+      # LocalControl.
+      #
+      # @return [void]
+      # @raise [ActionUnavailableError]
+      def require_switch_off!
+        require_dop2!
+        state = self.state
+        require!(under_remote_control?(state) || (!state.remote_control? && state.mobile_start?),
+                 'the oven is not remote enabled, or is under local control')
       end
 
       # The appliance state on 2/1586: 4 switches on, 1 off.

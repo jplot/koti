@@ -12,11 +12,11 @@ RSpec.describe Miele::Sdk::Oven do
   end
   let(:fake) do
     answers = dop2_answers
-    state = JSON.generate('Status' => 1, 'RemoteEnable' => remote_enable)
+    state = state_answer
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
-      in { verb: 'GET', path: %r{/State\z} } then [200, {}, state]
+      in { verb: 'GET', path: %r{/State\z} } then state
       in { verb: 'GET' } then [200, {}, "#{['000e00020631000000000001000104'].pack('H*')}\x07"]
       in { path: /DOP2/ } then answers.shift || [204, {}, '']
       else [200, {}, '']
@@ -33,6 +33,8 @@ RSpec.describe Miele::Sdk::Oven do
   def tech_type = 'H7464BP'
 
   def remote_enable = [15, 0, 0]
+
+  def state_answer = [200, {}, JSON.generate('Status' => 1, 'RemoteEnable' => remote_enable)]
 
   def power_written = fake.requests.select { it.verb == 'PUT' }.map { it.body.unpack1('H*') }
 
@@ -124,6 +126,15 @@ RSpec.describe Miele::Sdk::Oven do
       appliance.power_on
       appliance.power_off
       expect(power_written).to eq(%w[000e0002063200000000000100010404 000e0002063200000000000100010401])
+    end
+  end
+
+  context 'when State answers 500' do
+    def state_answer = [500, {}, '']
+
+    it 'raises without switching off, the app swallowing a 500 on the write alone', :aggregate_failures do
+      expect { appliance.power_off }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+      expect(puts_sent).to be_empty
     end
   end
 

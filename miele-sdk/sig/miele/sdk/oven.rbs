@@ -49,6 +49,8 @@ module Miele
 
       def require_switch_on!: () -> void
 
+      def require_switch_off!: () -> void
+
       def power_leaf: (Integer state) -> Dop2::Leaf
 
       def rouse: () -> void

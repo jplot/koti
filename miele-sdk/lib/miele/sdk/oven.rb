@@ -149,8 +149,7 @@ module Miele
         value&.current_value&.then { it / 100.0 }
       end
 
-      # IsDiscoveryOven: the app has no switch-on for an H2 oven. Its offline screen offers the switch-on for any
-      # RemoteEnableType but None.
+      # IsDiscoveryOven, and the app's offline screen, the loosest of its switch-on paths.
       #
       # @return [void]
       # @raise [ActionUnavailableError]

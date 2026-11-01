@@ -38,8 +38,7 @@ module Miele
 
         private
 
-        # DetermineIsProgramWriteable, which enables the app's program selection: remote control without local
-        # control, an OvenState that takes a program, no query the app cannot answer, and no program on 1/1585.
+        # DetermineIsProgramWriteable, which enables the app's program selection.
         #
         # @return [void]
         # @raise [ActionUnavailableError]
@@ -53,8 +52,7 @@ module Miele
           require!(!shows?(:query, *UNSUPPORTED_QUERIES), 'the oven asks a question the app cannot answer')
         end
 
-        # IsProgramWriteable: 1/1585 shows ProgId 0. Without a ProgId the app's entity fails, and its selection
-        # stays disabled.
+        # IsProgramWriteable. Without a ProgId the app's entity fails, and its selection stays disabled.
         #
         # @param device [Objects::Oven::GlobalDeviceContext] 1/1585
         # @return [Boolean]

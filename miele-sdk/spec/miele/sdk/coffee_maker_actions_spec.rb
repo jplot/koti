@@ -39,9 +39,10 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
 
   def struct(fields) = dop2_field(:struct, fields)
 
-  def ps_context(prog, phase, unit: 1)
-    attributes = { 1 => dop2_field(:e16, phase), 28 => dop2_field(:e16, prog) }
-    dop2_leaf(unit, 1574, { 7 => struct(attributes) }, idx2: 1)
+  def ps_context(prog, phase, unit: 1, missing: [])
+    attributes = { 1 => dop2_field(:e16, phase), 2 => dop2_field(:e16, 0), 3 => struct({}), 10 => dop2_field(:e8, 0),
+                   28 => dop2_field(:e16, prog) }
+    dop2_leaf(unit, 1574, { 7 => struct(attributes.except(*missing)) }, idx2: 1)
   end
 
   def combi(appliance, operation)
@@ -70,6 +71,18 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   it 'brews a drink for two cups as the app does, the header naming idx1' do
     coffee.brew(24_005, two_cups: true)
     expect(written).to eq([['DOP2/2/1577?idx1=0&idx2=1', select(24_005, 0, two: true, attribute: 0)]])
+  end
+
+  it 'refuses a drink while 1/1574 lacks a member the app reads', :aggregate_failures do
+    served[[1, 1574, 0, 1]] = ps_context(0, 0, missing: [2])
+    expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
+  it 'refuses program 0 or an id the app does not define, before sending anything', :aggregate_failures do
+    expect { coffee.brew(0) }.to raise_error(ArgumentError)
+    expect { coffee.brew(999_999) }.to raise_error(ArgumentError)
+    expect(written).to be_empty
   end
 
   it 'refuses the double shot the software ids do not allow', :aggregate_failures do

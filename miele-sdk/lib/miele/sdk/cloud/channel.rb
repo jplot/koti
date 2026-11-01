@@ -64,12 +64,10 @@ module Miele
         # @raise [NotFoundError] when the account has none
         # @api public
         def group
-          @group ||= begin
-            first = JSON.parse(request(:get, '/GroupKeyId/').body).first
-            raise NotFoundError.new(404, 'the account has no household key') unless first
+          first = JSON.parse(request(:get, '/GroupKeyId/').body).first
+          raise NotFoundError.new(404, 'the account has no household key') unless first
 
-            [first.fetch('groupId'), first.fetch('groupKey')]
-          end
+          [first.fetch('groupId'), first.fetch('groupKey')]
         end
 
         private

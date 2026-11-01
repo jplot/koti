@@ -36,6 +36,14 @@ RSpec.describe 'Ajax cloud', :live do # rubocop:disable RSpec/DescribeClass -- i
     expect(cloud.notifications(space.id, limit: 5)).to all(be_an(Ajax::Sdk::Cloud::Notification))
   end
 
+  it 'reads the photo addresses of a notification that carries photos' do
+    photographed = cloud.notification_history(space.id).first(300).find(&:image_resource)
+    skip 'no notification of the space carries photos' unless photographed
+    media = cloud.notification_media(space.id, photographed.id).first
+
+    expect(media.hub_notification_media.images.map(&:url)).to all(start_with('https://'))
+  end
+
   it 'walks the notification history, page by page, with distinct tokens', :aggregate_failures do
     history = cloud.notification_history(space.id).first(25)
 

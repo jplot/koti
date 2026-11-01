@@ -21,6 +21,7 @@ module Ajax
         module LOCATOR = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Locator
         module HUBSVC = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels
         module SPACE = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
+        module VIDEO = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Video
         module NOTIFICATION = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification
 
         type target = { hub_id: String, device_id: String }
@@ -141,8 +142,33 @@ module Ajax
         include Outputs
         include Protection
         include Details
+        module Archive : Methods
+          include Targets
+
+          SERVICES: String
+          SOURCES: Hash[Symbol, :cloud_archive | :video_edge_archive]
+          EXPORTS: Hash[Symbol, :cloud_archive | :video_edge]
+
+          def archive_days: (VideoChannel channel, ?source: :cloud | :device) -> Array[Date]
+          def cloud_fragments: (VideoChannel channel, during: Range[Time], ?quality: :main | :sub) -> FragmentList
+          def cloud_metadata_fragments: (VideoChannel channel, type: String, during: Range[Time]) -> FragmentList
+          def cloud_archive: (VideoChannel channel, ?quality: :main | :sub) -> CloudArchive
+          def cloud_metadata: (VideoChannel channel, type: String) -> CloudMetadata
+          def export_archive: (VideoChannel channel, Array[Range[Time]] ranges, ?quality: :main | :sub, ?audio: bool,
+                               ?source: :cloud | :device) -> String
+
+          # Provided by Client, used here.
+          def exchange: (String path) -> Exchange
+
+          private
+
+          def channel_target: (VideoChannel channel) -> { space_id: String, video_edge_id: String, channel_id: String }
+          def seconds: (Range[Time] during) -> VIDEO::TimestampRange
+        end
+
         include Media
         include Video
+        include Archive
       end
     end
   end

@@ -342,6 +342,52 @@ Each channel's permissions sit in `current_member(space_id)`, under `devices_per
 `:view_archive`, `:sound` for the sound and talk-back, and `:ptz`, which `ptz: true` takes on top of the
 channel's `ptz` capability.
 
+## Recordings
+
+A camera or recorder keeps its recordings on its own storage, and a channel with the cloud archive also in the
+Ajax cloud. The SDK gives the days that hold some, the cloud archive's fragments and their addresses, and
+exports; it hands out addresses and never touches the media. This follows the app 3.59 and was never tested:
+the koti space has no camera.
+
+```ruby
+channel = cloud.video_channels(space.id).first
+cloud.archive_days(channel)                       # the days with recordings; source: :device for the camera's own
+list = cloud.cloud_fragments(channel, during: (Time.now - 3600)..Time.now)
+archive = cloud.cloud_archive(channel)            # quality: :sub for the sub stream
+Thread.new { archive.each { |content| browser.send(content.raw.to_json) } }
+archive.get(*list.fragments.map(&:id))            # the tag its answers carry back
+archive.close
+```
+
+- `archive_days` reads `get_channel_calendar` as the app's `b151` does: a byte per day from `start_day`, each
+  recorded day shifted, in days, by the offsets of the last `tz_map` entry not after it, then each date once,
+  in that order, as UTC dates.
+- `cloud_fragments` and `cloud_metadata_fragments` ask for whole seconds and give a `FragmentList`: its
+  `fragments` (id, start, duration in seconds), and `utc_offsets`, the UTC offset in force from each time on,
+  which the app's timeline shows local time with. There are no pages: the app asks again from the end of the
+  last fragment it has, and keeps the main and the sub stream apart.
+- `cloud_archive` and `cloud_metadata` open the content stream with its init. `each` gives the answers as they
+  come: `FragmentContent` (`tag`, `fragment_id`, `status`, `content_url`, `content_url_expires_at`, which the app
+  never reads), `FragmentPartContent` (with the `content_url_headers` to fetch it with) and the video stream's
+  `Init`. Ask from one thread at a time, as the app does.
+  - On video, every `get` and `get_part` (a fragment from an offset in seconds, sent in whole milliseconds, as
+    the app seeks on the sub stream) carries the current tag, from `"-1"`; `seek` moves it on, as the app does
+    when the user seeks, so the answers to earlier requests come back with an older tag and can be dropped.
+    The app plays each video address, a fragmented MP4, as its own source.
+  - On metadata, each `get` takes the next tag, from `"0"`. Each address serves the gzip of
+    `StreamCloudArchiveMetadataFragmentsContentResponse.FragmentContent.Frames`: `entries`, each a `timestamp` in
+    microseconds and the `data` of an `ajax.video.v1.metadata.A` (activity) or `Figures` (overlays).
+    `Schemas.descriptor_set('v3/mobilegwsvc/service/stream_cloud_archive_metadata_fragments_content/response.proto',
+    'ajax/video/v1/metadata/metadata.proto')` gives those schemas.
+- The cloud refuses a stream with `ReadError` `:playback_limit_exceeded` or `:cloud_archive_not_found`.
+- The camera's own archive plays over its WebRTC session: `Streams.archive` and `Streams.activity` ask for it,
+  and the data channel seeks and plays it (see [Camera data channel](#camera-data-channel)).
+- `export_archive(channel, ranges, quality:, audio:, source:)` asks for an export of the ranges, to the
+  nanosecond, and returns its id; the file comes later as a notification whose `notification_media` holds its
+  address, and the app saves it as MP4.
+
+Each channel's `:view_archive` and `:export_archive` permissions sit with the others (see Live video).
+
 ## Camera data channel
 
 A live or archive session with an Ajax camera (`stream_webrtc`) carries a WebRTC data channel, which the far

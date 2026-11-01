@@ -518,9 +518,13 @@ coffee.rename_drink(24_037, 'Mein Kaffee')
 A DOP2 coffee maker writes 2/1586 as read to switch on and off, waking first when it answers 500,
 and its other objects as the app's ModifyDop2Message does: back where they were read, the index
 read at as the header's attribute. A CVA6000 takes Dop1 1101 to switch on and off and 1100 to
-stop, and its light by writing back its `State` as the app's DeviceStateDto keeps it. `brew` follows the app's drink rule: mobile
-start, no information or query shown, no drink, Barista or care program running; two cups or a
-double shot also need the software ids the app requires. `start_barista` follows the app's Barista
+stop, and its light by writing back its `State` as the app's DeviceStateDto keeps it. A DOP2
+coffee maker stops a drink only as the app's stop button allows: a drink running, not cancelled,
+no care program, under remote control without local control. Acknowledgements take options 1 to
+17, 1 to 16 on a CM7. `brew` takes a program id the app defines, not 0, and follows the app's drink
+rule: the program info read in full, mobile start, no information or query shown, no drink,
+Barista or care program running; two cups or a double shot also need the software ids the app
+requires. `start_barista` follows the app's Barista
 entry: a CM6F, CVA or Ref2 that lists it among the special beverages of 1/1599, on under remote
 control without local control, no program running and no information shown. `delete_profile` needs
 coffee profiles in 2/348, and only custom profiles are renamed or deleted. A CM7 takes no profile,

@@ -20,6 +20,19 @@ module Miele
 
         def require_option!: (Integer | Symbol option) -> void
 
+        def drink_stoppable?: () -> bool
+
+        def remote_stoppable?: () -> bool
+
+        def sub_phase_of: (untyped program) -> Integer
+
+        def phase_of: (untyped program) -> Integer
+
+        def dispensing?: (Integer id, Integer phase) -> bool
+
+        def care?: (Integer id) -> bool
+
+
         def read_combi_state: () -> untyped
 
         def switchable?: (State state, Array[Integer] statuses) -> bool

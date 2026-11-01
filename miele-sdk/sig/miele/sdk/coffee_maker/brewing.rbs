@@ -33,6 +33,8 @@ module Miele
 
         def busy?: (untyped program) -> bool
 
+        def phase_of: (untyped program) -> Integer
+
         def dispensing?: (Integer id, Integer phase) -> bool
 
         def care?: (Integer id) -> bool

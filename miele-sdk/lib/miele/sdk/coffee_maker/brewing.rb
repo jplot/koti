@@ -118,9 +118,12 @@ module Miele
         # @return [Boolean] a drink, Barista or a care program running
         def busy?(program)
           id = family::GlobalEnumPrgId.to_i(program.prog_id)
-          phase = program.prog_phase.nil? ? 0 : family::GlobalEnumPPhaseId.to_i(program.prog_phase)
-          dispensing?(id, phase) || (gen7? && id == BARISTA) || care?(id)
+          dispensing?(id, phase_of(program)) || (gen7? && id == BARISTA) || care?(id)
         end
+
+        # @param program [Data] +ProgAttributesCCA+
+        # @return [Integer] its phase, 0 when absent
+        def phase_of(program) = program.prog_phase.nil? ? 0 : family::GlobalEnumPPhaseId.to_i(program.prog_phase)
 
         # @param id [Integer]
         # @param phase [Integer]

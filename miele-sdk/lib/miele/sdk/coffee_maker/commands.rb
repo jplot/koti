@@ -60,10 +60,14 @@ module Miele
         end
 
         # @return [void]
-        # @raise [ActionUnavailableError] on a CVA6000 that runs no drink
+        # @raise [ActionUnavailableError] unless a drink runs, not cancelled, no care program, and on DOP2 under
+        #   remote control without local control
         # @api public
         def stop
-          return modify_dop2(family::GlobalUserReqRequest, 2, 1583, 0, 1) { it.with(request: 2) } if dop2?
+          if dop2?
+            require!(drink_stoppable?, 'the coffee maker runs no drink to stop')
+            return modify_dop2(family::GlobalUserReqRequest, 2, 1583, 0, 1) { it.with(request: 2) }
+          end
 
           require!(dop1_switch?(state, [5]), 'the coffee maker runs no drink to stop')
           klass = Objects::CoffeeGen7::ProcessActionCva
@@ -88,6 +92,28 @@ module Miele
         end
 
         private
+
+        # ActionProgressBarViewModel shows its stop button for a drink, not cancelled (24057), with no care program.
+        #
+        # @return [Boolean]
+        def drink_stoppable?
+          program = program_context&.prog_attributes_cca
+          return false if program&.prog_id.nil? || !remote_stoppable?
+
+          id = family::GlobalEnumPrgId.to_i(program.prog_id)
+          dispensing?(id, phase_of(program)) && sub_phase_of(program) != 24_057 && !care?(id)
+        end
+
+        # IsRemoteStoppable: remote control without local control, which on DOP2 is RemoteEnable 15.
+        #
+        # @return [Boolean]
+        def remote_stoppable? = state.raw.dig('RemoteEnable', 0) == 15
+
+        # @param program [Data] +ProgAttributesCCA+
+        # @return [Integer] its sub-phase, 0 when absent
+        def sub_phase_of(program)
+          program.prog_sub_phase.nil? ? 0 : family::GlobalEnumSubPPhaseId.to_i(program.prog_sub_phase)
+        end
 
         # The app's acknowledge mappers throw outside 1 to 17, 1 to 16 on a CM7, before anything is read.
         #

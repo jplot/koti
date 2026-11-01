@@ -39,8 +39,8 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
 
   def struct(fields) = dop2_field(:struct, fields)
 
-  def ps_context(prog, phase, unit: 1, missing: [])
-    attributes = { 1 => dop2_field(:e16, phase), 2 => dop2_field(:e16, 0), 3 => struct({}), 10 => dop2_field(:e8, 0),
+  def ps_context(prog, phase, unit: 1, missing: [], sub: 0)
+    attributes = { 1 => dop2_field(:e16, phase), 2 => dop2_field(:e16, sub), 3 => struct({}), 10 => dop2_field(:e8, 0),
                    28 => dop2_field(:e16, prog) }
     dop2_leaf(unit, 1574, { 7 => struct(attributes.except(*missing)) }, idx2: 1)
   end
@@ -147,9 +147,27 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     end
   end
 
-  it 'stops with request 2 on 2/1583 at 0/1, the header naming idx1' do
+  it 'stops a running drink with request 2 on 2/1583 at 0/1, the header naming idx1' do
+    served[[1, 1574, 0, 1]] = ps_context(24_010, 0)
     coffee.stop
     expect(written).to eq([['DOP2/2/1583?idx1=0&idx2=1', dop2_leaf(2, 0, { 1 => dop2_field(:e16, 2) }, idx2: 1)]])
+  end
+
+  it 'stops no drink cancelled, done or not a drink, as the app hides its stop button', :aggregate_failures do
+    [ps_context(24_010, 0, sub: 24_057), ps_context(24_010, 10_003), ps_context(24_407, 0)].each do |context|
+      served[[1, 1574, 0, 1]] = context
+      expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+    expect(written).to be_empty
+  end
+
+  it 'stops nothing under local control or during care', :aggregate_failures do
+    served[[1, 1574, 0, 1]] = ps_context(24_010, 0)
+    served['State'] = { 'Status' => 5, 'RemoteEnable' => [7, 0, 1] }
+    expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    served['State'] = { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] }
+    served[[2, 1586, 0, 0]] = combi(2, 8)
+    expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
   end
 
   it 'refuses an option the app does not map, before reading anything', :aggregate_failures do

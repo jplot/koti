@@ -2,6 +2,8 @@ module Miele
   module Sdk
     class Oven < Appliance
       module SteamBurst : Appliance
+        STEAM_BURST_PARAMETERS: Array[Symbol]
+
         def steam_burst: () -> void
 
         def context: () -> Objects::Oven::GlobalDeviceContext
@@ -12,11 +14,11 @@ module Miele
 
         def steam_burst?: () -> bool
 
-        def manual_steam_burst?: (Objects::Oven::GlobalDeviceContext device) -> bool
+        def manual_steam_burst?: (Objects::Oven::GlobalPsAttributesCCA shown) -> bool
 
-        def function_shown?: (Objects::Oven::GlobalPsAttributesCCA? shown, Objects::Oven::GlobalPsAttributesCCA? selected) -> bool
+        def function_shown?: (Objects::Oven::GlobalPsAttributesCCA shown, Objects::Oven::GlobalPsAttributesCCA? selected) -> bool
 
-        def burst_left?: (Objects::Oven::GlobalPsAttributesCCA? shown) -> bool
+        def burst_left?: (Objects::Oven::GlobalPsAttributesCCA shown) -> bool
 
         def user_request: (Integer id, String reason) { () -> boolish } -> void
 

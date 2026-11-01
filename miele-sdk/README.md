@@ -387,7 +387,8 @@ Each of these actions makes the checks the app's rules make before it, and raise
   message 20 shown. `steam_burst` needs what the app's steam burst button needs: request 59
   offered for a REST `ProgramID`, a manual steam burst (`NumberOfSteamBursts` readable, 1 to 3) in
   a function 1/1585 and 1/1574 both show, the oven running or paused, and a burst left, or the
-  last one under way (`BitField` 16).
+  last one under way (`BitField` 16). Every value the app reads for the button must be there,
+  the three steam burst times and `BitField` among them, or the app shows none.
 - A double oven's second cavity takes no action but `acknowledge(…, second_cavity: true)`.
 
 The app then waits until the oven shows the change; but for a selection, the SDK returns once the

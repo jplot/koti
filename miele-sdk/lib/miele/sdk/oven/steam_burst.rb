@@ -6,6 +6,10 @@ module Miele
       # The steam burst the app's oven module sends as user request 59 on 2/1583, offered as the app shows its
       # button (SteamBurstsSource, SteamBurstsRule).
       module SteamBurst
+        STEAM_BURST_PARAMETERS = %i[number_of_steam_bursts start_burst_of_steam1 start_burst_of_steam2
+                                    start_burst_of_steam3].freeze
+        private_constant :STEAM_BURST_PARAMETERS
+
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, or unless the oven offers request 59 for a REST ProgramID
         #   and a manual steam burst is left in a function that runs or pauses
@@ -14,48 +18,54 @@ module Miele
 
         private
 
+        # SteamBurstsSource gives no entity without a REST ProgramID.
+        #
         # @return [Boolean]
         def steam_burst?
           state = self.state
           device = context
-          state.program_id.to_i.positive? && offered(device).include?(59) && manual_steam_burst?(device) &&
-            %i[running paused].include?(oven_state(state, device, offered(device))) &&
-            burst_left?(device.prog_attributes_cca)
+          requests = offered(device)
+          shown = device.prog_attributes_cca
+          return false unless shown && state.program_id.to_i.positive? && requests.include?(59)
+
+          manual_steam_burst?(shown) && %i[running paused].include?(oven_state(state, device, requests)) &&
+            burst_left?(shown)
         end
 
-        # NumberOfSteamBursts readable and Manual1 to Manual3, for a program the app does not hide
-        # (ShouldHideProgramParameters).
+        # SteamBurstsRule.Convert, on the entity ConvertToEntity builds only when every value it reads is there.
         #
-        # @param device [Objects::Oven::GlobalDeviceContext] 1/1585
+        # @param shown [Objects::Oven::GlobalPsAttributesCCA] of 1/1585
         # @return [Boolean]
-        def manual_steam_burst?(device)
+        def manual_steam_burst?(shown)
           selected = program_context
-          count = selected.context_para_ca&.number_of_steam_bursts
-          mask(count).anybits?(8) && [1, 2, 3].include?(count&.current_value) &&
-            function_shown?(device.prog_attributes_cca, selected.prog_attributes_cca)
+          parameters = STEAM_BURST_PARAMETERS.map { selected.context_para_ca&.public_send(it) }
+          count = parameters.first
+          parameters.all? { it&.request_mask && it.current_value } && mask(count).anybits?(8) &&
+            [1, 2, 3].include?(count.current_value) && function_shown?(shown, selected.prog_attributes_cca)
         end
 
-        # A function on 1/1585 that 1/1574 shows too: the app hides parameters while the two differ (IsLoading).
+        # ShouldHideProgramParameters, whose IsLoading is 1/1585 and 1/1574 showing different programs.
         #
-        # @param shown [Objects::Oven::GlobalPsAttributesCCA, nil] of 1/1585
+        # @param shown [Objects::Oven::GlobalPsAttributesCCA] of 1/1585
         # @param selected [Objects::Oven::GlobalPsAttributesCCA, nil] of 1/1574
         # @return [Boolean]
         def function_shown?(shown, selected)
-          prog_id = shown&.prog_id
+          prog_id = shown.prog_id
           return false unless prog_id && functional?(shown)
 
           Objects::Oven::GlobalEnumPrgId.to_i(prog_id).positive? && prog_id == selected&.prog_id
         end
 
-        # IsStartButtonVisible: a burst left, or none left while the last one is under way (BitField equal to 16).
+        # IsStartButtonVisible compares BitField to 16 as a whole, not as a bit.
         #
-        # @param shown [Objects::Oven::GlobalPsAttributesCCA, nil] of 1/1585
+        # @param shown [Objects::Oven::GlobalPsAttributesCCA] of 1/1585
         # @return [Boolean]
         def burst_left?(shown)
-          remaining = shown&.remaining_steam_bursts&.current_value
-          return false unless remaining
+          left = shown.remaining_steam_bursts&.then { it.current_value if it.request_mask }
+          bit_field = shown.bit_field
+          return false unless left && bit_field
 
-          remaining.positive? || (remaining.zero? && shown&.bit_field == 16)
+          left.positive? || (left.zero? && bit_field == 16)
         end
       end
     end

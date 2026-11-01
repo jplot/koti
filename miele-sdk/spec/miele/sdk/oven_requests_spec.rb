@@ -47,16 +47,21 @@ RSpec.describe Miele::Sdk::Oven do
   end
 
   def burst_attributes(type: 2, remaining: 1, bit_field: 0)
-    attributes(type:).merge(12 => dop2_field(:struct, { 2 => dop2_field(:u8, remaining) }),
-                            19 => dop2_field(:u32, bit_field))
+    remaining = { 1 => dop2_field(:u8, 8), 2 => dop2_field(:u8, remaining) }
+    attributes(type:).merge(12 => dop2_field(:struct, remaining), 19 => dop2_field(:u32, bit_field))
   end
 
-  def serve_burst(count: 1, mask: 9, selected: 13, **shown)
-    resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, burst_attributes(**shown)),
-                                                    9 => dop2_field(:e16_array, [59]) })
+  def serve_burst(count: 1, mask: 9, selected: 13, times: [8, 9, 10], **shown)
+    parameters = times.to_h { [it, value(:u16, 9, 0)] }.merge(18 => value(:u8, mask, count))
+    serve_burst_device(burst_attributes(**shown))
     resources['DOP2/1/1574?idx1=0&idx2=1'] =
-      dop2_leaf(1, 1574, { 4 => dop2_field(:struct, { 18 => value(:u8, mask, count) }),
+      dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters),
                            7 => dop2_field(:struct, attributes(type: 2, prog_id: selected)) }, idx2: 1)
+  end
+
+  def serve_burst_device(shown)
+    resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown),
+                                                    9 => dop2_field(:e16_array, [59]) })
   end
 
   def serve(requests, parameters: {}, **shown)
@@ -215,6 +220,15 @@ RSpec.describe Miele::Sdk::Oven do
         serve_burst(**change)
         expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
       end
+      expect(written).to be_empty
+    end
+
+    it 'refuses a burst without a steam burst time on 1/1574 or a BitField on 1/1585', :aggregate_failures do
+      serve_burst(times: [8, 9])
+      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      serve_burst
+      serve_burst_device(burst_attributes.except(19))
+      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
       expect(written).to be_empty
     end
 

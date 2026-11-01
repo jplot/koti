@@ -15,42 +15,49 @@ module Ajax
 
         # @param client [Client] the client whose {Client::Exchanges#converse} runs the call
         # @param path [String] a bidi gRPC path
-        def initialize(client, path)
+        # @yieldparam request [Hash, Data, Google::Protobuf::AbstractMessage] a request written
+        # @yieldreturn [Google::Protobuf::AbstractMessage] the message it sends
+        def initialize(client, path, &message)
           @client = client
           @path = path
+          @message = message
           @lock = Mutex.new
           @queue = Thread::Queue.new
           @written = [] #: Array[untyped]?
+          @started = false
           @closed = false
         end
 
         # @param request [Hash, Data, Google::Protobuf::AbstractMessage] a request message
         # @return [self]
-        # @raise [IOError] once the exchange is closed, by {#close} or at the end of its call
+        # @raise [ArgumentError, TypeError] for a request the path does not take, which nothing sends
+        # @raise [IOError] once the exchange is closed, by {#close} or when {#each} returns
         def write(request)
+          message = @message.call(request)
           @lock.synchronize do
             raise IOError, 'the exchange is closed' if @closed
 
-            @written&.push(request)
-            @queue << request
+            @written&.push(message)
+            @queue << message
           end
           self
         end
 
-        # Runs the call on this thread until it ends.
+        # Runs the call on this thread until it ends; an exchange runs once.
         #
         # @yieldparam message [Data] each response message, or its success
-        # @return [nil]
+        # @return [nil, Enumerator] an Enumerator of the messages when no block is given; leaving it closes the call
         # @raise [ReadError, CommandError] when a response is a failure
+        # @raise [IOError] when the exchange is closed or has run
         def each(&block)
-          @client.converse(@path, self) do |message|
-            @lock.synchronize { @written = nil }
-            block.call(message)
+          return enum_for(:each) unless block
+
+          @lock.synchronize do
+            raise IOError, 'the exchange is closed or has run' if @closed || @started
+
+            @started = true
           end
-        rescue GRPC::Cancelled
-          raise unless @closed
-        ensure
-          close
+          relay(&block)
         end
 
         # Cancels the call, from any thread.
@@ -59,8 +66,8 @@ module Ajax
         def close
           @lock.synchronize do
             @closed = true
-            @queue.close
             @operation&.cancel
+            @queue.close
           end
           nil
         end
@@ -85,12 +92,21 @@ module Ajax
 
         private
 
+        def relay(&block)
+          @client.converse(@path, self) do |message|
+            @lock.synchronize { @written = nil }
+            block.call(message)
+          end
+        rescue GRPC::Cancelled
+          raise unless @closed
+        ensure
+          close
+        end
+
         def renew
           @lock.synchronize do
-            @queue.close
             @queue = Thread::Queue.new
             @written.to_a.each { @queue << it }
-            @queue.close if @closed
             @queue
           end
         end
@@ -113,7 +129,7 @@ module Ajax
           # @raise [ReadOnlyError] for a path that writes, under read-only
           def exchange(path)
             refuse_write(path)
-            Exchange.new(self, path)
+            Exchange.new(self, path) { message(path, it) }
           end
 
           # Runs the call of an {Exchange}, logging in again before its first response as {Client#bidi} does.
@@ -137,8 +153,7 @@ module Ajax
           private
 
           def operation(path, requests, metadata, relay)
-            stub.bidi_streamer(path, requests.lazy.map { message(path, it) }, encoder(path), IDENTITY,
-                               metadata:, return_op: true, &relay)
+            stub.bidi_streamer(path, requests, encoder(path), IDENTITY, metadata:, return_op: true, &relay)
           end
         end
       end

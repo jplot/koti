@@ -10,20 +10,24 @@ module Ajax
 
         @client: _Converser
         @path: String
+        @message: ^(untyped) -> untyped
         @lock: Thread::Mutex
         @queue: Thread::Queue
         @written: Array[untyped]?
+        @started: bool
         @closed: bool
         @operation: untyped
 
-        def initialize: (_Converser client, String path) -> void
+        def initialize: (_Converser client, String path) { (untyped) -> untyped } -> void
         def write: (untyped request) -> self
-        def each: () { (untyped) -> void } -> nil
+        def each: () -> Enumerator[untyped, nil]
+                | () { (untyped) -> void } -> nil
         def close: () -> nil
         def run: () { (Enumerator[untyped, void]) -> untyped } -> nil
 
         private
 
+        def relay: () { (untyped) -> void } -> nil
         def renew: () -> Thread::Queue
         def drain: (Thread::Queue queue, ^() -> untyped ended, Enumerator::Yielder out) -> void
       end

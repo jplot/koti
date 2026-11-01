@@ -89,10 +89,59 @@ RSpec.describe Ajax::Sdk::Cloud::Exchange do
   context 'when the exchange is closed' do
     let(:calls) { [] }
 
-    it 'refuses a write' do
+    it 'refuses a write and a run', :aggregate_failures do
       exchange.close
 
       expect { exchange.write(init) }.to raise_error(IOError)
+      expect { exchange.each { nil } }.to raise_error(IOError)
+    end
+  end
+
+  context 'when a request does not fit the path' do
+    let(:calls) { [] }
+
+    it 'raises at the write, keeping nothing to send' do
+      expect { exchange.write(bogus: 1) }.to raise_error(ArgumentError, /bogus/)
+    end
+  end
+
+  context 'when the exchange already ran' do
+    let(:calls) { [[:read, offer]] }
+
+    it 'refuses another run' do
+      exchange.write(init).each { nil }
+
+      expect { exchange.each { nil } }.to raise_error(IOError)
+    end
+  end
+
+  context 'when the exchange is running on another thread' do
+    let(:calls) { [%i[read open]] }
+
+    def quietly
+      Thread.new do
+        Thread.current.report_on_exception = false
+        yield
+      end
+    end
+
+    it 'refuses a second run' do
+      running = Thread.new { exchange.write(init).each { nil } }
+      sleep(0.05) until sent.any?
+
+      expect { quietly { exchange.each { nil } }.join(2) }.to raise_error(IOError)
+    ensure
+      exchange.close
+      running.join
+    end
+  end
+
+  context 'without a block' do
+    let(:calls) { [[:read, offer, :open]] }
+
+    it 'reads the responses through an Enumerator, which closes the call when left', :aggregate_failures do
+      expect(exchange.write(init).each.first.signaling_message).to eq(:offer)
+      expect(gateway.closed.pop(timeout: 1)).to eq(webrtc)
     end
   end
 
@@ -102,6 +151,13 @@ RSpec.describe Ajax::Sdk::Cloud::Exchange do
     it 'raises and closes the call on the gateway', :aggregate_failures do
       expect { exchange.write(init).each { nil } }.to raise_error(Ajax::Sdk::Cloud::ReadError, 'permission_denied')
       expect(gateway.closed.pop(timeout: 1)).to eq(webrtc)
+    end
+
+    it 'leaves no thread behind', :aggregate_failures do
+      threads = Thread.list
+
+      expect { exchange.write(init).each { nil } }.to raise_error(Ajax::Sdk::Cloud::ReadError)
+      expect(Timeout.timeout(2) { sleep(0.05) until (Thread.list - threads).empty? }).to be_nil
     end
   end
 

@@ -319,6 +319,31 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         .to eq([%i[set_state_commands], { space_locator: { space_id: 'space-1' } }])
     end
 
+    it 'asks a MotionCam for photos with the family the app names it by', :aggregate_failures do
+      cams = %i[motion_cam_phod superior_motion_cam_outdoor_hm_phod motion_cam_phod_fibra]
+      cams.each { client.take_photo(device(it)) }
+
+      expect(sent.map(&:first).uniq).to eq(['PhotoOnDemandService/capturePhoto'])
+      expect(sent.map { it.last[:device_type] }).to eq(%i[MOTION_CAM MOTION_CAM_OUTDOOR MOTION_CAM_FIBRA_BASE])
+      expect(sent.map { it.last.except(:device_type) }).to all(eq(target))
+    end
+
+    it 'refuses a photo from a device that takes none, sending nothing', :aggregate_failures do
+      expect { client.take_photo(device(:motion_cam_fibra)) }.to raise_error(ArgumentError, /motion_cam_fibra/)
+      expect(sent).to be_empty
+    end
+
+    it 'reads the media of a notification, each state as the cloud sends it', :aggregate_failures do
+      image = { status: :IMAGE_STATUS_READY, file_name: 'p1.jpg', url: 'https://media.example.com/p1.jpg' }
+      success = Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::StreamNotificationMediaResponse::Success
+      replying([success.from({ media: { hub_notification_media: { images: [image] } } })].each)
+      media = client.notification_media('space-1', 'n1').first
+
+      expect(media.hub_notification_media.images.map { [it.status, it.url] }).to eq([[:ready, image[:url]]])
+      expect(sent.last).to eq(['NotificationLogService/streamNotificationMedia',
+                               { notification_id: 'n1', origin: { space_id: 'space-1' } }])
+    end
+
     def quality_answer
       values = { values_temperature: { 3600 => { value_y: 21.5 } },
                  values_humidity: { 3600 => { value_y_range: { min_value_y: 40.0, max_value_y: 45.0 } } } }
@@ -352,7 +377,7 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         close_shutter: [device(:roller_shutter_ls)], stop_shutter: [device(:roller_shutter_ls)],
         move_shutter: [device(:roller_shutter_ls), 5], bypass: [device(:door_protect)],
         unbypass: [device(:door_protect)], arm_group: %w[space-1 g1], disarm_group: %w[space-1 g1],
-        set_security_mode: ['space-1', :regular],
+        set_security_mode: ['space-1', :regular], take_photo: [device(:motion_cam_phod)],
         panic: ['space-1'], lock: [device(:smart_lock)], unlock: [device(:smart_lock)],
         unlatch: [device(:smart_lock, hub: false)], mute: [fire], mute_fire_detectors: ['0000ABCD'],
         reset_fire_alarm: ['0000ABCD'], rename: [device(:relay), 'x'], update_device_settings: [device(:relay)],
@@ -362,7 +387,7 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
     def reads
       { rooms: ['space-1'], groups: ['space-1'], current_member: ['space-1'], scenarios: ['space-1'],
         hub_details: %w[space-1 0000ABCD],
-        device_details: [device(:door_protect)] }
+        device_details: [device(:door_protect)], notification_media: %w[space-1 n1] }
     end
 
     before do

@@ -32,7 +32,8 @@ module Ajax
         LOCATOR = Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Locator
         HUBSVC = Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels
         SPACE = Messages::Api::Mobile::V2::Common::Space
-        private_constant :SERVICE, :LOCATOR, :HUBSVC, :SPACE
+        ORIGIN = Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification
+        private_constant :SERVICE, :LOCATOR, :HUBSVC, :SPACE, :ORIGIN
 
         # The devices, spaces and hubs the shortcuts address.
         module Targets
@@ -410,9 +411,50 @@ module Ajax
           def space_snapshot(space_id) = first_of(space_stream(space_locator: space_of(space_id))).snapshot
         end
 
+        # MotionCam photos and the media of notifications.
+        module Media
+          include Targets
+
+          # The app 3.59 names a MotionCam by its family in a photo request; it offers the request on no other device.
+          PHOTO_FAMILIES = {
+            cam: %i[motion_cam motion_cam_phod motion_cam_s_phod motion_cam_superior_phod motion_cam_s_phod_am
+                    motion_cam_g3],
+            cam_outdoor: %i[motion_cam_outdoor motion_cam_outdoor_phod motion_cam_outdoor_two_four_phod
+                            superior_motion_cam_outdoor_phod superior_motion_cam_outdoor_hm_phod
+                            curtain_cam_outdoor_hm_phod],
+            cam_fibra_base: %i[motion_cam_phod_fibra]
+          }.flat_map { |family, kinds| kinds.map { [it, family] } }.to_h.freeze
+          private_constant :PHOTO_FAMILIES
+
+          # Asks a MotionCam for photos, as the app's photo on demand button does. They arrive as a
+          # +PHOTO_ON_DEMAND+ notification, whose {#notification_media} gives their addresses.
+          #
+          # @param device [Device] a MotionCam that takes photos on demand
+          # @return [nil]
+          # @raise [ArgumentError] for another device
+          def take_photo(device)
+            family = PHOTO_FAMILIES[device.kind] or raise ArgumentError, "#{device.kind} takes no photo on demand"
+
+            photo_on_demand_capture_photo(hub_id: hub_id_of(device), device_id: device.id, device_type: family)
+            nil
+          end
+
+          # @param space_id [String]
+          # @param notification_id [String] a {Notification#id}, such as one with a {Notification#image_resource}
+          # @return [Enumerator::Lazy<Data>] each state of its +NotificationMedia+, as the cloud sends it: the photo
+          #   addresses of +hub_notification_media+, which need no header, the files of an +archive_export_media+…
+          # @raise [ReadError] when the gateway refuses the read, or once the media expired (+:media_expired+)
+          def notification_media(space_id, notification_id)
+            origin = ORIGIN::NotificationOriginId.new(space_id:)
+            stream = notification_log_stream_notification_media(notification_id:, origin:)
+            Enumerator.new { |out| stream.each { out << it.media } }.lazy
+          end
+        end
+
         include Outputs
         include Protection
         include Details
+        include Media
       end
     end
   end

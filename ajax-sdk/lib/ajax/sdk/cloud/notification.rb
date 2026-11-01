@@ -46,6 +46,17 @@ module Ajax
         end
         private_class_method :about, :marks
       end
+
+      # The photos a notification carries.
+      class Notification
+        # @return [Data, nil] the photos of a hub notification, as an +ImageResource+: their status and who may see
+        #   them. {Shortcuts::Media#notification_media} gives their addresses.
+        def image_resource
+          found = raw[:additional_data]&.find { it[:hub_image_resource] } or return
+          Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationAdditionalData
+            .from(found).hub_image_resource
+        end
+      end
     end
   end
 end

@@ -55,15 +55,28 @@ module Miele
         # @return [Boolean]
         def holiday_or_sabbath?(state) = modes(state).values_at(:holiday, :sabbath).any? { it&.on }
 
+        # The rule PresentationLightStateRule and HumidityControlRule share.
+        #
+        # @param state [State]
+        # @return [Boolean] neither at Status 1 or 255, nor in a failure without a door signal, nor in Holiday or
+        #   Sabbath mode
+        def settings_shown?(state)
+          status = state.raw['Status']
+          return false if [1, 255].include?(status) || (status == 8 && door_signal(state).zero?)
+
+          !holiday_or_sabbath?(state)
+        end
+
         # PresentationLightStateRule, which shows the presenter light section and, behind it, the intensities.
         #
         # @param state [State]
         # @return [Boolean]
-        def presenter_light_shown?(state)
-          status = state.raw['Status']
-          return false if [1, 255].include?(status) || (status == 8 && door_signal(state).zero?)
+        def presenter_light_shown?(state) = presenter_light_state? && settings_shown?(state)
 
-          presenter_light_state? && !holiday_or_sabbath?(state)
+        # @param state [State]
+        # @return [Boolean] as HumidityControlRule, with a +HumidityControl+ value but -1
+        def humidity_control_shown?(state)
+          ![nil, -1].include?(cooling.dig('HumidityControl', 'Value')) && settings_shown?(state)
         end
 
         # The dashboard's quick action, which hides only while off or when Holiday or Sabbath leads its notices.

@@ -38,6 +38,8 @@ module Miele
 
         def presenter_quick_action?: (State state) -> bool
 
+        def humidity_control_shown?: (State state) -> bool
+
         def ice_maker?: () -> bool
 
         def wine?: () -> bool

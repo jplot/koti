@@ -16,7 +16,11 @@ module Miele
 
         def holiday_or_sabbath?: (State state) -> bool
 
+        def settings_shown?: (State state) -> bool
+
         def presenter_light_shown?: (State state) -> bool
+
+        def humidity_control_shown?: (State state) -> bool
 
         def presenter_quick_action?: (State state) -> bool
 

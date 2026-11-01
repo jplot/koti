@@ -259,11 +259,28 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
                                                     'DeviceIdentLabel' => { 'TechType' => 'KWTUS 6000' })
     end
 
+    before { resources['Cooling']['HumidityControl'] = { 'Value' => 2, 'Min' => 1, 'Max' => 3, 'Step' => 1 } }
+
     it 'lights it through State, and sets its humidity level' do
       fridge.light = true
       fridge.humidity = :high
       expect(written).to eq([['PUT', 'State/Light', { 'Light' => 1 }],
                              ['PUT', 'Cooling/HumidityControl', { 'Value' => 3 }]])
+    end
+
+    it 'refuses a humidity level in Sabbath mode, in a failure or at a Value of -1, as the app hides it',
+       :aggregate_failures do
+      resources['Cooling']['Sabbath'] = { 'Value' => 1 }
+      expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources.merge!('State' => { 'Status' => 8 }, 'Cooling' => { 'HumidityControl' => { 'Value' => 2 } })
+      expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources.merge!('State' => { 'Status' => 5 }, 'Cooling' => { 'HumidityControl' => { 'Value' => -1 } })
+      expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+
+    it 'refuses a humidity level off its Min to Max by Step, as the app offers none' do
+      resources['Cooling']['HumidityControl'] = { 'Value' => 2, 'Min' => 1, 'Max' => 2, 'Step' => 1 }
+      expect { fridge.humidity = :high }.to raise_error(ArgumentError)
     end
   end
 

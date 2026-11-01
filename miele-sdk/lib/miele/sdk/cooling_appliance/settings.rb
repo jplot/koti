@@ -69,11 +69,15 @@ module Miele
 
         # @param level [Symbol] +:low+, +:medium+ or +:high+
         # @return [void]
-        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit
+        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit, while the app shows its humidity control
+        # @raise [ArgumentError] for a level off +HumidityControl+'s +Min+ to +Max+ by +Step+, which the app offers
         # @api public
         def humidity=(level)
           require!(rioja? || kwtus?, 'the appliance has no humidity control')
-          put('Cooling', 'HumidityControl', Value: HUMIDITY.fetch(level))
+          require!(humidity_control_shown?(state), 'the app shows no humidity control now')
+          value = HUMIDITY.fetch(level)
+          require_offered!(value, picker(cooling['HumidityControl']))
+          put('Cooling', 'HumidityControl', Value: value)
         end
 
         # The app shows PerfectFresh for a +Step+ above 0 compared unsigned, so for any but 0.

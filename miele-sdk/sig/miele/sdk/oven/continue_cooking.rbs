@@ -6,6 +6,8 @@ module Miele
 
         CONTINUED_PHASES: Array[Integer]
 
+        CLEANING_TYPE: Integer
+
         def continue_cooking: () -> void
 
         def context: () -> Objects::Oven::GlobalDeviceContext
@@ -14,7 +16,11 @@ module Miele
 
         private
 
-        def continue_cooking?: () -> bool
+        def require_continue_offered!: () -> void
+
+        def continue_cooking?: (Objects::Oven::GlobalDeviceContext device) -> bool
+
+        def program_finished?: (State state, Objects::Oven::GlobalDeviceContext device) -> bool
 
         def shown_phase: (Array[Integer] phases) -> Integer?
 
@@ -22,7 +28,17 @@ module Miele
 
         def required_cooking_level: (Objects::Oven::GlobalPsContext context) -> [Integer, Integer]?
 
-        def user_request: (Integer id, String reason) { () -> boolish } -> void
+        def require_dop2!: () -> void
+
+        def under_remote_control?: (?State state) -> bool?
+
+        def oven_state: (State state, Objects::Oven::GlobalDeviceContext context, Array[Integer] requests) -> Symbol?
+
+        def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
+
+        def program_type: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
+
+        def option_running?: () -> bool
 
         def timed_poll: (Integer | Float timeout) { () -> untyped } -> [untyped, Float]
 

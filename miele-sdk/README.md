@@ -400,14 +400,16 @@ Each of these actions makes the checks the app's rules make before it, and raise
 - `stop` needs one of requests 2, 55, 56 and 57 offered, no pyrolysis abort running, and remote
   control without local control. A program not started yet takes 2, a started one the first of
   55, 56 and 57 the oven offers, started as the app derives its oven state.
-- `continue_cooking` needs the oven to offer it (baking or cooking). As the app does, it then reads
-  1/1585 every 3 seconds until the oven asks for a cooking level (ProgPhase 10000) or cooks on
-  (heating or remaining time, 28100, 28114, 28115 or 28124). Asked, it reads 1/1574 every 3
-  seconds until it shows a doneness the oven requires and lets write, else such a browning, and
-  writes it one step higher (255 becomes 0, as the app writes a byte), without the checks of the
-  cooking level cells, then waits for the oven to cook on. Past the app's 15 seconds it raises
-  `Miele::Sdk::ActionFailedError`, and so it does when 1/1574 lacks the doneness or browning the
-  app reads.
+- `continue_cooking` needs what the app's continue bubble and button need: the oven offering it
+  (baking or cooking), a finished program (OvenState End) other than a cleaning, no keep warm or
+  rapid cooling running after it, and mobile start under remote control without local control.
+  As the app does, it then reads 1/1585 every 3 seconds until the oven asks for a cooking level
+  (ProgPhase 10000) or cooks on (heating or remaining time, 28100, 28114, 28115 or 28124). Asked,
+  it reads 1/1574 every 3 seconds until it shows a doneness the oven requires and lets write, else
+  such a browning, and writes it one step higher (255 becomes 0, as the app writes a byte),
+  without the checks of the cooking level cells, then waits for the oven to cook on. Past the
+  app's 15 seconds it raises `Miele::Sdk::ActionFailedError`, and so it does when 1/1574 lacks the
+  doneness or browning the app reads.
 - `stop_keeping_warm` needs message 20 shown. `steam_burst` needs what the app's steam burst
   button needs: request 59 offered for a REST `ProgramID`, a manual steam burst (`NumberOfSteamBursts` readable, 1 to 3) in
   a function 1/1585 and 1/1574 both show, the oven running or paused, and a burst left, or the

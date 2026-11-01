@@ -10,17 +10,18 @@ module Miele
         PARA_CONSTRAINT = 10_000
         # ProgPhase heating and remaining time: the program goes on (ObserveProgramIsContinued).
         CONTINUED_PHASES = [28_100, 28_114, 28_115, 28_124].freeze
-        private_constant :PARA_CONSTRAINT, :CONTINUED_PHASES
+        # The raw programtype ConvertProgramType makes CleaningMaintenanceProgram.
+        CLEANING_TYPE = 7
+        private_constant :PARA_CONSTRAINT, :CONTINUED_PHASES, :CLEANING_TYPE
 
-        # Offered while 1/1585 shows ContinueCooking 1 or 2, baking or cooking (ContinueProgramOptionRule).
-        #
         # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or when not offered
+        # @raise [ActionUnavailableError] on a Dop1 oven, or unless the app offers its continue button
         # @raise [ActionFailedError] when the oven does not cook on within the 15 s the app waits, or 1/1574 lacks
         #   the doneness or browning the app reads
         # @api public
         def continue_cooking
-          user_request(72, 'the oven offers no continue cooking now') { continue_cooking? }
+          require_continue_offered!
+          write_dop2(Messages.user_request(72))
           phase, waited = timed_poll(Polling::ACTION_TIMEOUT) { shown_phase([PARA_CONSTRAINT, *CONTINUED_PHASES]) }
           waited += raise_cooking_level(Polling::ACTION_TIMEOUT - waited) if phase == PARA_CONSTRAINT
           continued, = timed_poll(Polling::ACTION_TIMEOUT - waited) { shown_phase(CONTINUED_PHASES) }
@@ -29,10 +30,38 @@ module Miele
 
         private
 
+        # ProgramFinishedSpeechBubblesService, the only caller of the action: its continue bubble for ContinueCooking
+        # 1 or 2 (ContinueProgramOptionRule) shows for a finished program while no option runs after the end, and
+        # IsContinueButtonActive enables its button under RemoteEnableType MobileStart alone.
+        #
+        # @return [void]
+        # @raise [ActionUnavailableError]
+        def require_continue_offered!
+          require_dop2!
+          state = self.state
+          device = context
+          require!(continue_cooking?(device), 'the oven offers no continue cooking now')
+          require!(program_finished?(state, device), 'the program is not finished')
+          require!(!option_running?, 'an option runs after the end of the program')
+          require!(under_remote_control?(state) && state.mobile_start? == true,
+                   'the app continues by mobile start only')
+        end
+
+        # @param device [Objects::Oven::GlobalDeviceContext] 1/1585
         # @return [Boolean]
-        def continue_cooking?
-          type = context.prog_attributes_cca&.continue_cooking&.then { Objects::Oven::GlobalEnumContinueCookingTypes.to_i(it) }
+        def continue_cooking?(device)
+          type = device.prog_attributes_cca&.continue_cooking&.then { Objects::Oven::GlobalEnumContinueCookingTypes.to_i(it) }
           [1, 2].include?(type)
+        end
+
+        # IsProgramInFinishedStateRule: OvenState End, and no cleaning or maintenance program.
+        #
+        # @param state [State]
+        # @param device [Objects::Oven::GlobalDeviceContext] 1/1585
+        # @return [Boolean]
+        def program_finished?(state, device)
+          oven_state(state, device, offered(device)) == :end &&
+            program_type(device.prog_attributes_cca) != CLEANING_TYPE
         end
 
         # @param phases [Array<Integer>]

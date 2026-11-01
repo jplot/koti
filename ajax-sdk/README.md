@@ -333,6 +333,20 @@ cloud.server_stream(path, { space_id: space.id }) { |message| … }
 cloud.server_stream(path, { space_id: space.id }).first
 ```
 
+`#bidi` sends its Array of requests and half-closes. A bidi call that must stay open while requests go
+out as they come, as the app holds its WebRTC and cloud archive streams, is an `Exchange`:
+
+```ruby
+exchange = cloud.exchange(path).write(first_request)
+Thread.new { exchange.each { |message| … } } # runs the call until it ends
+exchange.write(next_request)                  # from any thread, sent in order
+exchange.close                                # cancels the call, as the app ends it
+```
+
+The call ends when the gateway ends it, when a message is a failure (`each` raises it), or at `close`;
+it never half-closes. A write after the end raises `IOError`. Before the first message, an expired
+session logs in again and the call starts over with every request written so far.
+
 ## Errors
 
 - `Cloud::AuthenticationError(reason)` — the login was refused (`:invalid_credentials`,

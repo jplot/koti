@@ -72,6 +72,14 @@ module Miele
 
         def offered?: (Symbol request) -> bool
 
+        def supported_requests: () -> Array[Symbol]
+
+        def details_bar?: (State state) -> bool
+
+        def second_button: (Array[Symbol] requests) -> Symbol?
+
+        def second_button_on?: (State state) -> bool
+
         def require_no_info700!: () -> void
       end
     end

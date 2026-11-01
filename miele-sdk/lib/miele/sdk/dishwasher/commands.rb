@@ -52,17 +52,24 @@ module Miele
         # The app's Stop quick action is on while either Stop or Cancel is offered, and sends Stop.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] see {#cancel}
+        # @raise [ActionUnavailableError] unless it runs, pauses or waits awake, offers stop or cancel, is not locked
+        #   and shows no info 700
         # @api public
         def stop = stop_with(:stop, :cancel)
 
-        # The app stops or cancels without mobile start, only not locked.
+        # The app sends Cancel from its details bar alone (ActionBarComponentsRule), as its second button.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] unless it runs, pauses or waits awake, offers the request and shows no
-        #   info 700
+        # @raise [ActionUnavailableError] unless the bar shows (Status 3 to 6, not asleep waiting to start, not
+        #   locked, no info 700), offers neither pause nor stop ahead of cancel, and has mobile start, a program
+        #   running or paused, or one waiting under remote control
         # @api public
-        def cancel = stop_with(:cancel)
+        def cancel
+          state = checked_state
+          require!(details_bar?(state) && second_button(supported_requests) == :cancel && second_button_on?(state),
+                   'the dishwasher cannot cancel now')
+          run(state, :cancel)
+        end
 
         # @param prog_id [Integer, Symbol]
         # @return [void]

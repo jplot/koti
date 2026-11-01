@@ -409,8 +409,11 @@ dishwasher.open_door                        # Dop1, under mobile start with the 
 Each action makes the checks of the app's rule for it and raises `ActionUnavailableError` without
 sending anything when one fails. `start` needs mobile start (and AppSupport bit 4 on DOP2), the door
 closed, request 1 offered and the dishwasher ready (Status 3, or 4 awake); `pause` and `resume` need
-mobile start and a running or paused program; `stop` and `cancel` need no mobile start, only a
-program that runs, pauses or waits awake, the request offered, and a dishwasher not locked;
+mobile start and a running or paused program; `stop` needs no mobile start, only a program that
+runs, pauses or waits awake, stop or cancel offered, and a dishwasher not locked; `cancel` follows
+the app's details bar, where it is the second button only while neither pause nor stop comes
+first, from Status 3 to 6, under mobile start, while a program runs or pauses, or while one waits
+under remote control;
 `start_delayed` needs a program selected (Status 3) under mobile start, the dishwasher not locked. A
 DOP2 dishwasher refuses while it shows info 700. A Dop1 dishwasher takes `ProcessAction` on its
 `State`, as the app's DeviceStateDto keeps it, its program and extras on 8906 and its delayed start

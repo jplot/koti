@@ -39,6 +39,24 @@ module Miele
         # @return [Boolean]
         def offered?(request) = supported_requests.include?(request)
 
+        # @param state [State]
+        # @return [Boolean] IsActionBarVisibleCheck: Status 3 to 6, not asleep waiting to start, not locked
+        def details_bar?(state) = (3..6).cover?(status(state)) && !off?(state) && !locked_in?(state)
+
+        # @param requests [Array<Symbol>] those offered
+        # @return [Symbol, nil] the first of pause, stop and cancel offered, unless the first button shows it
+        def second_button(requests)
+          first = %i[start start_delay pause].find { requests.include?(it) }
+          %i[pause stop cancel].find { requests.include?(it) && it != first }
+        end
+
+        # @param state [State]
+        # @return [Boolean] mobile start, a program running or paused, or one waiting under remote control
+        def second_button_on?(state)
+          mobile?(state) || [5, 6].include?(status(state)) ||
+            (status(state) == 4 && mobile_control? && state.remote_control? == true)
+        end
+
         # The app looks at the first info only.
         #
         # @return [void]

@@ -6,13 +6,17 @@ module Miele
 
         RETRY_BASE: Float
 
+        ACTION_TIMEOUT: Integer
+
         private
 
-        def poll: (Integer timeout) { () -> untyped } -> untyped
+        def poll: (Integer | Float timeout) { () -> untyped } -> untyped
+
+        def timed_poll: (Integer | Float timeout) { () -> untyped } -> [untyped, Float]
 
         def polled: () { () -> untyped } -> [bool, untyped]
 
-        def pause: (Integer failures, Float waited, Integer timeout) -> (Integer | Float)
+        def pause: (Integer failures, Float waited, Integer | Float timeout) -> (Integer | Float)
       end
     end
   end

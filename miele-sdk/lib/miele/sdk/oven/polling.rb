@@ -9,24 +9,34 @@ module Miele
       module Polling
         POLLING_DELAY = 3
         RETRY_BASE = 1.5
+        # The app's ActionExecutionTimeout, in seconds.
+        ACTION_TIMEOUT = 15
         private_constant :POLLING_DELAY, :RETRY_BASE
 
         private
 
-        # @param timeout [Integer] the seconds the app waits
+        # @param timeout [Numeric] the seconds the app waits
         # @yieldreturn [Object, nil] what a read shows, nil or false to read again
         # @return [Object, nil] the first value the block gives, nil once the timeout is up
         # @raise [ResponseError] for a read refused with a 4xx
-        def poll(timeout, &)
+        def poll(timeout, &) = timed_poll(timeout, &).first
+
+        # @param timeout [Numeric] the seconds the app waits
+        # @yieldreturn [Object, nil] what a read shows, nil or false to read again
+        # @return [Array(Object, Float)] the first value the block gives, nil once the timeout is up, and the seconds
+        #   waited for it
+        # @raise [ResponseError] for a read refused with a 4xx
+        def timed_poll(timeout, &)
           waited = 0.0
           failures = 0
           while waited < timeout
             answered, found = polled(&)
-            return found if found
+            return [found, waited] if found
 
             failures = answered ? 0 : failures + 1
             waited += pause(failures, waited, timeout)
           end
+          [nil, waited]
         end
 
         # RetryOnRestException ends the app's poll on a 4xx alone.
@@ -43,7 +53,7 @@ module Miele
 
         # @param failures [Integer] the reads refused in a row
         # @param waited [Float] seconds since the wait began
-        # @param timeout [Integer]
+        # @param timeout [Numeric]
         # @return [Integer, Float] the seconds before the next read, slept unless past the timeout
         def pause(failures, waited, timeout)
           delay = failures.zero? ? POLLING_DELAY : RETRY_BASE**failures

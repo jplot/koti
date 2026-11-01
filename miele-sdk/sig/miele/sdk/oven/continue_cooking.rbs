@@ -1,0 +1,39 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module ContinueCooking : Appliance
+        PARA_CONSTRAINT: Integer
+
+        CONTINUED_PHASES: Array[Integer]
+
+        def continue_cooking: () -> void
+
+        def context: () -> Objects::Oven::GlobalDeviceContext
+
+        def program_context: () -> Objects::Oven::GlobalPsContext
+
+        private
+
+        def continue_cooking?: () -> bool
+
+        def shown_phase: (Array[Integer] phases) -> Integer?
+
+        def raise_cooking_level: (Integer | Float budget) -> Float
+
+        def required_cooking_level: (Objects::Oven::GlobalPsContext context) -> [Integer, Integer]?
+
+        def user_request: (Integer id, String reason) { () -> boolish } -> void
+
+        def timed_poll: (Integer | Float timeout) { () -> untyped } -> [untyped, Float]
+
+        def phase: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
+
+        def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
+
+        def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
+
+        def mask: (untyped value) -> Integer
+      end
+    end
+  end
+end

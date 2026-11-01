@@ -12,6 +12,7 @@ module Miele
       include Selection
       include Requests
       include SteamBurst
+      include ContinueCooking
       include OvenState
 
       NOTIFICATION_IDS = { info: Objects::Oven::GlobalEnumNtfctnInfoId, message: Objects::Oven::GlobalEnumNtfctnMessageId,

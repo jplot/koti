@@ -8,6 +8,7 @@ module Miele
       include Selection
       include Requests
       include SteamBurst
+      include ContinueCooking
       include OvenState
 
       NOTIFICATION_IDS: Hash[Symbol, Objects::Enum]

@@ -187,13 +187,12 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to be_empty
   end
 
-  it 'sends continue cooking and the end of keeping warm when the oven offers them' do
-    serve([59], continue_cooking: 1)
+  it 'sends the end of keeping warm while 1/131 shows message 20' do
+    serve([59])
     resources['DOP2/1/131?idx1=0&idx2=1'] =
       dop2_leaf(1, 131, { 2 => dop2_field(:struct_array, [{ 1 => dop2_field(:e16, 20) }]) }, idx2: 1)
-    oven.continue_cooking
     oven.stop_keeping_warm
-    expect(written.map(&:last)).to eq([user_request(72), user_request(68)])
+    expect(written.map(&:last)).to eq([user_request(68)])
   end
 
   it 'refuses the requests the oven does not offer', :aggregate_failures do

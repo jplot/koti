@@ -43,6 +43,10 @@ module Miele
 
         def process_action: (Zone zone, bool on) -> Integer
 
+        def require_offered!: (Integer value, Array[Integer] choices) -> void
+
+        def target_choices: (Zone zone, State state) -> Array[Integer]
+
         def opcode?: () -> bool
 
         def modes: () -> Hash[Symbol, Mode]

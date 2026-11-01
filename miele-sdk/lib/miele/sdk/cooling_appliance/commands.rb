@@ -16,10 +16,13 @@ module Miele
         # @param zone [Zone] one of {#zones}
         # @param degrees [Integer] whole degrees in {#temperature_unit}
         # @return [void]
-        # @raise [ArgumentError] for a fraction of a degree, which the app never sends
+        # @raise [ArgumentError] for a fraction of a degree, which the app never sends, or a value its picker does
+        #   not offer
         # @api public
         def set_target(zone, degrees)
           raise ArgumentError, 'the app sets whole degrees' unless degrees.is_a?(Integer)
+
+          require_offered!(degrees, target_choices(zone, state))
           return put('Cooling', "#{zone.number}/TargetTemp", Value: degrees * 100) unless opcode?
 
           request = "10000617000#{zone.number}00#{format('%04X', degrees & 0xFFFF)}"

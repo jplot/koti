@@ -22,6 +22,8 @@ module Miele
 
         def opcode_zones: (State state) -> Array[Zone]
 
+        def opcode_zone_count: (State state) -> Integer
+
         def opcode_zone: (Integer number, Integer? temperature, Integer? target, State state) -> Zone?
 
         def opcode_type: (Integer number) -> Symbol

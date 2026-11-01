@@ -7,6 +7,7 @@ module Miele
     # appliance (0 and 1) shows its zones in +State+.
     class CoolingAppliance < Appliance
       include Zones
+      include Pickers
       include Commands
 
       # A zone as the app shows it.

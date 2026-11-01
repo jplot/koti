@@ -12,7 +12,8 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
                      'EcoMode' => { 'Value' => 2, 'SetValues' => [1, 2] },
                      'Party' => { 'Value' => 2, 'SetValues' => [] } },
       'Cooling/1' => { 'ZoneState' => { 'Value' => 1, 'Type' => 20, 'Position' => 3 }, 'Fan' => { 'Value' => 2 },
-                       'SuperMode' => { 'Value' => 2, 'SetValues' => [1, 2] }, 'VarioCool' => { 'Value' => 2 } },
+                       'SuperMode' => { 'Value' => 2, 'SetValues' => [1, 2] }, 'VarioCool' => { 'Value' => 2 },
+                       'TargetTemp' => { 'Value' => -1800, 'Min' => -2400, 'Max' => -1400, 'Step' => 200 } },
       'Cooling/2' => { 'ZoneState' => { 'Value' => 1, 'Type' => 19, 'Position' => 1 } } }
   end
   let(:fake) do
@@ -42,6 +43,20 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
   it 'sets a zone target in hundredths of a degree, on its number' do
     fridge.set_target(freezer, -18)
     expect(written).to eq([['PUT', 'Cooling/1/TargetTemp', { 'Value' => -1800 }]])
+  end
+
+  it "refuses a target off the zone's Min to Max by Step, as the app's picker", :aggregate_failures do
+    expect { fridge.set_target(freezer, -17) }.to raise_error(ArgumentError)
+    expect { fridge.set_target(freezer, -26) }.to raise_error(ArgumentError)
+    expect(written).to be_empty
+  end
+
+  it 'offers the values the zone lists, else its target rounded half away from zero', :aggregate_failures do
+    resources['Cooling/1']['TargetTemp'] = { 'Value' => -1850, 'AllValues' => [-2000, -1800] }
+    expect { fridge.set_target(freezer, -19) }.to raise_error(ArgumentError)
+    resources['Cooling/1']['TargetTemp'] = { 'Value' => -1850, 'Min' => -1400, 'Max' => -2400, 'Step' => 100 }
+    fridge.set_target(freezer, -19)
+    expect(written).to eq([['PUT', 'Cooling/1/TargetTemp', { 'Value' => -1900 }]])
   end
 
   it 'sets the super mode duration first on protocol 201, then waits half a second', :aggregate_failures do
@@ -169,6 +184,56 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     it 'switches super freezing with ProcessAction 4' do
       fridge.set_super_mode(fridge.zones.last, true)
       expect(written).to eq([['PUT', 'State/ProcessAction', { 'ProcessAction' => 4 }]])
+    end
+
+    it 'refuses a target outside the range the app fixes for each zone', :aggregate_failures do
+      expect { fridge.set_target(fridge.zones.first, 1) }.to raise_error(ArgumentError)
+      expect { fridge.set_target(fridge.zones.last, -13) }.to raise_error(ArgumentError)
+      fridge.set_target(fridge.zones.first, 2)
+      expect(written).to eq([['POST', 'Oc85/', { 'Request' => '100006170001000002' }]])
+    end
+
+    context 'with a KFN 37692 iDE' do
+      let(:ident) do
+        Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 21, 'ProtocolVersion' => 1,
+                                                      'DeviceIdentLabel' => { 'TechType' => 'KFN 37692 iDE' })
+      end
+
+      it 'keeps its fridge to 3 to 9 °C and its freezer to -26 to -15 °C', :aggregate_failures do
+        expect { fridge.set_target(fridge.zones.first, 2) }.to raise_error(ArgumentError)
+        expect { fridge.set_target(fridge.zones.last, -14) }.to raise_error(ArgumentError)
+        fridge.set_target(fridge.zones.first, 9)
+        expect(written).to eq([['POST', 'Oc85/', { 'Request' => '100006170001000009' }]])
+      end
+    end
+
+    context 'with an FN 30402 i freezer' do
+      let(:ident) do
+        Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 20, 'ProtocolVersion' => 1,
+                                                      'DeviceIdentLabel' => { 'TechType' => 'FN 30402 i' })
+      end
+
+      it 'keeps it to -28 to -15 °C' do
+        expect { fridge.set_target(fridge.zones.first, -14) }.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'with a wine unit of four zones' do
+      let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 32, 'ProtocolVersion' => 1) }
+
+      before do
+        resources['State'] = { 'Status' => 5, 'Temperature' => [1200, 1400, 1600, 1800],
+                               'TargetTemperature' => [1200, 1450, 1600, 1800] }
+      end
+
+      it 'offers 5 to 20 °C in its first zone and only the current target in the others, as the app',
+         :aggregate_failures do
+        first, second = fridge.zones
+        expect { fridge.set_target(second, 14) }.to raise_error(ArgumentError)
+        fridge.set_target(second, 15)
+        fridge.set_target(first, 20)
+        expect(written.map { it[2]['Request'] }).to eq(%w[10000617000200000F 100006170001000014])
+      end
     end
   end
 end

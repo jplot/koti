@@ -75,10 +75,16 @@ module Miele
         # @return [Array<Zone>]
         def opcode_zones(state)
           temperatures = Array(state.raw['Temperature']) #: Array[Integer?]
-          count = { 19 => 1, 20 => 1, 21 => 2 }.fetch(identity.device_type) { temperatures.count { it != ABSENT } }
-          (0...count).filter_map do |index|
+          (0...opcode_zone_count(state)).filter_map do |index|
             opcode_zone(index + 1, temperatures[index], Array(state.raw['TargetTemperature'])[index], state)
           end
+        end
+
+        # @param state [State]
+        # @return [Integer] one or two zones by device type, else as many as the temperatures shown
+        def opcode_zone_count(state)
+          temperatures = Array(state.raw['Temperature']) #: Array[Integer?]
+          { 19 => 1, 20 => 1, 21 => 2 }.fetch(identity.device_type) { temperatures.count { it != ABSENT } }
         end
 
         # @param number [Integer]

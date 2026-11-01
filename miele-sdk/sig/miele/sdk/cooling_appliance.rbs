@@ -2,6 +2,7 @@ module Miele
   module Sdk
     class CoolingAppliance < Appliance
       include Zones
+      include Pickers
       include Commands
 
       class Zone < Data

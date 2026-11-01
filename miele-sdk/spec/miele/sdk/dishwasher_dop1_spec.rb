@@ -33,13 +33,27 @@ RSpec.describe Miele::Sdk::Dishwasher do
 
   def dop1_requests = written.map { it.last['Request'] }
 
-  it 'pauses a Dop1 dishwasher with ProcessAction 2 on the whole state' do
+  it 'pauses a Dop1 dishwasher with ProcessAction 2 on its state' do
     dishwasher.pause
     expect(written).to eq([['PUT', 'State', state.merge('ProcessAction' => 2)]])
   end
 
+  context 'when State carries keys the app does not know' do
+    let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1], 'ProgramName' => 'Eco', 'Light' => nil } }
+
+    it "writes back only what the app's DeviceStateDto keeps" do
+      dishwasher.pause
+      expect(written.last.last).to eq('Status' => 5, 'RemoteEnable' => [15, 0, 1], 'ProcessAction' => 2)
+    end
+  end
+
   context 'when its program waits' do
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 1], 'SignalDoor' => false, 'ProgramID' => 13 } }
+
+    it 'stops with ProcessAction 2 though only cancel is offered, as the app does' do
+      dishwasher.stop
+      expect(written.map(&:last)).to eq([state.merge('ProcessAction' => 2)])
+    end
 
     it 'cancels with 128' do
       dishwasher.cancel

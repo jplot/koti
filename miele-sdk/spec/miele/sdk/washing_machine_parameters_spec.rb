@@ -89,6 +89,12 @@ RSpec.describe Miele::Sdk::WashingMachine do
     expect(written.last.last).to eq(expected)
   end
 
+  it 'combines the stain flags as the app does, so a stain given twice counts once' do
+    leaves[1577] = wm_select(0, 0, { 19 => dop2_field(:u32, 0) })
+    washer.set_parameters(stains: %i[blood blood tea])
+    expect(written.last.last).to eq(wm_select(28, 2, { 19 => dop2_field(:u32, 0x100001) }))
+  end
+
   it 'leaves the drying time of a washer, which only a washer-dryer copies' do
     leaves[1574] = wm_context({ 22 => struct({ 6 => dop2_field(:u16, 120) }) })
     leaves[1577] = wm_select(0, 0, { 19 => dop2_field(:u32, 0), 22 => dop2_field(:u16, 0) })

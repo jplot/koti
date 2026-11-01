@@ -18,6 +18,12 @@ module Miele
 
         def off?: (State state) -> bool
 
+        def details_bar?: (State state) -> bool
+
+        def second_button: (Array[Symbol] requests) -> Symbol?
+
+        def second_button_on?: (State state) -> bool
+
         def offered?: (Symbol request) -> bool
 
         def require_no_info700!: () -> void

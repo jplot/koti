@@ -38,8 +38,10 @@ RSpec.describe Miele::Sdk::WashingMachine do
   def user_request(id) = ['PUT', 'DOP2/2/1583', dop2_leaf(2, 1583, { 1 => dop2_field(:e16, id) })]
 
   def ps_context(mode:)
-    para = { 2 => dop2_field(:struct, { 3 => dop2_field(:u8, mode) }) }
-    dop2_leaf(2, 1574, { 3 => dop2_field(:struct, para) }, idx2: 1)
+    para = { 1 => dop2_field(:struct, { 4 => dop2_field(:u64, 0) }) }
+    para[2] = dop2_field(:struct, { 3 => dop2_field(:u8, mode) }) if mode
+    attributes = dop2_field(:struct, { 1 => dop2_field(:e16, 28) })
+    dop2_leaf(2, 1574, { 3 => dop2_field(:struct, para), 6 => attributes }, idx2: 1)
   end
 
   def combi_state(appliance, operation, process)
@@ -76,6 +78,12 @@ RSpec.describe Miele::Sdk::WashingMachine do
       leaves['2/1574?idx1=0&idx2=1'] = ps_context(mode: 0)
       expect(washer.supported_requests).to eq([1])
       leaves['2/1574?idx1=0&idx2=1'] = ps_context(mode: 1)
+      expect(washer.supported_requests).to eq([1, 8])
+    end
+
+    it 'keeps request 8 when 2/1574 shows no delayed-start mode, which the app takes as relative' do
+      leaves['2/1585'] = device_context(requests: [1, 2, 8])
+      leaves['2/1574?idx1=0&idx2=1'] = ps_context(mode: nil)
       expect(washer.supported_requests).to eq([1, 8])
     end
   end

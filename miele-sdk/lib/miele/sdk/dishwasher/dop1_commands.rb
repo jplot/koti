@@ -22,14 +22,13 @@ module Miele
 
         private
 
-        # The app writes back the whole +State+ it read, without its nulls, with the action.
+        # The app writes back the +State+ it read as its DeviceStateDto, without nulls or keys it does not know.
         #
         # @param state [State]
         # @param action [Integer]
         # @return [void]
         def dop1_process_action(state, action)
-          body = JSON.generate(state.raw.compact.merge('ProcessAction' => action))
-          send_request(:put, "/Devices/#{fab}/State", body:)
+          command(Schema::DeviceState.from(state.raw).with(process_action: action))
         end
 
         # The app reads 8906 first and keeps the extras past bit 5.

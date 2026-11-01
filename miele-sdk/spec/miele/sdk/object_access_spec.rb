@@ -31,6 +31,12 @@ RSpec.describe Miele::Sdk::ObjectAccess do
                                                               idx2: 1).unpack1('H*'))
   end
 
+  it 'writes back the indexes the appliance answered, as the dishwasher and laundry modules do' do
+    appliance.modify(combi, [2, 1586, 0, 0]) { it.with(appliance_state: :off) }
+    expect(puts_sent.last.body.unpack1('H*')).to eq(dop2_leaf(2, 1586, fields.merge(1 => dop2_field(:e8, 1)),
+                                                              idx2: 1).unpack1('H*'))
+  end
+
   context 'when the leaf lacks the member to change' do
     let(:fields) { { 3 => dop2_field(:e8, 7) } }
 

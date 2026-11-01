@@ -89,11 +89,68 @@ RSpec.describe Miele::Sdk::Dishwasher do
   context 'when it runs without mobile start' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 0], 'StandbyState' => 1 } }
 
-    it 'stops and cancels, which need no mobile start, but refuses to pause', :aggregate_failures do
+    it 'stops without mobile start, but neither pauses nor cancels while its details bar shows pause',
+       :aggregate_failures do
       dishwasher.stop
-      dishwasher.cancel
       expect { dishwasher.pause }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written.map(&:last)).to eq([user_request(2).last, user_request(52).last])
+      expect { dishwasher.cancel }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(written.map(&:last)).to eq([user_request(2).last])
+    end
+  end
+
+  context 'when it runs and offers only to cancel' do
+    let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 1 } }
+
+    before { leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1) }
+
+    it "stops all the same, as the app's Stop quick action does" do
+      dishwasher.stop
+      expect(written.map(&:last)).to eq([user_request(2).last])
+    end
+
+    it 'cancels from its details bar' do
+      dishwasher.cancel
+      expect(written.map(&:last)).to eq([user_request(52).last])
+    end
+  end
+
+  context 'when its program is selected under mobile start and offers only to cancel' do
+    let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 1 } }
+
+    it 'cancels, as its details bar allows from Status 3' do
+      leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1)
+      dishwasher.cancel
+      expect(written.map(&:last)).to eq([user_request(52).last])
+    end
+  end
+
+  context 'when it waits for its start time without remote control or mobile start' do
+    let(:state) { { 'Status' => 4, 'RemoteEnable' => [14, 0, 0], 'StandbyState' => 1 } }
+
+    it 'refuses to cancel, as its details bar does' do
+      leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1)
+      expect { dishwasher.cancel }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+  end
+
+  context 'when it waits for its start time under remote control, without mobile start' do
+    let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 0], 'StandbyState' => 1 } }
+
+    it 'cancels, as its details bar allows' do
+      leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1)
+      dishwasher.cancel
+      expect(written.map(&:last)).to eq([user_request(52).last])
+    end
+  end
+
+  context 'when it is locked or asleep waiting to start' do
+    let(:state) { { 'Status' => 4, 'RemoteEnable' => [7, 0, 1], 'StandbyState' => 1 } }
+
+    it 'refuses to cancel, as its details bar hides itself', :aggregate_failures do
+      leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1)
+      expect { dishwasher.cancel }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      state.merge!('RemoteEnable' => [15, 0, 1], 'StandbyState' => 2)
+      expect { dishwasher.cancel }.to raise_error(Miele::Sdk::ActionUnavailableError)
     end
   end
 

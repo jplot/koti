@@ -411,12 +411,16 @@ dishwasher.open_door                        # Dop1, under mobile start with the 
 Each action makes the checks of the app's rule for it and raises `ActionUnavailableError` without
 sending anything when one fails. `start` needs mobile start (and AppSupport bit 4 on DOP2), the door
 closed, request 1 offered and the dishwasher ready (Status 3, or 4 awake); `pause` and `resume` need
-mobile start and a running or paused program; `stop` and `cancel` need no mobile start, only a
-program that runs, pauses or waits awake, the request offered, and a dishwasher not locked;
+mobile start and a running or paused program; `stop` needs no mobile start, only a program that
+runs, pauses or waits awake, stop or cancel offered, and a dishwasher not locked; `cancel` follows
+the app's details bar, where it is the second button only while neither pause nor stop comes
+first, from Status 3 to 6, under mobile start, while a program runs or pauses, or while one waits
+under remote control (the bar's other Cancel, which reverts the selected extras, is left out);
 `start_delayed` needs a program selected (Status 3) under mobile start, the dishwasher not locked. A
 DOP2 dishwasher refuses while it shows info 700. A Dop1 dishwasher takes `ProcessAction` on its
-whole `State`, its program and extras on 8906 and its delayed start on 8909. Delays are counted on
-the wall clock, as the app counts them, so on the day the clocks change they follow the clock.
+`State`, as the app's DeviceStateDto keeps it, its program and extras on 8906 and its delayed start
+on 8909. Delays are counted on the wall clock, as the app counts them, so on the day the clocks
+change they follow the clock.
 
 Not traced, so left to the dishwasher: where a Dop1 dishwasher shows info 700, and the units of the
 Dop1 consumption. The app sends the steps of `power_on` and `power_off` again while it watches
@@ -514,7 +518,7 @@ coffee.rename_drink(24_037, 'Mein Kaffee')
 A DOP2 coffee maker writes 2/1586 as read to switch on and off, waking first when it answers 500,
 and its other objects as the app's ModifyDop2Message does: back where they were read, the index
 read at as the header's attribute. A CVA6000 takes Dop1 1101 to switch on and off and 1100 to
-stop, and its light by writing back its whole `State`. `brew` follows the app's drink rule: mobile
+stop, and its light by writing back its `State` as the app's DeviceStateDto keeps it. `brew` follows the app's drink rule: mobile
 start, no information or query shown, no drink, Barista or care program running; two cups or a
 double shot also need the software ids the app requires. `start_barista` follows the app's Barista
 entry: a CM6F, CVA or Ref2 that lists it among the special beverages of 1/1599, on under remote
@@ -619,7 +623,8 @@ hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the f
   changed member in the wire type it was read in, and raises `ArgumentError` for a member it did not
   read, as the app's setters do.
 - `modify(klass, address) { |value| value.with(…) }` reads an object, lets the block change it and
-  writes it back at that address.
+  writes it back with the header the appliance answered, as the app's dishwasher and laundry modules
+  do.
 - A Dop1 object decodes its sections, bit fields and byte order (`from(bytes)`), and `to_bytes`
   gives what a write section sends.
 - `state.extended_state` decodes `ExtendedState` into the object the app builds from it: the hood's

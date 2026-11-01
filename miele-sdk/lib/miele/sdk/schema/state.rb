@@ -5,7 +5,7 @@ module Miele
     module Schema
       # What an appliance is doing, from its +State+, and the body of a command written there (Miele app
       # class +DeviceStateDto+, which the app writes with +DeviceAction+, +ProcessAction+, +Light+ or
-      # +StartTime+ alone).
+      # +StartTime+ alone, or whole as read on a Dop1 dishwasher and a CVA6000).
       #
       # @!attribute [r] status
       #   @return [Integer, nil] named by {Catalog::STATUS}

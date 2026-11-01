@@ -30,7 +30,8 @@ module Miele
                    with_index:)
       end
 
-      # The app writes most objects back where it read them.
+      # The app's dishwasher and laundry modules, and its coffee switch-off, send back the message they read, with
+      # the header and indexes the appliance answered.
       #
       # @param klass [Class] a generated DOP2 class
       # @param address [Array<Integer, nil>] as {#object} takes it
@@ -40,7 +41,11 @@ module Miele
       # @return [void]
       # @raise [ArgumentError] when a changed member was not read: nothing is written
       # @api public
-      def modify(klass, address, with_index: false) = write_object(yield(object(klass, address)), address, with_index:)
+      def modify(klass, address, with_index: false)
+        unit, attribute, idx1, idx2 = settled(address)
+        leaf = dop2(unit, attribute, idx1:, idx2:)
+        write_dop2(leaf.with(fields: yield(klass.from(leaf.fields)).to_fields), with_index:)
+      end
 
       private
 

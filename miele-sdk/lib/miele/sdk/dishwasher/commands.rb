@@ -49,18 +49,34 @@ module Miele
           run(state, :resume)
         end
 
-        # @return [void]
-        # @raise [ActionUnavailableError] see {#cancel}
-        # @api public
-        def stop = stop_with(:stop)
-
-        # The app stops or cancels without mobile start, only not locked.
+        # The app's Stop quick action is on while either Stop or Cancel is offered, and sends Stop.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] unless it runs, pauses or waits awake, offers the request and shows no
-        #   info 700
+        # @raise [ActionUnavailableError] unless it runs, pauses or waits awake, offers stop or cancel, is not locked
+        #   and shows no info 700
         # @api public
-        def cancel = stop_with(:cancel)
+        def stop
+          state = checked_state
+          running = [5, 6].include?(status(state)) || (status(state) == 4 && [1, 255].include?(standby(state)))
+          offered = offered?(:stop) || offered?(:cancel)
+          require!(!locked_in?(state) && offered && running, 'the dishwasher cannot stop now')
+          run(state, :stop)
+        end
+
+        # The app sends Cancel as the second button of its details bar (ActionBarComponentsRule). Its other Cancel,
+        # the button that reverts the selected extras when no action is offered, is left out.
+        #
+        # @return [void]
+        # @raise [ActionUnavailableError] unless the bar shows (Status 3 to 6, not asleep waiting to start, not
+        #   locked, no info 700), offers neither pause nor stop ahead of cancel, and has mobile start, a program
+        #   running or paused, or one waiting under remote control
+        # @api public
+        def cancel
+          state = checked_state
+          require!(details_bar?(state) && second_button(supported_requests) == :cancel && second_button_on?(state),
+                   'the dishwasher cannot cancel now')
+          run(state, :cancel)
+        end
 
         # @param prog_id [Integer, Symbol]
         # @return [void]
@@ -146,15 +162,6 @@ module Miele
           return pfd10? if id == 20_064
 
           dop2? && SETTINGS.include?(id) && %w[G38 G58 G7].any? { tech_type.to_s.start_with?(it) }
-        end
-
-        # @param request [Symbol]
-        # @return [void]
-        def stop_with(request)
-          state = checked_state
-          running = [5, 6].include?(status(state)) || (status(state) == 4 && [1, 255].include?(standby(state)))
-          require!(!locked_in?(state) && offered?(request) && running, "the dishwasher cannot #{request} now")
-          run(state, request)
         end
 
         # @param state [State]

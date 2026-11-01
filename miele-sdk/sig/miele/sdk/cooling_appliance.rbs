@@ -5,6 +5,7 @@ module Miele
       include Pickers
       include Screen
       include Commands
+      include Settings
 
       class Zone < Data
         attr_reader number: Integer

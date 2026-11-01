@@ -55,29 +55,73 @@ module Miele
         # @return [Boolean]
         def holiday_or_sabbath?(state) = modes(state).values_at(:holiday, :sabbath).any? { it&.on }
 
+        # The ice maker, humidifier, door alarm and PerfectFresh rules return Empty there, which hides their cells.
+        #
+        # @param state [State]
+        # @return [Boolean] neither at Status 1 nor 255
+        def settings_listed?(state) = ![1, 255].include?(state.raw['Status'])
+
+        # The rule PresentationLightStateRule and HumidityControlRule share.
+        #
+        # @param state [State]
+        # @return [Boolean] listed, not in a failure without a door signal, nor in Holiday or Sabbath mode
+        def settings_shown?(state)
+          return false if !settings_listed?(state) || (state.raw['Status'] == 8 && door_signal(state).zero?)
+
+          !holiday_or_sabbath?(state)
+        end
+
         # PresentationLightStateRule, which shows the presenter light section and, behind it, the intensities.
         #
         # @param state [State]
         # @return [Boolean]
-        def presenter_light_shown?(state)
-          status = state.raw['Status']
-          return false if [1, 255].include?(status) || (status == 8 && door_signal(state).zero?)
+        def presenter_light_shown?(state) = presenter_light_state? && settings_shown?(state)
 
-          presenter_light_state? && !holiday_or_sabbath?(state)
+        # @param state [State]
+        # @return [Boolean] as HumidityControlRule, with a +HumidityControl+ value but -1
+        def humidity_control_shown?(state)
+          ![nil, -1].include?(cooling.dig('HumidityControl', 'Value')) && settings_shown?(state)
         end
 
-        # The dashboard's quick action, which hides only while off or when Holiday or Sabbath leads its notices.
+        # @param state [State]
+        # @return [Boolean] the presenter light's quick action on the dashboard
+        def presenter_quick_action?(state) = presenter_light_state? && quick_action_shown?(state)
+
+        # The dashboard hides its light quick actions only while off or when Holiday or Sabbath leads its notices.
         #
         # @param state [State]
         # @return [Boolean]
-        def presenter_quick_action?(state)
-          return false if shown_off?(state) || !presenter_light_state?
-
-          !holiday_or_sabbath?(state) || notice_before_holiday?(state)
+        def quick_action_shown?(state)
+          !shown_off?(state) && (!holiday_or_sabbath?(state) || notice_before_holiday?(state))
         end
 
         # @return [Boolean] +PresentationLight+ at 1 or 2, which the app reads as on or off
         def presenter_light_state? = [1, 2].include?(cooling.dig('PresentationLight', 'Value'))
+
+        # The light section shows with the zones on a wine unit, the light's quick action on the dashboard; both
+        # need a light state.
+        #
+        # @param state [State]
+        # @return [Boolean]
+        def light_shown?(state) = !light_state(state).zero? && (zones_shown?(state) || quick_action_shown?(state))
+
+        # The light section shows the ambient light where its source reads a setting, and enables it with the
+        # light on.
+        #
+        # @param state [State]
+        # @param key [String] +AmbientLightMode+ or +Light+ in +Cooling+
+        # @return [Boolean]
+        def ambient_light_shown?(state, key) = !cooling[key].nil? && light_state(state) == 1 && zones_shown?(state)
+
+        # @param state [State]
+        # @return [Integer] 1 on, 2 off, 3 unknown (+State+ without +Light+), 0 none, as LightStateForOpCodeSource
+        #   and LightStateForCoolingApiSource read +Light+ and +AmbientLightState+
+        def light_state(state)
+          value = state_light? ? state.raw['Light'] : cooling.dig('AmbientLightState', 'Value')
+          return 3 if value.nil? && state_light?
+
+          [1, 2].include?(value) ? value : 0
+        end
 
         # GetAlarmInfoTypeNotification ranks a failure, filter or door alarm, then Party and Eco, before Holiday.
         #

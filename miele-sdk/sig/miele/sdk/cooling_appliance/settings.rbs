@@ -1,0 +1,65 @@
+module Miele
+  module Sdk
+    class CoolingAppliance < Appliance
+      module Settings : Appliance
+        HUMIDITY: Hash[Symbol, Integer]
+
+        def ice_maker=: (bool on) -> void
+
+        def light=: (bool on) -> void
+
+        def ambient_light_mode=: (Integer value) -> void
+
+        def presentation_light=: (bool on) -> void
+
+        def set_presentation_light_intensity: (Zone zone, Integer value) -> void
+
+        def humidity=: (Symbol level) -> void
+
+        def perfect_fresh=: (Integer value) -> void
+
+        def humidifier=: (Integer value) -> void
+
+        def door_alarm_delay=: (Integer seconds) -> void
+
+        private
+
+        def put: (String resource, String member, **untyped body) -> void
+
+        def switch: (bool on) -> Hash[Symbol, untyped]
+
+        def require_offered!: (Integer value, Array[Integer] choices) -> void
+
+        def picker: (Hash[String, untyped]? setting) -> Array[Integer]
+
+        def cooling: () -> Hash[String, untyped]
+
+        def settings_listed?: (State state) -> bool
+
+        def presenter_light_shown?: (State state) -> bool
+
+        def presenter_quick_action?: (State state) -> bool
+
+        def humidity_control_shown?: (State state) -> bool
+
+        def light_shown?: (State state) -> bool
+
+        def ambient_light_shown?: (State state, String key) -> bool
+
+        def ambient_light_numbers: (String key) -> Array[Integer]
+
+        def ice_maker?: () -> bool
+
+        def wine?: () -> bool
+
+        def rioja?: () -> bool
+
+        def kwtus?: () -> bool
+
+        def state_light?: () -> bool
+
+        def presentation_light?: () -> bool
+      end
+    end
+  end
+end

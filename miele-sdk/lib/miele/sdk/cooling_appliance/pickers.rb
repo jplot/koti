@@ -24,13 +24,34 @@ module Miele
         end
 
         # @param zone [Zone]
+        # @param degrees [Integer]
         # @param state [State]
+        # @return [Boolean] false for the zone's current target
+        # @raise [ArgumentError] for a value the app's picker does not offer
+        def new_target?(zone, degrees, state)
+          target = target_temp(zone, state)
+          require_offered!(degrees, target_choices(zone, state, target))
+          degrees * 100 != target['Value']
+        end
+
+        # @param zone [Zone]
+        # @param state [State]
+        # @return [Hash{String=>Object}] the zone's +TargetTemp+, its +TargetTemperature+ in +State+ on Opcode
+        def target_temp(zone, state)
+          return { 'Value' => state.raw['TargetTemperature'].to_a[zone.number - 1] } if opcode?
+
+          device("Cooling/#{zone.number}")['TargetTemp'].to_h
+        end
+
+        # @param zone [Zone]
+        # @param state [State]
+        # @param target [Hash{String=>Object}] its +TargetTemp+
         # @return [Array<Integer>] the whole degrees the app's picker offers, rounded half away from zero as it
         #   shows them
-        def target_choices(zone, state)
+        def target_choices(zone, state, target)
           return opcode_targets(zone, state) if opcode?
 
-          api_targets(device("Cooling/#{zone.number}")['TargetTemp'].to_h).map { it.fdiv(100).round }
+          api_targets(target).map { it.fdiv(100).round }
         end
 
         # @param target [Hash{String=>Object}] a zone's +TargetTemp+
@@ -40,6 +61,12 @@ module Miele
 
           target['Min'].to_i < target['Max'].to_i ? picker(target) : [target['Value']].compact
         end
+
+        # The BSH picker sends its index plus 1, the Liebherr slider its seven options' index plus 1.
+        #
+        # @param key [String] +AmbientLightMode+ or +Light+ in +Cooling+
+        # @return [Array<Integer>]
+        def ambient_light_numbers(key) = (1..(key == 'AmbientLightMode' ? picker(cooling[key]).size : 7)).to_a
 
         # .NET's remainder by a +Step+ of 0 throws, so such a picker offers nothing.
         #
@@ -63,7 +90,7 @@ module Miele
         # @param zone [Zone]
         # @param state [State]
         # @return [Integer] the zone's +TargetTemperature+ in whole °C, rounded half away from zero as the app shows it
-        def opcode_target(zone, state) = state.raw['TargetTemperature'].to_a[zone.number - 1].to_i.fdiv(100).round
+        def opcode_target(zone, state) = target_temp(zone, state)['Value'].to_i.fdiv(100).round
 
         # GetWineCoolingZoneSubType gives no subtype past the first zone of a unit of four zones or more.
         #

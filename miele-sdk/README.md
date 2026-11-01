@@ -593,20 +593,29 @@ current value, each in whole degrees rounded half away from zero as the app show
 zone keeps to the app's fixed ranges: 2 to 9 °C for a fridge, -28 to -14 °C for a freezer and 5 to
 20 °C for a wine zone; 3 to 9 and -26 to -15 °C on a KFN 37692 iDE or K 3.473 iD; any zone
 -28 to -15 °C on an FN 30402 i or FN 35402 i; and only its current target in a zone of no known
-kind. PerfectFresh, the humidifier and the door alarm delay keep to `Min` to `Max` by `Step`.
-PerfectFresh is refused on protocol 201 and without a `Step`, where the app shows none.
+kind. As the app, the SDK sends nothing for a zone's current target. PerfectFresh, the
+humidifier, the door alarm delay and the humidity level keep to `Min` to `Max` by `Step`. A BSH
+ambient light mode is numbered from 1 in its picker's `Min` to `Max` by `Step` order and a Liebherr
+one goes from 1 to 7, as the app sends them; a zone's presentation light intensity is 0 (off) or 1
+to 7.
 
 The SDK also refuses, with `ActionUnavailableError`, a control the app's screens hide. The zone
 controls (target, fan and VarioCool) are refused while off (Status 1, 10 or 255); while on,
 running or super freezing without a door signal, in Holiday or Sabbath mode; and in a failure
 without a door alarm, unless Holiday or Sabbath is on. A failure alarm shows the zones in both
 cases: the ice maker's alarm, a zone's power failure, or a temperature alarm in a freezer zone or a
-wine zone the app counts as one. The super mode is refused only while off, as the app's dashboard still offers it in those
-modes. The presentation light needs a light state (`PresentationLight` at 1 or 2). Its zone
-intensities are refused at Status 1 or 255, in a failure without a door signal, and in Holiday or
-Sabbath mode. Switching it on or off is also allowed where the app's dashboard offers it: at any
-Status but 1, 10 or 255, and in Holiday or Sabbath mode only under a failure, filter or door alarm,
-or with Party or Eco mode on.
+wine zone the app counts as one. The super mode is refused only while off, as the app's dashboard
+still offers it in those modes. PerfectFresh, the humidifier, the door alarm delay and the ice
+maker are refused at Status 1 or 255; PerfectFresh also on protocol 201 and without a `Step`, the
+humidifier and the door alarm delay without their setting or at a `Value` of -1, and the ice maker
+unless `IceMaker` is 1, 2 or 3. The humidity level and the presentation light's zone intensities
+are refused at Status 1 or 255, in a failure without a door signal, and in Holiday or Sabbath mode;
+the humidity level also needs a `HumidityControl` value other than -1, the intensities a light
+state (`PresentationLight` at 1 or 2). A wine unit's light needs a light state too
+(`AmbientLightState`, or `Light` in `State`, at 1 or 2, or no `Light` in `State`) and is switched
+where the zones show; its ambient light only there, with the light on and its setting listed. The
+app's dashboard also switches the light and the presentation light at any Status but 1, 10 or 255,
+in Holiday or Sabbath mode only under a failure, filter or door alarm, or with Party or Eco mode on.
 
 Left out: the app's retries of an Opcode target and its waits after some writes, and typed reads of
 zone alarms, target ranges and the ambient and presentation light state, which `cooling` gives

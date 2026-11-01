@@ -13,7 +13,8 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
                      'Party' => { 'Value' => 2, 'SetValues' => [] },
                      'DoorAlarmTime' => { 'Value' => 120, 'Min' => 60, 'Max' => 300, 'Step' => 60 },
                      'Humidifier' => { 'Value' => 0, 'Min' => 0, 'Max' => 2, 'Step' => 1 },
-                     'PerfectFresh' => { 'Value' => 1, 'Min' => 0, 'Max' => 2, 'Step' => 1 } },
+                     'PerfectFresh' => { 'Value' => 1, 'Min' => 0, 'Max' => 2, 'Step' => 1 },
+                     'IceMaker' => { 'Value' => 1 } },
       'Cooling/1' => { 'ZoneState' => { 'Value' => 1, 'Type' => 20, 'Position' => 3 }, 'Fan' => { 'Value' => 2 },
                        'SuperMode' => { 'Value' => 2, 'SetValues' => [1, 2] }, 'VarioCool' => { 'Value' => 2 },
                        'TargetTemp' => { 'Value' => -1800, 'Min' => -2400, 'Max' => -1400, 'Step' => 200 } },
@@ -44,8 +45,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
   def freezer = fridge.zones.find { it.number == 1 }
 
   it 'sets a zone target in hundredths of a degree, on its number' do
+    fridge.set_target(freezer, -20)
+    expect(written).to eq([['PUT', 'Cooling/1/TargetTemp', { 'Value' => -2000 }]])
+  end
+
+  it "sends nothing for the zone's current target, as the app does" do
     fridge.set_target(freezer, -18)
-    expect(written).to eq([['PUT', 'Cooling/1/TargetTemp', { 'Value' => -1800 }]])
+    expect(written).to be_empty
   end
 
   it "refuses a target off the zone's Min to Max by Step, as the app's picker", :aggregate_failures do
@@ -148,10 +154,10 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
   it 'shows the zones in Sabbath mode while super cooling or with the door open, as the app does' do
     resources['Cooling']['Sabbath'] = { 'Value' => 1 }
     resources['State'] = { 'Status' => 14 }
-    fridge.set_target(freezer, -18)
+    fridge.set_target(freezer, -16)
     resources['State'] = { 'Status' => 5, 'SignalDoor' => true, 'SignalFailure' => false }
     fridge.set_target(freezer, -20)
-    expect(written.map(&:last)).to eq([{ 'Value' => -1800 }, { 'Value' => -2000 }])
+    expect(written.map(&:last)).to eq([{ 'Value' => -1600 }, { 'Value' => -2000 }])
   end
 
   it 'sets a mode by its name in the Cooling API, only when the appliance lists values for it', :aggregate_failures do
@@ -176,6 +182,49 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect { fridge.humidifier = -1 }.to raise_error(ArgumentError)
     expect { fridge.humidifier = 3 }.to raise_error(ArgumentError)
     expect(written).to be_empty
+  end
+
+  it 'refuses the humidifier or the door alarm delay at a Value of -1 or absent, as the app hides their cells',
+     :aggregate_failures do
+    resources['Cooling'].merge!('Humidifier' => { 'Value' => -1, 'Min' => -1, 'Max' => -1, 'Step' => 1 })
+    resources['Cooling'].delete('DoorAlarmTime')
+    expect { fridge.humidifier = -1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { fridge.door_alarm_delay = 60 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
+  it 'refuses the ice maker without a state, as the app hides its switch', :aggregate_failures do
+    resources['Cooling']['IceMaker'] = { 'Value' => 0 }
+    expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError, /no ice maker state/)
+    resources['Cooling'].delete('IceMaker')
+    expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError, /no ice maker state/)
+  end
+
+  it 'switches an ice maker in alarm, whose switch the app still shows' do
+    resources['Cooling']['IceMaker'] = { 'Value' => 3 }
+    fridge.ice_maker = false
+    expect(written).to eq([['PUT', 'Cooling/IceMaker', { 'Value' => 2 }]])
+  end
+
+  it 'refuses the ice maker at Status 1 or 255, as the app hides its switch' do
+    [1, 255].each do |status|
+      resources['State'] = { 'Status' => status }
+      expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+  end
+
+  it 'refuses the humidifier at Status 1 or 255, as the app hides its cell' do
+    [1, 255].each do |status|
+      resources['State'] = { 'Status' => status }
+      expect { fridge.humidifier = 1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+  end
+
+  it 'refuses the door alarm delay at Status 1 or 255, as the app hides its cell' do
+    [1, 255].each do |status|
+      resources['State'] = { 'Status' => status }
+      expect { fridge.door_alarm_delay = 180 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
   end
 
   it 'refuses PerfectFresh on protocol 201, where the app reads none', :aggregate_failures do
@@ -217,6 +266,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       expect(written).to eq([['PUT', 'Cooling/PerfectFresh', { 'Value' => 2 }]])
     end
 
+    it 'refuses PerfectFresh at Status 1 or 255, as the app hides its cell' do
+      [1, 255].each do |status|
+        resources['State'] = { 'Status' => status }
+        expect { fridge.perfect_fresh = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      end
+    end
+
     it 'refuses PerfectFresh without a Step, as the app hides it' do
       resources['Cooling']['PerfectFresh'] = { 'Value' => 1, 'Min' => 0, 'Max' => 2, 'Step' => 0 }
       expect { fridge.perfect_fresh = 1 }.to raise_error(Miele::Sdk::ActionUnavailableError)
@@ -227,7 +283,7 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 19, 'ProtocolVersion' => 201) }
 
     it 'refuses the ice maker' do
-      expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { fridge.ice_maker = true }.to raise_error(Miele::Sdk::ActionUnavailableError, /has no ice maker/)
     end
   end
 
@@ -237,11 +293,34 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
                                                     'DeviceIdentLabel' => { 'TechType' => 'KWTUS 6000' })
     end
 
+    before { resources['Cooling']['HumidityControl'] = { 'Value' => 2, 'Min' => 1, 'Max' => 3, 'Step' => 1 } }
+
     it 'lights it through State, and sets its humidity level' do
       fridge.light = true
       fridge.humidity = :high
       expect(written).to eq([['PUT', 'State/Light', { 'Light' => 1 }],
                              ['PUT', 'Cooling/HumidityControl', { 'Value' => 3 }]])
+    end
+
+    it 'refuses a humidity level in Sabbath mode, in a failure or at a Value of -1, as the app hides it',
+       :aggregate_failures do
+      resources['Cooling']['Sabbath'] = { 'Value' => 1 }
+      expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources.merge!('State' => { 'Status' => 8 }, 'Cooling' => { 'HumidityControl' => { 'Value' => 2 } })
+      expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources.merge!('State' => { 'Status' => 5 }, 'Cooling' => { 'HumidityControl' => { 'Value' => -1 } })
+      expect { fridge.humidity = :high }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+
+    it 'sets a humidity level in a failure with a door signal, as the app still shows it' do
+      resources['State'] = { 'Status' => 8, 'SignalDoor' => true, 'SignalFailure' => false }
+      fridge.humidity = :low
+      expect(written).to eq([['PUT', 'Cooling/HumidityControl', { 'Value' => 1 }]])
+    end
+
+    it 'refuses a humidity level off its Min to Max by Step, as the app offers none' do
+      resources['Cooling']['HumidityControl'] = { 'Value' => 2, 'Min' => 1, 'Max' => 2, 'Step' => 1 }
+      expect { fridge.humidity = :high }.to raise_error(ArgumentError)
     end
   end
 
@@ -251,14 +330,64 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
                                                     'DeviceIdentLabel' => { 'TechType' => 'WT 6000' })
     end
 
+    before do
+      resources['State'] = { 'Status' => 5, 'Light' => 1 }
+      resources['Cooling']['Light'] = { 'Value' => 3 }
+    end
+
     it 'sets its ambient light level on Cooling/Light' do
       fridge.ambient_light_mode = 4
       expect(written).to eq([['PUT', 'Cooling/Light', { 'Value' => 4 }]])
+    end
+
+    it "keeps the ambient light level to the app's seven slider options", :aggregate_failures do
+      expect { fridge.ambient_light_mode = 0 }.to raise_error(ArgumentError)
+      expect { fridge.ambient_light_mode = 8 }.to raise_error(ArgumentError)
+      expect(written).to be_empty
     end
   end
 
   context 'with a BSH wine unit' do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 32, 'ProtocolVersion' => 200) }
+
+    before do
+      resources['Cooling'].merge!('AmbientLightState' => { 'Value' => 1 },
+                                  'AmbientLightMode' => { 'Value' => 1, 'Min' => 1, 'Max' => 4, 'Step' => 1 })
+    end
+
+    it 'refuses the light without a light state, as the app shows neither its switch nor its quick action' do
+      resources['Cooling'].delete('AmbientLightState')
+      expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    end
+
+    it "switches the light in a failure through the dashboard's quick action, never off or in Sabbath mode alone",
+       :aggregate_failures do
+      resources['State'] = { 'Status' => 8 }
+      fridge.light = true
+      resources['State'] = { 'Status' => 10 }
+      expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources['State'] = { 'Status' => 5 }
+      resources['Cooling']['Sabbath'] = { 'Value' => 1 }
+      expect { fridge.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(written.size).to eq(1)
+    end
+
+    it 'sets the ambient light mode only with the light on and its section shown, as the app', :aggregate_failures do
+      resources['Cooling']['AmbientLightState'] = { 'Value' => 2 }
+      expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources['Cooling'].merge!('AmbientLightState' => { 'Value' => 1 }, 'Sabbath' => { 'Value' => 1 })
+      expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      resources['Cooling'].merge!('Sabbath' => { 'Value' => 2 }, 'AmbientLightMode' => nil)
+      expect { fridge.ambient_light_mode = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(written).to be_empty
+    end
+
+    it 'numbers the ambient light modes its picker lists from 1, as the app sends them', :aggregate_failures do
+      resources['Cooling']['AmbientLightMode'] = { 'Value' => 1, 'Min' => 10, 'Max' => 40, 'Step' => 10 }
+      expect { fridge.ambient_light_mode = 10 }.to raise_error(ArgumentError)
+      fridge.ambient_light_mode = 4
+      expect(written).to eq([['PUT', 'Cooling/AmbientLightMode', { 'Value' => 4 }]])
+    end
 
     it 'lights it through AmbientLightState and sets its ambient light mode' do
       fridge.light = false
@@ -281,6 +410,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       fridge.set_presentation_light_intensity(freezer, 0)
       expect(written).to eq([['PUT', 'Cooling/PresentationLight', { 'Value' => 1 }],
                              ['PUT', 'Cooling/2/PresentationLightIntensity', { 'Value' => 0 }]])
+    end
+
+    it "keeps a zone intensity to 0 or the app's seven slider options", :aggregate_failures do
+      expect { fridge.set_presentation_light_intensity(freezer, 8) }.to raise_error(ArgumentError)
+      expect { fridge.set_presentation_light_intensity(freezer, -1) }.to raise_error(ArgumentError)
+      fridge.set_presentation_light_intensity(freezer, 7)
+      expect(written).to eq([['PUT', 'Cooling/2/PresentationLightIntensity', { 'Value' => 7 }]])
     end
 
     it 'sets a zone intensity with Status 10, where the app still shows its presenter light' do
@@ -326,8 +462,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     end
 
     it "sets a target through Oc85 in whole °C, as 16-bit two's complement" do
+      fridge.set_target(fridge.zones.last, -20)
+      expect(written).to eq([['POST', 'Oc85/', { 'Request' => '10000617000200FFEC' }]])
+    end
+
+    it 'sends nothing for the current target, as the app does' do
       fridge.set_target(fridge.zones.last, -18)
-      expect(written).to eq([['POST', 'Oc85/', { 'Request' => '10000617000200FFEE' }]])
+      expect(written).to be_empty
     end
 
     it 'switches super freezing with ProcessAction 4' do

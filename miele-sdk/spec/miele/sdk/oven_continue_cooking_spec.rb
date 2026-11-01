@@ -121,6 +121,13 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to eq([user_request(72), parameter(30, 5)])
   end
 
+  it 'raises the browning when the oven requires a doneness it does not let write' do
+    phases(10_000, 28_114)
+    levels(31 => level(2, mask: 2), 30 => level(4, mask: 3))
+    oven.continue_cooking
+    expect(written).to eq([user_request(72), parameter(30, 5)])
+  end
+
   it 'reads 1/1585 and 1/1574 every 3 s until the oven asks, then until it cooks on', :aggregate_failures do
     phases(0, 10_000, 0, 28_124)
     levels({}, 31 => level(2, mask: 3))
@@ -166,5 +173,11 @@ RSpec.describe Miele::Sdk::Oven do
     phases(10_000, 28_100)
     levels(31 => nil)
     expect { oven.continue_cooking }.to raise_error(Miele::Sdk::ActionFailedError, /doneness/)
+  end
+
+  it 'fails when 1/1574 has no browning once the doneness does not qualify' do
+    phases(10_000, 28_100)
+    levels(30 => nil)
+    expect { oven.continue_cooking }.to raise_error(Miele::Sdk::ActionFailedError, /browning/)
   end
 end

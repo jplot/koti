@@ -46,7 +46,8 @@ module Miele
     class NotAcceptedError < Error; end
 
     # The appliance took an action's write but did not show its effect within the 15 s the Miele app waits for it
-    # (ActionExecutionTimeout), which the app reports as a failed action.
+    # (ActionExecutionTimeout), or showed a state without a value the app reads on the way; the app reports
+    # either as a failed action.
     class ActionFailedError < Error; end
   end
 end

@@ -411,16 +411,17 @@ Each of these actions makes the checks the app's rules make before it, and raise
   app's 15 seconds it raises `Miele::Sdk::ActionFailedError`, and so it does at once when 1/1585
   shows no program phase or 1/1574 lacks the doneness, browning or ProgId the app reads.
 - `stop_keeping_warm` needs message 20 shown. `steam_burst` needs what the app's steam burst
-  button needs: request 59 offered for a REST `ProgramID`, a manual steam burst (`NumberOfSteamBursts` readable, 1 to 3) in
-  a function 1/1585 and 1/1574 both show, the oven running or paused, and a burst left, or the
-  last one under way (`BitField` 16). Every value the app reads for the button must be there,
-  the three steam burst times and `BitField` among them, or the app shows none.
+  button needs: request 59 offered for a REST `ProgramID`, a manual steam burst
+  (`NumberOfSteamBursts` readable, 1 to 3) in a function 1/1585 and 1/1574 both show, the oven
+  running or paused, and a burst left, or the last one under way (`BitField` 16). Every value the
+  app reads for the button must be there, the three steam burst times and `BitField` among them,
+  or the app shows none.
 - A double oven's second cavity takes no action but `acknowledge(…, second_cavity: true)`.
 
-The app then waits until the oven shows the change; but for a selection and `continue_cooking`,
-the SDK returns once the oven accepts the write, and `program_context` or `notifications` show what follows. One app behaviour rests on
-that wait and is left out: the switch-off that answers queries 4, 5, 21 and 27 as they appear.
-None of these writes has been sent to a real oven: their bytes follow
+The app then waits until the oven shows the change; but for a selection, the SDK returns once the
+oven accepts the write, and `program_context` or `notifications` show what follows. One app
+behaviour rests on that wait and is left out: the switch-off that answers queries 4, 5, 21 and 27
+as they appear. None of these writes has been sent to a real oven: their bytes follow
 the app's code, and the reads have run against a real oven through the cloud.
 
 ## Dishwashers

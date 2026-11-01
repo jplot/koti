@@ -102,8 +102,8 @@ module Miele
           Objects::Oven::GlobalEnumPrgId.to_i(prog_id)
         end
 
-        # DetermineCookingLevel: a doneness the oven requires and lets write, else such a browning. It reads both
-        # with LeftOrThrow, so a missing one fails the action; conv.u1 wraps the step past 255 to 0.
+        # DetermineCookingLevel: a doneness the oven requires and lets write, else such a browning. LeftOrThrow
+        # fails the action on a missing doneness, or on a missing browning it goes on to read; conv.u1 wraps 256 to 0.
         #
         # @param context [Objects::Oven::GlobalPsContext] 1/1574
         # @return [Array(Integer, Integer), nil] the parameter's attribute and its value one step higher

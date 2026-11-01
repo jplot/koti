@@ -23,13 +23,16 @@ RSpec.describe Miele::Sdk::Oven do
   after { fake.stop }
 
   def program_context
+    microwave = { 1 => dop2_field(:u8, microwave_mask), 2 => dop2_field(:u8, microwave_bits) }
     parameters = { 13 => dop2_field(:struct, { 2 => dop2_field(:u64, 1_700_000_000) }),
-                   15 => dop2_field(:struct, { 2 => dop2_field(:u8, microwave_bits) }) }
+                   15 => dop2_field(:struct, microwave) }
     dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters),
                          7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
   end
 
   def microwave_bits = 0x7F
+
+  def microwave_mask = 9
 
   def device_prog_id = 13
 
@@ -117,6 +120,19 @@ RSpec.describe Miele::Sdk::Oven do
       expect { oven.target_temperature = 180 }.to raise_error(Miele::Sdk::ActionUnavailableError)
       expect(written).to be_empty
     end
+
+    it 'refuses a microwave power without remote control before looking at its bit' do
+      expect { oven.microwave_power = 3 }.to raise_error(Miele::Sdk::ActionUnavailableError, /remote control/)
+    end
+  end
+
+  context 'with a microwave power the oven does not make readable' do
+    def microwave_mask = 1
+
+    it 'refuses it, as the app then shows no microwave section', :aggregate_failures do
+      expect { oven.microwave_power = 0x10 }.to raise_error(Miele::Sdk::ActionUnavailableError, /microwave/)
+      expect(written).to be_empty
+    end
   end
 
   context 'with mobile start while the oven runs' do
@@ -158,6 +174,10 @@ RSpec.describe Miele::Sdk::Oven do
 
     it 'refuses an oven that speaks Dop1' do
       expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionUnavailableError, /Dop1/)
+    end
+
+    it 'refuses a microwave power on a Dop1 oven before looking at its bit' do
+      expect { oven.microwave_power = 3 }.to raise_error(Miele::Sdk::ActionUnavailableError, /Dop1/)
     end
   end
 

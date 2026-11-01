@@ -48,6 +48,10 @@ module Miele
 
         def require_dop2!: () -> void
 
+        def supported_powers: (Objects::Oven::GlobalPsContext context) -> Integer
+
+        def mask: (untyped value) -> Integer
+
         def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
 
         def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void

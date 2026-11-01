@@ -39,16 +39,19 @@ module Miele
         end
 
         # @param bit [Integer] one bit of the oven's supported microwave powers, such as 0x10 for 600 W
+        # @raise [ActionUnavailableError] see {#set_parameter}, or when the oven shows no microwave power
         # @raise [ArgumentError] for any other value
         # @api public
         def microwave_power=(bit)
+          require_dop2!
+          require_parameters_allowed!
           context = program_context
-          supported = context.context_para_ca&.mw_power&.supported_bits.to_i
+          supported = supported_powers(context)
           unless MICROWAVE_BITS.include?(bit) && supported.anybits?(bit)
             raise ArgumentError, "#{bit} is not one of the microwave power bits the oven supports (#{supported})"
           end
 
-          set_parameter(15, :u8, bit, context:)
+          write_parameter(selected_program(context), 15, :u8, bit)
         end
 
         # @param level [Integer]
@@ -143,6 +146,18 @@ module Miele
           return unless prog_id == 361 || started?(state, device)
 
           require!(state.mobile_start?, 'the oven takes parameters only by mobile start once a program has started')
+        end
+
+        # MicrowaveLevelRule gives the app no microwave section while MwPower is not readable.
+        #
+        # @param context [Objects::Oven::GlobalPsContext] 1/1574
+        # @return [Integer] MwPower's SupportedBits
+        # @raise [ActionUnavailableError]
+        def supported_powers(context)
+          power = context.context_para_ca&.mw_power
+          return power.supported_bits.to_i if power && mask(power).anybits?(8)
+
+          raise ActionUnavailableError, 'the oven shows no microwave power'
         end
 
         # @param context [Objects::Oven::GlobalPsContext] 1/1574

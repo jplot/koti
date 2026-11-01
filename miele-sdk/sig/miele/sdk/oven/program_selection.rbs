@@ -4,6 +4,8 @@ module Miele
       module ProgramSelection : Appliance
         NOW: Integer
 
+        MICROWAVE_BITS: Array[Integer]
+
         def target_temperature=: (Integer | Float celsius) -> void
 
         def core_target_temperature=: (Integer | Float celsius) -> void
@@ -12,7 +14,7 @@ module Miele
 
         def grill_level=: (Integer level) -> void
 
-        def microwave_power=: (Integer level) -> void
+        def microwave_power=: (Integer bit) -> void
 
         def browning=: (Integer level) -> void
 

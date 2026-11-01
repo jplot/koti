@@ -353,7 +353,9 @@ oven.acknowledge(:query, 4, option: 12)  # or query.id and one of query.ack_opti
 The other parameters are `core_target_temperature=`, `moisture=`, `grill_level=`,
 `microwave_power=`, `browning=`, `doneness=`, `steam_bursts=` and `steam_burst_times=` (up to three
 times in seconds), and the other requests `continue_cooking`, `steam_burst` and
-`stop_keeping_warm`.
+`stop_keeping_warm`. `microwave_power=` takes one bit, as the app's picker writes it: 0x01 to 0x40
+for 80 to 1000 W (steps 1 to 7 on an oven of `ContinentVariant` 2), among those set in
+`program_context.context_para_ca.mw_power.supported_bits`; any other value raises `ArgumentError`.
 
 Each of these actions makes the checks the app's rules make before it, and raises
 `Miele::Sdk::ActionUnavailableError` without sending anything when one fails:

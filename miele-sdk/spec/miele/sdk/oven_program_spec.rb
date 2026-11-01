@@ -23,10 +23,13 @@ RSpec.describe Miele::Sdk::Oven do
   after { fake.stop }
 
   def program_context
-    start_at = { 2 => dop2_field(:u64, 1_700_000_000) }
-    dop2_leaf(1, 1574, { 4 => dop2_field(:struct, { 13 => dop2_field(:struct, start_at) }),
+    parameters = { 13 => dop2_field(:struct, { 2 => dop2_field(:u64, 1_700_000_000) }),
+                   15 => dop2_field(:struct, { 2 => dop2_field(:u8, microwave_bits) }) }
+    dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters),
                          7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
   end
+
+  def microwave_bits = 0x7F
 
   def device_prog_id = 13
 
@@ -60,6 +63,26 @@ RSpec.describe Miele::Sdk::Oven do
                                        parameter(30, :u8, 2), parameter(31, :u8, 1), parameter(18, :u8, 2),
                                        parameter(8, :u16, 60), parameter(9, :u16, 120),
                                        parameter(14, :u64, 1_700_003_600)])
+  end
+
+  it 'writes a microwave power as one bit of those the oven supports, as the app picks it' do
+    oven.microwave_power = 0x10
+    expect(written.map(&:last)).to eq([parameter(15, :u8, 16)])
+  end
+
+  it 'refuses a microwave power that is not a single bit', :aggregate_failures do
+    expect { oven.microwave_power = 3 }.to raise_error(ArgumentError)
+    expect { oven.microwave_power = 600 }.to raise_error(ArgumentError)
+    expect(written).to be_empty
+  end
+
+  context 'with an oven supporting the four lowest microwave powers' do
+    def microwave_bits = 0x0F
+
+    it 'refuses a power bit the oven does not support', :aggregate_failures do
+      expect { oven.microwave_power = 0x10 }.to raise_error(ArgumentError)
+      expect(written).to be_empty
+    end
   end
 
   it 'sends start at now as all ones' do

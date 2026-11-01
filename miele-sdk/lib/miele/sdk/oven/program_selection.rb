@@ -8,7 +8,10 @@ module Miele
       module ProgramSelection
         # +StartAt+ meaning now.
         NOW = 0xFFFF_FFFF_FFFF_FFFF
-        private_constant :NOW
+        # MicrowavePowers (80 to 1000 W) and MicrowaveSteps (1 to 7): the app's picker offers those of them set in
+        # MwPower's SupportedBits, and writes the one picked.
+        MICROWAVE_BITS = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40].freeze
+        private_constant :NOW, :MICROWAVE_BITS
 
         # @param celsius [Numeric]
         # @raise [ActionUnavailableError] see {#set_parameter}
@@ -35,10 +38,17 @@ module Miele
           set_parameter(1, :u8, level)
         end
 
-        # @param level [Integer]
+        # @param bit [Integer] one bit of the oven's supported microwave powers, such as 0x10 for 600 W
+        # @raise [ArgumentError] for any other value
         # @api public
-        def microwave_power=(level)
-          set_parameter(15, :u8, level)
+        def microwave_power=(bit)
+          context = program_context
+          supported = context.context_para_ca&.mw_power&.supported_bits.to_i
+          unless MICROWAVE_BITS.include?(bit) && supported.anybits?(bit)
+            raise ArgumentError, "#{bit} is not one of the microwave power bits the oven supports (#{supported})"
+          end
+
+          set_parameter(15, :u8, bit, context:)
         end
 
         # @param level [Integer]

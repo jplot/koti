@@ -36,8 +36,7 @@ RSpec.describe Miele::Sdk::Oven do
   def setters
     { target_temperature: [180, 6, :u16], core_target_temperature: [60, 7, :u16], moisture: [3, 2, :u8],
       grill_level: [2, 1, :u8], microwave_power: [0x10, 15, :u8], browning: [2, 30, :u8], doneness: [1, 31, :u8],
-      steam_bursts: [2, 18, :u8], duration: [1_800, 12, :u32], start_at: [:now, 13, :u64],
-      end_at: [Time.at(1_700_003_600), 14, :u64] }
+      duration: [1_800, 12, :u32], start_at: [:now, 13, :u64], end_at: [Time.at(1_700_003_600), 14, :u64] }
   end
 
   def written = fake.requests.select { it.verb == 'PUT' }.map { Miele::Sdk::Dop2.decode(it.body).fields[2].value }
@@ -51,7 +50,7 @@ RSpec.describe Miele::Sdk::Oven do
   it 'writes every parameter whose section the app shows' do
     setters.each { |name, (value)| oven.public_send(:"#{name}=", value) }
     oven.set_options(rapid_heating: true)
-    expect(written).to eq([6, 7, 2, 1, 15, 30, 31, 18, 12, 13, 14, 21])
+    expect(written).to eq([6, 7, 2, 1, 15, 30, 31, 12, 13, 14, 21])
   end
 
   it 'refuses a parameter whose section the app removes while its value is not readable', :aggregate_failures do
@@ -131,13 +130,5 @@ RSpec.describe Miele::Sdk::Oven do
     serve(type: 4, remote: [15, 0, 0])
     oven.set_options(keep_warm: true)
     expect(written).to eq([27])
-  end
-
-  it 'refuses steam bursts whose type the app shows no cell for', :aggregate_failures do
-    [0, 8].each do |count|
-      serve(parameters: { 18 => shown_parameter(:u8, count) })
-      refused(:steam_bursts)
-    end
-    expect(written).to be_empty
   end
 end

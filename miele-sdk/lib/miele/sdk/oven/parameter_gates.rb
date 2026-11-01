@@ -9,8 +9,7 @@ module Miele
       module ParameterGates
         MEMBERS = { temperature: :temperature, core_temperature: :core_temperature, moisture: :moisture,
                     grill_level: :grill_level, microwave_power: :mw_power, browning: :browning,
-                    doneness: :doneness, steam_bursts: :number_of_steam_bursts, duration: :duration,
-                    start_at: :start_at, end_at: :end_at }.freeze
+                    doneness: :doneness, duration: :duration, start_at: :start_at, end_at: :end_at }.freeze
         # BrowningLevelRule and DonenessLevelRule alone ignore ShouldHideProgramParameters.
         SHOWN_WITH_ANY_PROGRAM = %i[browning doneness].freeze
         OPTIONS = { 21 => :use_rapid_heating, 24 => :use_pre_heating, 25 => :use_crisp_function,
@@ -102,8 +101,7 @@ module Miele
           rule_shows?(name, value, parameters, %i[running paused].include?(oven_state(state, device, offered(device))))
         end
 
-        # TargetTemperatureRule's IsInvalidTargetTemperature, and SteamBurstsRule with the steam burst type cell
-        # (SteamBurstType 1 to 7).
+        # TargetTemperatureRule's IsInvalidTargetTemperature.
         #
         # @param name [Symbol]
         # @param value [Object] the parameter's +GLOBAL_GenericParameterValue+
@@ -113,7 +111,6 @@ module Miele
         def rule_shows?(name, value, parameters, running)
           case name
           when :temperature then value.current_value.to_i.positive?
-          when :steam_bursts then (1..7).cover?(value.current_value)
           when :duration, :start_at, :end_at then time_shown?(name, value, parameters, running)
           else true
           end

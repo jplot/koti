@@ -47,22 +47,6 @@ module Miele
           set_parameter(:doneness, 31, :u8, level)
         end
 
-        # @param count [Integer]
-        # @api public
-        def steam_bursts=(count)
-          set_parameter(:steam_bursts, 18, :u8, count)
-        end
-
-        # The app 4.19.0 never enables its steam burst timer cells: UpdateSteamBurstPicker hands them
-        # isUserAllowedToModifyFunctionParameters false.
-        #
-        # @param _seconds [Array<Integer>] up to three times, in seconds
-        # @raise [ActionUnavailableError] always
-        # @api public
-        def steam_burst_times=(_seconds)
-          raise ActionUnavailableError, 'the app never lets a steam burst time be set'
-        end
-
         # @param time [Time, :now]
         # @api public
         def start_at=(time)

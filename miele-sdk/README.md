@@ -351,10 +351,9 @@ oven.acknowledge(:query, 4, option: 12)  # or query.id and one of query.ack_opti
 ```
 
 The other parameters are `core_target_temperature=`, `moisture=`, `grill_level=`,
-`microwave_power=`, `browning=`, `doneness=` and `steam_bursts=`, and the other requests
-`continue_cooking`, `steam_burst` and `stop_keeping_warm`. `steam_burst_times=` always raises
-`Miele::Sdk::ActionUnavailableError`: the app 4.19.0 never enables its steam burst timer cells, so it
-never writes a steam burst time. `microwave_power=` takes one bit, as the app's picker writes it: 0x01 to 0x40
+`microwave_power=`, `browning=` and `doneness=`, and the other requests `continue_cooking`,
+`steam_burst` and `stop_keeping_warm`. The SDK sets no steam burst count or time: the app 4.19.0
+never enables its cells for them, so it never writes either. `microwave_power=` takes one bit, as the app's picker writes it: 0x01 to 0x40
 for 80 to 1000 W (steps 1 to 7 on an oven of `ContinentVariant` 2), among those set in
 `program_context.context_para_ca.mw_power.supported_bits`; any other value raises `ArgumentError`.
 An `mw_power` that is not readable raises `Miele::Sdk::ActionUnavailableError`, the app then
@@ -380,7 +379,7 @@ Each of these actions makes the checks the app's rules make before it, and raise
   It also needs the section the app shows for it (its Rules.ProgramParameters rule): a value
   readable on 1/1574 (request mask 8); for all but browning and doneness, a function on 1/1585
   (program type 2, 3, 4, 5, 7, 8, 38 or 50) that 1/1574 shows too (ShouldHideProgramParameters);
-  a current target temperature above zero; steam bursts of a type 1 to 7; no duration or start
+  a current target temperature above zero; no duration or start
   time while the oven runs or pauses with a duration set; and no start or end time while a
   readable duration is unset. Options need that function and each option readable. The cell the
   app enables needs a writable value (request mask 1), and mobile start too for browning and

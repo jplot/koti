@@ -45,7 +45,7 @@ RSpec.describe Miele::Sdk::Oven do
 
   def hidden_parameters
     { target_temperature: 180, core_target_temperature: 60, moisture: 3, grill_level: 2, microwave_power: 0x10,
-      steam_bursts: 2, duration: 1800, start_at: :now, end_at: Time.at(1_700_003_600) }
+      duration: 1800, start_at: :now, end_at: Time.at(1_700_003_600) }
   end
 
   def written = fake.requests.select { it.verb == 'PUT' }.map { [it.path, it.body.unpack1('H*')] }
@@ -93,10 +93,10 @@ RSpec.describe Miele::Sdk::Oven do
 
   it 'writes each parameter under the id and wire type the app gives it' do
     parameters = { core_target_temperature: 60, moisture: 3, microwave_power: 4, browning: 2, doneness: 1,
-                   steam_bursts: 2, end_at: Time.at(1_700_003_600) }
+                   end_at: Time.at(1_700_003_600) }
     parameters.each { |name, value| oven.public_send(:"#{name}=", value) }
     expect(written.map(&:last)).to eq([parameter(7, :u16, 6000), parameter(2, :u8, 3), parameter(15, :u8, 4),
-                                       parameter(30, :u8, 2), parameter(31, :u8, 1), parameter(18, :u8, 2),
+                                       parameter(30, :u8, 2), parameter(31, :u8, 1),
                                        parameter(14, :u64, 1_700_003_600)])
   end
 
@@ -135,9 +135,8 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([parameter(13, :u64, 1_700_000_000), parameter(12, :u32, 0)])
   end
 
-  it 'refuses any steam burst time, the app never enabling its timer cells', :aggregate_failures do
-    expect { oven.steam_burst_times = [60] }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst time/)
-    expect(written).to be_empty
+  it 'has no steam burst count or time to set, the app never enabling those cells' do
+    expect(%i[steam_bursts= steam_burst_times=].select { oven.respond_to?(it) }).to be_empty
   end
 
   it 'sets the options one by one, keep warm last' do

@@ -16,10 +16,6 @@ module Miele
 
         def doneness=: (Integer level) -> void
 
-        def steam_bursts=: (Integer count) -> void
-
-        def steam_burst_times=: (Array[Integer] seconds) -> void
-
         def start_at=: (Time | :now time) -> void
 
         def end_at=: (Time time) -> void

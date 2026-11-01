@@ -65,7 +65,7 @@ module Miele
           put('Cooling', 'PresentationLight', Value: on ? 1 : 2)
         end
 
-        # The app sends 0 for a zone switched off, else its seven-option slider's index plus 1.
+        # The app's seven-option slider sends its index plus 1.
         #
         # @param zone [Zone] one of {#zones}
         # @param value [Integer] 0 switches the zone's light off, 1 to 7 sets its level

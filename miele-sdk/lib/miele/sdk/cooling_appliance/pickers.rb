@@ -66,9 +66,7 @@ module Miele
         #
         # @param key [String] +AmbientLightMode+ or +Light+ in +Cooling+
         # @return [Array<Integer>]
-        def ambient_light_numbers(key)
-          (1..(key == 'AmbientLightMode' ? picker(cooling[key]).size : 7)).to_a
-        end
+        def ambient_light_numbers(key) = (1..(key == 'AmbientLightMode' ? picker(cooling[key]).size : 7)).to_a
 
         # .NET's remainder by a +Step+ of 0 throws, so such a picker offers nothing.
         #
@@ -92,7 +90,7 @@ module Miele
         # @param zone [Zone]
         # @param state [State]
         # @return [Integer] the zone's +TargetTemperature+ in whole °C, rounded half away from zero as the app shows it
-        def opcode_target(zone, state) = state.raw['TargetTemperature'].to_a[zone.number - 1].to_i.fdiv(100).round
+        def opcode_target(zone, state) = target_temp(zone, state)['Value'].to_i.fdiv(100).round
 
         # GetWineCoolingZoneSubType gives no subtype past the first zone of a unit of four zones or more.
         #

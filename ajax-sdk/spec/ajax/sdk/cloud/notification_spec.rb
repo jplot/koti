@@ -38,6 +38,12 @@ RSpec.describe Ajax::Sdk::Cloud::Notification do
     expect(described_class.from(raw).image_resource).to be_nil
   end
 
+  it 'gives no photos when two entries carry them, as the app reads a single one' do
+    photos = { hub_image_resource: { images: [{ status: :IMAGE_STATUS_READY }] } }
+
+    expect(described_class.from({ **raw, additional_data: [photos, photos] }).image_resource).to be_nil
+  end
+
   it 'gives the values the cloud leaves out at their default' do
     expect(described_class.from({ id: 'n3' })).to have_attributes(
       time: nil, kind: :unknown, event: nil, transition: nil, source: nil, folder: :unspecified,

@@ -319,17 +319,28 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         .to eq([%i[set_state_commands], { space_locator: { space_id: 'space-1' } }])
     end
 
-    it 'asks a MotionCam for photos with the family the app names it by', :aggregate_failures do
-      cams = %i[motion_cam_phod superior_motion_cam_outdoor_hm_phod motion_cam_phod_fibra]
-      cams.each { client.take_photo(device(it)) }
+    def photo_families
+      { MOTION_CAM: %i[motion_cam motion_cam_phod motion_cam_s_phod motion_cam_superior_phod motion_cam_s_phod_am
+                       motion_cam_g3],
+        MOTION_CAM_OUTDOOR: %i[motion_cam_outdoor motion_cam_outdoor_phod motion_cam_outdoor_two_four_phod
+                               superior_motion_cam_outdoor_phod superior_motion_cam_outdoor_hm_phod
+                               curtain_cam_outdoor_hm_phod],
+        MOTION_CAM_FIBRA_BASE: %i[motion_cam_phod_fibra],
+        NO_DEVICE_TYPE_INFO: %i[motion_cam_fibra_base motion_cam_fibra] }
+    end
+
+    it 'asks each MotionCam the app knows for photos with the family it names it by', :aggregate_failures do
+      photo_families.values.flatten.each { client.take_photo(device(it)) }
+      expected = photo_families.flat_map { |family, kinds| [family] * kinds.size }
 
       expect(sent.map(&:first).uniq).to eq(['PhotoOnDemandService/capturePhoto'])
-      expect(sent.map { it.last[:device_type] }).to eq(%i[MOTION_CAM MOTION_CAM_OUTDOOR MOTION_CAM_FIBRA_BASE])
+      expect(sent.map { it.last[:device_type] }).to eq(expected)
       expect(sent.map { it.last.except(:device_type) }).to all(eq(target))
     end
 
-    it 'refuses a photo from a device that takes none, sending nothing', :aggregate_failures do
-      expect { client.take_photo(device(:motion_cam_fibra)) }.to raise_error(ArgumentError, /motion_cam_fibra/)
+    it 'refuses a photo from a device the app has no family for, sending nothing', :aggregate_failures do
+      expect { client.take_photo(device(:motion_cam_video_base)) }.to raise_error(ArgumentError, /video_base/)
+      expect { client.take_photo(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
       expect(sent).to be_empty
     end
 

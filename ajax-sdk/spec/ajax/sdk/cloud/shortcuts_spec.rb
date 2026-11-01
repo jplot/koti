@@ -24,6 +24,13 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
 
   def target = { hub_id: '0000ABCD', device_id: '0000BEEF' }
 
+  def camera
+    Ajax::Sdk::Cloud::VideoChannel.new(space_id: 'space-1', video_edge_id: '0000ABCD', channel_id: 'ch-1', ptz: false,
+                                       sub_stream: true, sound: true, raw: nil)
+  end
+
+  def camera_target = { space_id: 'space-1', video_edge_id: '0000ABCD', channel_id: 'ch-1' }
+
   def gw = Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service
 
   def fire = device(:fire_protect_two, mute_button(:MUTE_COMMAND_OWN))
@@ -340,6 +347,47 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       expect(sent.last).to eq(['StreamVideoPlayerService/execute', { space_id: 'space-1' }])
     end
 
+    def calendar
+      start = Time.utc(2026, 10, 1).to_i
+      tz_map = [{ day: { seconds: start + 86_400 }, offsets: [0] },
+                { day: { seconds: start + (3 * 86_400) }, offsets: [0, -3, -2] }]
+      service = Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service
+      service::GetChannelCalendar::GetChannelCalendarResponse::Success
+        .from({ calendar: { start_day: { seconds: start }, days: "\x01\x01\x00\x01".b, tz_map: } })
+    end
+
+    it 'gives the days with recordings as the app reads its calendar', :aggregate_failures do
+      replying(calendar)
+
+      expect(client.archive_days(camera, source: :device)).to eq([Date.new(2026, 10, 1), Date.new(2026, 10, 2),
+                                                                  Date.new(2026, 10, 4)])
+      expect(sent.last).to eq(['GetChannelCalendarService/execute',
+                               { **camera_target, source_type: :SOURCE_TYPE_VIDEO_EDGE_ARCHIVE }])
+    end
+
+    it 'lists the cloud fragments of a time range, asked in whole seconds', :aggregate_failures do
+      info = Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::FindAllCloudArchiveVideoFragmentsInfo
+      fragment = { fragment_id: 42, timestamp: { seconds: 150 }, duration: { seconds: 10 } }
+      replying(info::FindAllCloudArchiveVideoFragmentsInfoResponse::Success.from({ fragments_info: [fragment] }))
+
+      expect(client.cloud_fragments(camera, during: Time.at(100.5)..Time.at(200.5)))
+        .to eq([Ajax::Sdk::Cloud::Fragment.new(id: 42, start: Time.at(150, in: 'UTC'), duration: 10.0)])
+      expect(sent.last.last).to eq({ **camera_target, stream_type: :ST_MAIN,
+                                                      timestamp_range: { min_value: { seconds: 100, nanos: 0 },
+                                                                         max_value: { seconds: 200, nanos: 0 } } })
+    end
+
+    it 'asks for an archive export, whose file comes as a notification', :aggregate_failures do
+      export = Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Video::Videoedge::Archive::ExportArchiveResponse::Success
+      replying(export.from({ export_id: 'e1' }))
+
+      expect(client.export_archive(camera, [Time.at(100)..Time.at(160)], audio: true)).to eq('e1')
+      expect(sent.last.last).to include(
+        space_locator: { space_id: 'space-1' }, video_edge_id: '0000ABCD', channel_id: 'ch-1', stream_type: :ST_MAIN,
+        with_audio: true, with_figures: false, video_source_type: :VIDEO_SOURCE_TYPE_CLOUD_ARCHIVE
+      )
+    end
+
     def quality_answer
       values = { values_temperature: { 3600 => { value_y: 21.5 } },
                  values_humidity: { 3600 => { value_y_range: { min_value_y: 40.0, max_value_y: 45.0 } } } }
@@ -367,13 +415,15 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       klass.encode(klass.new(message))
     end
 
+    def export_args = [camera, [Time.at(100)..Time.at(160)]]
+
     def commands
       { turn_on: [device(:relay)], turn_off: [device(:relay)],
         set_brightness: [device(:light_switch_dimmer, gang(1)), 5], open_shutter: [device(:roller_shutter_ls)],
         close_shutter: [device(:roller_shutter_ls)], stop_shutter: [device(:roller_shutter_ls)],
         move_shutter: [device(:roller_shutter_ls), 5], bypass: [device(:door_protect)],
         unbypass: [device(:door_protect)], arm_group: %w[space-1 g1], disarm_group: %w[space-1 g1],
-        set_security_mode: ['space-1', :regular],
+        set_security_mode: ['space-1', :regular], export_archive: export_args,
         panic: ['space-1'], lock: [device(:smart_lock)], unlock: [device(:smart_lock)],
         unlatch: [device(:smart_lock, hub: false)], mute: [fire], mute_fire_detectors: ['0000ABCD'],
         reset_fire_alarm: ['0000ABCD'], rename: [device(:relay), 'x'], update_device_settings: [device(:relay)],

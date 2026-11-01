@@ -10,6 +10,7 @@ require_relative 'shortcuts'
 require_relative 'feed'
 require_relative 'exchange'
 require_relative 'live_video'
+require_relative 'cloud_archive'
 
 module Ajax
   module Sdk

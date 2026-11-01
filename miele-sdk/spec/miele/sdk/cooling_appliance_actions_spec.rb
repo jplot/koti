@@ -44,8 +44,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
   def freezer = fridge.zones.find { it.number == 1 }
 
   it 'sets a zone target in hundredths of a degree, on its number' do
+    fridge.set_target(freezer, -20)
+    expect(written).to eq([['PUT', 'Cooling/1/TargetTemp', { 'Value' => -2000 }]])
+  end
+
+  it "sends nothing for the zone's current target, as the app does" do
     fridge.set_target(freezer, -18)
-    expect(written).to eq([['PUT', 'Cooling/1/TargetTemp', { 'Value' => -1800 }]])
+    expect(written).to be_empty
   end
 
   it "refuses a target off the zone's Min to Max by Step, as the app's picker", :aggregate_failures do
@@ -148,10 +153,10 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
   it 'shows the zones in Sabbath mode while super cooling or with the door open, as the app does' do
     resources['Cooling']['Sabbath'] = { 'Value' => 1 }
     resources['State'] = { 'Status' => 14 }
-    fridge.set_target(freezer, -18)
+    fridge.set_target(freezer, -16)
     resources['State'] = { 'Status' => 5, 'SignalDoor' => true, 'SignalFailure' => false }
     fridge.set_target(freezer, -20)
-    expect(written.map(&:last)).to eq([{ 'Value' => -1800 }, { 'Value' => -2000 }])
+    expect(written.map(&:last)).to eq([{ 'Value' => -1600 }, { 'Value' => -2000 }])
   end
 
   it 'sets a mode by its name in the Cooling API, only when the appliance lists values for it', :aggregate_failures do
@@ -335,8 +340,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     end
 
     it "sets a target through Oc85 in whole °C, as 16-bit two's complement" do
+      fridge.set_target(fridge.zones.last, -20)
+      expect(written).to eq([['POST', 'Oc85/', { 'Request' => '10000617000200FFEC' }]])
+    end
+
+    it 'sends nothing for the current target, as the app does' do
       fridge.set_target(fridge.zones.last, -18)
-      expect(written).to eq([['POST', 'Oc85/', { 'Request' => '10000617000200FFEE' }]])
+      expect(written).to be_empty
     end
 
     it 'switches super freezing with ProcessAction 4' do

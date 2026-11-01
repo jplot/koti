@@ -11,7 +11,8 @@ module Miele
         HUMIDITY = { low: 1, medium: 2, high: 3 }.freeze
         private_constant :SUPER_MODE_ACTIONS, :HUMIDITY
 
-        # An Opcode appliance takes its target through +Oc85+, as 16-bit two's complement of whole °C.
+        # An Opcode appliance takes its target through +Oc85+, as 16-bit two's complement of whole °C. As the app's
+        # ChangeTargetTemperatureAsync, nothing goes out for the zone's current target.
         #
         # @param zone [Zone] one of {#zones}
         # @param degrees [Integer] whole degrees in {#temperature_unit}
@@ -25,7 +26,7 @@ module Miele
 
           state = self.state
           require_zones_shown!(state)
-          require_offered!(degrees, target_choices(zone, state))
+          return unless new_target?(zone, degrees, state)
           return put('Cooling', "#{zone.number}/TargetTemp", Value: degrees * 100) unless opcode?
 
           request = "10000617000#{zone.number}00#{format('%04X', degrees & 0xFFFF)}"

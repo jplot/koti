@@ -24,13 +24,34 @@ module Miele
         end
 
         # @param zone [Zone]
+        # @param degrees [Integer]
         # @param state [State]
+        # @return [Boolean] false for the zone's current target
+        # @raise [ArgumentError] for a value the app's picker does not offer
+        def new_target?(zone, degrees, state)
+          target = target_temp(zone, state)
+          require_offered!(degrees, target_choices(zone, state, target))
+          degrees * 100 != target['Value']
+        end
+
+        # @param zone [Zone]
+        # @param state [State]
+        # @return [Hash{String=>Object}] the zone's +TargetTemp+, its +TargetTemperature+ in +State+ on Opcode
+        def target_temp(zone, state)
+          return { 'Value' => state.raw['TargetTemperature'].to_a[zone.number - 1] } if opcode?
+
+          device("Cooling/#{zone.number}")['TargetTemp'].to_h
+        end
+
+        # @param zone [Zone]
+        # @param state [State]
+        # @param target [Hash{String=>Object}] its +TargetTemp+
         # @return [Array<Integer>] the whole degrees the app's picker offers, rounded half away from zero as it
         #   shows them
-        def target_choices(zone, state)
+        def target_choices(zone, state, target)
           return opcode_targets(zone, state) if opcode?
 
-          api_targets(device("Cooling/#{zone.number}")['TargetTemp'].to_h).map { it.fdiv(100).round }
+          api_targets(target).map { it.fdiv(100).round }
         end
 
         # @param target [Hash{String=>Object}] a zone's +TargetTemp+

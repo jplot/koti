@@ -45,7 +45,7 @@ module Miele
 
         def require_offered!: (Integer value, Array[Integer] choices) -> void
 
-        def target_choices: (Zone zone, State state) -> Array[Integer]
+        def new_target?: (Zone zone, Integer degrees, State state) -> bool
 
         def picker: (Hash[String, untyped]? setting) -> Array[Integer]
 

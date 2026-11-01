@@ -57,6 +57,10 @@ RSpec.describe Miele::Sdk::Appliance do
     expect(fake.requests).to be_empty
   end
 
+  it 'needs the fab of an appliance reached through the cloud, which names appliances by it' do
+    expect { described_class.new('127.0.0.1', cloud: Miele::Sdk.cloud) }.to raise_error(ArgumentError, /fab/)
+  end
+
   it 'names the module host when Dop1 goes through the cloud' do
     by_cloud.dop1('8E0101000000')
     expect(cloud.requests.find { it.path.end_with?('/DOP/') }.headers['host']).to eq('Miele-0000000000000000.local')

@@ -95,10 +95,16 @@ RSpec.describe Miele::Sdk::Hood do
     expect(excluded.auto_refresh_supported?).to be(false)
   end
 
-  it 'reads ColorFlow, nil when the hood answers 404', :aggregate_failures do
-    expect(hood.color_flow).to be_nil
+  it 'reads ColorFlow, raising a local 404, which a module that does not serve it answers too', :aggregate_failures do
+    expect { hood.color_flow }.to raise_error(Miele::Sdk::NotFoundError)
     resources['ColorFlow'] = [200, {}, '{"active":true,"intervalDurationSeconds":20}']
     expect(hood.color_flow).to eq(described_class::ColorFlow.new(active: true, interval: 20))
+  end
+
+  it 'reads a 404 through the cloud as no ColorFlow, as the app does' do
+    cloud = instance_double(Miele::Sdk::Cloud::Channel)
+    allow(cloud).to receive(:request).and_raise(Miele::Sdk::NotFoundError.new(404))
+    expect(described_class.new('127.0.0.1', ident:, fab:, cloud:).color_flow).to be_nil
   end
 
   it 'reads an interval the app does not know as 10 seconds, as its mapper does' do

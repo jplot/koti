@@ -82,6 +82,8 @@ module Miele
 
       def identity: () -> Schema::DeviceIdentification
 
+      def through_cloud?: () -> bool
+
       def module_host: () -> String?
 
       def device: (String resource) -> resource

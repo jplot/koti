@@ -144,13 +144,13 @@ RSpec.describe Miele::Sdk, :live do
     end
 
     it 'reads the oven DeviceContext as a typed value, through the cloud' do
-      oven = appliances.find { it.device_type.start_with?('oven') } or skip 'no oven among MIELE_HOSTS'
+      oven = described_class.appliances(through_cloud: true).grep(Miele::Sdk::Oven).first or skip 'no oven'
       expect(oven.object(Miele::Sdk::Objects::Oven::GlobalDeviceContext))
         .to be_a(Miele::Sdk::Objects::Oven::GlobalDeviceContext)
     end
 
     it 'gives the oven its family class and reads it as the app does', :aggregate_failures do
-      oven = described_class.appliances.find { it.is_a?(Miele::Sdk::Oven) } or skip 'no oven in this account'
+      oven = described_class.appliances(through_cloud: true).grep(Miele::Sdk::Oven).first or skip 'no oven'
       objects = Miele::Sdk::Objects::Oven
       expect([oven.context, oven.program_context, oven.notifications])
         .to match([an_instance_of(objects::GlobalDeviceContext), an_instance_of(objects::GlobalPsContext),
@@ -159,7 +159,7 @@ RSpec.describe Miele::Sdk, :live do
     end
 
     it "reads the hood's ColorFlow and Con@ctivity Plus, nil where it has none" do
-      hood = appliances.find { it.is_a?(Miele::Sdk::Hood) } or skip 'no hood among MIELE_HOSTS'
+      hood = described_class.appliances(through_cloud: true).grep(Miele::Sdk::Hood).first or skip 'no hood'
       expect([hood.color_flow, hood.connectivity_plus]).to all(be_nil.or(be_a(Data)))
     end
 
@@ -176,7 +176,7 @@ RSpec.describe Miele::Sdk, :live do
        :aggregate_failures do
       sockets = websocket_connections
       events = []
-      expect { Timeout.timeout(20) { described_class.events { events << it } } }.to raise_error(Timeout::Error)
+      expect { Timeout.timeout(20) { described_class.events(cloud:) { events << it } } }.to raise_error(Timeout::Error)
       expect(events.select { it.resource == '/State/' }.map(&:fab)).to include(*cloud.devices.map(&:fab))
       expect(sockets).to contain_exactly(be_closed)
     end

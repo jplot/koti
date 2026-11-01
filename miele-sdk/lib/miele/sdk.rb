@@ -113,10 +113,9 @@ module Miele
     def self.discover(timeout: 4, address: '224.0.0.251', port: 5353) = Discovery.discover(timeout:, address:, port:)
 
     # @param host [String] address or +.local+ name of the appliance
-    # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, such as {.cloud}; locally without one
     # @return [Appliance] an instance of its family's class, such as an {Oven}
     # @api public
-    def self.appliance(host, cloud: nil) = Appliance.for(host, cloud:)
+    def self.appliance(host) = Appliance.for(host)
 
     # @param through_cloud [Boolean] whether to reach them through the account's cloud rather than locally, by the
     #   name of their module

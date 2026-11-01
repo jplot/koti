@@ -30,7 +30,10 @@ module Miele
       # @param ident [Schema::DeviceIdentification, nil] its identity, which gives its type and protocol without a read
       # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, as the app does once it is paired;
       #   without one, every request goes to the appliance itself
+      # @raise [ArgumentError] with a cloud but no fab, which the cloud names appliances by
       def initialize(host, sleeper: method(:sleep), fab: nil, ident: nil, cloud: nil)
+        raise ArgumentError, 'an appliance reached through the cloud needs its fab' if cloud && !fab
+
         @host = host
         @identity = ident
         @sleeper = sleeper
@@ -185,6 +188,9 @@ module Miele
 
       # @return [Schema::DeviceIdentification]
       def identity = @identity ||= ident
+
+      # @return [Boolean]
+      def through_cloud? = !@cloud.nil?
 
       # @return [String, nil] the mDNS name of its Wi-Fi module, which the cloud routes Dop1 by
       def module_host = @module_host ||= @cloud&.devices&.find { it.fab == fab }&.host

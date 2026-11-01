@@ -44,7 +44,7 @@ module Miele
 
         def cooling: () -> Hash[String, untyped]
 
-        def modes: () -> Hash[Symbol, Mode]
+        def modes: (?State state) -> Hash[Symbol, Mode]
       end
     end
   end

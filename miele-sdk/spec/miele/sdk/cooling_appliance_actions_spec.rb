@@ -100,6 +100,12 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect(written.last).to eq(['PUT', 'Cooling/1/SuperMode', { 'Value' => 1, 'SetValues' => [1, 2] }])
   end
 
+  it 'checks the zones against a single read of State' do
+    zone = freezer
+    reads = -> { fake.requests.count { it.verb == 'GET' && it.path.end_with?('/State') } }
+    expect { fridge.set_fan(zone, true) }.to change(reads, :call).by(1)
+  end
+
   it 'refuses every zone control while off with Status 10, which the app reads as off', :aggregate_failures do
     resources['State'] = { 'Status' => 10 }
     expect { fridge.set_target(freezer, -18) }.to raise_error(Miele::Sdk::ActionUnavailableError)

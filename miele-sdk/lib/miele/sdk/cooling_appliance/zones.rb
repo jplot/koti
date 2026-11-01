@@ -48,7 +48,9 @@ module Miele
         #   without a door signal
         def holiday_banner?(state)
           door = state.raw['SignalDoor'] == true && !state.raw['SignalFailure'].nil?
-          [2, 5, 13].include?(state.raw['Status']) && !door && modes.values_at(:holiday, :sabbath).any? { it&.on }
+          return false if door || ![2, 5, 13].include?(state.raw['Status'])
+
+          modes(state).values_at(:holiday, :sabbath).any? { it&.on }
         end
 
         # @return [Array<Zone>]

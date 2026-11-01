@@ -39,7 +39,7 @@ module Miele
 
       def temperature_unit: () -> Symbol?
 
-      def modes: () -> Hash[Symbol, Mode]
+      def modes: (?State state) -> Hash[Symbol, Mode]
 
       def alarms: () -> Array[Symbol]
 

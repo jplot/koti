@@ -63,10 +63,11 @@ module Miele
         cooling.dig('TempUnit', 'Value') == 2 ? :fahrenheit : :celsius
       end
 
+      # @param state [State]
       # @return [Hash{Symbol=>Mode}] the modes the appliance lists, none while off or on Opcode
       # @api public
-      def modes
-        listed = cooling_api? && on? ? cooling : {} #: Hash[String, untyped]
+      def modes(state = self.state)
+        listed = cooling_api? && on?(state) ? cooling : {} #: Hash[String, untyped]
         MODES.filter_map { |name, key| [name, mode(listed[key])] if [1, 2].include?(listed.dig(key, 'Value')) }.to_h
       end
 

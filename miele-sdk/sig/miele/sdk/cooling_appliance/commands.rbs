@@ -57,7 +57,7 @@ module Miele
 
         def opcode?: () -> bool
 
-        def modes: () -> Hash[Symbol, Mode]
+        def modes: (?State state) -> Hash[Symbol, Mode]
 
         def ice_maker?: () -> bool
 

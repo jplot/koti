@@ -6,8 +6,8 @@ module Hue
 
     def self.pair: (?app_name: String, ?instance_name: String) -> Pairing::Credentials
 
-    def self.events: (?last_event_id: String?) { (Event) -> void } -> void
-                   | (?last_event_id: String?) -> Enumerator::Lazy[Event, void]
+    def self.events: () { (Event) -> void } -> void
+                   | () -> Enumerator::Lazy[Event, void]
 
     def self.resource: (String type, ?nil id) -> Models::Base
                      | (String type, String id) -> Models::Base::Instance

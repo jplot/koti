@@ -68,8 +68,8 @@ module Hue
         end
       end
 
-      # Reads the event stream of the bridge once, to its end. It keeps the id of the last message read: a stream
-      # opened again with it gets the events sent meanwhile, as the protocol's +Last-Event-ID+ asks.
+      # Reads the event stream of the bridge once, to its end. It keeps the id of the last message read and sends it
+      # back as +Last-Event-ID+, which the bridge answers with the events it sent meanwhile first.
       class Stream
         PATH = '/eventstream/clip/v2'
         private_constant :PATH
@@ -91,15 +91,16 @@ module Hue
 
         # @param last_event_id [String, nil] the {#last_event_id} of an earlier stream, to resume from
         # @api public
-        def initialize(last_event_id: nil)
-          @last_id = last_event_id
-        end
+        def initialize(last_event_id: nil) = @last_id = last_event_id
 
-        # @return [String, nil] the id of the last message read, or the one given
+        # A message the block leaves part-way keeps the id before it, so a stream resumed from that id yields it again.
+        #
+        # @return [String, nil] the id of the last message whose events the block took whole, or the one given
         # @api public
         def last_event_id = @last_id
 
-        # Blocks and yields every event until the bridge ends the stream.
+        # Blocks and yields every event until the bridge ends the stream. Called again, it resumes from
+        # {#last_event_id}.
         #
         # @yieldparam event [Event]
         # @return [void]

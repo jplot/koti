@@ -43,19 +43,18 @@ module Hue
     # @api public
     def self.pair(app_name: 'hue-sdk', instance_name: Socket.gethostname) = Pairing.pair(app_name:, instance_name:)
 
-    # Follows what changes on the bridge until it ends the stream. To resume where it stopped, open
-    # {Events::Stream} with the {Events::Stream#last_event_id} of the last one.
+    # Follows what changes on the bridge until it ends the stream. An {Events::Stream} followed directly keeps the
+    # id to resume from.
     #
     # @example Print every light switched on or off
     #   Hue::Sdk.events { |event| puts event.resource_id if event.changes.key?('on') }
     #
-    # @param last_event_id [String, nil] the id of the last message an earlier stream read, to resume from
     # @yieldparam event [Event]
     # @return [Enumerator::Lazy<Event>, nil] without a block; with one, blocks until the stream ends
     # @raise (see Events::Stream#each)
     # @api public
-    def self.events(last_event_id: nil, &block)
-      stream = Events::Stream.new(last_event_id:)
+    def self.events(&block)
+      stream = Events::Stream.new
       block ? stream.each(&block) : stream.to_enum.lazy
     end
 

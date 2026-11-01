@@ -410,9 +410,50 @@ module Ajax
           def space_snapshot(space_id) = first_of(space_stream(space_locator: space_of(space_id))).snapshot
         end
 
+        # The cameras and recorders of a space, and live WebRTC sessions with them.
+        module Video
+          include Targets
+
+          STREAM_WEBRTC = '/systems.ajax.api.ecosystem.v3.mobilegwsvc.service.stream_webrtc.StreamWebrtcService/execute'
+          REQUEST = SERVICE::StreamWebrtc::StreamWebrtcRequest
+          FILTERS = Messages::Api::Mobile::V2::Common::Video::Webrtc::IceCandidateFilters
+          private_constant :STREAM_WEBRTC, :REQUEST, :FILTERS
+
+          # @param space_id [String]
+          # @return [Array<VideoChannel>] every channel of the space's cameras and recorders, from the first message
+          #   of +stream_video_player+
+          # @raise [ReadError] when the gateway refuses the read
+          def video_channels(space_id)
+            video_edges = first_of(stream_video_player(space_id:)).initial_state&.video_edges || []
+            video_edges.flat_map { |edge| edge.channels.map { VideoChannel.from(space_id, edge, it) } }
+          end
+
+          # Opens a WebRTC session with a camera or recorder, as the app does: its init lets every ICE candidate
+          # through and starts the given streams. The session runs at {LiveVideo#each}.
+          #
+          # @param space_id [String]
+          # @param video_edge_id [String] a {VideoChannel#video_edge_id}
+          # @param streams [Array<Data>] the streams to start with, from {Streams}
+          # @param allow_large_rtp_packets [Boolean] the app's setting, on unless its cloud configuration says not
+          # @return [LiveVideo]
+          def live_video(space_id, video_edge_id, streams, allow_large_rtp_packets: true)
+            init = REQUEST::Init.new(space_locator: space_of(space_id), video_edge_id:, initial_streams: streams,
+                                     ice_filters: every_candidate, allow_large_rtp_packets:)
+            LiveVideo.new(exchange(STREAM_WEBRTC).write(REQUEST.new(init:)))
+          end
+
+          private
+
+          def every_candidate
+            FILTERS.new(type_filter: FILTERS::TypeFilter.new(host: true, reflexive: true, relay: true),
+                        protocol_filter: FILTERS::ProtocolFilter.new(tcp: true, udp: true))
+          end
+        end
+
         include Outputs
         include Protection
         include Details
+        include Video
       end
     end
   end

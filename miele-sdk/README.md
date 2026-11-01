@@ -619,9 +619,10 @@ hood.state.extended_state.luefter_1.luefterstufe_luefter_1               # the f
   no index, else `[unit, attribute, idx1, idx2]`, nil for an index it computes. `object` reads at
   the first unless given another; `write_object` writes only where it is told, the app writing some
   objects elsewhere than it reads them. Both raise `ArgumentError` while an index is left to compute.
-- An attribute the leaf lacks reads nil. `write_object` writes back the attributes as read, each
-  changed member in the wire type it was read in, and raises `ArgumentError` for a member it did not
-  read, as the app's setters do.
+- An attribute the leaf lacks reads nil, and so does an enum, a struct or an array of either whose
+  wire type does not fit, as the app fails that one attribute. `write_object` writes back the
+  attributes as read, each changed member in the wire type it was read in, and raises
+  `ArgumentError` for a member it did not read, as the app's setters do.
 - `modify(klass, address) { |value| value.with(…) }` reads an object, lets the block change it and
   writes it back with the header the appliance answered, as the app's dishwasher and laundry modules
   do.

@@ -26,6 +26,24 @@ RSpec.describe Miele::Sdk::Objects do
     it 'reads an absent attribute as nil' do
       expect(steps.from(1 => field(:u8, 3))).to have_attributes(edit_status: nil, infos2: nil)
     end
+
+    it 'reads a struct whose wire type does not fit as nil, and keeps its field' do
+      fields = { 4 => field(:u16, 5), 8 => field(:u16, 3) }
+      expect(described_class::Oven::GlobalPsContext.from(fields))
+        .to have_attributes(context_para_ca: nil, used_selection_parameter: 3, raw: fields)
+    end
+
+    it 'reads an enum or an enum array whose wire type does not fit as nil' do
+      value = described_class::Oven::GlobalDeviceContext.from(9 => field(:struct_array, [{}]), 10 => field(:struct, {}),
+                                                              12 => field(:bool, true), 16 => field(:u8, 2))
+      expect(value).to have_attributes(supported_user_requests: nil, session_owner: nil, show_me_how_id: nil,
+                                       wash2_dry_state: :active)
+    end
+
+    it 'reads a struct array whose wire type does not fit as nil' do
+      value = described_class::Oven::GlobalNtfctnShow.from(1 => field(:u16_array, [1, 2]), 2 => field(:struct, {}))
+      expect(value).to have_attributes(infos: nil, messages: nil)
+    end
   end
 
   describe 'a DOP2 write' do

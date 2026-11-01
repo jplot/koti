@@ -160,16 +160,16 @@ module Miele
       CLOUD.synchronize { @cloud = nil }
     end
 
-    # Streams the changes the appliances push, to this host and through the Miele cloud, until the block breaks
-    # or raises.
+    # Streams the changes the appliances push to this host, and those of an account through the Miele cloud, until
+    # the block breaks or raises.
     #
     # @param hosts [Array<String>] addresses of the appliances to listen to on the network
-    # @param cloud [Cloud::Channel, nil] the account to follow through its websocket, the configured one by default
+    # @param cloud [Cloud::Channel, nil] the account to follow through its websocket, as {.cloud} gives it
     # @yieldparam event [Events::Event]
     # @return [Enumerator::Lazy<Events::Event>, Object] the events without a block
     # @raise [ArgumentError] without hosts or an account
     # @api public
-    def self.events(hosts: [], cloud: self.cloud, &)
+    def self.events(hosts: [], cloud: nil, &)
       raise ArgumentError, 'no appliance to listen to, nor a Miele account' if hosts.empty? && cloud.nil?
 
       sources = [] #: Array[untyped]

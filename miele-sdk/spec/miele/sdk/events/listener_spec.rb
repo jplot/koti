@@ -89,11 +89,10 @@ RSpec.describe Miele::Sdk::Events::Listener do
     expect { described_class.new(hosts: []) }.to raise_error(ArgumentError, /no appliance/)
   end
 
-  it 'keeps streaming when an appliance cannot be enrolled', :aggregate_failures do
-    pusher = push_state
+  it 'raises when an appliance cannot be enrolled, leaving the others withdrawn', :aggregate_failures do
     both = described_class.new(hosts: ['127.0.0.1', '::1'], mdns_address: '127.0.0.1', mdns_port: 0)
-    expect { expect(both.each.first.fab).to eq(fab) }.to output(/no events from ::1/).to_stderr
-    pusher.join
+    expect { both.each { nil } }.to raise_error(Miele::Sdk::ConnectionError)
+    expect(subscriptions).to eq('1' => cloud)
   end
 
   it 'returns a lazy enumerator without a block' do
@@ -113,9 +112,16 @@ RSpec.describe Miele::Sdk::Events::Listener do
   context 'when an appliance refuses the withdrawal' do
     let(:refusals) { { 'DELETE' => [500, {}, ''] } }
 
-    it 'warns that subscriptions stay on it' do
+    it 'raises it once the stream ends' do
       pusher = push_state
-      expect { listener.each.first }.to output(/subscriptions left on 127\.0\.0\.1: appliance answered 500/).to_stderr
+      expect { listener.each.first }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+      pusher.join
+    end
+
+    it 'leaves the error that ended the stream to the caller' do
+      pusher = push_state
+      stop = ->(_event) { raise 'stop' }
+      expect { listener.each(&stop) }.to raise_error(RuntimeError, 'stop')
       pusher.join
     end
   end

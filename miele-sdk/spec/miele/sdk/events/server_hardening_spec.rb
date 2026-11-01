@@ -29,10 +29,8 @@ RSpec.describe Miele::Sdk::Events::Server do
       "Authorization: #{authorization}\r\nContent-Length: #{length}\r\n#{header}\r\n#{'x' * 16}"
   end
 
-  it 'answers 403 to a signature that is not 32 bytes', :aggregate_failures do
-    answer = nil
-    expect { answer = exchange(push_request("MieleH256 #{FakeAppliance::GROUP_ID}:AB")) }.to output(/refused/).to_stderr
-    expect(answer).to start_with('HTTP/1.1 403')
+  it 'answers 403 to a signature that is not 32 bytes' do
+    expect(exchange(push_request("MieleH256 #{FakeAppliance::GROUP_ID}:AB"))).to start_with('HTTP/1.1 403')
   end
 
   it 'answers 400 to a Content-Length out of range' do

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'English'
 require 'socket'
 
 module Miele
@@ -31,6 +32,7 @@ module Miele
         #
         # @yieldparam event [Event]
         # @return [Enumerator::Lazy<Event>, Object] the events without a block, else what +break+ returns
+        # @raise [Error] when an appliance cannot be enrolled, or, once the block breaks, withdrawn
         # @api public
         def each(&)
           return to_enum(:each).lazy unless block_given?
@@ -48,7 +50,7 @@ module Miele
             yield event
           end
         ensure
-          close
+          close($ERROR_INFO)
         end
 
         # @return [void]
@@ -62,30 +64,29 @@ module Miele
           @appliances.each { enroll(it, advertiser.hostname, server.port) }
         end
 
-        # One appliance out of reach must not deprive the others of their events.
-        #
         # @return [void]
         def enroll(appliance, callback_host, port)
           Enrollment.enroll(appliance, our_fab: @fab, callback_host:, port:)
-        rescue Error => e
-          warn "miele-sdk: no events from #{appliance.host}: #{e.message}"
         end
 
+        # A refused withdrawal must not leave the other appliances enrolled, nor hide the error that ended the
+        # stream.
+        #
+        # @param error [Exception, nil] what ended the stream
         # @return [void]
-        def close
-          @appliances.each { withdraw(it) }
+        def close(error)
+          failures = @appliances.filter_map { withdraw(it) }
           @advertiser&.stop
           @server&.stop
+          raise failures.first if error.nil? && failures.any?
         end
 
-        # A failure here must not hide the error that ended the stream, nor
-        # leave the other appliances enrolled.
-        #
-        # @return [void]
+        # @return [Error, nil] why the appliance keeps its subscriptions
         def withdraw(appliance)
           Enrollment.withdraw(appliance, our_fab: @fab)
+          nil
         rescue Error => e
-          warn "miele-sdk: subscriptions left on #{appliance.host}: #{e.message}"
+          e
         end
 
         # @return [String] local address that routes to the first appliance

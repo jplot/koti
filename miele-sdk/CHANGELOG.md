@@ -9,6 +9,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** without `group_id` and `group_key`, the local channel no longer reads the household
+  key from the Miele account: it raises `ConfigurationError`. `Miele::Sdk.cloud.group` gives the
+  account's key to set them.
 - **Breaking:** an appliance no longer turns to the cloud on its own after a local 404: it is reached
   locally, raising `NotFoundError`, unless given a cloud (`Appliance.for(host, fab:, cloud:)` or
   `Miele::Sdk.appliances(through_cloud: true)`), and then every request under `/Devices/` goes
@@ -106,7 +109,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The Miele cloud next to the local channel, as the Miele app uses it: the cloud and login system of
   the account's country from the locales the app reads, MCS login or CIAM code exchange, a token
   renewed once across threads and kept in `token_file`, requests under `/V2` for an appliance given
-  the cloud, `Miele::Sdk.appliances`, and the household key read from the account.
+  the cloud, `Miele::Sdk.appliances`, and `Cloud::Channel#group`, the account's household key.
 
 - `services`, the lower-case resource the Miele app reads, which EK057 and EK039W modules do not
   serve locally.

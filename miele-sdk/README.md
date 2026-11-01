@@ -58,9 +58,18 @@ end
 Every request is signed with HMAC-SHA256 and its body encrypted with AES-256, both with the
 household GroupKey; every answer must carry a valid signature too. The GroupID is public: each
 appliance announces it (`Miele::Sdk.discover.first.group_id`). The GroupKey is held by the Miele
-app and by the appliances; this SDK never fetches it.
-[ha-miele-at-lan](https://github.com/tiehfood/ha-miele-at-lan) can retrieve it once from the
-Miele cloud. Keep it secret: it controls every appliance of the household.
+app and by the appliances, and the Miele account gives both, as it gives them to the app:
+`Miele::Sdk.cloud.group` reads them from the cloud (`/V2/GroupKeyId/`). The SDK signs only with the
+`group_id` and `group_key` set, and raises `ConfigurationError` without them. Keep the key secret:
+it controls every appliance of the household.
+
+```ruby
+group_id, group_key = Miele::Sdk.cloud.group   # with the account configured, see Cloud
+Miele::Sdk.configure do |config|
+  config.group_id = group_id
+  config.group_key = group_key
+end
+```
 
 ## Discovery
 
@@ -750,8 +759,6 @@ it sends every request under `/Devices/` there instead, under `/V2`; a Dop1 requ
 in `Host`, as the app does. The module's own resources (`info`, `host_info`, `software_update`) have
 no counterpart in the cloud and are still read from the module. Which way to reach an appliance is
 the caller's. A hood's ColorFlow reads a 404 as none only through the cloud, as the app does.
-With an account and neither `group_id` nor `group_key`, the local channel signs with the household
-key the account holds (`/V2/GroupKeyId/`).
 
 **Logging in.** The SDK reads the cloud of the account's country and how its accounts log in where
 the app reads them (`/V3/Locales` on `locales_host`), or from the copy the app bundles when they do

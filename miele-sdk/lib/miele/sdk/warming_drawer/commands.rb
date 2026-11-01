@@ -69,13 +69,14 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] unless under remote control and mobile start without local control, the
         #   program set or running (Status 3 to 6)
+        # @raise [ArgumentError] for a time other than 0 under the program's minimum hours, which the app's picker
+        #   does not offer
         # @api public
         def remaining_time=(minutes)
           state = self.state
           require!(controllable?(state) && [3, 4, 5, 6].include?(state.raw['Status']),
                    'the drawer takes a remaining time only while its program is set or runs')
-          max_hours = program(state)&.max_hours
-          minutes = [minutes, max_hours * 60].min if max_hours
+          minutes = picked_minutes(program(state), minutes)
           write_process_data(state.raw['ProgramID'].to_i, minutes, target_celsius(state))
         end
 
@@ -128,6 +129,19 @@ module Miele
         # @param state [State]
         # @return [Program, nil] the program +State+ shows
         def program(state) = programs.find { it.id == state.raw['ProgramID'] }
+
+        # @param program [Program, nil]
+        # @param minutes [Integer]
+        # @return [Integer] the minutes kept to the program's maximum hours
+        # @raise [ArgumentError] for a time other than 0 under its minimum hours
+        def picked_minutes(program, minutes)
+          min_hours = program&.min_hours.to_i
+          unless minutes.zero? || minutes >= min_hours * 60
+            raise ArgumentError, "the app sets 0 or at least #{min_hours} h"
+          end
+
+          program ? [minutes, program.max_hours * 60].min : minutes
+        end
 
         # @param state [State]
         # @return [Integer] +RemainingTime+ [h, m] in minutes, 0 without both

@@ -26,6 +26,8 @@ module Miele
 
         def program: (State state) -> Program?
 
+        def picked_minutes: (Program? program, Integer minutes) -> Integer
+
         def remaining_minutes: (State state) -> Integer
 
         def target_celsius: (State state) -> Integer

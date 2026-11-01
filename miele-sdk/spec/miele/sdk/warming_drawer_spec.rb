@@ -133,6 +133,14 @@ RSpec.describe Miele::Sdk::WarmingDrawer do
     expect(requests).to eq(%w[97880100 9781020001030f000241 97880100 97810200010300000341])
   end
 
+  it "refuses a remaining time below the program's minimum but 0, as the app's picker does", :aggregate_failures do
+    state(5, [15, 0, 1], 'ProgramID' => 3, 'TargetTemperature' => [6500])
+    expect { drawer.remaining_time = -30 }.to raise_error(ArgumentError)
+    expect { drawer.remaining_time = 30 }.to raise_error(ArgumentError)
+    drawer.remaining_time = 0
+    expect(requests.grep(/\A9781/)).to eq(%w[97810200010300000041])
+  end
+
   it 'sends 255 as the target when State shows none, as the app does' do
     state(5, [15, 0, 1], 'ProgramID' => 3)
     drawer.remaining_time = 60

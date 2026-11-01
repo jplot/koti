@@ -23,6 +23,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `archive_days`, `cloud_fragments`, `cloud_metadata_fragments`, `cloud_archive`, `cloud_metadata` and
+  `export_archive`: a channel's recorded days, the cloud archive's fragments and their addresses, and exports.
 - `video_channels(space_id)`, `Streams` and `live_video`: a live WebRTC session with an Ajax camera, whose
   signaling `LiveVideo` relays between the cloud and a browser in the shapes `RTCPeerConnection` takes.
 - `Schemas.descriptor_set(*names)`: the schemas of the messages a camera's data channel carries

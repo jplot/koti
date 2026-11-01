@@ -235,11 +235,17 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(dop1_requests).to eq(%w[110102000103 110002000102])
     end
 
-    it 'switches its light by writing back the whole State' do
+    it 'switches its light by writing back its State' do
       served['State'] = { 'Status' => 2, 'RemoteEnable' => [15, 0, 1], 'Light' => 2 }
       coffee.light = true
       expect(written.map { [it.first, JSON.parse(it.last)] })
         .to eq([['State', { 'Status' => 2, 'RemoteEnable' => [15, 0, 1], 'Light' => 1 }]])
+    end
+
+    it 'leaves out of that State the keys the app does not know, as its DeviceStateDto does' do
+      served['State'] = { 'Status' => 2, 'RemoteEnable' => [15, 0, 1], 'Light' => 2, 'ProgramName' => 'Espresso' }
+      coffee.light = true
+      expect(JSON.parse(written.last.last)).not_to have_key('ProgramName')
     end
   end
 end

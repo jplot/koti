@@ -413,8 +413,9 @@ mobile start and a running or paused program; `stop` and `cancel` need no mobile
 program that runs, pauses or waits awake, the request offered, and a dishwasher not locked;
 `start_delayed` needs a program selected (Status 3) under mobile start, the dishwasher not locked. A
 DOP2 dishwasher refuses while it shows info 700. A Dop1 dishwasher takes `ProcessAction` on its
-whole `State`, its program and extras on 8906 and its delayed start on 8909. Delays are counted on
-the wall clock, as the app counts them, so on the day the clocks change they follow the clock.
+`State`, as the app's DeviceStateDto keeps it, its program and extras on 8906 and its delayed start
+on 8909. Delays are counted on the wall clock, as the app counts them, so on the day the clocks
+change they follow the clock.
 
 Not traced, so left to the dishwasher: where a Dop1 dishwasher shows info 700, and the units of the
 Dop1 consumption. The app sends the steps of `power_on` and `power_off` again while it watches
@@ -512,7 +513,7 @@ coffee.rename_drink(24_037, 'Mein Kaffee')
 A DOP2 coffee maker writes 2/1586 as read to switch on and off, waking first when it answers 500,
 and its other objects as the app's ModifyDop2Message does: back where they were read, the index
 read at as the header's attribute. A CVA6000 takes Dop1 1101 to switch on and off and 1100 to
-stop, and its light by writing back its whole `State`. `brew` follows the app's drink rule: mobile
+stop, and its light by writing back its `State` as the app's DeviceStateDto keeps it. `brew` follows the app's drink rule: mobile
 start, no information or query shown, no drink, Barista or care program running; two cups or a
 double shot also need the software ids the app requires. `start_barista` follows the app's Barista
 entry: a CM6F, CVA or Ref2 that lists it among the special beverages of 1/1599, on under remote

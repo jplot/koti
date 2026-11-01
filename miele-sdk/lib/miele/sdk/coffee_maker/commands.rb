@@ -56,8 +56,7 @@ module Miele
         def light=(on)
           state = self.state
           require!(dop1_switch?(state, LIGHT_STATUSES), 'the app switches the light of a CVA6000 only')
-          body = JSON.generate(state.raw.compact.merge('Light' => on ? 1 : 2))
-          send_request(:put, "/Devices/#{fab}/State", body:)
+          command(Schema::DeviceState.from(state.raw).with(light: on ? 1 : 2))
         end
 
         # @return [void]

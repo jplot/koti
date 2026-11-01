@@ -23,6 +23,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `Schemas.descriptor_set(*names)`: the schemas of the messages a camera's data channel carries
+  (`ajax.dcp.v1`, `ajax.video.v1.metadata`), with what they import, for a front that encodes them.
 - `current_member(space_id)`: the signed-in account's role and permissions in a space, which the app reads to
   offer only what the account may do; the README lists what the app checks before each shortcut.
 - `events(space_id)`: one feed of `Event`s (space, security, groups, rooms, devices, notifications) for a

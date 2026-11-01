@@ -77,7 +77,7 @@ module Ajax
         # @return [nil]
         def run
           operation = nil #: untyped
-          operation = yield(Enumerator.new { |out| drain(@queue, -> { operation&.status }, out) })
+          operation = yield(Enumerator.new { |out| drain(-> { operation&.status }, out) })
           @lock.synchronize do
             @operation = operation
             return if @closed
@@ -96,10 +96,10 @@ module Ajax
           close
         end
 
-        def drain(queue, ended, out)
+        def drain(ended, out)
           until ended.call
-            request = queue.pop(timeout: POLL)
-            break if request.nil? && queue.closed?
+            request = @queue.pop(timeout: POLL)
+            break if request.nil? && @queue.closed?
 
             out << request unless request.nil?
           end

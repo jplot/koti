@@ -18,8 +18,8 @@ module Ajax
       # Talks to the Ajax mobile gateway over gRPC. It resolves a path to its request and response
       # messages through {Schemas}, sends the call of the right kind, and attaches the app and session
       # metadata the gateway expects. One {Session} rides along: the client logs in lazily and, on an
-      # +UNAUTHENTICATED+ answer, logs in again and retries the call once (a stream, only before its
-      # first message).
+      # +UNAUTHENTICATED+ answer, drops the session, as the app does, and raises the error; the next call
+      # logs in again.
       #
       # Responses come back as the typed values of {Messages}, built from +to_h+: google-protobuf's field
       # readers misbehave on messages decoded against a private descriptor pool, but +to_h+ is reliable. A
@@ -170,8 +170,7 @@ module Ajax
         end
 
         def authenticating
-          @session.ensure_login
-          metadata = @session.metadata
+          metadata = @session.ensure_login
           yield(metadata)
         rescue GRPC::Unauthenticated
           @session.forget(metadata&.fetch('client-session-token', nil))

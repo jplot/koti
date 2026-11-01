@@ -495,7 +495,7 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
     before do
       allow(settings).to receive(:read_only).and_return(true)
       allow(GRPC::ClientStub).to receive(:new).and_return(grpc)
-      allow(client.session).to receive_messages(ensure_login: nil, login: nil, metadata: {})
+      allow(client.session).to receive_messages(ensure_login: {}, metadata: {})
       allow(grpc).to receive(:server_streamer) do |path, *, &relay|
         relay.call(answer(path, { success: { snapshot: {} } }))
       end

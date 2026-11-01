@@ -34,7 +34,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
   it 'logs in with the password hash and keeps the session', :aggregate_failures do
     allow(client).to receive(:authenticate).and_return(success)
 
-    session.login
+    session.ensure_login
 
     expect(client).to have_received(:authenticate)
       .with(anything, have_attributes(password_sha256_hash: 'abc123', user_role: :user), anything)
@@ -45,7 +45,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
   it 'completes a two-factor login with the TOTP code', :aggregate_failures do
     allow(client).to receive(:authenticate).and_return(two_factor, totp_success)
 
-    session.login
+    session.ensure_login
 
     expect(client).to have_received(:authenticate).twice
     expect(session.metadata).to include('client-session-token' => 'ABCD')
@@ -54,7 +54,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
   it 'retries once with the next window on invalid_totp' do
     allow(client).to receive(:authenticate).and_return(two_factor, invalid_totp, totp_success)
 
-    session.login
+    session.ensure_login
 
     expect(client).to have_received(:authenticate).exactly(3).times
   end
@@ -63,7 +63,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     refused = password({ failure: { invalid_credentials: {}, attempts_left: 2 } })
     allow(client).to receive(:authenticate).and_return(refused)
 
-    expect { session.login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError, /2 attempts/) do |error|
+    expect { session.ensure_login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError, /2 attempts/) do |error|
       expect(error.reason).to eq(:invalid_credentials)
     end
   end
@@ -71,14 +71,14 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
   it 'raises ConfigurationError rather than send a login with no password' do
     allow(settings).to receive_messages(password_sha256: nil, password: nil)
 
-    expect { session.login }.to raise_error(Ajax::Sdk::ConfigurationError)
+    expect { session.ensure_login }.to raise_error(Ajax::Sdk::ConfigurationError)
   end
 
   it 'raises when two-factor is required but no secret is configured', :aggregate_failures do
     allow(settings).to receive(:totp_secret).and_return(nil)
     allow(client).to receive(:authenticate).and_return(two_factor)
 
-    expect { session.login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
+    expect { session.ensure_login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
       expect(error.reason).to eq(:two_fa_required)
     end
   end
@@ -110,6 +110,21 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     expect(client).to have_received(:authenticate).twice
   end
 
+  it 'returns the call metadata once logged in' do
+    allow(client).to receive(:authenticate).and_return(success)
+
+    expect(session.ensure_login).to include('client-session-token' => 'ABCD', 'a911-user-id' => 'user-1')
+  end
+
+  it 'signs in once when several threads find the same session refused' do
+    renewed_tokens
+    expired = session.ensure_login['client-session-token']
+
+    Array.new(4) { Thread.new { session.forget(expired) || session.ensure_login } }.each(&:join)
+
+    expect(client).to have_received(:authenticate).twice
+  end
+
   it 'keeps a session another thread has renewed since the refusal' do
     renewed_tokens
     session.ensure_login
@@ -124,7 +139,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
 
   it 'never prints the token or secrets in inspect' do
     allow(client).to receive(:authenticate).and_return(success)
-    session.login
+    session.ensure_login
 
     expect(session.inspect).to eq('#<Ajax::Sdk::Cloud::Session logged_in=true>')
   end
@@ -134,7 +149,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     requests = []
     allow(client).to receive(:authenticate) { |_path, request, _metadata| (requests << request) && answers.shift }
     allow(Time).to receive(:now).and_return(first, retry_at)
-    session.login
+    session.ensure_login
     requests.filter_map { it.to_h[:totp] }
   end
 
@@ -153,7 +168,7 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
   it 'gives up after a second invalid_totp', :aggregate_failures do
     allow(client).to receive(:authenticate).and_return(two_factor, invalid_totp, invalid_totp)
 
-    expect { session.login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
+    expect { session.ensure_login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
       expect(error.reason).to eq(:invalid_totp)
     end
   end

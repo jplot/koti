@@ -27,7 +27,7 @@ module Ajax
         private
 
         def relay: () { (untyped) -> void } -> nil
-        def drain: (Thread::Queue queue, ^() -> untyped ended, Enumerator::Yielder out) -> void
+        def drain: (^() -> untyped ended, Enumerator::Yielder out) -> void
       end
 
       class Client

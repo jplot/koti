@@ -18,7 +18,7 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
 
   before do
     allow(GRPC::ClientStub).to receive(:new).and_return(grpc)
-    allow(client.session).to receive_messages(ensure_login: nil, login: nil, metadata: {})
+    allow(client.session).to receive_messages(ensure_login: {}, metadata: {})
   end
 
   def answer(path, message = { success: {} })
@@ -107,7 +107,13 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
     expect { client.server_stream(devices, { space_id: 's1' }) { |message| collected << message } }
       .to raise_error(GRPC::Unauthenticated)
     expect(collected.size).to eq(1)
-    expect(client.session).not_to have_received(:login)
+  end
+
+  it 'raises a stream refused before its first message, opening it once', :aggregate_failures do
+    streaming(GRPC::Unauthenticated.new('expired'))
+
+    expect { client.server_stream(devices, { space_id: 's1' }) { nil } }.to raise_error(GRPC::Unauthenticated)
+    expect(grpc).to have_received(:server_streamer).once
   end
 
   it 'gives unary calls a deadline and leaves streams without one', :aggregate_failures do
@@ -163,10 +169,11 @@ RSpec.describe Ajax::Sdk::Cloud::Client do
 
   it 'drops the session the gateway refuses and raises, as the app does', :aggregate_failures do
     allow(grpc).to receive(:request_response).and_raise(GRPC::Unauthenticated, 'nope')
-    allow(client.session).to receive_messages(metadata: { 'client-session-token' => 'tok' }, forget: nil)
+    allow(client.session).to receive_messages(ensure_login: { 'client-session-token' => 'sent' },
+                                              metadata: { 'client-session-token' => 'renewed' }, forget: nil)
 
     expect { client.unary(spaces) }.to raise_error(GRPC::Unauthenticated)
-    expect(client.session).to have_received(:forget).with('tok')
+    expect(client.session).to have_received(:forget).with('sent')
     expect(grpc).to have_received(:request_response).once
   end
 end

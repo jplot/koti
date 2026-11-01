@@ -31,16 +31,18 @@ module Ajax
         # @return [String] a description that never prints the token or the account's secrets
         def inspect = "#<#{self.class.name} logged_in=#{!@token.nil?}>"
 
-        # @return [void] log in only if there is no session yet; concurrent callers log in once
-        def ensure_login
-          @mutex.synchronize { sign_in_flow unless @token && @user_id }
-        end
-
-        # Signs in with the password hash, then with the TOTP code when two-factor is required.
+        # Signs in with the password hash, then with the TOTP code when two-factor is required, unless a session is
+        # held; concurrent callers sign in once. The metadata is read under the same lock, so a session another
+        # thread forgets meanwhile never sends a call without its token.
         #
-        # @return [void]
+        # @return [Hash{String=>String}] the call metadata
         # @raise [AuthenticationError] when the gateway refuses the login
-        def login = @mutex.synchronize { sign_in_flow }
+        def ensure_login
+          @mutex.synchronize do
+            sign_in_flow unless @token && @user_id
+            metadata
+          end
+        end
 
         # Drops the session the gateway refused, as the app does, so the next call signs in again.
         #

@@ -8,89 +8,55 @@ module Miele
       module ProgramSelection
         # +StartAt+ meaning now.
         NOW = 0xFFFF_FFFF_FFFF_FFFF
-        # MicrowavePowers (80 to 1000 W) and MicrowaveSteps (1 to 7): the app's picker offers those of them set in
-        # MwPower's SupportedBits, and writes the one picked.
-        MICROWAVE_BITS = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40].freeze
-        private_constant :NOW, :MICROWAVE_BITS
+        private_constant :NOW
 
         # @param celsius [Numeric]
         # @raise [ActionUnavailableError] see {#set_parameter}
         # @api public
         def target_temperature=(celsius)
-          set_parameter(6, :u16, hundredths(celsius))
+          set_parameter(:temperature, 6, :u16, hundredths(celsius))
         end
 
         # @param celsius [Numeric] of the core probe
         # @api public
         def core_target_temperature=(celsius)
-          set_parameter(7, :u16, hundredths(celsius))
+          set_parameter(:core_temperature, 7, :u16, hundredths(celsius))
         end
 
         # @param level [Integer]
         # @api public
         def moisture=(level)
-          set_parameter(2, :u8, level)
+          set_parameter(:moisture, 2, :u8, level)
         end
 
         # @param level [Integer]
         # @api public
         def grill_level=(level)
-          set_parameter(1, :u8, level)
-        end
-
-        # @param bit [Integer] one bit of the oven's supported microwave powers, such as 0x10 for 600 W
-        # @raise [ActionUnavailableError] see {#set_parameter}, or when the oven shows no microwave power
-        # @raise [ArgumentError] for any other value
-        # @api public
-        def microwave_power=(bit)
-          require_dop2!
-          require_parameters_allowed!
-          context = program_context
-          supported = supported_powers(context)
-          unless MICROWAVE_BITS.include?(bit) && supported.anybits?(bit)
-            raise ArgumentError, "#{bit} is not one of the microwave power bits the oven supports (#{supported})"
-          end
-
-          write_parameter(selected_program(context), 15, :u8, bit)
+          set_parameter(:grill_level, 1, :u8, level)
         end
 
         # @param level [Integer]
         # @api public
         def browning=(level)
-          set_parameter(30, :u8, level)
+          set_parameter(:browning, 30, :u8, level)
         end
 
         # @param level [Integer]
         # @api public
         def doneness=(level)
-          set_parameter(31, :u8, level)
-        end
-
-        # @param count [Integer]
-        # @api public
-        def steam_bursts=(count)
-          set_parameter(18, :u8, count)
-        end
-
-        # @param seconds [Array<Integer>] up to three times, in seconds
-        # @raise [ArgumentError] for more than three
-        # @api public
-        def steam_burst_times=(seconds)
-          raise ArgumentError, 'an oven takes up to three steam burst times' if seconds.size > 3
-
-          seconds.each_with_index { |time, index| set_parameter(8 + index, :u16, time) }
+          set_parameter(:doneness, 31, :u8, level)
         end
 
         # @param time [Time, :now]
         # @api public
         def start_at=(time)
-          set_parameter(13, :u64, unix_time(time))
+          set_parameter(:start_at, 13, :u64, unix_time(time))
         end
 
         # @param time [Time]
         # @api public
         def end_at=(time)
-          set_parameter(14, :u64, time.to_i)
+          set_parameter(:end_at, 14, :u64, time.to_i)
         end
 
         # The app moves the start to its minimum before a zero duration only (SetDurationAction).
@@ -98,9 +64,10 @@ module Miele
         # @param seconds [Integer]
         # @api public
         def duration=(seconds)
-          context = program_context
-          set_parameter(13, :u64, context.context_para_ca&.start_at&.min.to_i, context:) if seconds.zero?
-          set_parameter(12, :u32, seconds, context:)
+          context = editable_parameters(:duration)
+          prog_id = selected_program(context)
+          write_parameter(prog_id, 13, :u64, context.context_para_ca&.start_at&.min.to_i) if seconds.zero?
+          write_parameter(prog_id, 12, :u32, seconds)
         end
 
         # Keep warm goes last, as in the app (WriteProgramOptionsAsync).
@@ -114,50 +81,23 @@ module Miele
         # @api public
         def set_options(rapid_heating: nil, pre_heating: nil, crisp: nil, rapid_cooling: nil, keep_warm: nil)
           options = { 21 => rapid_heating, 24 => pre_heating, 25 => crisp, 26 => rapid_cooling, 27 => keep_warm }
-          options.each { |id, on| set_parameter(id, :bool, on) unless on.nil? }
+          options = options.compact
+          return if options.empty?
+
+          prog_id = selected_program(editable_options(options.keys))
+          options.each { |id, on| write_parameter(prog_id, id, :bool, on) }
         end
 
         private
 
-        # @param id [Integer] a +GLOBAL_PS_SelectionParaCA+ attribute
+        # @param name [Symbol] the parameter, as {ParameterGates} names it
+        # @param id [Integer] its +GLOBAL_PS_SelectionParaCA+ attribute
         # @param type [Symbol] its wire type
         # @param value [Object]
-        # @param context [Objects::Oven::GlobalPsContext, nil] 1/1574, read when not given
         # @return [void]
         # @raise [ActionUnavailableError]
-        def set_parameter(id, type, value, context: nil)
-          require_dop2!
-          require_parameters_allowed!
-          write_parameter(selected_program(context || program_context), id, type, value)
-        end
-
-        # IsUserAllowedToModifyFunctionParametersRule: remote control and a program on the oven (1/1585), and
-        # mobile start too once the program has started, or for program 361.
-        #
-        # @return [void]
-        # @raise [ActionUnavailableError]
-        def require_parameters_allowed!
-          state = self.state
-          device = context
-          shown = device.prog_attributes_cca&.prog_id
-          prog_id = shown ? Objects::Oven::GlobalEnumPrgId.to_i(shown) : 0
-          require!(under_remote_control?(state), 'the oven takes parameters only under remote control')
-          require!(prog_id.positive?, 'the oven shows no program')
-          return unless prog_id == 361 || started?(state, device)
-
-          require!(state.mobile_start?, 'the oven takes parameters only by mobile start once a program has started')
-        end
-
-        # MicrowaveLevelRule gives the app no microwave section while MwPower is not readable.
-        #
-        # @param context [Objects::Oven::GlobalPsContext] 1/1574
-        # @return [Integer] MwPower's SupportedBits
-        # @raise [ActionUnavailableError]
-        def supported_powers(context)
-          power = context.context_para_ca&.mw_power
-          return power.supported_bits.to_i if power && mask(power).anybits?(8)
-
-          raise ActionUnavailableError, 'the oven shows no microwave power'
+        def set_parameter(name, id, type, value)
+          write_parameter(selected_program(editable_parameters(name)), id, type, value)
         end
 
         # @param context [Objects::Oven::GlobalPsContext] 1/1574

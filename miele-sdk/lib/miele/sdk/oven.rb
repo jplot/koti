@@ -5,7 +5,10 @@ module Miele
     # An oven, steam oven or oven with microwave, which the Miele app's oven module handles (device types 12, 13,
     # 15, 31, 39 and 45).
     class Oven < Appliance
+      include Polling
+      include ParameterGates
       include ProgramSelection
+      include MicrowavePower
       include Selection
       include Requests
       include SteamBurst

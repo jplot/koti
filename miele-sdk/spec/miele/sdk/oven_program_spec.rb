@@ -5,10 +5,10 @@ RSpec.describe Miele::Sdk::Oven do
 
   let(:fab) { '000123456789' }
   let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 13, 'ProtocolVersion' => 4) }
-  let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 0] } }
+  let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 1] } }
   let(:fake) do
     served = { 'State' => JSON.generate(state), 'DOP2/1/1574?idx1=0&idx2=1' => program_context,
-               'DOP2/1/1585' => device_context }
+               'DOP2/1/1585' => device_context, 'DOP2/1/131?idx1=0&idx2=1' => dop2_leaf(1, 131, {}, idx2: 1) }
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
@@ -24,8 +24,8 @@ RSpec.describe Miele::Sdk::Oven do
 
   def program_context
     microwave = { 1 => dop2_field(:u8, microwave_mask), 2 => dop2_field(:u8, microwave_bits) }
-    parameters = { 13 => dop2_field(:struct, { 2 => dop2_field(:u64, 1_700_000_000) }),
-                   15 => dop2_field(:struct, microwave) }
+    parameters = shown_parameters(13 => shown_parameter(:u64, 0, min: 1_700_000_000),
+                                  15 => dop2_field(:struct, microwave))
     dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters),
                          7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
   end
@@ -36,13 +36,46 @@ RSpec.describe Miele::Sdk::Oven do
 
   def device_prog_id = 13
 
-  def device_context = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, { 28 => dop2_field(:e16, device_prog_id) }) })
+  def device_program_type = 5
+
+  def device_context
+    shown = { 10 => dop2_field(:e8, device_program_type), 28 => dop2_field(:e16, device_prog_id) }
+    dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown) })
+  end
+
+  def hidden_parameters
+    { target_temperature: 180, core_target_temperature: 60, moisture: 3, grill_level: 2, microwave_power: 0x10,
+      duration: 1800, start_at: :now, end_at: Time.at(1_700_003_600) }
+  end
 
   def written = fake.requests.select { it.verb == 'PUT' }.map { [it.path, it.body.unpack1('H*')] }
 
   def parameter(id, type, value)
     dop2_leaf(2, 1577, { 1 => dop2_field(:e16, 13), 3 => dop2_field(:e8, 2), 2 => dop2_field(:u16, id),
                          7 => dop2_field(:struct, { id => dop2_field(type, value) }) }).unpack1('H*')
+  end
+
+  shared_examples 'parameters the app hides' do
+    it 'refuses those the app hides with ShouldHideProgramParameters, and writes the others', :aggregate_failures do
+      hidden_parameters.each do |name, value|
+        expect { oven.public_send(:"#{name}=", value) }.to raise_error(Miele::Sdk::ActionUnavailableError, /hides/)
+      end
+      expect { oven.set_options(keep_warm: true) }.to raise_error(Miele::Sdk::ActionUnavailableError, /hides/)
+      oven.browning = 2
+      expect(written.map(&:last)).to eq([parameter(30, :u8, 2)])
+    end
+  end
+
+  context 'when 1/1574 shows another program than 1/1585' do
+    def device_prog_id = 14
+
+    it_behaves_like 'parameters the app hides'
+  end
+
+  context 'when 1/1585 shows a program that is not a function' do
+    def device_program_type = 1
+
+    it_behaves_like 'parameters the app hides'
   end
 
   it 'sets the target temperature as the app does' do
@@ -60,11 +93,10 @@ RSpec.describe Miele::Sdk::Oven do
 
   it 'writes each parameter under the id and wire type the app gives it' do
     parameters = { core_target_temperature: 60, moisture: 3, microwave_power: 4, browning: 2, doneness: 1,
-                   steam_bursts: 2, steam_burst_times: [60, 120], end_at: Time.at(1_700_003_600) }
+                   end_at: Time.at(1_700_003_600) }
     parameters.each { |name, value| oven.public_send(:"#{name}=", value) }
     expect(written.map(&:last)).to eq([parameter(7, :u16, 6000), parameter(2, :u8, 3), parameter(15, :u8, 4),
-                                       parameter(30, :u8, 2), parameter(31, :u8, 1), parameter(18, :u8, 2),
-                                       parameter(8, :u16, 60), parameter(9, :u16, 120),
+                                       parameter(30, :u8, 2), parameter(31, :u8, 1),
                                        parameter(14, :u64, 1_700_003_600)])
   end
 
@@ -103,9 +135,8 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([parameter(13, :u64, 1_700_000_000), parameter(12, :u32, 0)])
   end
 
-  it 'refuses more than three steam burst times', :aggregate_failures do
-    expect { oven.steam_burst_times = [60, 120, 180, 240] }.to raise_error(ArgumentError)
-    expect(written).to be_empty
+  it 'has no steam burst count or time to set, the app never enabling those cells' do
+    expect(%i[steam_bursts= steam_burst_times=].select { oven.respond_to?(it) }).to be_empty
   end
 
   it 'sets the options one by one, keep warm last' do
@@ -193,7 +224,8 @@ RSpec.describe Miele::Sdk::Oven do
       end
     end
     let(:cloud) do
-      leaves = { '1/1574?idx1=0&idx2=1' => program_context, '1/1585' => device_context }
+      leaves = { '1/1574?idx1=0&idx2=1' => program_context, '1/1585' => device_context,
+                 '1/131?idx1=0&idx2=1' => dop2_leaf(1, 131, {}, idx2: 1) }
       FakeCloud.start do |request|
         next unless request.path.include?('/DOP2/')
 
@@ -215,8 +247,9 @@ RSpec.describe Miele::Sdk::Oven do
     it 'writes through the cloud when the oven serves no DOP2 locally' do
       oven.target_temperature = 180
       device = "/V2/Devices/#{fab}/DOP2"
-      expect(cloud.requests.map { [it.verb, it.path] }.last(2))
-        .to eq([['GET', "#{device}/1/1574?idx1=0&idx2=1"], ['PUT', "#{device}/2/1577"]])
+      expect(cloud.requests.map { [it.verb, it.path] }.last(3))
+        .to eq([['GET', "#{device}/1/1574?idx1=0&idx2=1"], ['GET', "#{device}/1/131?idx1=0&idx2=1"],
+                ['PUT', "#{device}/2/1577"]])
     end
   end
 end

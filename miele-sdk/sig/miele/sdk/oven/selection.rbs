@@ -2,11 +2,7 @@ module Miele
   module Sdk
     class Oven < Appliance
       module Selection : Appliance
-        POLLING_DELAY: Integer
-
         ACTION_TIMEOUT: Integer
-
-        RETRY_BASE: Float
 
         UNSUPPORTED_QUERIES: Array[Integer]
 
@@ -26,11 +22,9 @@ module Miele
 
         def shown_program_context: (Integer id) -> Objects::Oven::GlobalPsContext
 
-        def polled_program_context: () -> Objects::Oven::GlobalPsContext?
-
         def program_shown?: (Objects::Oven::GlobalPsContext context, Integer id) -> bool
 
-        def pause: (Integer failures, Float waited) -> (Integer | Float)
+        def poll: (Integer timeout) { () -> untyped } -> untyped
 
         def require_dop2!: () -> void
 

@@ -6,15 +6,12 @@ module Miele
       # What the app's SelectOvenFunctionAction does: the program through PsSelectMessage (2/1577), then, once
       # 1/1574 shows it, the parameters it requires.
       module Selection
-        # The app's PollingDelay and ActionExecutionTimeout, in seconds, and the base of RetryOnRestException's
-        # CalculateDelay: 1.5^n s before the n-th retry in a row.
-        POLLING_DELAY = 3
+        # The app's ActionExecutionTimeout, in seconds.
         ACTION_TIMEOUT = 15
-        RETRY_BASE = 1.5
         # UnsupportedDop2Notifications.GenericQueryIds.
         UNSUPPORTED_QUERIES = [16_011, 16_013].freeze
         UNWRITABLE_STATES = %i[off not_connected running waiting_for_start].freeze
-        private_constant :POLLING_DELAY, :ACTION_TIMEOUT, :RETRY_BASE, :UNSUPPORTED_QUERIES, :UNWRITABLE_STATES
+        private_constant :ACTION_TIMEOUT, :UNSUPPORTED_QUERIES, :UNWRITABLE_STATES
 
         # The app only logs a refused required parameter.
         #
@@ -67,26 +64,8 @@ module Miele
         # @return [Objects::Oven::GlobalPsContext] 1/1574 showing it
         # @raise [ActionFailedError]
         def shown_program_context(id)
-          waited = 0.0
-          failures = 0
-          while waited < ACTION_TIMEOUT
-            context = polled_program_context
-            return context if context && program_shown?(context, id)
-
-            failures = context ? 0 : failures + 1
-            waited += pause(failures, waited)
-          end
-          raise ActionFailedError, "the oven did not show program #{id} within #{ACTION_TIMEOUT} s"
-        end
-
-        # RetryOnRestException ends the app's poll on a 4xx alone.
-        #
-        # @return [Objects::Oven::GlobalPsContext, nil] 1/1574, nil when a refusal is retried
-        # @raise [ResponseError] for a 4xx
-        def polled_program_context
-          program_context
-        rescue ResponseError => e
-          raise if (400..499).cover?(e.status)
+          poll(ACTION_TIMEOUT) { program_context.then { it if program_shown?(it, id) } } ||
+            raise(ActionFailedError, "the oven did not show program #{id} within #{ACTION_TIMEOUT} s")
         end
 
         # @param context [Objects::Oven::GlobalPsContext] 1/1574
@@ -95,15 +74,6 @@ module Miele
         def program_shown?(context, id)
           shown = context.prog_attributes_cca&.prog_id
           shown ? Objects::Oven::GlobalEnumPrgId.to_i(shown) == id : false
-        end
-
-        # @param failures [Integer] the reads refused in a row
-        # @param waited [Float] seconds since the selection
-        # @return [Integer, Float] the seconds before the next read, slept unless past the app's timeout
-        def pause(failures, waited)
-          delay = failures.zero? ? POLLING_DELAY : RETRY_BASE**failures
-          @sleeper.call(delay) if waited + delay < ACTION_TIMEOUT
-          delay
         end
       end
     end

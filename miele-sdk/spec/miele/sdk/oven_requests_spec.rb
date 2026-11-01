@@ -69,7 +69,8 @@ RSpec.describe Miele::Sdk::Oven do
     resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, attributes),
                                                     9 => dop2_field(:e16_array, requests) })
     resources['DOP2/1/1574?idx1=0&idx2=1'] =
-      dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters), 7 => dop2_field(:struct, attributes) }, idx2: 1)
+      dop2_leaf(1, 1574, { 4 => dop2_field(:struct, oven_parameters(parameters)),
+                           7 => dop2_field(:struct, attributes) }, idx2: 1)
   end
 
   it 'starts with request 1 on unit 2' do
@@ -115,6 +116,12 @@ RSpec.describe Miele::Sdk::Oven do
     resources[:put] = [[500, {}, '']]
     expect { oven.start }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
     expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(7, :u16, 6_000)])
+  end
+
+  it 'writes no required parameter and does not start while 1/1574 lacks one of the eight', :aggregate_failures do
+    serve([1], parameters: { 6 => value(:u16, 2, 18_000), 31 => nil })
+    expect { oven.start }.to raise_error(Miele::Sdk::ActionUnavailableError, /parameter/)
+    expect(written).to be_empty
   end
 
   it 'refuses to start a program whose duration is required but not set', :aggregate_failures do

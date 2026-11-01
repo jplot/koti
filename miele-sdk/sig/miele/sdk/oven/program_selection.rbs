@@ -4,8 +4,6 @@ module Miele
       module ProgramSelection : Appliance
         NOW: Integer
 
-        MICROWAVE_BITS: Array[Integer]
-
         def target_temperature=: (Integer | Float celsius) -> void
 
         def core_target_temperature=: (Integer | Float celsius) -> void
@@ -14,15 +12,9 @@ module Miele
 
         def grill_level=: (Integer level) -> void
 
-        def microwave_power=: (Integer bit) -> void
-
         def browning=: (Integer level) -> void
 
         def doneness=: (Integer level) -> void
-
-        def steam_bursts=: (Integer count) -> void
-
-        def steam_burst_times=: (Array[Integer] seconds) -> void
 
         def start_at=: (Time | :now time) -> void
 
@@ -36,21 +28,11 @@ module Miele
 
         private
 
-        def set_parameter: (Integer id, Symbol type, untyped value, ?context: Objects::Oven::GlobalPsContext?) -> void
+        def set_parameter: (Symbol name, Integer id, Symbol type, untyped value) -> void
 
-        def require_parameters_allowed!: () -> void
+        def editable_parameters: (Symbol name) -> Objects::Oven::GlobalPsContext
 
-        def under_remote_control?: (?State state) -> bool?
-
-        def context: () -> Objects::Oven::GlobalDeviceContext
-
-        def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool
-
-        def require_dop2!: () -> void
-
-        def supported_powers: (Objects::Oven::GlobalPsContext context) -> Integer
-
-        def mask: (untyped value) -> Integer
+        def editable_options: (Array[Integer] ids) -> Objects::Oven::GlobalPsContext
 
         def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
 

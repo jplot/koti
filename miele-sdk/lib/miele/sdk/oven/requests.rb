@@ -115,8 +115,10 @@ module Miele
         # @param prog_id [Integer]
         # @param context [Objects::Oven::GlobalPsContext]
         # @return [void]
+        # @raise [ActionUnavailableError] when 1/1574 lacks one of the eight parameters: nothing is sent
         # @raise [Error] the first refusal, once every one is sent
         def write_required_parameters(prog_id, context)
+          require_parameters_read!(context)
           refusals = REQUIRED_PARAMETERS.filter_map do |name, (id, type)|
             value = context.context_para_ca&.public_send(name)
             next unless unconfirmed?(name, value)
@@ -126,6 +128,17 @@ module Miele
             refusal { write_parameter(prog_id, id, type, written) }
           end
           refusals.first&.then { raise it }
+        end
+
+        # BuildProgramParameters reads all eight with LeftOrThrow before any write.
+        #
+        # @param context [Objects::Oven::GlobalPsContext]
+        # @return [void]
+        # @raise [ActionUnavailableError]
+        def require_parameters_read!(context)
+          parameters = context.context_para_ca
+          require!(REQUIRED_PARAMETERS.keys.all? { parameters&.public_send(it)&.current_value },
+                   'the oven lacks a program parameter the app reads before writing any')
         end
 
         # @yield a write

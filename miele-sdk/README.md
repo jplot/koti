@@ -351,13 +351,15 @@ oven.acknowledge(:query, 4, option: 12)  # or query.id and one of query.ack_opti
 ```
 
 The other parameters are `core_target_temperature=`, `moisture=`, `grill_level=`,
-`microwave_power=`, `browning=`, `doneness=`, `steam_bursts=` and `steam_burst_times=` (up to three
-times in seconds), and the other requests `continue_cooking`, `steam_burst` and
-`stop_keeping_warm`. `microwave_power=` takes one bit, as the app's picker writes it: 0x01 to 0x40
+`microwave_power=`, `browning=` and `doneness=`, and the other requests `continue_cooking`,
+`steam_burst` and `stop_keeping_warm`. The SDK sets no steam burst count or time: the app 4.19.0
+never enables its cells for them, so it never writes either. `microwave_power=` takes one bit, as the app's picker writes it: 0x01 to 0x40
 for 80 to 1000 W (steps 1 to 7 on an oven of `ContinentVariant` 2), among those set in
 `program_context.context_para_ca.mw_power.supported_bits`; any other value raises `ArgumentError`.
 An `mw_power` that is not readable raises `Miele::Sdk::ActionUnavailableError`, the app then
-showing no microwave section.
+showing no microwave section. When the oven answers 500 to the write, the SDK reads 1/131 every 3
+seconds, as the app does, and takes the write as done if info 14 shows within the app's 6 seconds;
+otherwise it raises the 500.
 
 Each of these actions makes the checks the app's rules make before it, and raises
 `Miele::Sdk::ActionUnavailableError` without sending anything when one fails:
@@ -374,12 +376,25 @@ Each of these actions makes the checks the app's rules make before it, and raise
   `Miele::Sdk::ActionFailedError` and writes no parameter.
 - A parameter needs remote control without local control and a program on the oven, and a mobile
   start too once the program has started (waiting, running, paused or ended) or for program 361.
+  It also needs the section the app shows for it: none while 1/131 shows message 20 or 19 (keep
+  warm or rapid cooling running after the program); its Rules.ProgramParameters rule then wants a
+  value readable on 1/1574 (request mask 8); for all but browning and doneness, a function on 1/1585
+  (program type 2, 3, 4, 5, 7, 8, 38 or 50) that 1/1574 shows too (ShouldHideProgramParameters);
+  a current target temperature above zero; no duration or start
+  time while the oven runs or pauses with a duration set; and no start or end time while a
+  readable duration is unset. Options need that function and each option readable. The cell the
+  app enables needs a writable value (request mask 1), and mobile start too for browning and
+  doneness, for the duration, start and end times of an own or automatic program, and for an
+  automatic program's options.
   `duration = 0` first moves the start to its minimum, as the app does.
 - `start` refuses a program that requires a duration not set yet. It first writes the parameters
   the program requires and the user has not confirmed, with the values they show, a temperature
   through degrees and back as the app does (3730 writes 3729), then sends request 1, or 113 when
   the oven does not offer 1. Like the app, it writes every one of them though one is refused, then
-  raises the first refusal without starting. An automatic program starts by writing its
+  raises the first refusal without starting. The app reads all eight it may write (temperature,
+  core temperature, moisture, grill level, microwave power, duration, browning, doneness) before
+  writing any: when 1/1574 lacks one, `start` writes none and raises
+  `Miele::Sdk::ActionUnavailableError`, and a selection writes none. An automatic program starts by writing its
   start time instead; another program takes `start_at=` beforehand, and `start(at:)` raises
   `ArgumentError` for it.
 - `stop` needs one of requests 2, 55, 56 and 57 offered, no pyrolysis abort running, and remote
@@ -397,7 +412,7 @@ The app then waits until the oven shows the change; but for a selection, the SDK
 oven accepts the write, and `program_context` or `notifications` show what follows. Two app behaviours rest on
 that wait and are left out: the switch-off that answers queries 4, 5, 21 and 27 as they appear,
 and the raise of doneness or browning by one step after `continue_cooking` (write it with
-`doneness=` or `browning=`). None of these writes has been sent to a real oven: their bytes follow
+`doneness=` or `browning=`, which take the checks of the app's cooking level cells). None of these writes has been sent to a real oven: their bytes follow
 the app's code, and the reads have run against a real oven through the cloud.
 
 ## Dishwashers

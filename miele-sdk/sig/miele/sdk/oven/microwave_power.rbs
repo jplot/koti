@@ -1,0 +1,29 @@
+module Miele
+  module Sdk
+    class Oven < Appliance
+      module MicrowavePower : Appliance
+        MICROWAVE_BITS: Array[Integer]
+
+        MICROWAVE_TIMEOUT: Integer
+
+        def microwave_power=: (Integer bit) -> void
+
+        private
+
+        def write_microwave_power: (Integer prog_id, Integer bit) -> void
+
+        def power_message_shown?: () -> bool?
+
+        def editable_parameters: (Symbol name) -> Objects::Oven::GlobalPsContext
+
+        def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
+
+        def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
+
+        def poll: (Integer timeout) { () -> untyped } -> untyped
+
+        def shows?: (Symbol type, *Integer ids) -> bool
+      end
+    end
+  end
+end

@@ -38,6 +38,8 @@ module Miele
 
         def write_required_parameters: (Integer prog_id, Objects::Oven::GlobalPsContext context) -> void
 
+        def require_parameters_read!: (Objects::Oven::GlobalPsContext context) -> void
+
         def refusal: () { () -> void } -> Error?
 
         def unconfirmed?: (Symbol name, untyped value) -> bool

@@ -31,17 +31,10 @@ module Hue
         def dispatch: () { (message) -> void } -> void
       end
 
-      interface _Sleeper
-        def call: (Integer seconds) -> untyped
-      end
-
       class Stream
         PATH: String
-        MAX_DELAY: Integer
 
-        @sleeper: _Sleeper
         @last_id: String?
-        @delay: Integer
 
         class BlockFailure < StandardError
           attr_reader error: Exception
@@ -49,7 +42,9 @@ module Hue
           def initialize: (Exception error) -> void
         end
 
-        def initialize: (?sleeper: _Sleeper) -> void
+        def initialize: (?last_event_id: String?) -> void
+
+        def last_event_id: () -> String?
 
         def each: () { (Event) -> void } -> void
 
@@ -60,8 +55,6 @@ module Hue
         def deliver: (Parser::message message) { (Event) -> void } -> void
 
         def headers: (String key) -> Hash[String, String]
-
-        def wait: () -> void
 
         def events: (String data) -> Array[Event]
 

@@ -7,6 +7,12 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `events` no longer reconnects, nor sends its request a second time as Net::HTTP would: it reads
+  the stream once and raises `ConnectionError` when it breaks. `Events::Stream` takes the `last_event_id:` of
+  an earlier stream to resume from; `sleeper:` is gone.
+
 ### Added
 
 - Configuration of the bridge address, identity, keys and timeouts through `Hue::Sdk.configure`.
@@ -19,8 +25,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - A model and an entry point for each of the 47 resource types of the Bridge Pro firmware,
   offering only the operations the bridge accepts, with `owner`, `children` and `services`
   associations; deprecated fields are left out.
-- Real-time events through `Hue::Sdk.events`, with automatic reconnection sending the id of the
-  last event received.
+- Real-time events through `Hue::Sdk.events` and `Events::Stream`, which resumes from the id of the last
+  message read (`Last-Event-ID`).
 - Entertainment streaming over DTLS 1.2 with a pre-shared key (`require 'hue/sdk/entertainment'`,
   with the `ffi` gem), through the libssl Ruby's OpenSSL extension is linked with; the lights of
   the area are put back as they were when streaming ends.

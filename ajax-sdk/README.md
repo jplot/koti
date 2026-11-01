@@ -344,8 +344,11 @@ exchange.close                                # cancels the call, as the app end
 ```
 
 The call ends when the gateway ends it, when a message is a failure (`each` raises it), or at `close`;
-it never half-closes. A write after the end raises `IOError`. Before the first message, an expired
-session logs in again and the call starts over with every request written so far.
+it never half-closes. `write` builds its message at once, so a request the path does not take raises
+there; once `each` has returned, `write` raises `IOError`, and a request written between the gateway's end
+and that return is dropped. An exchange runs once; without a block, `each` returns an Enumerator. Before
+the first message, an expired session logs in again and the call starts over with every request written
+so far.
 
 ## Errors
 

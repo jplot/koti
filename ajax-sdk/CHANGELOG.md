@@ -23,6 +23,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `video_channels(space_id)`, `Streams` and `live_video`: a live WebRTC session with an Ajax camera, whose
+  signaling `LiveVideo` relays between the cloud and a browser in the shapes `RTCPeerConnection` takes.
 - `exchange(path)`: a bidi call that stays open while requests are written from any thread, read with
   `each` and cancelled with `close`, as the app holds its WebRTC and cloud archive streams.
 - `current_member(space_id)`: the signed-in account's role and permissions in a space, which the app reads to

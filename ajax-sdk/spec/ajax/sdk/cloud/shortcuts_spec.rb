@@ -319,6 +319,42 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         .to eq([%i[set_state_commands], { space_locator: { space_id: 'space-1' } }])
     end
 
+    def photo_families
+      { MOTION_CAM: %i[motion_cam motion_cam_phod motion_cam_s_phod motion_cam_superior_phod motion_cam_s_phod_am
+                       motion_cam_g3],
+        MOTION_CAM_OUTDOOR: %i[motion_cam_outdoor motion_cam_outdoor_phod motion_cam_outdoor_two_four_phod
+                               superior_motion_cam_outdoor_phod superior_motion_cam_outdoor_hm_phod
+                               curtain_cam_outdoor_hm_phod],
+        MOTION_CAM_FIBRA_BASE: %i[motion_cam_phod_fibra],
+        NO_DEVICE_TYPE_INFO: %i[motion_cam_fibra_base motion_cam_fibra] }
+    end
+
+    it 'asks each MotionCam the app knows for photos with the family it names it by', :aggregate_failures do
+      photo_families.values.flatten.each { client.take_photo(device(it)) }
+      expected = photo_families.flat_map { |family, kinds| [family] * kinds.size }
+
+      expect(sent.map(&:first).uniq).to eq(['PhotoOnDemandService/capturePhoto'])
+      expect(sent.map { it.last[:device_type] }).to eq(expected)
+      expect(sent.map { it.last.except(:device_type) }).to all(eq(target))
+    end
+
+    it 'refuses a photo from a device the app has no family for, sending nothing', :aggregate_failures do
+      expect { client.take_photo(device(:motion_cam_video_base)) }.to raise_error(ArgumentError, /video_base/)
+      expect { client.take_photo(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
+      expect(sent).to be_empty
+    end
+
+    it 'reads the media of a notification, each state as the cloud sends it', :aggregate_failures do
+      image = { status: :IMAGE_STATUS_READY, file_name: 'p1.jpg', url: 'https://media.example.com/p1.jpg' }
+      success = Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Notification::StreamNotificationMediaResponse::Success
+      replying([success.from({ media: { hub_notification_media: { images: [image] } } })].each)
+      media = client.notification_media('space-1', 'n1').first
+
+      expect(media.hub_notification_media.images.map { [it.status, it.url] }).to eq([[:ready, image[:url]]])
+      expect(sent.last).to eq(['NotificationLogService/streamNotificationMedia',
+                               { notification_id: 'n1', origin: { space_id: 'space-1' } }])
+    end
+
     def catalogue
       player = Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Service::StreamVideoPlayer
       capabilities = { ptz: { flags: [:CAN_PANTILT] }, has_sub_stream: true }
@@ -373,7 +409,7 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         close_shutter: [device(:roller_shutter_ls)], stop_shutter: [device(:roller_shutter_ls)],
         move_shutter: [device(:roller_shutter_ls), 5], bypass: [device(:door_protect)],
         unbypass: [device(:door_protect)], arm_group: %w[space-1 g1], disarm_group: %w[space-1 g1],
-        set_security_mode: ['space-1', :regular],
+        set_security_mode: ['space-1', :regular], take_photo: [device(:motion_cam_phod)],
         panic: ['space-1'], lock: [device(:smart_lock)], unlock: [device(:smart_lock)],
         unlatch: [device(:smart_lock, hub: false)], mute: [fire], mute_fire_detectors: ['0000ABCD'],
         reset_fire_alarm: ['0000ABCD'], rename: [device(:relay), 'x'], update_device_settings: [device(:relay)],
@@ -383,7 +419,7 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
     def reads
       { rooms: ['space-1'], groups: ['space-1'], current_member: ['space-1'], scenarios: ['space-1'],
         hub_details: %w[space-1 0000ABCD],
-        device_details: [device(:door_protect)] }
+        device_details: [device(:door_protect)], notification_media: %w[space-1 n1] }
     end
 
     before do

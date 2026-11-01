@@ -45,7 +45,22 @@ module Ajax
             source: source&.then { Source.from(it) } }
         end
         private_class_method :about, :marks
+        # rubocop:disable Style/Documentation -- a comment on the class reopened below would replace this docstring
       end
+
+      class Notification
+        # @return [Data, nil] the photos of a hub notification, as an +ImageResource+: their status and who may see
+        #   them. {Shortcuts::Media#notification_media} gives their addresses. The app reads a notification with
+        #   two such entries as one without photos.
+        def image_resource
+          found = raw[:additional_data].to_a.select { it[:hub_image_resource] }
+          return unless found.one?
+
+          Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::NotificationAdditionalData
+            .from(found.first).hub_image_resource
+        end
+      end
+      # rubocop:enable Style/Documentation
     end
   end
 end

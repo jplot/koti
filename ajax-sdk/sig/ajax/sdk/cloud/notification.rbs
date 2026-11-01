@@ -30,6 +30,7 @@ module Ajax
         def self.from: (Hash[Symbol, untyped] raw, ?parent_id: String?) -> Notification
         def self.about: (Hash[Symbol, untyped] content) -> { event: Symbol?, transition: Symbol?, source: Source? }
         def self.marks: (Hash[Symbol, untyped] raw) -> { folder: Symbol, importance: Symbol, read: bool, token: String }
+        def image_resource: () -> ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification::Hub::Additional::Data::ImageResource?
       end
     end
   end

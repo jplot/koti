@@ -21,6 +21,7 @@ module Ajax
         module LOCATOR = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Locator
         module HUBSVC = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Hubsvc::Commonmodels
         module SPACE = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Common::Space
+        module NOTIFICATION = ::Ajax::Sdk::Cloud::Messages::Api::Ecosystem::V2::Communicationsvc::Mobile::Commonmodels::Notification
 
         type target = { hub_id: String, device_id: String }
         type switched = { hub_id: String, device_id: String, device_type: HUBSVC::ObjectType, channels: Array[Integer] }
@@ -109,6 +110,15 @@ module Ajax
           def space_snapshot: (String space_id) -> SPACE::Space?
         end
 
+        module Media : Methods
+          include Targets
+
+          PHOTO_FAMILIES: Hash[Symbol, :cam | :cam_outdoor | :cam_fibra_base | :no_device_type_info]
+
+          def take_photo: (Device device) -> nil
+          def notification_media: (String space_id, String notification_id) -> Enumerator::Lazy[NOTIFICATION::NotificationMedia, untyped]
+        end
+
         module Video : Methods
           include Targets
 
@@ -131,6 +141,7 @@ module Ajax
         include Outputs
         include Protection
         include Details
+        include Media
         include Video
       end
     end

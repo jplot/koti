@@ -14,8 +14,8 @@ module Miele
         SHOWN_WITH_ANY_PROGRAM = %i[browning doneness].freeze
         OPTIONS = { 21 => :use_rapid_heating, 24 => :use_pre_heating, 25 => :use_crisp_function,
                     26 => :use_rapid_cooling, 27 => :use_holding }.freeze
-        # The raw programtypes ConvertProgramType makes Own, Automatic or Helper, and Automatic alone.
-        FIXED_TIME_TYPES = [1, 2, 3, 4].freeze
+        # The raw programtypes ConvertProgramType makes Own or Automatic, and Automatic alone.
+        FIXED_TIME_TYPES = [2, 3, 4].freeze
         AUTOMATIC_TYPES = [2, 3].freeze
         # Keep warm and rapid cooling (OptionsRunningAfterEndSource): DetailParameterSectionViewModel and the
         # temperature sections hide while 1/131 shows one.

@@ -51,7 +51,9 @@ module Google
     end
 
     class FileDescriptorSet
+      def self.new: (**untyped) -> untyped
       def self.decode: (String) -> untyped
+      def self.encode: (untyped) -> String
       def file: () -> untyped
     end
   end

@@ -316,6 +316,45 @@ Each channel's permissions sit in `current_member(space_id)`, under `devices_per
 `:view_archive`, `:sound` for the sound and talk-back, and `:ptz`, which `ptz: true` takes on top of the
 channel's `ptz` capability.
 
+## Camera data channel
+
+A live or archive session with an Ajax camera (`stream_webrtc`) carries a WebRTC data channel, which the far
+end opens: the app never creates it. The browser that plays the video talks to the camera over it, so the
+back-end never sees it: playing, pausing and seeking the camera's archive, its timeline, PTZ, and metadata
+frames such as overlays and thumbnails. Its messages are protobuf, `ajax.dcp.v1.ClientMsg` from the browser and `ajax.dcp.v1.ServerMsg`
+from the camera, and the frames hold `ajax.video.v1.metadata` messages. `Schemas.descriptor_set` gives their
+schemas to a front that encodes and decodes them:
+
+```ruby
+schemas = Ajax::Sdk::Cloud::Schemas.descriptor_set('ajax/dcp/v1/dcp.proto', 'ajax/video/v1/metadata/metadata.proto')
+# a serialized FileDescriptorSet, each file after its imports: protobuf.js reads it with Root.fromDescriptor,
+# from protobufjs/ext/descriptor, and keeps the proto field names (sync_marker)
+```
+
+What the app 3.59 does on the channel, never tested here (the koti space has no camera):
+
+- **Framing.** Each message goes after its length, a little-endian 32-bit integer that counts these 4 bytes;
+  a message can span several data channel messages. The app sets only the low byte of the length it sends,
+  which is right under 256 bytes, as all its commands are.
+- **Opening.** Once the channel is open, the app sends `hello` with
+  `supported_compression_methods: [:CM_GZIP]`; the camera may then send `compressed`, the gzip of a
+  `ServerMsg.Uncompressed` holding `frame_data` or `archive_timeline`.
+- **Addressing.** Every command carries `tag`, the `dcp_tag` of the stream it is about, and `sync_marker`,
+  which the app counts up from one command to the next; its `hello` carries neither. The app holds its
+  commands while the channel buffers 1,024 bytes or more.
+- **Commands.** `archive_play` (`speed`, 1.0), `archive_pause`, `archive_seek` (`ts`; when the previous seek
+  was less than 200 ms before, `economy: true` at once and an exact seek of the same instant 200 ms later,
+  otherwise one exact seek), `archive_play_range` (`ts_range` in whole seconds,
+  `speed` 0, `loop` false), `archive_reopen` (points a stream at a new `tag`, type, filter and range);
+  `ptz_move` (`speed_x`, `speed_y`), `ptz_zoom` and `ptz_focus` (`speed`, positive for zoom in and
+  Focus+, negative for zoom out and Focus-; a tap sends 1, then 0 50 ms later, and a release sends 0). The app never sends `ptz_stop`,
+  `archive_change_range` or `archive_multi_play_range`, and its PTZ home button does not use the channel.
+- **Camera messages.** `archive_status` (playing or paused, and the position);
+  `archive_timeline`, whose `seconds` holds a byte per second from `ts_range.min_value`, bit 0 set when that
+  second is recorded, to merge or to replace as `update_type` says; `frame_data`, whose frames each hold
+  the metadata message their `type` names (`Thumbnail`, a JPEG; `Figures`, overlays such as detection boxes, labels and lines; `A`, the
+  activity; `PirMotion`; `RadarMotion`); `quality_report`; `hello`, which says whether `archive_reopen` works.
+
 ## Any method
 
 Every gRPC method the app has is in the shipped schema table, and the client has a method for each of

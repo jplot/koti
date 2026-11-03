@@ -62,13 +62,10 @@ RSpec.describe Hue::Sdk, :live do
     listener&.kill
   end
 
-  it 'reads a few seconds of events in typed values' do
-    values = Queue.new
-    listener = Thread.new { Hue::Sdk::Events::Stream.new.each { values << it.attributes } }
-    listener.join(3)
-    expect(Array.new(values.size) { values.pop }.compact).to all(be_a(Hue::Sdk::Schema::Value))
-  ensure
-    listener&.kill
+  it 'reads every resource of the bridge as the changes of an event', :aggregate_failures do
+    resources = Hue::Sdk::Client.get('/resource')
+    expect(resources).not_to be_empty
+    resources.each { |resource| expect { Hue::Sdk::Schema::CHANGES[resource['type']]&.from(resource) }.not_to raise_error }
   end
 
   it 'cannot write' do

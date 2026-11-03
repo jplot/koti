@@ -68,17 +68,15 @@ class SchemaGenerator
 
     def add(classes, resources)
       names = reached(classes, resources.each_value.map { it.fetch('response') })
-      classes.merge!(names.to_h { [name(it), twin(classes.fetch(it))] })
-      resources.each_value { it['change'] = name(it.fetch('response')) }
+      classes.merge!(names.to_h { [change_of(it), twin(classes.fetch(it))] })
+      resources.each_value { it['change'] = change_of(it.fetch('response')) }
     end
 
-    def reached(classes, names)
-      names.each { |name| names.concat(held(classes.fetch(name)) - names) }
-    end
+    def reached(classes, names) = names.each { |name| names.concat(held(classes.fetch(name)) - names) }
 
     def held(cls) = cls['fields'].values.filter_map { SchemaGenerator.held(it['type']) }.uniq
 
-    def name(origin) = "#{origin}Change"
+    def change_of(origin) = "#{origin}Change"
 
     def twin(cls)
       fields = cls['fields'].transform_values { it.merge('type' => type(it['type']), 'required' => false) }
@@ -86,8 +84,8 @@ class SchemaGenerator
     end
 
     def type(type)
-      return type == 'BehaviorConfiguration' ? 'Hash' : type if type.is_a?(String)
-      return { 'class' => name(type['class']) } if type['class']
+      return type if type.is_a?(String)
+      return { 'class' => change_of(type['class']) } if type['class']
 
       type.transform_values { type(it) }
     end

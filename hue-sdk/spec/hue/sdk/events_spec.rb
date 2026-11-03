@@ -66,12 +66,20 @@ RSpec.describe Hue::Sdk::Events do
       expect(event_of('new_type', { 'x' => 1 }).attributes).to be_nil
     end
 
-    it 'gives an empty value for a deleted resource' do
-      expect(event_of('light', {}, kind: :delete).attributes.on).to be_nil
+    it 'gives a deleted resource its id alone', :aggregate_failures do
+      value = event_of('light', {}, kind: :delete).attributes
+      expect(value.id).to eq('r')
+      expect(value.on).to be_nil
+    end
+
+    it 'gives the id of the resource, which the stream takes out of the changes' do
+      expect(event_of('light', { 'on' => { 'on' => true } }).attributes.id).to eq('r')
     end
 
     it 'leaves the changes as they are' do
-      expect(event_of('light', { 'on' => { 'on' => true } }).changes).to eq('on' => { 'on' => true })
+      event = event_of('light', { 'on' => { 'on' => true } })
+      event.attributes
+      expect(event.changes).to eq('on' => { 'on' => true })
     end
   end
 end

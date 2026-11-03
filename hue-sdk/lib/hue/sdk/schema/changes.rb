@@ -325,7 +325,7 @@ module Hue
       # @!attribute [r] state
       #   @return [BehaviorStateChange, nil]
       # @!attribute [r] configuration
-      #   @return [Hash{String=>Object}, nil]
+      #   @return [Value, Hash{String=>Object}, nil]
       # @!attribute [r] dependees
       #   @return [Array<ResourceDependeeChange>, nil]
       # @!attribute [r] status

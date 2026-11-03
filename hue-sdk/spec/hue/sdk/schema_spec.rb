@@ -74,6 +74,14 @@ RSpec.describe Hue::Sdk::Schema do
     expect(value.configuration).to eq('where' => [])
   end
 
+  it 'types the configuration of an added automation, whose event gives its script' do
+    where = [{ 'group' => { 'rid' => 'r', 'rtype' => 'room' } }]
+    value = described_class::BehaviorInstanceChange.from(
+      'script_id' => described_class::BEHAVIOR_SCRIPTS.fetch(:smoke_alarm), 'configuration' => { 'where' => where }
+    )
+    expect(value.configuration.where.first.group.rid).to eq('r')
+  end
+
   it 'types the changed state of an automation' do
     value = described_class::BehaviorInstanceChange.from('state' => { 'timer_state' => 'paused' })
     expect(value.state.timer_state).to eq('paused')

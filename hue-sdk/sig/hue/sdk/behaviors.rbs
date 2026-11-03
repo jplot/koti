@@ -1,8 +1,12 @@
 module Hue
   module Sdk
     module Schema
-      class BehaviorInstance
-        def self.read_configuration: (String? script_id, untyped data) -> untyped
+      module TypedConfiguration : Value::ClassMethods
+        def from: (Hash[String, untyped] data) -> untyped
+
+        private
+
+        def read_configuration: (String? script_id, untyped data) -> untyped
       end
     end
   end

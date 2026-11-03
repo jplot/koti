@@ -13,7 +13,7 @@ module Hue
 
       def resource: () -> Models::Base::Instance
 
-      def attributes: () -> Data?
+      def attributes: () -> Schema::Value?
     end
 
     module Events

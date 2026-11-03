@@ -75,8 +75,9 @@ RSpec.describe Miele::Sdk::Appliance do
   context 'when the appliance answers a read without a body' do
     let(:fake) { FakeAppliance.start { [204, {}, ''] } }
 
-    it 'reads a resource without members' do
-      expect(appliance.get('/Subscriptions/')).to eq({})
+    it 'raises ResponseError, as a read needs a body' do
+      expect { appliance.get('/Subscriptions/') }
+        .to raise_error(Miele::Sdk::ResponseError, '/Subscriptions/ answered 204 without a body')
     end
   end
 

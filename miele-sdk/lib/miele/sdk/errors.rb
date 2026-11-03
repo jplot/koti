@@ -18,7 +18,7 @@ module Miele
     # The appliance refused a read: the household key does not match its own.
     class AuthenticationError < Error; end
 
-    # The appliance answered with an error status.
+    # The appliance answered with an error status, or a read without a body.
     class ResponseError < Error
       # @return [Integer] HTTP status returned by the appliance
       attr_reader :status

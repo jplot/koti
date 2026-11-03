@@ -22,9 +22,9 @@ module Miele
     end
 
     class SubscriptionError < Error
-      attr_reader failures: Hash[String, Error]
+      attr_reader failures: Hash[String, StandardError]
 
-      def initialize: (String action, Hash[String, Error] failures) -> void
+      def initialize: (String action, Hash[String, StandardError] failures) -> void
     end
 
     class NotFoundError < ResponseError

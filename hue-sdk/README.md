@@ -271,11 +271,12 @@ Hue::Sdk::Settings.time_zones                    # the time zones the bridge acc
 settings.update(time_zone: 'Europe/London')      # sends a request per setting, then reads them again
 settings.update(utc: '2026-11-03T10:00:00')      # the clock of the bridge
 settings.update(http_blocked: true)              # refuse plain HTTP
+settings.update(analytics_consent: false)        # do not share statistics
 ```
 
-The app writes nothing else there once the bridge is paired: `remote_access` and `analytics_consent` can only be read,
-and the network of the bridge stays out of the SDK. The application keys of other clients, which the same answer holds,
-stay out of the value. The SDK never wrote these settings on a real bridge.
+`remote_access` can only be read, as the app sets it when pairing. The network of the bridge and its software updates,
+which the app also writes there, stay out of the SDK, and so do the application keys of other clients, which the same
+answer holds. The SDK never wrote these settings on a real bridge.
 
 ## Associations
 

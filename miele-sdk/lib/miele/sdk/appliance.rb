@@ -12,10 +12,11 @@ module Miele
     class Appliance
       include ObjectAccess
 
-      # @return [String] address or +.local+ name of the appliance
+      # @return [String] address or +.local+ name of the appliance; through a cloud, the name its Dop1 requests give
       attr_reader :host
 
-      # @param host [String] address or +.local+ name of the appliance
+      # @param host [String] address or +.local+ name of the appliance; given +cloud:+, the name of its module as
+      #   the cloud lists it ({Cloud::Channel::Device#host}) for its Dop1 requests to reach it
       # @param ident [Schema::DeviceIdentification, nil] its identity, read from it when not given
       # @return [Appliance] an instance of its family's class
       # @api public
@@ -24,7 +25,8 @@ module Miele
         Families.claim(ident ||= probe.ident).new(host, **, ident:, fab: probe.fab)
       end
 
-      # @param host [String] address or +.local+ name of the appliance
+      # @param host [String] address or +.local+ name of the appliance; given +cloud:+, the name of its module as
+      #   the cloud lists it for its Dop1 requests to reach it
       # @param sleeper [#call] waits the given number of seconds
       # @param fab [String, nil] its fabrication number, when already known
       # @param ident [Schema::DeviceIdentification, nil] its identity, which gives its type and protocol without a read
@@ -195,14 +197,11 @@ module Miele
         cloud = @cloud if path.start_with?('/Devices/')
         return @local.request(method, path, body:, kind:) unless cloud
 
-        cloud.request(method, path, body:, kind:, host: (module_host if path.match?(%r{\A/Devices/\d+/DOP/})))
+        cloud.request(method, path, body:, kind:, host: (host if path.match?(%r{\A/Devices/\d+/DOP/})))
       end
 
       # @return [Schema::DeviceIdentification]
       def identity = @identity ||= ident
-
-      # @return [String, nil] the mDNS name of its Wi-Fi module, which the cloud routes Dop1 by
-      def module_host = @module_host ||= @cloud&.devices&.find { it.fab == fab }&.host
 
       # @param resource [String]
       # @return [Hash{String=>Object}]

@@ -166,10 +166,10 @@ module Miele
       # Reads any JSON resource.
       #
       # @param path [String] absolute path
-      # @return [Hash{String=>Object}]
+      # @return [Hash{String=>Object}] empty when the appliance answers without a body: the read succeeded
       # @raise [Error] see {Connection.request}
       # @api public
-      def get(path) = JSON.parse(send_request(:get, path).body)
+      def get(path) = send_request(:get, path).body.then { it.empty? ? {} : JSON.parse(it) }
 
       # @return [Boolean] whether its +/Devices/+ requests go through the cloud
       # @api public

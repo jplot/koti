@@ -72,6 +72,14 @@ RSpec.describe Miele::Sdk::Appliance do
     end
   end
 
+  context 'when the appliance answers a read without a body' do
+    let(:fake) { FakeAppliance.start { [204, {}, ''] } }
+
+    it 'reads a resource without members' do
+      expect(appliance.get('/Subscriptions/')).to eq({})
+    end
+  end
+
   it 'reads its state' do
     resources["/Devices/#{fab}/State"] = { 'Status' => 1, 'ProgramPhase' => 3329 }
     expect([appliance.state.status, appliance.state.program_phase]).to eq(%i[off heating_up_phase])

@@ -111,7 +111,7 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
     end
 
     it 'hands it nothing for a frame it accepts' do
-      expect(refusal(sia_frame('"NULL"0003L0#AAA[]'))).to be_nil
+      expect(refusal(sia_frame('"SIA-DCS"0003L0#AAA[#AAA|Nri1/BA3]'))).to be_nil
     end
 
     context 'with a key' do
@@ -126,6 +126,35 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
         expect(refusal(sia_frame('"SIA-DCS"0006L0#AAA[#AAA|Nri1/BA3]')))
           .to have_attributes(reply: :duh, reason: 'a clear frame while a key is set')
       end
+    end
+  end
+
+  context 'when the callback for refused frames raises' do
+    subject(:receiver) do
+      described_class.new(host: '127.0.0.1', port: 0, account: 'AAA', key:, timeband: [40, 20],
+                          refused: ->(_) { raise(IOError, 'refused io') }, &handler).start
+    end
+
+    let(:threads) { Queue.new }
+
+    before do
+      allow(Thread).to receive(:new).and_wrap_original do |original, &body|
+        original.call do
+          threads << Thread.current
+          Thread.current.report_on_exception = false
+          body.call
+        end
+      end
+    end
+
+    it 'leaves the error to the thread of that connection, after the DUH', :aggregate_failures do
+      socket = TCPSocket.new('127.0.0.1', receiver.port)
+      socket.write(sia_frame('"SIA-DCS"0001L0#BBB[#BBB|Nri1/XC12]'))
+      answers = [socket.gets("\r"), socket.wait_readable(1) && socket.read]
+      expect(answers).to eq([sia_frame('"DUH"0001L0#BBB[]'), ''])
+      expect { Array.new(2) { threads.pop }.last.join(1) }.to raise_error(IOError, 'refused io')
+    ensure
+      socket&.close
     end
   end
 

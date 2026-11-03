@@ -23,6 +23,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The entertainment DTLS handshake sends a lost flight again after 1 s, then 2 s, and gives up after 5 s,
   as documented, instead of resending every 5 s and giving up after 20 s. A handshake losing three flights
   now fails at 5 s, where it succeeded at 15 s.
+- An error reported in the event stream reaches the block as an event of kind `:error`, instead of ending the stream
+  with `NoMethodError`.
 
 ### Added
 

@@ -9,6 +9,12 @@ module Hue
 
       module Streaming : _Configuration
         def stream: () { (Session) -> void } -> void
+
+        private
+
+        def with_session: (String key) { (Session) -> void } -> void
+
+        def stop: (Exception? error) -> void
       end
     end
 

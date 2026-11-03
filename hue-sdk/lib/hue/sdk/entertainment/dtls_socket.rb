@@ -15,6 +15,14 @@ module Hue
         HANDSHAKE_TIMEOUT = 5
         private_constant :HANDSHAKE_TIMEOUT
 
+        # DTLS sends a lost flight again after 1 s, then 2 s (RFC 6347, 4.2.4.1); with a socket BIO, libssl looks
+        # at that timer only when a read returns, so a read waiting 5 s delayed it to 5 s.
+        READ_TIMEOUT = 1
+        private_constant :READ_TIMEOUT
+
+        WANT_READ = 2
+        private_constant :WANT_READ
+
         # @param host [String] bridge address
         # @param identity [String] PSK identity: the application key
         # @param psk [String] raw pre-shared key: the client key decoded from hex
@@ -44,12 +52,17 @@ module Hue
         # @raise [ConnectionError] if the handshake fails
         # @api private
         def handshake
-          result = LibSSL.SSL_connect(@ssl)
-          return if result == 1
+          deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + HANDSHAKE_TIMEOUT
+          loop do
+            result = LibSSL.SSL_connect(@ssl)
+            return if result == 1
 
-          error = LibSSL.SSL_get_error(@ssl, result)
-          close
-          raise ConnectionError, "#{@endpoint}: DTLS handshake failed (SSL error #{error})"
+            error = LibSSL.SSL_get_error(@ssl, result)
+            next if error == WANT_READ && Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline
+
+            close
+            raise ConnectionError, "#{@endpoint}: DTLS handshake failed (SSL error #{error})"
+          end
         end
 
         # @param data [String] one message, sent as one datagram
@@ -83,14 +96,14 @@ module Hue
         private
 
         # Ruby opens sockets with O_NONBLOCK: libssl's recv would return EAGAIN
-        # at once and SSL_connect give up before the bridge answers.
+        # at once, and the handshake spin on SSL_connect until its deadline.
         #
         # @param host [String]
         # @param port [Integer]
-        # @return [UDPSocket] connected, blocking, reads time out after 5 seconds
+        # @return [UDPSocket] connected, blocking, reads time out after a second
         # @api private
         def blocking_socket(host, port)
-          timeval = [HANDSHAKE_TIMEOUT, 0].pack('l_2')
+          timeval = [READ_TIMEOUT, 0].pack('l_2')
           UDPSocket.new.tap do |socket|
             socket.connect(host, port)
             socket.nonblock = false # steep:ignore NoMethod

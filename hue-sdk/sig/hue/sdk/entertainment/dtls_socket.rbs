@@ -6,6 +6,10 @@ module Hue
 
         HANDSHAKE_TIMEOUT: Integer
 
+        READ_TIMEOUT: Integer
+
+        WANT_READ: Integer
+
         @endpoint: String
         @socket: UDPSocket
         @callback: untyped

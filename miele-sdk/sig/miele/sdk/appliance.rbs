@@ -13,8 +13,6 @@ module Miele
 
       @local: Connection::Local
 
-      @module_host: String?
-
       @cloud: Cloud::Channel?
 
       @device_type: Symbol?
@@ -83,8 +81,6 @@ module Miele
       def send_request: (Symbol method, String path, ?body: String?, ?kind: Symbol) -> Connection::Response
 
       def identity: () -> Schema::DeviceIdentification
-
-      def module_host: () -> String?
 
       def device: (String resource) -> resource
 

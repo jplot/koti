@@ -34,18 +34,42 @@ module Hue
         # @return [void]
         # @raise [AuthenticationError] if no client key is configured
         # @raise [ConnectionError] if the DTLS handshake fails
-        # @raise [ResponseError] if the bridge refuses the start or the stop
+        # @raise [ResponseError] if the bridge refuses the start, or the stop when nothing else ended the stream
         # @api public
-        def stream
-          config = Sdk.config
-          key = config.client_key or raise AuthenticationError, 'client_key is not configured: pairing returns it'
+        def stream(&)
+          key = Sdk.config.client_key or raise AuthenticationError, 'client_key is not configured: pairing returns it'
           update(action: 'start')
-          started = true
+          begin
+            with_session(key, &)
+          rescue Exception => e # rubocop:disable Lint/RescueException -- what ended the stream outranks a failed stop
+            error = e
+            raise
+          ensure
+            stop(error)
+          end
+        end
+
+        private
+
+        # @param key [String] the client key, as hexadecimal digits
+        # @yieldparam session [Session]
+        # @return [void]
+        # @api private
+        def with_session(key)
+          config = Sdk.config
           socket = DtlsSocket.open(host: config.host.to_s, identity: config.application_key.to_s, psk: [key].pack('H*'))
           yield Session.new(socket, id)
         ensure
           socket&.close
-          update(action: 'stop') if started
+        end
+
+        # @param error [Exception, nil] what ended the stream
+        # @return [void]
+        # @api private
+        def stop(error)
+          update(action: 'stop')
+        rescue StandardError
+          raise unless error
         end
       end
     end

@@ -51,8 +51,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Dop1 settings go out with structure version 1, and the README's filter example resets the
   operating hours (40012) instead of writing the filter limit (40010) to 0.
 - DOP2 fields of every type the app knows decode and encode; strings lose their trailing NULs.
-- `Appliance#get` reads a 2xx answer without a body as an empty resource (`{}`) instead of raising
-  `JSON::ParserError`.
+- `Appliance#get` raises a `ResponseError` carrying the status for an answer without a body, instead
+  of `JSON::ParserError`, an error outside `Miele::Sdk::Error`.
 
 ### Added
 

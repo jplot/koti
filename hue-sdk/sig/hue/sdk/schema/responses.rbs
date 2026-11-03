@@ -254,8 +254,8 @@ module Hue
 
         attr_reader script_id: String
         attr_reader enabled: bool
-        attr_reader state: Hash[String, untyped]?
-        attr_reader configuration: Hash[String, untyped]
+        attr_reader state: BehaviorState?
+        attr_reader configuration: behavior_configuration
         attr_reader dependees: Array[ResourceDependee]
         attr_reader status: String
         attr_reader last_error: String
@@ -264,7 +264,7 @@ module Hue
         attr_reader id: String
         attr_reader id_v1: String?
 
-        def self.new: (script_id: String, enabled: bool, ?state: Hash[String, untyped]?, configuration: Hash[String, untyped], dependees: Array[ResourceDependee], status: String, last_error: String, metadata: InstanceMetadata, ?migrated_from: String?, id: String, ?id_v1: String?) -> BehaviorInstance
+        def self.new: (script_id: String, enabled: bool, ?state: BehaviorState?, configuration: behavior_configuration, dependees: Array[ResourceDependee], status: String, last_error: String, metadata: InstanceMetadata, ?migrated_from: String?, id: String, ?id_v1: String?) -> BehaviorInstance
         def self.from: (Hash[String, untyped] data) -> BehaviorInstance
       end
 

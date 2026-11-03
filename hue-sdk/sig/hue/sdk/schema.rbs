@@ -1,6 +1,20 @@
 module Hue
   module Sdk
     module Schema
+      module ScriptConfiguration : Value
+        def self.included: (Module base) -> void
+
+        module Reading : Value::ClassMethods
+          def from: (Hash[String, untyped] data) -> Data
+        end
+
+        def to_body: () -> Hash[Symbol, untyped]
+
+        private
+
+        def with_items: (Hash[Symbol, untyped] body) -> Hash[Symbol, untyped]
+      end
+
       module Value : Data
         type nested_type = ClassMethods | [ClassMethods]
 

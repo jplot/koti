@@ -20,6 +20,14 @@ RSpec.describe Hue::Sdk, :live do
     expect(described_class.discover.map(&:bridge_id)).to include(ENV.fetch('HUE_BRIDGE_ID').upcase)
   end
 
+  it 'reads every behavior instance in typed values, back to the JSON of the bridge' do
+    described_class.BehaviorInstance.list.each do |instance|
+      configuration = instance.attributes.configuration
+      read = configuration.is_a?(Hash) ? configuration : JSON.parse(configuration.to_json)
+      expect(read).to eq(instance.data['configuration'])
+    end
+  end
+
   it 'lists lights', :aggregate_failures do
     lights = described_class.Light.list
     expect(lights).not_to be_empty

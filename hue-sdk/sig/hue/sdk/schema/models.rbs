@@ -2,8 +2,13 @@ module Hue
   module Sdk
     module Models
       class BehaviorInstance < Base
+        def create: (Schema::BehaviorInstanceAdd request, **untyped attributes) -> Instance
+                  | (**untyped attributes) -> Instance
+
         class Instance < Base::Instance
           def attributes: () -> Schema::BehaviorInstance
+          def update: (Schema::BehaviorInstanceUpdate request, **untyped attributes) -> self
+                    | (**untyped attributes) -> self
         end
       end
 

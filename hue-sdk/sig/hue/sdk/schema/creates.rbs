@@ -154,6 +154,20 @@ module Hue
         def self.from: (Hash[String, untyped] data) -> ActionAdd
       end
 
+      class BehaviorInstanceAdd < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader script_id: String
+        attr_reader enabled: bool
+        attr_reader configuration: behavior_configuration
+        attr_reader metadata: BehaviorMetadata
+        attr_reader migrated_from: String?
+
+        def self.new: (script_id: String, enabled: bool, configuration: behavior_configuration, metadata: BehaviorMetadata, ?migrated_from: String?) -> BehaviorInstanceAdd
+        def self.from: (Hash[String, untyped] data) -> BehaviorInstanceAdd
+      end
+
       class ColorPaletteAdd < Data
         include Value
         extend Value::ClassMethods

@@ -45,3 +45,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `Hue::Sdk::Schema` value whose signature tells which fields the bridge always sends, and
   `update` and `create` accept the request classes the app sends (`Schema::LightUpdate`,
   `Schema::RoomAdd`…).
+- Automations as typed values: `behavior_instance` reads its configuration with a class per script and its
+  state with `BehaviorState`, and takes `BehaviorInstanceAdd` and `BehaviorInstanceUpdate`, triggers included.
+  `Schema::BEHAVIOR_SCRIPTS` names the scripts.

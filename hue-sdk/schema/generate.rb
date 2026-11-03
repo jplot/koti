@@ -2,19 +2,25 @@
 
 require 'json'
 
-# Writes the typed values of lib/hue/sdk/schema/ and their signatures from schema/hue.json. Run `rake schema`.
+# Writes the typed values of lib/hue/sdk/schema/ and their signatures from schema/hue.json and schema/behaviors.json.
+# Run `rake schema`.
 class SchemaGenerator
-  FILES = { 'response' => 'responses', 'update' => 'updates', 'add' => 'creates' }.freeze
+  FILES = { 'behavior' => 'behaviors', 'response' => 'responses', 'update' => 'updates', 'add' => 'creates' }.freeze
   WIDTH = 120
 
-  def initialize(schema)
-    @classes = schema.fetch('classes')
-    @resources = schema.fetch('resources')
+  # @param root [String] the folder of the gem
+  def self.load(root) = new(*%w[hue behaviors].map { JSON.parse(File.read(File.join(root, 'schema', "#{it}.json"))) })
+
+  def initialize(schema, behaviors)
+    @classes = schema.fetch('classes').merge(behaviors.fetch('classes'))
+    behaviors.fetch('overrides').each { |name, fields| override(@classes.fetch(name).fetch('fields'), fields) }
+    @resources = schema.fetch('resources').merge(behaviors.fetch('resources')) { |_, slots, more| slots.merge(more) }
+    @scripts = behaviors.fetch('scripts')
   end
 
   def files
-    ruby = RubyWriter.new(@classes, @resources)
-    rbs = RbsWriter.new(@classes, @resources)
+    ruby = RubyWriter.new(@classes, @resources, @scripts)
+    rbs = RbsWriter.new(@classes, @resources, @scripts)
     FILES.each_with_object({}) do |(kind, name), files|
       files["lib/hue/sdk/schema/#{name}.rb"] = ruby.file(kind, ordered(kind))
       files["sig/hue/sdk/schema/#{name}.rbs"] = rbs.file(kind, ordered(kind))
@@ -22,6 +28,9 @@ class SchemaGenerator
   end
 
   def write(root) = files.each { |path, content| File.write(File.join(root, path), content) }
+
+  # A configuration of an automation script is the only class that keeps the keys it does not know.
+  def self.script(fields) = fields.key?('unknown') ? ['        include ScriptConfiguration'] : []
 
   def self.held(type)
     return unless type.is_a?(Hash)
@@ -31,10 +40,13 @@ class SchemaGenerator
 
   private
 
-  # Classes of one kind, each after the classes it holds, so that its declaration can name them.
+  def override(fields, changes) = changes.each { |key, change| fields[key] = fields.fetch(key).merge(change) }
+
+  # Classes of one kind, each after the classes it holds, so that its declaration can name them. A class of another
+  # kind stays in the file of its own.
   def ordered(kind)
     names = @classes.select { |_, c| c['kind'] == kind }.keys.sort
-    names.each_with_object([]) { |name, done| visit(name, done) }
+    names.each_with_object([]) { |name, done| visit(name, done) }.select { @classes[it]['kind'] == kind }
   end
 
   def visit(name, done)
@@ -44,11 +56,45 @@ class SchemaGenerator
     done << name
   end
 
+  # Writes the tables of the automation scripts.
+  module ScriptTables
+    module_function
+
+    def ruby(scripts)
+      names = scripts.map { |id, script| "  #{script['name']}: '#{id}'" }.sort.join(",\n")
+      classes = scripts.map { |id, script| "  '#{id}' => #{script['configuration']}" }.sort.join(",\n")
+      <<~RUBY.gsub(/^(?=.)/, '      ')
+        # Id of each automation script, by a stable name.
+        BEHAVIOR_SCRIPTS = {
+        #{names}
+        }.freeze
+
+        # Configuration value class of each automation script, by its id.
+        BEHAVIOR_CONFIGURATIONS = {
+        #{classes}
+        }.freeze
+      RUBY
+    end
+
+    def rbs(scripts)
+      classes = scripts.each_value.map { it['configuration'] }.uniq.sort
+      <<~RBS.gsub(/^(?=.)/, '      ')
+        type behavior_configuration = #{classes.join(' | ')} | Hash[String, untyped]
+
+        BEHAVIOR_SCRIPTS: Hash[Symbol, String]
+
+        BEHAVIOR_CONFIGURATIONS: Hash[String, Value::ClassMethods]
+      RBS
+    end
+  end
+
   # Writes the Ruby value classes.
   class RubyWriter
     YARD = { 'String' => 'String', 'Integer' => 'Integer', 'Numeric' => 'Numeric', 'Boolean' => 'Boolean',
-             'Hash' => 'Hash{String=>Object}', 'Object' => 'Object' }.freeze
+             'Hash' => 'Hash{String=>Object}', 'Object' => 'Object',
+             'BehaviorConfiguration' => 'Value, Hash{String=>Object}' }.freeze
     SUMMARY = {
+      'behavior' => ['Part of an automation as the Hue app describes it', nil],
       'response' => ['Part of a resource as the bridge reports it', 'The +%s+ resource as the bridge reports it'],
       'update' => ['Part of the changes sent to update a resource', 'The changes sent to update a +%s+ resource'],
       'add' => ['Part of a resource sent to create it', 'A +%s+ resource sent to create it']
@@ -56,15 +102,17 @@ class SchemaGenerator
     # Members the bridge names like a method of Data; they shadow it, which the value classes never call.
     SHADOWING = 'Lint/DataDefineOverride -- the bridge names this key'
 
-    def initialize(classes, resources)
+    def initialize(classes, resources, scripts)
       @classes = classes
       @resources = resources
+      @scripts = scripts
     end
 
     def file(kind, names)
       body = names.map { define(it) }.join("\n")
       body += "\n#{responses}" if kind == 'response'
-      "# frozen_string_literal: true\n\n# Generated by schema/generate.rb from schema/hue.json: do not edit.\n\n" \
+      body += "\n#{ScriptTables.ruby(@scripts)}" if kind == 'behavior'
+      "# frozen_string_literal: true\n\n# Generated by schema/generate.rb from its data in schema/: do not edit.\n\n" \
         "module Hue\n  module Sdk\n    module Schema\n#{body}    end\n  end\nend\n"
     end
 
@@ -73,7 +121,8 @@ class SchemaGenerator
     def define(name)
       fields = @classes[name]['fields']
       shadowing = fields.keys.intersect?(Data.instance_methods.map(&:to_s))
-      lines = [*docs(name), head(name, fields), '        include Value', *macros(fields), '      end']
+      lines = [*docs(name), head(name, fields), '        include Value', *SchemaGenerator.script(fields),
+               *macros(fields), '      end']
       lines = shadow(lines) if shadowing
       "#{lines.join("\n")}\n"
     end
@@ -104,10 +153,18 @@ class SchemaGenerator
     def docs(name)
       cls = @classes[name]
       attributes = cls['fields'].flat_map { |key, field| attribute(key, field) }
-      lines = paragraph("#{summary(name, cls['kind'])} (Hue app class +#{cls['origin']}+).", '')
+      lines = paragraph(description(name, cls), '')
       lines.push('', *attributes) if attributes.any?
       lines.map { "      # #{it}".rstrip }
     end
+
+    def description(name, cls)
+      return "#{summary(name, cls['kind'])} (Hue app class +#{cls['origin']}+)." unless script?(name)
+
+      "The configuration of the +#{cls['origin']}+ automation script, from the steps of its definition in the Hue app."
+    end
+
+    def script?(name) = @scripts.each_value.any? { it['configuration'] == name }
 
     def attribute(key, field) = ["@!attribute [r] #{key}", *paragraph("@return [#{yard(field)}]#{values(field)}", '  ')]
 
@@ -156,16 +213,19 @@ class SchemaGenerator
   # Writes the RBS signatures of the value classes, and the typed methods of the models.
   class RbsWriter
     TYPES = { 'String' => 'String', 'Integer' => 'Integer', 'Numeric' => 'Numeric', 'Boolean' => 'bool',
-              'Hash' => 'Hash[String, untyped]', 'Object' => 'untyped' }.freeze
+              'Hash' => 'Hash[String, untyped]', 'Object' => 'untyped',
+              'BehaviorConfiguration' => 'behavior_configuration' }.freeze
 
-    def initialize(classes, resources)
+    def initialize(classes, resources, scripts)
       @classes = classes
       @resources = resources
+      @scripts = scripts
     end
 
     def file(kind, names)
       body = names.map { declare(it) }.join("\n")
       body += "\n      RESPONSES: Hash[String, Value::ClassMethods]\n" if kind == 'response'
+      body += "\n#{ScriptTables.rbs(@scripts)}" if kind == 'behavior'
       "module Hue\n  module Sdk\n    module Schema\n#{body}    end\n  end\nend\n"
     end
 
@@ -180,7 +240,8 @@ class SchemaGenerator
       fields = @classes[name]['fields']
       readers = fields.map { |key, field| "        attr_reader #{key}: #{type(field)}" }
       params = fields.map { |key, field| "#{'?' unless field['required']}#{key}: #{type(field)}" }
-      ["      class #{name} < Data", '        include Value', '        extend Value::ClassMethods', '', *readers,
+      ["      class #{name} < Data", '        include Value', *SchemaGenerator.script(fields),
+       '        extend Value::ClassMethods', '', *readers,
        ('' if readers.any?), "        def self.new: (#{params.join(', ')}) -> #{name}",
        "        def self.from: (Hash[String, untyped] data) -> #{name}", "      end\n"].compact.join("\n")
     end
@@ -215,6 +276,4 @@ class SchemaGenerator
   end
 end
 
-if $PROGRAM_NAME == __FILE__
-  SchemaGenerator.new(JSON.parse(File.read(File.join(__dir__, 'hue.json')))).write(File.dirname(__dir__))
-end
+SchemaGenerator.load(File.dirname(__dir__)).write(File.dirname(__dir__)) if $PROGRAM_NAME == __FILE__

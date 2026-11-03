@@ -11,6 +11,7 @@ module Schema
       SIGNATURE = /\A  (\S.*)\{\s*\z/
       ADDRESS = %r{// \*\* addr: (0x\h+), size: (0x\h+)}
       POOL = /\A\[pp\+(0x\h+)\] (.*)/
+      ENUM = /\A\[pp\+0x\h+\] Map<(\w+), String>\(\d+\) \{/
 
       # @param directory [String] blutter's output
       # @param disassembler [#call] gives the instructions at an address, for a size in bytes
@@ -42,6 +43,9 @@ module Schema
 
       def string(offset) = object(offset).to_s[/\AString: "(.*)"\z/, 1]
 
+      # @return [Array<String>, nil] the values of an enum, from the map json_serializable decodes it with
+      def enum_values(name) = (@enums ||= read_enums)[name]
+
       def instructions(address, size) = @disassembler.call(address, size)
 
       def source(library) = File.join(@directory, 'asm', library)
@@ -56,6 +60,13 @@ module Schema
           address, size = line.match(ADDRESS)&.captures
           @functions[address.hex] = Function.new("#{owner}.#{signature[/(\S+)\(/, 1]}", size.hex) if address
         end
+      end
+
+      def read_enums
+        File.readlines(File.join(@directory, 'pp.txt')).slice_before(ENUM).filter_map do |head, *lines|
+          name = head[ENUM, 1]
+          [name, lines.take_while { !it.start_with?('}') }.filter_map { it[/: "(.*)",?\s*\z/, 1] }] if name
+        end.to_h
       end
 
       def read_pool

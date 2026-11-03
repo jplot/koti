@@ -1,6 +1,6 @@
 # Typed values
 
-`hue.json` describes every typed value of `Hue::Sdk::Schema`; `generate.rb` turns it into
+`hue.json` and `behaviors.json` describe every typed value of `Hue::Sdk::Schema`; `generate.rb` turns them into
 `lib/hue/sdk/schema/*.rb` and `sig/hue/sdk/schema/*.rbs`. Neither the gem nor its specs read the
 description at run time, but a spec fails while the generated files differ from it.
 
@@ -33,15 +33,28 @@ description at run time, but a spec fails while the generated files differ from 
 - **Check.** Every resource of a Bridge Pro (BSB003, software 6.3.2071556020) parses against these
   classes; the only key they lack is `type` in the `dependees` of a `behavior_instance`.
 
+- **Automations.** `behaviors.json` holds what the configuration of a `behavior_instance` is made of, as the same
+  classes in `classes`, with:
+  - `scripts`: the id of each script, its stable name and its configuration class;
+  - `resources` and `overrides`: what it adds to `hue.json`, the requests of `behavior_instance` and the types of its
+    `configuration` and `state`.
+
+  The bridge only refers to the schemas of these forms (`{"$ref": "basic_wake_up_config.json#"}`), and the app has no
+  class for a configuration. So a configuration comes from the definition of its script in the assets of the APK
+  (`packages/behavior_ui/lib/assets/behaviors/*/behavior.yaml`): each step with a `result_name` gives a key, and the type
+  of the step gives its value, as `BehaviorEncoder` writes it. A key is required unless a feature gates it or the app
+  gives it a default when it is missing. The values themselves are the classes json_serializable
+  writes in `behavior_bridge_control`, where a key is required when its `fromJson` reads it once, and not nullable.
+
 ## Regenerating
 
-Edit `hue.json`, then:
+Edit `hue.json` or `behaviors.json`, then:
 
 ```sh
 bundle exec rake schema
 ```
 
-## Rebuilding hue.json
+## Rebuilding the data
 
 `extract/` rebuilds `hue.json` from a newer version of the app. The app, blutter, aiohue and the
 capture of a bridge stay out of the repository; the capture holds a home's data. It needs Python
@@ -86,3 +99,15 @@ On stderr, it lists by kind what to check:
   optional but the `id`, and their request fields follow the app alone.
 - `request type inferred from the response class`, `request type taken from aiohue`: where a
   request field got its type, for information.
+
+`behaviors.json` comes from the same output of blutter, and the assets of the base APK:
+
+```sh
+unzip path/to/base.apk 'assets/flutter_assets/packages/behavior_ui/lib/assets/behaviors/*' -d path/to/assets
+LLVM_OBJDUMP=… bundle exec ruby schema/extract/build_behaviors.rb path/to/blutter-output path/to/libapp.so \
+  path/to/assets/assets/flutter_assets/packages/behavior_ui/lib/assets/behaviors > schema/behaviors.json
+bundle exec rake schema
+```
+
+It stops on a step type it does not know, an enum the app no longer has, or a value class of the app whose name `hue.json`
+takes.

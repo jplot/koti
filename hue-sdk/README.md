@@ -130,16 +130,16 @@ light.update(Hue::Sdk::Schema::LightUpdate.new(
 ))
 ```
 
-The app has request classes for 19 types to update and 8 to create, listed below. The hash form
-remains for the other types, and keywords given along with a request are added to its body for the
-fields the app never sends.
+The app has request classes for 19 types to update and 8 to create, listed below with those of
+`behavior_instance`, which it writes by hand. The hash form remains for the other types, and keywords
+given along with a request are added to its body for the fields the app never sends.
 
 <details>
 <summary>Resource types and operations</summary>
 
 | Type | Entry point | Operations | Typed requests |
 |---|---|---|---|
-| `behavior_instance` | `Hue::Sdk.BehaviorInstance` | list, get, create, update, delete | — |
+| `behavior_instance` | `Hue::Sdk.BehaviorInstance` | list, get, create, update, delete | `BehaviorInstanceUpdate`, `BehaviorInstanceAdd` |
 | `behavior_script` | `Hue::Sdk.BehaviorScript` | list, get, update | — |
 | `behavior_script_formula` | `Hue::Sdk.BehaviorScriptFormula` | list, get, create, delete | — |
 | `bell_button` | `Hue::Sdk.BellButton` | list, get, update | — |
@@ -188,6 +188,54 @@ fields the app never sends.
 | `zone` | `Hue::Sdk.Zone` | list, get, create, update, delete | `ZoneUpdate`, `ZoneAdd` |
 
 </details>
+
+## Automations
+
+A `behavior_instance` is an automation of the bridge: a wake-up, a timer, a schedule… Its configuration has a form per
+script, which the bridge does not describe. `attributes` reads it with a class generated from the definitions of the Hue
+app, and its state with `Hue::Sdk::Schema::BehaviorState`.
+
+```ruby
+automation = Hue::Sdk.BehaviorInstance('7b1f…').attributes
+automation.configuration                       # => a Hue::Sdk::Schema::WakeUpConfiguration, for a wake-up
+automation.configuration.when.time_point.time  # => #<data Hue::Sdk::Schema::TimeStamp hour=7, minute=0>
+```
+
+`Hue::Sdk::Schema::BEHAVIOR_SCRIPTS` gives the id of each script by a stable name: `coming_home`, `go_to_sleep`,
+`leaving_home`, `native_go_to_sleep`, `pm_automation` (presence mimicking), `smoke_alarm`, `state_after_streaming`,
+`time_based` (a schedule), `timer` and `wake_up`. The app does not know `native_go_to_sleep`, to which the bridge gives
+the schema reference of `go_to_sleep`. Any other script, such as those of switches and sensors, keeps its configuration as
+a hash. `state` reads what the app reads, and `data` always holds the JSON of the bridge, such as the `source_type` of the
+state of a switch.
+
+A configuration keeps in `unknown` the keys its class does not know, and sends them back. As in the app, a key its
+definition gives a default for may be missing, and the lights (`items`) of each scene of `what` are written from those of
+the same group in `where`.
+
+```ruby
+schema = Hue::Sdk::Schema
+room = schema::BehaviorGroup.new(rid: '8c2d…', rtype: 'room')
+seven = schema::BehaviorTimePoint.new(type: 'time', time: schema::TimeStamp.new(hour: 7, minute: 0))
+
+Hue::Sdk.BehaviorInstance.create(schema::BehaviorInstanceAdd.new(
+  script_id: schema::BEHAVIOR_SCRIPTS.fetch(:wake_up),
+  enabled: true,
+  metadata: schema::BehaviorMetadata.new(name: 'Morning'),
+  configuration: schema::WakeUpConfiguration.new(
+    where: [schema::BehaviorGroupAndLights.new(group: room)],
+    when: schema::BehaviorWhen.new(time_point: seven, recurrence_days: %w[monday friday]),
+    fade_in_duration: schema::BehaviorFadeDuration.new(seconds: 1800)
+  )
+))
+
+automation = Hue::Sdk.BehaviorInstance('7b1f…')
+automation.update(schema::BehaviorInstanceUpdate.new(enabled: false))
+automation.update(schema::BehaviorInstanceUpdate.new(trigger: schema::BehaviorTrigger.new(start: {}))) # stop: {} to stop
+```
+
+`BehaviorInstanceAdd` adds the types the app always names, `behavior_instance` and `instance_metadata`. The app builds
+these requests by hand; their fields come from its code. Only `coming_home`, `go_to_sleep`, `leaving_home` and
+`time_based` were read on a real bridge, and the SDK never wrote an automation on one.
 
 ## Associations
 

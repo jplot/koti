@@ -29,16 +29,20 @@ module Ajax
     # The hub gets its ACK as soon as an event is queued, so events still queued when the iteration
     # stops are lost to the caller, though the hub counts them as delivered.
     #
-    # @param refused [#call, nil] called with each frame the receiver refuses, as a {Sia::Refusal}
+    # @param refused [#call, nil] called on the caller's thread, as the block is, with each frame the receiver
+    #   refuses, as a {Sia::Refusal}
     # @yieldparam event [Sia::Event]
     # @return [Enumerator::Lazy, nil]
     # @raise [ConfigurationError] when +sia_account+ is not set
     def self.sia_events(refused: nil)
       return enum_for(:sia_events, refused:).lazy unless block_given?
 
-      events = Queue.new
-      receiver = sia_receiver(refused) { events << it }.start
-      loop { yield events.pop }
+      outcomes = Queue.new
+      receiver = sia_receiver(refused && ->(refusal) { outcomes << refusal }) { outcomes << it }.start
+      loop do
+        outcome = outcomes.pop
+        outcome.is_a?(Sia::Refusal) ? refused&.call(outcome) : yield(outcome)
+      end
     ensure
       receiver&.stop
     end

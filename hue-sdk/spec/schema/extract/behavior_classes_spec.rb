@@ -28,11 +28,24 @@ RSpec.describe Schema::Extract::BehaviorClasses do
         static _ _$BridgeBehaviorInstanceFromJson(/* No info */) {
           // ** addr: 0x600, size: 0x40
         }
+        static _ _$BridgeAccessoryConfigFromJson(/* No info */) {
+          // ** addr: 0xa00, size: 0x40
+        }
         static _ $enumDecode(/* No info */) {
           // ** addr: 0x800, size: 0x40
         }
         static Y0? $enumDecodeNullable<Y0 extends Enum, Y1>(Map<Y0, Y1>, Object?) {
           // ** addr: 0x900, size: 0x40
+        }
+      }
+      class BridgeAccessoryHandWritten extends Object {
+        factory _ BridgeAccessoryHandWritten.fromJson(/* No info */) {
+          // ** addr: 0xb00, size: 0x40
+        }
+      }
+      class BridgeAccessoryActionValue extends Object {
+        static _ fromJsonActionValues(/* No info */) {
+          // ** addr: 0xc00, size: 0x40
         }
       }
     DART
@@ -59,6 +72,13 @@ RSpec.describe Schema::Extract::BehaviorClasses do
         Obj!Weekday@2: "tuesday"
       }
       [pp+0x90] String: "mode"
+      [pp+0x98] String: "buttons"
+      [pp+0xa0] Type: Map<String, dynamic>?
+      [pp+0xa8] TypeArguments: <String, BridgeBehaviorMetadata>
+      [pp+0xb0] String: "signal"
+      [pp+0xb8] TypeArguments: <Object, TimeSpan>
+      [pp+0xc0] String: "recall_single"
+      [pp+0xc8] String: "chime"
     POOL
   end
   let(:code) do
@@ -71,7 +91,11 @@ RSpec.describe Schema::Extract::BehaviorClasses do
                 "ldr\tx2, [x27, #0x90]", "blr\tx30", "ldr\tx1, [x27, #0x48]", "ldr\tx1, [x27, #0x50]", "bl\t0x900"],
       0x300 => ["ldr\tx2, [x27, #0x40]", "blr\tx30", "ldr\tx1, [x27, #0x48]", "ldr\tx1, [x27, #0x50]", "bl\t0x800"],
       0x400 => ["ldr\tx2, [x27, #0x78]", "blr\tx30", "ldr\tx1, [x27, #0x80]"],
-      0x600 => [] }
+      0x600 => [],
+      0xa00 => ["ldr\tx2, [x27, #0x98]", "blr\tx30", "ldr\tx1, [x27, #0xa0]", "ldr\tx3, [x27, #0xa8]",
+                "ldr\tx2, [x27, #0xb0]", "blr\tx30", "ldr\tx3, [x27, #0xb8]",
+                "ldr\tx2, [x27, #0xc0]", "blr\tx30", "bl\t0xc00", "ldr\tx2, [x27, #0xc8]", "blr\tx30"],
+      0xb00 => ["ldr\tx2, [x27, #0x68]", "blr\tx30", "ldr\tx1, [x27, #0x70]"] }
   end
 
   after { FileUtils.remove_entry(directory) }
@@ -111,8 +135,38 @@ RSpec.describe Schema::Extract::BehaviorClasses do
     expect(classes.keys).to contain_exactly('BehaviorWhen', 'BehaviorMetadata', 'BehaviorTimePoint', 'TimeSpan')
   end
 
+  context 'with the classes of an accessory' do
+    subject(:fields) { reader.read(['BridgeAccessoryConfig'])['AccessoryConfig']['fields'] }
+
+    it 'types a table of values, by the type arguments of its map' do
+      expect(fields['buttons']).to eq('type' => { 'map' => { 'class' => 'BehaviorMetadata' } }, 'required' => false)
+    end
+
+    it 'types the value of a converter with a closure, by its type arguments' do
+      expect(fields['signal']).to eq('type' => { 'class' => 'TimeSpan' }, 'required' => false)
+    end
+
+    it 'types the value of a hand-written converter of the app, always optional' do
+      expect(fields['recall_single'])
+        .to eq('type' => { 'list' => { 'class' => 'AccessoryActionValue' } }, 'required' => false)
+    end
+
+    it 'leaves out the default of a key, which the app loads like a key' do
+      expect(fields).not_to have_key('chime')
+    end
+
+    it 'reads a class from its hand-written fromJson' do
+      expect(reader.read(['BridgeAccessoryHandWritten'])['AccessoryHandWritten']['fields'].keys).to eq(['rid'])
+    end
+  end
+
   it 'stops on a name hue.json already takes' do
-    expect { reader.read(['BridgeBehaviorInstance']) }.to raise_error(ArgumentError, /BehaviorInstance/)
+    taken = described_class.new(snapshot, taken: ['BehaviorWhen'])
+    expect { taken.read(['BridgeBehaviorWhen']) }.to raise_error(ArgumentError, /BehaviorWhen/)
+  end
+
+  it 'renames a class whose plain name hue.json takes' do
+    expect(reader.read(['BridgeBehaviorInstance'])).to have_key('BehaviorInstanceReference')
   end
 
   it 'stops on a class the app has no fromJson for' do

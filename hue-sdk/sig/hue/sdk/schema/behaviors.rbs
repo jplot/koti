@@ -1,22 +1,215 @@
 module Hue
   module Sdk
     module Schema
-      class BehaviorBlink < Data
+      class TimeSpan < Data
         include Value
         extend Value::ClassMethods
 
-        def self.new: () -> BehaviorBlink
-        def self.from: (Hash[String, untyped] data) -> BehaviorBlink
+        attr_reader hours: Numeric?
+        attr_reader minutes: Numeric?
+        attr_reader seconds: Numeric?
+        attr_reader milliseconds: Numeric?
+
+        def self.new: (?hours: Numeric?, ?minutes: Numeric?, ?seconds: Numeric?, ?milliseconds: Numeric?) -> TimeSpan
+        def self.from: (Hash[String, untyped] data) -> TimeSpan
       end
 
-      class BehaviorFadeDuration < Data
+      class AccessoryBehaviorTimer < Data
         include Value
         extend Value::ClassMethods
 
-        attr_reader seconds: Numeric
+        attr_reader duration: TimeSpan
+        attr_reader type: String
 
-        def self.new: (seconds: Numeric) -> BehaviorFadeDuration
-        def self.from: (Hash[String, untyped] data) -> BehaviorFadeDuration
+        def self.new: (duration: TimeSpan, type: String) -> AccessoryBehaviorTimer
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorTimer
+      end
+
+      class AccessoryActionValue < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: untyped?
+
+        def self.new: (?action: untyped?) -> AccessoryActionValue
+        def self.from: (Hash[String, untyped] data) -> AccessoryActionValue
+      end
+
+      class AccessoryActionWithOff < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader enabled: bool
+
+        def self.new: (enabled: bool) -> AccessoryActionWithOff
+        def self.from: (Hash[String, untyped] data) -> AccessoryActionWithOff
+      end
+
+      class AccessoryActionExtended < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader with_off: AccessoryActionWithOff?
+        attr_reader actions: Array[AccessoryActionValue]?
+
+        def self.new: (?with_off: AccessoryActionWithOff?, ?actions: Array[AccessoryActionValue]?) -> AccessoryActionExtended
+        def self.from: (Hash[String, untyped] data) -> AccessoryActionExtended
+      end
+
+      class AccessorySceneCycleActionExtended < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader slots: Array[Array[AccessoryActionValue]]?
+        attr_reader repeat_timeout: TimeSpan?
+        attr_reader with_off: AccessoryActionWithOff?
+
+        def self.new: (?slots: Array[Array[AccessoryActionValue]]?, ?repeat_timeout: TimeSpan?, ?with_off: AccessoryActionWithOff?) -> AccessorySceneCycleActionExtended
+        def self.from: (Hash[String, untyped] data) -> AccessorySceneCycleActionExtended
+      end
+
+      class TimeStamp < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader hour: Numeric
+        attr_reader minute: Numeric
+
+        def self.new: (hour: Numeric, minute: Numeric) -> TimeStamp
+        def self.from: (Hash[String, untyped] data) -> TimeStamp
+      end
+
+      class AccessorySignalSound < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader sound: String?
+        attr_reader volume: Numeric
+        attr_reader type: String?
+
+        def self.new: (?sound: String?, volume: Numeric, ?type: String?) -> AccessorySignalSound
+        def self.from: (Hash[String, untyped] data) -> AccessorySignalSound
+      end
+
+      class AccessorySignalLightColorXY < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader x: Numeric
+        attr_reader y: Numeric
+
+        def self.new: (x: Numeric, y: Numeric) -> AccessorySignalLightColorXY
+        def self.from: (Hash[String, untyped] data) -> AccessorySignalLightColorXY
+      end
+
+      class AccessorySignalLightColor < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader xy: AccessorySignalLightColorXY
+
+        def self.new: (xy: AccessorySignalLightColorXY) -> AccessorySignalLightColor
+        def self.from: (Hash[String, untyped] data) -> AccessorySignalLightColor
+      end
+
+      class AccessorySignalLight < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader duration: TimeSpan
+        attr_reader colors: Array[AccessorySignalLightColor]
+        attr_reader type: String?
+
+        def self.new: (duration: TimeSpan, colors: Array[AccessorySignalLightColor], ?type: String?) -> AccessorySignalLight
+        def self.from: (Hash[String, untyped] data) -> AccessorySignalLight
+      end
+
+      class AccessorySignal < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader sounds: Array[AccessorySignalSound]?
+        attr_reader lights: Array[AccessorySignalLight]?
+
+        def self.new: (?sounds: Array[AccessorySignalSound]?, ?lights: Array[AccessorySignalLight]?) -> AccessorySignal
+        def self.from: (Hash[String, untyped] data) -> AccessorySignal
+      end
+
+      class AccessoryBehaviorTimeSlot < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader start_time: TimeStamp
+        attr_reader actions: Array[AccessoryActionValue]?
+        attr_reader signal: AccessorySignal?
+
+        def self.new: (start_time: TimeStamp, ?actions: Array[AccessoryActionValue]?, ?signal: AccessorySignal?) -> AccessoryBehaviorTimeSlot
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorTimeSlot
+      end
+
+      class AccessoryTimeBasedActionExtended < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader slots: Array[AccessoryBehaviorTimeSlot]?
+        attr_reader repeat_timeout: TimeSpan?
+        attr_reader with_off: AccessoryActionWithOff?
+
+        def self.new: (?slots: Array[AccessoryBehaviorTimeSlot]?, ?repeat_timeout: TimeSpan?, ?with_off: AccessoryActionWithOff?) -> AccessoryTimeBasedActionExtended
+        def self.from: (Hash[String, untyped] data) -> AccessoryTimeBasedActionExtended
+      end
+
+      class BehaviorInstanceReference < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader rtype: String
+        attr_reader rid: String
+
+        def self.new: (rtype: String, rid: String) -> BehaviorInstanceReference
+        def self.from: (Hash[String, untyped] data) -> BehaviorInstanceReference
+      end
+
+      class AccessoryBehaviorAction < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader behavior: BehaviorInstanceReference
+        attr_reader trigger: String
+
+        def self.new: (behavior: BehaviorInstanceReference, trigger: String) -> AccessoryBehaviorAction
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorAction
+      end
+
+      class AccessorySpeakerControlAction < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader action: String
+        attr_reader content_id: String?
+
+        def self.new: (action: String, ?content_id: String?) -> AccessorySpeakerControlAction
+        def self.from: (Hash[String, untyped] data) -> AccessorySpeakerControlAction
+      end
+
+      class AccessoryAction < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader after: TimeSpan?
+        attr_reader timer: AccessoryBehaviorTimer?
+        attr_reader recall_single: Array[AccessoryActionValue]?
+        attr_reader recall_single_extended: AccessoryActionExtended?
+        attr_reader scene_cycle: Array[Array[AccessoryActionValue]]?
+        attr_reader scene_cycle_extended: AccessorySceneCycleActionExtended?
+        attr_reader time_based: Array[AccessoryBehaviorTimeSlot]?
+        attr_reader time_based_extended: AccessoryTimeBasedActionExtended?
+        attr_reader action: untyped?
+        attr_reader behavior_trigger: AccessoryBehaviorAction?
+        attr_reader sound_targets_control: AccessorySpeakerControlAction?
+
+        def self.new: (?after: TimeSpan?, ?timer: AccessoryBehaviorTimer?, ?recall_single: Array[AccessoryActionValue]?, ?recall_single_extended: AccessoryActionExtended?, ?scene_cycle: Array[Array[AccessoryActionValue]]?, ?scene_cycle_extended: AccessorySceneCycleActionExtended?, ?time_based: Array[AccessoryBehaviorTimeSlot]?, ?time_based_extended: AccessoryTimeBasedActionExtended?, ?action: untyped?, ?behavior_trigger: AccessoryBehaviorAction?, ?sound_targets_control: AccessorySpeakerControlAction?) -> AccessoryAction
+        def self.from: (Hash[String, untyped] data) -> AccessoryAction
       end
 
       class BehaviorGroup < Data
@@ -50,6 +243,331 @@ module Hue
 
         def self.new: (group: BehaviorGroup, ?items: Array[BehaviorLight]?) -> BehaviorGroupAndLights
         def self.from: (Hash[String, untyped] data) -> BehaviorGroupAndLights
+      end
+
+      class BehaviorSpeakerService < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader rid: String
+        attr_reader rtype: String?
+
+        def self.new: (rid: String, ?rtype: String?) -> BehaviorSpeakerService
+        def self.from: (Hash[String, untyped] data) -> BehaviorSpeakerService
+      end
+
+      class BehaviorSpeaker < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader speaker_service: BehaviorSpeakerService
+
+        def self.new: (speaker_service: BehaviorSpeakerService) -> BehaviorSpeaker
+        def self.from: (Hash[String, untyped] data) -> BehaviorSpeaker
+      end
+
+      class AccessoryBehaviorButton < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader on_short_release: AccessoryAction?
+        attr_reader on_long_press: AccessoryAction?
+        attr_reader on_repeat: AccessoryAction?
+        attr_reader where: Array[BehaviorGroupAndLights]?
+        attr_reader sound_targets: Array[BehaviorSpeaker]?
+
+        def self.new: (?on_short_release: AccessoryAction?, ?on_long_press: AccessoryAction?, ?on_repeat: AccessoryAction?, ?where: Array[BehaviorGroupAndLights]?, ?sound_targets: Array[BehaviorSpeaker]?) -> AccessoryBehaviorButton
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorButton
+      end
+
+      class AccessoryTimedAction < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader recall_single: Array[AccessoryActionValue]?
+        attr_reader timer: AccessoryBehaviorTimer?
+
+        def self.new: (?recall_single: Array[AccessoryActionValue]?, ?timer: AccessoryBehaviorTimer?) -> AccessoryTimedAction
+        def self.from: (Hash[String, untyped] data) -> AccessoryTimedAction
+      end
+
+      class AccessoryBehaviorContactSensorActionsConfiguration < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader on_open: AccessoryAction
+        attr_reader on_close: AccessoryTimedAction
+
+        def self.new: (on_open: AccessoryAction, on_close: AccessoryTimedAction) -> AccessoryBehaviorContactSensorActionsConfiguration
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorContactSensorActionsConfiguration
+      end
+
+      class BehaviorDevice < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader rtype: String
+        attr_reader rid: String
+
+        def self.new: (rtype: String, rid: String) -> BehaviorDevice
+        def self.from: (Hash[String, untyped] data) -> BehaviorDevice
+      end
+
+      class AccessoryBehaviorContactSensorConfigurations < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader always: AccessoryBehaviorContactSensorActionsConfiguration
+
+        def self.new: (always: AccessoryBehaviorContactSensorActionsConfiguration) -> AccessoryBehaviorContactSensorConfigurations
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorContactSensorConfigurations
+      end
+
+      class AccessoryBehaviorContactSensorConfiguration < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader device: BehaviorDevice
+        attr_reader where: Array[BehaviorGroupAndLights]
+        attr_reader when: AccessoryBehaviorContactSensorConfigurations
+
+        def self.new: (device: BehaviorDevice, where: Array[BehaviorGroupAndLights], when: AccessoryBehaviorContactSensorConfigurations) -> AccessoryBehaviorContactSensorConfiguration
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorContactSensorConfiguration
+      end
+
+      class AccessoryBehaviorDaylightSensitivity < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader dark_threshold: Numeric
+        attr_reader offset: Numeric
+
+        def self.new: (dark_threshold: Numeric, offset: Numeric) -> AccessoryBehaviorDaylightSensitivity
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorDaylightSensitivity
+      end
+
+      class AccessoryBehaviorRotary < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader where: Array[BehaviorGroupAndLights]?
+        attr_reader sound_targets: Array[BehaviorSpeaker]?
+        attr_reader on_dim_off: AccessoryAction?
+        attr_reader on_dim_on: AccessoryAction?
+        attr_reader on_rotate: AccessoryAction?
+
+        def self.new: (?where: Array[BehaviorGroupAndLights]?, ?sound_targets: Array[BehaviorSpeaker]?, ?on_dim_off: AccessoryAction?, ?on_dim_on: AccessoryAction?, ?on_rotate: AccessoryAction?) -> AccessoryBehaviorRotary
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorRotary
+      end
+
+      class AccessoryBehaviorHTDSConfiguration < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader device: BehaviorDevice
+        attr_reader button1: AccessoryBehaviorButton
+        attr_reader button2: AccessoryBehaviorButton
+        attr_reader button3: AccessoryBehaviorButton
+        attr_reader button4: AccessoryBehaviorButton
+        attr_reader rotary: AccessoryBehaviorRotary
+
+        def self.new: (device: BehaviorDevice, button1: AccessoryBehaviorButton, button2: AccessoryBehaviorButton, button3: AccessoryBehaviorButton, button4: AccessoryBehaviorButton, rotary: AccessoryBehaviorRotary) -> AccessoryBehaviorHTDSConfiguration
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorHTDSConfiguration
+      end
+
+      class BehaviorLightLevelService < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader rid: String
+        attr_reader rtype: String
+
+        def self.new: (rid: String, rtype: String) -> BehaviorLightLevelService
+        def self.from: (Hash[String, untyped] data) -> BehaviorLightLevelService
+      end
+
+      class AccessorySensorLightLevelSensitivity < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader light_level_service: BehaviorLightLevelService
+        attr_reader settings: AccessoryBehaviorDaylightSensitivity
+
+        def self.new: (light_level_service: BehaviorLightLevelService, settings: AccessoryBehaviorDaylightSensitivity) -> AccessorySensorLightLevelSensitivity
+        def self.from: (Hash[String, untyped] data) -> AccessorySensorLightLevelSensitivity
+      end
+
+      class AccessorySunriseSunsetOffset < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader sunrise_offset: TimeSpan
+        attr_reader sunset_offset: TimeSpan
+
+        def self.new: (sunrise_offset: TimeSpan, sunset_offset: TimeSpan) -> AccessorySunriseSunsetOffset
+        def self.from: (Hash[String, untyped] data) -> AccessorySunriseSunsetOffset
+      end
+
+      class AccessoryDaylight < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader daylight_sensitivity: AccessorySensorLightLevelSensitivity?
+        attr_reader sunrise_sunset: AccessorySunriseSunsetOffset?
+
+        def self.new: (?daylight_sensitivity: AccessorySensorLightLevelSensitivity?, ?sunrise_sunset: AccessorySunriseSunsetOffset?) -> AccessoryDaylight
+        def self.from: (Hash[String, untyped] data) -> AccessoryDaylight
+      end
+
+      class AccessoryBehaviorLightLevel < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader light_level_service: BehaviorLightLevelService?
+        attr_reader daylight_sensitivity: AccessoryBehaviorDaylightSensitivity?
+        attr_reader daylight: AccessoryDaylight?
+
+        def self.new: (?light_level_service: BehaviorLightLevelService?, ?daylight_sensitivity: AccessoryBehaviorDaylightSensitivity?, ?daylight: AccessoryDaylight?) -> AccessoryBehaviorLightLevel
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorLightLevel
+      end
+
+      class BehaviorMotionService < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader rid: String
+        attr_reader rtype: String
+
+        def self.new: (rid: String, rtype: String) -> BehaviorMotionService
+        def self.from: (Hash[String, untyped] data) -> BehaviorMotionService
+      end
+
+      class AccessoryBehaviorMotionSensorTimeSlotStartTime < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader time: TimeStamp
+        attr_reader type: String
+
+        def self.new: (time: TimeStamp, type: String) -> AccessoryBehaviorMotionSensorTimeSlotStartTime
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorMotionSensorTimeSlotStartTime
+      end
+
+      class AccessoryBehaviorMotionSensorNoMotionAction < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader after: TimeSpan
+        attr_reader recall_single: Array[AccessoryActionValue]?
+        attr_reader action: untyped?
+
+        def self.new: (after: TimeSpan, ?recall_single: Array[AccessoryActionValue]?, ?action: untyped?) -> AccessoryBehaviorMotionSensorNoMotionAction
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorMotionSensorNoMotionAction
+      end
+
+      class AccessoryBehaviorMotionSensorTimeSlot < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader start_time: AccessoryBehaviorMotionSensorTimeSlotStartTime
+        attr_reader on_motion: AccessoryAction
+        attr_reader on_no_motion: AccessoryBehaviorMotionSensorNoMotionAction?
+        attr_reader do_not_disturb: bool?
+
+        def self.new: (start_time: AccessoryBehaviorMotionSensorTimeSlotStartTime, on_motion: AccessoryAction, ?on_no_motion: AccessoryBehaviorMotionSensorNoMotionAction?, ?do_not_disturb: bool?) -> AccessoryBehaviorMotionSensorTimeSlot
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorMotionSensorTimeSlot
+      end
+
+      class AccessoryBehaviorMotionSensorConfigurations < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader timeslots: Array[AccessoryBehaviorMotionSensorTimeSlot]
+
+        def self.new: (timeslots: Array[AccessoryBehaviorMotionSensorTimeSlot]) -> AccessoryBehaviorMotionSensorConfigurations
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorMotionSensorConfigurations
+      end
+
+      class AccessoryBehaviorMotionSensor < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader motion_service: BehaviorMotionService
+        attr_reader where: Array[BehaviorGroupAndLights]
+        attr_reader when: AccessoryBehaviorMotionSensorConfigurations
+
+        def self.new: (motion_service: BehaviorMotionService, where: Array[BehaviorGroupAndLights], when: AccessoryBehaviorMotionSensorConfigurations) -> AccessoryBehaviorMotionSensor
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorMotionSensor
+      end
+
+      class BehaviorSource < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader rtype: String
+        attr_reader rid: String
+
+        def self.new: (rtype: String, rid: String) -> BehaviorSource
+        def self.from: (Hash[String, untyped] data) -> BehaviorSource
+      end
+
+      class AccessoryBehaviorSettings < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader daylight_sensitivity: AccessoryBehaviorDaylightSensitivity?
+
+        def self.new: (?daylight_sensitivity: AccessoryBehaviorDaylightSensitivity?) -> AccessoryBehaviorSettings
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorSettings
+      end
+
+      class AccessoryBehaviorMotionSensorConfiguration < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader source: BehaviorSource
+        attr_reader where: Array[BehaviorGroupAndLights]
+        attr_reader settings: AccessoryBehaviorSettings
+        attr_reader when: AccessoryBehaviorMotionSensorConfigurations
+
+        def self.new: (source: BehaviorSource, where: Array[BehaviorGroupAndLights], settings: AccessoryBehaviorSettings, when: AccessoryBehaviorMotionSensorConfigurations) -> AccessoryBehaviorMotionSensorConfiguration
+        def self.from: (Hash[String, untyped] data) -> AccessoryBehaviorMotionSensorConfiguration
+      end
+
+      class AccessoryGenericConfiguration < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader device: BehaviorDevice?
+        attr_reader source: BehaviorSource?
+        attr_reader model_id: String?
+        attr_reader buttons: Hash[String, AccessoryBehaviorButton]?
+        attr_reader motion: AccessoryBehaviorMotionSensor?
+        attr_reader light_level: AccessoryBehaviorLightLevel?
+        attr_reader brand: String?
+        attr_reader where: Array[BehaviorGroupAndLights]?
+        attr_reader rotaries: Hash[String, AccessoryBehaviorRotary]?
+
+        def self.new: (?device: BehaviorDevice?, ?source: BehaviorSource?, ?model_id: String?, ?buttons: Hash[String, AccessoryBehaviorButton]?, ?motion: AccessoryBehaviorMotionSensor?, ?light_level: AccessoryBehaviorLightLevel?, ?brand: String?, ?where: Array[BehaviorGroupAndLights]?, ?rotaries: Hash[String, AccessoryBehaviorRotary]?) -> AccessoryGenericConfiguration
+        def self.from: (Hash[String, untyped] data) -> AccessoryGenericConfiguration
+      end
+
+      class BehaviorBlink < Data
+        include Value
+        extend Value::ClassMethods
+
+        def self.new: () -> BehaviorBlink
+        def self.from: (Hash[String, untyped] data) -> BehaviorBlink
+      end
+
+      class BehaviorFadeDuration < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader seconds: Numeric
+
+        def self.new: (seconds: Numeric) -> BehaviorFadeDuration
+        def self.from: (Hash[String, untyped] data) -> BehaviorFadeDuration
       end
 
       class BehaviorRecall < Data
@@ -112,30 +630,6 @@ module Hue
 
         def self.new: (rid: String, rtype: String) -> BehaviorStreamingEndScene
         def self.from: (Hash[String, untyped] data) -> BehaviorStreamingEndScene
-      end
-
-      class TimeSpan < Data
-        include Value
-        extend Value::ClassMethods
-
-        attr_reader hours: Numeric?
-        attr_reader minutes: Numeric?
-        attr_reader seconds: Numeric?
-        attr_reader milliseconds: Numeric?
-
-        def self.new: (?hours: Numeric?, ?minutes: Numeric?, ?seconds: Numeric?, ?milliseconds: Numeric?) -> TimeSpan
-        def self.from: (Hash[String, untyped] data) -> TimeSpan
-      end
-
-      class TimeStamp < Data
-        include Value
-        extend Value::ClassMethods
-
-        attr_reader hour: Numeric
-        attr_reader minute: Numeric
-
-        def self.new: (hour: Numeric, minute: Numeric) -> TimeStamp
-        def self.from: (Hash[String, untyped] data) -> TimeStamp
       end
 
       class BehaviorTimePoint < Data
@@ -327,7 +821,7 @@ module Hue
         def self.from: (Hash[String, untyped] data) -> WakeUpConfiguration
       end
 
-      type behavior_configuration = ComingHomeConfiguration | GoToSleepConfiguration | LeavingHomeConfiguration | PmAutomationConfiguration | SmokeAlarmConfiguration | StateAfterStreamingConfiguration | TimeBasedConfiguration | TimerConfiguration | WakeUpConfiguration | Hash[String, untyped]
+      type behavior_configuration = AccessoryBehaviorContactSensorConfiguration | AccessoryBehaviorHTDSConfiguration | AccessoryBehaviorMotionSensorConfiguration | AccessoryGenericConfiguration | ComingHomeConfiguration | GoToSleepConfiguration | LeavingHomeConfiguration | PmAutomationConfiguration | SmokeAlarmConfiguration | StateAfterStreamingConfiguration | TimeBasedConfiguration | TimerConfiguration | WakeUpConfiguration | Hash[String, untyped]
 
       BEHAVIOR_SCRIPTS: Hash[Symbol, String]
 

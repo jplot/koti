@@ -204,13 +204,33 @@ automation.configuration.when.time_point.time  # => #<data Hue::Sdk::Schema::Tim
 `Hue::Sdk::Schema::BEHAVIOR_SCRIPTS` gives the id of each script by a stable name: `coming_home`, `go_to_sleep`,
 `leaving_home`, `native_go_to_sleep`, `pm_automation` (presence mimicking), `smoke_alarm`, `state_after_streaming`,
 `time_based` (a schedule), `timer` and `wake_up`. The app does not know `native_go_to_sleep`, to which the bridge gives
-the schema reference of `go_to_sleep`. Any other script, such as those of switches and sensors, keeps its configuration as
-a hash. `state` reads what the app reads, and `data` always holds the JSON of the bridge, such as the `source_type` of the
-state of a switch.
+the schema reference of `go_to_sleep`.
 
-A configuration keeps in `unknown` the keys its class does not know, and sends them back. As in the app, a key its
-definition gives a default for may be missing, and the lights (`items`) of each scene of `what` are written from those of
-the same group in `where`.
+The configuration of an accessory is an automation too, under the script the app gives it:
+
+| Script | Accessories |
+|---|---|
+| `hue_accessories` | switches, smart buttons, dimmers, the Hue Tap, motion sensors, doorbells, MotionAware areas; the Tap Dial on a bridge whose script supports it (`hue_tap_dial_switch`) |
+| `tap_switch` | the Tap Dial otherwise |
+| `motion_sensor` | cameras, despite its name, which is the bridge's |
+| `contact_sensor` | contact sensors |
+
+Any other script keeps its configuration as a hash, and so does a configuration its class would not send back whole, as
+the app keeps what it cannot decode. `state` reads what the app reads. `data` always holds the JSON of the bridge, such as
+the `source_type` of the state of a switch.
+
+An `action` is a name (`all_off`, `home_off`, `dim_up`…), or a hash to recall a scene: `{ recall: { rid: '…', rtype: 'scene' } }`
+to send one, and the same with string keys, as JSON, when read.
+
+```ruby
+switch = Hue::Sdk.BehaviorInstance('a91c…').attributes.configuration
+switch.buttons.fetch('3e0f…').on_long_press.action  # => "home_off"
+```
+
+The configuration of an automation script keeps in `unknown` the keys its class does not know, and sends them back. As in
+the app, a key its definition gives a default for may be missing, and the lights (`items`) of each scene of `what` are
+written from those of the same group in `where`. The classes of accessories ignore the keys they do not know, as the app
+does.
 
 ```ruby
 schema = Hue::Sdk::Schema
@@ -234,8 +254,8 @@ automation.update(schema::BehaviorInstanceUpdate.new(trigger: schema::BehaviorTr
 ```
 
 `BehaviorInstanceAdd` adds the types the app always names, `behavior_instance` and `instance_metadata`. The app builds
-these requests by hand; their fields come from its code. Only `coming_home`, `go_to_sleep`, `leaving_home` and
-`time_based` were read on a real bridge, and the SDK never wrote an automation on one.
+these requests by hand; their fields come from its code. Only `coming_home`, `go_to_sleep`, `hue_accessories`,
+`leaving_home` and `time_based` were read on a real bridge, and the SDK never wrote an automation on one.
 
 ## Associations
 

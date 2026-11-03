@@ -35,7 +35,7 @@ class SchemaGenerator
   def self.held(type)
     return unless type.is_a?(Hash)
 
-    type['class'] || (type['list']['class'] if type['list'].is_a?(Hash))
+    type['class'] || held(type['list'] || type['map'])
   end
 
   private
@@ -145,9 +145,12 @@ class SchemaGenerator
       lines.any? ? ['', *lines] : []
     end
 
-    def nested(key, type)
-      held = SchemaGenerator.held(type)
-      "#{key}: #{type['class'] ? held : "[#{held}]"}" if held
+    def nested(key, type) = ("#{key}: #{nested_type(type)}" if SchemaGenerator.held(type))
+
+    def nested_type(type)
+      return type['class'] if type['class']
+
+      type['map'] ? "{ String => #{nested_type(type['map'])} }" : "[#{nested_type(type['list'])}]"
     end
 
     def docs(name)
@@ -159,12 +162,10 @@ class SchemaGenerator
     end
 
     def description(name, cls)
-      return "#{summary(name, cls['kind'])} (Hue app class +#{cls['origin']}+)." unless script?(name)
+      return "#{summary(name, cls['kind'])} (Hue app class +#{cls['origin']}+)." unless cls['fields'].key?('unknown')
 
       "The configuration of the +#{cls['origin']}+ automation script, from the steps of its definition in the Hue app."
     end
-
-    def script?(name) = @scripts.each_value.any? { it['configuration'] == name }
 
     def attribute(key, field) = ["@!attribute [r] #{key}", *paragraph("@return [#{yard(field)}]#{values(field)}", '  ')]
 
@@ -181,11 +182,17 @@ class SchemaGenerator
 
     def yard_type(type)
       return YARD.fetch(type) if type.is_a?(String)
+      return "Hash{String=>#{yard_type(type['map'])}}" if type['map']
 
       type['class'] || "Array<#{yard_type(type['list'])}>"
     end
 
-    def values(field) = field['values'] ? " one of #{field['values'].map { "+#{it}+" }.join(', ')}" : ''
+    def values(field)
+      return '' unless field['values']
+
+      names = field['values'].map { "+#{it}+" }.join(', ')
+      " one of #{names}#{', or a hash to recall a scene' if field['type'] == 'Object'}"
+    end
 
     def paragraph(text, indent)
       text.split.each_with_object([+indent]) do |word, lines|
@@ -250,6 +257,7 @@ class SchemaGenerator
 
     def plain(type)
       return TYPES.fetch(type) if type.is_a?(String)
+      return "Hash[String, #{plain(type['map'])}]" if type['map']
 
       type['class'] || "Array[#{plain(type['list'])}]"
     end

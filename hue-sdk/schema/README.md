@@ -45,6 +45,8 @@ description at run time, but a spec fails while the generated files differ from 
   of the step gives its value, as `BehaviorEncoder` writes it. A key is required unless a feature gates it or the app
   gives it a default when it is missing. The values themselves are the classes json_serializable
   writes in `behavior_bridge_control`, where a key is required when its `fromJson` reads it once, and not nullable.
+  The app decodes the actions of an accessory by hand: `schema/extract/behaviors.rb` holds the type each of these decoders
+  returns, and the class each accessory script is read with (`AccessoryBehaviorIdToScriptIdBatch`).
 
 ## Regenerating
 

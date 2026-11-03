@@ -51,6 +51,13 @@ RSpec.describe Hue::Sdk::Schema do
     expect(room.to_body[:children]).to eq([{ rid: 'd1', rtype: 'device' }])
   end
 
+  it 'reads and writes a table of values, its keys left as they are', :aggregate_failures do
+    table = { String => described_class::OnFeatureUpdate }
+    values = described_class::Value.load(table, 'a' => { 'on' => true })
+    expect(values['a']).to be_a(described_class::OnFeatureUpdate)
+    expect(described_class::Value.dump(values)).to eq('a' => { on: true })
+  end
+
   it 'gives every registered resource type a response value' do
     expect(Hue::Sdk::Models::REGISTRY.keys - described_class::RESPONSES.keys).to be_empty
   end

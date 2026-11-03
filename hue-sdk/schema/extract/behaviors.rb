@@ -11,6 +11,34 @@ module Schema
     class BehaviorFromJson < FromJson
       NESTED = /\A\._\$(\w+)FromJson\z/
       ENUM = /\AMap<(\w+), String>\(\d+\) \{\z/
+      TABLE = /\ATypeArguments: <String, (\w+)>\z/
+      CLOSURE = /\ATypeArguments: <Object, (\w+)>\z/
+      # The defaults of a +type+ or +rtype+, not keys: their toJson does not write them.
+      DEFAULTS = %w[on_off_color chime speaker].freeze
+      # The decoders the app writes by hand, and the type of what each returns.
+      CONVERTERS = {
+        'BridgeAccessoryActionValue.fromJson' => 'Object',
+        'BridgeAccessoryActionValue.fromJsonActionValues' => { 'list' => { 'class' => 'BridgeAccessoryActionValue' } },
+        'BridgeAccessoryActionValue.fromJsonSceneCycleActionValues' => {
+          'list' => { 'list' => { 'class' => 'BridgeAccessoryActionValue' } }
+        },
+        'BridgeAccessoryActionExtended.fromJsonActionExtendedValue' => { 'class' => 'BridgeAccessoryActionExtended' },
+        'BridgeAccessorySceneCycleActionExtended.fromJsonSceneCycleExtendedValue' => {
+          'class' => 'BridgeAccessorySceneCycleActionExtended'
+        },
+        'BridgeAccessoryBehaviorTimeSlot.fromJsonTimeBasedActionValues' => {
+          'list' => { 'class' => 'BridgeAccessoryBehaviorTimeSlot' }
+        },
+        'BridgeAccessoryTimeBasedActionExtended.fromJsonTimeBasedExtendedValue' => {
+          'class' => 'BridgeAccessoryTimeBasedActionExtended'
+        },
+        'BridgeAccessoryBehaviorAction.fromJsonBehaviorActionValue' => { 'class' => 'BridgeAccessoryBehaviorAction' },
+        'BridgeAccessorySpeakerControlAction.fromJsonBehaviorActionValue' => {
+          'class' => 'BridgeAccessorySpeakerControlAction'
+        },
+        'BridgeAccessoryActionWithOff.fromJsonNullable' => { 'class' => 'BridgeAccessoryActionWithOff' },
+        'TimeSpan.fromJsonNullable' => { 'class' => 'TimeSpan' }
+      }.freeze
 
       def initialize(snapshot, name)
         super
@@ -18,20 +46,34 @@ module Schema
       end
 
       # @return [Hash{String=>Hash}] by key, what {FromJson} tells of it, and how many times it was read
-      def decoded(instructions) = fields(instructions).to_h { |key, field| [key, field.merge('reads' => @reads[key])] }
+      def decoded(instructions)
+        fields(instructions).except(*DEFAULTS).to_h { |key, field| [key, field.merge('reads' => @reads[key])] }
+      end
 
       private
 
       def load(register, offset)
         super
-        enum = @snapshot.object(offset).to_s[ENUM, 1]
-        describe('enum', enum) if enum
+        object = @snapshot.object(offset).to_s
+        describe('enum', object[ENUM, 1]) if object[ENUM, 1]
+        describe('map', object[TABLE, 1]) if value_class?(object[TABLE, 1])
+        closure(object[CLOSURE, 1]) if value_class?(object[CLOSURE, 1])
       end
 
+      # The app maps a value through a closure only when it is there.
+      def closure(dart)
+        describe('class', dart)
+        describe('optional', true)
+      end
+
+      def value_class?(dart) = dart && dart != 'dynamic' && !Types.primitive(dart)
+
       def call(target)
-        case @snapshot.owner(target.hex).to_s
+        owner = @snapshot.owner(target.hex).to_s
+        case owner
         when NESTED then describe('class', Regexp.last_match(1))
         when '.$enumDecode' then describe('always', true)
+        when *CONVERTERS.keys then describe('converter', owner)
         else consume
         end
         @key = nil
@@ -46,6 +88,9 @@ module Schema
     # The classes of the app's automations that some roots reach, as hue.json describes a class. They come from
     # json_serializable, not from the API description, so the code alone tells which keys are required.
     class BehaviorClasses
+      # A reference to an automation, while hue.json has the automation itself.
+      RENAMED = { 'BridgeBehaviorInstance' => 'BehaviorInstanceReference' }.freeze
+
       # @param snapshot [Snapshot]
       # @param taken [Array<String>] the classes of hue.json, whose names these classes cannot use
       def initialize(snapshot, taken:)
@@ -71,31 +116,54 @@ module Schema
       private
 
       def decoded(origin)
-        address, size = @snapshot.function("._$#{origin}FromJson")
+        address, size = @snapshot.function("._$#{origin}FromJson") || @snapshot.function("#{origin}.#{origin}.fromJson")
         raise ArgumentError, "no fromJson for #{origin}" unless address
 
         BehaviorFromJson.new(@snapshot, origin).decoded(@snapshot.instructions(address, size))
       end
 
       def name(origin)
-        origin.delete_prefix('Bridge').tap do |name|
+        RENAMED.fetch(origin) { origin.delete_prefix('Bridge') }.tap do |name|
           raise ArgumentError, "#{origin} would take the name #{name}, which hue.json has" if @taken.include?(name)
         end
       end
 
       def field(decoded)
+        return converted(decoded) if decoded['converter']
+
         values = @snapshot.enum_values(decoded['enum'] || decoded['items'])
         field = { 'type' => type(decoded, values), 'required' => required?(decoded) }
         values ? field.merge('values' => values) : field
       end
 
+      def converted(decoded)
+        type = renamed(BehaviorFromJson::CONVERTERS.fetch(decoded['converter']))
+        field = { 'type' => type, 'required' => false }
+        type == 'Object' ? field.merge('values' => BehaviorSchema::ACTIONS) : field
+      end
+
+      def renamed(type)
+        return type if type.is_a?(String)
+        return { 'class' => name(type['class']) } if type['class']
+
+        { 'list' => renamed(type['list']) }
+      end
+
       def type(decoded, values)
         return 'String' if decoded['enum']
+        return { 'map' => item(decoded['map']) } if decoded['map']
         return { 'class' => name(decoded['class']) } if decoded['class']
         return { 'list' => values ? 'String' : item(decoded['items']) } if decoded['items']
 
-        dart = decoded['type'].to_s.delete_suffix('?')
-        Types.primitive(dart) || (dart.start_with?('Map<') ? 'Hash' : 'Object')
+        plain(decoded['type'].to_s.delete_suffix('?'))
+      end
+
+      def plain(dart) = Types.primitive(dart) || (dart.start_with?('Map<') ? 'Hash' : 'Object')
+
+      def converted_class(converter)
+        type = BehaviorFromJson::CONVERTERS.fetch(converter)
+        type = type['list'] while type.is_a?(Hash) && type['list']
+        type['class'] unless type == 'Object' || type['class'] == BehaviorSchema::ACTION_VALUE
       end
 
       def item(dart) = Types.primitive(dart) || { 'class' => name(dart) }
@@ -103,12 +171,14 @@ module Schema
       def required?(decoded)
         return decoded.key?('always') if decoded['enum']
 
-        decoded['reads'] == 1 && !decoded['type'].to_s.end_with?('?')
+        decoded['reads'] == 1 && !decoded['optional'] && !decoded['type'].to_s.end_with?('?')
       end
 
       def held(decoded)
         items = decoded['items']
-        decoded['class'] || (items unless Types.primitive(items) || @snapshot.enum_values(items))
+        return converted_class(decoded['converter']) if decoded['converter']
+
+        decoded['class'] || decoded['map'] || (items unless Types.primitive(items) || @snapshot.enum_values(items))
       end
     end
 
@@ -210,8 +280,28 @@ module Schema
     module BehaviorSchema
       ROOTS = %w[BridgeBehaviorGroupAndLights BridgeBehaviorGroupScene BridgeBehaviorWhen BridgeBehaviorWhenExtended
                  BridgeBehaviorWhenConstrained TimeSpan BridgeBehaviorFadeDuration BridgeBehaviorStreamingEndScene
-                 BridgeBehaviorState BridgeBehaviorMetadata].freeze
-      REQUESTS = {
+                 BridgeBehaviorState BridgeBehaviorMetadata BridgeAccessoryGenericConfiguration
+                 BridgeAccessoryBehaviorHTDSConfiguration BridgeAccessoryBehaviorMotionSensorConfiguration
+                 BridgeAccessoryBehaviorContactSensorConfiguration].freeze
+      # The class of an accessory script comes with its kind (AccessoryBehaviorIdToScriptIdBatch).
+      ACCESSORIES = {
+        '67d9395b-4403-42cc-b5f0-740b699d67c6' => { 'name' => 'hue_accessories',
+                                                    'configuration' => 'AccessoryGenericConfiguration' },
+        'f306f634-acdb-4dd6-bdf5-48dd626d667e' => { 'name' => 'tap_switch',
+                                                    'configuration' => 'AccessoryBehaviorHTDSConfiguration' },
+        'bba79770-19f1-11ec-9621-0242ac130002' => { 'name' => 'motion_sensor',
+                                                    'configuration' => 'AccessoryBehaviorMotionSensorConfiguration' },
+        '049008e6-62d7-42ba-b473-d8488cfde600' => { 'name' => 'contact_sensor',
+                                                    'configuration' => 'AccessoryBehaviorContactSensorConfiguration' }
+      }.freeze
+      # A value is a name of BridgeAccessoryActionValue.toJson, or +{recall: …}+, so it stays untyped.
+      ACTION_VALUE = 'BridgeAccessoryActionValue'
+      ACTIONS = %w[last_on all_off home_off on_off previous_state clamp do_nothing dim_up dim_down dim_alternate].freeze
+      BY_HAND = {
+        'AccessoryActionValue' => {
+          'origin' => ACTION_VALUE, 'kind' => 'behavior',
+          'fields' => { 'action' => { 'type' => 'Object', 'required' => false, 'values' => ACTIONS } }
+        },
         'BehaviorInstanceAdd' => {
           'origin' => 'BridgeBehavior', 'kind' => 'add',
           'fields' => {
@@ -248,8 +338,8 @@ module Schema
       # @param classes [Hash{String=>Hash}] what {BehaviorClasses#read} returns
       # @return [Hash] the content of behaviors.json
       def compose(scripts:, classes:)
-        { 'scripts' => scripts.fetch('scripts'), 'resources' => RESOURCES, 'overrides' => OVERRIDES,
-          'classes' => classes.merge(scripts.fetch('classes'), REQUESTS).sort.to_h }
+        { 'scripts' => scripts.fetch('scripts').merge(ACCESSORIES), 'resources' => RESOURCES, 'overrides' => OVERRIDES,
+          'classes' => classes.merge(scripts.fetch('classes'), BY_HAND).sort.to_h }
       end
     end
   end

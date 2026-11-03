@@ -39,6 +39,22 @@
     "a5624529-bd7e-4bc8-9d2f-9200476f106e": {
       "name": "native_go_to_sleep",
       "configuration": "GoToSleepConfiguration"
+    },
+    "67d9395b-4403-42cc-b5f0-740b699d67c6": {
+      "name": "hue_accessories",
+      "configuration": "AccessoryGenericConfiguration"
+    },
+    "f306f634-acdb-4dd6-bdf5-48dd626d667e": {
+      "name": "tap_switch",
+      "configuration": "AccessoryBehaviorHTDSConfiguration"
+    },
+    "bba79770-19f1-11ec-9621-0242ac130002": {
+      "name": "motion_sensor",
+      "configuration": "AccessoryBehaviorMotionSensorConfiguration"
+    },
+    "049008e6-62d7-42ba-b473-d8488cfde600": {
+      "name": "contact_sensor",
+      "configuration": "AccessoryBehaviorContactSensorConfiguration"
     }
   },
   "resources": {
@@ -60,10 +76,947 @@
     }
   },
   "classes": {
+    "AccessoryAction": {
+      "origin": "BridgeAccessoryAction",
+      "kind": "behavior",
+      "fields": {
+        "after": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": false
+        },
+        "timer": {
+          "type": {
+            "class": "AccessoryBehaviorTimer"
+          },
+          "required": false
+        },
+        "recall_single": {
+          "type": {
+            "list": {
+              "class": "AccessoryActionValue"
+            }
+          },
+          "required": false
+        },
+        "recall_single_extended": {
+          "type": {
+            "class": "AccessoryActionExtended"
+          },
+          "required": false
+        },
+        "scene_cycle": {
+          "type": {
+            "list": {
+              "list": {
+                "class": "AccessoryActionValue"
+              }
+            }
+          },
+          "required": false
+        },
+        "scene_cycle_extended": {
+          "type": {
+            "class": "AccessorySceneCycleActionExtended"
+          },
+          "required": false
+        },
+        "time_based": {
+          "type": {
+            "list": {
+              "class": "AccessoryBehaviorTimeSlot"
+            }
+          },
+          "required": false
+        },
+        "time_based_extended": {
+          "type": {
+            "class": "AccessoryTimeBasedActionExtended"
+          },
+          "required": false
+        },
+        "action": {
+          "type": "Object",
+          "required": false,
+          "values": [
+            "last_on",
+            "all_off",
+            "home_off",
+            "on_off",
+            "previous_state",
+            "clamp",
+            "do_nothing",
+            "dim_up",
+            "dim_down",
+            "dim_alternate"
+          ]
+        },
+        "behavior_trigger": {
+          "type": {
+            "class": "AccessoryBehaviorAction"
+          },
+          "required": false
+        },
+        "sound_targets_control": {
+          "type": {
+            "class": "AccessorySpeakerControlAction"
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessoryActionExtended": {
+      "origin": "BridgeAccessoryActionExtended",
+      "kind": "behavior",
+      "fields": {
+        "with_off": {
+          "type": {
+            "class": "AccessoryActionWithOff"
+          },
+          "required": false
+        },
+        "actions": {
+          "type": {
+            "list": {
+              "class": "AccessoryActionValue"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessoryActionValue": {
+      "origin": "BridgeAccessoryActionValue",
+      "kind": "behavior",
+      "fields": {
+        "action": {
+          "type": "Object",
+          "required": false,
+          "values": [
+            "last_on",
+            "all_off",
+            "home_off",
+            "on_off",
+            "previous_state",
+            "clamp",
+            "do_nothing",
+            "dim_up",
+            "dim_down",
+            "dim_alternate"
+          ]
+        }
+      }
+    },
+    "AccessoryActionWithOff": {
+      "origin": "BridgeAccessoryActionWithOff",
+      "kind": "behavior",
+      "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorAction": {
+      "origin": "BridgeAccessoryBehaviorAction",
+      "kind": "behavior",
+      "fields": {
+        "behavior": {
+          "type": {
+            "class": "BehaviorInstanceReference"
+          },
+          "required": true
+        },
+        "trigger": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "start",
+            "stop"
+          ]
+        }
+      }
+    },
+    "AccessoryBehaviorButton": {
+      "origin": "BridgeAccessoryBehaviorButton",
+      "kind": "behavior",
+      "fields": {
+        "on_short_release": {
+          "type": {
+            "class": "AccessoryAction"
+          },
+          "required": false
+        },
+        "on_long_press": {
+          "type": {
+            "class": "AccessoryAction"
+          },
+          "required": false
+        },
+        "on_repeat": {
+          "type": {
+            "class": "AccessoryAction"
+          },
+          "required": false
+        },
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": false
+        },
+        "sound_targets": {
+          "type": {
+            "list": {
+              "class": "BehaviorSpeaker"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessoryBehaviorContactSensorActionsConfiguration": {
+      "origin": "BridgeAccessoryBehaviorContactSensorActionsConfiguration",
+      "kind": "behavior",
+      "fields": {
+        "on_open": {
+          "type": {
+            "class": "AccessoryAction"
+          },
+          "required": true
+        },
+        "on_close": {
+          "type": {
+            "class": "AccessoryTimedAction"
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorContactSensorConfiguration": {
+      "origin": "BridgeAccessoryBehaviorContactSensorConfiguration",
+      "kind": "behavior",
+      "fields": {
+        "device": {
+          "type": {
+            "class": "BehaviorDevice"
+          },
+          "required": true
+        },
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "when": {
+          "type": {
+            "class": "AccessoryBehaviorContactSensorConfigurations"
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorContactSensorConfigurations": {
+      "origin": "BridgeAccessoryBehaviorContactSensorConfigurations",
+      "kind": "behavior",
+      "fields": {
+        "always": {
+          "type": {
+            "class": "AccessoryBehaviorContactSensorActionsConfiguration"
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorDaylightSensitivity": {
+      "origin": "BridgeAccessoryBehaviorDaylightSensitivity",
+      "kind": "behavior",
+      "fields": {
+        "dark_threshold": {
+          "type": "Numeric",
+          "required": true
+        },
+        "offset": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorHTDSConfiguration": {
+      "origin": "BridgeAccessoryBehaviorHTDSConfiguration",
+      "kind": "behavior",
+      "fields": {
+        "device": {
+          "type": {
+            "class": "BehaviorDevice"
+          },
+          "required": true
+        },
+        "button1": {
+          "type": {
+            "class": "AccessoryBehaviorButton"
+          },
+          "required": true
+        },
+        "button2": {
+          "type": {
+            "class": "AccessoryBehaviorButton"
+          },
+          "required": true
+        },
+        "button3": {
+          "type": {
+            "class": "AccessoryBehaviorButton"
+          },
+          "required": true
+        },
+        "button4": {
+          "type": {
+            "class": "AccessoryBehaviorButton"
+          },
+          "required": true
+        },
+        "rotary": {
+          "type": {
+            "class": "AccessoryBehaviorRotary"
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorLightLevel": {
+      "origin": "BridgeAccessoryBehaviorLightLevel",
+      "kind": "behavior",
+      "fields": {
+        "light_level_service": {
+          "type": {
+            "class": "BehaviorLightLevelService"
+          },
+          "required": false
+        },
+        "daylight_sensitivity": {
+          "type": {
+            "class": "AccessoryBehaviorDaylightSensitivity"
+          },
+          "required": false
+        },
+        "daylight": {
+          "type": {
+            "class": "AccessoryDaylight"
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessoryBehaviorMotionSensor": {
+      "origin": "BridgeAccessoryBehaviorMotionSensor",
+      "kind": "behavior",
+      "fields": {
+        "motion_service": {
+          "type": {
+            "class": "BehaviorMotionService"
+          },
+          "required": true
+        },
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "when": {
+          "type": {
+            "class": "AccessoryBehaviorMotionSensorConfigurations"
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorMotionSensorConfiguration": {
+      "origin": "BridgeAccessoryBehaviorMotionSensorConfiguration",
+      "kind": "behavior",
+      "fields": {
+        "source": {
+          "type": {
+            "class": "BehaviorSource"
+          },
+          "required": true
+        },
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "settings": {
+          "type": {
+            "class": "AccessoryBehaviorSettings"
+          },
+          "required": true
+        },
+        "when": {
+          "type": {
+            "class": "AccessoryBehaviorMotionSensorConfigurations"
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorMotionSensorConfigurations": {
+      "origin": "BridgeAccessoryBehaviorMotionSensorConfigurations",
+      "kind": "behavior",
+      "fields": {
+        "timeslots": {
+          "type": {
+            "list": {
+              "class": "AccessoryBehaviorMotionSensorTimeSlot"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorMotionSensorNoMotionAction": {
+      "origin": "BridgeAccessoryBehaviorMotionSensorNoMotionAction",
+      "kind": "behavior",
+      "fields": {
+        "after": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": true
+        },
+        "recall_single": {
+          "type": {
+            "list": {
+              "class": "AccessoryActionValue"
+            }
+          },
+          "required": false
+        },
+        "action": {
+          "type": "Object",
+          "required": false,
+          "values": [
+            "last_on",
+            "all_off",
+            "home_off",
+            "on_off",
+            "previous_state",
+            "clamp",
+            "do_nothing",
+            "dim_up",
+            "dim_down",
+            "dim_alternate"
+          ]
+        }
+      }
+    },
+    "AccessoryBehaviorMotionSensorTimeSlot": {
+      "origin": "BridgeAccessoryBehaviorMotionSensorTimeSlot",
+      "kind": "behavior",
+      "fields": {
+        "start_time": {
+          "type": {
+            "class": "AccessoryBehaviorMotionSensorTimeSlotStartTime"
+          },
+          "required": true
+        },
+        "on_motion": {
+          "type": {
+            "class": "AccessoryAction"
+          },
+          "required": true
+        },
+        "on_no_motion": {
+          "type": {
+            "class": "AccessoryBehaviorMotionSensorNoMotionAction"
+          },
+          "required": false
+        },
+        "do_not_disturb": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "AccessoryBehaviorMotionSensorTimeSlotStartTime": {
+      "origin": "BridgeAccessoryBehaviorMotionSensorTimeSlotStartTime",
+      "kind": "behavior",
+      "fields": {
+        "time": {
+          "type": {
+            "class": "TimeStamp"
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "AccessoryBehaviorRotary": {
+      "origin": "BridgeAccessoryBehaviorRotary",
+      "kind": "behavior",
+      "fields": {
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": false
+        },
+        "sound_targets": {
+          "type": {
+            "list": {
+              "class": "BehaviorSpeaker"
+            }
+          },
+          "required": false
+        },
+        "on_dim_off": {
+          "type": {
+            "class": "AccessoryAction"
+          },
+          "required": false
+        },
+        "on_dim_on": {
+          "type": {
+            "class": "AccessoryAction"
+          },
+          "required": false
+        },
+        "on_rotate": {
+          "type": {
+            "class": "AccessoryAction"
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessoryBehaviorSettings": {
+      "origin": "BridgeAccessoryBehaviorSettings",
+      "kind": "behavior",
+      "fields": {
+        "daylight_sensitivity": {
+          "type": {
+            "class": "AccessoryBehaviorDaylightSensitivity"
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessoryBehaviorTimeSlot": {
+      "origin": "BridgeAccessoryBehaviorTimeSlot",
+      "kind": "behavior",
+      "fields": {
+        "start_time": {
+          "type": {
+            "class": "TimeStamp"
+          },
+          "required": true
+        },
+        "actions": {
+          "type": {
+            "list": {
+              "class": "AccessoryActionValue"
+            }
+          },
+          "required": false
+        },
+        "signal": {
+          "type": {
+            "class": "AccessorySignal"
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessoryBehaviorTimer": {
+      "origin": "BridgeAccessoryBehaviorTimer",
+      "kind": "behavior",
+      "fields": {
+        "duration": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "time_out_after",
+            "after_a_set_time"
+          ]
+        }
+      }
+    },
+    "AccessoryDaylight": {
+      "origin": "BridgeAccessoryDaylight",
+      "kind": "behavior",
+      "fields": {
+        "daylight_sensitivity": {
+          "type": {
+            "class": "AccessorySensorLightLevelSensitivity"
+          },
+          "required": false
+        },
+        "sunrise_sunset": {
+          "type": {
+            "class": "AccessorySunriseSunsetOffset"
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessoryGenericConfiguration": {
+      "origin": "BridgeAccessoryGenericConfiguration",
+      "kind": "behavior",
+      "fields": {
+        "device": {
+          "type": {
+            "class": "BehaviorDevice"
+          },
+          "required": false
+        },
+        "source": {
+          "type": {
+            "class": "BehaviorSource"
+          },
+          "required": false
+        },
+        "model_id": {
+          "type": "String",
+          "required": false
+        },
+        "buttons": {
+          "type": {
+            "map": {
+              "class": "AccessoryBehaviorButton"
+            }
+          },
+          "required": false
+        },
+        "motion": {
+          "type": {
+            "class": "AccessoryBehaviorMotionSensor"
+          },
+          "required": false
+        },
+        "light_level": {
+          "type": {
+            "class": "AccessoryBehaviorLightLevel"
+          },
+          "required": false
+        },
+        "brand": {
+          "type": "String",
+          "required": false
+        },
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": false
+        },
+        "rotaries": {
+          "type": {
+            "map": {
+              "class": "AccessoryBehaviorRotary"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessorySceneCycleActionExtended": {
+      "origin": "BridgeAccessorySceneCycleActionExtended",
+      "kind": "behavior",
+      "fields": {
+        "slots": {
+          "type": {
+            "list": {
+              "list": {
+                "class": "AccessoryActionValue"
+              }
+            }
+          },
+          "required": false
+        },
+        "repeat_timeout": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": false
+        },
+        "with_off": {
+          "type": {
+            "class": "AccessoryActionWithOff"
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessorySensorLightLevelSensitivity": {
+      "origin": "BridgeAccessorySensorLightLevelSensitivity",
+      "kind": "behavior",
+      "fields": {
+        "light_level_service": {
+          "type": {
+            "class": "BehaviorLightLevelService"
+          },
+          "required": true
+        },
+        "settings": {
+          "type": {
+            "class": "AccessoryBehaviorDaylightSensitivity"
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessorySignal": {
+      "origin": "BridgeAccessorySignal",
+      "kind": "behavior",
+      "fields": {
+        "sounds": {
+          "type": {
+            "list": {
+              "class": "AccessorySignalSound"
+            }
+          },
+          "required": false
+        },
+        "lights": {
+          "type": {
+            "list": {
+              "class": "AccessorySignalLight"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessorySignalLight": {
+      "origin": "BridgeAccessorySignalLight",
+      "kind": "behavior",
+      "fields": {
+        "duration": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": true
+        },
+        "colors": {
+          "type": {
+            "list": {
+              "class": "AccessorySignalLightColor"
+            }
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "AccessorySignalLightColor": {
+      "origin": "BridgeAccessorySignalLightColor",
+      "kind": "behavior",
+      "fields": {
+        "xy": {
+          "type": {
+            "class": "AccessorySignalLightColorXY"
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessorySignalLightColorXY": {
+      "origin": "BridgeAccessorySignalLightColorXY",
+      "kind": "behavior",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "AccessorySignalSound": {
+      "origin": "BridgeAccessorySignalSound",
+      "kind": "behavior",
+      "fields": {
+        "sound": {
+          "type": "String",
+          "required": false
+        },
+        "volume": {
+          "type": "Numeric",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "AccessorySpeakerControlAction": {
+      "origin": "BridgeAccessorySpeakerControlAction",
+      "kind": "behavior",
+      "fields": {
+        "action": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "play",
+            "pause",
+            "toggle_play_pause",
+            "favorite",
+            "volume_up",
+            "volume_down",
+            "volume_alternate",
+            "volume_control",
+            "next",
+            "previous",
+            "do_nothing"
+          ]
+        },
+        "content_id": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "AccessorySunriseSunsetOffset": {
+      "origin": "BridgeAccessorySunriseSunsetOffset",
+      "kind": "behavior",
+      "fields": {
+        "sunrise_offset": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": true
+        },
+        "sunset_offset": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": true
+        }
+      }
+    },
+    "AccessoryTimeBasedActionExtended": {
+      "origin": "BridgeAccessoryTimeBasedActionExtended",
+      "kind": "behavior",
+      "fields": {
+        "slots": {
+          "type": {
+            "list": {
+              "class": "AccessoryBehaviorTimeSlot"
+            }
+          },
+          "required": false
+        },
+        "repeat_timeout": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": false
+        },
+        "with_off": {
+          "type": {
+            "class": "AccessoryActionWithOff"
+          },
+          "required": false
+        }
+      }
+    },
+    "AccessoryTimedAction": {
+      "origin": "BridgeAccessoryTimedAction",
+      "kind": "behavior",
+      "fields": {
+        "recall_single": {
+          "type": {
+            "list": {
+              "class": "AccessoryActionValue"
+            }
+          },
+          "required": false
+        },
+        "timer": {
+          "type": {
+            "class": "AccessoryBehaviorTimer"
+          },
+          "required": false
+        }
+      }
+    },
     "BehaviorBlink": {
       "origin": "BridgeBehaviorBlink",
       "kind": "behavior",
       "fields": {}
+    },
+    "BehaviorDevice": {
+      "origin": "BridgeBehaviorDevice",
+      "kind": "behavior",
+      "fields": {
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_home",
+            "room",
+            "zone",
+            "service_group",
+            "light",
+            "scene",
+            "smart_scene",
+            "recipe",
+            "device",
+            "entertainment_configuration",
+            "button",
+            "relative_rotary",
+            "motion",
+            "grouped_motion",
+            "camera_motion",
+            "light_level",
+            "grouped_light_level",
+            "grouped_light",
+            "temperature",
+            "contact",
+            "tamper",
+            "motion_area_configuration",
+            "convenience_area_motion",
+            "security_area_motion",
+            "behavior_instance",
+            "speaker"
+          ]
+        },
+        "rid": {
+          "type": "String",
+          "required": true
+        }
+      }
     },
     "BehaviorFadeDuration": {
       "origin": "BridgeBehaviorFadeDuration",
@@ -203,6 +1156,48 @@
         }
       }
     },
+    "BehaviorInstanceReference": {
+      "origin": "BridgeBehaviorInstance",
+      "kind": "behavior",
+      "fields": {
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_home",
+            "room",
+            "zone",
+            "service_group",
+            "light",
+            "scene",
+            "smart_scene",
+            "recipe",
+            "device",
+            "entertainment_configuration",
+            "button",
+            "relative_rotary",
+            "motion",
+            "grouped_motion",
+            "camera_motion",
+            "light_level",
+            "grouped_light_level",
+            "grouped_light",
+            "temperature",
+            "contact",
+            "tamper",
+            "motion_area_configuration",
+            "convenience_area_motion",
+            "security_area_motion",
+            "behavior_instance",
+            "speaker"
+          ]
+        },
+        "rid": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
     "BehaviorInstanceUpdate": {
       "origin": "BridgeBehavior",
       "kind": "update",
@@ -271,6 +1266,48 @@
         }
       }
     },
+    "BehaviorLightLevelService": {
+      "origin": "BridgeBehaviorLightLevelService",
+      "kind": "behavior",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_home",
+            "room",
+            "zone",
+            "service_group",
+            "light",
+            "scene",
+            "smart_scene",
+            "recipe",
+            "device",
+            "entertainment_configuration",
+            "button",
+            "relative_rotary",
+            "motion",
+            "grouped_motion",
+            "camera_motion",
+            "light_level",
+            "grouped_light_level",
+            "grouped_light",
+            "temperature",
+            "contact",
+            "tamper",
+            "motion_area_configuration",
+            "convenience_area_motion",
+            "security_area_motion",
+            "behavior_instance",
+            "speaker"
+          ]
+        }
+      }
+    },
     "BehaviorMetadata": {
       "origin": "BridgeBehaviorMetadata",
       "kind": "behavior",
@@ -282,6 +1319,48 @@
         "name": {
           "type": "String",
           "required": false
+        }
+      }
+    },
+    "BehaviorMotionService": {
+      "origin": "BridgeBehaviorMotionService",
+      "kind": "behavior",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_home",
+            "room",
+            "zone",
+            "service_group",
+            "light",
+            "scene",
+            "smart_scene",
+            "recipe",
+            "device",
+            "entertainment_configuration",
+            "button",
+            "relative_rotary",
+            "motion",
+            "grouped_motion",
+            "camera_motion",
+            "light_level",
+            "grouped_light_level",
+            "grouped_light",
+            "temperature",
+            "contact",
+            "tamper",
+            "motion_area_configuration",
+            "convenience_area_motion",
+            "security_area_motion",
+            "behavior_instance",
+            "speaker"
+          ]
         }
       }
     },
@@ -324,6 +1403,74 @@
         "rid": {
           "type": "String",
           "required": true
+        }
+      }
+    },
+    "BehaviorSource": {
+      "origin": "BridgeBehaviorSource",
+      "kind": "behavior",
+      "fields": {
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_home",
+            "room",
+            "zone",
+            "service_group",
+            "light",
+            "scene",
+            "smart_scene",
+            "recipe",
+            "device",
+            "entertainment_configuration",
+            "button",
+            "relative_rotary",
+            "motion",
+            "grouped_motion",
+            "camera_motion",
+            "light_level",
+            "grouped_light_level",
+            "grouped_light",
+            "temperature",
+            "contact",
+            "tamper",
+            "motion_area_configuration",
+            "convenience_area_motion",
+            "security_area_motion",
+            "behavior_instance",
+            "speaker"
+          ]
+        },
+        "rid": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "BehaviorSpeaker": {
+      "origin": "BridgeBehaviorSpeaker",
+      "kind": "behavior",
+      "fields": {
+        "speaker_service": {
+          "type": {
+            "class": "BehaviorSpeakerService"
+          },
+          "required": true
+        }
+      }
+    },
+    "BehaviorSpeakerService": {
+      "origin": "BridgeBehaviorSpeakerService",
+      "kind": "behavior",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": false
         }
       }
     },

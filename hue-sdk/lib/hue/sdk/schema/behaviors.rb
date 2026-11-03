@@ -5,17 +5,259 @@
 module Hue
   module Sdk
     module Schema
-      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorBlink+).
-      BehaviorBlink = Data.define do
+      # Part of an automation as the Hue app describes it (Hue app class +TimeSpan+).
+      #
+      # @!attribute [r] hours
+      #   @return [Numeric, nil]
+      # @!attribute [r] minutes
+      #   @return [Numeric, nil]
+      # @!attribute [r] seconds
+      #   @return [Numeric, nil]
+      # @!attribute [r] milliseconds
+      #   @return [Numeric, nil]
+      TimeSpan = Data.define(:hours, :minutes, :seconds, :milliseconds) do
+        include Value
+
+        optional :hours, :minutes, :seconds, :milliseconds
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorTimer+).
+      #
+      # @!attribute [r] duration
+      #   @return [TimeSpan]
+      # @!attribute [r] type
+      #   @return [String] one of +time_out_after+, +after_a_set_time+
+      AccessoryBehaviorTimer = Data.define(:duration, :type) do
+        include Value
+
+        nested duration: TimeSpan
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryActionValue+).
+      #
+      # @!attribute [r] action
+      #   @return [Object, nil] one of +last_on+, +all_off+, +home_off+, +on_off+, +previous_state+, +clamp+,
+      #     +do_nothing+, +dim_up+, +dim_down+, +dim_alternate+
+      AccessoryActionValue = Data.define(:action) do
+        include Value
+
+        optional :action
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryActionWithOff+).
+      #
+      # @!attribute [r] enabled
+      #   @return [Boolean]
+      AccessoryActionWithOff = Data.define(:enabled) do
         include Value
       end
 
-      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorFadeDuration+).
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryActionExtended+).
       #
-      # @!attribute [r] seconds
-      #   @return [Numeric]
-      BehaviorFadeDuration = Data.define(:seconds) do
+      # @!attribute [r] with_off
+      #   @return [AccessoryActionWithOff, nil]
+      # @!attribute [r] actions
+      #   @return [Array<AccessoryActionValue>, nil]
+      AccessoryActionExtended = Data.define(:with_off, :actions) do
         include Value
+
+        optional :with_off, :actions
+        nested with_off: AccessoryActionWithOff, actions: [AccessoryActionValue]
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessorySceneCycleActionExtended+).
+      #
+      # @!attribute [r] slots
+      #   @return [Array<Array<AccessoryActionValue>>, nil]
+      # @!attribute [r] repeat_timeout
+      #   @return [TimeSpan, nil]
+      # @!attribute [r] with_off
+      #   @return [AccessoryActionWithOff, nil]
+      AccessorySceneCycleActionExtended = Data.define(:slots, :repeat_timeout, :with_off) do
+        include Value
+
+        optional :slots, :repeat_timeout, :with_off
+        nested slots: [[AccessoryActionValue]], repeat_timeout: TimeSpan, with_off: AccessoryActionWithOff
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +TimeStamp+).
+      #
+      # @!attribute [r] hour
+      #   @return [Numeric]
+      # @!attribute [r] minute
+      #   @return [Numeric]
+      TimeStamp = Data.define(:hour, :minute) do
+        include Value
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessorySignalSound+).
+      #
+      # @!attribute [r] sound
+      #   @return [String, nil]
+      # @!attribute [r] volume
+      #   @return [Numeric]
+      # @!attribute [r] type
+      #   @return [String, nil]
+      AccessorySignalSound = Data.define(:sound, :volume, :type) do
+        include Value
+
+        optional :sound, :type
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessorySignalLightColorXY+).
+      #
+      # @!attribute [r] x
+      #   @return [Numeric]
+      # @!attribute [r] y
+      #   @return [Numeric]
+      AccessorySignalLightColorXY = Data.define(:x, :y) do
+        include Value
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessorySignalLightColor+).
+      #
+      # @!attribute [r] xy
+      #   @return [AccessorySignalLightColorXY]
+      AccessorySignalLightColor = Data.define(:xy) do
+        include Value
+
+        nested xy: AccessorySignalLightColorXY
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessorySignalLight+).
+      #
+      # @!attribute [r] duration
+      #   @return [TimeSpan]
+      # @!attribute [r] colors
+      #   @return [Array<AccessorySignalLightColor>]
+      # @!attribute [r] type
+      #   @return [String, nil]
+      AccessorySignalLight = Data.define(:duration, :colors, :type) do
+        include Value
+
+        optional :type
+        nested duration: TimeSpan, colors: [AccessorySignalLightColor]
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessorySignal+).
+      #
+      # @!attribute [r] sounds
+      #   @return [Array<AccessorySignalSound>, nil]
+      # @!attribute [r] lights
+      #   @return [Array<AccessorySignalLight>, nil]
+      AccessorySignal = Data.define(:sounds, :lights) do
+        include Value
+
+        optional :sounds, :lights
+        nested sounds: [AccessorySignalSound], lights: [AccessorySignalLight]
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorTimeSlot+).
+      #
+      # @!attribute [r] start_time
+      #   @return [TimeStamp]
+      # @!attribute [r] actions
+      #   @return [Array<AccessoryActionValue>, nil]
+      # @!attribute [r] signal
+      #   @return [AccessorySignal, nil]
+      AccessoryBehaviorTimeSlot = Data.define(:start_time, :actions, :signal) do
+        include Value
+
+        optional :actions, :signal
+        nested start_time: TimeStamp, actions: [AccessoryActionValue], signal: AccessorySignal
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryTimeBasedActionExtended+).
+      #
+      # @!attribute [r] slots
+      #   @return [Array<AccessoryBehaviorTimeSlot>, nil]
+      # @!attribute [r] repeat_timeout
+      #   @return [TimeSpan, nil]
+      # @!attribute [r] with_off
+      #   @return [AccessoryActionWithOff, nil]
+      AccessoryTimeBasedActionExtended = Data.define(:slots, :repeat_timeout, :with_off) do
+        include Value
+
+        optional :slots, :repeat_timeout, :with_off
+        nested slots: [AccessoryBehaviorTimeSlot], repeat_timeout: TimeSpan, with_off: AccessoryActionWithOff
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorInstance+).
+      #
+      # @!attribute [r] rtype
+      #   @return [String] one of +bridge_home+, +room+, +zone+, +service_group+, +light+, +scene+, +smart_scene+,
+      #     +recipe+, +device+, +entertainment_configuration+, +button+, +relative_rotary+, +motion+, +grouped_motion+,
+      #     +camera_motion+, +light_level+, +grouped_light_level+, +grouped_light+, +temperature+, +contact+, +tamper+,
+      #     +motion_area_configuration+, +convenience_area_motion+, +security_area_motion+, +behavior_instance+,
+      #     +speaker+
+      # @!attribute [r] rid
+      #   @return [String]
+      BehaviorInstanceReference = Data.define(:rtype, :rid) do
+        include Value
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorAction+).
+      #
+      # @!attribute [r] behavior
+      #   @return [BehaviorInstanceReference]
+      # @!attribute [r] trigger
+      #   @return [String] one of +start+, +stop+
+      AccessoryBehaviorAction = Data.define(:behavior, :trigger) do
+        include Value
+
+        nested behavior: BehaviorInstanceReference
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessorySpeakerControlAction+).
+      #
+      # @!attribute [r] action
+      #   @return [String] one of +play+, +pause+, +toggle_play_pause+, +favorite+, +volume_up+, +volume_down+,
+      #     +volume_alternate+, +volume_control+, +next+, +previous+, +do_nothing+
+      # @!attribute [r] content_id
+      #   @return [String, nil]
+      AccessorySpeakerControlAction = Data.define(:action, :content_id) do
+        include Value
+
+        optional :content_id
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryAction+).
+      #
+      # @!attribute [r] after
+      #   @return [TimeSpan, nil]
+      # @!attribute [r] timer
+      #   @return [AccessoryBehaviorTimer, nil]
+      # @!attribute [r] recall_single
+      #   @return [Array<AccessoryActionValue>, nil]
+      # @!attribute [r] recall_single_extended
+      #   @return [AccessoryActionExtended, nil]
+      # @!attribute [r] scene_cycle
+      #   @return [Array<Array<AccessoryActionValue>>, nil]
+      # @!attribute [r] scene_cycle_extended
+      #   @return [AccessorySceneCycleActionExtended, nil]
+      # @!attribute [r] time_based
+      #   @return [Array<AccessoryBehaviorTimeSlot>, nil]
+      # @!attribute [r] time_based_extended
+      #   @return [AccessoryTimeBasedActionExtended, nil]
+      # @!attribute [r] action
+      #   @return [Object, nil] one of +last_on+, +all_off+, +home_off+, +on_off+, +previous_state+, +clamp+,
+      #     +do_nothing+, +dim_up+, +dim_down+, +dim_alternate+
+      # @!attribute [r] behavior_trigger
+      #   @return [AccessoryBehaviorAction, nil]
+      # @!attribute [r] sound_targets_control
+      #   @return [AccessorySpeakerControlAction, nil]
+      AccessoryAction = Data.define(:after, :timer, :recall_single, :recall_single_extended, :scene_cycle,
+                                    :scene_cycle_extended, :time_based, :time_based_extended, :action,
+                                    :behavior_trigger, :sound_targets_control) do
+        include Value
+
+        optional :after, :timer, :recall_single, :recall_single_extended, :scene_cycle, :scene_cycle_extended,
+                 :time_based, :time_based_extended, :action, :behavior_trigger, :sound_targets_control
+        nested after: TimeSpan, timer: AccessoryBehaviorTimer, recall_single: [AccessoryActionValue],
+               recall_single_extended: AccessoryActionExtended, scene_cycle: [[AccessoryActionValue]],
+               scene_cycle_extended: AccessorySceneCycleActionExtended, time_based: [AccessoryBehaviorTimeSlot],
+               time_based_extended: AccessoryTimeBasedActionExtended, behavior_trigger: AccessoryBehaviorAction,
+               sound_targets_control: AccessorySpeakerControlAction
       end
 
       # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorGroup+).
@@ -57,6 +299,407 @@ module Hue
 
         optional :items
         nested group: BehaviorGroup, items: [BehaviorLight]
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorSpeakerService+).
+      #
+      # @!attribute [r] rid
+      #   @return [String]
+      # @!attribute [r] rtype
+      #   @return [String, nil]
+      BehaviorSpeakerService = Data.define(:rid, :rtype) do
+        include Value
+
+        optional :rtype
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorSpeaker+).
+      #
+      # @!attribute [r] speaker_service
+      #   @return [BehaviorSpeakerService]
+      BehaviorSpeaker = Data.define(:speaker_service) do
+        include Value
+
+        nested speaker_service: BehaviorSpeakerService
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorButton+).
+      #
+      # @!attribute [r] on_short_release
+      #   @return [AccessoryAction, nil]
+      # @!attribute [r] on_long_press
+      #   @return [AccessoryAction, nil]
+      # @!attribute [r] on_repeat
+      #   @return [AccessoryAction, nil]
+      # @!attribute [r] where
+      #   @return [Array<BehaviorGroupAndLights>, nil]
+      # @!attribute [r] sound_targets
+      #   @return [Array<BehaviorSpeaker>, nil]
+      AccessoryBehaviorButton = Data.define(:on_short_release, :on_long_press, :on_repeat, :where, :sound_targets) do
+        include Value
+
+        optional :on_short_release, :on_long_press, :on_repeat, :where, :sound_targets
+        nested on_short_release: AccessoryAction, on_long_press: AccessoryAction, on_repeat: AccessoryAction,
+               where: [BehaviorGroupAndLights], sound_targets: [BehaviorSpeaker]
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryTimedAction+).
+      #
+      # @!attribute [r] recall_single
+      #   @return [Array<AccessoryActionValue>, nil]
+      # @!attribute [r] timer
+      #   @return [AccessoryBehaviorTimer, nil]
+      AccessoryTimedAction = Data.define(:recall_single, :timer) do
+        include Value
+
+        optional :recall_single, :timer
+        nested recall_single: [AccessoryActionValue], timer: AccessoryBehaviorTimer
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class
+      #   +BridgeAccessoryBehaviorContactSensorActionsConfiguration+).
+      #
+      # @!attribute [r] on_open
+      #   @return [AccessoryAction]
+      # @!attribute [r] on_close
+      #   @return [AccessoryTimedAction]
+      AccessoryBehaviorContactSensorActionsConfiguration = Data.define(:on_open, :on_close) do
+        include Value
+
+        nested on_open: AccessoryAction, on_close: AccessoryTimedAction
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorDevice+).
+      #
+      # @!attribute [r] rtype
+      #   @return [String] one of +bridge_home+, +room+, +zone+, +service_group+, +light+, +scene+, +smart_scene+,
+      #     +recipe+, +device+, +entertainment_configuration+, +button+, +relative_rotary+, +motion+, +grouped_motion+,
+      #     +camera_motion+, +light_level+, +grouped_light_level+, +grouped_light+, +temperature+, +contact+, +tamper+,
+      #     +motion_area_configuration+, +convenience_area_motion+, +security_area_motion+, +behavior_instance+,
+      #     +speaker+
+      # @!attribute [r] rid
+      #   @return [String]
+      BehaviorDevice = Data.define(:rtype, :rid) do
+        include Value
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class
+      #   +BridgeAccessoryBehaviorContactSensorConfigurations+).
+      #
+      # @!attribute [r] always
+      #   @return [AccessoryBehaviorContactSensorActionsConfiguration]
+      AccessoryBehaviorContactSensorConfigurations = Data.define(:always) do
+        include Value
+
+        nested always: AccessoryBehaviorContactSensorActionsConfiguration
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class
+      #   +BridgeAccessoryBehaviorContactSensorConfiguration+).
+      #
+      # @!attribute [r] device
+      #   @return [BehaviorDevice]
+      # @!attribute [r] where
+      #   @return [Array<BehaviorGroupAndLights>]
+      # @!attribute [r] when
+      #   @return [AccessoryBehaviorContactSensorConfigurations]
+      AccessoryBehaviorContactSensorConfiguration = Data.define(:device, :where, :when) do
+        include Value
+
+        nested device: BehaviorDevice, where: [BehaviorGroupAndLights],
+               when: AccessoryBehaviorContactSensorConfigurations
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorDaylightSensitivity+).
+      #
+      # @!attribute [r] dark_threshold
+      #   @return [Numeric]
+      # @!attribute [r] offset
+      #   @return [Numeric]
+      AccessoryBehaviorDaylightSensitivity = Data.define(:dark_threshold, :offset) do
+        include Value
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorRotary+).
+      #
+      # @!attribute [r] where
+      #   @return [Array<BehaviorGroupAndLights>, nil]
+      # @!attribute [r] sound_targets
+      #   @return [Array<BehaviorSpeaker>, nil]
+      # @!attribute [r] on_dim_off
+      #   @return [AccessoryAction, nil]
+      # @!attribute [r] on_dim_on
+      #   @return [AccessoryAction, nil]
+      # @!attribute [r] on_rotate
+      #   @return [AccessoryAction, nil]
+      AccessoryBehaviorRotary = Data.define(:where, :sound_targets, :on_dim_off, :on_dim_on, :on_rotate) do
+        include Value
+
+        optional :where, :sound_targets, :on_dim_off, :on_dim_on, :on_rotate
+        nested where: [BehaviorGroupAndLights], sound_targets: [BehaviorSpeaker], on_dim_off: AccessoryAction,
+               on_dim_on: AccessoryAction, on_rotate: AccessoryAction
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorHTDSConfiguration+).
+      #
+      # @!attribute [r] device
+      #   @return [BehaviorDevice]
+      # @!attribute [r] button1
+      #   @return [AccessoryBehaviorButton]
+      # @!attribute [r] button2
+      #   @return [AccessoryBehaviorButton]
+      # @!attribute [r] button3
+      #   @return [AccessoryBehaviorButton]
+      # @!attribute [r] button4
+      #   @return [AccessoryBehaviorButton]
+      # @!attribute [r] rotary
+      #   @return [AccessoryBehaviorRotary]
+      AccessoryBehaviorHTDSConfiguration = Data.define(:device, :button1, :button2, :button3, :button4, :rotary) do
+        include Value
+
+        nested device: BehaviorDevice, button1: AccessoryBehaviorButton, button2: AccessoryBehaviorButton,
+               button3: AccessoryBehaviorButton, button4: AccessoryBehaviorButton, rotary: AccessoryBehaviorRotary
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorLightLevelService+).
+      #
+      # @!attribute [r] rid
+      #   @return [String]
+      # @!attribute [r] rtype
+      #   @return [String] one of +bridge_home+, +room+, +zone+, +service_group+, +light+, +scene+, +smart_scene+,
+      #     +recipe+, +device+, +entertainment_configuration+, +button+, +relative_rotary+, +motion+, +grouped_motion+,
+      #     +camera_motion+, +light_level+, +grouped_light_level+, +grouped_light+, +temperature+, +contact+, +tamper+,
+      #     +motion_area_configuration+, +convenience_area_motion+, +security_area_motion+, +behavior_instance+,
+      #     +speaker+
+      BehaviorLightLevelService = Data.define(:rid, :rtype) do
+        include Value
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessorySensorLightLevelSensitivity+).
+      #
+      # @!attribute [r] light_level_service
+      #   @return [BehaviorLightLevelService]
+      # @!attribute [r] settings
+      #   @return [AccessoryBehaviorDaylightSensitivity]
+      AccessorySensorLightLevelSensitivity = Data.define(:light_level_service, :settings) do
+        include Value
+
+        nested light_level_service: BehaviorLightLevelService, settings: AccessoryBehaviorDaylightSensitivity
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessorySunriseSunsetOffset+).
+      #
+      # @!attribute [r] sunrise_offset
+      #   @return [TimeSpan]
+      # @!attribute [r] sunset_offset
+      #   @return [TimeSpan]
+      AccessorySunriseSunsetOffset = Data.define(:sunrise_offset, :sunset_offset) do
+        include Value
+
+        nested sunrise_offset: TimeSpan, sunset_offset: TimeSpan
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryDaylight+).
+      #
+      # @!attribute [r] daylight_sensitivity
+      #   @return [AccessorySensorLightLevelSensitivity, nil]
+      # @!attribute [r] sunrise_sunset
+      #   @return [AccessorySunriseSunsetOffset, nil]
+      AccessoryDaylight = Data.define(:daylight_sensitivity, :sunrise_sunset) do
+        include Value
+
+        optional :daylight_sensitivity, :sunrise_sunset
+        nested daylight_sensitivity: AccessorySensorLightLevelSensitivity, sunrise_sunset: AccessorySunriseSunsetOffset
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorLightLevel+).
+      #
+      # @!attribute [r] light_level_service
+      #   @return [BehaviorLightLevelService, nil]
+      # @!attribute [r] daylight_sensitivity
+      #   @return [AccessoryBehaviorDaylightSensitivity, nil]
+      # @!attribute [r] daylight
+      #   @return [AccessoryDaylight, nil]
+      AccessoryBehaviorLightLevel = Data.define(:light_level_service, :daylight_sensitivity, :daylight) do
+        include Value
+
+        optional :light_level_service, :daylight_sensitivity, :daylight
+        nested light_level_service: BehaviorLightLevelService,
+               daylight_sensitivity: AccessoryBehaviorDaylightSensitivity, daylight: AccessoryDaylight
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorMotionService+).
+      #
+      # @!attribute [r] rid
+      #   @return [String]
+      # @!attribute [r] rtype
+      #   @return [String] one of +bridge_home+, +room+, +zone+, +service_group+, +light+, +scene+, +smart_scene+,
+      #     +recipe+, +device+, +entertainment_configuration+, +button+, +relative_rotary+, +motion+, +grouped_motion+,
+      #     +camera_motion+, +light_level+, +grouped_light_level+, +grouped_light+, +temperature+, +contact+, +tamper+,
+      #     +motion_area_configuration+, +convenience_area_motion+, +security_area_motion+, +behavior_instance+,
+      #     +speaker+
+      BehaviorMotionService = Data.define(:rid, :rtype) do
+        include Value
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class
+      #   +BridgeAccessoryBehaviorMotionSensorTimeSlotStartTime+).
+      #
+      # @!attribute [r] time
+      #   @return [TimeStamp]
+      # @!attribute [r] type
+      #   @return [String]
+      AccessoryBehaviorMotionSensorTimeSlotStartTime = Data.define(:time, :type) do
+        include Value
+
+        nested time: TimeStamp
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class
+      #   +BridgeAccessoryBehaviorMotionSensorNoMotionAction+).
+      #
+      # @!attribute [r] after
+      #   @return [TimeSpan]
+      # @!attribute [r] recall_single
+      #   @return [Array<AccessoryActionValue>, nil]
+      # @!attribute [r] action
+      #   @return [Object, nil] one of +last_on+, +all_off+, +home_off+, +on_off+, +previous_state+, +clamp+,
+      #     +do_nothing+, +dim_up+, +dim_down+, +dim_alternate+
+      AccessoryBehaviorMotionSensorNoMotionAction = Data.define(:after, :recall_single, :action) do
+        include Value
+
+        optional :recall_single, :action
+        nested after: TimeSpan, recall_single: [AccessoryActionValue]
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorMotionSensorTimeSlot+).
+      #
+      # @!attribute [r] start_time
+      #   @return [AccessoryBehaviorMotionSensorTimeSlotStartTime]
+      # @!attribute [r] on_motion
+      #   @return [AccessoryAction]
+      # @!attribute [r] on_no_motion
+      #   @return [AccessoryBehaviorMotionSensorNoMotionAction, nil]
+      # @!attribute [r] do_not_disturb
+      #   @return [Boolean, nil]
+      AccessoryBehaviorMotionSensorTimeSlot = Data.define(:start_time, :on_motion, :on_no_motion, :do_not_disturb) do
+        include Value
+
+        optional :on_no_motion, :do_not_disturb
+        nested start_time: AccessoryBehaviorMotionSensorTimeSlotStartTime, on_motion: AccessoryAction,
+               on_no_motion: AccessoryBehaviorMotionSensorNoMotionAction
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class
+      #   +BridgeAccessoryBehaviorMotionSensorConfigurations+).
+      #
+      # @!attribute [r] timeslots
+      #   @return [Array<AccessoryBehaviorMotionSensorTimeSlot>]
+      AccessoryBehaviorMotionSensorConfigurations = Data.define(:timeslots) do
+        include Value
+
+        nested timeslots: [AccessoryBehaviorMotionSensorTimeSlot]
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorMotionSensor+).
+      #
+      # @!attribute [r] motion_service
+      #   @return [BehaviorMotionService]
+      # @!attribute [r] where
+      #   @return [Array<BehaviorGroupAndLights>]
+      # @!attribute [r] when
+      #   @return [AccessoryBehaviorMotionSensorConfigurations]
+      AccessoryBehaviorMotionSensor = Data.define(:motion_service, :where, :when) do
+        include Value
+
+        nested motion_service: BehaviorMotionService, where: [BehaviorGroupAndLights],
+               when: AccessoryBehaviorMotionSensorConfigurations
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorSource+).
+      #
+      # @!attribute [r] rtype
+      #   @return [String] one of +bridge_home+, +room+, +zone+, +service_group+, +light+, +scene+, +smart_scene+,
+      #     +recipe+, +device+, +entertainment_configuration+, +button+, +relative_rotary+, +motion+, +grouped_motion+,
+      #     +camera_motion+, +light_level+, +grouped_light_level+, +grouped_light+, +temperature+, +contact+, +tamper+,
+      #     +motion_area_configuration+, +convenience_area_motion+, +security_area_motion+, +behavior_instance+,
+      #     +speaker+
+      # @!attribute [r] rid
+      #   @return [String]
+      BehaviorSource = Data.define(:rtype, :rid) do
+        include Value
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryBehaviorSettings+).
+      #
+      # @!attribute [r] daylight_sensitivity
+      #   @return [AccessoryBehaviorDaylightSensitivity, nil]
+      AccessoryBehaviorSettings = Data.define(:daylight_sensitivity) do
+        include Value
+
+        optional :daylight_sensitivity
+        nested daylight_sensitivity: AccessoryBehaviorDaylightSensitivity
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class
+      #   +BridgeAccessoryBehaviorMotionSensorConfiguration+).
+      #
+      # @!attribute [r] source
+      #   @return [BehaviorSource]
+      # @!attribute [r] where
+      #   @return [Array<BehaviorGroupAndLights>]
+      # @!attribute [r] settings
+      #   @return [AccessoryBehaviorSettings]
+      # @!attribute [r] when
+      #   @return [AccessoryBehaviorMotionSensorConfigurations]
+      AccessoryBehaviorMotionSensorConfiguration = Data.define(:source, :where, :settings, :when) do
+        include Value
+
+        nested source: BehaviorSource, where: [BehaviorGroupAndLights], settings: AccessoryBehaviorSettings,
+               when: AccessoryBehaviorMotionSensorConfigurations
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeAccessoryGenericConfiguration+).
+      #
+      # @!attribute [r] device
+      #   @return [BehaviorDevice, nil]
+      # @!attribute [r] source
+      #   @return [BehaviorSource, nil]
+      # @!attribute [r] model_id
+      #   @return [String, nil]
+      # @!attribute [r] buttons
+      #   @return [Hash{String=>AccessoryBehaviorButton}, nil]
+      # @!attribute [r] motion
+      #   @return [AccessoryBehaviorMotionSensor, nil]
+      # @!attribute [r] light_level
+      #   @return [AccessoryBehaviorLightLevel, nil]
+      # @!attribute [r] brand
+      #   @return [String, nil]
+      # @!attribute [r] where
+      #   @return [Array<BehaviorGroupAndLights>, nil]
+      # @!attribute [r] rotaries
+      #   @return [Hash{String=>AccessoryBehaviorRotary}, nil]
+      AccessoryGenericConfiguration = Data.define(:device, :source, :model_id, :buttons, :motion, :light_level, :brand,
+                                                  :where, :rotaries) do
+        include Value
+
+        optional :device, :source, :model_id, :buttons, :motion, :light_level, :brand, :where, :rotaries
+        nested device: BehaviorDevice, source: BehaviorSource, buttons: { String => AccessoryBehaviorButton },
+               motion: AccessoryBehaviorMotionSensor, light_level: AccessoryBehaviorLightLevel,
+               where: [BehaviorGroupAndLights], rotaries: { String => AccessoryBehaviorRotary }
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorBlink+).
+      BehaviorBlink = Data.define do
+        include Value
+      end
+
+      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorFadeDuration+).
+      #
+      # @!attribute [r] seconds
+      #   @return [Numeric]
+      BehaviorFadeDuration = Data.define(:seconds) do
+        include Value
       end
 
       # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorRecall+).
@@ -132,32 +775,6 @@ module Hue
       # @!attribute [r] rtype
       #   @return [String]
       BehaviorStreamingEndScene = Data.define(:rid, :rtype) do
-        include Value
-      end
-
-      # Part of an automation as the Hue app describes it (Hue app class +TimeSpan+).
-      #
-      # @!attribute [r] hours
-      #   @return [Numeric, nil]
-      # @!attribute [r] minutes
-      #   @return [Numeric, nil]
-      # @!attribute [r] seconds
-      #   @return [Numeric, nil]
-      # @!attribute [r] milliseconds
-      #   @return [Numeric, nil]
-      TimeSpan = Data.define(:hours, :minutes, :seconds, :milliseconds) do
-        include Value
-
-        optional :hours, :minutes, :seconds, :milliseconds
-      end
-
-      # Part of an automation as the Hue app describes it (Hue app class +TimeStamp+).
-      #
-      # @!attribute [r] hour
-      #   @return [Numeric]
-      # @!attribute [r] minute
-      #   @return [Numeric]
-      TimeStamp = Data.define(:hour, :minute) do
         include Value
       end
 
@@ -413,12 +1030,16 @@ module Hue
       # Id of each automation script, by a stable name.
       BEHAVIOR_SCRIPTS = {
         coming_home: 'fd60fcd1-4809-4813-b510-4a18856a595c',
+        contact_sensor: '049008e6-62d7-42ba-b473-d8488cfde600',
         go_to_sleep: '7e571ac6-f363-42e1-809a-4cbf6523ed72',
+        hue_accessories: '67d9395b-4403-42cc-b5f0-740b699d67c6',
         leaving_home: '0194752a-2d53-4f92-8209-dfdc52745af3',
+        motion_sensor: 'bba79770-19f1-11ec-9621-0242ac130002',
         native_go_to_sleep: 'a5624529-bd7e-4bc8-9d2f-9200476f106e',
         pm_automation: 'db06cabc-c752-4904-9e8f-4ebe98feaa1a',
         smoke_alarm: '58f97610-b471-4c94-a27d-4d55bcd8c197',
         state_after_streaming: '7719b841-6b3d-448d-a0e7-601ae9edb6a2',
+        tap_switch: 'f306f634-acdb-4dd6-bdf5-48dd626d667e',
         time_based: '7238c707-8693-4f19-9095-ccdc1444d228',
         timer: 'e73bc72d-96b1-46f8-aa57-729861f80c78',
         wake_up: 'ff8957e3-2eb9-4699-a0c8-ad2cb3ede704'
@@ -427,13 +1048,17 @@ module Hue
       # Configuration value class of each automation script, by its id.
       BEHAVIOR_CONFIGURATIONS = {
         '0194752a-2d53-4f92-8209-dfdc52745af3' => LeavingHomeConfiguration,
+        '049008e6-62d7-42ba-b473-d8488cfde600' => AccessoryBehaviorContactSensorConfiguration,
         '58f97610-b471-4c94-a27d-4d55bcd8c197' => SmokeAlarmConfiguration,
+        '67d9395b-4403-42cc-b5f0-740b699d67c6' => AccessoryGenericConfiguration,
         '7238c707-8693-4f19-9095-ccdc1444d228' => TimeBasedConfiguration,
         '7719b841-6b3d-448d-a0e7-601ae9edb6a2' => StateAfterStreamingConfiguration,
         '7e571ac6-f363-42e1-809a-4cbf6523ed72' => GoToSleepConfiguration,
         'a5624529-bd7e-4bc8-9d2f-9200476f106e' => GoToSleepConfiguration,
+        'bba79770-19f1-11ec-9621-0242ac130002' => AccessoryBehaviorMotionSensorConfiguration,
         'db06cabc-c752-4904-9e8f-4ebe98feaa1a' => PmAutomationConfiguration,
         'e73bc72d-96b1-46f8-aa57-729861f80c78' => TimerConfiguration,
+        'f306f634-acdb-4dd6-bdf5-48dd626d667e' => AccessoryBehaviorHTDSConfiguration,
         'fd60fcd1-4809-4813-b510-4a18856a595c' => ComingHomeConfiguration,
         'ff8957e3-2eb9-4699-a0c8-ad2cb3ede704' => WakeUpConfiguration
       }.freeze

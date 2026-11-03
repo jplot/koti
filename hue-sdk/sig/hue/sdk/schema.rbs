@@ -16,7 +16,7 @@ module Hue
       end
 
       module Value : Data
-        type nested_type = ClassMethods | [ClassMethods]
+        type nested_type = ClassMethods | [nested_type] | Hash[singleton(String), nested_type]
 
         def self.included: (Module base) -> void
 

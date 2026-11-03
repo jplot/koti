@@ -86,7 +86,8 @@ RSpec.describe Hue::Sdk::Schema::BehaviorInstance do
   it 'names every automation script' do
     expect(schema::BEHAVIOR_SCRIPTS.keys).to contain_exactly(
       :coming_home, :go_to_sleep, :leaving_home, :native_go_to_sleep, :pm_automation, :smoke_alarm,
-      :state_after_streaming, :time_based, :timer, :wake_up
+      :state_after_streaming, :time_based, :timer, :wake_up, :hue_accessories, :tap_switch, :motion_sensor,
+      :contact_sensor
     )
   end
 end

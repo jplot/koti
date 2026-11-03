@@ -13,13 +13,15 @@ module Hue
         # @api private
         def self.included(base) = base.extend(ClassMethods)
 
-        # @param type [Class, Array<Class>, nil] a value class, a list of them, or nil for plain JSON
+        # @param type [Class, Array, Hash, nil] a value class, a list of them, a table of them by string, or nil for
+        #   plain JSON
         # @param data [Object] the JSON of the bridge
         # @return [Object]
         # @api private
         def self.load(type, data)
           case type
           in [item] then data&.map { load(item, it) }
+          in Hash then data&.transform_values { load(type.fetch(String), it) }
           in Class then data && type.from(data)
           else data
           end
@@ -32,6 +34,7 @@ module Hue
           case value
           when Value then value.to_body
           when Array then value.map { dump(it) }
+          when Hash then value.transform_values { dump(it) }
           else value
           end
         end
@@ -42,7 +45,7 @@ module Hue
           # @api private
           def optional_members = @optional_members || []
 
-          # @return [Hash{Symbol=>Class, Array<Class>}] the members holding a value, or a list of them
+          # @return [Hash{Symbol=>Class, Array, Hash}] the members holding a value, a list of them or a table of them
           # @api private
           def nested_members = @nested_members || {}
 
@@ -62,7 +65,7 @@ module Hue
             @optional_members = names
           end
 
-          # @param types [Hash{Symbol=>Class, Array<Class>}]
+          # @param types [Hash{Symbol=>Class, Array, Hash}]
           # @return [void]
           # @api private
           def nested(**types)

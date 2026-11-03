@@ -1,17 +1,17 @@
 module Hue
   module Sdk
     class Event < Data
-      attr_reader id: String
+      attr_reader id: String?
       attr_reader kind: Symbol
       attr_reader created_at: Time
-      attr_reader resource_type: String
-      attr_reader resource_id: String
+      attr_reader resource_type: String?
+      attr_reader resource_id: String?
       attr_reader changes: Hash[String, untyped]
 
-      def self.new: (id: String, kind: Symbol, created_at: Time, resource_type: String, resource_id: String,
+      def self.new: (id: String?, kind: Symbol, created_at: Time, resource_type: String?, resource_id: String?,
                      changes: Hash[String, untyped]) -> Event
 
-      def resource: () -> Models::Base::Instance
+      def resource: () -> Models::Base::Instance?
 
       def attributes: () -> Schema::Value?
     end
@@ -59,6 +59,11 @@ module Hue
         def headers: (String key) -> Hash[String, String]
 
         def events: (String data) -> Array[Event]
+
+        def container_events: (Hash[String, untyped] container) -> Array[Event]
+
+        def event: (Hash[String, untyped] container, String? resource_type, String? resource_id,
+                   Hash[String, untyped] changes) -> Event
 
         def refuse: (Net::HTTPResponse response) -> bot
       end

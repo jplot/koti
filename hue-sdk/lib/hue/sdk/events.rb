@@ -16,21 +16,22 @@ module Hue
     # @!attribute [r] created_at
     #   @return [Time] when the bridge emitted the event
     # @!attribute [r] resource_type
-    #   @return [String] type of the changed resource (+light+, +motion+…)
+    #   @return [String, nil] type of the changed resource (+light+, +motion+…), nil for an error
     # @!attribute [r] resource_id
-    #   @return [String] id of the changed resource
+    #   @return [String, nil] id of the changed resource, nil for an error
     # @!attribute [r] changes
-    #   @return [Hash{String=>Object}] the attributes that changed
+    #   @return [Hash{String=>Object}] the attributes that changed; for an error, +errors+ with their +code+ and
+    #     +description+
     class Event
-      # @return [Models::Base::Instance] the changed resource, loaded on first access
+      # @return [Models::Base::Instance, nil] the changed resource, loaded on first access; nil for an error
       # @api public
-      def resource = Sdk.resource(resource_type, resource_id)
+      def resource = (Sdk.resource(resource_type, resource_id) if resource_type && resource_id)
 
       # @return [Schema::Value, nil] {#changes} and the id of the resource as a typed value (+Schema::LightChange+ for
       #   a light…), where a field that did not change, or that the SDK hides as deprecated, is nil; nil for a type
       #   this version does not know
       # @api public
-      def attributes = Schema::CHANGES[resource_type]&.from(changes.merge('id' => resource_id)) #: Schema::Value?
+      def attributes = Schema::CHANGES[resource_type.to_s]&.from(changes.merge('id' => resource_id)) #: Schema::Value?
     end
 
     # Server-sent events of the bridge.
@@ -162,16 +163,31 @@ module Hue
         # @param data [String] JSON array of event containers
         # @return [Array<Event>] one event per changed resource
         # @api private
-        def events(data)
-          JSON.parse(data).flat_map do |container|
-            id = container['id']
-            kind = container['type'].to_sym
-            created_at = Time.iso8601(container['creationtime'])
-            container['data'].map do |resource|
-              Event.new(id:, kind:, created_at:, resource_type: resource['type'], resource_id: resource['id'],
-                        changes: Models.lookup(resource['type']).strip(resource.except('id', 'type')))
-            end
+        def events(data) = JSON.parse(data).flat_map { container_events(it) }
+
+        # An error container has +errors+ instead of +data+ (EventContainerError in the app).
+        #
+        # @param container [Hash{String=>Object}]
+        # @return [Array<Event>]
+        # @api private
+        def container_events(container)
+          return [event(container, nil, nil, container.slice('errors'))] if container.key?('errors')
+
+          container['data'].map do |resource|
+            type = resource['type']
+            event(container, type, resource['id'], Models.lookup(type).strip(resource.except('id', 'type')))
           end
+        end
+
+        # @param container [Hash{String=>Object}]
+        # @param resource_type [String, nil]
+        # @param resource_id [String, nil]
+        # @param changes [Hash{String=>Object}]
+        # @return [Event]
+        # @api private
+        def event(container, resource_type, resource_id, changes)
+          Event.new(id: container['id'], kind: container['type'].to_sym,
+                    created_at: Time.iso8601(container['creationtime']), resource_type:, resource_id:, changes:)
         end
 
         # @param response [Net::HTTPResponse]

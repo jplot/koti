@@ -257,6 +257,26 @@ automation.update(schema::BehaviorInstanceUpdate.new(trigger: schema::BehaviorTr
 these requests by hand; their fields come from its code. Only `coming_home`, `go_to_sleep`, `hue_accessories`,
 `leaving_home` and `time_based` were read on a real bridge, and the SDK never wrote an automation on one.
 
+## Bridge settings
+
+CLIP v2 only reports the time zone of the bridge. The Hue app reads and writes its settings over CLIP v1, and so does
+`Hue::Sdk.settings`.
+
+```ruby
+settings = Hue::Sdk.settings
+settings.time_zone          # => "Europe/Paris"
+settings.software_version   # => "1970000000"
+
+Hue::Sdk::Settings.time_zones                    # the time zones the bridge accepts
+settings.update(time_zone: 'Europe/London')      # sends a request per setting, then reads them again
+settings.update(utc: '2026-11-03T10:00:00')      # the clock of the bridge
+settings.update(http_blocked: true)              # refuse plain HTTP
+```
+
+The app writes nothing else there once the bridge is paired: `remote_access` and `analytics_consent` can only be read,
+and the network of the bridge stays out of the SDK. The application keys of other clients, which the same answer holds,
+stay out of the value. The SDK never wrote these settings on a real bridge.
+
 ## Associations
 
 References between resources resolve to resources of the right type:

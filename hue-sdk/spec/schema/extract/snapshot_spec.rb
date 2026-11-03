@@ -23,6 +23,11 @@ RSpec.describe Schema::Extract::Snapshot do
       pool heap offset: 0x3400080
       [pp+0x10] String: "on"
       [pp+0x18] Type: LightAdded
+      [pp+0x20] Map<Kind, String>(2) {
+        Obj!Kind@1: "always",
+        Obj!Kind@2: "between"
+      }
+      [pp+0x28] Null
     POOL
   end
 
@@ -40,6 +45,11 @@ RSpec.describe Schema::Extract::Snapshot do
   it 'reads the objects and strings of the object pool', :aggregate_failures do
     expect(snapshot.object(0x18)).to eq('Type: LightAdded')
     expect([snapshot.string(0x10), snapshot.string(0x18)]).to eq(['on', nil])
+  end
+
+  it 'reads the values of an enum map of the pool', :aggregate_failures do
+    expect(snapshot.enum_values('Kind')).to eq(%w[always between])
+    expect(snapshot.enum_values('Other')).to be_nil
   end
 
   it 'disassembles through the disassembler it was given' do

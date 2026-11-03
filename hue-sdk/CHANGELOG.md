@@ -18,6 +18,12 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   timeout included, or a failed handshake) rather than the stop's error, which it raises only when nothing else
   did.
 
+### Fixed
+
+- The entertainment DTLS handshake sends a lost flight again after 1 s, then 2 s, and gives up after 5 s,
+  as documented, instead of resending every 5 s and giving up after 20 s. A handshake losing three flights
+  now fails at 5 s, where it succeeded at 15 s.
+
 ### Added
 
 - Configuration of the bridge address, identity, keys and timeouts through `Hue::Sdk.configure`.

@@ -68,6 +68,16 @@ RSpec.describe Hue::Sdk, :live do
     resources.each { |resource| expect { Hue::Sdk::Schema::CHANGES[resource['type']]&.from(resource) }.not_to raise_error }
   end
 
+  it 'reads the settings of the bridge and its time zones', :aggregate_failures do
+    settings = described_class.settings
+    expect(settings.bridge_id.to_s.upcase).to eq(ENV.fetch('HUE_BRIDGE_ID').upcase)
+    expect(Hue::Sdk::Settings.time_zones).to include(settings.time_zone)
+  end
+
+  it 'cannot write the settings' do
+    expect { described_class.settings.update(time_zone: 'Europe/Paris') }.to raise_error(RuntimeError, /read-only: PUT/)
+  end
+
   it 'cannot write' do
     light = described_class.Light.list.first
     expect { light.update(on: light['on']) }.to raise_error(RuntimeError, /read-only: PUT refused/)

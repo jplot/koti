@@ -1,0 +1,35 @@
+module Hue
+  module Sdk
+    class Settings < Data
+      WRITE: Hash[Symbol, String]
+
+      UNAUTHORIZED: Integer
+
+      attr_reader name: String?
+      attr_reader bridge_id: String?
+      attr_reader model_id: String?
+      attr_reader software_version: String?
+      attr_reader api_version: String?
+      attr_reader time_zone: String?
+      attr_reader utc: String?
+      attr_reader remote_access: bool?
+      attr_reader analytics_consent: bool?
+
+      def self.new: (name: String?, bridge_id: String?, model_id: String?, software_version: String?,
+                     api_version: String?, time_zone: String?, utc: String?, remote_access: bool?,
+                     analytics_consent: bool?) -> Settings
+
+      def self.read: () -> Settings
+
+      def self.time_zones: () -> Array[String]
+
+      def update: (?time_zone: String?, ?utc: String?, ?http_blocked: bool?) -> Settings
+
+      def self.request: (Symbol method, String path, ?Hash[String, untyped]? body) -> untyped
+
+      private
+
+      def self.refuse: (untyped answer) -> void
+    end
+  end
+end

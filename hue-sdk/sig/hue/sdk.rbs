@@ -9,6 +9,8 @@ module Hue
     def self.events: () { (Event) -> void } -> void
                    | () -> Enumerator::Lazy[Event, void]
 
+    def self.settings: () -> Settings
+
     def self.resource: (String type, ?nil id) -> Models::Base
                      | (String type, String id) -> Models::Base::Instance
 

@@ -279,7 +279,8 @@ end
 
 `Hue::Sdk.events` blocks and yields a `Hue::Sdk::Event` per changed resource (`id`, `kind`,
 `created_at`, `resource_type`, `resource_id`, `changes`, and `resource` to load it). Without a
-block it returns a lazy enumerator.
+block it returns a lazy enumerator. An error the bridge reports in the stream is an event of kind
+`:error`, without a resource, whose `changes` hold its `errors`.
 
 `attributes` gives the changes as a typed value without a request, `Hue::Sdk::Schema::LightChange`
 for a light, as the app reads events. A field that did not change, or that the SDK hides as

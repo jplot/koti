@@ -15,8 +15,8 @@ module Hue
         HANDSHAKE_TIMEOUT = 5
         private_constant :HANDSHAKE_TIMEOUT
 
-        # DTLS sends a lost flight again after 1 s, then 2 s (RFC 6347, 4.2.4.1); libssl's socket BIO looks at
-        # that timer only when a read returns, so a read waiting 5 s delayed it to 5 s.
+        # DTLS sends a lost flight again after 1 s, then 2 s (RFC 6347, 4.2.4.1); with a socket BIO, libssl looks
+        # at that timer only when a read returns, so a read waiting 5 s delayed it to 5 s.
         READ_TIMEOUT = 1
         private_constant :READ_TIMEOUT
 
@@ -96,7 +96,7 @@ module Hue
         private
 
         # Ruby opens sockets with O_NONBLOCK: libssl's recv would return EAGAIN
-        # at once and SSL_connect give up before the bridge answers.
+        # at once, and the handshake spin on SSL_connect until its deadline.
         #
         # @param host [String]
         # @param port [Integer]

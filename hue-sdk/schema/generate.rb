@@ -9,9 +9,7 @@ class SchemaGenerator
   WIDTH = 120
 
   # @param root [String] the folder of the gem
-  def self.load(root)
-    new(*%w[hue behaviors].map { JSON.parse(File.read(File.join(root, 'schema', "#{it}.json"))) })
-  end
+  def self.load(root) = new(*%w[hue behaviors].map { JSON.parse(File.read(File.join(root, 'schema', "#{it}.json"))) })
 
   def initialize(schema, behaviors)
     @classes = schema.fetch('classes').merge(behaviors.fetch('classes'))
@@ -30,6 +28,9 @@ class SchemaGenerator
   end
 
   def write(root) = files.each { |path, content| File.write(File.join(root, path), content) }
+
+  # A configuration of an automation script is the only class that keeps the keys it does not know.
+  def self.script(fields) = fields.key?('unknown') ? ['        include ScriptConfiguration'] : []
 
   def self.held(type)
     return unless type.is_a?(Hash)
@@ -63,7 +64,7 @@ class SchemaGenerator
       names = scripts.map { |id, script| "  #{script['name']}: '#{id}'" }.sort.join(",\n")
       classes = scripts.map { |id, script| "  '#{id}' => #{script['configuration']}" }.sort.join(",\n")
       <<~RUBY.gsub(/^(?=.)/, '      ')
-        # Id of each automation script the Hue app defines, by a stable name.
+        # Id of each automation script, by a stable name.
         BEHAVIOR_SCRIPTS = {
         #{names}
         }.freeze
@@ -120,7 +121,8 @@ class SchemaGenerator
     def define(name)
       fields = @classes[name]['fields']
       shadowing = fields.keys.intersect?(Data.instance_methods.map(&:to_s))
-      lines = [*docs(name), head(name, fields), '        include Value', *macros(fields), '      end']
+      lines = [*docs(name), head(name, fields), '        include Value', *SchemaGenerator.script(fields),
+               *macros(fields), '      end']
       lines = shadow(lines) if shadowing
       "#{lines.join("\n")}\n"
     end
@@ -238,7 +240,8 @@ class SchemaGenerator
       fields = @classes[name]['fields']
       readers = fields.map { |key, field| "        attr_reader #{key}: #{type(field)}" }
       params = fields.map { |key, field| "#{'?' unless field['required']}#{key}: #{type(field)}" }
-      ["      class #{name} < Data", '        include Value', '        extend Value::ClassMethods', '', *readers,
+      ["      class #{name} < Data", '        include Value', *SchemaGenerator.script(fields),
+       '        extend Value::ClassMethods', '', *readers,
        ('' if readers.any?), "        def self.new: (#{params.join(', ')}) -> #{name}",
        "        def self.from: (Hash[String, untyped] data) -> #{name}", "      end\n"].compact.join("\n")
     end

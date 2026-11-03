@@ -180,8 +180,6 @@ module Hue
 
       # A +behavior_instance+ resource sent to create it (Hue app class +BridgeBehavior+).
       #
-      # @!attribute [r] type
-      #   @return [String, nil] one of +behavior_instance+
       # @!attribute [r] script_id
       #   @return [String]
       # @!attribute [r] enabled
@@ -189,17 +187,14 @@ module Hue
       # @!attribute [r] configuration
       #   @return [Value, Hash{String=>Object}]
       # @!attribute [r] metadata
-      #   @return [BehaviorMetadata, nil]
-      # @!attribute [r] dependees
-      #   @return [Array<BehaviorDependee>, nil]
+      #   @return [BehaviorMetadata]
       # @!attribute [r] migrated_from
       #   @return [String, nil]
-      BehaviorInstanceAdd = Data.define(:type, :script_id, :enabled, :configuration, :metadata, :dependees,
-                                        :migrated_from) do
+      BehaviorInstanceAdd = Data.define(:script_id, :enabled, :configuration, :metadata, :migrated_from) do
         include Value
 
-        optional :type, :metadata, :dependees, :migrated_from
-        nested metadata: BehaviorMetadata, dependees: [BehaviorDependee]
+        optional :migrated_from
+        nested metadata: BehaviorMetadata
       end
 
       # Part of a resource sent to create it (Hue app class +ColorPaletteAdd+).

@@ -65,18 +65,6 @@
       "kind": "behavior",
       "fields": {}
     },
-    "BehaviorDependee": {
-      "origin": "BridgeBehaviorDependee",
-      "kind": "behavior",
-      "fields": {
-        "target": {
-          "type": {
-            "class": "BehaviorResource"
-          },
-          "required": true
-        }
-      }
-    },
     "BehaviorFadeDuration": {
       "origin": "BridgeBehaviorFadeDuration",
       "kind": "behavior",
@@ -191,13 +179,6 @@
       "origin": "BridgeBehavior",
       "kind": "add",
       "fields": {
-        "type": {
-          "type": "String",
-          "required": false,
-          "values": [
-            "behavior_instance"
-          ]
-        },
         "script_id": {
           "type": "String",
           "required": true
@@ -214,15 +195,7 @@
           "type": {
             "class": "BehaviorMetadata"
           },
-          "required": false
-        },
-        "dependees": {
-          "type": {
-            "list": {
-              "class": "BehaviorDependee"
-            }
-          },
-          "required": false
+          "required": true
         },
         "migrated_from": {
           "type": "String",
@@ -314,48 +287,6 @@
     },
     "BehaviorRecall": {
       "origin": "BridgeBehaviorRecall",
-      "kind": "behavior",
-      "fields": {
-        "rtype": {
-          "type": "String",
-          "required": true,
-          "values": [
-            "bridge_home",
-            "room",
-            "zone",
-            "service_group",
-            "light",
-            "scene",
-            "smart_scene",
-            "recipe",
-            "device",
-            "entertainment_configuration",
-            "button",
-            "relative_rotary",
-            "motion",
-            "grouped_motion",
-            "camera_motion",
-            "light_level",
-            "grouped_light_level",
-            "grouped_light",
-            "temperature",
-            "contact",
-            "tamper",
-            "motion_area_configuration",
-            "convenience_area_motion",
-            "security_area_motion",
-            "behavior_instance",
-            "speaker"
-          ]
-        },
-        "rid": {
-          "type": "String",
-          "required": true
-        }
-      }
-    },
-    "BehaviorResource": {
-      "origin": "BridgeBehaviorResource",
       "kind": "behavior",
       "fields": {
         "rtype": {
@@ -640,6 +571,10 @@
             }
           },
           "required": true
+        },
+        "unknown": {
+          "type": "Hash",
+          "required": false
         }
       }
     },
@@ -683,6 +618,10 @@
             "nightlight",
             "minimum_brightness"
           ]
+        },
+        "unknown": {
+          "type": "Hash",
+          "required": false
         }
       }
     },
@@ -705,6 +644,10 @@
             }
           },
           "required": true
+        },
+        "unknown": {
+          "type": "Hash",
+          "required": false
         }
       }
     },
@@ -730,7 +673,7 @@
         },
         "excluded_lights": {
           "type": "String",
-          "required": true,
+          "required": false,
           "values": [
             "turn_off",
             "do_nothing"
@@ -738,11 +681,15 @@
         },
         "end_state": {
           "type": "String",
-          "required": true,
+          "required": false,
           "values": [
             "turn_off",
             "do_nothing"
           ]
+        },
+        "unknown": {
+          "type": "Hash",
+          "required": false
         }
       }
     },
@@ -757,6 +704,10 @@
             }
           },
           "required": true
+        },
+        "unknown": {
+          "type": "Hash",
+          "required": false
         }
       }
     },
@@ -787,6 +738,10 @@
             "class": "BehaviorStreamingEndScene"
           },
           "required": false
+        },
+        "unknown": {
+          "type": "Hash",
+          "required": false
         }
       }
     },
@@ -815,6 +770,10 @@
             }
           },
           "required": true
+        },
+        "unknown": {
+          "type": "Hash",
+          "required": false
         }
       }
     },
@@ -879,6 +838,10 @@
             }
           },
           "required": true
+        },
+        "unknown": {
+          "type": "Hash",
+          "required": false
         }
       }
     },
@@ -923,6 +886,10 @@
             "class": "BehaviorFadeDuration"
           },
           "required": true
+        },
+        "unknown": {
+          "type": "Hash",
+          "required": false
         }
       }
     }

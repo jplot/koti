@@ -9,27 +9,6 @@ module Hue
         def self.from: (Hash[String, untyped] data) -> BehaviorBlink
       end
 
-      class BehaviorResource < Data
-        include Value
-        extend Value::ClassMethods
-
-        attr_reader rtype: String
-        attr_reader rid: String
-
-        def self.new: (rtype: String, rid: String) -> BehaviorResource
-        def self.from: (Hash[String, untyped] data) -> BehaviorResource
-      end
-
-      class BehaviorDependee < Data
-        include Value
-        extend Value::ClassMethods
-
-        attr_reader target: BehaviorResource
-
-        def self.new: (target: BehaviorResource) -> BehaviorDependee
-        def self.from: (Hash[String, untyped] data) -> BehaviorDependee
-      end
-
       class BehaviorFadeDuration < Data
         include Value
         extend Value::ClassMethods
@@ -221,18 +200,21 @@ module Hue
 
       class ComingHomeConfiguration < Data
         include Value
+        include ScriptConfiguration
         extend Value::ClassMethods
 
         attr_reader when_constrained: BehaviorWhenConstrained
         attr_reader where: Array[BehaviorGroupAndLights]
         attr_reader what: Array[BehaviorGroupScene]
+        attr_reader unknown: Hash[String, untyped]?
 
-        def self.new: (when_constrained: BehaviorWhenConstrained, where: Array[BehaviorGroupAndLights], what: Array[BehaviorGroupScene]) -> ComingHomeConfiguration
+        def self.new: (when_constrained: BehaviorWhenConstrained, where: Array[BehaviorGroupAndLights], what: Array[BehaviorGroupScene], ?unknown: Hash[String, untyped]?) -> ComingHomeConfiguration
         def self.from: (Hash[String, untyped] data) -> ComingHomeConfiguration
       end
 
       class GoToSleepConfiguration < Data
         include Value
+        include ScriptConfiguration
         extend Value::ClassMethods
 
         attr_reader where: Array[BehaviorGroupAndLights]
@@ -240,83 +222,97 @@ module Hue
         attr_reader when: BehaviorWhen
         attr_reader style: String?
         attr_reader end_state: String
+        attr_reader unknown: Hash[String, untyped]?
 
-        def self.new: (where: Array[BehaviorGroupAndLights], fade_out_duration: BehaviorFadeDuration, when: BehaviorWhen, ?style: String?, end_state: String) -> GoToSleepConfiguration
+        def self.new: (where: Array[BehaviorGroupAndLights], fade_out_duration: BehaviorFadeDuration, when: BehaviorWhen, ?style: String?, end_state: String, ?unknown: Hash[String, untyped]?) -> GoToSleepConfiguration
         def self.from: (Hash[String, untyped] data) -> GoToSleepConfiguration
       end
 
       class LeavingHomeConfiguration < Data
         include Value
+        include ScriptConfiguration
         extend Value::ClassMethods
 
         attr_reader where: Array[BehaviorGroupAndLights]
         attr_reader what: Array[BehaviorGroupScene]
+        attr_reader unknown: Hash[String, untyped]?
 
-        def self.new: (where: Array[BehaviorGroupAndLights], what: Array[BehaviorGroupScene]) -> LeavingHomeConfiguration
+        def self.new: (where: Array[BehaviorGroupAndLights], what: Array[BehaviorGroupScene], ?unknown: Hash[String, untyped]?) -> LeavingHomeConfiguration
         def self.from: (Hash[String, untyped] data) -> LeavingHomeConfiguration
       end
 
       class PmAutomationConfiguration < Data
         include Value
+        include ScriptConfiguration
         extend Value::ClassMethods
 
         attr_reader where: Array[BehaviorGroupAndLights]
         attr_reader mode: String
-        attr_reader excluded_lights: String
-        attr_reader end_state: String
+        attr_reader excluded_lights: String?
+        attr_reader end_state: String?
+        attr_reader unknown: Hash[String, untyped]?
 
-        def self.new: (where: Array[BehaviorGroupAndLights], mode: String, excluded_lights: String, end_state: String) -> PmAutomationConfiguration
+        def self.new: (where: Array[BehaviorGroupAndLights], mode: String, ?excluded_lights: String?, ?end_state: String?, ?unknown: Hash[String, untyped]?) -> PmAutomationConfiguration
         def self.from: (Hash[String, untyped] data) -> PmAutomationConfiguration
       end
 
       class SmokeAlarmConfiguration < Data
         include Value
+        include ScriptConfiguration
         extend Value::ClassMethods
 
         attr_reader where: Array[BehaviorGroupAndLights]
+        attr_reader unknown: Hash[String, untyped]?
 
-        def self.new: (where: Array[BehaviorGroupAndLights]) -> SmokeAlarmConfiguration
+        def self.new: (where: Array[BehaviorGroupAndLights], ?unknown: Hash[String, untyped]?) -> SmokeAlarmConfiguration
         def self.from: (Hash[String, untyped] data) -> SmokeAlarmConfiguration
       end
 
       class StateAfterStreamingConfiguration < Data
         include Value
+        include ScriptConfiguration
         extend Value::ClassMethods
 
         attr_reader where: Array[BehaviorGroupAndLights]
         attr_reader end_state: String
         attr_reader end_scene: BehaviorStreamingEndScene?
+        attr_reader unknown: Hash[String, untyped]?
 
-        def self.new: (where: Array[BehaviorGroupAndLights], end_state: String, ?end_scene: BehaviorStreamingEndScene?) -> StateAfterStreamingConfiguration
+        def self.new: (where: Array[BehaviorGroupAndLights], end_state: String, ?end_scene: BehaviorStreamingEndScene?, ?unknown: Hash[String, untyped]?) -> StateAfterStreamingConfiguration
         def self.from: (Hash[String, untyped] data) -> StateAfterStreamingConfiguration
       end
 
       class TimeBasedConfiguration < Data
         include Value
+        include ScriptConfiguration
         extend Value::ClassMethods
 
         attr_reader when_extended: BehaviorWhenExtended
         attr_reader where: Array[BehaviorGroupAndLights]
         attr_reader what: Array[BehaviorGroupScene]
+        attr_reader unknown: Hash[String, untyped]?
 
-        def self.new: (when_extended: BehaviorWhenExtended, where: Array[BehaviorGroupAndLights], what: Array[BehaviorGroupScene]) -> TimeBasedConfiguration
+        def self.new: (when_extended: BehaviorWhenExtended, where: Array[BehaviorGroupAndLights], what: Array[BehaviorGroupScene], ?unknown: Hash[String, untyped]?) -> TimeBasedConfiguration
         def self.from: (Hash[String, untyped] data) -> TimeBasedConfiguration
       end
 
       class TimerConfiguration < Data
         include Value
+        include ScriptConfiguration
         extend Value::ClassMethods
 
         attr_reader duration: TimeSpan
         attr_reader where: Array[BehaviorGroupAndLights]
         attr_reader what: Array[BehaviorGroupScene]
+        attr_reader unknown: Hash[String, untyped]?
 
-        def self.new: (duration: TimeSpan, where: Array[BehaviorGroupAndLights], what: Array[BehaviorGroupScene]) -> TimerConfiguration
+        def self.new: (duration: TimeSpan, where: Array[BehaviorGroupAndLights], what: Array[BehaviorGroupScene], ?unknown: Hash[String, untyped]?) -> TimerConfiguration
         def self.from: (Hash[String, untyped] data) -> TimerConfiguration
       end
 
       class WakeUpConfiguration < Data
         include Value
+        include ScriptConfiguration
         extend Value::ClassMethods
 
         attr_reader where: Array[BehaviorGroupAndLights]
@@ -325,8 +321,9 @@ module Hue
         attr_reader end_brightness: Numeric?
         attr_reader turn_lights_off_after: TimeSpan?
         attr_reader fade_in_duration: BehaviorFadeDuration
+        attr_reader unknown: Hash[String, untyped]?
 
-        def self.new: (where: Array[BehaviorGroupAndLights], when: BehaviorWhen, ?style: String?, ?end_brightness: Numeric?, ?turn_lights_off_after: TimeSpan?, fade_in_duration: BehaviorFadeDuration) -> WakeUpConfiguration
+        def self.new: (where: Array[BehaviorGroupAndLights], when: BehaviorWhen, ?style: String?, ?end_brightness: Numeric?, ?turn_lights_off_after: TimeSpan?, fade_in_duration: BehaviorFadeDuration, ?unknown: Hash[String, untyped]?) -> WakeUpConfiguration
         def self.from: (Hash[String, untyped] data) -> WakeUpConfiguration
       end
 

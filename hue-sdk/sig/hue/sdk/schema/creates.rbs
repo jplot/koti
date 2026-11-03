@@ -158,15 +158,13 @@ module Hue
         include Value
         extend Value::ClassMethods
 
-        attr_reader type: String?
         attr_reader script_id: String
         attr_reader enabled: bool
         attr_reader configuration: behavior_configuration
-        attr_reader metadata: BehaviorMetadata?
-        attr_reader dependees: Array[BehaviorDependee]?
+        attr_reader metadata: BehaviorMetadata
         attr_reader migrated_from: String?
 
-        def self.new: (?type: String?, script_id: String, enabled: bool, configuration: behavior_configuration, ?metadata: BehaviorMetadata?, ?dependees: Array[BehaviorDependee]?, ?migrated_from: String?) -> BehaviorInstanceAdd
+        def self.new: (script_id: String, enabled: bool, configuration: behavior_configuration, metadata: BehaviorMetadata, ?migrated_from: String?) -> BehaviorInstanceAdd
         def self.from: (Hash[String, untyped] data) -> BehaviorInstanceAdd
       end
 

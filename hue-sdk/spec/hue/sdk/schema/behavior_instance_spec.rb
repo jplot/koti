@@ -28,6 +28,29 @@ RSpec.describe Hue::Sdk::Schema::BehaviorInstance do
     expect(JSON.parse(JSON.generate(configuration.to_body))).to eq(go_to_sleep)
   end
 
+  it 'keeps a key its class does not know, and sends it back', :aggregate_failures do
+    configuration = instance(script(:go_to_sleep), go_to_sleep.merge('new_key' => { 'a' => 1 })).configuration
+    expect(configuration.unknown).to eq('new_key' => { 'a' => 1 })
+    expect(JSON.parse(JSON.generate(configuration.to_body))).to eq(go_to_sleep.merge('new_key' => { 'a' => 1 }))
+  end
+
+  it 'sends a configuration that lacks a key the app defaults' do
+    where = [{ 'group' => { 'rid' => '11111111-1111-4111-8111-111111111111', 'rtype' => 'room' } }]
+    configuration = instance(script(:pm_automation), { 'where' => where, 'mode' => '24h' }).configuration
+    expect(JSON.parse(JSON.generate(configuration.to_body))).to eq('where' => where, 'mode' => '24h')
+  end
+
+  it 'writes the lights of each scene from the lights of its group, as the app does' do
+    group = { rid: '11111111-1111-4111-8111-111111111111', rtype: 'room' }
+    lights = [schema::BehaviorLight.new(rid: '22222222-2222-4222-8222-222222222222', rtype: 'light')]
+    typed = schema::TimerConfiguration.new(
+      where: [schema::BehaviorGroupAndLights.new(group: schema::BehaviorGroup.new(**group), items: lights)],
+      what: [schema::BehaviorGroupScene.new(group: schema::BehaviorGroup.new(**group))],
+      duration: schema::TimeSpan.new(minutes: 5)
+    )
+    expect(typed.to_body[:what]).to eq([{ group:, items: [{ rid: lights.first.rid, rtype: 'light' }] }])
+  end
+
   it 'reads the native go to sleep like go to sleep' do
     expect(instance(script(:native_go_to_sleep), go_to_sleep).configuration).to be_a(schema::GoToSleepConfiguration)
   end
@@ -60,7 +83,7 @@ RSpec.describe Hue::Sdk::Schema::BehaviorInstance do
       .to raise_error(ArgumentError, /where/)
   end
 
-  it 'names every script of the app' do
+  it 'names every automation script' do
     expect(schema::BEHAVIOR_SCRIPTS.keys).to contain_exactly(
       :coming_home, :go_to_sleep, :leaving_home, :native_go_to_sleep, :pm_automation, :smoke_alarm,
       :state_after_streaming, :time_based, :timer, :wake_up

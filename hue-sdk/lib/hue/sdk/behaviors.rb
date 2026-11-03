@@ -15,6 +15,17 @@ module Hue
           value.with(configuration: Value.load(BEHAVIOR_CONFIGURATIONS[value.script_id], value.configuration))
         end
       end
+
+      # An automation to create. The app always names the types of the resource and of its metadata.
+      class BehaviorInstanceAdd
+        # @return [Hash{Symbol=>Object}] the value as a JSON body, without its nil members
+        # @raise [ArgumentError] if a member the class requires is nil
+        # @api public
+        def to_body
+          body = super
+          body.merge(type: 'behavior_instance', metadata: { type: 'instance_metadata', **body.fetch(:metadata) })
+        end
+      end
     end
   end
 end

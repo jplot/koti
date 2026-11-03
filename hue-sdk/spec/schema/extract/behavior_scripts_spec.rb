@@ -47,25 +47,34 @@ RSpec.describe Schema::Extract::BehaviorScripts do
         creation:
           - step_type: end_state_selection
             result_name: end_state
-        editing:
           - step_type: time_and_recurrence_selection
             result_name: when
             configuration:
               fade_selection_step:
                 step_type: fade_selection
                 result_name: fade_out_duration
+        editing: []
       YAML
       'behaviors/pm_automation/behavior.yaml' => <<~YAML,
         script_id: db06cabc-c752-4904-9e8f-4ebe98feaa1a
         creation:
           - step_type: option_selection_step
             result_name: excluded_lights
+            default_value_when_missing: turn_off
+          - step_type: option_selection_step
+            result_name: mode
         editing:
           - step_type: option_selection_step
             result_name: excluded_lights
             options:
               - value: turn_off
               - value: do_nothing
+      YAML
+      'behaviors/timer/behavior.yaml' => <<~YAML,
+        script_id: e73bc72d-96b1-46f8-aa57-729861f80c78
+        creation:
+          - step_type: duration_selection
+            result_name: duration
       YAML
       'behaviors/state_after_streaming/behavior.yaml' => <<~YAML
         script_id: 7719b841-6b3d-448d-a0e7-601ae9edb6a2
@@ -91,7 +100,7 @@ RSpec.describe Schema::Extract::BehaviorScripts do
 
   it 'gives a key per result_name, with the type of its step', :aggregate_failures do
     expect(fields('WakeUpConfiguration').keys).to contain_exactly(
-      'where', 'when', 'style', 'end_brightness', 'turn_lights_off_after', 'fade_in_duration'
+      'where', 'when', 'style', 'end_brightness', 'turn_lights_off_after', 'fade_in_duration', 'unknown'
     )
     expect(fields('WakeUpConfiguration')['where']['type']).to eq('list' => { 'class' => 'BehaviorGroupAndLights' })
     expect(fields('WakeUpConfiguration')['fade_in_duration']['type']).to eq('class' => 'BehaviorFadeDuration')
@@ -113,7 +122,7 @@ RSpec.describe Schema::Extract::BehaviorScripts do
                                                                      ])
   end
 
-  it 'finds the fade step an editing step nests in its configuration' do
+  it 'finds the fade step a step nests in its configuration' do
     expect(fields('GoToSleepConfiguration')['fade_out_duration']['type']).to eq('class' => 'BehaviorFadeDuration')
   end
 
@@ -126,8 +135,18 @@ RSpec.describe Schema::Extract::BehaviorScripts do
     expect(fields('StateAfterStreamingConfiguration')['end_scene']['required']).to be(false)
   end
 
-  it 'leaves a step of the editing form alone optional' do
-    expect(fields('GoToSleepConfiguration')['when']['required']).to be(false)
+  it 'leaves optional a key the app defaults when it is missing', :aggregate_failures do
+    expect(fields('PmAutomationConfiguration')['excluded_lights']['required']).to be(false)
+    expect(fields('PmAutomationConfiguration')['mode']['required']).to be(true)
+  end
+
+  it 'gives each configuration a place for the keys it does not know' do
+    expect(fields('TimerConfiguration')['unknown']).to eq('type' => 'Hash', 'required' => false)
+  end
+
+  it 'stops on an enum the app no longer has' do
+    File.write(File.join(directory, 'pp.txt'), '')
+    expect { data }.to raise_error(ArgumentError, /BridgeBehaviorEndStateType/)
   end
 
   it 'gives the native go to sleep the configuration of go to sleep' do

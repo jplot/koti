@@ -10,30 +10,6 @@ module Hue
         include Value
       end
 
-      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorResource+).
-      #
-      # @!attribute [r] rtype
-      #   @return [String] one of +bridge_home+, +room+, +zone+, +service_group+, +light+, +scene+, +smart_scene+,
-      #     +recipe+, +device+, +entertainment_configuration+, +button+, +relative_rotary+, +motion+, +grouped_motion+,
-      #     +camera_motion+, +light_level+, +grouped_light_level+, +grouped_light+, +temperature+, +contact+, +tamper+,
-      #     +motion_area_configuration+, +convenience_area_motion+, +security_area_motion+, +behavior_instance+,
-      #     +speaker+
-      # @!attribute [r] rid
-      #   @return [String]
-      BehaviorResource = Data.define(:rtype, :rid) do
-        include Value
-      end
-
-      # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorDependee+).
-      #
-      # @!attribute [r] target
-      #   @return [BehaviorResource]
-      BehaviorDependee = Data.define(:target) do
-        include Value
-
-        nested target: BehaviorResource
-      end
-
       # Part of an automation as the Hue app describes it (Hue app class +BridgeBehaviorFadeDuration+).
       #
       # @!attribute [r] seconds
@@ -271,9 +247,13 @@ module Hue
       #   @return [Array<BehaviorGroupAndLights>]
       # @!attribute [r] what
       #   @return [Array<BehaviorGroupScene>]
-      ComingHomeConfiguration = Data.define(:when_constrained, :where, :what) do
+      # @!attribute [r] unknown
+      #   @return [Hash{String=>Object}, nil]
+      ComingHomeConfiguration = Data.define(:when_constrained, :where, :what, :unknown) do
         include Value
+        include ScriptConfiguration
 
+        optional :unknown
         nested when_constrained: BehaviorWhenConstrained, where: [BehaviorGroupAndLights], what: [BehaviorGroupScene]
       end
 
@@ -289,10 +269,13 @@ module Hue
       #   @return [String, nil] one of +sunset+, +basic+
       # @!attribute [r] end_state
       #   @return [String] one of +turn_off+, +nightlight+, +minimum_brightness+
-      GoToSleepConfiguration = Data.define(:where, :fade_out_duration, :when, :style, :end_state) do
+      # @!attribute [r] unknown
+      #   @return [Hash{String=>Object}, nil]
+      GoToSleepConfiguration = Data.define(:where, :fade_out_duration, :when, :style, :end_state, :unknown) do
         include Value
+        include ScriptConfiguration
 
-        optional :style
+        optional :style, :unknown
         nested where: [BehaviorGroupAndLights], fade_out_duration: BehaviorFadeDuration, when: BehaviorWhen
       end
 
@@ -302,9 +285,13 @@ module Hue
       #   @return [Array<BehaviorGroupAndLights>]
       # @!attribute [r] what
       #   @return [Array<BehaviorGroupScene>]
-      LeavingHomeConfiguration = Data.define(:where, :what) do
+      # @!attribute [r] unknown
+      #   @return [Hash{String=>Object}, nil]
+      LeavingHomeConfiguration = Data.define(:where, :what, :unknown) do
         include Value
+        include ScriptConfiguration
 
+        optional :unknown
         nested where: [BehaviorGroupAndLights], what: [BehaviorGroupScene]
       end
 
@@ -315,12 +302,16 @@ module Hue
       # @!attribute [r] mode
       #   @return [String] one of +24h+, +nighttime+
       # @!attribute [r] excluded_lights
-      #   @return [String] one of +turn_off+, +do_nothing+
+      #   @return [String, nil] one of +turn_off+, +do_nothing+
       # @!attribute [r] end_state
-      #   @return [String] one of +turn_off+, +do_nothing+
-      PmAutomationConfiguration = Data.define(:where, :mode, :excluded_lights, :end_state) do
+      #   @return [String, nil] one of +turn_off+, +do_nothing+
+      # @!attribute [r] unknown
+      #   @return [Hash{String=>Object}, nil]
+      PmAutomationConfiguration = Data.define(:where, :mode, :excluded_lights, :end_state, :unknown) do
         include Value
+        include ScriptConfiguration
 
+        optional :excluded_lights, :end_state, :unknown
         nested where: [BehaviorGroupAndLights]
       end
 
@@ -328,9 +319,13 @@ module Hue
       #
       # @!attribute [r] where
       #   @return [Array<BehaviorGroupAndLights>]
-      SmokeAlarmConfiguration = Data.define(:where) do
+      # @!attribute [r] unknown
+      #   @return [Hash{String=>Object}, nil]
+      SmokeAlarmConfiguration = Data.define(:where, :unknown) do
         include Value
+        include ScriptConfiguration
 
+        optional :unknown
         nested where: [BehaviorGroupAndLights]
       end
 
@@ -343,10 +338,13 @@ module Hue
       #   @return [String] one of +do_nothing+, +last_state+, +off+, +scene+
       # @!attribute [r] end_scene
       #   @return [BehaviorStreamingEndScene, nil]
-      StateAfterStreamingConfiguration = Data.define(:where, :end_state, :end_scene) do
+      # @!attribute [r] unknown
+      #   @return [Hash{String=>Object}, nil]
+      StateAfterStreamingConfiguration = Data.define(:where, :end_state, :end_scene, :unknown) do
         include Value
+        include ScriptConfiguration
 
-        optional :end_scene
+        optional :end_scene, :unknown
         nested where: [BehaviorGroupAndLights], end_scene: BehaviorStreamingEndScene
       end
 
@@ -358,9 +356,13 @@ module Hue
       #   @return [Array<BehaviorGroupAndLights>]
       # @!attribute [r] what
       #   @return [Array<BehaviorGroupScene>]
-      TimeBasedConfiguration = Data.define(:when_extended, :where, :what) do
+      # @!attribute [r] unknown
+      #   @return [Hash{String=>Object}, nil]
+      TimeBasedConfiguration = Data.define(:when_extended, :where, :what, :unknown) do
         include Value
+        include ScriptConfiguration
 
+        optional :unknown
         nested when_extended: BehaviorWhenExtended, where: [BehaviorGroupAndLights], what: [BehaviorGroupScene]
       end
 
@@ -372,9 +374,13 @@ module Hue
       #   @return [Array<BehaviorGroupAndLights>]
       # @!attribute [r] what
       #   @return [Array<BehaviorGroupScene>]
-      TimerConfiguration = Data.define(:duration, :where, :what) do
+      # @!attribute [r] unknown
+      #   @return [Hash{String=>Object}, nil]
+      TimerConfiguration = Data.define(:duration, :where, :what, :unknown) do
         include Value
+        include ScriptConfiguration
 
+        optional :unknown
         nested duration: TimeSpan, where: [BehaviorGroupAndLights], what: [BehaviorGroupScene]
       end
 
@@ -392,16 +398,19 @@ module Hue
       #   @return [TimeSpan, nil]
       # @!attribute [r] fade_in_duration
       #   @return [BehaviorFadeDuration]
+      # @!attribute [r] unknown
+      #   @return [Hash{String=>Object}, nil]
       WakeUpConfiguration = Data.define(:where, :when, :style, :end_brightness, :turn_lights_off_after,
-                                        :fade_in_duration) do
+                                        :fade_in_duration, :unknown) do
         include Value
+        include ScriptConfiguration
 
-        optional :style, :end_brightness, :turn_lights_off_after
+        optional :style, :end_brightness, :turn_lights_off_after, :unknown
         nested where: [BehaviorGroupAndLights], when: BehaviorWhen, turn_lights_off_after: TimeSpan,
                fade_in_duration: BehaviorFadeDuration
       end
 
-      # Id of each automation script the Hue app defines, by a stable name.
+      # Id of each automation script, by a stable name.
       BEHAVIOR_SCRIPTS = {
         coming_home: 'fd60fcd1-4809-4813-b510-4a18856a595c',
         go_to_sleep: '7e571ac6-f363-42e1-809a-4cbf6523ed72',

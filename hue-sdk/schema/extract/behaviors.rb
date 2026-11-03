@@ -134,7 +134,9 @@ module Schema
                 'streaming_end_state_selection' => 'BridgeBehaviorStreamingEndStateType' }.freeze
       # Switching the first off omits its key; only the end state +scene+ uses the second.
       OPTIONAL = %w[lights_off_after_selection streaming_end_scene_selection].freeze
-      # Without a definition in the assets; the bridge gives it the same +$ref+ as go to sleep.
+      # The keys the app keeps as they are (BridgeStepResultValueUnknown), and sends back.
+      UNKNOWN = { 'type' => 'Hash', 'required' => false }.freeze
+      # Unknown to the app; the bridge gives it the same +$ref+ as go to sleep.
       NATIVE = { 'a5624529-bd7e-4bc8-9d2f-9200476f106e' => { 'name' => 'native_go_to_sleep',
                                                              'configuration' => 'GoToSleepConfiguration' } }.freeze
 
@@ -166,10 +168,9 @@ module Schema
       def class_name(name) = "#{name.split('_').map(&:capitalize).join}Configuration"
 
       def configuration(name, definition)
-        created = steps(definition['creation'])
         edited = steps(definition['editing'])
-        fields = (created.keys | edited.keys).to_h { [it, field(created[it], edited[it])] }
-        { 'origin' => name, 'kind' => 'behavior', 'fields' => fields }
+        fields = steps(definition['creation']).to_h { |key, step| [key, field(step, edited[key])] }
+        { 'origin' => name, 'kind' => 'behavior', 'fields' => fields.merge('unknown' => UNKNOWN) }
       end
 
       def steps(list)
@@ -180,25 +181,28 @@ module Schema
       end
 
       def field(created, edited)
-        type = (created || edited).fetch('step_type')
+        type = created.fetch('step_type')
         field = { 'type' => STEPS.fetch(type) { raise ArgumentError, "unknown step #{type}" },
                   'required' => required?(created) }
         values = values(type, [created, edited].compact)
         values.empty? ? field : field.merge('values' => values)
       end
 
+      # The app raises on a missing key, unless its definition or step type gives a default
+      # (BehaviorDecoder._defaultStepResultValue).
       def required?(step)
-        return false unless step
+        return false if step['required_feature'] || step['default_value_when_missing']
 
-        options = step.fetch('options', [])
-        !step['required_feature'] && !OPTIONAL.include?(step['step_type']) && options.none? { it['required_feature'] }
+        !OPTIONAL.include?(step['step_type']) && step.fetch('options', []).none? { it['required_feature'] }
       end
 
       def values(type, steps)
-        return @snapshot.enum_values(ENUMS[type]).to_a if ENUMS[type]
+        return enum_values(ENUMS[type]) if ENUMS[type]
 
         steps.flat_map { it.fetch('options', []) }.map { it.fetch('value') }.uniq
       end
+
+      def enum_values(enum) = @snapshot.enum_values(enum) || raise(ArgumentError, "no values for #{enum}")
     end
 
     # What behaviors.json holds besides what the app's code and definitions give by rule. The app builds its requests
@@ -206,17 +210,15 @@ module Schema
     module BehaviorSchema
       ROOTS = %w[BridgeBehaviorGroupAndLights BridgeBehaviorGroupScene BridgeBehaviorWhen BridgeBehaviorWhenExtended
                  BridgeBehaviorWhenConstrained TimeSpan BridgeBehaviorFadeDuration BridgeBehaviorStreamingEndScene
-                 BridgeBehaviorState BridgeBehaviorMetadata BridgeBehaviorDependee].freeze
+                 BridgeBehaviorState BridgeBehaviorMetadata].freeze
       REQUESTS = {
         'BehaviorInstanceAdd' => {
           'origin' => 'BridgeBehavior', 'kind' => 'add',
           'fields' => {
-            'type' => { 'type' => 'String', 'required' => false, 'values' => ['behavior_instance'] },
             'script_id' => { 'type' => 'String', 'required' => true },
             'enabled' => { 'type' => 'Boolean', 'required' => true },
             'configuration' => { 'type' => 'BehaviorConfiguration', 'required' => true },
-            'metadata' => { 'type' => { 'class' => 'BehaviorMetadata' }, 'required' => false },
-            'dependees' => { 'type' => { 'list' => { 'class' => 'BehaviorDependee' } }, 'required' => false },
+            'metadata' => { 'type' => { 'class' => 'BehaviorMetadata' }, 'required' => true },
             'migrated_from' => { 'type' => 'String', 'required' => false }
           }
         },

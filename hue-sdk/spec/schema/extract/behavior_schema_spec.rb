@@ -19,7 +19,12 @@ RSpec.describe Schema::Extract::BehaviorSchema do
 
   it 'requires what the app always sends to create an automation' do
     required = schema['classes']['BehaviorInstanceAdd']['fields'].select { |_, field| field['required'] }.keys
-    expect(required).to contain_exactly('script_id', 'enabled', 'configuration')
+    expect(required).to contain_exactly('script_id', 'enabled', 'configuration', 'metadata')
+  end
+
+  it 'offers only what the app sends to create an automation' do
+    expect(schema['classes']['BehaviorInstanceAdd']['fields'].keys)
+      .to contain_exactly('script_id', 'enabled', 'configuration', 'metadata', 'migrated_from')
   end
 
   it 'triggers an automation with a start or a stop' do

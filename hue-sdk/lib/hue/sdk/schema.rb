@@ -94,6 +94,49 @@ module Hue
         # @api public
         def to_json(state = nil) = to_body.to_json(state)
       end
+
+      # The configuration of an automation script. As the app does, it sends back the keys its class does not know, and
+      # writes the lights of each scene of +what+ from the lights of the same group in +where+.
+      module ScriptConfiguration
+        # @param base [Class]
+        # @return [void]
+        # @api private
+        def self.included(base) = base.extend(Reading)
+
+        # Class methods of a configuration.
+        module Reading
+          # Builds a value from the JSON of the bridge, keeping in +unknown+ the keys its class does not know.
+          #
+          # @param data [Hash{String=>Object}]
+          # @return [Value]
+          # @api public
+          def from(data)
+            value = super
+            unknown = data.except(*members.map(&:to_s))
+            unknown.empty? ? value : value.with(unknown:)
+          end
+        end
+
+        # @return [Hash{Symbol=>Object}] the value as a JSON body, without its nil members
+        # @raise [ArgumentError] if a member the class requires is nil
+        # @api public
+        def to_body
+          body = super
+          (body.delete(:unknown) || {}).merge(with_items(body))
+        end
+
+        private
+
+        # @param body [Hash{Symbol=>Object}]
+        # @return [Hash{Symbol=>Object}]
+        # @api private
+        def with_items(body)
+          return body unless body[:what]
+
+          items = body.fetch(:where, []).to_h { [it[:group], it[:items]] }
+          body.merge(what: body[:what].map { |scene| scene.merge(items: items[scene[:group]]).compact })
+        end
+      end
     end
   end
 end

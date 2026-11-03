@@ -36,8 +36,9 @@ RSpec.describe Hue::Sdk::Models::BehaviorInstance do
     metadata = schema::BehaviorMetadata.new(name: 'Pasta')
     request = schema::BehaviorInstanceAdd.new(script_id: timer, enabled: true, configuration: typed, metadata:)
     Hue::Sdk.BehaviorInstance.create(request)
-    expect(sent).to eq('script_id' => timer, 'enabled' => true, 'configuration' => configuration,
-                       'metadata' => { 'name' => 'Pasta' })
+    expect(sent).to eq('type' => 'behavior_instance', 'script_id' => timer, 'enabled' => true,
+                       'configuration' => configuration,
+                       'metadata' => { 'type' => 'instance_metadata', 'name' => 'Pasta' })
   end
 
   it 'sends only the fields a typed update gives' do
@@ -53,7 +54,8 @@ RSpec.describe Hue::Sdk::Models::BehaviorInstance do
 
   it 'refuses a request whose configuration lacks a required field before sending', :aggregate_failures do
     typed = schema::TimerConfiguration.new(where: nil, what: [], duration: nil)
-    request = schema::BehaviorInstanceAdd.new(script_id: timer, enabled: true, configuration: typed)
+    metadata = schema::BehaviorMetadata.new(name: 'Pasta')
+    request = schema::BehaviorInstanceAdd.new(script_id: timer, enabled: true, configuration: typed, metadata:)
     expect { Hue::Sdk.BehaviorInstance.create(request) }.to raise_error(ArgumentError, /where/)
     expect(bridge.requests).to be_empty
   end

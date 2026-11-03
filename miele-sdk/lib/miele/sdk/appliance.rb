@@ -28,8 +28,9 @@ module Miele
       # @param sleeper [#call] waits the given number of seconds
       # @param fab [String, nil] its fabrication number, when already known
       # @param ident [Schema::DeviceIdentification, nil] its identity, which gives its type and protocol without a read
-      # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, as the app does once it is paired;
-      #   without one, every request goes to the appliance itself
+      # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, as the app does once it is paired,
+      #   +host+ being then the name of its module as the cloud lists it ({Cloud::Channel::Device#host}), which Dop1
+      #   requests name; without one, every request goes to the appliance itself
       # @raise [ArgumentError] with a cloud but no fab, which the cloud names appliances by
       def initialize(host, sleeper: method(:sleep), fab: nil, ident: nil, cloud: nil)
         raise ArgumentError, 'an appliance reached through the cloud needs its fab' if cloud && !fab
@@ -189,14 +190,11 @@ module Miele
         cloud = @cloud if path.start_with?('/Devices/')
         return @local.request(method, path, body:, kind:) unless cloud
 
-        cloud.request(method, path, body:, kind:, host: (module_host if path.match?(%r{\A/Devices/\d+/DOP/})))
+        cloud.request(method, path, body:, kind:, host: (host if path.match?(%r{\A/Devices/\d+/DOP/})))
       end
 
       # @return [Schema::DeviceIdentification]
       def identity = @identity ||= ident
-
-      # @return [String, nil] the mDNS name of its Wi-Fi module, which the cloud routes Dop1 by
-      def module_host = @module_host ||= @cloud&.devices&.find { it.fab == fab }&.host
 
       # @param resource [String]
       # @return [Hash{String=>Object}]

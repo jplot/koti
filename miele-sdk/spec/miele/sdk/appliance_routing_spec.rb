@@ -73,19 +73,18 @@ RSpec.describe Miele::Sdk::Appliance do
     expect(cloud.requests.map(&:path)).not_to include('/V2/Info')
   end
 
-  it 'sends Dop1 through the very cloud it is given, naming the module that cloud lists' do
-    channel = instance_double(Miele::Sdk::Cloud::Channel,
-                              devices: [Miele::Sdk::Cloud::Channel::Device.new(fab:, host: 'module.local',
-                                                                               ident: nil, state: nil)])
+  it 'sends Dop1 through the very cloud it is given, naming the module by its host' do
+    channel = instance_double(Miele::Sdk::Cloud::Channel)
     allow(channel).to receive(:request).and_return(Miele::Sdk::Connection::Response.new(200, '{}'))
-    described_class.new('127.0.0.1', fab:, cloud: channel).dop1('8E0101000000')
+    described_class.new('module.local', fab:, cloud: channel).dop1('8E0101000000')
     expect(channel).to have_received(:request)
       .with(:post, "/Devices/#{fab}/DOP/", body: anything, kind: :json, host: 'module.local')
   end
 
-  it 'names the module host when Dop1 goes through the cloud' do
-    by_cloud.dop1('8E0101000000')
+  it 'names the module the account lists when Dop1 goes through the cloud, listing it once', :aggregate_failures do
+    Miele::Sdk.appliances(through_cloud: true).first.dop1('8E0101000000')
     expect(cloud.requests.find { it.path.end_with?('/DOP/') }.headers['host']).to eq('Miele-0000000000000000.local')
+    expect(cloud.requests.map(&:path).count('/V2/Devices')).to eq(1)
   end
 
   it 'reads State locally when the appliance serves it', :aggregate_failures do

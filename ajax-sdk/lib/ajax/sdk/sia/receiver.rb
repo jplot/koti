@@ -9,8 +9,8 @@ module Ajax
       # hands each accepted event to the block, after the ACK. Each hub connection runs in its own thread,
       # so the block may be called from several threads at once; an exception it raises ends that
       # connection's thread, which Ruby reports as it does for any thread, and the connection with it. One
-      # address keeps at most 8 connections open: a ninth closes the oldest. Given +refused:+, it hands it
-      # each frame it refuses, as a {Refusal}, after the answer and on the same thread.
+      # address keeps at most 8 connections open: a ninth closes the oldest. Given +refused:+, it calls that
+      # callable with each frame it refuses, as a {Refusal}, after the reply and on the connection's thread.
       class Receiver
         # The 0LLL length field caps a frame at 4105 bytes; a peer that never sends +\r+ stays bounded.
         LIMIT = 4105

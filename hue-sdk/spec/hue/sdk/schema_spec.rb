@@ -55,9 +55,14 @@ RSpec.describe Hue::Sdk::Schema do
     expect(Hue::Sdk::Models::REGISTRY.keys - described_class::RESPONSES.keys).to be_empty
   end
 
-  it 'matches what schema/generate.rb writes from schema/hue.json' do
+  it 'matches what schema/generate.rb writes from its data' do
     root = File.expand_path('../../..', __dir__)
-    files = SchemaGenerator.new(JSON.parse(File.read(File.join(root, 'schema/hue.json')))).files
+    files = SchemaGenerator.load(root).files
     expect(files.to_h { |path, _| [path, File.read(File.join(root, path))] }).to eq(files)
+  end
+
+  it 'writes a class in the file of its kind, whichever kind holds it' do
+    files = SchemaGenerator.load(File.expand_path('../../..', __dir__)).files
+    expect(files['lib/hue/sdk/schema/responses.rb']).not_to include('BehaviorState = Data.define')
   end
 end

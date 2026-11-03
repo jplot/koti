@@ -98,6 +98,8 @@ module Hue
   end
 end
 
+require_relative 'schema/behaviors'
 require_relative 'schema/responses'
 require_relative 'schema/updates'
 require_relative 'schema/creates'
+require_relative 'behaviors'

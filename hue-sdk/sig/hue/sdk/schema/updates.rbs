@@ -195,6 +195,30 @@ module Hue
         def self.from: (Hash[String, untyped] data) -> AssociationFeatureUpdate
       end
 
+      class BehaviorTrigger < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader start: Hash[String, untyped]?
+        attr_reader stop: Hash[String, untyped]?
+
+        def self.new: (?start: Hash[String, untyped]?, ?stop: Hash[String, untyped]?) -> BehaviorTrigger
+        def self.from: (Hash[String, untyped] data) -> BehaviorTrigger
+      end
+
+      class BehaviorInstanceUpdate < Data
+        include Value
+        extend Value::ClassMethods
+
+        attr_reader enabled: bool?
+        attr_reader configuration: behavior_configuration?
+        attr_reader metadata: BehaviorMetadata?
+        attr_reader trigger: BehaviorTrigger?
+
+        def self.new: (?enabled: bool?, ?configuration: behavior_configuration?, ?metadata: BehaviorMetadata?, ?trigger: BehaviorTrigger?) -> BehaviorInstanceUpdate
+        def self.from: (Hash[String, untyped] data) -> BehaviorInstanceUpdate
+      end
+
       class ColorFeatureUpdate < Data
         include Value
         extend Value::ClassMethods

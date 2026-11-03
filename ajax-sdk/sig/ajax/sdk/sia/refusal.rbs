@@ -1,6 +1,10 @@
 module Ajax
   module Sdk
     module Sia
+      interface _RefusalHandler
+        def call: (Refusal refusal) -> void
+      end
+
       class Refusal < Data
         attr_reader frame: String
         attr_reader reply: (:duh | :nak)?

@@ -757,7 +757,8 @@ ovens.first.dop2(1, 1585)                  # through the cloud, as the app reads
 **Which way.** An appliance sends every request locally, and a resource its module does not serve
 raises `NotFoundError`. Given a cloud (`Appliance.for(host, fab:, cloud:)`, or `through_cloud: true`),
 it sends every request under `/Devices/` there instead, under `/V2`; a Dop1 request names the module
-in `Host`, as the app does. The module's own resources (`info`, `host_info`, `software_update`) have
+in `Host`, as the app does, so `host` is then the module's name as the cloud lists it
+(`Miele::Sdk.cloud.devices`), which `through_cloud: true` gives. The module's own resources (`info`, `host_info`, `software_update`) have
 no counterpart in the cloud and are still read from the module. Which way to reach an appliance is
 the caller's. A hood's ColorFlow reads a 404 as none only through the cloud, as the app does.
 

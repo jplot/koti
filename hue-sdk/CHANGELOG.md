@@ -24,7 +24,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   as documented, instead of resending every 5 s and giving up after 20 s. A handshake losing three flights
   now fails at 5 s, where it succeeded at 15 s.
 - An error reported in the event stream reaches the block as an event of kind `:error`, instead of ending the stream
-  with `NoMethodError`.
+  with `NoMethodError`. Its `resource_type` and `resource_id` are nil, and so is `Event#resource`.
 
 ### Added
 

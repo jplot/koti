@@ -14,20 +14,25 @@ module Hue
       attr_reader utc: String?
       attr_reader remote_access: bool?
       attr_reader analytics_consent: bool?
+      attr_reader http_blocked: bool?
 
       def self.new: (name: String?, bridge_id: String?, model_id: String?, software_version: String?,
                      api_version: String?, time_zone: String?, utc: String?, remote_access: bool?,
-                     analytics_consent: bool?) -> Settings
+                     analytics_consent: bool?, http_blocked: bool?) -> Settings
 
       def self.read: () -> Settings
 
       def self.time_zones: () -> Array[String]
 
-      def update: (?time_zone: String?, ?utc: String?, ?http_blocked: bool?) -> Settings
+      def update: (?time_zone: String?, ?utc: String?, ?http_blocked: bool?, ?analytics_consent: bool?) -> Settings
 
       def self.request: (Symbol method, String path, ?Hash[String, untyped]? body) -> untyped
 
       private
+
+      def self.object: (String path) -> Hash[String, untyped]
+
+      def self.parse: (String body) -> untyped
 
       def self.refuse: (untyped answer) -> void
     end

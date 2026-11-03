@@ -25,6 +25,8 @@ module Hue
 
       def delete: (String path) -> data
 
+      def refuse: (Integer status, Array[String] errors) -> bot
+
       private
 
       def call: (Symbol method, String path, ?Hash[Symbol | String, untyped]? body) -> data

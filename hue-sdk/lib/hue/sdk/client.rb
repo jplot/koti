@@ -70,6 +70,17 @@ module Hue
         def delete(path) = instance.delete(path)
       end
 
+      # @param status [Integer] an error status
+      # @param errors [Array<String>] error descriptions returned by the bridge
+      # @return [void]
+      # @raise [AuthenticationError, ResponseError]
+      # @api private
+      def refuse(status, errors)
+        raise AuthenticationError, "bridge rejected the application key (#{status})" if [401, 403].include?(status)
+
+        raise ERRORS.fetch(status, ResponseError).new(status, errors)
+      end
+
       private
 
       # @param method [Symbol]
@@ -93,9 +104,8 @@ module Hue
         status = response.code.to_i
         payload = parse(response.body)
         return payload.fetch('data', []) if status == 200
-        raise AuthenticationError, "bridge rejected the application key (#{status})" if [401, 403].include?(status)
 
-        raise ERRORS.fetch(status, ResponseError).new(status, payload.fetch('errors', []).map { it['description'] })
+        refuse(status, payload.fetch('errors', []).map { it['description'] })
       end
 
       # @param body [String, nil]

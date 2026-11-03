@@ -14,6 +14,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Breaking:** `events` no longer reconnects, nor sends its request a second time as Net::HTTP would: it reads
   the stream once and raises `ConnectionError` when it breaks. `Events::Stream` takes the `last_event_id:` of
   an earlier stream to resume from; `sleeper:` is gone.
+- The entertainment DTLS handshake sends a lost flight again after 1 s, then 2 s, and gives up after 5 s,
+  as documented, instead of resending every 5 s and giving up after 20 s.
 
 ### Added
 

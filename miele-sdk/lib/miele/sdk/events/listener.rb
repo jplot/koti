@@ -80,16 +80,17 @@ module Miele
         # @return [void]
         def close(error)
           failures = @appliances.to_h { [it.host, withdraw(it)] }.compact
+          raise SubscriptionError.new('withdraw', failures) if error.nil? && failures.any?
+        ensure
           @advertiser&.stop
           @server&.stop
-          raise SubscriptionError.new('withdraw', failures) if error.nil? && failures.any?
         end
 
-        # @return [Error, nil] why the appliance keeps its subscriptions
+        # @return [StandardError, nil] why the appliance keeps its subscriptions
         def withdraw(appliance)
           Enrollment.withdraw(appliance, our_fab: @fab)
           nil
-        rescue Error => e
+        rescue StandardError => e
           e
         end
 

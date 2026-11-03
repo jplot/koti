@@ -155,4 +155,38 @@ RSpec.describe Miele::Sdk::Events::Listener do
       pusher.join
     end
   end
+
+  context 'when an appliance answers its withdrawal with what the SDK cannot read' do
+    let(:subscriptions) { { '1' => [] } }
+
+    it 'names it once the stream ends, having stopped listening', :aggregate_failures do
+      pusher = push_state
+      expect { listener.each.first }
+        .to raise_error(Miele::Sdk::SubscriptionError) { expect(it.failures['127.0.0.1']).to be_a(TypeError) }
+      expect { TCPSocket.new('127.0.0.1', listener_port).close }.to raise_error(Errno::ECONNREFUSED)
+      pusher.join
+    end
+
+    it 'leaves the error that ended the stream to the caller' do
+      pusher = push_state
+      stop = ->(_event) { raise 'stop' }
+      expect { listener.each(&stop) }.to raise_error(RuntimeError, 'stop')
+      pusher.join
+    end
+  end
+
+  context 'when a withdrawal is interrupted' do
+    before { allow(Miele::Sdk::Events::Enrollment).to receive(:withdraw).and_raise(Interrupt) }
+
+    it 'still stops listening and announcing', :aggregate_failures do
+      advertisers = []
+      allow(Miele::Sdk::Events::Advertiser).to(receive(:new)
+        .and_wrap_original { |new, **options| new.call(**options).tap { advertisers << it } })
+      pusher = push_state
+      expect { listener.each.first }.to raise_error(Interrupt)
+      expect { TCPSocket.new('127.0.0.1', listener_port).close }.to raise_error(Errno::ECONNREFUSED)
+      expect { advertisers.fetch(0).port }.to raise_error(IOError)
+      pusher.join
+    end
+  end
 end

@@ -282,9 +282,10 @@ end
 block it returns a lazy enumerator.
 
 `attributes` gives the changes as a typed value without a request, `Hue::Sdk::Schema::LightChange`
-for a light, where a field that did not change is nil. The app reads events this way. A type this
-version does not know gives nil. The `configuration` of an automation stays a hash, as an event
-does not tell its script.
+for a light, as the app reads events. A field that did not change, or that the SDK hides as
+deprecated, is nil, and a deleted resource only has its `id`. A type this version does not know gives
+nil. The `configuration` of an automation is typed when the event gives its script, as the event
+that adds one does; it stays a hash otherwise.
 
 The stream is read once: `events` returns when the bridge ends it, and raises
 `Hue::Sdk::ConnectionError` when the bridge cannot be reached or drops it, as it does to a stream

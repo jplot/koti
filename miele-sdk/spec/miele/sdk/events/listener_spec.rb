@@ -155,4 +155,15 @@ RSpec.describe Miele::Sdk::Events::Listener do
       pusher.join
     end
   end
+
+  context 'when a withdrawal raises an error the SDK does not name' do
+    before { allow(Miele::Sdk::Events::Enrollment).to receive(:withdraw).and_raise(JSON::ParserError) }
+
+    it 'still stops listening', :aggregate_failures do
+      pusher = push_state
+      expect { listener.each.first }.to raise_error(JSON::ParserError)
+      expect { TCPSocket.new('127.0.0.1', listener_port).close }.to raise_error(Errno::ECONNREFUSED)
+      pusher.join
+    end
+  end
 end

@@ -51,6 +51,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Dop1 settings go out with structure version 1, and the README's filter example resets the
   operating hours (40012) instead of writing the filter limit (40010) to 0.
 - DOP2 fields of every type the app knows decode and encode; strings lose their trailing NULs.
+- The events listener stops its server and its mDNS announcements even when a withdrawal raises an
+  error other than a `Miele::Sdk::Error`, such as an unreadable answer.
 
 ### Added
 

@@ -281,6 +281,11 @@ end
 `created_at`, `resource_type`, `resource_id`, `changes`, and `resource` to load it). Without a
 block it returns a lazy enumerator.
 
+`attributes` gives the changes as a typed value without a request, `Hue::Sdk::Schema::LightChange`
+for a light, where a field that did not change is nil. The app reads events this way. A type this
+version does not know gives nil. The `configuration` of an automation stays a hash, as an event
+does not tell its script.
+
 The stream is read once: `events` returns when the bridge ends it, and raises
 `Hue::Sdk::ConnectionError` when the bridge cannot be reached or drops it, as it does to a stream
 idle for 5 minutes. Whether and when to follow the bridge again is the caller's. An

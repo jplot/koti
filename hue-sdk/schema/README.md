@@ -48,6 +48,9 @@ description at run time, but a spec fails while the generated files differ from 
   The app decodes the actions of an accessory by hand: `schema/extract/behaviors.rb` holds the type each of these decoders
   returns, and the class each accessory script is read with (`AccessoryBehaviorIdToScriptIdBatch`).
 
+- **Changes.** The classes of an event (`LightChange`…) are not in the data: `generate.rb` makes one from each response
+  class, with every field optional. The app's 179 `*Updated` classes decode the same keys as their `*Added` classes.
+
 ## Regenerating
 
 Edit `hue.json` or `behaviors.json`, then:

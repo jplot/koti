@@ -14,7 +14,7 @@ RSpec.describe Hue::Sdk::Entertainment::DtlsSocket do
 
   before { skip "#{openssl} not found" unless system(openssl, 'version', out: File::NULL, err: File::NULL) }
 
-  after { relays.each(&:kill) }
+  after { relays.each { it.kill.join } }
 
   def serve(server_key = key)
     command = [openssl, 's_server', '-dtls1_2', '-nocert', '-psk', server_key, '-psk_identity', identity,
@@ -41,7 +41,6 @@ RSpec.describe Hue::Sdk::Entertainment::DtlsSocket do
     Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
   end
 
-  # Forwards datagrams between the client and the server, losing the client's first +lost+ ones.
   def relay(lost)
     front = UDPSocket.new.tap { it.bind('127.0.0.1', 0) }
     back = UDPSocket.new.tap { it.connect('127.0.0.1', port) }
@@ -59,6 +58,8 @@ RSpec.describe Hue::Sdk::Entertainment::DtlsSocket do
         back.send(data, 0) if (lost -= 1).negative?
       end
     end
+  ensure
+    [front, back].each(&:close)
   end
 
   it 'handshakes with an OpenSSL PSK server' do
@@ -80,14 +81,19 @@ RSpec.describe Hue::Sdk::Entertainment::DtlsSocket do
     expect(elapsed).to be_between(0.9, 2)
   end
 
-  it 'gives up 5 seconds after a host that never answers', :aggregate_failures do
+  it 'gives up 5 seconds after a host that never answers, waiting rather than spinning', :aggregate_failures do
     silent = UDPSocket.new.tap { it.bind('127.0.0.1', 0) }
+    cpu = Process.clock_gettime(Process::CLOCK_PROCESS_CPUTIME_ID)
     elapsed = timed { expect { connect(to: silent.addr[1]) }.to raise_error(Hue::Sdk::ConnectionError) }
-    expect(elapsed).to be_between(4.9, 6)
+    spent = Process.clock_gettime(Process::CLOCK_PROCESS_CPUTIME_ID) - cpu
+    expect([elapsed, spent]).to match([be_between(4.9, 6), be < 1])
+  ensure
+    silent&.close
   end
 
-  it 'raises ConnectionError when nothing answers' do
-    expect { connect }.to raise_error(Hue::Sdk::ConnectionError, /DTLS handshake failed/)
+  it 'raises ConnectionError at once when nothing answers', :aggregate_failures do
+    elapsed = timed { expect { connect }.to raise_error(Hue::Sdk::ConnectionError, /DTLS handshake failed/) }
+    expect(elapsed).to be < 1
   end
 
   it 'raises ConnectionError and closes its socket when the host does not resolve', :aggregate_failures do

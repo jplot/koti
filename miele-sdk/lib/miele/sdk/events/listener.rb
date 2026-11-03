@@ -86,11 +86,11 @@ module Miele
           @server&.stop
         end
 
-        # @return [Error, nil] why the appliance keeps its subscriptions
+        # @return [StandardError, nil] why the appliance keeps its subscriptions
         def withdraw(appliance)
           Enrollment.withdraw(appliance, our_fab: @fab)
           nil
-        rescue Error => e
+        rescue StandardError => e
           e
         end
 

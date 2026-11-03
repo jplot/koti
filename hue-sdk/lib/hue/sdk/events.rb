@@ -25,6 +25,11 @@ module Hue
       # @return [Models::Base::Instance] the changed resource, loaded on first access
       # @api public
       def resource = Sdk.resource(resource_type, resource_id)
+
+      # @return [Schema::Value, nil] {#changes} as a typed value, where a field that did not change is nil
+      #   (+Schema::LightChange+ for a light…), or nil for a type this version does not know
+      # @api public
+      def attributes = Schema::CHANGES[resource_type]&.from(changes)
     end
 
     # Server-sent events of the bridge.

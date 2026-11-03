@@ -62,6 +62,15 @@ RSpec.describe Hue::Sdk, :live do
     listener&.kill
   end
 
+  it 'reads a few seconds of events in typed values' do
+    values = Queue.new
+    listener = Thread.new { Hue::Sdk::Events::Stream.new.each { values << it.attributes } }
+    listener.join(3)
+    expect(Array.new(values.size) { values.pop }.compact).to all(be_a(Hue::Sdk::Schema::Value))
+  ensure
+    listener&.kill
+  end
+
   it 'cannot write' do
     light = described_class.Light.list.first
     expect { light.update(on: light['on']) }.to raise_error(RuntimeError, /read-only: PUT refused/)

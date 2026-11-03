@@ -58,6 +58,27 @@ RSpec.describe Hue::Sdk::Schema do
     expect(described_class::Value.dump(values)).to eq('a' => { on: true })
   end
 
+  it 'makes every field of a change optional, nested classes included', :aggregate_failures do
+    value = described_class::LightChange.from('dimming' => { 'brightness' => 60.0 })
+    expect(value.dimming).to be_a(described_class::DimmingFeatureChange)
+    expect(value.dimming.brightness).to eq(60.0)
+    expect(value.on).to be_nil
+  end
+
+  it 'has a change class for every resource type' do
+    expect(described_class::CHANGES.keys).to match_array(described_class::RESPONSES.keys)
+  end
+
+  it 'keeps a changed configuration a hash, without a script id to read it by' do
+    value = described_class::BehaviorInstanceChange.from('configuration' => { 'where' => [] })
+    expect(value.configuration).to eq('where' => [])
+  end
+
+  it 'types the changed state of an automation' do
+    value = described_class::BehaviorInstanceChange.from('state' => { 'timer_state' => 'paused' })
+    expect(value.state.timer_state).to eq('paused')
+  end
+
   it 'gives every registered resource type a response value' do
     expect(Hue::Sdk::Models::REGISTRY.keys - described_class::RESPONSES.keys).to be_empty
   end

@@ -12,6 +12,8 @@ module Hue
                      changes: Hash[String, untyped]) -> Event
 
       def resource: () -> Models::Base::Instance
+
+      def attributes: () -> Data?
     end
 
     module Events

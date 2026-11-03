@@ -5,6 +5,7 @@ require_relative 'sia/cipher'
 require_relative 'sia/message'
 require_relative 'sia/codes'
 require_relative 'sia/event'
+require_relative 'sia/refusal'
 require_relative 'sia/receiver'
 
 module Ajax

@@ -48,5 +48,5 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Automations as typed values: `behavior_instance` reads its configuration with a class per script and its
   state with `BehaviorState`, and takes `BehaviorInstanceAdd` and `BehaviorInstanceUpdate`, triggers included.
   `Schema::BEHAVIOR_SCRIPTS` names the scripts.
-- The configurations of switches, sensors and MotionAware areas as typed values, by the scripts `hue_accessories`,
-  `tap_switch`, `motion_sensor` and `contact_sensor`.
+- The configurations of accessories and MotionAware areas as typed values, under the scripts `hue_accessories`,
+  `tap_switch`, `motion_sensor` (cameras) and `contact_sensor`. A configuration that would not go back whole stays a hash.

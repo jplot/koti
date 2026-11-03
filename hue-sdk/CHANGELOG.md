@@ -48,4 +48,3 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Automations as typed values: `behavior_instance` reads its configuration with a class per script and its
   state with `BehaviorState`, and takes `BehaviorInstanceAdd` and `BehaviorInstanceUpdate`, triggers included.
   `Schema::BEHAVIOR_SCRIPTS` names the scripts.
-

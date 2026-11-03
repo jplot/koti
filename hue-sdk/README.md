@@ -203,8 +203,14 @@ automation.configuration.when.time_point.time  # => #<data Hue::Sdk::Schema::Tim
 
 `Hue::Sdk::Schema::BEHAVIOR_SCRIPTS` gives the id of each script by a stable name: `coming_home`, `go_to_sleep`,
 `leaving_home`, `native_go_to_sleep`, `pm_automation` (presence mimicking), `smoke_alarm`, `state_after_streaming`,
-`time_based` (a schedule), `timer` and `wake_up`. Any other script, such as those of switches and sensors, keeps its
-configuration as a hash, and `data` always holds the JSON of the bridge.
+`time_based` (a schedule), `timer` and `wake_up`. The app does not know `native_go_to_sleep`, to which the bridge gives
+the schema reference of `go_to_sleep`. Any other script, such as those of switches and sensors, keeps its configuration as
+a hash. `state` reads what the app reads, and `data` always holds the JSON of the bridge, such as the `source_type` of the
+state of a switch.
+
+A configuration keeps in `unknown` the keys its class does not know, and sends them back. As in the app, a key its
+definition gives a default for may be missing, and the lights (`items`) of each scene of `what` are written from those of
+the same group in `where`.
 
 ```ruby
 schema = Hue::Sdk::Schema
@@ -227,8 +233,9 @@ automation.update(schema::BehaviorInstanceUpdate.new(enabled: false))
 automation.update(schema::BehaviorInstanceUpdate.new(trigger: schema::BehaviorTrigger.new(start: {}))) # stop: {} to stop
 ```
 
-The app builds these requests by hand; their fields come from its code. Only `coming_home`, `go_to_sleep`, `leaving_home`
-and `time_based` were read on a real bridge, and the SDK never wrote an automation on one.
+`BehaviorInstanceAdd` adds the types the app always names, `behavior_instance` and `instance_metadata`. The app builds
+these requests by hand; their fields come from its code. Only `coming_home`, `go_to_sleep`, `leaving_home` and
+`time_based` were read on a real bridge, and the SDK never wrote an automation on one.
 
 ## Associations
 

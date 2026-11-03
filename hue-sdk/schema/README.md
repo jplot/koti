@@ -42,7 +42,8 @@ description at run time, but a spec fails while the generated files differ from 
   The bridge only refers to the schemas of these forms (`{"$ref": "basic_wake_up_config.json#"}`), and the app has no
   class for a configuration. So a configuration comes from the definition of its script in the assets of the APK
   (`packages/behavior_ui/lib/assets/behaviors/*/behavior.yaml`): each step with a `result_name` gives a key, and the type
-  of the step gives its value, as `BehaviorEncoder` writes it. The values themselves are the classes json_serializable
+  of the step gives its value, as `BehaviorEncoder` writes it. A key is required unless a feature gates it or the app
+  gives it a default when it is missing. The values themselves are the classes json_serializable
   writes in `behavior_bridge_control`, where a key is required when its `fromJson` reads it once, and not nullable.
 
 ## Regenerating
@@ -108,4 +109,5 @@ LLVM_OBJDUMP=… bundle exec ruby schema/extract/build_behaviors.rb path/to/blut
 bundle exec rake schema
 ```
 
-It stops on a step type it does not know, or on a class whose name `hue.json` takes.
+It stops on a step type it does not know, an enum the app no longer has, or a value class of the app whose name `hue.json`
+takes.

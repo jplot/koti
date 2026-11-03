@@ -16,21 +16,22 @@ module Hue
     # @!attribute [r] created_at
     #   @return [Time] when the bridge emitted the event
     # @!attribute [r] resource_type
-    #   @return [String] type of the changed resource (+light+, +motion+…)
+    #   @return [String, nil] type of the changed resource (+light+, +motion+…), nil for an error
     # @!attribute [r] resource_id
-    #   @return [String] id of the changed resource
+    #   @return [String, nil] id of the changed resource, nil for an error
     # @!attribute [r] changes
-    #   @return [Hash{String=>Object}] the attributes that changed
+    #   @return [Hash{String=>Object}] the attributes that changed; for an error, +errors+ with their +code+ and
+    #     +description+
     class Event
-      # @return [Models::Base::Instance] the changed resource, loaded on first access
+      # @return [Models::Base::Instance, nil] the changed resource, loaded on first access; nil for an error
       # @api public
-      def resource = Sdk.resource(resource_type, resource_id)
+      def resource = (Sdk.resource(resource_type, resource_id) if resource_type && resource_id)
 
       # @return [Schema::Value, nil] {#changes} and the id of the resource as a typed value (+Schema::LightChange+ for
       #   a light…), where a field that did not change, or that the SDK hides as deprecated, is nil; nil for a type
       #   this version does not know
       # @api public
-      def attributes = Schema::CHANGES[resource_type]&.from(changes.merge('id' => resource_id)) #: Schema::Value?
+      def attributes = Schema::CHANGES[resource_type.to_s]&.from(changes.merge('id' => resource_id)) #: Schema::Value?
     end
 
     # Server-sent events of the bridge.
@@ -144,7 +145,7 @@ module Hue
         # @raise [BlockFailure] wrapping what the block raised
         # @api private
         def deliver(message)
-          events(message[:data]).each do |event|
+          events(message).each do |event|
             yield event
           rescue StandardError => e
             raise BlockFailure, e
@@ -159,18 +160,37 @@ module Hue
           { 'hue-application-key' => key, 'Accept' => 'text/event-stream', 'Last-Event-ID' => @last_id }.compact
         end
 
-        # @param data [String] JSON array of event containers
-        # @return [Array<Event>] one event per changed resource
+        # @param message [Hash{Symbol=>String}] +id+ and +data+ of one message, a JSON array of event containers
+        # @return [Array<Event>] one event per changed resource, or per error container
         # @api private
-        def events(data)
-          JSON.parse(data).flat_map do |container|
-            id = container['id']
-            kind = container['type'].to_sym
-            created_at = Time.iso8601(container['creationtime'])
-            container['data'].map do |resource|
-              Event.new(id:, kind:, created_at:, resource_type: resource['type'], resource_id: resource['id'],
-                        changes: Models.lookup(resource['type']).strip(resource.except('id', 'type')))
-            end
+        def events(message)
+          JSON.parse(message[:data]).flat_map do |container|
+            base = [container['id'] || message[:id], container['type'].to_sym, Time.iso8601(container['creationtime'])]
+            container['type'] == 'error' ? [failure(base, container)] : changes(base, container)
+          end
+        end
+
+        # An error holds +errors+ instead of +data+, and no id of its own.
+        #
+        # @param base [Array] id, kind and time of the container
+        # @param container [Hash{String=>Object}]
+        # @return [Event]
+        # @api private
+        def failure(base, container)
+          id, kind, created_at = base
+          Event.new(id:, kind:, created_at:, resource_type: nil, resource_id: nil, changes: container.slice('errors'))
+        end
+
+        # @param base [Array] id, kind and time of the container
+        # @param container [Hash{String=>Object}]
+        # @return [Array<Event>]
+        # @api private
+        def changes(base, container)
+          id, kind, created_at = base
+          container['data'].map do |resource|
+            type = resource['type']
+            Event.new(id:, kind:, created_at:, resource_type: type, resource_id: resource['id'],
+                      changes: Models.lookup(type).strip(resource.except('id', 'type')))
           end
         end
 

@@ -14,8 +14,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Breaking:** `events` no longer reconnects, nor sends its request a second time as Net::HTTP would: it reads
   the stream once and raises `ConnectionError` when it breaks. `Events::Stream` takes the `last_event_id:` of
   an earlier stream to resume from; `sleeper:` is gone.
-- When the bridge refuses the stop, entertainment `stream` raises what ended the stream (the block's error, a
-  failed handshake) rather than the stop's `ResponseError`, which it raises only when nothing else did.
+- When the stop fails, entertainment `stream` raises what ended the stream (the block's error, an interrupt or a
+  timeout included, or a failed handshake) rather than the stop's error, which it raises only when nothing else
+  did.
 
 ### Added
 

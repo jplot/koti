@@ -10,6 +10,7 @@ require_relative 'sdk/pairing'
 require_relative 'sdk/schema'
 require_relative 'sdk/models'
 require_relative 'sdk/events'
+require_relative 'sdk/settings'
 
 # Namespace of the koti SDKs for the Philips Hue ecosystem.
 module Hue
@@ -57,6 +58,13 @@ module Hue
       stream = Events::Stream.new
       block ? stream.each(&block) : stream.to_enum.lazy
     end
+
+    # Reads the settings of the bridge the Hue app writes over CLIP v1.
+    #
+    # @return [Settings]
+    # @raise (see Settings.read)
+    # @api public
+    def self.settings = Settings.read
 
     # Returns the collection of a resource type, or one resource.
     #

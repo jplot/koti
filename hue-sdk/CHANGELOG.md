@@ -50,3 +50,4 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `Schema::BEHAVIOR_SCRIPTS` names the scripts.
 - The configurations of accessories and MotionAware areas as typed values, under the scripts `hue_accessories`,
   `tap_switch`, `motion_sensor` (cameras) and `contact_sensor`. A configuration that would not go back whole stays a hash.
+- `Event#attributes` gives the changes of an event as a typed value, without a request.

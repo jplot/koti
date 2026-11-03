@@ -3,17 +3,20 @@
 module Hue
   module Sdk
     module Schema
-      # An automation of the bridge. Its configuration has a form per script, which the bridge does not describe.
-      class BehaviorInstance
-        # Builds the value from the JSON of the bridge, its configuration typed when the SDK knows its script.
+      # Reads a configuration with the class of its script, when the JSON gives the script: an automation does, and the
+      # event that adds one. The bridge does not describe these forms.
+      module TypedConfiguration
+        # Builds the value from the JSON of the bridge.
         #
         # @param data [Hash{String=>Object}]
-        # @return [BehaviorInstance]
+        # @return [Value]
         # @api public
-        def self.from(data)
-          value = super #: BehaviorInstance
+        def from(data)
+          value = super #: untyped
           value.with(configuration: read_configuration(value.script_id, value.configuration))
         end
+
+        private
 
         # The app keeps as it is the JSON it cannot decode (BridgeBehavior._decodeAccessoryConfiguration): a
         # configuration its class would not send back whole stays a hash.
@@ -22,13 +25,22 @@ module Hue
         # @param data [Object]
         # @return [Value, Object]
         # @api private
-        def self.read_configuration(script_id, data)
+        def read_configuration(script_id, data)
           typed = Value.load(BEHAVIOR_CONFIGURATIONS[script_id], data)
           JSON.parse(JSON.generate(typed)) == data ? typed : data
         rescue ArgumentError, NoMethodError, TypeError
           data
         end
-        private_class_method :read_configuration
+      end
+
+      # An automation of the bridge.
+      class BehaviorInstance
+        extend TypedConfiguration
+      end
+
+      # The changes of an automation, as an event reports them.
+      class BehaviorInstanceChange
+        extend TypedConfiguration
       end
 
       # An automation to create. The app always names the types of the resource and of its metadata.

@@ -50,4 +50,36 @@ RSpec.describe Hue::Sdk::Events do
       expect(Hue::Sdk.events.first.changes).to eq('on' => { 'on' => true })
     end
   end
+
+  describe Hue::Sdk::Event do
+    def event_of(type, changes, kind: :update)
+      described_class.new(id: 'e', kind:, created_at: Time.at(0), resource_type: type, resource_id: 'r', changes:)
+    end
+
+    it 'gives the changes as a typed value, without a request', :aggregate_failures do
+      allow(Hue::Sdk::Connection).to receive(:request)
+      expect(event_of('light', { 'on' => { 'on' => true } }).attributes.on.on).to be(true)
+      expect(Hue::Sdk::Connection).not_to have_received(:request)
+    end
+
+    it 'gives nil for a type it does not know' do
+      expect(event_of('new_type', { 'x' => 1 }).attributes).to be_nil
+    end
+
+    it 'gives a deleted resource its id alone', :aggregate_failures do
+      value = event_of('light', {}, kind: :delete).attributes
+      expect(value.id).to eq('r')
+      expect(value.on).to be_nil
+    end
+
+    it 'gives the id of the resource, which the stream takes out of the changes' do
+      expect(event_of('light', { 'on' => { 'on' => true } }).attributes.id).to eq('r')
+    end
+
+    it 'leaves the changes as they are' do
+      event = event_of('light', { 'on' => { 'on' => true } })
+      event.attributes
+      expect(event.changes).to eq('on' => { 'on' => true })
+    end
+  end
 end

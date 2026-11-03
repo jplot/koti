@@ -62,6 +62,12 @@ RSpec.describe Hue::Sdk, :live do
     listener&.kill
   end
 
+  it 'reads every resource of the bridge as the changes of an event', :aggregate_failures do
+    resources = Hue::Sdk::Client.get('/resource')
+    expect(resources).not_to be_empty
+    resources.each { |resource| expect { Hue::Sdk::Schema::CHANGES[resource['type']]&.from(resource) }.not_to raise_error }
+  end
+
   it 'cannot write' do
     light = described_class.Light.list.first
     expect { light.update(on: light['on']) }.to raise_error(RuntimeError, /read-only: PUT refused/)

@@ -12,10 +12,11 @@ module Miele
     class Appliance
       include ObjectAccess
 
-      # @return [String] address or +.local+ name of the appliance
+      # @return [String] address or +.local+ name of the appliance; through a cloud, the name its Dop1 requests give
       attr_reader :host
 
-      # @param host [String] address or +.local+ name of the appliance
+      # @param host [String] address or +.local+ name of the appliance; given +cloud:+, the name of its module as
+      #   the cloud lists it ({Cloud::Channel::Device#host}) for its Dop1 requests to reach it
       # @param ident [Schema::DeviceIdentification, nil] its identity, read from it when not given
       # @return [Appliance] an instance of its family's class
       # @api public
@@ -24,13 +25,13 @@ module Miele
         Families.claim(ident ||= probe.ident).new(host, **, ident:, fab: probe.fab)
       end
 
-      # @param host [String] address or +.local+ name of the appliance
+      # @param host [String] address or +.local+ name of the appliance; given +cloud:+, the name of its module as
+      #   the cloud lists it for its Dop1 requests to reach it
       # @param sleeper [#call] waits the given number of seconds
       # @param fab [String, nil] its fabrication number, when already known
       # @param ident [Schema::DeviceIdentification, nil] its identity, which gives its type and protocol without a read
-      # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, as the app does once it is paired,
-      #   +host+ being then the name of its module as the cloud lists it ({Cloud::Channel::Device#host}), which Dop1
-      #   requests name; without one, every request goes to the appliance itself
+      # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, as the app does once it is paired;
+      #   without one, every request goes to the appliance itself
       # @raise [ArgumentError] with a cloud but no fab, which the cloud names appliances by
       def initialize(host, sleeper: method(:sleep), fab: nil, ident: nil, cloud: nil)
         raise ArgumentError, 'an appliance reached through the cloud needs its fab' if cloud && !fab

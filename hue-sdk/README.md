@@ -204,13 +204,22 @@ automation.configuration.when.time_point.time  # => #<data Hue::Sdk::Schema::Tim
 `Hue::Sdk::Schema::BEHAVIOR_SCRIPTS` gives the id of each script by a stable name: `coming_home`, `go_to_sleep`,
 `leaving_home`, `native_go_to_sleep`, `pm_automation` (presence mimicking), `smoke_alarm`, `state_after_streaming`,
 `time_based` (a schedule), `timer` and `wake_up`. The app does not know `native_go_to_sleep`, to which the bridge gives
-the schema reference of `go_to_sleep`. Any other script, such as those of switches and sensors, keeps its configuration as
-a hash. `state` reads what the app reads, and `data` always holds the JSON of the bridge, such as the `source_type` of the
-state of a switch.
+the schema reference of `go_to_sleep`. Any other script keeps its configuration as a hash. `state` reads what the app
+reads, and `data` always holds the JSON of the bridge, such as the `source_type` of the state of a switch.
 
-A configuration keeps in `unknown` the keys its class does not know, and sends them back. As in the app, a key its
-definition gives a default for may be missing, and the lights (`items`) of each scene of `what` are written from those of
-the same group in `where`.
+The configuration of a switch or a sensor is an automation too, of the script `hue_accessories` (switches, smart buttons,
+MotionAware areas), `tap_switch` (Tap Dial), `motion_sensor` or `contact_sensor`. An `action` is a name (`all_off`,
+`home_off`, `dim_up`…) or a hash, `{ recall: { rid: '…', rtype: 'scene' } }`.
+
+```ruby
+switch = Hue::Sdk.BehaviorInstance('a91c…').attributes.configuration
+switch.buttons.fetch('3e0f…').on_long_press.action  # => "home_off"
+```
+
+The configuration of an automation script keeps in `unknown` the keys its class does not know, and sends them back. As in
+the app, a key its definition gives a default for may be missing, and the lights (`items`) of each scene of `what` are
+written from those of the same group in `where`. The classes of accessories ignore the keys they do not know, as the app
+does.
 
 ```ruby
 schema = Hue::Sdk::Schema
@@ -234,8 +243,8 @@ automation.update(schema::BehaviorInstanceUpdate.new(trigger: schema::BehaviorTr
 ```
 
 `BehaviorInstanceAdd` adds the types the app always names, `behavior_instance` and `instance_metadata`. The app builds
-these requests by hand; their fields come from its code. Only `coming_home`, `go_to_sleep`, `leaving_home` and
-`time_based` were read on a real bridge, and the SDK never wrote an automation on one.
+these requests by hand; their fields come from its code. Only `coming_home`, `go_to_sleep`, `hue_accessories`,
+`leaving_home` and `time_based` were read on a real bridge, and the SDK never wrote an automation on one.
 
 ## Associations
 

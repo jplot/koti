@@ -73,9 +73,10 @@ RSpec.describe Hue::Sdk::Entertainment::Session do
   end
 
   context 'when the bridge refuses the stop' do
+    let(:stop_status) { 500 }
     let(:bridge) do
       FakeBridge.start do |request|
-        status = JSON.parse(request.body)['action'] == 'stop' ? 500 : 200
+        status = JSON.parse(request.body)['action'] == 'stop' ? stop_status : 200
         [status, { 'Content-Type' => 'application/json' }, JSON.generate(data: [], errors: [])]
       end
     end
@@ -91,6 +92,18 @@ RSpec.describe Hue::Sdk::Entertainment::Session do
     it 'leaves a failed handshake to the caller' do
       allow(Hue::Sdk::Entertainment::DtlsSocket).to receive(:open).and_raise(Hue::Sdk::ConnectionError, 'handshake')
       expect { configuration.stream { nil } }.to raise_error(Hue::Sdk::ConnectionError, 'handshake')
+    end
+
+    it 'leaves an interrupt to the caller' do
+      expect { configuration.stream { raise Interrupt } }.to raise_error(Interrupt)
+    end
+
+    context 'with a status line Net::HTTP cannot read' do
+      let(:stop_status) { 'bad' }
+
+      it 'leaves the error that ended the stream to the caller' do
+        expect { configuration.stream { raise 'boom' } }.to raise_error(RuntimeError, 'boom')
+      end
     end
   end
 

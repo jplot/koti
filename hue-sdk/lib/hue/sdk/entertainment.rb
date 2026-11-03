@@ -41,7 +41,7 @@ module Hue
           update(action: 'start')
           begin
             with_session(key, &)
-          rescue Exception => e # rubocop:disable Lint/RescueException -- what ended the stream outranks a refused stop
+          rescue Exception => e # rubocop:disable Lint/RescueException -- what ended the stream outranks a failed stop
             error = e
             raise
           ensure
@@ -68,7 +68,7 @@ module Hue
         # @api private
         def stop(error)
           update(action: 'stop')
-        rescue Error
+        rescue StandardError
           raise unless error
         end
       end

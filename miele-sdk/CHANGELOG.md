@@ -55,6 +55,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   even when a withdrawal raises an error other than a `Miele::Sdk::Error`, such as an unreadable
   answer: that error joins the `SubscriptionError` failures, and no longer hides the one that ended
   the stream. An interrupted withdrawal still stops the server and the announcements.
+- `Appliance#get` raises a `ResponseError` carrying the status for an answer without a body, instead
+  of `JSON::ParserError`, an error outside `Miele::Sdk::Error`.
 
 ### Added
 

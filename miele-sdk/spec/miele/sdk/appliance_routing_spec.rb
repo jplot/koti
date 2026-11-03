@@ -81,6 +81,13 @@ RSpec.describe Miele::Sdk::Appliance do
       .with(:post, "/Devices/#{fab}/DOP/", body: anything, kind: :json, host: 'module.local')
   end
 
+  it 'names the module on Dop1 requests only' do
+    channel = instance_double(Miele::Sdk::Cloud::Channel)
+    allow(channel).to receive(:request).and_return(Miele::Sdk::Connection::Response.new(200, '{}'))
+    described_class.new('module.local', fab:, cloud: channel).get("/Devices/#{fab}/State")
+    expect(channel).to have_received(:request).with(:get, "/Devices/#{fab}/State", body: nil, kind: :json, host: nil)
+  end
+
   it 'names the module the account lists when Dop1 goes through the cloud, listing it once', :aggregate_failures do
     Miele::Sdk.appliances(through_cloud: true).first.dop1('8E0101000000')
     expect(cloud.requests.find { it.path.end_with?('/DOP/') }.headers['host']).to eq('Miele-0000000000000000.local')

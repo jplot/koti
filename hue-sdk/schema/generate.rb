@@ -187,7 +187,12 @@ class SchemaGenerator
       type['class'] || "Array<#{yard_type(type['list'])}>"
     end
 
-    def values(field) = field['values'] ? " one of #{field['values'].map { "+#{it}+" }.join(', ')}" : ''
+    def values(field)
+      return '' unless field['values']
+
+      names = field['values'].map { "+#{it}+" }.join(', ')
+      " one of #{names}#{', or a hash to recall a scene' if field['type'] == 'Object'}"
+    end
 
     def paragraph(text, indent)
       text.split.each_with_object([+indent]) do |word, lines|

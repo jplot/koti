@@ -12,8 +12,23 @@ module Hue
         # @api public
         def self.from(data)
           value = super #: BehaviorInstance
-          value.with(configuration: Value.load(BEHAVIOR_CONFIGURATIONS[value.script_id], value.configuration))
+          value.with(configuration: read_configuration(value.script_id, value.configuration))
         end
+
+        # The app keeps as it is the JSON it cannot decode (BridgeBehavior._decodeAccessoryConfiguration): a
+        # configuration its class would not send back whole stays a hash.
+        #
+        # @param script_id [String, nil]
+        # @param data [Object]
+        # @return [Value, Object]
+        # @api private
+        def self.read_configuration(script_id, data)
+          typed = Value.load(BEHAVIOR_CONFIGURATIONS[script_id], data)
+          JSON.parse(JSON.generate(typed)) == data ? typed : data
+        rescue ArgumentError, NoMethodError, TypeError
+          data
+        end
+        private_class_method :read_configuration
       end
 
       # An automation to create. The app always names the types of the resource and of its metadata.

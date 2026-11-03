@@ -33,6 +33,19 @@ RSpec.describe Hue::Sdk::Schema::BehaviorInstance, '.from' do
     described_class.from('script_id' => id, 'configuration' => data).configuration
   end
 
+  def action_forms
+    slot = { 'start_time' => { 'hour' => 7, 'minute' => 0 }, 'signal' => {},
+             'actions' => [{ 'action' => { 'recall' => scene } }] }
+    [{ 'time_based' => [slot] },
+     { 'time_based_extended' => { 'slots' => [slot], 'repeat_timeout' => { 'seconds' => 2 } } },
+     { 'scene_cycle_extended' => { 'slots' => [[{ 'action' => 'all_off' }]], 'with_off' => { 'enabled' => false } } },
+     { 'behavior_trigger' => { 'behavior' => resource('behavior_instance'), 'trigger' => 'start' } },
+     { 'sound_targets_control' => { 'action' => 'play', 'content_id' => 'x' } },
+     { 'after' => { 'minutes' => 1 }, 'timer' => { 'duration' => { 'hours' => 1 }, 'type' => 'time_out_after' } }]
+  end
+
+  def resource(rtype) = { 'rid' => '77777777-7777-4777-8777-777777777777', 'rtype' => rtype }
+
   def round_trip(value) = JSON.parse(JSON.generate(value.to_body))
 
   it 'types a switch, and round-trips it', :aggregate_failures do
@@ -50,20 +63,49 @@ RSpec.describe Hue::Sdk::Schema::BehaviorInstance, '.from' do
     expect(round_trip(value)).to eq(area)
   end
 
-  it 'types a Tap Dial by its script', :aggregate_failures do
-    value = configuration(:tap_switch, { 'button1' => { 'on_short_release' => { 'action' => 'dim_up' } } })
+  it 'types a Tap Dial by its script, and round-trips it', :aggregate_failures do
+    press = { 'on_short_release' => { 'action' => 'dim_up' } }
+    data = { 'device' => resource('device'), 'button1' => press, 'button2' => press, 'button3' => press,
+             'button4' => press, 'rotary' => { 'on_rotate' => { 'action' => 'dim_alternate' } } }
+    value = configuration(:tap_switch, data)
     expect(value).to be_a(schema::AccessoryBehaviorHTDSConfiguration)
-    expect(value.button1.on_short_release.action).to eq('dim_up')
+    expect(round_trip(value)).to eq(data)
   end
 
-  it 'types a motion sensor by its script' do
-    expect(configuration(:motion_sensor, { 'source' => { 'rid' => 'x', 'rtype' => 'device' } }))
-      .to be_a(schema::AccessoryBehaviorMotionSensorConfiguration)
+  it 'types what the motion sensor script holds, and round-trips it', :aggregate_failures do
+    sensitivity = { 'daylight_sensitivity' => { 'dark_threshold' => 16_000, 'offset' => 7000 } }
+    data = { 'source' => resource('camera_motion'), 'where' => where, 'settings' => sensitivity,
+             'when' => { 'timeslots' => [timeslot] } }
+    value = configuration(:motion_sensor, data)
+    expect(value).to be_a(schema::AccessoryBehaviorMotionSensorConfiguration)
+    expect(round_trip(value)).to eq(data)
   end
 
-  it 'types a contact sensor by its script' do
-    expect(configuration(:contact_sensor, { 'device' => { 'rid' => 'x', 'rtype' => 'device' } }))
-      .to be_a(schema::AccessoryBehaviorContactSensorConfiguration)
+  it 'types a contact sensor by its script, and round-trips it', :aggregate_failures do
+    on_close = { 'recall_single' => [{ 'action' => 'all_off' }],
+                 'timer' => { 'duration' => { 'minutes' => 2 }, 'type' => 'after_a_set_time' } }
+    actions = { 'on_open' => { 'recall_single' => [{ 'action' => { 'recall' => scene } }] }, 'on_close' => on_close }
+    data = { 'device' => resource('device'), 'where' => where, 'when' => { 'always' => actions } }
+    value = configuration(:contact_sensor, data)
+    expect(value).to be_a(schema::AccessoryBehaviorContactSensorConfiguration)
+    expect(round_trip(value)).to eq(data)
+  end
+
+  it 'round-trips every other form of action of a button' do
+    expect(action_forms.map { round_trip(schema::AccessoryAction.from(it)) }).to eq(action_forms)
+  end
+
+  it 'keeps a table of rotaries' do
+    data = { 'rotaries' => { button => { 'on_rotate' => { 'action' => 'dim_up' } } } }
+    expect(configuration(:hue_accessories, data).rotaries.fetch(button).on_rotate.action).to eq('dim_up')
+  end
+
+  it 'keeps as they are the forms it cannot decode, as the app does', :aggregate_failures do
+    [{ 'recall_single' => { 'action' => 'all_off' } }, { 'recall_single_extended' => [] },
+     { 'recall_single_extended' => 'x' }, { 'behavior_trigger' => 'x' }].each do |form|
+      data = { 'buttons' => { button => { 'on_short_release' => form } } }
+      expect(configuration(:hue_accessories, data)).to eq(data)
+    end
   end
 
   it 'reads a scene cycle, a list of lists of actions, and round-trips it' do

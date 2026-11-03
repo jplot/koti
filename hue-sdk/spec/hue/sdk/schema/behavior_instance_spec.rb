@@ -68,8 +68,8 @@ RSpec.describe Hue::Sdk::Schema::BehaviorInstance do
     expect(state.timer_state).to eq('started')
   end
 
-  it 'does not raise on a missing required key when reading' do
-    expect(instance(script(:wake_up), {}).configuration.where).to be_nil
+  it 'keeps as a hash a configuration it would not send back whole, such as one missing a required key' do
+    expect(instance(script(:wake_up), {}).configuration).to eq({})
   end
 
   it 'refuses an unknown field before sending' do

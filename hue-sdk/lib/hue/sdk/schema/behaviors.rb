@@ -37,7 +37,7 @@ module Hue
       #
       # @!attribute [r] action
       #   @return [Object, nil] one of +last_on+, +all_off+, +home_off+, +on_off+, +previous_state+, +clamp+,
-      #     +do_nothing+, +dim_up+, +dim_down+, +dim_alternate+
+      #     +do_nothing+, +dim_up+, +dim_down+, +dim_alternate+, or a hash to recall a scene
       AccessoryActionValue = Data.define(:action) do
         include Value
 
@@ -241,7 +241,7 @@ module Hue
       #   @return [AccessoryTimeBasedActionExtended, nil]
       # @!attribute [r] action
       #   @return [Object, nil] one of +last_on+, +all_off+, +home_off+, +on_off+, +previous_state+, +clamp+,
-      #     +do_nothing+, +dim_up+, +dim_down+, +dim_alternate+
+      #     +do_nothing+, +dim_up+, +dim_down+, +dim_alternate+, or a hash to recall a scene
       # @!attribute [r] behavior_trigger
       #   @return [AccessoryBehaviorAction, nil]
       # @!attribute [r] sound_targets_control
@@ -564,7 +564,7 @@ module Hue
       #   @return [Array<AccessoryActionValue>, nil]
       # @!attribute [r] action
       #   @return [Object, nil] one of +last_on+, +all_off+, +home_off+, +on_off+, +previous_state+, +clamp+,
-      #     +do_nothing+, +dim_up+, +dim_down+, +dim_alternate+
+      #     +do_nothing+, +dim_up+, +dim_down+, +dim_alternate+, or a hash to recall a scene
       AccessoryBehaviorMotionSensorNoMotionAction = Data.define(:after, :recall_single, :action) do
         include Value
 

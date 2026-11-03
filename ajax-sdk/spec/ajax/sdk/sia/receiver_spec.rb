@@ -119,7 +119,7 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
 
       it 'hands it a frame another key encrypted, answered nothing' do
         expect(refusal(encrypted_sia_frame('SIA-DCS', '#AAA|Nri1/BA3', key: 'FEDCBA9876543210')))
-          .to have_attributes(reply: nil, reason: 'no pipe after the padding of a data frame')
+          .to have_attributes(reply: nil, reason: 'the key does not open this frame')
       end
 
       it 'hands it a clear frame, answered DUH' do

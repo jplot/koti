@@ -42,6 +42,33 @@ RSpec.describe Hue::Sdk::Events::Stream do
       expect(failure.resource).to be_nil
       expect(failure.attributes).to be_nil
     end
+
+    it 'gives it the id of its message, and goes past it', :aggregate_failures do
+      failure, = take_events(2)
+      expect(failure.id).to eq('1:0')
+      expect(stream.last_event_id).to eq('1:0')
+    end
+  end
+
+  context 'when a container is of type error without errors' do
+    let(:message) { "id: 1:0\ndata: #{JSON.generate([{ creationtime: '2026-10-25T10:00:00Z', type: 'error' }])}\n\n" }
+
+    it 'yields it without any change, as a failure' do
+      expect(take_events(1).first).to have_attributes(kind: :error, changes: {})
+    end
+  end
+
+  context 'when a container of another type holds errors too' do
+    let(:message) do
+      light = { id: 'l1', type: 'light' }
+      container = { creationtime: '2026-10-25T10:00:00Z', id: 'c1', type: 'update', data: [light],
+                    errors: [{ code: 1 }] }
+      "id: 1:0\ndata: #{JSON.generate([container])}\n\n"
+    end
+
+    it 'reads its data, as the app decides by its type' do
+      expect(take_events(1).first).to have_attributes(kind: :update, resource_id: 'l1')
+    end
   end
 
   it 'asks for the event stream with the application key' do

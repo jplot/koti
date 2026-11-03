@@ -145,7 +145,7 @@ module Hue
         # @raise [BlockFailure] wrapping what the block raised
         # @api private
         def deliver(message)
-          events(message[:data]).each do |event|
+          events(message).each do |event|
             yield event
           rescue StandardError => e
             raise BlockFailure, e
@@ -160,34 +160,38 @@ module Hue
           { 'hue-application-key' => key, 'Accept' => 'text/event-stream', 'Last-Event-ID' => @last_id }.compact
         end
 
-        # @param data [String] JSON array of event containers
-        # @return [Array<Event>] one event per changed resource
+        # @param message [Hash{Symbol=>String}] +id+ and +data+ of one message, a JSON array of event containers
+        # @return [Array<Event>] one event per changed resource, or per error container
         # @api private
-        def events(data) = JSON.parse(data).flat_map { container_events(it) }
-
-        # An error container has +errors+ instead of +data+ (EventContainerError in the app).
-        #
-        # @param container [Hash{String=>Object}]
-        # @return [Array<Event>]
-        # @api private
-        def container_events(container)
-          return [event(container, nil, nil, container.slice('errors'))] if container.key?('errors')
-
-          container['data'].map do |resource|
-            type = resource['type']
-            event(container, type, resource['id'], Models.lookup(type).strip(resource.except('id', 'type')))
+        def events(message)
+          JSON.parse(message[:data]).flat_map do |container|
+            base = [container['id'] || message[:id], container['type'].to_sym, Time.iso8601(container['creationtime'])]
+            container['type'] == 'error' ? [failure(base, container)] : changes(base, container)
           end
         end
 
+        # An error holds +errors+ instead of +data+, and no id of its own.
+        #
+        # @param base [Array] id, kind and time of the container
         # @param container [Hash{String=>Object}]
-        # @param resource_type [String, nil]
-        # @param resource_id [String, nil]
-        # @param changes [Hash{String=>Object}]
         # @return [Event]
         # @api private
-        def event(container, resource_type, resource_id, changes)
-          Event.new(id: container['id'], kind: container['type'].to_sym,
-                    created_at: Time.iso8601(container['creationtime']), resource_type:, resource_id:, changes:)
+        def failure(base, container)
+          id, kind, created_at = base
+          Event.new(id:, kind:, created_at:, resource_type: nil, resource_id: nil, changes: container.slice('errors'))
+        end
+
+        # @param base [Array] id, kind and time of the container
+        # @param container [Hash{String=>Object}]
+        # @return [Array<Event>]
+        # @api private
+        def changes(base, container)
+          id, kind, created_at = base
+          container['data'].map do |resource|
+            type = resource['type']
+            Event.new(id:, kind:, created_at:, resource_type: type, resource_id: resource['id'],
+                      changes: Models.lookup(type).strip(resource.except('id', 'type')))
+          end
         end
 
         # @param response [Net::HTTPResponse]

@@ -9,7 +9,8 @@ module Ajax
       # hands each accepted event to the block, after the ACK. Each hub connection runs in its own thread,
       # so the block may be called from several threads at once; an exception it raises ends that
       # connection's thread, which Ruby reports as it does for any thread, and the connection with it. One
-      # address keeps at most 8 connections open: a ninth closes the oldest.
+      # address keeps at most 8 connections open: a ninth closes the oldest. Given +refused:+, it calls that
+      # callable with each frame it refuses, as a {Refusal}, after the reply and on the connection's thread.
       class Receiver
         # The 0LLL length field caps a frame at 4105 bytes; a peer that never sends +\r+ stays bounded.
         LIMIT = 4105
@@ -24,13 +25,15 @@ module Ajax
         # @param account [String] the account (object number) set on the hub
         # @param key [String, nil] the encryption key set on the hub; without one, only clear frames pass
         # @param timeband [Array(Integer, Integer)] seconds a timestamp may lag behind or run ahead
+        # @param refused [#call, nil] called with each {Refusal}
         # @yieldparam event [Event]
-        def initialize(host:, port:, account:, key:, timeband:, &handler)
+        def initialize(host:, port:, account:, key:, timeband:, refused: nil, &handler) # rubocop:disable Metrics/ParameterLists -- the hub's settings, then the caller's own
           @host = host
           @port = port
           @account = account
           @cipher = key && Cipher.new(key)
           @timeband = timeband
+          @refused = refused
           @handler = handler
           @clients = {}
           @mutex = Mutex.new
@@ -88,8 +91,8 @@ module Ajax
         end
 
         def serve(socket)
-          while (event = receive(socket))
-            @handler.call(event)
+          while (outcome = receive(socket))
+            outcome.is_a?(Event) ? @handler.call(outcome) : @refused&.call(outcome)
           end
         ensure
           socket.close
@@ -98,9 +101,9 @@ module Ajax
 
         def receive(socket)
           while (frame = socket.gets("\r", LIMIT))
-            reply, event = answer(frame)
+            reply, outcome = answer(frame)
             socket.write(reply) if reply
-            return event if event
+            return outcome if outcome
           end
         rescue IOError, SystemCallError
           nil
@@ -108,14 +111,24 @@ module Ajax
 
         def answer(frame)
           message = Message.parse(frame)
-          return [message.duh, nil] unless message.account == @account && message.encrypted == !@cipher.nil?
+          mismatch = mismatch(message)
+          return [message.duh, Refusal.new(frame:, reply: :duh, reason: mismatch)] if mismatch
 
           message = Message.parse(frame, cipher: @cipher) if message.encrypted
-          return [Message.nak, nil] unless timely?(message.timestamp)
+          unless timely?(message.timestamp)
+            return [Message.nak, Refusal.new(frame:, reply: :nak, reason: 'a timestamp outside the time band')]
+          end
 
           [message.ack(cipher: @cipher), message.type == 'NULL' ? nil : Event.from(message)]
-        rescue FrameError
-          [nil, nil]
+        rescue FrameError => e
+          [nil, Refusal.new(frame:, reply: nil, reason: e.message)]
+        end
+
+        def mismatch(message)
+          return "another account: #{message.account}" unless message.account == @account
+          return if message.encrypted == !@cipher.nil?
+
+          @cipher ? 'a clear frame while a key is set' : 'an encrypted frame without a key'
         end
 
         def timely?(time)

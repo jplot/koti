@@ -32,6 +32,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `refused:` on `Ajax::Sdk.sia_events` and `Sia::Receiver.new`: a callable given each frame the receiver
+  refuses, as a `Sia::Refusal` (the frame, the reply `:duh`, `:nak` or nil, and why), such as a frame
+  another SIA key encrypted.
 - `archive_days`, `cloud_fragments`, `cloud_metadata_fragments`, `cloud_archive`, `cloud_metadata` and
   `export_archive`: a channel's recorded days, the cloud archive's fragments and their addresses, and exports.
 - `take_photo(device)`: a MotionCam's photo on demand, sent as the app names the camera's family;

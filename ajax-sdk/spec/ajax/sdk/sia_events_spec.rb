@@ -32,6 +32,28 @@ RSpec.describe Ajax::Sdk, '.sia_events' do
     expect { TCPServer.new('127.0.0.1', port).close }.not_to raise_error
   end
 
+  it 'hands the frames its receiver refuses to refused', :aggregate_failures do
+    refusals = Queue.new
+    reader = Thread.new { described_class.sia_events(refused: ->(refusal) { refusals << refusal }).first(1) }
+
+    send_when_listening(sia_frame('"SIA-DCS"0001L0#BBB[#BBB|Nri2/BA7]'))
+    send_when_listening(sia_frame('"SIA-DCS"0002L0#AAA[#AAA|Nri2/BA7]'))
+
+    expect(refusals.pop(timeout: 1)).to have_attributes(reply: :duh)
+    expect(reader.value.first).to have_attributes(code: 'BA')
+  end
+
+  it 'calls refused on its own thread, which gets what refused raises' do
+    reader = Thread.new { described_class.sia_events(refused: ->(_) { raise 'refused' }).first(1) }
+    reader.report_on_exception = false
+
+    send_when_listening(sia_frame('"SIA-DCS"0001L0#BBB[#BBB|Nri2/BA7]'))
+
+    expect { reader.join(2) }.to raise_error(RuntimeError, 'refused')
+  ensure
+    reader&.kill
+  end
+
   it 'refuses to start without an account' do
     described_class.configure { |config| config.sia_account = nil }
 

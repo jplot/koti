@@ -11,13 +11,14 @@ module Ajax
         @account: String
         @cipher: Cipher?
         @timeband: [Integer, Integer]
+        @refused: _RefusalHandler?
         @handler: ^(Event) -> void
         @clients: Hash[TCPSocket, [String, Thread]]
         @mutex: Thread::Mutex
         @server: TCPServer
         @acceptor: Thread
 
-        def initialize: (host: String, port: Integer, account: String, key: String?, timeband: [Integer, Integer]) { (Event) -> void } -> void
+        def initialize: (host: String, port: Integer, account: String, key: String?, timeband: [Integer, Integer], ?refused: _RefusalHandler?) { (Event) -> void } -> void
         def start: () -> self
         def port: () -> Integer
         def stop: () -> void
@@ -28,8 +29,9 @@ module Ajax
         def admit: (TCPSocket socket) -> void
         def finish: (Thread thread) -> void
         def serve: (TCPSocket socket) -> nil
-        def receive: (TCPSocket socket) -> Event?
-        def answer: (String frame) -> [String?, Event?]
+        def receive: (TCPSocket socket) -> (Event | Refusal)?
+        def answer: (String frame) -> [String?, (Event | Refusal)?]
+        def mismatch: (Message message) -> String?
         def timely?: (Time? time) -> bool
       end
     end

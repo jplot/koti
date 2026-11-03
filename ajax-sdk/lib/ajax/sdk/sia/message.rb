@@ -63,6 +63,8 @@ module Ajax
           raise FrameError, 'encrypted part is not whole AES blocks' unless hex.match?(/\A(?:\h{32})+\z/)
 
           plain = cipher.decrypt(hex)
+          raise FrameError, 'the key does not open this frame' unless plain.match?(STAMP)
+
           plain = if plain.include?('|') then plain.split('|', 2).fetch(1)
                   elsif type == 'NULL' then plain[/\].*\z/m].to_s
                   else raise FrameError, 'no pipe after the padding of a data frame'

@@ -2,8 +2,8 @@ module Ajax
   module Sdk
     extend Configuration
 
-    def self.sia_events: () -> Enumerator::Lazy[Sia::Event, void]
-                       | () { (Sia::Event) -> void } -> bot
-    def self.sia_receiver: () { (Sia::Event) -> void } -> Sia::Receiver
+    def self.sia_events: (?refused: Sia::_RefusalHandler?) -> Enumerator::Lazy[Sia::Event, void]
+                       | (?refused: Sia::_RefusalHandler?) { (Sia::Event) -> void } -> bot
+    def self.sia_receiver: (Sia::_RefusalHandler? refused) { (Sia::Event) -> void } -> Sia::Receiver
   end
 end

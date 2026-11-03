@@ -47,6 +47,20 @@ RSpec.describe Ajax::Sdk::Sia::Message do
     expect { described_class.parse(frame, cipher:) }.to raise_error(Ajax::Sdk::Sia::FrameError)
   end
 
+  # Under the wrong key, the 10:00 frame decrypts to noise without a pipe, the 12:30 one to noise with one.
+  it 'names a frame another key encrypted the same way, whatever its noise holds' do
+    frames = [Time.utc(2026, 11, 3, 10), Time.utc(2026, 11, 3, 12, 30)].map do |time|
+      encrypted_sia_frame('SIA-DCS', '#AAA|Nri1/BA3', key: 'FEDCBA9876543210', time:)
+    end
+    expect(frames.map { reason(it) }).to all(eq('the key does not open this frame'))
+  end
+
+  def reason(frame)
+    described_class.parse(frame, cipher:)
+  rescue Ajax::Sdk::Sia::FrameError => e
+    e.message
+  end
+
   it 'rejects an encrypted data frame without the pipe that ends its padding' do
     frame = sia_frame(%("*SIA-DCS"0001R0L0#AAA[#{sia_encrypt("]#{sia_stamp}".rjust(32, '0'))}))
 

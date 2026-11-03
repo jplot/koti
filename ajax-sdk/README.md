@@ -64,6 +64,17 @@ no receiver runs, the hub reports the monitoring station as lost. The ACK goes o
 is queued, so events still queued when `sia_events` stops are lost to koti, though the hub counts them
 as delivered.
 
+Given `refused:`, the receiver hands each frame it refuses to that callable, as a `Sia::Refusal`: the
+frame, the reply (`:duh`, `:nak`, or nil when it answered nothing) and the reason. A hub set with
+another key sends frames the receiver cannot open and answers nothing to: without `refused:` it looks
+like a silent hub. Logging or alerting on a refusal is the caller's choice. `sia_events` calls `refused`
+on the caller's thread, as its block, so what it raises stops the receiver; `Sia::Receiver` calls it on
+the connection's thread, after the reply, as its own block.
+
+```ruby
+Ajax::Sdk.sia_events(refused: ->(refusal) { warn refusal.reason }) { |event| p event }
+```
+
 Set a key. Without one, any device on the network can send events the receiver accepts. With one, a
 device on the network cannot make up an event, but a device placed between the hub and koti can still
 replay or alter frames: DC-09 encrypts without authenticating.

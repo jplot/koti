@@ -1,0 +1,17 @@
+module Ajax
+  module Sdk
+    module Sia
+      interface _RefusalHandler
+        def call: (Refusal refusal) -> void
+      end
+
+      class Refusal < Data
+        attr_reader frame: String
+        attr_reader reply: (:duh | :nak)?
+        attr_reader reason: String
+
+        def self.new: (frame: String, reply: (:duh | :nak)?, reason: String) -> Refusal
+      end
+    end
+  end
+end

@@ -80,6 +80,84 @@ RSpec.describe Ajax::Sdk::Sia::Receiver do
     end
   end
 
+  context 'with a callback for refused frames' do
+    subject(:receiver) do
+      described_class.new(host: '127.0.0.1', port: 0, account: 'AAA', key:, timeband: [40, 20],
+                          refused: ->(refusal) { refusals << refusal }, &handler).start
+    end
+
+    let(:refusals) { Queue.new }
+
+    def refusal(frame) = exchange(frame).then { refusals.pop(timeout: 1) }
+
+    it 'hands it a frame of another account, answered DUH' do
+      frame = sia_frame('"SIA-DCS"0001L0#BBB[#BBB|Nri1/XC12]')
+      expect(refusal(frame)).to eq(Ajax::Sdk::Sia::Refusal.new(frame:, reply: :duh, reason: 'another account: BBB'))
+    end
+
+    it 'hands it an encrypted frame, answered DUH without a key' do
+      expect(refusal(encrypted_sia_frame('SIA-DCS', '#AAA|Nri1/BA3')))
+        .to have_attributes(reply: :duh, reason: 'an encrypted frame without a key')
+    end
+
+    it 'hands it a frame outside the time band, answered NAK' do
+      late = sia_frame("\"SIA-DCS\"0002L0#AAA[#AAA|Nri1/BA3]#{sia_stamp(Time.now - 120)}")
+      expect(refusal(late)).to have_attributes(frame: late, reply: :nak, reason: 'a timestamp outside the time band')
+    end
+
+    it 'hands it a frame it cannot read, answered nothing' do
+      corrupt = sia_frame('"SIA-DCS"0004L0#AAA[#AAA|Nri1/BA3]').sub(/\A\n\h{4}/, "\n0000")
+      expect(refusal(corrupt)).to have_attributes(reply: nil, reason: 'CRC mismatch')
+    end
+
+    it 'hands it nothing for a frame it accepts' do
+      expect(refusal(sia_frame('"SIA-DCS"0003L0#AAA[#AAA|Nri1/BA3]'))).to be_nil
+    end
+
+    context 'with a key' do
+      let(:key) { SiaFrames::KEY }
+
+      it 'hands it a frame another key encrypted, answered nothing' do
+        expect(refusal(encrypted_sia_frame('SIA-DCS', '#AAA|Nri1/BA3', key: 'FEDCBA9876543210')))
+          .to have_attributes(reply: nil, reason: 'the key does not open this frame')
+      end
+
+      it 'hands it a clear frame, answered DUH' do
+        expect(refusal(sia_frame('"SIA-DCS"0006L0#AAA[#AAA|Nri1/BA3]')))
+          .to have_attributes(reply: :duh, reason: 'a clear frame while a key is set')
+      end
+    end
+  end
+
+  context 'when the callback for refused frames raises' do
+    subject(:receiver) do
+      described_class.new(host: '127.0.0.1', port: 0, account: 'AAA', key:, timeband: [40, 20],
+                          refused: ->(_) { raise(IOError, 'refused io') }, &handler).start
+    end
+
+    let(:threads) { Queue.new }
+
+    before do
+      allow(Thread).to receive(:new).and_wrap_original do |original, &body|
+        original.call do
+          threads << Thread.current
+          Thread.current.report_on_exception = false
+          body.call
+        end
+      end
+    end
+
+    it 'leaves the error to the thread of that connection, after the DUH', :aggregate_failures do
+      socket = TCPSocket.new('127.0.0.1', receiver.port)
+      socket.write(sia_frame('"SIA-DCS"0001L0#BBB[#BBB|Nri1/XC12]'))
+      answers = [socket.gets("\r"), socket.wait_readable(1) && socket.read]
+      expect(answers).to eq([sia_frame('"DUH"0001L0#BBB[]'), ''])
+      expect { Array.new(2) { threads.pop }.last.join(1) }.to raise_error(IOError, 'refused io')
+    ensure
+      socket&.close
+    end
+  end
+
   it 'acknowledges a frame whose text is not UTF-8', :aggregate_failures do
     frame = sia_frame("\"SIA-DCS\"0009L0#AAA[#AAA|Nri1/BA3 Entr\xE9e]".b)
 

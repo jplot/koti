@@ -1,0 +1,930 @@
+{
+  "scripts": {
+    "fd60fcd1-4809-4813-b510-4a18856a595c": {
+      "name": "coming_home",
+      "configuration": "ComingHomeConfiguration"
+    },
+    "7e571ac6-f363-42e1-809a-4cbf6523ed72": {
+      "name": "go_to_sleep",
+      "configuration": "GoToSleepConfiguration"
+    },
+    "0194752a-2d53-4f92-8209-dfdc52745af3": {
+      "name": "leaving_home",
+      "configuration": "LeavingHomeConfiguration"
+    },
+    "db06cabc-c752-4904-9e8f-4ebe98feaa1a": {
+      "name": "pm_automation",
+      "configuration": "PmAutomationConfiguration"
+    },
+    "58f97610-b471-4c94-a27d-4d55bcd8c197": {
+      "name": "smoke_alarm",
+      "configuration": "SmokeAlarmConfiguration"
+    },
+    "7719b841-6b3d-448d-a0e7-601ae9edb6a2": {
+      "name": "state_after_streaming",
+      "configuration": "StateAfterStreamingConfiguration"
+    },
+    "7238c707-8693-4f19-9095-ccdc1444d228": {
+      "name": "time_based",
+      "configuration": "TimeBasedConfiguration"
+    },
+    "e73bc72d-96b1-46f8-aa57-729861f80c78": {
+      "name": "timer",
+      "configuration": "TimerConfiguration"
+    },
+    "ff8957e3-2eb9-4699-a0c8-ad2cb3ede704": {
+      "name": "wake_up",
+      "configuration": "WakeUpConfiguration"
+    },
+    "a5624529-bd7e-4bc8-9d2f-9200476f106e": {
+      "name": "native_go_to_sleep",
+      "configuration": "GoToSleepConfiguration"
+    }
+  },
+  "resources": {
+    "behavior_instance": {
+      "update": "BehaviorInstanceUpdate",
+      "create": "BehaviorInstanceAdd"
+    }
+  },
+  "overrides": {
+    "BehaviorInstance": {
+      "configuration": {
+        "type": "BehaviorConfiguration"
+      },
+      "state": {
+        "type": {
+          "class": "BehaviorState"
+        }
+      }
+    }
+  },
+  "classes": {
+    "BehaviorBlink": {
+      "origin": "BridgeBehaviorBlink",
+      "kind": "behavior",
+      "fields": {}
+    },
+    "BehaviorDependee": {
+      "origin": "BridgeBehaviorDependee",
+      "kind": "behavior",
+      "fields": {
+        "target": {
+          "type": {
+            "class": "BehaviorResource"
+          },
+          "required": true
+        }
+      }
+    },
+    "BehaviorFadeDuration": {
+      "origin": "BridgeBehaviorFadeDuration",
+      "kind": "behavior",
+      "fields": {
+        "seconds": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "BehaviorGroup": {
+      "origin": "BridgeBehaviorGroup",
+      "kind": "behavior",
+      "fields": {
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_home",
+            "room",
+            "zone",
+            "service_group",
+            "light",
+            "scene",
+            "smart_scene",
+            "recipe",
+            "device",
+            "entertainment_configuration",
+            "button",
+            "relative_rotary",
+            "motion",
+            "grouped_motion",
+            "camera_motion",
+            "light_level",
+            "grouped_light_level",
+            "grouped_light",
+            "temperature",
+            "contact",
+            "tamper",
+            "motion_area_configuration",
+            "convenience_area_motion",
+            "security_area_motion",
+            "behavior_instance",
+            "speaker"
+          ]
+        },
+        "rid": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "BehaviorGroupAndLights": {
+      "origin": "BridgeBehaviorGroupAndLights",
+      "kind": "behavior",
+      "fields": {
+        "group": {
+          "type": {
+            "class": "BehaviorGroup"
+          },
+          "required": true
+        },
+        "items": {
+          "type": {
+            "list": {
+              "class": "BehaviorLight"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "BehaviorGroupScene": {
+      "origin": "BridgeBehaviorGroupScene",
+      "kind": "behavior",
+      "fields": {
+        "group": {
+          "type": {
+            "class": "BehaviorGroup"
+          },
+          "required": true
+        },
+        "items": {
+          "type": {
+            "list": {
+              "class": "BehaviorLight"
+            }
+          },
+          "required": false
+        },
+        "recall": {
+          "type": {
+            "class": "BehaviorRecall"
+          },
+          "required": false
+        },
+        "actions": {
+          "type": {
+            "list": "Object"
+          },
+          "required": false
+        },
+        "blink": {
+          "type": {
+            "class": "BehaviorBlink"
+          },
+          "required": false
+        }
+      }
+    },
+    "BehaviorInstanceAdd": {
+      "origin": "BridgeBehavior",
+      "kind": "add",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "behavior_instance"
+          ]
+        },
+        "script_id": {
+          "type": "String",
+          "required": true
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "configuration": {
+          "type": "BehaviorConfiguration",
+          "required": true
+        },
+        "metadata": {
+          "type": {
+            "class": "BehaviorMetadata"
+          },
+          "required": false
+        },
+        "dependees": {
+          "type": {
+            "list": {
+              "class": "BehaviorDependee"
+            }
+          },
+          "required": false
+        },
+        "migrated_from": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "BehaviorInstanceUpdate": {
+      "origin": "BridgeBehavior",
+      "kind": "update",
+      "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "configuration": {
+          "type": "BehaviorConfiguration",
+          "required": false
+        },
+        "metadata": {
+          "type": {
+            "class": "BehaviorMetadata"
+          },
+          "required": false
+        },
+        "trigger": {
+          "type": {
+            "class": "BehaviorTrigger"
+          },
+          "required": false
+        }
+      }
+    },
+    "BehaviorLight": {
+      "origin": "BridgeBehaviorLight",
+      "kind": "behavior",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_home",
+            "room",
+            "zone",
+            "service_group",
+            "light",
+            "scene",
+            "smart_scene",
+            "recipe",
+            "device",
+            "entertainment_configuration",
+            "button",
+            "relative_rotary",
+            "motion",
+            "grouped_motion",
+            "camera_motion",
+            "light_level",
+            "grouped_light_level",
+            "grouped_light",
+            "temperature",
+            "contact",
+            "tamper",
+            "motion_area_configuration",
+            "convenience_area_motion",
+            "security_area_motion",
+            "behavior_instance",
+            "speaker"
+          ]
+        }
+      }
+    },
+    "BehaviorMetadata": {
+      "origin": "BridgeBehaviorMetadata",
+      "kind": "behavior",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": false
+        },
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "BehaviorRecall": {
+      "origin": "BridgeBehaviorRecall",
+      "kind": "behavior",
+      "fields": {
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_home",
+            "room",
+            "zone",
+            "service_group",
+            "light",
+            "scene",
+            "smart_scene",
+            "recipe",
+            "device",
+            "entertainment_configuration",
+            "button",
+            "relative_rotary",
+            "motion",
+            "grouped_motion",
+            "camera_motion",
+            "light_level",
+            "grouped_light_level",
+            "grouped_light",
+            "temperature",
+            "contact",
+            "tamper",
+            "motion_area_configuration",
+            "convenience_area_motion",
+            "security_area_motion",
+            "behavior_instance",
+            "speaker"
+          ]
+        },
+        "rid": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "BehaviorResource": {
+      "origin": "BridgeBehaviorResource",
+      "kind": "behavior",
+      "fields": {
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "bridge_home",
+            "room",
+            "zone",
+            "service_group",
+            "light",
+            "scene",
+            "smart_scene",
+            "recipe",
+            "device",
+            "entertainment_configuration",
+            "button",
+            "relative_rotary",
+            "motion",
+            "grouped_motion",
+            "camera_motion",
+            "light_level",
+            "grouped_light_level",
+            "grouped_light",
+            "temperature",
+            "contact",
+            "tamper",
+            "motion_area_configuration",
+            "convenience_area_motion",
+            "security_area_motion",
+            "behavior_instance",
+            "speaker"
+          ]
+        },
+        "rid": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "BehaviorState": {
+      "origin": "BridgeBehaviorState",
+      "kind": "behavior",
+      "fields": {
+        "pm_state": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "started",
+            "stopped"
+          ]
+        },
+        "timer_state": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "started",
+            "paused",
+            "stopped"
+          ]
+        },
+        "next_trigger_time": {
+          "type": "String",
+          "required": false
+        },
+        "gts_state": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "started",
+            "stopped"
+          ]
+        },
+        "fade_end_time": {
+          "type": "String",
+          "required": false
+        },
+        "smoke_alarm_state": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "started",
+            "stopped"
+          ]
+        }
+      }
+    },
+    "BehaviorStreamingEndScene": {
+      "origin": "BridgeBehaviorStreamingEndScene",
+      "kind": "behavior",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "BehaviorTimePoint": {
+      "origin": "BridgeBehaviorTimePoint",
+      "kind": "behavior",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "time",
+            "sunset",
+            "sunrise"
+          ]
+        },
+        "offset": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": false
+        },
+        "time": {
+          "type": {
+            "class": "TimeStamp"
+          },
+          "required": false
+        }
+      }
+    },
+    "BehaviorTimePointWithTransition": {
+      "origin": "BridgeBehaviorTimePointWithTransition",
+      "kind": "behavior",
+      "fields": {
+        "time_point": {
+          "type": {
+            "class": "BehaviorTimePoint"
+          },
+          "required": true
+        },
+        "transition": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": false
+        }
+      }
+    },
+    "BehaviorTrigger": {
+      "origin": "BridgeBehaviorTrigger",
+      "kind": "update",
+      "fields": {
+        "start": {
+          "type": "Hash",
+          "required": false
+        },
+        "stop": {
+          "type": "Hash",
+          "required": false
+        }
+      }
+    },
+    "BehaviorWhen": {
+      "origin": "BridgeBehaviorWhen",
+      "kind": "behavior",
+      "fields": {
+        "time_point": {
+          "type": {
+            "class": "BehaviorTimePoint"
+          },
+          "required": true
+        },
+        "recurrence_days": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        },
+        "randomization": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": false
+        }
+      }
+    },
+    "BehaviorWhenConstrained": {
+      "origin": "BridgeBehaviorWhenConstrained",
+      "kind": "behavior",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "always",
+            "nighttime",
+            "between"
+          ]
+        },
+        "start": {
+          "type": {
+            "class": "TimeStamp"
+          },
+          "required": false
+        },
+        "end": {
+          "type": {
+            "class": "TimeStamp"
+          },
+          "required": false
+        }
+      }
+    },
+    "BehaviorWhenExtended": {
+      "origin": "BridgeBehaviorWhenExtended",
+      "kind": "behavior",
+      "fields": {
+        "start_at": {
+          "type": {
+            "class": "BehaviorTimePointWithTransition"
+          },
+          "required": true
+        },
+        "end_at": {
+          "type": {
+            "class": "BehaviorTimePointWithTransition"
+          },
+          "required": false
+        },
+        "recurrence_days": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday"
+          ]
+        },
+        "randomization": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": false
+        }
+      }
+    },
+    "ComingHomeConfiguration": {
+      "origin": "coming_home",
+      "kind": "behavior",
+      "fields": {
+        "when_constrained": {
+          "type": {
+            "class": "BehaviorWhenConstrained"
+          },
+          "required": true
+        },
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "what": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupScene"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "GoToSleepConfiguration": {
+      "origin": "go_to_sleep",
+      "kind": "behavior",
+      "fields": {
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "fade_out_duration": {
+          "type": {
+            "class": "BehaviorFadeDuration"
+          },
+          "required": true
+        },
+        "when": {
+          "type": {
+            "class": "BehaviorWhen"
+          },
+          "required": true
+        },
+        "style": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "sunset",
+            "basic"
+          ]
+        },
+        "end_state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "turn_off",
+            "nightlight",
+            "minimum_brightness"
+          ]
+        }
+      }
+    },
+    "LeavingHomeConfiguration": {
+      "origin": "leaving_home",
+      "kind": "behavior",
+      "fields": {
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "what": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupScene"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "PmAutomationConfiguration": {
+      "origin": "pm_automation",
+      "kind": "behavior",
+      "fields": {
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "mode": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "24h",
+            "nighttime"
+          ]
+        },
+        "excluded_lights": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "turn_off",
+            "do_nothing"
+          ]
+        },
+        "end_state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "turn_off",
+            "do_nothing"
+          ]
+        }
+      }
+    },
+    "SmokeAlarmConfiguration": {
+      "origin": "smoke_alarm",
+      "kind": "behavior",
+      "fields": {
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "StateAfterStreamingConfiguration": {
+      "origin": "state_after_streaming",
+      "kind": "behavior",
+      "fields": {
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "end_state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "do_nothing",
+            "last_state",
+            "off",
+            "scene"
+          ]
+        },
+        "end_scene": {
+          "type": {
+            "class": "BehaviorStreamingEndScene"
+          },
+          "required": false
+        }
+      }
+    },
+    "TimeBasedConfiguration": {
+      "origin": "time_based",
+      "kind": "behavior",
+      "fields": {
+        "when_extended": {
+          "type": {
+            "class": "BehaviorWhenExtended"
+          },
+          "required": true
+        },
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "what": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupScene"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "TimeSpan": {
+      "origin": "TimeSpan",
+      "kind": "behavior",
+      "fields": {
+        "hours": {
+          "type": "Numeric",
+          "required": false
+        },
+        "minutes": {
+          "type": "Numeric",
+          "required": false
+        },
+        "seconds": {
+          "type": "Numeric",
+          "required": false
+        },
+        "milliseconds": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "TimeStamp": {
+      "origin": "TimeStamp",
+      "kind": "behavior",
+      "fields": {
+        "hour": {
+          "type": "Numeric",
+          "required": true
+        },
+        "minute": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "TimerConfiguration": {
+      "origin": "timer",
+      "kind": "behavior",
+      "fields": {
+        "duration": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": true
+        },
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "what": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupScene"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "WakeUpConfiguration": {
+      "origin": "wake_up",
+      "kind": "behavior",
+      "fields": {
+        "where": {
+          "type": {
+            "list": {
+              "class": "BehaviorGroupAndLights"
+            }
+          },
+          "required": true
+        },
+        "when": {
+          "type": {
+            "class": "BehaviorWhen"
+          },
+          "required": true
+        },
+        "style": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "sunrise",
+            "basic"
+          ]
+        },
+        "end_brightness": {
+          "type": "Numeric",
+          "required": false
+        },
+        "turn_lights_off_after": {
+          "type": {
+            "class": "TimeSpan"
+          },
+          "required": false
+        },
+        "fade_in_duration": {
+          "type": {
+            "class": "BehaviorFadeDuration"
+          },
+          "required": true
+        }
+      }
+    }
+  }
+}

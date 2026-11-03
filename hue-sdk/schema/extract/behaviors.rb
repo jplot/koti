@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'yaml'
 require_relative 'classes'
 require_relative 'responses'
 
@@ -108,6 +109,145 @@ module Schema
       def held(decoded)
         items = decoded['items']
         decoded['class'] || (items unless Types.primitive(items) || @snapshot.enum_values(items))
+      end
+    end
+
+    # The configuration of each automation script. The app has no class for one: the steps of its definition, in the
+    # assets of the APK, name its keys, and the type of a step gives the value it writes (BehaviorEncoder).
+    class BehaviorScripts
+      STEPS = {
+        'lights_selection' => { 'list' => { 'class' => 'BehaviorGroupAndLights' } },
+        'scene_selection' => { 'list' => { 'class' => 'BehaviorGroupScene' } },
+        'time_and_recurrence_selection' => { 'class' => 'BehaviorWhen' },
+        'when_extended_selection' => { 'class' => 'BehaviorWhenExtended' },
+        'when_selection' => { 'class' => 'BehaviorWhenConstrained' },
+        'fade_selection' => { 'class' => 'BehaviorFadeDuration' },
+        'duration_selection' => { 'class' => 'TimeSpan' },
+        'lights_off_after_selection' => { 'class' => 'TimeSpan' },
+        'streaming_end_scene_selection' => { 'class' => 'BehaviorStreamingEndScene' },
+        'end_state_selection' => 'String',
+        'streaming_end_state_selection' => 'String',
+        'option_selection_step' => 'String',
+        'brightness_selection' => 'Numeric'
+      }.freeze
+      ENUMS = { 'end_state_selection' => 'BridgeBehaviorEndStateType',
+                'streaming_end_state_selection' => 'BridgeBehaviorStreamingEndStateType' }.freeze
+      # Switching the first off omits its key; only the end state +scene+ uses the second.
+      OPTIONAL = %w[lights_off_after_selection streaming_end_scene_selection].freeze
+      # Without a definition in the assets; the bridge gives it the same +$ref+ as go to sleep.
+      NATIVE = { 'a5624529-bd7e-4bc8-9d2f-9200476f106e' => { 'name' => 'native_go_to_sleep',
+                                                             'configuration' => 'GoToSleepConfiguration' } }.freeze
+
+      # @param directory [String] the +behaviors+ folder of the assets of the APK
+      # @param snapshot [Snapshot]
+      def initialize(directory, snapshot)
+        @directory = directory
+        @snapshot = snapshot
+      end
+
+      # @return [Hash] +scripts+ by uuid, and +classes+ by name
+      # @raise [ArgumentError] for a step type this reader does not know
+      def read
+        scripts = definitions.to_h { |name, definition| [definition.fetch('script_id'), script(name)] }
+        classes = definitions.to_h { |name, definition| [class_name(name), configuration(name, definition)] }
+        { 'scripts' => scripts.merge(NATIVE), 'classes' => classes }
+      end
+
+      private
+
+      def definitions
+        @definitions ||= Dir[File.join(@directory, '*', 'behavior.yaml')].to_h do |path|
+          [File.basename(File.dirname(path)), YAML.load_file(path)]
+        end
+      end
+
+      def script(name) = { 'name' => name, 'configuration' => class_name(name) }
+
+      def class_name(name) = "#{name.split('_').map(&:capitalize).join}Configuration"
+
+      def configuration(name, definition)
+        created = steps(definition['creation'])
+        edited = steps(definition['editing'])
+        fields = (created.keys | edited.keys).to_h { [it, field(created[it], edited[it])] }
+        { 'origin' => name, 'kind' => 'behavior', 'fields' => fields }
+      end
+
+      def steps(list)
+        Array(list).each_with_object({}) do |step, found|
+          found.merge!(steps(step['steps']), steps([step.dig('configuration', 'fade_selection_step')].compact))
+          found[step['result_name']] = step if step['result_name']
+        end
+      end
+
+      def field(created, edited)
+        type = (created || edited).fetch('step_type')
+        field = { 'type' => STEPS.fetch(type) { raise ArgumentError, "unknown step #{type}" },
+                  'required' => required?(created) }
+        values = values(type, [created, edited].compact)
+        values.empty? ? field : field.merge('values' => values)
+      end
+
+      def required?(step)
+        return false unless step
+
+        options = step.fetch('options', [])
+        !step['required_feature'] && !OPTIONAL.include?(step['step_type']) && options.none? { it['required_feature'] }
+      end
+
+      def values(type, steps)
+        return @snapshot.enum_values(ENUMS[type]).to_a if ENUMS[type]
+
+        steps.flat_map { it.fetch('options', []) }.map { it.fetch('value') }.uniq
+      end
+    end
+
+    # What behaviors.json holds besides what the app's code and definitions give by rule. The app builds its requests
+    # by hand (BehaviorEncoder.toBridgeBehavior, toBridgeBehaviorPartial, BridgeBehaviorControlLib.triggerBehavior).
+    module BehaviorSchema
+      ROOTS = %w[BridgeBehaviorGroupAndLights BridgeBehaviorGroupScene BridgeBehaviorWhen BridgeBehaviorWhenExtended
+                 BridgeBehaviorWhenConstrained TimeSpan BridgeBehaviorFadeDuration BridgeBehaviorStreamingEndScene
+                 BridgeBehaviorState BridgeBehaviorMetadata BridgeBehaviorDependee].freeze
+      REQUESTS = {
+        'BehaviorInstanceAdd' => {
+          'origin' => 'BridgeBehavior', 'kind' => 'add',
+          'fields' => {
+            'type' => { 'type' => 'String', 'required' => false, 'values' => ['behavior_instance'] },
+            'script_id' => { 'type' => 'String', 'required' => true },
+            'enabled' => { 'type' => 'Boolean', 'required' => true },
+            'configuration' => { 'type' => 'BehaviorConfiguration', 'required' => true },
+            'metadata' => { 'type' => { 'class' => 'BehaviorMetadata' }, 'required' => false },
+            'dependees' => { 'type' => { 'list' => { 'class' => 'BehaviorDependee' } }, 'required' => false },
+            'migrated_from' => { 'type' => 'String', 'required' => false }
+          }
+        },
+        'BehaviorInstanceUpdate' => {
+          'origin' => 'BridgeBehavior', 'kind' => 'update',
+          'fields' => {
+            'enabled' => { 'type' => 'Boolean', 'required' => false },
+            'configuration' => { 'type' => 'BehaviorConfiguration', 'required' => false },
+            'metadata' => { 'type' => { 'class' => 'BehaviorMetadata' }, 'required' => false },
+            'trigger' => { 'type' => { 'class' => 'BehaviorTrigger' }, 'required' => false }
+          }
+        },
+        'BehaviorTrigger' => {
+          'origin' => 'BridgeBehaviorTrigger', 'kind' => 'update',
+          'fields' => { 'start' => { 'type' => 'Hash', 'required' => false },
+                        'stop' => { 'type' => 'Hash', 'required' => false } }
+        }
+      }.freeze
+      RESOURCES = { 'behavior_instance' => { 'update' => 'BehaviorInstanceUpdate',
+                                             'create' => 'BehaviorInstanceAdd' } }.freeze
+      OVERRIDES = { 'BehaviorInstance' => { 'configuration' => { 'type' => 'BehaviorConfiguration' },
+                                            'state' => { 'type' => { 'class' => 'BehaviorState' } } } }.freeze
+
+      module_function
+
+      # @param scripts [Hash] what {BehaviorScripts#read} returns
+      # @param classes [Hash{String=>Hash}] what {BehaviorClasses#read} returns
+      # @return [Hash] the content of behaviors.json
+      def compose(scripts:, classes:)
+        { 'scripts' => scripts.fetch('scripts'), 'resources' => RESOURCES, 'overrides' => OVERRIDES,
+          'classes' => classes.merge(scripts.fetch('classes'), REQUESTS).sort.to_h }
       end
     end
   end

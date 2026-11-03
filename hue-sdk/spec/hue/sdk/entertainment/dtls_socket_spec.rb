@@ -10,7 +10,11 @@ RSpec.describe Hue::Sdk::Entertainment::DtlsSocket do
   let(:key) { '0123456789abcdef0123456789abcdef' }
   let(:port) { UDPSocket.new.tap { it.bind('127.0.0.1', 0) }.then { |socket| socket.addr[1].tap { socket.close } } }
 
+  let(:relays) { [] }
+
   before { skip "#{openssl} not found" unless system(openssl, 'version', out: File::NULL, err: File::NULL) }
+
+  after { relays.each(&:kill) }
 
   def serve(server_key = key)
     command = [openssl, 's_server', '-dtls1_2', '-nocert', '-psk', server_key, '-psk_identity', identity,
@@ -29,7 +33,33 @@ RSpec.describe Hue::Sdk::Entertainment::DtlsSocket do
     buffer
   end
 
-  def connect(psk: [key].pack('H*')) = described_class.open(host: '127.0.0.1', port:, identity:, psk:)
+  def connect(psk: [key].pack('H*'), to: port) = described_class.open(host: '127.0.0.1', port: to, identity:, psk:)
+
+  def timed
+    start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    yield
+    Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+  end
+
+  # Forwards datagrams between the client and the server, losing the client's first +lost+ ones.
+  def relay(lost)
+    front = UDPSocket.new.tap { it.bind('127.0.0.1', 0) }
+    back = UDPSocket.new.tap { it.connect('127.0.0.1', port) }
+    relays << Thread.new { forward(front, back, lost) }
+    front.addr[1]
+  end
+
+  def forward(front, back, lost)
+    client = nil
+    loop do
+      IO.select([front, back]).first.each do |io|
+        next front.send(back.recv(65_535), 0, client[3], client[1]) if io == back
+
+        data, client = front.recvfrom(65_535)
+        back.send(data, 0) if (lost -= 1).negative?
+      end
+    end
+  end
 
   it 'handshakes with an OpenSSL PSK server' do
     received = serve do |output|
@@ -43,6 +73,17 @@ RSpec.describe Hue::Sdk::Entertainment::DtlsSocket do
     serve('fedcba9876543210fedcba9876543210') do
       expect { connect }.to raise_error(Hue::Sdk::ConnectionError, /127\.0\.0\.1:\d+: DTLS handshake failed/)
     end
+  end
+
+  it 'sends its first flight again a second after losing it' do
+    elapsed = serve { timed { connect(to: relay(1)).close } }
+    expect(elapsed).to be_between(0.9, 2)
+  end
+
+  it 'gives up 5 seconds after a host that never answers', :aggregate_failures do
+    silent = UDPSocket.new.tap { it.bind('127.0.0.1', 0) }
+    elapsed = timed { expect { connect(to: silent.addr[1]) }.to raise_error(Hue::Sdk::ConnectionError) }
+    expect(elapsed).to be_between(4.9, 6)
   end
 
   it 'raises ConnectionError when nothing answers' do

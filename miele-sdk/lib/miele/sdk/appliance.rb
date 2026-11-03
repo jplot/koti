@@ -169,9 +169,15 @@ module Miele
       #
       # @param path [String] absolute path
       # @return [Hash{String=>Object}]
+      # @raise [ResponseError] if the answer has no body
       # @raise [Error] see {Connection.request}
       # @api public
-      def get(path) = JSON.parse(send_request(:get, path).body)
+      def get(path)
+        answer = send_request(:get, path)
+        raise ResponseError.new(answer.status, "#{path} answered #{answer.status} without a body") if answer.body.empty?
+
+        JSON.parse(answer.body)
+      end
 
       # @return [Boolean] whether its +/Devices/+ requests go through the cloud
       # @api public

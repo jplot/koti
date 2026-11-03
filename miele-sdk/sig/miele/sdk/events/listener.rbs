@@ -30,7 +30,7 @@ module Miele
 
         def close: (Exception? error) -> void
 
-        def withdraw: (Appliance appliance) -> Error?
+        def withdraw: (Appliance appliance) -> StandardError?
 
         def local_address: () -> String
       end

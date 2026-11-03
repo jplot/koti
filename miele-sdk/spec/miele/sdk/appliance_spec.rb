@@ -72,6 +72,15 @@ RSpec.describe Miele::Sdk::Appliance do
     end
   end
 
+  context 'when the appliance answers a read without a body' do
+    let(:fake) { FakeAppliance.start { [204, {}, ''] } }
+
+    it 'raises ResponseError, as a read needs a body' do
+      expect { appliance.get('/Subscriptions/') }
+        .to raise_error(Miele::Sdk::ResponseError, '/Subscriptions/ answered 204 without a body')
+    end
+  end
+
   it 'reads its state' do
     resources["/Devices/#{fab}/State"] = { 'Status' => 1, 'ProgramPhase' => 3329 }
     expect([appliance.state.status, appliance.state.program_phase]).to eq(%i[off heating_up_phase])

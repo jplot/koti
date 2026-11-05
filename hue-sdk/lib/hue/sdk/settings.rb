@@ -39,6 +39,8 @@ module Hue
       #
       # @return [Settings]
       # @raise [AuthenticationError] if no application key is configured or the bridge rejects it
+      # @raise [ConnectionError] if no host is configured or the bridge cannot be reached
+      # @raise [TLSError] if the bridge certificate is not trusted
       # @raise [ResponseError] if the bridge refuses
       # @api public
       def self.read

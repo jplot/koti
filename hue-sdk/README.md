@@ -274,6 +274,9 @@ settings.update(http_blocked: true)              # refuse plain HTTP
 settings.update(analytics_consent: false)        # do not share statistics
 ```
 
+`update` returns the settings with the values written, as the app keeps them. Only `http_blocked` is read back, as the
+app does: it stays nil on a bridge that does not report it, and keeps its value if that read fails.
+
 `remote_access` can only be read, as the app sets it when pairing. The network of the bridge and its software updates,
 which the app also writes there, stay out of the SDK, and so do the application keys of other clients, which the same
 answer holds. The SDK never wrote these settings on a real bridge.

@@ -259,8 +259,8 @@ these requests by hand; their fields come from its code. Only `coming_home`, `go
 
 ## Bridge settings
 
-CLIP v2 only reports the time zone of the bridge. The Hue app reads and writes its settings over CLIP v1, and so does
-`Hue::Sdk.settings`.
+CLIP v2 only reports the time zone of the bridge. The Hue app reads it there, reads the other settings over CLIP v1 and
+writes them all over CLIP v1, and so does `Hue::Sdk.settings`.
 
 ```ruby
 settings = Hue::Sdk.settings
@@ -268,11 +268,14 @@ settings.time_zone          # => "Europe/Paris"
 settings.software_version   # => "1970000000"
 
 Hue::Sdk::Settings.time_zones                    # the time zones the bridge accepts
-settings.update(time_zone: 'Europe/London')      # sends a request per setting, then reads them again
+settings.update(time_zone: 'Europe/London')      # sends a request per setting, returns the values written
 settings.update(utc: '2026-11-03T10:00:00')      # the clock of the bridge
 settings.update(http_blocked: true)              # refuse plain HTTP
 settings.update(analytics_consent: false)        # do not share statistics
 ```
+
+`update` returns the settings with the values written, as the app keeps them. Only `http_blocked` is read back, as the
+app does: it stays nil on a bridge that does not report it, and keeps its value if that read fails.
 
 `remote_access` can only be read, as the app sets it when pairing. The network of the bridge and its software updates,
 which the app also writes there, stay out of the SDK, and so do the application keys of other clients, which the same

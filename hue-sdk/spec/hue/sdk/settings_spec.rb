@@ -4,14 +4,18 @@ RSpec.describe Hue::Sdk::Settings do
   let(:key) { 'test-key' }
   let(:config) do
     { name: 'Hue Bridge', bridgeid: 'ECB5FAFFFE000001', modelid: 'BSB003', swversion: '1970000000',
-      apiversion: '1.70.0', timezone: 'Europe/Paris', UTC: '2026-11-03T10:00:00', portalservices: true,
+      apiversion: '1.70.0', timezone: 'Etc/UTC', UTC: '2026-11-03T10:00:00', portalservices: true,
       analyticsconsent: false, httpblocked: true, dhcp: true, ipaddress: '192.0.2.10',
       whitelist: { 'other-client-key' => { name: 'other' } } }
+  end
+  let(:bridge_resource) do
+    { 'GET /clip/v2/resource/bridge' => { errors: [], data: [{ id: 'b1', time_zone: { time_zone: 'Europe/Paris' } }] } }
   end
   let(:routes) do
     { "GET /api/#{key}/config" => config,
       "PUT /api/#{key}/config" => [200, [{ success: { '/config/timezone' => 'Europe/London' } }]],
-      "GET /api/#{key}/capabilities" => { timezones: { values: %w[Europe/London Europe/Paris] } } }
+      "GET /api/#{key}/capabilities" => { timezones: { values: %w[Europe/London Europe/Paris] } },
+      **bridge_resource }
   end
   let(:bridge) { FakeBridge.serving(routes) }
 
@@ -24,9 +28,13 @@ RSpec.describe Hue::Sdk::Settings do
   it 'reads the settings' do
     expect(Hue::Sdk.settings).to have_attributes(
       name: 'Hue Bridge', bridge_id: 'ECB5FAFFFE000001', model_id: 'BSB003', software_version: '1970000000',
-      api_version: '1.70.0', time_zone: 'Europe/Paris', utc: '2026-11-03T10:00:00', remote_access: true,
+      api_version: '1.70.0', utc: '2026-11-03T10:00:00', remote_access: true,
       analytics_consent: false, http_blocked: true
     )
+  end
+
+  it 'reads the time zone where the app does, on the bridge resource of CLIP v2' do
+    expect(Hue::Sdk.settings.time_zone).to eq('Europe/Paris')
   end
 
   it 'never exposes the keys of other clients nor the network', :aggregate_failures do
@@ -57,10 +65,40 @@ RSpec.describe Hue::Sdk::Settings do
     expect(written).to eq([{ 'analyticsconsent' => true }])
   end
 
-  it 'writes each setting in a request of its own, and reads them again', :aggregate_failures do
-    updated = Hue::Sdk.settings.update(time_zone: 'Europe/London', http_blocked: true)
+  it 'writes each setting in a request of its own' do
+    Hue::Sdk.settings.update(time_zone: 'Europe/London', http_blocked: true)
     expect(written).to eq([{ 'timezone' => 'Europe/London' }, { 'blockhttp' => true }])
-    expect(updated).to be_a(described_class)
+  end
+
+  it 'keeps the values it wrote without reading the bridge again, as the app does', :aggregate_failures do
+    settings = Hue::Sdk.settings
+    reads = bridge.requests.size
+    updated = settings.update(time_zone: 'Europe/London', analytics_consent: true)
+    expect(updated).to have_attributes(time_zone: 'Europe/London', analytics_consent: true, name: 'Hue Bridge')
+    expect(bridge.requests.drop(reads).map(&:verb)).to eq(%w[PUT PUT])
+  end
+
+  it 'reads http_blocked back after writing it, as the app does' do
+    config[:httpblocked] = false
+    settings = Hue::Sdk.settings
+    config[:httpblocked] = true
+    expect(settings.update(http_blocked: false).http_blocked).to be(true)
+  end
+
+  it 'gives nil for http_blocked on a bridge that does not report it, as the app holds' do
+    config.delete(:httpblocked)
+    expect(Hue::Sdk.settings.update(http_blocked: true).http_blocked).to be_nil
+  end
+
+  it 'keeps the http_blocked it held when reading it back fails, since the write went through', :aggregate_failures do
+    settings = Hue::Sdk.settings
+    routes["GET /api/#{key}/config"] = [503, {}]
+    expect(settings.update(http_blocked: false).http_blocked).to be(true)
+    expect(written).to eq([{ 'blockhttp' => false }])
+  end
+
+  it 'keeps its requests to itself' do
+    expect(described_class).not_to respond_to(:request)
   end
 
   it 'lists the time zones' do
@@ -70,7 +108,7 @@ RSpec.describe Hue::Sdk::Settings do
   context 'when the bridge refuses with a 200' do
     let(:routes) do
       error = { type: 7, address: '/config/timezone', description: 'invalid value' }
-      { "GET /api/#{key}/config" => config, "PUT /api/#{key}/config" => [200, [{ error: }]] }
+      { "GET /api/#{key}/config" => config, "PUT /api/#{key}/config" => [200, [{ error: }]], **bridge_resource }
     end
 
     it 'raises its error, without the key', :aggregate_failures do
@@ -96,6 +134,22 @@ RSpec.describe Hue::Sdk::Settings do
 
     it 'raises ResponseError with the status', :aggregate_failures do
       expect { Hue::Sdk.settings }.to raise_error(Hue::Sdk::ResponseError) { expect(it.status).to eq(503) }
+    end
+  end
+
+  context 'when the bridge refuses its resource' do
+    let(:bridge_resource) { { 'GET /clip/v2/resource/bridge' => [503, {}] } }
+
+    it 'raises ResponseError with the status', :aggregate_failures do
+      expect { Hue::Sdk.settings }.to raise_error(Hue::Sdk::ResponseError) { expect(it.status).to eq(503) }
+    end
+  end
+
+  context 'when the bridge lists no bridge resource' do
+    let(:bridge_resource) { { 'GET /clip/v2/resource/bridge' => { errors: [], data: [] } } }
+
+    it 'gives no time zone' do
+      expect(Hue::Sdk.settings.time_zone).to be_nil
     end
   end
 

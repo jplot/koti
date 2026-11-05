@@ -4,14 +4,18 @@ RSpec.describe Hue::Sdk::Settings do
   let(:key) { 'test-key' }
   let(:config) do
     { name: 'Hue Bridge', bridgeid: 'ECB5FAFFFE000001', modelid: 'BSB003', swversion: '1970000000',
-      apiversion: '1.70.0', timezone: 'Europe/Paris', UTC: '2026-11-03T10:00:00', portalservices: true,
+      apiversion: '1.70.0', timezone: 'Etc/UTC', UTC: '2026-11-03T10:00:00', portalservices: true,
       analyticsconsent: false, httpblocked: true, dhcp: true, ipaddress: '192.0.2.10',
       whitelist: { 'other-client-key' => { name: 'other' } } }
+  end
+  let(:bridge_resource) do
+    { 'GET /clip/v2/resource/bridge' => { errors: [], data: [{ id: 'b1', time_zone: { time_zone: 'Europe/Paris' } }] } }
   end
   let(:routes) do
     { "GET /api/#{key}/config" => config,
       "PUT /api/#{key}/config" => [200, [{ success: { '/config/timezone' => 'Europe/London' } }]],
-      "GET /api/#{key}/capabilities" => { timezones: { values: %w[Europe/London Europe/Paris] } } }
+      "GET /api/#{key}/capabilities" => { timezones: { values: %w[Europe/London Europe/Paris] } },
+      **bridge_resource }
   end
   let(:bridge) { FakeBridge.serving(routes) }
 
@@ -27,6 +31,10 @@ RSpec.describe Hue::Sdk::Settings do
       api_version: '1.70.0', time_zone: 'Europe/Paris', utc: '2026-11-03T10:00:00', remote_access: true,
       analytics_consent: false, http_blocked: true
     )
+  end
+
+  it 'reads the time zone where the app does, on the bridge resource of CLIP v2' do
+    expect(Hue::Sdk.settings.time_zone).to eq('Europe/Paris')
   end
 
   it 'never exposes the keys of other clients nor the network', :aggregate_failures do
@@ -70,7 +78,7 @@ RSpec.describe Hue::Sdk::Settings do
   context 'when the bridge refuses with a 200' do
     let(:routes) do
       error = { type: 7, address: '/config/timezone', description: 'invalid value' }
-      { "GET /api/#{key}/config" => config, "PUT /api/#{key}/config" => [200, [{ error: }]] }
+      { "GET /api/#{key}/config" => config, "PUT /api/#{key}/config" => [200, [{ error: }]], **bridge_resource }
     end
 
     it 'raises its error, without the key', :aggregate_failures do
@@ -93,6 +101,14 @@ RSpec.describe Hue::Sdk::Settings do
 
   context 'when the bridge answers with an error status' do
     let(:routes) { { "GET /api/#{key}/config" => [503, {}] } }
+
+    it 'raises ResponseError with the status', :aggregate_failures do
+      expect { Hue::Sdk.settings }.to raise_error(Hue::Sdk::ResponseError) { expect(it.status).to eq(503) }
+    end
+  end
+
+  context 'when the bridge refuses its resource' do
+    let(:bridge_resource) { { 'GET /clip/v2/resource/bridge' => [503, {}] } }
 
     it 'raises ResponseError with the status', :aggregate_failures do
       expect { Hue::Sdk.settings }.to raise_error(Hue::Sdk::ResponseError) { expect(it.status).to eq(503) }

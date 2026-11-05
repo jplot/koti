@@ -7,7 +7,8 @@ module Hue
     Settings = Data.define(:name, :bridge_id, :model_id, :software_version, :api_version, :time_zone, :utc,
                            :remote_access, :analytics_consent, :http_blocked)
 
-    # The settings of the bridge the Hue app reads and writes over CLIP v1, as CLIP v2 only reports the time zone.
+    # The settings of the bridge the Hue app reads and writes over CLIP v1. CLIP v2 only reports the time zone, and the
+    # app reads it there.
     #
     # @!attribute [r] name
     #   @return [String, nil] name of the bridge
@@ -44,7 +45,8 @@ module Hue
       def self.read
         config = object('config')
         new(name: config['name'], bridge_id: config['bridgeid'], model_id: config['modelid'],
-            software_version: config['swversion'], api_version: config['apiversion'], time_zone: config['timezone'],
+            software_version: config['swversion'], api_version: config['apiversion'],
+            time_zone: Client.get('/resource/bridge').first&.dig('time_zone', 'time_zone'),
             utc: config['UTC'], remote_access: config['portalservices'], analytics_consent: config['analyticsconsent'],
             http_blocked: config['httpblocked'])
       end

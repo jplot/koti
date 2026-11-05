@@ -28,7 +28,7 @@ RSpec.describe Hue::Sdk::Settings do
   it 'reads the settings' do
     expect(Hue::Sdk.settings).to have_attributes(
       name: 'Hue Bridge', bridge_id: 'ECB5FAFFFE000001', model_id: 'BSB003', software_version: '1970000000',
-      api_version: '1.70.0', time_zone: 'Europe/Paris', utc: '2026-11-03T10:00:00', remote_access: true,
+      api_version: '1.70.0', utc: '2026-11-03T10:00:00', remote_access: true,
       analytics_consent: false, http_blocked: true
     )
   end
@@ -73,9 +73,28 @@ RSpec.describe Hue::Sdk::Settings do
   it 'keeps the values it wrote without reading the bridge again, as the app does', :aggregate_failures do
     settings = Hue::Sdk.settings
     reads = bridge.requests.size
-    updated = settings.update(time_zone: 'Europe/London', http_blocked: false)
-    expect(updated).to have_attributes(time_zone: 'Europe/London', http_blocked: false, name: 'Hue Bridge')
+    updated = settings.update(time_zone: 'Europe/London', analytics_consent: true)
+    expect(updated).to have_attributes(time_zone: 'Europe/London', analytics_consent: true, name: 'Hue Bridge')
     expect(bridge.requests.drop(reads).map(&:verb)).to eq(%w[PUT PUT])
+  end
+
+  it 'reads http_blocked back after writing it, as the app does' do
+    config[:httpblocked] = false
+    settings = Hue::Sdk.settings
+    config[:httpblocked] = true
+    expect(settings.update(http_blocked: false).http_blocked).to be(true)
+  end
+
+  it 'gives nil for http_blocked on a bridge that does not report it, as the app holds' do
+    config.delete(:httpblocked)
+    expect(Hue::Sdk.settings.update(http_blocked: true).http_blocked).to be_nil
+  end
+
+  it 'keeps the http_blocked it held when reading it back fails, since the write went through', :aggregate_failures do
+    settings = Hue::Sdk.settings
+    routes["GET /api/#{key}/config"] = [503, {}]
+    expect(settings.update(http_blocked: false).http_blocked).to be(true)
+    expect(written).to eq([{ 'blockhttp' => false }])
   end
 
   it 'keeps its requests to itself' do
@@ -123,6 +142,14 @@ RSpec.describe Hue::Sdk::Settings do
 
     it 'raises ResponseError with the status', :aggregate_failures do
       expect { Hue::Sdk.settings }.to raise_error(Hue::Sdk::ResponseError) { expect(it.status).to eq(503) }
+    end
+  end
+
+  context 'when the bridge lists no bridge resource' do
+    let(:bridge_resource) { { 'GET /clip/v2/resource/bridge' => { errors: [], data: [] } } }
+
+    it 'gives no time zone' do
+      expect(Hue::Sdk.settings.time_zone).to be_nil
     end
   end
 

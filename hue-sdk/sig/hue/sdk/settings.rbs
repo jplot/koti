@@ -24,6 +24,8 @@ module Hue
 
       def update: (?time_zone: String?, ?utc: String?, ?http_blocked: bool?, ?analytics_consent: bool?) -> Settings
 
+      private def http_blocked_read_back: () -> bool?
+
       module ClipV1
         UNAUTHORIZED: Integer
 

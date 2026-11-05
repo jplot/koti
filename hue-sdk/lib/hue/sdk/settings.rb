@@ -64,12 +64,14 @@ module Hue
       # @param utc [String, nil] the clock of the bridge
       # @param http_blocked [Boolean, nil] whether the bridge refuses plain HTTP
       # @param analytics_consent [Boolean, nil] whether the bridge may share statistics
-      # @return [Settings] these settings with the values written; as the app does, it does not read the bridge again
+      # @return [Settings] these settings with the values written, as the app keeps them; it reads only +http_blocked+
+      #   back from the bridge, which is nil on a bridge that does not report it
       # @raise (see .read)
       # @api public
       def update(time_zone: nil, utc: nil, http_blocked: nil, analytics_consent: nil)
         written = { time_zone:, utc:, http_blocked:, analytics_consent: }.compact
         written.each { |name, value| ClipV1.request(:put, 'config', { WRITE.fetch(name) => value }) }
+        written[:http_blocked] = http_blocked_read_back if written.key?(:http_blocked)
         with(**written)
       end
 
@@ -131,6 +133,18 @@ module Hue
         private_class_method :refuse
       end
       private_constant :ClipV1
+
+      private
+
+      # The app reads this setting back in an action of its own, whose failure leaves what it held.
+      #
+      # @return [Boolean, nil]
+      # @api private
+      def http_blocked_read_back
+        ClipV1.object('config')['httpblocked']
+      rescue Error
+        http_blocked
+      end
     end
   end
 end

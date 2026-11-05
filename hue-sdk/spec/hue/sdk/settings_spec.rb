@@ -65,10 +65,17 @@ RSpec.describe Hue::Sdk::Settings do
     expect(written).to eq([{ 'analyticsconsent' => true }])
   end
 
-  it 'writes each setting in a request of its own, and reads them again', :aggregate_failures do
-    updated = Hue::Sdk.settings.update(time_zone: 'Europe/London', http_blocked: true)
+  it 'writes each setting in a request of its own' do
+    Hue::Sdk.settings.update(time_zone: 'Europe/London', http_blocked: true)
     expect(written).to eq([{ 'timezone' => 'Europe/London' }, { 'blockhttp' => true }])
-    expect(updated).to be_a(described_class)
+  end
+
+  it 'keeps the values it wrote without reading the bridge again, as the app does', :aggregate_failures do
+    settings = Hue::Sdk.settings
+    reads = bridge.requests.size
+    updated = settings.update(time_zone: 'Europe/London', http_blocked: false)
+    expect(updated).to have_attributes(time_zone: 'Europe/London', http_blocked: false, name: 'Hue Bridge')
+    expect(bridge.requests.drop(reads).map(&:verb)).to eq(%w[PUT PUT])
   end
 
   it 'lists the time zones' do

@@ -59,20 +59,19 @@ module Hue
         zones || raise(ResponseError.new(200, ['no time zones in the answer']))
       end
 
-      # Changes a setting the way the app does, a request for each.
+      # Changes a setting the way the app does, a request for each. A setting written before a refusal stays written.
       #
       # @param time_zone [String, nil] one of {.time_zones}
       # @param utc [String, nil] the clock of the bridge
       # @param http_blocked [Boolean, nil] whether the bridge refuses plain HTTP
       # @param analytics_consent [Boolean, nil] whether the bridge may share statistics
-      # @return [Settings] the settings read again
+      # @return [Settings] these settings with the values written; as the app does, it does not read the bridge again
       # @raise (see .read)
       # @api public
       def update(time_zone: nil, utc: nil, http_blocked: nil, analytics_consent: nil)
-        { time_zone:, utc:, http_blocked:, analytics_consent: }.compact.each do |name, value|
-          self.class.request(:put, 'config', { WRITE.fetch(name) => value })
-        end
-        self.class.read
+        written = { time_zone:, utc:, http_blocked:, analytics_consent: }.compact
+        written.each { |name, value| self.class.request(:put, 'config', { WRITE.fetch(name) => value }) }
+        with(**written)
       end
 
       # @param method [Symbol] +:get+ or +:put+

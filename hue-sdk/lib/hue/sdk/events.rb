@@ -29,9 +29,13 @@ module Hue
 
       # @return [Schema::Value, nil] {#changes} and the id of the resource as a typed value (+Schema::LightChange+ for
       #   a light…), where a field that did not change, or that the SDK hides as deprecated, is nil; nil for a type
-      #   this version does not know
+      #   this version does not know, or for changes it cannot read, so that they do not stop a stream
       # @api public
-      def attributes = Schema::CHANGES[resource_type.to_s]&.from(changes.merge('id' => resource_id)) #: Schema::Value?
+      def attributes
+        Schema::CHANGES[resource_type.to_s]&.from(changes.merge('id' => resource_id)) #: Schema::Value?
+      rescue NoMethodError, TypeError
+        nil
+      end
     end
 
     # Server-sent events of the bridge.

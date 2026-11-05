@@ -66,6 +66,14 @@ RSpec.describe Hue::Sdk::Events do
       expect(event_of('new_type', { 'x' => 1 }).attributes).to be_nil
     end
 
+    it 'gives nil for changes it cannot read, which stay in the changes', :aggregate_failures do
+      [{ 'dimming' => 60 }, { 'dimming' => true }, { 'owner' => [1] }].each do |changes|
+        event = event_of('light', changes)
+        expect(event.attributes).to be_nil
+        expect(event.changes).to eq(changes)
+      end
+    end
+
     it 'gives a deleted resource its id alone', :aggregate_failures do
       value = event_of('light', {}, kind: :delete).attributes
       expect(value.id).to eq('r')

@@ -78,6 +78,10 @@ RSpec.describe Hue::Sdk::Settings do
     expect(bridge.requests.drop(reads).map(&:verb)).to eq(%w[PUT PUT])
   end
 
+  it 'keeps its requests to itself' do
+    expect(described_class).not_to respond_to(:request)
+  end
+
   it 'lists the time zones' do
     expect(described_class.time_zones).to eq(%w[Europe/London Europe/Paris])
   end

@@ -53,5 +53,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The configurations of accessories and MotionAware areas as typed values, under the scripts `hue_accessories`,
   `tap_switch`, `motion_sensor` (cameras) and `contact_sensor`. A configuration that would not go back whole stays a hash.
 - `Event#attributes` gives the changes of an event as a typed value, without a request.
-- `Hue::Sdk.settings` reads the settings of the bridge over CLIP v1, and `update` writes its time zone, its clock, the
-  blocking of plain HTTP and the consent to share statistics, as the app does.
+- `Hue::Sdk.settings` reads the time zone of the bridge over CLIP v2 and its other settings over CLIP v1. `update` writes
+  its time zone, its clock, the blocking of plain HTTP and the consent to share statistics over CLIP v1, and keeps the
+  values written without reading the bridge again, as the app does.

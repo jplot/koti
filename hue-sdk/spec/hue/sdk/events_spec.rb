@@ -67,11 +67,21 @@ RSpec.describe Hue::Sdk::Events do
     end
 
     it 'gives nil for changes it cannot read, which stay in the changes', :aggregate_failures do
-      [{ 'dimming' => 60 }, { 'dimming' => true }, { 'owner' => [1] }].each do |changes|
+      [{ 'dimming' => 60 }, { 'dimming' => true }, { 'dimming' => false }, { 'dimming' => 'brightness' },
+       { 'owner' => [1] }].each do |changes|
         event = event_of('light', changes)
         expect(event.attributes).to be_nil
         expect(event.changes).to eq(changes)
       end
+    end
+
+    it 'gives nil for a list it cannot read' do
+      expect(event_of('device', { 'services' => false }).attributes).to be_nil
+    end
+
+    it 'lets an error of the SDK itself through' do
+      allow(Hue::Sdk::Schema::LightChange).to receive(:from).and_raise(NoMethodError)
+      expect { event_of('light', {}).attributes }.to raise_error(NoMethodError)
     end
 
     it 'gives a deleted resource its id alone', :aggregate_failures do

@@ -33,7 +33,7 @@ module Hue
       # @api public
       def attributes
         Schema::CHANGES[resource_type.to_s]&.from(changes.merge('id' => resource_id)) #: Schema::Value?
-      rescue NoMethodError, TypeError
+      rescue TypeError
         nil
       end
     end

@@ -3,8 +3,6 @@ module Hue
     class Settings < Data
       WRITE: Hash[Symbol, String]
 
-      UNAUTHORIZED: Integer
-
       attr_reader name: String?
       attr_reader bridge_id: String?
       attr_reader model_id: String?
@@ -26,15 +24,21 @@ module Hue
 
       def update: (?time_zone: String?, ?utc: String?, ?http_blocked: bool?, ?analytics_consent: bool?) -> Settings
 
-      def self.request: (Symbol method, String path, ?Hash[String, untyped]? body) -> untyped
+      private def http_blocked_read_back: () -> bool?
 
-      private
+      module ClipV1
+        UNAUTHORIZED: Integer
 
-      def self.object: (String path) -> Hash[String, untyped]
+        def self.request: (Symbol method, String path, ?Hash[String, untyped]? body) -> untyped
 
-      def self.parse: (String body) -> untyped
+        def self.object: (String path) -> Hash[String, untyped]
 
-      def self.refuse: (untyped answer) -> void
+        private
+
+        def self.parse: (String body) -> untyped
+
+        def self.refuse: (untyped answer) -> void
+      end
     end
   end
 end

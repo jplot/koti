@@ -22,6 +22,8 @@ module Hue
 
         def self.load: (nested_type? type, untyped data) -> untyped
 
+        def self.shaped: (Class shape, untyped data) -> untyped
+
         def self.dump: (untyped value) -> untyped
 
         module ClassMethods

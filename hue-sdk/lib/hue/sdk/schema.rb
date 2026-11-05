@@ -17,15 +17,25 @@ module Hue
         #   plain JSON
         # @param data [Object] the JSON of the bridge
         # @return [Object]
+        # @raise [TypeError] if the JSON has another shape than +type+
         # @api private
         def self.load(type, data)
+          return if data.nil?
+
           case type
-          in [item] then data&.map { load(item, it) }
-          in Hash then data&.transform_values { load(type.fetch(String), it) }
-          in Class then data && type.from(data)
+          in [item] then shaped(Array, data).map { load(item, it) }
+          in Hash then shaped(Hash, data).transform_values { load(type.fetch(String), it) }
+          in Class then type.from(shaped(Hash, data))
           else data
           end
         end
+
+        # @param shape [Class]
+        # @param data [Object]
+        # @return [Object] +data+
+        # @raise [TypeError] if it is not a +shape+
+        # @api private
+        def self.shaped(shape, data) = data.is_a?(shape) ? data : raise(TypeError, "not a #{shape}: #{data.class}")
 
         # @param value [Object]
         # @return [Object] +value+ as JSON-ready data

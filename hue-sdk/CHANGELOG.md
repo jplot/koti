@@ -69,3 +69,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   cannot read, reads one, and sounds the speakers of the home together; a camera updates its settings and services,
   takes a snapshot, wakes up, reboots, resets, and sounds a chime or its siren. `Hue::Sdk::Secure.auto_responses`
   reads the responses a doorbell may play. Their classes come from the app's, which decode with `checked: true`.
+- The Hue Secure timeline, never tested with a device: `home.events` reads one page at a time with its cursor, the
+  first significant event and the insights of a phone, deletes, reports and purges events, deletes a clip, and
+  sends the all-safe and alarm triggers. Each event reads with the class the app chooses by its type.
+- `home.follow` follows a Hue Secure home over MQTT, as the app does, until the broker ends the connection, without
+  publishing; each message reads as the app reads its topic.

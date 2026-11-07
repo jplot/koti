@@ -32,6 +32,26 @@ RSpec.describe Hue::Sdk::Secure::Events do
                                            '&end_time=2026-11-07T22%3A00%3A00.000Z')
   end
 
+  it 'leaves the times the caller gives as they were, a frozen one included' do
+    page_of
+    start_time = Time.new(2026, 11, 7, 22, 0, 0, '+01:00').freeze
+    events.page(limit: 20, start_time:)
+    expect(start_time.utc_offset).to eq(3600)
+  end
+
+  it 'sends the microseconds of a time as the app does, and milliseconds when they are all there is' do
+    2.times { answer_empty }
+    events.all_safe(device_timestamp: Time.utc(2026, 11, 7, 21, 0, 0, 123_456))
+    events.all_safe(device_timestamp: Time.utc(2026, 11, 7, 21, 0, 0, 123_000))
+    expect(cloud.requests.map { JSON.parse(it.body)['device_timestamp'] })
+      .to eq(%w[2026-11-07T21:00:00.123456Z 2026-11-07T21:00:00.123Z])
+  end
+
+  it 'skips an item of data that is not an event, as the app does' do
+    page_of(1, [], message('geofence', { 'type' => 'security_presence', 'device_name' => 'phone' }))
+    expect(events.page(limit: 3).events.map(&:type)).to eq(['geofence'])
+  end
+
   it 'gives no cursor on the last page' do
     page_of
     expect(events.page(limit: 20).cursor).to be_nil

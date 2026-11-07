@@ -183,11 +183,13 @@ module Hue
 
         # @param body [Hash{String=>Object}] a +DataApiResponse+
         # @return [Array<MessageEvent>]
-        def messages(body) = body.fetch('data').compact.map { MessageEvent.from(it) }
+        def messages(body) = body.fetch('data').grep(Hash).map { MessageEvent.from(it) }
 
+        # The app's toIso8601String writes microseconds when the time has some, milliseconds otherwise.
+        #
         # @param time [Time, nil]
         # @return [String, nil]
-        def utc(time) = time&.utc&.iso8601(3)
+        def utc(time) = time&.getutc&.then { it.iso8601((it.usec % 1000).zero? ? 3 : 6) }
       end
     end
   end

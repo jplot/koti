@@ -2,6 +2,7 @@ module Hue
   module Sdk
     module Secure
       class Follow
+        include Enumerable[Message]
         TOPICS: Array[String]
 
         NETWORK_ERRORS: Array[singleton(Exception)]
@@ -19,29 +20,27 @@ module Hue
 
         @prefix: String
         @topics: Array[String]
+        @keep_alive: Numeric
 
         def self.read: (String topic, untyped data) -> untyped
 
-        def initialize: (String home_id, topics: Array[String]) -> void
+        def initialize: (String home_id, topics: Array[String], ?keep_alive: Numeric) -> void
 
         def each: () { (Message) -> void } -> void
 
         private
 
-        def connect: () -> untyped
+        def connect: () -> Mqtt::Link
 
-        def tls: (Configuration::Settings config) -> untyped
+        def hello: (String username) -> String
 
-        def context: (Configuration::Settings config) -> OpenSSL::SSL::SSLContext
+        def transport: [T] () { () -> T } -> T
 
-        def acknowledged: (untyped socket) -> void
+        def acknowledged: ([Integer, String]? packet) -> void
 
-        def subscribe: (untyped socket) -> void
+        def following: (Mqtt::Link link) -> Message?
 
-        # The core signature of OpenSSL::SSL::SSLSocket leaves out wait_readable and the reads of OpenSSL::Buffering.
-        def read: (untyped socket) { (Message) -> void } -> void
-
-        def message: (Integer type, String body) -> Message
+        def message: (Mqtt::Link link, Integer type, String body) -> Message
       end
     end
   end

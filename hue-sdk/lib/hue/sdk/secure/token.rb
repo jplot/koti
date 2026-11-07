@@ -37,11 +37,16 @@ module Hue
           json && from_json(json)
         end
 
-        # @return [Token] itself, written to +token_file+ when one is set
+        # Auth0 rotates the refresh token on each renewal: a +token+ setting the caller gave follows, for the caller to
+        # save it again.
+        #
+        # @return [Token] itself, in the +token+ setting when one is set, and written to +token_file+ when one is set
         # @api public
         def save
-          file = Secure.config.token_file
-          File.open(file, 'w', 0o600) { it.write(to_json) } if file
+          config = Secure.config
+          config.token &&= to_json
+          file = config.token_file
+          write(file) if file
           self
         end
 
@@ -49,6 +54,18 @@ module Hue
         # @api public
         def to_json(*)
           JSON.generate(value:, refresh:, created_at: created_at.to_i, expires_at: expires_at.to_i)
+        end
+
+        # Written aside, then renamed over: a crash leaves the former file whole, and the new one is in mode 0600 even
+        # when the former was not.
+        #
+        # @param file [String]
+        # @return [void]
+        # @api private
+        def write(file)
+          aside = "#{file}.#{Process.pid}"
+          File.open(aside, 'w', 0o600) { it.write(to_json) }
+          File.rename(aside, file)
         end
 
         # The app renews a token that expires in less than 30 s before it connects to MQTT.

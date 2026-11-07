@@ -8,6 +8,8 @@ module Hue
 
         @clock: ^() -> Time
         @mutex: Thread::Mutex
+        @attempts: Integer
+        @failure: Error?
 
         attr_reader token: Token?
         attr_reader verifier: String?
@@ -24,7 +26,9 @@ module Hue
 
         private
 
-        def replaced: (Token expired) -> Token
+        def replaced: (Token expired, Integer attempts) -> Token
+
+        def attempted: (Token expired) -> Token
 
         def refresh_form: (Token expired) -> Hash[Symbol, String?]
 

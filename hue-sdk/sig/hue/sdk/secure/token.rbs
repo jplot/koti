@@ -15,6 +15,8 @@ module Hue
 
         def save: () -> Token
 
+        def write: (String file) -> void
+
         def to_json: (*untyped) -> String
 
         def due?: (Time now) -> bool

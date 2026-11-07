@@ -40,6 +40,8 @@ RSpec.describe Hue::Sdk::Secure::Session do
     session.exchange('the-code')
   end
 
+  def logging_in?(request) = request.form['grant_type'] == 'authorization_code'
+
   it 'builds the authorize address with PKCE', :aggregate_failures do
     address = session.authorize_url
     challenge = Digest::SHA256.base64digest(session.verifier).tr('+/', '-_').delete('=')
@@ -69,6 +71,20 @@ RSpec.describe Hue::Sdk::Secure::Session do
   it 'writes the token file in mode 0600' do
     logged_in
     expect(File.stat(Hue::Sdk::Secure.config.token_file).mode & 0o777).to eq(0o600)
+  end
+
+  it 'writes the token file in mode 0600 over a file others may read' do
+    session
+    File.write(Hue::Sdk::Secure.config.token_file, '{}', perm: 0o644)
+    logged_in
+    expect(File.stat(Hue::Sdk::Secure.config.token_file).mode & 0o777).to eq(0o600)
+  end
+
+  it 'keeps the token setting current, for the caller to save the rotated refresh token' do
+    due = Hue::Sdk::Secure::Token.new(value: 'jwt-0', refresh: 'refresh-0', created_at: now - 86_400, expires_at: now)
+    Hue::Sdk::Secure.configure { it.token = due.to_json }
+    session.current
+    expect(JSON.parse(Hue::Sdk::Secure.config.token).values_at('value', 'refresh')).to eq(%w[renewed refresh-2])
   end
 
   it 'starts from the token given in the settings' do
@@ -125,6 +141,12 @@ RSpec.describe Hue::Sdk::Secure::Session do
       expect([saved['value'], session.token.value]).to eq(%w[jwt-1 jwt-1])
     end
 
+    it 'sends the renewal again on a later call after a failure', :aggregate_failures do
+      renewals.push([503, {}, ''])
+      expect { session.current }.to raise_error(Hue::Sdk::ResponseError)
+      expect(session.current.value).to eq('renewed')
+    end
+
     it 'renews once across threads' do
       Array.new(8) { Thread.new { session.current } }.each(&:join)
       expect(token_posts('refresh_token').size).to eq(1)
@@ -143,8 +165,6 @@ RSpec.describe Hue::Sdk::Secure::Session do
       end
     end
 
-    def logging_in?(request) = request.form['grant_type'] == 'authorization_code'
-
     it 'does not leave an empty file when a thread is killed while renewing' do
       logged_in
       times << (now + 90)
@@ -154,6 +174,37 @@ RSpec.describe Hue::Sdk::Secure::Session do
       gate.pop
       renewing.join
       expect(saved['value']).to eq('renewed')
+    end
+  end
+
+  context 'when threads wait on a renewal Auth0 refuses' do
+    let(:gate) { Thread::SizedQueue.new(1).tap { it << :taken } }
+    let(:cloud) do
+      first = true
+      FakeCloud.start do |request|
+        next unless request.path == '/oauth/token'
+        next FakeCloud.json(access_token: 'jwt-1', refresh_token: 'refresh-1', expires_in: 100) if logging_in?(request)
+
+        gate << :renewing if first
+        first = false
+        FakeCloud.json({ error: 'invalid_grant' }, 403)
+      end
+    end
+
+    def outcome
+      yield
+    rescue Hue::Sdk::Error => e
+      e
+    end
+
+    it 'sends the renewal once and raises its refusal in each thread', :aggregate_failures do
+      logged_in
+      times << (now + 90)
+      threads = Array.new(6) { Thread.new { outcome { session.current } } }
+      Timeout.timeout(5) { Thread.pass until gate.num_waiting == 1 && threads.all? { it.status == 'sleep' } }
+      gate.pop
+      expect(threads.map { it.value.class }.uniq).to eq([Hue::Sdk::AuthenticationError])
+      expect(token_posts('refresh_token').size).to eq(1)
     end
   end
 end

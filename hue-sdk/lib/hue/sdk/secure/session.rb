@@ -27,6 +27,7 @@ module Hue
         def initialize(clock: -> { Time.now })
           @clock = clock
           @mutex = Mutex.new
+          @attempts = 0
           @token = Token.saved
         end
 
@@ -63,25 +64,47 @@ module Hue
           token.due?(@clock.call) ? renew(token) : token
         end
 
-        # Renews the token unless another thread already did since +expired+ was read: Auth0 may rotate the refresh
-        # token. A kill waits for the renewal, which Auth0 may have done already, and for its file, which it would
-        # leave empty.
+        # Renews the token once across threads: a thread that waited on another's renewal of the same token takes its
+        # token, or raises its failure, since Auth0 rotates the refresh token. A kill waits for the renewal, which
+        # Auth0 may have done already, and for its file.
         #
         # @param expired [Token]
         # @return [Token]
         # @raise [AuthenticationError] if Auth0 refuses the renewal; the saved token stays
         # @api public
-        def renew(expired) = Thread.handle_interrupt(Object => :never) { @mutex.synchronize { replaced(expired) } }
+        def renew(expired)
+          Thread.handle_interrupt(Object => :never) do
+            attempts = @attempts
+            @mutex.synchronize { replaced(expired, attempts) }
+          end
+        end
 
         private
 
         # @param expired [Token]
+        # @param attempts [Integer] the renewals sent when the thread began to wait
         # @return [Token]
-        def replaced(expired)
+        def replaced(expired, attempts)
           token = @token
           return token if token && !token.equal?(expired)
 
-          @token = issued(refresh_form(expired), expired.refresh).save
+          failure = @failure
+          raise failure if failure && @attempts != attempts
+
+          attempted(expired)
+        end
+
+        # @param expired [Token]
+        # @return [Token]
+        def attempted(expired)
+          token = issued(refresh_form(expired), expired.refresh).save
+          @failure = nil
+          @token = token
+        rescue Error => e
+          @failure = e
+          raise
+        ensure
+          @attempts += 1
         end
 
         # @param expired [Token]

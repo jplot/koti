@@ -9,7 +9,7 @@ module Schema
     # fromJson, as an automation's class is, and a request, which has none, from the keys its toJson writes.
     class SecureClasses < BehaviorClasses
       # What the load of a field tells of its value. A pointer may hold anything, which Value.dump sends as it is.
-      TYPES = { 'int' => 'Integer', 'double' => 'Numeric', 'string' => 'String' }.freeze
+      TYPES = { 'int' => 'Integer', 'double' => 'Numeric' }.freeze
 
       # @param roots [Array<String>] classes of the app
       # @return [Hash{String=>Hash}] the classes by name
@@ -39,6 +39,13 @@ module Schema
           { 'type' => TYPES.fetch(field['kind'], 'Object'), 'required' => field['required'] }
         end
         { 'origin' => origin, 'kind' => 'request', 'fields' => fields }
+      end
+
+      # The keys an automation's fromJson drops are the defaults of its type; a Hue Secure class reads them, as
+      # AlarmSignal does +speaker+.
+      def decoded(origin)
+        address, size = @snapshot.function("._$#{origin}FromJson")
+        BehaviorFromJson.new(@snapshot, origin, dropped: []).decoded(@snapshot.instructions(address, size))
       end
 
       def name(origin)

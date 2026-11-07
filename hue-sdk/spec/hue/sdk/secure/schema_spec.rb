@@ -11,6 +11,11 @@ RSpec.describe Hue::Sdk::Secure::Schema do
     expect(read.config).to be_nil
   end
 
+  it 'reads both signals of an alarm, the light and the speaker' do
+    expect(described_class::AlarmSignal.from('light' => 'on_off', 'speaker' => 'siren').to_body)
+      .to eq(light: 'on_off', speaker: 'siren')
+  end
+
   it 'sends a request without the keys left out, and refuses one missing a required key', :aggregate_failures do
     request = described_class::ArmDisarmScheduleActionInfoRequest
     expect(request.new(time: '22:00', arm_state: 'armed_stay').to_body).to eq(time: '22:00', arm_state: 'armed_stay')

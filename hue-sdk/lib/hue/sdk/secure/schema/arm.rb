@@ -26,10 +26,12 @@ module Hue
         #
         # @!attribute [r] light
         #   @return [String, nil]
-        AlarmSignal = Data.define(:light) do
+        # @!attribute [r] speaker
+        #   @return [String, nil]
+        AlarmSignal = Data.define(:light, :speaker) do
           include Sdk::Schema::Value
 
-          optional :light
+          optional :light, :speaker
         end
 
         # Part of what the Hue cloud answers (Hue app class +ArmDisarmDeviceConfigResponse+).

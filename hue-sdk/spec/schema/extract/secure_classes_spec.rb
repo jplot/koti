@@ -16,6 +16,9 @@ RSpec.describe Schema::Extract::SecureClasses do
         static _ _$ArmDisarmStateSourceResponseFromJson(/* No info */) {
           // ** addr: 0x200, size: 0x40
         }
+        static _ _$AlarmSignalFromJson(/* No info */) {
+          // ** addr: 0x300, size: 0x40
+        }
       }
     RESPONSE
                    'asm/arm_disarm_client/src/api/http/request.dart' => <<~REQUEST, 'pp.txt' => <<~POOL)
@@ -42,6 +45,9 @@ RSpec.describe Schema::Extract::SecureClasses do
                      [pp+0x48] String: "alarm_duration"
                      [pp+0x50] String: "device"
                      [pp+0x58] String: "exit_delay"
+                     [pp+0x60] String: "light"
+                     [pp+0x68] String: "speaker"
+                     [pp+0x70] Type: String?
                    POOL
   end
   let(:code) do
@@ -49,6 +55,8 @@ RSpec.describe Schema::Extract::SecureClasses do
                 "ldr\tx2, [x27, #0x20]", "blr\tx30", "ldr\tx2, [x27, #0x20]", "blr\tx30", "ldr\tx1, [x27, #0x18]",
                 "ldr\tx2, [x27, #0x28]", "blr\tx30", "ldr\tx1, [x27, #0x30]", "bl\t0x200"],
       0x200 => ["ldr\tx2, [x27, #0x38]", "blr\tx30", "ldr\tx1, [x27, #0x18]"],
+      0x300 => ["ldr\tx2, [x27, #0x60]", "blr\tx30", "ldr\tx1, [x27, #0x70]",
+                "ldr\tx2, [x27, #0x68]", "blr\tx30", "ldr\tx1, [x27, #0x70]"],
       0x600 => %W[bl\t0x800 ret], 0x700 => %W[bl\t0x800 ret],
       0x800 => [*Array.new(8, "mov\tx29, x15"),
                 "ldur\tx6, [x1, #0xf]", "ldr\tx2, [x27, #0x40]", "blr\tx30",
@@ -89,6 +97,12 @@ RSpec.describe Schema::Extract::SecureClasses do
   it 'follows a toJson shared with an identical class' do
     shared = reader.read(['ArmDisarmGeofenceStatusConfigRequest'])['ArmDisarmGeofenceStatusConfigRequest']
     expect(shared['fields']).to eq(classes['ArmDisarmModeConfigRequest']['fields'])
+  end
+
+  it 'keeps every key a fromJson reads, those an automation drops included' do
+    expect(reader.read(['AlarmSignal'])['AlarmSignal']['fields'])
+      .to eq('light' => { 'type' => 'String', 'required' => false },
+             'speaker' => { 'type' => 'String', 'required' => false })
   end
 
   it 'stops on a class the app has neither fromJson nor toJson for' do

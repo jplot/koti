@@ -25,6 +25,10 @@
         "light": {
           "type": "String",
           "required": false
+        },
+        "speaker": {
+          "type": "String",
+          "required": false
         }
       }
     },

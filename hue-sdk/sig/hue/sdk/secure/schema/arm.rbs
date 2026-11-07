@@ -21,8 +21,9 @@ module Hue
           extend Sdk::Schema::Value::ClassMethods
 
           attr_reader light: String?
+          attr_reader speaker: String?
 
-          def self.new: (?light: String?) -> AlarmSignal
+          def self.new: (?light: String?, ?speaker: String?) -> AlarmSignal
           def self.from: (Hash[String, untyped] data) -> AlarmSignal
         end
 

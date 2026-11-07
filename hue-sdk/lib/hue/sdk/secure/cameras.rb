@@ -24,15 +24,14 @@ module Hue
         # @api public
         def get(id) = Camera.new(@home_id, id, Secure.client.get("#{@path}/#{id}").body.fetch('reported'))
 
-        # Sounds the speakers of the home together, as the app's alarm does, with no sound of their own.
+        # Sends the speakers of the home the one group command the app sends, without a duration.
         #
-        # @param duration [Numeric] seconds
         # @return [void]
-        # @raise [ResponseError] with status 207 when part of the speakers do not sound
+        # @raise [ResponseError] with status 207 when part of the speakers do not take it
         # @raise (see Http.request)
         # @api public
-        def sound_group_alarm(duration:)
-          alarm = Schema::SpeakerAlarmCommand.new(sound: 'no_sound', duration: (duration * 1000).to_i)
+        def sound_group_alarm
+          alarm = Schema::SpeakerAlarmCommand.new(sound: 'no_sound')
           Secure.client.put("security/device-configuration/v2/home/#{@home_id}/grouped_speaker/command",
                             body: Schema::SpeakerCommand.new(alarm:))
         end

@@ -22,16 +22,16 @@ RSpec.describe Hue::Sdk::Secure::Cameras do
     expect([camera.id, camera.data]).to eq(['cam-1', { 'id' => 'cam-1', 'enabled' => true }])
   end
 
-  it 'sounds the speakers of the home together, for a duration in seconds' do
+  it 'sounds the speakers of the home together with the one body the app sends' do
     answer_empty
-    cameras.sound_group_alarm(duration: 30)
+    cameras.sound_group_alarm
     expect(sent).to eq(['PUT', '/security/device-configuration/v2/home/home-1/grouped_speaker/command',
-                        'application/json', '{"alarm":{"sound":"no_sound","duration":30000}}'])
+                        'application/json', '{"alarm":{"sound":"no_sound"}}'])
   end
 
   it 'raises ResponseError on a partial group' do
     answer({}, 207)
-    expect { cameras.sound_group_alarm(duration: 30) }
+    expect { cameras.sound_group_alarm }
       .to raise_error(an_instance_of(Hue::Sdk::ResponseError).and(having_attributes(status: 207)))
   end
 end

@@ -23,7 +23,7 @@ module Hue
         # @!attribute [r] entire_area
         #   @return [Boolean, nil]
         # @!attribute [r] detection_type
-        #   @return [Array<String>, nil] one of +home_dashboard_edit_mode+
+        #   @return [Array<String>, nil]
         # @!attribute [r] area
         #   @return [Array<DetectionZonePointResponse>, nil]
         ActivityZoneResponse = Data.define(:entire_area, :detection_type, :area) do
@@ -35,13 +35,15 @@ module Hue
 
         # Part of a request to the Hue cloud (Hue app class +ActivityZoneUpdate+).
         #
+        # @!attribute [r] enabled
+        #   @return [Boolean]
         # @!attribute [r] entire_area
         #   @return [Object]
         # @!attribute [r] detection_type
         #   @return [Object]
         # @!attribute [r] area
         #   @return [Object, nil]
-        ActivityZoneUpdate = Data.define(:entire_area, :detection_type, :area) do
+        ActivityZoneUpdate = Data.define(:enabled, :entire_area, :detection_type, :area) do
           include Sdk::Schema::Value
 
           optional :area
@@ -52,20 +54,20 @@ module Hue
         # @!attribute [r] enabled
         #   @return [Boolean]
         # @!attribute [r] volume
-        #   @return [String, nil] one of
+        #   @return [Integer]
         # @!attribute [r] playback_delay
-        #   @return [String, nil] one of
+        #   @return [Integer]
         # @!attribute [r] url
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         # @!attribute [r] category_id
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         # @!attribute [r] response_id
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         CameraBellButtonAutomaticResponseResponse = Data.define(:enabled, :volume, :playback_delay, :url, :category_id,
                                                                 :response_id) do
           include Sdk::Schema::Value
 
-          optional :volume, :playback_delay, :url, :category_id, :response_id
+          optional :url, :category_id, :response_id
         end
 
         # Part of a request to the Hue cloud (Hue app class +CameraBellButtonAutomaticResponseUpdate+).
@@ -92,13 +94,11 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +CameraBellButtonChimeSoundResponse+).
         #
         # @!attribute [r] sound
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         # @!attribute [r] volume
-        #   @return [String, nil] one of
+        #   @return [Integer]
         CameraBellButtonChimeSoundResponse = Data.define(:sound, :volume) do
           include Sdk::Schema::Value
-
-          optional :sound, :volume
         end
 
         # Part of a request to the Hue cloud (Hue app class +CameraBellButtonChimeSoundUpdate+).
@@ -164,7 +164,7 @@ module Hue
         # @!attribute [r] entire_area
         #   @return [Boolean]
         # @!attribute [r] detection_type
-        #   @return [Array<String>, nil] one of +home_dashboard_edit_mode+
+        #   @return [Array<String>, nil]
         # @!attribute [r] area
         #   @return [Array<DetectionZonePointResponse>, nil]
         LightingZoneResponse = Data.define(:entire_area, :detection_type, :area) do
@@ -197,7 +197,7 @@ module Hue
         # @!attribute [r] night_vision
         #   @return [Boolean, nil]
         # @!attribute [r] video_quality
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         # @!attribute [r] hdr
         #   @return [Boolean, nil]
         # @!attribute [r] face_blur
@@ -205,9 +205,9 @@ module Hue
         # @!attribute [r] clips_recording
         #   @return [Boolean, nil]
         # @!attribute [r] clips_duration
-        #   @return [String, nil] one of
+        #   @return [Integer, nil]
         # @!attribute [r] clips_cooldown
-        #   @return [String, nil] one of
+        #   @return [Integer, nil]
         # @!attribute [r] activity_zones
         #   @return [Array<ActivityZoneResponse>, nil]
         # @!attribute [r] privacy_zones
@@ -286,7 +286,7 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +HomeKitLastUsed+).
         #
         # @!attribute [r] live_view
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         HomeKitLastUsed = Data.define(:live_view) do
           include Sdk::Schema::Value
 
@@ -363,7 +363,7 @@ module Hue
         # @!attribute [r] metadata
         #   @return [CameraLinkedDeviceMetadataResponse]
         # @!attribute [r] services
-        #   @return [Array<String>] one of +home_dashboard_edit_mode+
+        #   @return [Array<String>]
         CameraLinkedDeviceResponse = Data.define(:product_data, :metadata, :services) do
           include Sdk::Schema::Value
 
@@ -381,9 +381,9 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +CameraMetadataResponse+).
         #
         # @!attribute [r] name
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         # @!attribute [r] archetype
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         CameraMetadataResponse = Data.define(:name, :archetype) do
           include Sdk::Schema::Value
 
@@ -428,13 +428,11 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +CameraMotionSensitivityResponse+).
         #
         # @!attribute [r] sensitivity
-        #   @return [String, nil] one of
+        #   @return [Integer]
         # @!attribute [r] sensitivity_max
-        #   @return [String, nil] one of
+        #   @return [Integer]
         CameraMotionSensitivityResponse = Data.define(:sensitivity, :sensitivity_max) do
           include Sdk::Schema::Value
-
-          optional :sensitivity, :sensitivity_max
         end
 
         # Part of a request to the Hue cloud (Hue app class +CameraMotionSensitivityUpdate+).
@@ -448,9 +446,9 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +CameraPowerStateResponse+).
         #
         # @!attribute [r] battery_level
-        #   @return [String, nil] one of
+        #   @return [Integer, nil]
         # @!attribute [r] battery_state
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         # @!attribute [r] charging
         #   @return [Boolean, nil]
         # @!attribute [r] battery_healthy
@@ -474,20 +472,18 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +CameraProductDataResponse+).
         #
         # @!attribute [r] model_id
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         # @!attribute [r] product_name
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         # @!attribute [r] manufacturer_name
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         # @!attribute [r] software_version
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         # @!attribute [r] product_archetype
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         CameraProductDataResponse = Data.define(:model_id, :product_name, :manufacturer_name, :software_version,
                                                 :product_archetype) do
           include Sdk::Schema::Value
-
-          optional :model_id, :product_name, :manufacturer_name, :software_version, :product_archetype
         end
 
         # Part of what the Hue cloud answers (Hue app class +CameraWifiConnectivityResponse+).
@@ -507,33 +503,31 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +CameraZigbeeConnectivityResponse+).
         #
         # @!attribute [r] status
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         # @!attribute [r] mac_address
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         # @!attribute [r] channel
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         # @!attribute [r] extended_pan_id
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         CameraZigbeeConnectivityResponse = Data.define(:status, :mac_address, :channel, :extended_pan_id) do
           include Sdk::Schema::Value
 
-          optional :status, :mac_address, :channel, :extended_pan_id
+          optional :channel, :extended_pan_id
         end
 
         # Part of what the Hue cloud answers (Hue app class +CameraSpeakerSignalingStatusResponse+).
         #
         # @!attribute [r] signal
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         CameraSpeakerSignalingStatusResponse = Data.define(:signal) do
           include Sdk::Schema::Value
-
-          optional :signal
         end
 
         # Part of what the Hue cloud answers (Hue app class +CameraSpeakerSignalingResponse+).
         #
         # @!attribute [r] signal_values
-        #   @return [Array<String>] one of +home_dashboard_edit_mode+
+        #   @return [Array<String>]
         # @!attribute [r] status
         #   @return [CameraSpeakerSignalingStatusResponse]
         CameraSpeakerSignalingResponse = Data.define(:signal_values, :status) do
@@ -545,7 +539,7 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +CameraSpeakerMuteResponse+).
         #
         # @!attribute [r] mute
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         CameraSpeakerMuteResponse = Data.define(:mute) do
           include Sdk::Schema::Value
 
@@ -555,13 +549,11 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +CameraSpeakerSoundResponse+).
         #
         # @!attribute [r] sound_values
-        #   @return [Array<String>] one of +home_dashboard_edit_mode+
+        #   @return [Array<String>]
         # @!attribute [r] status
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         CameraSpeakerSoundResponse = Data.define(:sound_values, :status) do
           include Sdk::Schema::Value
-
-          optional :status
         end
 
         # Part of what the Hue cloud answers (Hue app class +CameraSpeakerResponse+).
@@ -569,7 +561,7 @@ module Hue
         # @!attribute [r] signaling
         #   @return [CameraSpeakerSignalingResponse, nil]
         # @!attribute [r] owner
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         # @!attribute [r] mute
         #   @return [CameraSpeakerMuteResponse, nil]
         # @!attribute [r] alarm
@@ -621,15 +613,15 @@ module Hue
         # Part of what the Hue cloud answers (Hue app class +CameraResponse+).
         #
         # @!attribute [r] id
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String]
         # @!attribute [r] metadata
-        #   @return [CameraMetadataResponse]
+        #   @return [CameraMetadataResponse, nil]
         # @!attribute [r] product_data
         #   @return [CameraProductDataResponse]
         # @!attribute [r] service
         #   @return [CameraServiceResponse]
         # @!attribute [r] timezone
-        #   @return [String, nil] one of +home_dashboard_edit_mode+
+        #   @return [String, nil]
         # @!attribute [r] enabled
         #   @return [Boolean, nil]
         # @!attribute [r] linked_device
@@ -637,7 +629,7 @@ module Hue
         CameraResponse = Data.define(:id, :metadata, :product_data, :service, :timezone, :enabled, :linked_device) do
           include Sdk::Schema::Value
 
-          optional :id, :timezone, :enabled, :linked_device
+          optional :metadata, :timezone, :enabled, :linked_device
           nested metadata: CameraMetadataResponse, product_data: CameraProductDataResponse,
                  service: CameraServiceResponse, linked_device: { String => CameraLinkedDeviceResponse }
         end
@@ -702,13 +694,15 @@ module Hue
 
         # Part of a request to the Hue cloud (Hue app class +LightingZoneUpdate+).
         #
+        # @!attribute [r] enabled
+        #   @return [Boolean]
         # @!attribute [r] entire_area
         #   @return [Object]
         # @!attribute [r] detection_type
         #   @return [Object]
         # @!attribute [r] area
         #   @return [Object, nil]
-        LightingZoneUpdate = Data.define(:entire_area, :detection_type, :area) do
+        LightingZoneUpdate = Data.define(:enabled, :entire_area, :detection_type, :area) do
           include Sdk::Schema::Value
 
           optional :area

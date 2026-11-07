@@ -9,7 +9,7 @@ module Schema
     # fromJson, as an automation's class is, and a request, which has none, from the keys its toJson writes.
     class SecureClasses < BehaviorClasses
       # What the load of a field tells of its value. A pointer may hold anything, which Value.dump sends as it is.
-      TYPES = { 'int' => 'Integer', 'double' => 'Numeric' }.freeze
+      TYPES = { 'int' => 'Integer', 'double' => 'Numeric', 'bool' => 'Boolean' }.freeze
 
       # @param roots [Array<String>] classes of the app
       # @return [Hash{String=>Hash}] the classes by name
@@ -100,9 +100,21 @@ module Schema
         seen[:key] = object[KEY, 1] if object.match?(KEY)
       end
 
+      # A null check before the cast is a default the app gives a missing key, as CameraResponse.metadata has.
       def field(dart, closure)
-        cast = objects(body(closure)).filter_map { it[CAST, 1] }.first.to_s
-        describe(dart).merge('reads' => 1, 'optional' => cast.empty? || cast.end_with?('?'))
+        code = body(closure)
+        cast, at = first_cast(code)
+        checked = code.take(at).any? { it.match?(/\Acmp\s+w\d+, w22\z/) }
+        describe(dart).merge('reads' => 1, 'optional' => cast.nil? || cast.end_with?('?') || checked)
+      end
+
+      def first_cast(code)
+        pages = {}
+        code.each_with_index do |instruction, index|
+          cast = object(instruction, pages).to_s[CAST, 1]
+          return [cast, index] if cast
+        end
+        [nil, code.size]
       end
 
       def describe(dart)
@@ -113,7 +125,6 @@ module Schema
         readable?(base) ? { 'type' => dart, 'class' => base } : { 'type' => dart }
       end
 
-      # A table of what the gem reads, or a list of it or of a primitive.
       def container(dart, base)
         inner = base[/\A(?:Map<String, |List<)(\w+)>\z/, 1]
         list = base.start_with?('List<')

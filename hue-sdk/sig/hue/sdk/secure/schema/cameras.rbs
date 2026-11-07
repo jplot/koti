@@ -31,11 +31,12 @@ module Hue
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods
 
+          attr_reader enabled: bool
           attr_reader entire_area: untyped
           attr_reader detection_type: untyped
           attr_reader area: untyped?
 
-          def self.new: (entire_area: untyped, detection_type: untyped, ?area: untyped?) -> ActivityZoneUpdate
+          def self.new: (enabled: bool, entire_area: untyped, detection_type: untyped, ?area: untyped?) -> ActivityZoneUpdate
           def self.from: (Hash[String, untyped] data) -> ActivityZoneUpdate
         end
 
@@ -44,13 +45,13 @@ module Hue
           extend Sdk::Schema::Value::ClassMethods
 
           attr_reader enabled: bool
-          attr_reader volume: String?
-          attr_reader playback_delay: String?
+          attr_reader volume: Integer
+          attr_reader playback_delay: Integer
           attr_reader url: String?
           attr_reader category_id: String?
           attr_reader response_id: String?
 
-          def self.new: (enabled: bool, ?volume: String?, ?playback_delay: String?, ?url: String?, ?category_id: String?, ?response_id: String?) -> CameraBellButtonAutomaticResponseResponse
+          def self.new: (enabled: bool, volume: Integer, playback_delay: Integer, ?url: String?, ?category_id: String?, ?response_id: String?) -> CameraBellButtonAutomaticResponseResponse
           def self.from: (Hash[String, untyped] data) -> CameraBellButtonAutomaticResponseResponse
         end
 
@@ -73,10 +74,10 @@ module Hue
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods
 
-          attr_reader sound: String?
-          attr_reader volume: String?
+          attr_reader sound: String
+          attr_reader volume: Integer
 
-          def self.new: (?sound: String?, ?volume: String?) -> CameraBellButtonChimeSoundResponse
+          def self.new: (sound: String, volume: Integer) -> CameraBellButtonChimeSoundResponse
           def self.from: (Hash[String, untyped] data) -> CameraBellButtonChimeSoundResponse
         end
 
@@ -174,15 +175,15 @@ module Hue
           attr_reader hdr: bool?
           attr_reader face_blur: bool?
           attr_reader clips_recording: bool?
-          attr_reader clips_duration: String?
-          attr_reader clips_cooldown: String?
+          attr_reader clips_duration: Integer?
+          attr_reader clips_cooldown: Integer?
           attr_reader activity_zones: Array[ActivityZoneResponse]?
           attr_reader privacy_zones: Array[PrivacyZoneResponse]?
           attr_reader package_detection_zones: Array[PackageDetectionZoneResponse]?
           attr_reader lighting_zones: Array[LightingZoneResponse]?
           attr_reader e2ee: E2eeResponse?
 
-          def self.new: (?night_vision: bool?, ?video_quality: String?, ?hdr: bool?, ?face_blur: bool?, ?clips_recording: bool?, ?clips_duration: String?, ?clips_cooldown: String?, ?activity_zones: Array[ActivityZoneResponse]?, ?privacy_zones: Array[PrivacyZoneResponse]?, ?package_detection_zones: Array[PackageDetectionZoneResponse]?, ?lighting_zones: Array[LightingZoneResponse]?, ?e2ee: E2eeResponse?) -> CameraCameraServiceResponse
+          def self.new: (?night_vision: bool?, ?video_quality: String?, ?hdr: bool?, ?face_blur: bool?, ?clips_recording: bool?, ?clips_duration: Integer?, ?clips_cooldown: Integer?, ?activity_zones: Array[ActivityZoneResponse]?, ?privacy_zones: Array[PrivacyZoneResponse]?, ?package_detection_zones: Array[PackageDetectionZoneResponse]?, ?lighting_zones: Array[LightingZoneResponse]?, ?e2ee: E2eeResponse?) -> CameraCameraServiceResponse
           def self.from: (Hash[String, untyped] data) -> CameraCameraServiceResponse
         end
 
@@ -357,10 +358,10 @@ module Hue
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods
 
-          attr_reader sensitivity: String?
-          attr_reader sensitivity_max: String?
+          attr_reader sensitivity: Integer
+          attr_reader sensitivity_max: Integer
 
-          def self.new: (?sensitivity: String?, ?sensitivity_max: String?) -> CameraMotionSensitivityResponse
+          def self.new: (sensitivity: Integer, sensitivity_max: Integer) -> CameraMotionSensitivityResponse
           def self.from: (Hash[String, untyped] data) -> CameraMotionSensitivityResponse
         end
 
@@ -378,12 +379,12 @@ module Hue
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods
 
-          attr_reader battery_level: String?
+          attr_reader battery_level: Integer?
           attr_reader battery_state: String?
           attr_reader charging: bool?
           attr_reader battery_healthy: bool?
 
-          def self.new: (?battery_level: String?, ?battery_state: String?, ?charging: bool?, ?battery_healthy: bool?) -> CameraPowerStateResponse
+          def self.new: (?battery_level: Integer?, ?battery_state: String?, ?charging: bool?, ?battery_healthy: bool?) -> CameraPowerStateResponse
           def self.from: (Hash[String, untyped] data) -> CameraPowerStateResponse
         end
 
@@ -401,13 +402,13 @@ module Hue
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods
 
-          attr_reader model_id: String?
-          attr_reader product_name: String?
-          attr_reader manufacturer_name: String?
-          attr_reader software_version: String?
-          attr_reader product_archetype: String?
+          attr_reader model_id: String
+          attr_reader product_name: String
+          attr_reader manufacturer_name: String
+          attr_reader software_version: String
+          attr_reader product_archetype: String
 
-          def self.new: (?model_id: String?, ?product_name: String?, ?manufacturer_name: String?, ?software_version: String?, ?product_archetype: String?) -> CameraProductDataResponse
+          def self.new: (model_id: String, product_name: String, manufacturer_name: String, software_version: String, product_archetype: String) -> CameraProductDataResponse
           def self.from: (Hash[String, untyped] data) -> CameraProductDataResponse
         end
 
@@ -427,12 +428,12 @@ module Hue
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods
 
-          attr_reader status: String?
-          attr_reader mac_address: String?
+          attr_reader status: String
+          attr_reader mac_address: String
           attr_reader channel: String?
           attr_reader extended_pan_id: String?
 
-          def self.new: (?status: String?, ?mac_address: String?, ?channel: String?, ?extended_pan_id: String?) -> CameraZigbeeConnectivityResponse
+          def self.new: (status: String, mac_address: String, ?channel: String?, ?extended_pan_id: String?) -> CameraZigbeeConnectivityResponse
           def self.from: (Hash[String, untyped] data) -> CameraZigbeeConnectivityResponse
         end
 
@@ -440,9 +441,9 @@ module Hue
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods
 
-          attr_reader signal: String?
+          attr_reader signal: String
 
-          def self.new: (?signal: String?) -> CameraSpeakerSignalingStatusResponse
+          def self.new: (signal: String) -> CameraSpeakerSignalingStatusResponse
           def self.from: (Hash[String, untyped] data) -> CameraSpeakerSignalingStatusResponse
         end
 
@@ -472,9 +473,9 @@ module Hue
           extend Sdk::Schema::Value::ClassMethods
 
           attr_reader sound_values: Array[String]
-          attr_reader status: String?
+          attr_reader status: String
 
-          def self.new: (sound_values: Array[String], ?status: String?) -> CameraSpeakerSoundResponse
+          def self.new: (sound_values: Array[String], status: String) -> CameraSpeakerSoundResponse
           def self.from: (Hash[String, untyped] data) -> CameraSpeakerSoundResponse
         end
 
@@ -514,15 +515,15 @@ module Hue
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods
 
-          attr_reader id: String?
-          attr_reader metadata: CameraMetadataResponse
+          attr_reader id: String
+          attr_reader metadata: CameraMetadataResponse?
           attr_reader product_data: CameraProductDataResponse
           attr_reader service: CameraServiceResponse
           attr_reader timezone: String?
           attr_reader enabled: bool?
           attr_reader linked_device: Hash[String, CameraLinkedDeviceResponse]?
 
-          def self.new: (?id: String?, metadata: CameraMetadataResponse, product_data: CameraProductDataResponse, service: CameraServiceResponse, ?timezone: String?, ?enabled: bool?, ?linked_device: Hash[String, CameraLinkedDeviceResponse]?) -> CameraResponse
+          def self.new: (id: String, ?metadata: CameraMetadataResponse?, product_data: CameraProductDataResponse, service: CameraServiceResponse, ?timezone: String?, ?enabled: bool?, ?linked_device: Hash[String, CameraLinkedDeviceResponse]?) -> CameraResponse
           def self.from: (Hash[String, untyped] data) -> CameraResponse
         end
 
@@ -594,11 +595,12 @@ module Hue
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods
 
+          attr_reader enabled: bool
           attr_reader entire_area: untyped
           attr_reader detection_type: untyped
           attr_reader area: untyped?
 
-          def self.new: (entire_area: untyped, detection_type: untyped, ?area: untyped?) -> LightingZoneUpdate
+          def self.new: (enabled: bool, entire_area: untyped, detection_type: untyped, ?area: untyped?) -> LightingZoneUpdate
           def self.from: (Hash[String, untyped] data) -> LightingZoneUpdate
         end
 

@@ -48,11 +48,17 @@ RSpec.describe Hue::Sdk::Secure::Camera do
 
   it 'uses v2 for the speaker commands, with a 10 s siren and the chime volume in hundredths', :aggregate_failures do
     2.times { answer_empty }
-    camera.sound_chime(sound: 'ding', volume: 0.5)
+    camera.sound_chime(sound: 'ding', volume: 0.29)
     chime = sent
     camera.sound_alarm
-    expect(chime).to eq(['PUT', speaker, 'application/json', '{"chime":{"sound":"ding","volume":{"level":50}}}'])
+    expect(chime).to eq(['PUT', speaker, 'application/json', '{"chime":{"sound":"ding","volume":{"level":29}}}'])
     expect(sent).to eq(['PUT', speaker, 'application/json', '{"alarm":{"sound":"siren","duration":10000}}'])
+  end
+
+  it 'sounds a chime without a volume, as the app may' do
+    answer_empty
+    camera.sound_chime(sound: 'ding')
+    expect(cloud.requests.last.body).to eq('{"chime":{"sound":"ding"}}')
   end
 
   it 'raises ResponseError when the camera is out of reach', :aggregate_failures do

@@ -11,7 +11,7 @@ module Hue
 
         def get: (String id) -> Camera
 
-        def sound_group_alarm: (duration: Integer | Float) -> void
+        def sound_group_alarm: () -> void
 
         private
 

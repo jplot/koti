@@ -12,6 +12,9 @@ module Schema
       ADDRESS = %r{// \*\* addr: (0x\h+), size: (0x\h+)}
       POOL = /\A\[pp\+(0x\h+)\] (.*)/
       ENUM = /\A\[pp\+0x\h+\] Map<(\w+), String>\(\d+\) \{/
+      # A map keyed by a core type is a table of the app, not the values of an enum: a Map<String, String> made every
+      # String of a checked class an enum.
+      CORE = %w[String int double num bool Object dynamic].freeze
 
       # @param directory [String] blutter's output
       # @param disassembler [#call] gives the instructions at an address, for a size in bytes
@@ -65,7 +68,9 @@ module Schema
       def read_enums
         File.readlines(File.join(@directory, 'pp.txt')).slice_before(ENUM).filter_map do |head, *lines|
           name = head[ENUM, 1]
-          [name, lines.take_while { !it.start_with?('}') }.filter_map { it[/: "(.*)",?\s*\z/, 1] }] if name
+          next if !name || CORE.include?(name)
+
+          [name, lines.take_while { !it.start_with?('}') }.filter_map { it[/: "(.*)",?\s*\z/, 1] }]
         end.to_h
       end
 

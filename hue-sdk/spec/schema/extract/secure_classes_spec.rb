@@ -28,6 +28,12 @@ RSpec.describe Schema::Extract::SecureClasses do
                          // ** addr: 0x600, size: 0x48
                        }
                      }
+                     class ActivityZoneUpdate extends _$ActivityZoneUpdate {
+
+                       Map<String, Object?> toJson(ActivityZoneUpdate) {
+                         // ** addr: 0x900, size: 0x48
+                       }
+                     }
                      class ArmDisarmGeofenceStatusConfigRequest extends _$ArmDisarmGeofenceStatusConfigRequest {
 
                        Map<String, Object?> toJson(ArmDisarmGeofenceStatusConfigRequest) {
@@ -48,6 +54,7 @@ RSpec.describe Schema::Extract::SecureClasses do
                      [pp+0x60] String: "light"
                      [pp+0x68] String: "speaker"
                      [pp+0x70] Type: String?
+                     [pp+0x78] String: "enabled"
                    POOL
   end
   let(:code) do
@@ -57,7 +64,8 @@ RSpec.describe Schema::Extract::SecureClasses do
       0x200 => ["ldr\tx2, [x27, #0x38]", "blr\tx30", "ldr\tx1, [x27, #0x18]"],
       0x300 => ["ldr\tx2, [x27, #0x60]", "blr\tx30", "ldr\tx1, [x27, #0x70]",
                 "ldr\tx2, [x27, #0x68]", "blr\tx30", "ldr\tx1, [x27, #0x70]"],
-      0x600 => %W[bl\t0x800 ret], 0x700 => %W[bl\t0x800 ret],
+      0x600 => %W[bl\t0x800 ret], 0x700 => %W[bl\t0x800 ret], 0x900 => %W[bl\t0xa00 ret],
+      0xa00 => [*Array.new(16, "mov\tx29, x15"), "ldr\tx2, [x27, #0x78]", "add\tx3, x22, #0x20", "blr\tx30", 'ret'],
       0x800 => [*Array.new(8, "mov\tx29, x15"),
                 "ldur\tx6, [x1, #0xf]", "ldr\tx2, [x27, #0x40]", "blr\tx30",
                 "ldur\td0, [x1, #0x23]", "ldr\tx2, [x27, #0x58]", "blr\tx30",
@@ -92,6 +100,11 @@ RSpec.describe Schema::Extract::SecureClasses do
       .to eq('arm_state' => true, 'trigger_time' => false, 'source' => true)
     expect(classes['ArmDisarmModeConfigRequest']['fields'].transform_values { it['required'] })
       .to eq('entry_delay' => true, 'exit_delay' => true, 'alarm_duration' => false, 'device' => true)
+  end
+
+  it 'reads a key the toJson always writes as true' do
+    expect(reader.read(['ActivityZoneUpdate'])['ActivityZoneUpdate']['fields'])
+      .to eq('enabled' => { 'type' => 'Boolean', 'required' => true })
   end
 
   it 'follows a toJson shared with an identical class' do

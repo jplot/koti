@@ -34,7 +34,7 @@ module Hue
 
         def reset: () -> void
 
-        def sound_chime: (sound: String, volume: Float) -> void
+        def sound_chime: (sound: String, ?volume: Float?) -> void
 
         def sound_alarm: () -> void
       end

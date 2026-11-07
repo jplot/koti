@@ -107,15 +107,15 @@ module Hue
         # @api public
         def reset = Secure.client.put("#{@path}/default_settings")
 
-        # The app sends the volume, from 0.0 to 1.0, as a whole number of hundredths.
+        # The app sends the volume, from 0.0 to 1.0, as a rounded number of hundredths, and none when it has none.
         #
         # @param sound [String]
-        # @param volume [Float] from 0.0 to 1.0
+        # @param volume [Float, nil] from 0.0 to 1.0
         # @return [void]
         # @raise (see Http.request)
         # @api public
-        def sound_chime(sound:, volume:)
-          level = Schema::SpeakerCommandVolume.new(level: (volume * 100).to_i)
+        def sound_chime(sound:, volume: nil)
+          level = Schema::SpeakerCommandVolume.new(level: (volume * 100).round) if volume
           chime = Schema::SpeakerChimeCommand.new(sound:, volume: level)
           Secure.client.put(@speaker, body: Schema::SpeakerCommand.new(chime:))
         end

@@ -574,10 +574,7 @@
           "type": {
             "list": "String"
           },
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "area": {
           "type": {
@@ -593,6 +590,10 @@
       "origin": "ActivityZoneUpdate",
       "kind": "request",
       "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
         "entire_area": {
           "type": "Object",
           "required": true
@@ -616,35 +617,24 @@
           "required": true
         },
         "volume": {
-          "type": "String",
-          "required": false,
-          "values": []
+          "type": "Integer",
+          "required": true
         },
         "playback_delay": {
-          "type": "String",
-          "required": false,
-          "values": []
+          "type": "Integer",
+          "required": true
         },
         "url": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "category_id": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "response_id": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         }
       }
     },
@@ -684,15 +674,11 @@
       "fields": {
         "sound": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "volume": {
-          "type": "String",
-          "required": false,
-          "values": []
+          "type": "Integer",
+          "required": true
         }
       }
     },
@@ -752,10 +738,7 @@
         },
         "video_quality": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "hdr": {
           "type": "Boolean",
@@ -770,14 +753,12 @@
           "required": false
         },
         "clips_duration": {
-          "type": "String",
-          "required": false,
-          "values": []
+          "type": "Integer",
+          "required": false
         },
         "clips_cooldown": {
-          "type": "String",
-          "required": false,
-          "values": []
+          "type": "Integer",
+          "required": false
         },
         "activity_zones": {
           "type": {
@@ -1008,10 +989,7 @@
           "type": {
             "list": "String"
           },
-          "required": true,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         }
       }
     },
@@ -1031,17 +1009,11 @@
       "fields": {
         "name": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "archetype": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         }
       }
     },
@@ -1080,14 +1052,12 @@
       "kind": "response",
       "fields": {
         "sensitivity": {
-          "type": "String",
-          "required": false,
-          "values": []
+          "type": "Integer",
+          "required": true
         },
         "sensitivity_max": {
-          "type": "String",
-          "required": false,
-          "values": []
+          "type": "Integer",
+          "required": true
         }
       }
     },
@@ -1118,16 +1088,12 @@
       "kind": "response",
       "fields": {
         "battery_level": {
-          "type": "String",
-          "required": false,
-          "values": []
+          "type": "Integer",
+          "required": false
         },
         "battery_state": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "charging": {
           "type": "Boolean",
@@ -1145,38 +1111,23 @@
       "fields": {
         "model_id": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "product_name": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "manufacturer_name": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "software_version": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "product_archetype": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         }
       }
     },
@@ -1186,16 +1137,13 @@
       "fields": {
         "id": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "metadata": {
           "type": {
             "class": "CameraMetadataResponse"
           },
-          "required": true
+          "required": false
         },
         "product_data": {
           "type": {
@@ -1211,10 +1159,7 @@
         },
         "timezone": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "enabled": {
           "type": "Boolean",
@@ -1334,10 +1279,7 @@
       "fields": {
         "mute": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         }
       }
     },
@@ -1363,10 +1305,7 @@
         },
         "owner": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "mute": {
           "type": {
@@ -1396,10 +1335,7 @@
           "type": {
             "list": "String"
           },
-          "required": true,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "status": {
           "type": {
@@ -1415,10 +1351,7 @@
       "fields": {
         "signal": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         }
       }
     },
@@ -1430,17 +1363,11 @@
           "type": {
             "list": "String"
           },
-          "required": true,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "status": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         }
       }
     },
@@ -1478,31 +1405,19 @@
       "fields": {
         "status": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "mac_address": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": true
         },
         "channel": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "extended_pan_id": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         }
       }
     },
@@ -1588,10 +1503,7 @@
       "fields": {
         "live_view": {
           "type": "String",
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         }
       }
     },
@@ -1607,10 +1519,7 @@
           "type": {
             "list": "String"
           },
-          "required": false,
-          "values": [
-            "home_dashboard_edit_mode"
-          ]
+          "required": false
         },
         "area": {
           "type": {
@@ -1626,6 +1535,10 @@
       "origin": "LightingZoneUpdate",
       "kind": "request",
       "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
         "entire_area": {
           "type": "Object",
           "required": true

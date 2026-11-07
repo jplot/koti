@@ -29,6 +29,10 @@ RSpec.describe Hue::Sdk::Secure, :live do
     expect(status).to eq(200).or eq(404)
   end
 
+  it 'reads a page of the timeline of the first home' do
+    expect(described_class.homes.first.events.page(limit: 5).events).to all(be_a(Hue::Sdk::Secure::MessageEvent))
+  end
+
   it 'reads the arming, the schedules and the geofence clients of the first home, which may have none' do
     home = described_class.homes.first
     read = [-> { home.arm.read }, -> { home.schedules.list }, -> { home.geofence.list }].map do |reading|
@@ -47,6 +51,15 @@ RSpec.describe Hue::Sdk::Secure, :live do
       []
     end
     expect(cameras).to all(be_a(Hue::Sdk::Secure::Camera))
+  end
+
+  it 'follows the first home for a few seconds, without publishing' do
+    home = described_class.homes.first
+    follower = Thread.new { home.follow { nil } }
+    follower.report_on_exception = false
+    expect(follower.join(5)).to be_nil
+  ensure
+    follower&.kill
   end
 
   it 'reads the automatic responses a doorbell may play' do

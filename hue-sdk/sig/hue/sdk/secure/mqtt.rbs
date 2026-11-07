@@ -1,0 +1,48 @@
+module Hue
+  module Sdk
+    module Secure
+      module Mqtt
+        def self?.packet: (Integer type, String body) -> String
+
+        def self?.string: (String text) -> String
+
+        class Link
+          # The core signature of OpenSSL::SSL::SSLSocket leaves out read_nonblock and to_io.
+          @socket: untyped
+          @keep_alive: Numeric
+          @buffer: String
+          @sent: Float
+          @pinged: bool
+
+          def self.open: (Configuration::Settings config, Numeric keep_alive) -> Link
+
+          def self.context: (Configuration::Settings config) -> OpenSSL::SSL::SSLContext
+
+          def self.handshake: (untyped socket, Float deadline) -> untyped
+
+          def initialize: (untyped socket, Numeric keep_alive) -> void
+
+          def write: (Integer type, String body) -> void
+
+          def receive: (?within: Numeric?) -> [Integer, String]?
+
+          def close: () -> void
+
+          private
+
+          def parsed: () -> [Integer, String]?
+
+          def header: () -> [Integer, Integer]?
+
+          def finished: () -> nil
+
+          def wait: (Symbol want, Float? deadline) -> void
+
+          def ping: () -> void
+
+          def clock: () -> Float
+        end
+      end
+    end
+  end
+end

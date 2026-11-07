@@ -1,0 +1,66 @@
+module Hue
+  module Sdk
+    module Secure
+      class MessageEvent < Data
+        EVENTS: Hash[String, Symbol]
+
+        KINDS: Hash[String, [String, Hash[String, Symbol]]]
+
+        attr_reader id: String?
+        attr_reader home_id: String?
+        attr_reader timestamp: String?
+        attr_reader type: String?
+        attr_reader event: untyped
+        attr_reader metadata: untyped
+        attr_reader trace_info: untyped
+
+        def self.new: (id: String?, home_id: String?, timestamp: String?, type: String?, event: untyped, metadata: untyped,
+                       trace_info: untyped) -> MessageEvent
+
+        def self.from: (Hash[String, untyped] data) -> MessageEvent
+
+        def self.class_of: (String? type, untyped event) -> Symbol?
+
+        def self.typed: (Symbol? name, untyped data) -> untyped
+      end
+
+      class Events
+        class Page < Data
+          attr_reader events: Array[MessageEvent]
+          attr_reader cursor: String?
+
+          def self.new: (events: Array[MessageEvent], cursor: String?) -> Page
+        end
+
+        @home_id: String
+        @path: String
+
+        def initialize: (String home_id) -> void
+
+        def page: (limit: Integer, ?start_time: Time?, ?end_time: Time?, ?cursor: String?) -> Page
+
+        def last_significant: () -> MessageEvent?
+
+        def insights: (String mobile_device_id, start_time: Time, end_time: Time) -> Schema::SecurityEventInsightsResponse
+
+        def delete: (Schema::TimelineEventsDelete request) -> void
+
+        def report: (Schema::TimelineEventsReport request) -> void
+
+        def purge: () -> void
+
+        def delete_clip: (String id) -> void
+
+        def all_safe: (device_timestamp: Time) -> void
+
+        def trigger_alarm: (String alarm_state, device_timestamp: Time) -> void
+
+        private
+
+        def messages: (Hash[String, untyped] body) -> Array[MessageEvent]
+
+        def utc: (Time? time) -> String?
+      end
+    end
+  end
+end

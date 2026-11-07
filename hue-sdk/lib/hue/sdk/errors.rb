@@ -9,7 +9,8 @@ module Hue
     class ConnectionError < Error; end
 
     # The bridge certificate is not signed by the Hue root CA, or does not
-    # carry the configured bridge id.
+    # carry the configured bridge id; or the certificate of the Hue Secure broker does not chain to the root the app
+    # pins, or names another host.
     class TLSError < Error; end
 
     # The application key is missing, unknown to the bridge or revoked; or the Hue account has no token, or

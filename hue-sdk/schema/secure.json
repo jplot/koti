@@ -1671,5 +1671,1401 @@
         }
       }
     }
+  },
+  "events": {
+    "ActionAllSafeEvent": {
+      "origin": "ActionAllSafeEvent",
+      "kind": "response",
+      "fields": {
+        "user_id": {
+          "type": "String",
+          "required": true
+        },
+        "user_display_name": {
+          "type": "String",
+          "required": true
+        },
+        "device_timestamp": {
+          "type": "String",
+          "required": true
+        },
+        "received_timestamp": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "AlarmTriggerRequest": {
+      "origin": "AlarmTriggerRequest",
+      "kind": "request",
+      "fields": {
+        "alarm_state": {
+          "type": "Object",
+          "required": true
+        },
+        "device_timestamp": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "AllSafeRequest": {
+      "origin": "AllSafeRequest",
+      "kind": "request",
+      "fields": {
+        "home_id": {
+          "type": "Object",
+          "required": true
+        },
+        "device_timestamp": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "ArmEvent": {
+      "origin": "ArmEvent",
+      "kind": "response",
+      "fields": {
+        "arm_state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "armed_away",
+            "armed_stay",
+            "disarmed"
+          ]
+        },
+        "source": {
+          "type": {
+            "class": "Source"
+          },
+          "required": true
+        },
+        "trigger_time": {
+          "type": "String",
+          "required": true
+        },
+        "apply_time": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "AudioDetectionCameraEvent": {
+      "origin": "AudioDetectionCameraEvent",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true
+        },
+        "resource_uri": {
+          "type": "String",
+          "required": true
+        },
+        "resource_type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "wifi_connectivity",
+            "device_power",
+            "camera_video_clips_eventing",
+            "security_motion_eventing",
+            "audio_detection_eventing",
+            "doorbell_button_event"
+          ]
+        },
+        "data": {
+          "type": {
+            "class": "AudioDetectionCameraEventData"
+          },
+          "required": true
+        },
+        "context": {
+          "type": {
+            "class": "CameraEventContext"
+          },
+          "required": true
+        },
+        "device_timestamp": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "AudioDetectionCameraEventData": {
+      "origin": "AudioDetectionCameraEventData",
+      "kind": "response",
+      "fields": {
+        "snapshot_url": {
+          "type": "String",
+          "required": false
+        },
+        "detection_type": {
+          "type": "String",
+          "required": false
+        },
+        "group_id": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "BatteryCameraEvent": {
+      "origin": "BatteryCameraEvent",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true
+        },
+        "resource_uri": {
+          "type": "String",
+          "required": true
+        },
+        "resource_type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "wifi_connectivity",
+            "device_power",
+            "camera_video_clips_eventing",
+            "security_motion_eventing",
+            "audio_detection_eventing",
+            "doorbell_button_event"
+          ]
+        },
+        "data": {
+          "type": {
+            "class": "BatteryCameraEventData"
+          },
+          "required": true
+        }
+      }
+    },
+    "BatteryCameraEventData": {
+      "origin": "BatteryCameraEventData",
+      "kind": "response",
+      "fields": {
+        "power_state": {
+          "type": {
+            "class": "BatteryCameraPowerState"
+          },
+          "required": false
+        },
+        "battery_state": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "normal",
+            "low",
+            "critical"
+          ]
+        }
+      }
+    },
+    "BatteryCameraPowerState": {
+      "origin": "BatteryCameraPowerState",
+      "kind": "response",
+      "fields": {
+        "battery_state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "normal",
+            "low",
+            "critical"
+          ]
+        }
+      }
+    },
+    "BatteryClipV2Event": {
+      "origin": "BatteryClipV2Event",
+      "kind": "response",
+      "fields": {
+        "power_state": {
+          "type": {
+            "class": "DevicePowerState"
+          },
+          "required": true
+        },
+        "device_type": {
+          "type": "String",
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "Owner"
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "motion",
+            "device_power",
+            "contact",
+            "zigbee_connectivity",
+            "tamper",
+            "security_area_motion",
+            "motion_area_configuration"
+          ]
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "BridgeConnectivityEvent": {
+      "origin": "BridgeConnectivityEvent",
+      "kind": "response",
+      "fields": {
+        "bridge_id": {
+          "type": "String",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "device_removed",
+            "bridge_heartbeat"
+          ]
+        },
+        "state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "unknown",
+            "unreachable",
+            "reachable"
+          ]
+        }
+      }
+    },
+    "BridgeDeviceContactReport": {
+      "origin": "BridgeDeviceContactReport",
+      "kind": "response",
+      "fields": {
+        "state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "contact",
+            "no_contact"
+          ]
+        }
+      }
+    },
+    "CameraConfigMetadataUpdateEvent": {
+      "origin": "CameraConfigMetadataUpdateEvent",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "CameraConfigUpdateEventValues": {
+      "origin": "CameraConfigUpdateEventValues",
+      "kind": "response",
+      "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "metadata": {
+          "type": {
+            "class": "CameraConfigMetadataUpdateEvent"
+          },
+          "required": false
+        },
+        "service": {
+          "type": {
+            "class": "CameraServiceUpdateEvent"
+          },
+          "required": false
+        },
+        "linked_device": {
+          "type": "Hash",
+          "required": false
+        }
+      }
+    },
+    "CameraEventContext": {
+      "origin": "CameraEventContext",
+      "kind": "response",
+      "fields": {
+        "camera_name": {
+          "type": "String",
+          "required": false
+        },
+        "device": {
+          "type": {
+            "class": "CameraEventDevice"
+          },
+          "required": false
+        }
+      }
+    },
+    "CameraEventDevice": {
+      "origin": "CameraEventDevice",
+      "kind": "response",
+      "fields": {
+        "metadata": {
+          "type": {
+            "class": "CameraEventDeviceMetaData"
+          },
+          "required": false
+        },
+        "product_data": {
+          "type": {
+            "class": "CameraEventDeviceProductData"
+          },
+          "required": false
+        }
+      }
+    },
+    "CameraEventDeviceMetaData": {
+      "origin": "CameraEventDeviceMetaData",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "CameraEventDeviceProductData": {
+      "origin": "CameraEventDeviceProductData",
+      "kind": "response",
+      "fields": {
+        "model_id": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "CameraServiceUpdateEvent": {
+      "origin": "CameraServiceUpdateEvent",
+      "kind": "response",
+      "fields": {
+        "camera": {
+          "type": "Hash",
+          "required": false
+        },
+        "microphone": {
+          "type": "Hash",
+          "required": false
+        },
+        "speaker": {
+          "type": "Hash",
+          "required": false
+        },
+        "wifi_connectivity": {
+          "type": "Hash",
+          "required": false
+        },
+        "zigbee_connectivity": {
+          "type": "Hash",
+          "required": false
+        },
+        "motion": {
+          "type": "Hash",
+          "required": false
+        },
+        "device_power": {
+          "type": "Hash",
+          "required": false
+        },
+        "bell_button": {
+          "type": "Hash",
+          "required": false
+        },
+        "homekit": {
+          "type": "Hash",
+          "required": false
+        }
+      }
+    },
+    "ClipUploadRelatedEvent": {
+      "origin": "ClipUploadRelatedEvent",
+      "kind": "response",
+      "fields": {
+        "uuid": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "ClipsUploadCameraEvent": {
+      "origin": "ClipsUploadCameraEvent",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true
+        },
+        "resource_uri": {
+          "type": "String",
+          "required": true
+        },
+        "resource_type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "wifi_connectivity",
+            "device_power",
+            "camera_video_clips_eventing",
+            "security_motion_eventing",
+            "audio_detection_eventing",
+            "doorbell_button_event"
+          ]
+        },
+        "data": {
+          "type": {
+            "class": "ClipsUploadCameraEventData"
+          },
+          "required": true
+        }
+      }
+    },
+    "ClipsUploadCameraEventData": {
+      "origin": "ClipsUploadCameraEventData",
+      "kind": "response",
+      "fields": {
+        "timestamp": {
+          "type": "String",
+          "required": true
+        },
+        "start_timestamp": {
+          "type": "String",
+          "required": true
+        },
+        "end_timestamp": {
+          "type": "String",
+          "required": true
+        },
+        "stream_name": {
+          "type": "String",
+          "required": true
+        },
+        "related_events": {
+          "type": {
+            "list": {
+              "class": "ClipUploadRelatedEvent"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "ContactClipV2Event": {
+      "origin": "ContactClipV2Event",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "Owner"
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "motion",
+            "device_power",
+            "contact",
+            "zigbee_connectivity",
+            "tamper",
+            "security_area_motion",
+            "motion_area_configuration"
+          ]
+        },
+        "contact_report": {
+          "type": {
+            "class": "BridgeDeviceContactReport"
+          },
+          "required": false
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "DeleteTimelineEntriesEvent": {
+      "origin": "DeleteTimelineEntriesEvent",
+      "kind": "response",
+      "fields": {
+        "events": {
+          "type": {
+            "list": {
+              "class": "DeleteTimelineEntryEvent"
+            }
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "delete_event_batch",
+            "purge_timeline",
+            "refresh_timeline",
+            "report_event_batch"
+          ]
+        }
+      }
+    },
+    "DeleteTimelineEntryEvent": {
+      "origin": "DeleteTimelineEntryEvent",
+      "kind": "response",
+      "fields": {
+        "event_id": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "DeviceNotificationEvents": {
+      "origin": "DeviceNotificationEvents",
+      "kind": "response",
+      "fields": {
+        "device_id": {
+          "type": "String",
+          "required": true
+        },
+        "device_type": {
+          "type": "String",
+          "required": true
+        },
+        "count": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "DeviceNotificationStatistics": {
+      "origin": "DeviceNotificationStatistics",
+      "kind": "response",
+      "fields": {
+        "device_notification_counts": {
+          "type": {
+            "list": {
+              "class": "DeviceNotificationEvents"
+            }
+          },
+          "required": true
+        },
+        "date": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "DevicePowerState": {
+      "origin": "DevicePowerState",
+      "kind": "response",
+      "fields": {
+        "battery_level": {
+          "type": "Numeric",
+          "required": true
+        },
+        "battery_state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "normal",
+            "low",
+            "critical"
+          ]
+        }
+      }
+    },
+    "DeviceRemovedEvent": {
+      "origin": "DeviceRemovedEvent",
+      "kind": "response",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "device_removed",
+            "bridge_heartbeat"
+          ]
+        },
+        "device_type": {
+          "type": "String",
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "DoorbellButtonCameraEvent": {
+      "origin": "DoorbellButtonCameraEvent",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true
+        },
+        "resource_uri": {
+          "type": "String",
+          "required": true
+        },
+        "resource_type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "wifi_connectivity",
+            "device_power",
+            "camera_video_clips_eventing",
+            "security_motion_eventing",
+            "audio_detection_eventing",
+            "doorbell_button_event"
+          ]
+        },
+        "context": {
+          "type": {
+            "class": "CameraEventContext"
+          },
+          "required": true
+        },
+        "device_timestamp": {
+          "type": "String",
+          "required": false
+        },
+        "data": {
+          "type": {
+            "class": "DoorbellButtonCameraEventData"
+          },
+          "required": true
+        }
+      }
+    },
+    "DoorbellButtonCameraEventData": {
+      "origin": "DoorbellButtonCameraEventData",
+      "kind": "response",
+      "fields": {
+        "snapshot_url": {
+          "type": "String",
+          "required": false
+        },
+        "event": {
+          "type": "String",
+          "required": false
+        },
+        "group_id": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "EventStatsWhileArmedData": {
+      "origin": "EventStatsWhileArmedData",
+      "kind": "response",
+      "fields": {
+        "people": {
+          "type": "Numeric",
+          "required": true
+        },
+        "pet": {
+          "type": "Numeric",
+          "required": true
+        },
+        "vehicle": {
+          "type": "Numeric",
+          "required": true
+        },
+        "package": {
+          "type": "Numeric",
+          "required": true
+        },
+        "other_motion": {
+          "type": "Numeric",
+          "required": true
+        },
+        "contact": {
+          "type": "Numeric",
+          "required": true
+        },
+        "motion": {
+          "type": "Numeric",
+          "required": true
+        },
+        "motion_area": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "GeofenceEvent": {
+      "origin": "GeofenceEvent",
+      "kind": "response",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "security_empty",
+            "security_presence"
+          ]
+        },
+        "device_name": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "HomeStatistics": {
+      "origin": "HomeStatistics",
+      "kind": "response",
+      "fields": {
+        "date": {
+          "type": "String",
+          "required": true
+        },
+        "armed_stay": {
+          "type": {
+            "class": "EventStatsWhileArmedData"
+          },
+          "required": true
+        },
+        "armed_away": {
+          "type": {
+            "class": "EventStatsWhileArmedData"
+          },
+          "required": true
+        }
+      }
+    },
+    "MessageEventMetaData": {
+      "origin": "MessageEventMetaData",
+      "kind": "response",
+      "fields": {
+        "arming_interrupted": {
+          "type": "Boolean",
+          "required": false
+        },
+        "clip": {
+          "type": "Hash",
+          "required": false
+        },
+        "trigger_alarm": {
+          "type": "Boolean",
+          "required": false
+        },
+        "entry_delay": {
+          "type": "Numeric",
+          "required": false
+        },
+        "report_status": {
+          "type": "String",
+          "required": false
+        },
+        "initiate_call": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "MessageEventTraceInfo": {
+      "origin": "MessageEventTraceInfo",
+      "kind": "response",
+      "fields": {
+        "source_timestamp": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "MotionAreaClipV2Event": {
+      "origin": "MotionAreaClipV2Event",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "Owner"
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "motion",
+            "device_power",
+            "contact",
+            "zigbee_connectivity",
+            "tamper",
+            "security_area_motion",
+            "motion_area_configuration"
+          ]
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "MotionAreaConfigurationClipV2Event": {
+      "origin": "MotionAreaConfigurationClipV2Event",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "Owner"
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "motion",
+            "device_power",
+            "contact",
+            "zigbee_connectivity",
+            "tamper",
+            "security_area_motion",
+            "motion_area_configuration"
+          ]
+        },
+        "health": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "healthy",
+            "degraded",
+            "not_running",
+            "unrecoverable",
+            "recovering"
+          ]
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "MotionCameraEvent": {
+      "origin": "MotionCameraEvent",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true
+        },
+        "resource_uri": {
+          "type": "String",
+          "required": true
+        },
+        "resource_type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "wifi_connectivity",
+            "device_power",
+            "camera_video_clips_eventing",
+            "security_motion_eventing",
+            "audio_detection_eventing",
+            "doorbell_button_event"
+          ]
+        },
+        "data": {
+          "type": {
+            "class": "MotionCameraEventData"
+          },
+          "required": true
+        },
+        "context": {
+          "type": {
+            "class": "CameraEventContext"
+          },
+          "required": true
+        },
+        "device_timestamp": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "MotionCameraEventData": {
+      "origin": "MotionCameraEventData",
+      "kind": "response",
+      "fields": {
+        "snapshot_url": {
+          "type": "String",
+          "required": false
+        },
+        "detection_type": {
+          "type": "String",
+          "required": true
+        },
+        "group_id": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "MotionClipV2Event": {
+      "origin": "MotionClipV2Event",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "Owner"
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "motion",
+            "device_power",
+            "contact",
+            "zigbee_connectivity",
+            "tamper",
+            "security_area_motion",
+            "motion_area_configuration"
+          ]
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "id_v1": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "Owner": {
+      "origin": "Owner",
+      "kind": "response",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "PurgeTimelineEvent": {
+      "origin": "PurgeTimelineEvent",
+      "kind": "response",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "delete_event_batch",
+            "purge_timeline",
+            "refresh_timeline",
+            "report_event_batch"
+          ]
+        }
+      }
+    },
+    "RefreshTimelineEvent": {
+      "origin": "RefreshTimelineEvent",
+      "kind": "response",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "delete_event_batch",
+            "purge_timeline",
+            "refresh_timeline",
+            "report_event_batch"
+          ]
+        }
+      }
+    },
+    "ReportTimelineEntriesEvent": {
+      "origin": "ReportTimelineEntriesEvent",
+      "kind": "response",
+      "fields": {
+        "events": {
+          "type": {
+            "list": {
+              "class": "ReportTimelineEntryEvent"
+            }
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "delete_event_batch",
+            "purge_timeline",
+            "refresh_timeline",
+            "report_event_batch"
+          ]
+        }
+      }
+    },
+    "ReportTimelineEntryEvent": {
+      "origin": "ReportTimelineEntryEvent",
+      "kind": "response",
+      "fields": {
+        "event_id": {
+          "type": "String",
+          "required": true
+        },
+        "report_status": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "SecurityEventInsightsResponse": {
+      "origin": "SecurityEventInsightsResponse",
+      "kind": "response",
+      "fields": {
+        "home_stats": {
+          "type": {
+            "list": {
+              "class": "HomeStatistics"
+            }
+          },
+          "required": false
+        },
+        "device_notification_stats": {
+          "type": {
+            "list": {
+              "class": "DeviceNotificationStatistics"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "Source": {
+      "origin": "Source",
+      "kind": "response",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "user",
+            "schedule"
+          ]
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "TamperClipV2Event": {
+      "origin": "TamperClipV2Event",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "Owner"
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "motion",
+            "device_power",
+            "contact",
+            "zigbee_connectivity",
+            "tamper",
+            "security_area_motion",
+            "motion_area_configuration"
+          ]
+        },
+        "tamper_reports": {
+          "type": {
+            "list": {
+              "class": "TamperReport"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "TamperReport": {
+      "origin": "TamperReport",
+      "kind": "response",
+      "fields": {
+        "changed": {
+          "type": "String",
+          "required": true
+        },
+        "state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "tampered",
+            "not_tampered"
+          ]
+        }
+      }
+    },
+    "TimelineEventDelete": {
+      "origin": "TimelineEventDelete",
+      "kind": "request",
+      "fields": {
+        "id": {
+          "type": "Object",
+          "required": true
+        },
+        "timestamp": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "TimelineEventReport": {
+      "origin": "TimelineEventReport",
+      "kind": "request",
+      "fields": {
+        "id": {
+          "type": "Object",
+          "required": true
+        },
+        "event_type": {
+          "type": "Object",
+          "required": true
+        },
+        "detection_type": {
+          "type": "Object",
+          "required": true
+        },
+        "timestamp": {
+          "type": "Object",
+          "required": true
+        },
+        "report_status": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "TimelineEventsDelete": {
+      "origin": "TimelineEventsDelete",
+      "kind": "request",
+      "fields": {
+        "events": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "TimelineEventsReport": {
+      "origin": "TimelineEventsReport",
+      "kind": "request",
+      "fields": {
+        "events": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "TriggerEvent": {
+      "origin": "TriggerEvent",
+      "kind": "response",
+      "fields": {
+        "device_timestamp": {
+          "type": "String",
+          "required": true
+        },
+        "received_timestamp": {
+          "type": "String",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "alarm_started",
+            "alarm_stopped",
+            "alarm_failed"
+          ]
+        },
+        "source": {
+          "type": {
+            "class": "Source"
+          },
+          "required": true
+        },
+        "alarm_type": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "security",
+            "safety"
+          ]
+        }
+      }
+    },
+    "WifiConnectivityCameraEvent": {
+      "origin": "WifiConnectivityCameraEvent",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true
+        },
+        "resource_uri": {
+          "type": "String",
+          "required": true
+        },
+        "resource_type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "wifi_connectivity",
+            "device_power",
+            "camera_video_clips_eventing",
+            "security_motion_eventing",
+            "audio_detection_eventing",
+            "doorbell_button_event"
+          ]
+        },
+        "data": {
+          "type": {
+            "class": "WifiConnectivityCameraEventData"
+          },
+          "required": true
+        },
+        "device": {
+          "type": {
+            "class": "CameraEventDevice"
+          },
+          "required": false
+        }
+      }
+    },
+    "WifiConnectivityCameraEventData": {
+      "origin": "WifiConnectivityCameraEventData",
+      "kind": "response",
+      "fields": {
+        "strength": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "ZigbeeConnectivityClipV2Event": {
+      "origin": "ZigbeeConnectivityClipV2Event",
+      "kind": "response",
+      "fields": {
+        "device_type": {
+          "type": "String",
+          "required": false
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "owner": {
+          "type": {
+            "class": "Owner"
+          },
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "motion",
+            "device_power",
+            "contact",
+            "zigbee_connectivity",
+            "tamper",
+            "security_area_motion",
+            "motion_area_configuration"
+          ]
+        }
+      }
+    }
   }
 }

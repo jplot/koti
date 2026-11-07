@@ -34,6 +34,10 @@ module Hue
 
         def cameras: () -> Cameras
 
+        def events: () -> Events
+
+        def follow: (?topics: Array[String]) { (Follow::Message) -> void } -> void
+
         def self.list: (Session session) -> Array[Home]
 
         TEXTS: Hash[Symbol, Integer]

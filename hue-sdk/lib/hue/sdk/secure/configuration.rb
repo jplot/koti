@@ -38,6 +38,17 @@ module Hue
           #   (default: nil, TLS with the system's roots)
           attr_accessor :grpc_credentials
 
+          # @return [String] host of the MQTT broker that {Follow} follows a home on
+          #   (default: +mqtt.eu.secure.meethue.com+)
+          attr_accessor :mqtt_host
+
+          # @return [Integer] port of the MQTT broker, which takes ALPN +mqtt+ (default: 443)
+          attr_accessor :mqtt_port
+
+          # @return [String] PEM file of the one root the broker's certificate must chain to (default: Amazon Root CA 1,
+          #   the root the app pins)
+          attr_accessor :mqtt_ca_file
+
           # @return [Numeric] seconds to wait for a connection (default: 5)
           attr_accessor :open_timeout
 
@@ -52,6 +63,9 @@ module Hue
             @api_url = 'https://api.account.meethue.com'
             @grpc_target = 'api.account.meethue.com:443'
             @auto_responses_url = 'https://automaticresponses.eu.secure.meethue.com'
+            @mqtt_host = 'mqtt.eu.secure.meethue.com'
+            @mqtt_port = 443
+            @mqtt_ca_file = File.expand_path('../certificates/amazon-root-ca-1.pem', File.dirname(__FILE__))
             @open_timeout = 5
             @read_timeout = 10
           end

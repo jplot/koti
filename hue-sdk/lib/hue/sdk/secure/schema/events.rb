@@ -259,6 +259,61 @@ module Hue
           include Sdk::Schema::Value
         end
 
+        # Part of what the Hue cloud answers (Hue app class +CameraConfigMetadataUpdateEvent+).
+        #
+        # @!attribute [r] name
+        #   @return [String, nil]
+        CameraConfigMetadataUpdateEvent = Data.define(:name) do
+          include Sdk::Schema::Value
+
+          optional :name
+        end
+
+        # Part of what the Hue cloud answers (Hue app class +CameraServiceUpdateEvent+).
+        #
+        # @!attribute [r] camera
+        #   @return [Hash{String=>Object}, nil]
+        # @!attribute [r] microphone
+        #   @return [Hash{String=>Object}, nil]
+        # @!attribute [r] speaker
+        #   @return [Hash{String=>Object}, nil]
+        # @!attribute [r] wifi_connectivity
+        #   @return [Hash{String=>Object}, nil]
+        # @!attribute [r] zigbee_connectivity
+        #   @return [Hash{String=>Object}, nil]
+        # @!attribute [r] motion
+        #   @return [Hash{String=>Object}, nil]
+        # @!attribute [r] device_power
+        #   @return [Hash{String=>Object}, nil]
+        # @!attribute [r] bell_button
+        #   @return [Hash{String=>Object}, nil]
+        # @!attribute [r] homekit
+        #   @return [Hash{String=>Object}, nil]
+        CameraServiceUpdateEvent = Data.define(:camera, :microphone, :speaker, :wifi_connectivity, :zigbee_connectivity,
+                                               :motion, :device_power, :bell_button, :homekit) do
+          include Sdk::Schema::Value
+
+          optional :camera, :microphone, :speaker, :wifi_connectivity, :zigbee_connectivity, :motion, :device_power,
+                   :bell_button, :homekit
+        end
+
+        # Part of what the Hue cloud answers (Hue app class +CameraConfigUpdateEventValues+).
+        #
+        # @!attribute [r] enabled
+        #   @return [Boolean, nil]
+        # @!attribute [r] metadata
+        #   @return [CameraConfigMetadataUpdateEvent, nil]
+        # @!attribute [r] service
+        #   @return [CameraServiceUpdateEvent, nil]
+        # @!attribute [r] linked_device
+        #   @return [Hash{String=>Object}, nil]
+        CameraConfigUpdateEventValues = Data.define(:enabled, :metadata, :service, :linked_device) do
+          include Sdk::Schema::Value
+
+          optional :enabled, :metadata, :service, :linked_device
+          nested metadata: CameraConfigMetadataUpdateEvent, service: CameraServiceUpdateEvent
+        end
+
         # Part of what the Hue cloud answers (Hue app class +ClipUploadRelatedEvent+).
         #
         # @!attribute [r] uuid

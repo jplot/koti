@@ -1972,6 +1972,42 @@
         }
       }
     },
+    "CameraConfigMetadataUpdateEvent": {
+      "origin": "CameraConfigMetadataUpdateEvent",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "CameraConfigUpdateEventValues": {
+      "origin": "CameraConfigUpdateEventValues",
+      "kind": "response",
+      "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "metadata": {
+          "type": {
+            "class": "CameraConfigMetadataUpdateEvent"
+          },
+          "required": false
+        },
+        "service": {
+          "type": {
+            "class": "CameraServiceUpdateEvent"
+          },
+          "required": false
+        },
+        "linked_device": {
+          "type": "Hash",
+          "required": false
+        }
+      }
+    },
     "CameraEventContext": {
       "origin": "CameraEventContext",
       "kind": "response",
@@ -2022,6 +2058,48 @@
       "fields": {
         "model_id": {
           "type": "String",
+          "required": false
+        }
+      }
+    },
+    "CameraServiceUpdateEvent": {
+      "origin": "CameraServiceUpdateEvent",
+      "kind": "response",
+      "fields": {
+        "camera": {
+          "type": "Hash",
+          "required": false
+        },
+        "microphone": {
+          "type": "Hash",
+          "required": false
+        },
+        "speaker": {
+          "type": "Hash",
+          "required": false
+        },
+        "wifi_connectivity": {
+          "type": "Hash",
+          "required": false
+        },
+        "zigbee_connectivity": {
+          "type": "Hash",
+          "required": false
+        },
+        "motion": {
+          "type": "Hash",
+          "required": false
+        },
+        "device_power": {
+          "type": "Hash",
+          "required": false
+        },
+        "bell_button": {
+          "type": "Hash",
+          "required": false
+        },
+        "homekit": {
+          "type": "Hash",
           "required": false
         }
       }

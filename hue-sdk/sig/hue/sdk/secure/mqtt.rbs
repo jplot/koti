@@ -1,0 +1,14 @@
+module Hue
+  module Sdk
+    module Secure
+      module Mqtt
+        def self?.packet: (Integer type, String body) -> String
+
+        def self?.string: (String text) -> String
+
+        # The core signature of OpenSSL::SSL::SSLSocket leaves out the reads of OpenSSL::Buffering.
+        def self?.received: (untyped socket) -> [Integer, String]
+      end
+    end
+  end
+end

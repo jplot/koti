@@ -17,6 +17,8 @@ require_relative 'secure/geofence'
 require_relative 'secure/camera'
 require_relative 'secure/cameras'
 require_relative 'secure/events'
+require_relative 'secure/mqtt'
+require_relative 'secure/follow'
 
 module Hue
   module Sdk

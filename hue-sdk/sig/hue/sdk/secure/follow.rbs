@@ -1,0 +1,48 @@
+module Hue
+  module Sdk
+    module Secure
+      class Follow
+        TOPICS: Array[String]
+
+        NETWORK_ERRORS: Array[singleton(Exception)]
+
+        AUTHORIZER: String
+
+        class Message < Data
+          attr_reader topic: String
+          attr_reader payload: String
+
+          def self.new: (topic: String, payload: String) -> Message
+
+          def attributes: () -> untyped
+        end
+
+        @prefix: String
+        @topics: Array[String]
+
+        def self.read: (String topic, untyped data) -> untyped
+
+        def initialize: (String home_id, topics: Array[String]) -> void
+
+        def each: () { (Message) -> void } -> void
+
+        private
+
+        def connect: () -> untyped
+
+        def tls: (Configuration::Settings config) -> untyped
+
+        def context: (Configuration::Settings config) -> OpenSSL::SSL::SSLContext
+
+        def acknowledged: (untyped socket) -> void
+
+        def subscribe: (untyped socket) -> void
+
+        # The core signature of OpenSSL::SSL::SSLSocket leaves out wait_readable and the reads of OpenSSL::Buffering.
+        def read: (untyped socket) { (Message) -> void } -> void
+
+        def message: (Integer type, String body) -> Message
+      end
+    end
+  end
+end

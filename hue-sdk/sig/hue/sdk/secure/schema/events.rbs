@@ -228,6 +228,47 @@ module Hue
           def self.from: (Hash[String, untyped] data) -> BridgeDeviceContactReport
         end
 
+        class CameraConfigMetadataUpdateEvent < Data
+          include Sdk::Schema::Value
+          extend Sdk::Schema::Value::ClassMethods
+
+          attr_reader name: String?
+
+          def self.new: (?name: String?) -> CameraConfigMetadataUpdateEvent
+          def self.from: (Hash[String, untyped] data) -> CameraConfigMetadataUpdateEvent
+        end
+
+        class CameraServiceUpdateEvent < Data
+          include Sdk::Schema::Value
+          extend Sdk::Schema::Value::ClassMethods
+
+          attr_reader camera: Hash[String, untyped]?
+          attr_reader microphone: Hash[String, untyped]?
+          attr_reader speaker: Hash[String, untyped]?
+          attr_reader wifi_connectivity: Hash[String, untyped]?
+          attr_reader zigbee_connectivity: Hash[String, untyped]?
+          attr_reader motion: Hash[String, untyped]?
+          attr_reader device_power: Hash[String, untyped]?
+          attr_reader bell_button: Hash[String, untyped]?
+          attr_reader homekit: Hash[String, untyped]?
+
+          def self.new: (?camera: Hash[String, untyped]?, ?microphone: Hash[String, untyped]?, ?speaker: Hash[String, untyped]?, ?wifi_connectivity: Hash[String, untyped]?, ?zigbee_connectivity: Hash[String, untyped]?, ?motion: Hash[String, untyped]?, ?device_power: Hash[String, untyped]?, ?bell_button: Hash[String, untyped]?, ?homekit: Hash[String, untyped]?) -> CameraServiceUpdateEvent
+          def self.from: (Hash[String, untyped] data) -> CameraServiceUpdateEvent
+        end
+
+        class CameraConfigUpdateEventValues < Data
+          include Sdk::Schema::Value
+          extend Sdk::Schema::Value::ClassMethods
+
+          attr_reader enabled: bool?
+          attr_reader metadata: CameraConfigMetadataUpdateEvent?
+          attr_reader service: CameraServiceUpdateEvent?
+          attr_reader linked_device: Hash[String, untyped]?
+
+          def self.new: (?enabled: bool?, ?metadata: CameraConfigMetadataUpdateEvent?, ?service: CameraServiceUpdateEvent?, ?linked_device: Hash[String, untyped]?) -> CameraConfigUpdateEventValues
+          def self.from: (Hash[String, untyped] data) -> CameraConfigUpdateEventValues
+        end
+
         class ClipUploadRelatedEvent < Data
           include Sdk::Schema::Value
           extend Sdk::Schema::Value::ClassMethods

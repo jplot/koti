@@ -12,6 +12,9 @@ module Hue
           attr_accessor login_url: String
           attr_accessor api_url: String
           attr_accessor auto_responses_url: String
+          attr_accessor mqtt_host: String
+          attr_accessor mqtt_port: Integer
+          attr_accessor mqtt_ca_file: String
           attr_accessor grpc_target: String
           attr_accessor grpc_credentials: untyped
           attr_accessor open_timeout: Integer | Float

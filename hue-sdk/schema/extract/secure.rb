@@ -183,7 +183,7 @@ module Schema
                        AudioDetectionCameraEvent DoorbellButtonCameraEvent DeviceRemovedEvent BridgeConnectivityEvent
                        DeleteTimelineEntriesEvent PurgeTimelineEvent RefreshTimelineEvent ReportTimelineEntriesEvent
                        SecurityEventInsightsResponse TimelineEventsDelete TimelineEventDelete TimelineEventsReport
-                       TimelineEventReport AllSafeRequest AlarmTriggerRequest]
+                       TimelineEventReport AllSafeRequest AlarmTriggerRequest CameraConfigUpdateEventValues]
       }.freeze
     end
   end

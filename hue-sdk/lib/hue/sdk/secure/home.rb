@@ -69,6 +69,15 @@ module Hue
         # @api public
         def events = Events.new(id)
 
+        # Follows the home over MQTT until the broker ends the connection.
+        #
+        # @param topics [Array<String>] topics under +dt:home/<home>/+
+        # @yieldparam message [Follow::Message]
+        # @return [void]
+        # @raise (see Follow#each)
+        # @api public
+        def follow(topics: Follow::TOPICS, &) = Follow.new(id, topics:).each(&)
+
         # The app lists the homes over gRPC, and no REST path gives them. grpc is loaded here only.
         #
         # @param session [Session]

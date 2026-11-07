@@ -560,5 +560,1203 @@
         }
       }
     }
+  },
+  "cameras": {
+    "ActivityZoneResponse": {
+      "origin": "ActivityZoneResponse",
+      "kind": "response",
+      "fields": {
+        "entire_area": {
+          "type": "Boolean",
+          "required": false
+        },
+        "detection_type": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "area": {
+          "type": {
+            "list": {
+              "class": "DetectionZonePointResponse"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "ActivityZoneUpdate": {
+      "origin": "ActivityZoneUpdate",
+      "kind": "request",
+      "fields": {
+        "entire_area": {
+          "type": "Object",
+          "required": true
+        },
+        "detection_type": {
+          "type": "Object",
+          "required": true
+        },
+        "area": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "CameraBellButtonAutomaticResponseResponse": {
+      "origin": "CameraBellButtonAutomaticResponseResponse",
+      "kind": "response",
+      "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "volume": {
+          "type": "String",
+          "required": false,
+          "values": []
+        },
+        "playback_delay": {
+          "type": "String",
+          "required": false,
+          "values": []
+        },
+        "url": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "category_id": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "response_id": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        }
+      }
+    },
+    "CameraBellButtonAutomaticResponseUpdate": {
+      "origin": "CameraBellButtonAutomaticResponseUpdate",
+      "kind": "request",
+      "fields": {
+        "enabled": {
+          "type": "Object",
+          "required": false
+        },
+        "volume": {
+          "type": "Object",
+          "required": false
+        },
+        "playback_delay": {
+          "type": "Object",
+          "required": false
+        },
+        "url": {
+          "type": "Object",
+          "required": false
+        },
+        "category_id": {
+          "type": "Object",
+          "required": false
+        },
+        "response_id": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "CameraBellButtonChimeSoundResponse": {
+      "origin": "CameraBellButtonChimeSoundResponse",
+      "kind": "response",
+      "fields": {
+        "sound": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "volume": {
+          "type": "String",
+          "required": false,
+          "values": []
+        }
+      }
+    },
+    "CameraBellButtonChimeSoundUpdate": {
+      "origin": "CameraBellButtonChimeSoundUpdate",
+      "kind": "request",
+      "fields": {
+        "sound": {
+          "type": "Object",
+          "required": false
+        },
+        "volume": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "CameraBellButtonResponse": {
+      "origin": "CameraBellButtonResponse",
+      "kind": "response",
+      "fields": {
+        "chime": {
+          "type": {
+            "class": "CameraBellButtonChimeSoundResponse"
+          },
+          "required": true
+        },
+        "automatic_response": {
+          "type": {
+            "class": "CameraBellButtonAutomaticResponseResponse"
+          },
+          "required": false
+        }
+      }
+    },
+    "CameraBellButtonUpdate": {
+      "origin": "CameraBellButtonUpdate",
+      "kind": "request",
+      "fields": {
+        "chime": {
+          "type": "Object",
+          "required": false
+        },
+        "automatic_response": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "CameraCameraServiceResponse": {
+      "origin": "CameraCameraServiceResponse",
+      "kind": "response",
+      "fields": {
+        "night_vision": {
+          "type": "Boolean",
+          "required": false
+        },
+        "video_quality": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "hdr": {
+          "type": "Boolean",
+          "required": false
+        },
+        "face_blur": {
+          "type": "Boolean",
+          "required": false
+        },
+        "clips_recording": {
+          "type": "Boolean",
+          "required": false
+        },
+        "clips_duration": {
+          "type": "String",
+          "required": false,
+          "values": []
+        },
+        "clips_cooldown": {
+          "type": "String",
+          "required": false,
+          "values": []
+        },
+        "activity_zones": {
+          "type": {
+            "list": {
+              "class": "ActivityZoneResponse"
+            }
+          },
+          "required": false
+        },
+        "privacy_zones": {
+          "type": {
+            "list": {
+              "class": "PrivacyZoneResponse"
+            }
+          },
+          "required": false
+        },
+        "package_detection_zones": {
+          "type": {
+            "list": {
+              "class": "PackageDetectionZoneResponse"
+            }
+          },
+          "required": false
+        },
+        "lighting_zones": {
+          "type": {
+            "list": {
+              "class": "LightingZoneResponse"
+            }
+          },
+          "required": false
+        },
+        "e2ee": {
+          "type": {
+            "class": "E2eeResponse"
+          },
+          "required": false
+        }
+      }
+    },
+    "CameraCameraServiceUpdate": {
+      "origin": "CameraCameraServiceUpdate",
+      "kind": "request",
+      "fields": {
+        "night_vision": {
+          "type": "Object",
+          "required": false
+        },
+        "video_quality": {
+          "type": "Object",
+          "required": true
+        },
+        "hdr": {
+          "type": "Object",
+          "required": false
+        },
+        "face_blur": {
+          "type": "Object",
+          "required": false
+        },
+        "clips_recording": {
+          "type": "Object",
+          "required": false
+        },
+        "clips_duration": {
+          "type": "Object",
+          "required": false
+        },
+        "clips_cooldown": {
+          "type": "Object",
+          "required": false
+        },
+        "activity_zones": {
+          "type": "Object",
+          "required": false
+        },
+        "privacy_zones": {
+          "type": "Object",
+          "required": false
+        },
+        "package_detection_zones": {
+          "type": "Object",
+          "required": false
+        },
+        "lighting_zones": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "CameraConfigMetadataUpdate": {
+      "origin": "CameraConfigMetadataUpdate",
+      "kind": "request",
+      "fields": {
+        "name": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "CameraConfigUpdate": {
+      "origin": "CameraConfigUpdate",
+      "kind": "request",
+      "fields": {
+        "enabled": {
+          "type": "Object",
+          "required": false
+        },
+        "metadata": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "CameraHomeKitResponse": {
+      "origin": "CameraHomeKitResponse",
+      "kind": "response",
+      "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "last_used": {
+          "type": {
+            "class": "HomeKitLastUsed"
+          },
+          "required": false
+        },
+        "status": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "unpaired",
+            "pairing",
+            "paired"
+          ]
+        },
+        "provisioning_source": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "in_field",
+            "factory"
+          ]
+        }
+      }
+    },
+    "CameraLinkedDeviceMetadataResponse": {
+      "origin": "CameraLinkedDeviceMetadataResponse",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "archetype": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "CameraLinkedDeviceMetadataUpdate": {
+      "origin": "CameraLinkedDeviceMetadataUpdate",
+      "kind": "request",
+      "fields": {
+        "name": {
+          "type": "Object",
+          "required": false
+        },
+        "archetype": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "CameraLinkedDeviceProductDataResponse": {
+      "origin": "CameraLinkedDeviceProductDataResponse",
+      "kind": "response",
+      "fields": {
+        "manufacturer_name": {
+          "type": "String",
+          "required": true
+        },
+        "model_id": {
+          "type": "String",
+          "required": true
+        },
+        "product_name": {
+          "type": "String",
+          "required": true
+        },
+        "software_version": {
+          "type": "String",
+          "required": true
+        },
+        "product_archetype": {
+          "type": "String",
+          "required": true
+        },
+        "certified": {
+          "type": "Boolean",
+          "required": true
+        },
+        "hardware_platform_type": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "CameraLinkedDeviceResponse": {
+      "origin": "CameraLinkedDeviceResponse",
+      "kind": "response",
+      "fields": {
+        "product_data": {
+          "type": {
+            "class": "CameraLinkedDeviceProductDataResponse"
+          },
+          "required": true
+        },
+        "metadata": {
+          "type": {
+            "class": "CameraLinkedDeviceMetadataResponse"
+          },
+          "required": true
+        },
+        "services": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        }
+      }
+    },
+    "CameraLinkedDeviceUpdate": {
+      "origin": "CameraLinkedDeviceUpdate",
+      "kind": "request",
+      "fields": {
+        "metadata": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "CameraMetadataResponse": {
+      "origin": "CameraMetadataResponse",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "archetype": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        }
+      }
+    },
+    "CameraMicrophoneResponse": {
+      "origin": "CameraMicrophoneResponse",
+      "kind": "response",
+      "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "smoke_alarm_detection": {
+          "type": {
+            "class": "CameraSmokeAlarmDetectionResponse"
+          },
+          "required": false
+        }
+      }
+    },
+    "CameraMicrophoneUpdate": {
+      "origin": "CameraMicrophoneUpdate",
+      "kind": "request",
+      "fields": {
+        "enabled": {
+          "type": "Object",
+          "required": false
+        },
+        "smoke_alarm_detection": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "CameraMotionSensitivityResponse": {
+      "origin": "CameraMotionSensitivityResponse",
+      "kind": "response",
+      "fields": {
+        "sensitivity": {
+          "type": "String",
+          "required": false,
+          "values": []
+        },
+        "sensitivity_max": {
+          "type": "String",
+          "required": false,
+          "values": []
+        }
+      }
+    },
+    "CameraMotionSensitivityUpdate": {
+      "origin": "CameraMotionSensitivityUpdate",
+      "kind": "request",
+      "fields": {
+        "sensitivity": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    },
+    "CameraPowerResponse": {
+      "origin": "CameraPowerResponse",
+      "kind": "response",
+      "fields": {
+        "power_state": {
+          "type": {
+            "class": "CameraPowerStateResponse"
+          },
+          "required": true
+        }
+      }
+    },
+    "CameraPowerStateResponse": {
+      "origin": "CameraPowerStateResponse",
+      "kind": "response",
+      "fields": {
+        "battery_level": {
+          "type": "String",
+          "required": false,
+          "values": []
+        },
+        "battery_state": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "charging": {
+          "type": "Boolean",
+          "required": false
+        },
+        "battery_healthy": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "CameraProductDataResponse": {
+      "origin": "CameraProductDataResponse",
+      "kind": "response",
+      "fields": {
+        "model_id": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "product_name": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "manufacturer_name": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "software_version": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "product_archetype": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        }
+      }
+    },
+    "CameraResponse": {
+      "origin": "CameraResponse",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "metadata": {
+          "type": {
+            "class": "CameraMetadataResponse"
+          },
+          "required": true
+        },
+        "product_data": {
+          "type": {
+            "class": "CameraProductDataResponse"
+          },
+          "required": true
+        },
+        "service": {
+          "type": {
+            "class": "CameraServiceResponse"
+          },
+          "required": true
+        },
+        "timezone": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "linked_device": {
+          "type": {
+            "map": {
+              "class": "CameraLinkedDeviceResponse"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "CameraServiceResponse": {
+      "origin": "CameraServiceResponse",
+      "kind": "response",
+      "fields": {
+        "wifi_connectivity": {
+          "type": {
+            "map": {
+              "class": "CameraWifiConnectivityResponse"
+            }
+          },
+          "required": false
+        },
+        "zigbee_connectivity": {
+          "type": {
+            "map": {
+              "class": "CameraZigbeeConnectivityResponse"
+            }
+          },
+          "required": false
+        },
+        "camera": {
+          "type": {
+            "map": {
+              "class": "CameraCameraServiceResponse"
+            }
+          },
+          "required": false
+        },
+        "microphone": {
+          "type": {
+            "map": {
+              "class": "CameraMicrophoneResponse"
+            }
+          },
+          "required": false
+        },
+        "speaker": {
+          "type": {
+            "map": {
+              "class": "CameraSpeakerResponse"
+            }
+          },
+          "required": false
+        },
+        "device_power": {
+          "type": {
+            "map": {
+              "class": "CameraPowerResponse"
+            }
+          },
+          "required": false
+        },
+        "motion": {
+          "type": {
+            "map": {
+              "class": "CameraMotionSensitivityResponse"
+            }
+          },
+          "required": false
+        },
+        "bell_button": {
+          "type": {
+            "map": {
+              "class": "CameraBellButtonResponse"
+            }
+          },
+          "required": false
+        },
+        "homekit": {
+          "type": {
+            "map": {
+              "class": "CameraHomeKitResponse"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "CameraSmokeAlarmDetectionResponse": {
+      "origin": "CameraSmokeAlarmDetectionResponse",
+      "kind": "response",
+      "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": false
+        }
+      }
+    },
+    "CameraSmokeAlarmDetectionUpdate": {
+      "origin": "CameraSmokeAlarmDetectionUpdate",
+      "kind": "request",
+      "fields": {
+        "enabled": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "CameraSpeakerMuteResponse": {
+      "origin": "CameraSpeakerMuteResponse",
+      "kind": "response",
+      "fields": {
+        "mute": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        }
+      }
+    },
+    "CameraSpeakerMuteUpdate": {
+      "origin": "CameraSpeakerMuteUpdate",
+      "kind": "request",
+      "fields": {
+        "mute": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "CameraSpeakerResponse": {
+      "origin": "CameraSpeakerResponse",
+      "kind": "response",
+      "fields": {
+        "signaling": {
+          "type": {
+            "class": "CameraSpeakerSignalingResponse"
+          },
+          "required": false
+        },
+        "owner": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "mute": {
+          "type": {
+            "class": "CameraSpeakerMuteResponse"
+          },
+          "required": false
+        },
+        "alarm": {
+          "type": {
+            "class": "CameraSpeakerSoundResponse"
+          },
+          "required": false
+        },
+        "chime": {
+          "type": {
+            "class": "CameraSpeakerSoundResponse"
+          },
+          "required": false
+        }
+      }
+    },
+    "CameraSpeakerSignalingResponse": {
+      "origin": "CameraSpeakerSignalingResponse",
+      "kind": "response",
+      "fields": {
+        "signal_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "status": {
+          "type": {
+            "class": "CameraSpeakerSignalingStatusResponse"
+          },
+          "required": true
+        }
+      }
+    },
+    "CameraSpeakerSignalingStatusResponse": {
+      "origin": "CameraSpeakerSignalingStatusResponse",
+      "kind": "response",
+      "fields": {
+        "signal": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        }
+      }
+    },
+    "CameraSpeakerSoundResponse": {
+      "origin": "CameraSpeakerSoundResponse",
+      "kind": "response",
+      "fields": {
+        "sound_values": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "status": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        }
+      }
+    },
+    "CameraSpeakerUpdate": {
+      "origin": "CameraSpeakerUpdate",
+      "kind": "request",
+      "fields": {
+        "mute": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "CameraWifiConnectivityResponse": {
+      "origin": "CameraWifiConnectivityResponse",
+      "kind": "response",
+      "fields": {
+        "strength": {
+          "type": "Numeric",
+          "required": false
+        },
+        "ssid": {
+          "type": "String",
+          "required": false
+        },
+        "ip_address": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "CameraZigbeeConnectivityResponse": {
+      "origin": "CameraZigbeeConnectivityResponse",
+      "kind": "response",
+      "fields": {
+        "status": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "mac_address": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "channel": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "extended_pan_id": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        }
+      }
+    },
+    "DetectionZonePointResponse": {
+      "origin": "DetectionZonePointResponse",
+      "kind": "response",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "DetectionZonePointUpdate": {
+      "origin": "DetectionZonePointUpdate",
+      "kind": "request",
+      "fields": {
+        "x": {
+          "type": "Numeric",
+          "required": true
+        },
+        "y": {
+          "type": "Numeric",
+          "required": true
+        }
+      }
+    },
+    "E2eeResponse": {
+      "origin": "E2eeResponse",
+      "kind": "response",
+      "fields": {
+        "live_view": {
+          "type": {
+            "class": "LiveViewResponse"
+          },
+          "required": true
+        }
+      }
+    },
+    "FetchedAutoResponseCategory": {
+      "origin": "FetchedAutoResponseCategory",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "type": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "FetchedAutoResponseConfiguration": {
+      "origin": "FetchedAutoResponseConfiguration",
+      "kind": "response",
+      "fields": {
+        "responses": {
+          "type": "Hash",
+          "required": true
+        },
+        "categories": {
+          "type": {
+            "list": {
+              "class": "FetchedAutoResponseCategory"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "HomeKitLastUsed": {
+      "origin": "HomeKitLastUsed",
+      "kind": "response",
+      "fields": {
+        "live_view": {
+          "type": "String",
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        }
+      }
+    },
+    "LightingZoneResponse": {
+      "origin": "LightingZoneResponse",
+      "kind": "response",
+      "fields": {
+        "entire_area": {
+          "type": "Boolean",
+          "required": true
+        },
+        "detection_type": {
+          "type": {
+            "list": "String"
+          },
+          "required": false,
+          "values": [
+            "home_dashboard_edit_mode"
+          ]
+        },
+        "area": {
+          "type": {
+            "list": {
+              "class": "DetectionZonePointResponse"
+            }
+          },
+          "required": false
+        }
+      }
+    },
+    "LightingZoneUpdate": {
+      "origin": "LightingZoneUpdate",
+      "kind": "request",
+      "fields": {
+        "entire_area": {
+          "type": "Object",
+          "required": true
+        },
+        "detection_type": {
+          "type": "Object",
+          "required": true
+        },
+        "area": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "LiveViewResponse": {
+      "origin": "LiveViewResponse",
+      "kind": "response",
+      "fields": {
+        "enabled": {
+          "type": "Boolean",
+          "required": true
+        }
+      }
+    },
+    "PackageDetectionZoneResponse": {
+      "origin": "PackageDetectionZoneResponse",
+      "kind": "response",
+      "fields": {
+        "area": {
+          "type": {
+            "list": {
+              "class": "DetectionZonePointResponse"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "PackageDetectionZoneUpdate": {
+      "origin": "PackageDetectionZoneUpdate",
+      "kind": "request",
+      "fields": {
+        "enabled": {
+          "type": "Object",
+          "required": true
+        },
+        "area": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "PrivacyZoneResponse": {
+      "origin": "PrivacyZoneResponse",
+      "kind": "response",
+      "fields": {
+        "area": {
+          "type": {
+            "list": {
+              "class": "DetectionZonePointResponse"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "PrivacyZoneUpdate": {
+      "origin": "PrivacyZoneUpdate",
+      "kind": "request",
+      "fields": {
+        "enabled": {
+          "type": "Object",
+          "required": true
+        },
+        "area": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "SpeakerAlarmCommand": {
+      "origin": "SpeakerAlarmCommand",
+      "kind": "request",
+      "fields": {
+        "sound": {
+          "type": "Object",
+          "required": true
+        },
+        "duration": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "SpeakerChimeCommand": {
+      "origin": "SpeakerChimeCommand",
+      "kind": "request",
+      "fields": {
+        "sound": {
+          "type": "Object",
+          "required": true
+        },
+        "volume": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "SpeakerCommand": {
+      "origin": "SpeakerCommand",
+      "kind": "request",
+      "fields": {
+        "alarm": {
+          "type": "Object",
+          "required": false
+        },
+        "chime": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "SpeakerCommandVolume": {
+      "origin": "SpeakerCommandVolume",
+      "kind": "request",
+      "fields": {
+        "level": {
+          "type": "Integer",
+          "required": true
+        }
+      }
+    }
   }
 }

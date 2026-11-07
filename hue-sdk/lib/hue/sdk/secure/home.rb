@@ -65,6 +65,10 @@ module Hue
         # @api public
         def cameras = Cameras.new(id)
 
+        # @return [Events] the timeline of the home
+        # @api public
+        def events = Events.new(id)
+
         # The app lists the homes over gRPC, and no REST path gives them. grpc is loaded here only.
         #
         # @param session [Session]

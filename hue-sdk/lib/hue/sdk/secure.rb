@@ -10,11 +10,13 @@ require_relative 'secure/wire'
 require_relative 'secure/home'
 require_relative 'secure/schema/arm'
 require_relative 'secure/schema/cameras'
+require_relative 'secure/schema/events'
 require_relative 'secure/arm'
 require_relative 'secure/schedules'
 require_relative 'secure/geofence'
 require_relative 'secure/camera'
 require_relative 'secure/cameras'
+require_relative 'secure/events'
 
 module Hue
   module Sdk

@@ -175,7 +175,15 @@ module Schema
                         CameraSmokeAlarmDetectionUpdate CameraSpeakerUpdate CameraSpeakerMuteUpdate
                         CameraBellButtonUpdate CameraBellButtonChimeSoundUpdate CameraBellButtonAutomaticResponseUpdate
                         CameraMotionSensitivityUpdate SpeakerCommand SpeakerChimeCommand SpeakerAlarmCommand
-                        SpeakerCommandVolume FetchedAutoResponseConfiguration]
+                        SpeakerCommandVolume FetchedAutoResponseConfiguration],
+        'events' => %w[MessageEventMetaData MessageEventTraceInfo ActionAllSafeEvent ArmEvent TriggerEvent GeofenceEvent
+                       MotionClipV2Event BatteryClipV2Event ContactClipV2Event TamperClipV2Event
+                       ZigbeeConnectivityClipV2Event MotionAreaClipV2Event MotionAreaConfigurationClipV2Event
+                       MotionCameraEvent ClipsUploadCameraEvent WifiConnectivityCameraEvent BatteryCameraEvent
+                       AudioDetectionCameraEvent DoorbellButtonCameraEvent DeviceRemovedEvent BridgeConnectivityEvent
+                       DeleteTimelineEntriesEvent PurgeTimelineEvent RefreshTimelineEvent ReportTimelineEntriesEvent
+                       SecurityEventInsightsResponse TimelineEventsDelete TimelineEventDelete TimelineEventsReport
+                       TimelineEventReport AllSafeRequest AlarmTriggerRequest]
       }.freeze
     end
   end

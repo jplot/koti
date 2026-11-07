@@ -1,0 +1,21 @@
+module Hue
+  module Sdk
+    module Secure
+      extend Configuration
+
+      LOCK: Thread::Mutex
+
+      self.@session: Session?
+
+      def self.session: () -> Session
+
+      def self.client: () -> Client
+
+      def self.homes: () -> Array[Home]
+
+      def self.home: (String id) -> Home
+
+      def self.configure: () { (Configuration::Settings) -> void } -> void
+    end
+  end
+end

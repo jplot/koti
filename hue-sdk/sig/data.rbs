@@ -1,0 +1,4 @@
+# The core signature leaves out the keywords Data#initialize takes.
+class Data
+  def initialize: (**untyped) -> void
+end

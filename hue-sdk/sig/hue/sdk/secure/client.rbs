@@ -1,0 +1,23 @@
+module Hue
+  module Sdk
+    module Secure
+      class Client
+        @session: Session
+
+        def initialize: (Session session) -> void
+
+        def get: (String path, ?query: Hash[String | Symbol, untyped], ?headers: Hash[String, String]) -> Http::Response
+
+        def post: (String path, ?body: untyped, ?query: Hash[String | Symbol, untyped], ?headers: Hash[String, String]) -> Http::Response
+
+        def put: (String path, ?body: untyped, ?query: Hash[String | Symbol, untyped], ?headers: Hash[String, String]) -> Http::Response
+
+        def delete: (String path, ?query: Hash[String | Symbol, untyped], ?headers: Hash[String, String]) -> Http::Response
+
+        private
+
+        def request: (Symbol method, String path, untyped body, Hash[String | Symbol, untyped] query, Hash[String, String] headers) -> Http::Response
+      end
+    end
+  end
+end

@@ -1,7 +1,8 @@
 # hue-sdk
 
 Unofficial Ruby SDK for the Philips Hue CLIP API v2. It talks to one bridge on the local
-network, without any cloud service.
+network, without any cloud service. Only Hue Secure goes through the Hue account's cloud; it is loaded
+apart.
 
 > **Unofficial.** This gem is not affiliated with, endorsed by or sponsored by Signify.
 > Philips Hue is a trademark of Signify.
@@ -9,7 +10,7 @@ network, without any cloud service.
 ## Requirements
 
 - Ruby 4.0 or later; no runtime dependency outside the standard library, except the `ffi` gem
-  for Entertainment streaming.
+  for Entertainment streaming and the `grpc` gem to list the Hue Secure homes.
 - A Hue bridge speaking CLIP v2: Hue Bridge (v2) or Hue Bridge Pro.
 
 ## Installation
@@ -358,15 +359,74 @@ Ruby's OpenSSL extension has no DTLS, so the SDK binds through `ffi` the libssl 
 is linked with, wherever it is installed. Set `HUE_SDK_LIBSSL` to the path of another libssl
 (OpenSSL 3 or 4) to use that one instead.
 
+## Hue Secure
+
+> **Never tested with a Hue Secure device.** The requests follow the code of the Hue app; only the
+> login, the renewal and the list of homes were tried, on an account without Hue Secure.
+
+Hue Secure (arming, cameras and their events) lives in the Hue account's cloud, not on the
+bridge. `require 'hue/sdk/secure'` loads it; `require 'hue/sdk'` does not.
+
+The account logs in through Auth0 with the Hue app's client id. The gem does not ship that id:
+the caller gives it as `client_id`. Logging in takes two steps, since the page ends on an address
+only the app opens:
+
+```ruby
+require 'hue/sdk/secure'
+
+Hue::Sdk::Secure.configure do |config|
+  config.client_id = ENV.fetch('HUE_ACCOUNT_CLIENT_ID')
+  config.token_file = 'hue-account.json'   # written in mode 0600
+end
+
+session = Hue::Sdk::Secure.session
+puts session.authorize_url   # open it and log in
+session.exchange(code)
+```
+
+Once logged in, the browser fails to open
+`hue-auth0://auth.meethue.com/com.signify.hue/callback?code=…&state=…`; the developer tools of
+the browser show that address, whose `code` goes to `exchange`. When the code comes back to
+another process, keep `session.verifier` and pass it as `exchange(code, verifier:)`.
+
+The token is saved in `token_file`, replaced whole in mode 0600, or given through `token` (from
+`Token#to_json`). Auth0 rotates the refresh token on each renewal: the gem keeps `token` current,
+for the caller to save it again, and a token file serves one process. The token is renewed 30 s
+before it expires, once across threads: the threads that waited on a refused renewal raise its
+`AuthenticationError`, and the saved token stays. No request is sent twice.
+
+```ruby
+# Gemfile: gem 'grpc'
+Hue::Sdk::Secure.homes.map { |home| [home.name, home.security_activated] }
+
+home = Hue::Sdk::Secure.home('5c3e…')   # by its id, without a request
+Hue::Sdk::Secure.client.get("security/arm-manager/v1/home/#{home.id}/arm/state").body
+```
+
+The app lists the homes over gRPC: `homes` needs the `grpc` gem, nothing else does. `client`
+reaches any path under `api_url`, or an absolute address, with the token, and gives the status,
+the body (parsed when it is JSON) and the headers. The gem names itself in `User-Agent` and sends
+none of the app's own headers.
+
+| Setting | Default | Purpose |
+|---|---|---|
+| `client_id` | — | Auth0 client id of the Hue app |
+| `token` / `token_file` | — | saved token; `token` is read first |
+| `login_url` | `https://login.meethue.com` | OpenID discovery of the login |
+| `api_url` | `https://api.account.meethue.com` | base of the paths given to `client` |
+| `grpc_target` | `api.account.meethue.com:443` | gRPC service listing the homes |
+| `grpc_credentials` | TLS with the system's roots | `:this_channel_is_insecure` for a test server |
+| `open_timeout` / `read_timeout` | `5` / `10` s | each request |
+
 ## Errors
 
 | Error | Raised when |
 |---|---|
-| `Hue::Sdk::ConnectionError` | the bridge cannot be reached, or drops the connection |
+| `Hue::Sdk::ConnectionError` | the bridge or the Hue cloud cannot be reached, or drops the connection |
 | `Hue::Sdk::TLSError` | the bridge certificate fails the CA or bridge id check |
-| `Hue::Sdk::AuthenticationError` | the application key is missing, unknown or revoked |
+| `Hue::Sdk::AuthenticationError` | the application key is missing, unknown or revoked; the Hue account has no token, or refuses it |
 | `Hue::Sdk::LinkButtonNotPressedError` | pairing without pressing the link button |
-| `Hue::Sdk::ResponseError` | the bridge answers with an error status, partial success (207) included; carries `status` and `errors` |
+| `Hue::Sdk::ResponseError` | the bridge or the Hue cloud answers with an error status, partial success (207) included; carries `status` and `errors` |
 | `Hue::Sdk::NotFoundError` | the resource does not exist (a `ResponseError`) |
 | `Hue::Sdk::RateLimitError` | the bridge asks to slow down (a `ResponseError`) |
 
@@ -398,6 +458,10 @@ refused.
 HUE_LIVE=1 HUE_HOST=192.0.2.10 HUE_BRIDGE_ID=ECB5FAFFFE000001 HUE_APPLICATION_KEY=… \
   bundle exec rspec --tag live
 ```
+
+The live specs of Hue Secure read the account given by `HUE_ACCOUNT_CLIENT_ID` and
+`HUE_ACCOUNT_TOKEN_FILE`, a token saved by the gem. They refuse any request other than `GET`,
+except the renewal of the token.
 
 ## License
 

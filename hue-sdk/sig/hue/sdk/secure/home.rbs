@@ -1,0 +1,45 @@
+module Hue
+  module Sdk
+    module Secure
+      class Home < Data
+        LIST: String
+
+        ABSENT: Hash[Symbol, nil]
+
+        attr_reader id: String
+        attr_reader name: String?
+        attr_reader user_count: Integer?
+        attr_reader max_users: Integer?
+        attr_reader admin_count: Integer?
+        attr_reader revision: Integer?
+        attr_reader permissions: Array[String]?
+        attr_reader country_code: String?
+        attr_reader time_zone: String?
+        attr_reader security_activated: bool?
+        attr_reader bridges: Array[String]?
+
+        def self.new: (id: String, ?name: String?, ?user_count: Integer?, ?max_users: Integer?, ?admin_count: Integer?,
+                       ?revision: Integer?, ?permissions: Array[String]?, ?country_code: String?, ?time_zone: String?,
+                       ?security_activated: bool?, ?bridges: Array[String]?) -> Home
+
+        def self.members: () -> Array[Symbol]
+
+        def initialize: (id: String, **untyped attributes) -> void
+
+        def self.list: (Session session) -> Array[Home]
+
+        TEXTS: Hash[Symbol, Integer]
+
+        NUMBERS: Hash[Symbol, Integer]
+
+        def self.listed: (Session session) -> Array[Home]
+
+        def self.stub: () -> GRPC::ClientStub
+
+        def self.translated: (GRPC::BadStatus status) -> Error
+
+        def self.decode: (String bytes) -> Home
+      end
+    end
+  end
+end

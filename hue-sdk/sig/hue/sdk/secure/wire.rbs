@@ -1,0 +1,21 @@
+module Hue
+  module Sdk
+    module Secure
+      module Wire
+        def self?.decode: (String bytes) -> Hash[Integer, Array[Integer | String]]
+
+        def self?.texts: (Hash[Integer, Array[Integer | String]] fields, Integer tag) -> Array[String]
+
+        def self?.text: (Hash[Integer, Array[Integer | String]] fields, Integer tag) -> String
+
+        def self?.number: (Hash[Integer, Array[Integer | String]] fields, Integer tag) -> Integer
+
+        def self?.value: (String bytes, Integer type, Integer at) -> [Integer | String, Integer]
+
+        def self?.varint: (String bytes, Integer at) -> [Integer, Integer]
+
+        def self?.slice: (String bytes, Integer at, Integer length) -> [String, Integer]
+      end
+    end
+  end
+end

@@ -1,0 +1,31 @@
+module Hue
+  module Sdk
+    module Secure
+      module Http
+        REQUESTS: Hash[Symbol, singleton(Net::HTTPRequest)]
+
+        NETWORK_ERRORS: Array[singleton(Exception)]
+
+        ERRORS: Hash[Integer, singleton(ResponseError)]
+
+        class Response < Data
+          attr_reader status: Integer
+          attr_reader body: untyped
+          attr_reader headers: Hash[String, String]
+
+          def self.new: (status: Integer, body: untyped, headers: Hash[String, String]) -> Response
+        end
+
+        def self?.request: (Symbol method, String url, ?headers: Hash[String, String], ?body: String?) -> Response
+
+        def self?.exchange: (URI::HTTP uri, Net::HTTPRequest request) -> Net::HTTPResponse
+
+        def self?.parse: (Net::HTTPResponse answer) -> untyped
+
+        def self?.refuse: (Response response) -> bot
+
+        def self?.descriptions: (untyped body) -> Array[String]
+      end
+    end
+  end
+end

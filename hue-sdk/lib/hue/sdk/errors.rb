@@ -5,20 +5,21 @@ module Hue
     # Base class of every error raised by the SDK.
     class Error < StandardError; end
 
-    # The bridge could not be reached, or the connection broke.
+    # The bridge or the Hue cloud could not be reached, or the connection broke.
     class ConnectionError < Error; end
 
     # The bridge certificate is not signed by the Hue root CA, or does not
     # carry the configured bridge id.
     class TLSError < Error; end
 
-    # The application key is missing, unknown to the bridge or revoked.
+    # The application key is missing, unknown to the bridge or revoked; or the Hue account has no token, or
+    # refuses it.
     class AuthenticationError < Error; end
 
     # The link button of the bridge was not pressed before pairing.
     class LinkButtonNotPressedError < Error; end
 
-    # The bridge answered with an error status.
+    # The bridge, or the Hue cloud, answered with an error status.
     class ResponseError < Error
       # @return [Integer] HTTP status returned by the bridge
       attr_reader :status
@@ -28,11 +29,12 @@ module Hue
 
       # @param status [Integer] HTTP status returned by the bridge
       # @param errors [Array<String>] error descriptions returned by the bridge
+      # @param source [String] who answered
       # @api public
-      def initialize(status, errors)
+      def initialize(status, errors, source: 'bridge')
         @status = status
         @errors = errors
-        super("bridge answered #{status}: #{errors.empty? ? 'no description' : errors.join('; ')}")
+        super("#{source} answered #{status}: #{errors.empty? ? 'no description' : errors.join('; ')}")
       end
     end
 

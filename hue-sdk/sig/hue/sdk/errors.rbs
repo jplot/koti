@@ -19,7 +19,7 @@ module Hue
       attr_reader status: Integer
       attr_reader errors: Array[String]
 
-      def initialize: (Integer status, Array[String] errors) -> void
+      def initialize: (Integer status, Array[String] errors, ?source: String) -> void
     end
 
     class NotFoundError < ResponseError

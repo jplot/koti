@@ -13,6 +13,8 @@ require_relative 'secure/schema/cameras'
 require_relative 'secure/arm'
 require_relative 'secure/schedules'
 require_relative 'secure/geofence'
+require_relative 'secure/camera'
+require_relative 'secure/cameras'
 
 module Hue
   module Sdk
@@ -49,6 +51,15 @@ module Hue
       # @return [Home] the home of this id, without a request
       # @api public
       def self.home(id) = Home.new(id:)
+
+      # @return [Schema::FetchedAutoResponseConfiguration] the automatic responses a doorbell may play, chosen on the
+      #   camera with {Camera#update_bell_button}
+      # @raise (see Http.request)
+      # @api public
+      def self.auto_responses
+        manifest = client.get("#{config.auto_responses_url}/automatic_response/manifest.json").body
+        Schema::FetchedAutoResponseConfiguration.from(manifest)
+      end
 
       # Changes the settings; the next session reads them.
       #

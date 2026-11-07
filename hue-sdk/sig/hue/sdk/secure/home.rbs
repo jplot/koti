@@ -32,6 +32,8 @@ module Hue
 
         def geofence: () -> Geofence
 
+        def cameras: () -> Cameras
+
         def self.list: (Session session) -> Array[Home]
 
         TEXTS: Hash[Symbol, Integer]

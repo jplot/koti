@@ -1,0 +1,22 @@
+module Hue
+  module Sdk
+    module Secure
+      class Cameras
+        @home_id: String
+        @path: String
+
+        def initialize: (String home_id) -> void
+
+        def list: () -> Array[Camera]
+
+        def get: (String id) -> Camera
+
+        def sound_group_alarm: (duration: Integer | Float) -> void
+
+        private
+
+        def camera: (Hash[String, untyped] reported) -> Camera
+      end
+    end
+  end
+end

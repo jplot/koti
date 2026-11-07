@@ -475,9 +475,10 @@ The timeline of a home goes through the data API, as the app's `EventHttpClient`
 The gem reads one page at a time: going through the whole timeline is the caller's.
 
 ```ruby
-page = home.events.page(limit: 20, start_time: Time.now - 86_400)
+range = { limit: 20, start_time: Time.now - 86_400, end_time: Time.now }
+page = home.events.page(**range)
 page.events.each { |message| p [message.type, message.event] }
-page = home.events.page(limit: 20, cursor: page.cursor) if page.cursor   # nil on the last page
+page = home.events.page(**range, cursor: page.cursor) if page.cursor   # the same range; nil on the last page
 
 home.events.last_significant   # the event the app shows first, or nil
 home.events.all_safe(device_timestamp: Time.now)
@@ -494,7 +495,9 @@ reports and purges events, deletes a clip, and sends the alarm triggers.
 `follow` connects to the MQTT broker of Hue Secure as the app does: TLS with ALPN `mqtt` to the one
 root the app pins (Amazon Root CA 1), MQTT 3.1.1, the token in the username of AWS IoT's custom
 authorizer, renewed when it expires within 30 s. It subscribes, never publishes, and yields each
-message until the broker ends the connection; following it again is the caller's.
+message until the broker ends the connection; following it again is the caller's. It pings once 60 s have
+passed since it last sent and raises `ConnectionError` when a ping goes unanswered, acknowledges each message at
+the QoS 1 the app subscribes at, and disconnects when the block stops it. An error the block raises goes through.
 
 ```ruby
 home.follow do |message|
@@ -512,7 +515,7 @@ the app's device and build.
 | Error | Raised when |
 |---|---|
 | `Hue::Sdk::ConnectionError` | the bridge or the Hue cloud cannot be reached, or drops the connection |
-| `Hue::Sdk::TLSError` | the bridge certificate fails the CA or bridge id check |
+| `Hue::Sdk::TLSError` | the bridge certificate fails the CA or bridge id check; the broker of Hue Secure is not the pinned root's, or names another host |
 | `Hue::Sdk::AuthenticationError` | the application key is missing, unknown or revoked; the Hue account has no token, or refuses it |
 | `Hue::Sdk::LinkButtonNotPressedError` | pairing without pressing the link button |
 | `Hue::Sdk::ResponseError` | the bridge or the Hue cloud answers with an error status, partial success (207) included; carries `status` and `errors` |

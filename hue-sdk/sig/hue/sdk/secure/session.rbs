@@ -1,0 +1,39 @@
+module Hue
+  module Sdk
+    module Secure
+      class Session
+        REDIRECT: String
+
+        AUDIENCE: String
+
+        @clock: ^() -> Time
+        @mutex: Thread::Mutex
+
+        attr_reader token: Token?
+        attr_reader verifier: String?
+
+        def initialize: (?clock: ^() -> Time) -> void
+
+        def authorize_url: () -> String
+
+        def exchange: (String code, ?verifier: String?) -> Token
+
+        def current: () -> Token
+
+        def renew: (Token expired) -> Token
+
+        private
+
+        def replaced: (Token expired) -> Token
+
+        def refresh_form: (Token expired) -> Hash[Symbol, String?]
+
+        def issued: (Hash[Symbol, String?] form, ?String? refresh) -> Token
+
+        def endpoint: (String name) -> String
+
+        def client_id: () -> String
+      end
+    end
+  end
+end

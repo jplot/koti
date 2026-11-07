@@ -1,0 +1,26 @@
+module Hue
+  module Sdk
+    module Secure
+      module Configuration
+        class Settings
+          include Singleton
+          def self.instance: () -> Settings
+
+          attr_accessor client_id: String?
+          attr_accessor token: String?
+          attr_accessor token_file: String?
+          attr_accessor login_url: String
+          attr_accessor api_url: String
+          attr_accessor open_timeout: Integer | Float
+          attr_accessor read_timeout: Integer | Float
+
+          def initialize: () -> void
+        end
+
+        def config: () -> Settings
+
+        def configure: () { (Settings) -> void } -> void
+      end
+    end
+  end
+end

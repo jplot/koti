@@ -57,8 +57,10 @@ module Hue
         # @api private
         def exchange(uri, request)
           config = Secure.config
+          # Net::HTTP sends a GET, PUT or DELETE again once when the connection drops before the answer: sending an
+          # arming order twice is the caller's call.
           options = { use_ssl: uri.scheme == 'https', open_timeout: config.open_timeout,
-                      read_timeout: config.read_timeout }
+                      read_timeout: config.read_timeout, max_retries: 0 }
           Net::HTTP.start(uri.host.to_s, uri.port, **options) { it.request(request) }
         rescue *NETWORK_ERRORS => e
           raise ConnectionError, "#{uri.host}: #{e.message}"

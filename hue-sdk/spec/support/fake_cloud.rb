@@ -4,7 +4,8 @@ require 'json'
 require 'socket'
 
 # Plain-HTTP server standing in for the Hue account's cloud. It answers the OpenID discovery unless the spec's
-# handler answers first, and keeps every request it receives.
+# handler answers first, closes the connection without an answer when the handler returns :drop, and keeps every
+# request it receives.
 class FakeCloud
   Request = Data.define(:verb, :path, :headers, :body) do
     def form = URI.decode_www_form(body).to_h
@@ -54,7 +55,10 @@ class FakeCloud
   def serve(socket)
     request = read_request(socket)
     @mutex.synchronize { @requests << request }
-    status, headers, body = @handler.call(request) || answer(request)
+    answer = @handler.call(request) || answer(request)
+    return if answer == :drop
+
+    status, headers, body = answer
     lines = ["HTTP/1.1 #{status} Fake", "Content-Length: #{body.bytesize}",
              *headers.map { |name, value| "#{name}: #{value}" }]
     socket.write("#{lines.join("\r\n")}\r\n\r\n#{body}")

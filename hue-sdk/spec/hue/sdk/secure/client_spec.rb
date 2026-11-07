@@ -58,6 +58,13 @@ RSpec.describe Hue::Sdk::Secure::Client do
       .to eq(['application/json', nil, 'application/json'])
   end
 
+  it 'sends a request once, even when the connection drops before the answer', :aggregate_failures do
+    answers.push(:drop)
+    expect { client.put('security/arm-manager/v1/home/home-1/arm/state', body: {}) }
+      .to raise_error(Hue::Sdk::ConnectionError)
+    expect(cloud.requests.size).to eq(1)
+  end
+
   it 'gives an empty body as nil' do
     answers.push([204, {}, ''])
     expect(client.delete('security/arm-manager/v1/home/home-1/arm').body).to be_nil

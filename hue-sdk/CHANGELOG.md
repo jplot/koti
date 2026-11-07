@@ -65,3 +65,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   sounds the alarm and removes the arming or its geofence parts; `home.schedules` and `home.geofence` list, create,
   update and delete the arming schedules and the phones whose presence arms the home. Their answers and requests are
   classes of `Hue::Sdk::Secure::Schema`, generated from the app's into `schema/secure.json`.
+- Hue Secure cameras, never tested with a device: `home.cameras` lists the cameras of a home, keeping one the gem
+  cannot read, reads one, and sounds the speakers of the home together; a camera updates its settings and services,
+  takes a snapshot, wakes up, reboots, resets, and sounds a chime or its siren. `Hue::Sdk::Secure.auto_responses`
+  reads the responses a doorbell may play. Their classes come from the app's, which decode with `checked: true`.

@@ -444,6 +444,28 @@ own (see [schema/README.md](schema/README.md)). A request leaving a required fie
 `ArgumentError` before anything is sent. `arm.sound_alarm` sends the one body the app sends; when
 part of the devices do not sound, the cloud answers 207 and the gem raises `ResponseError`.
 
+### Cameras
+
+The cameras of a home follow the app's `CamerasHttpClient`:
+
+```ruby
+camera = home.cameras.list.first
+camera.attributes&.metadata&.name   # => "Front door"; attributes is nil for a camera the gem cannot read
+camera.data                         # => the body the cloud reported, as it came
+camera.update_motion(Hue::Sdk::Secure::Schema::CameraMotionSensitivityUpdate.new(sensitivity: 3))
+camera.snapshot
+camera.sound_chime(sound: 'ding_dong', volume: 0.6)   # volume from 0.0 to 1.0
+home.cameras.sound_group_alarm(duration: 30)          # seconds
+
+Hue::Sdk::Secure.auto_responses.categories   # the responses a doorbell may play
+```
+
+A camera also updates its camera, microphone, speaker and bell button services and its linked
+devices, wakes up, reboots and resets. The siren of `sound_alarm` lasts the 10 s the app sends.
+A camera out of reach answers 521, and a partial group 207: both raise `ResponseError`. The app
+reads a camera it cannot decode as a wired camera; the gem keeps it with `attributes` nil and its
+`data` whole.
+
 ## Errors
 
 | Error | Raised when |

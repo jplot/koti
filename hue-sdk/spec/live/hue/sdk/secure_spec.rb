@@ -39,4 +39,17 @@ RSpec.describe Hue::Sdk::Secure, :live do
     expect(read).to match([be_a(Hue::Sdk::Secure::Schema::ArmDisarmResponse).or(eq(:none)),
                            be_an(Array).or(eq(:none)), be_an(Array).or(eq(:none))])
   end
+
+  it 'lists the cameras of the first home, which may have none' do
+    cameras = begin
+      described_class.homes.first.cameras.list
+    rescue Hue::Sdk::NotFoundError
+      []
+    end
+    expect(cameras).to all(be_a(Hue::Sdk::Secure::Camera))
+  end
+
+  it 'reads the automatic responses a doorbell may play' do
+    expect(described_class.auto_responses.categories).to all(be_a(Hue::Sdk::Secure::Schema::FetchedAutoResponseCategory))
+  end
 end

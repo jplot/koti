@@ -1,0 +1,43 @@
+module Hue
+  module Sdk
+    module Secure
+      class Camera
+        @path: String
+        @speaker: String
+
+        attr_reader id: String
+        attr_reader data: Hash[String, untyped]
+
+        def initialize: (String home_id, String id, Hash[String, untyped] data) -> void
+
+        def attributes: () -> Schema::CameraResponse?
+
+        def update: (Schema::CameraConfigUpdate request) -> void
+
+        def update_camera: (Schema::CameraCameraServiceUpdate request) -> void
+
+        def update_microphone: (Schema::CameraMicrophoneUpdate request) -> void
+
+        def update_speaker: (String service, Schema::CameraSpeakerUpdate request) -> void
+
+        def update_bell_button: (String service, Schema::CameraBellButtonUpdate request) -> void
+
+        def update_motion: (Schema::CameraMotionSensitivityUpdate request) -> void
+
+        def update_linked_device: (String id, Schema::CameraLinkedDeviceUpdate request) -> void
+
+        def snapshot: () -> void
+
+        def wake_up: () -> void
+
+        def reboot: () -> void
+
+        def reset: () -> void
+
+        def sound_chime: (sound: String, ?volume: Float?) -> void
+
+        def sound_alarm: () -> void
+      end
+    end
+  end
+end

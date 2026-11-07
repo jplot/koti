@@ -26,6 +26,10 @@ module Hue
           # @return [String] address the paths of {Client} are under (default: +https://api.account.meethue.com+)
           attr_accessor :api_url
 
+          # @return [String] address of the automatic responses of a doorbell
+          #   (default: +https://automaticresponses.eu.secure.meethue.com+)
+          attr_accessor :auto_responses_url
+
           # @return [String] +host:port+ of the gRPC service that lists the homes
           #   (default: +api.account.meethue.com:443+)
           attr_accessor :grpc_target
@@ -47,6 +51,7 @@ module Hue
             @login_url = 'https://login.meethue.com'
             @api_url = 'https://api.account.meethue.com'
             @grpc_target = 'api.account.meethue.com:443'
+            @auto_responses_url = 'https://automaticresponses.eu.secure.meethue.com'
             @open_timeout = 5
             @read_timeout = 10
           end

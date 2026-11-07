@@ -3,11 +3,22 @@ module Hue
     module Secure
       class Follow
         include Enumerable[Message]
+
         TOPICS: Array[String]
 
         NETWORK_ERRORS: Array[singleton(Exception)]
 
         AUTHORIZER: String
+
+        ENDED: String
+
+        REFUSED: Regexp
+
+        class BlockFailure < StandardError
+          attr_reader error: Exception
+
+          def initialize: (Exception error) -> void
+        end
 
         class Message < Data
           attr_reader topic: String
@@ -30,17 +41,27 @@ module Hue
 
         private
 
-        def connect: () -> Mqtt::Link
+        def follow: () { (Message) -> void } -> void
 
-        def hello: (String username) -> String
+        def receive: (MQTT::Client client) { (Message) -> void } -> void
 
-        def transport: [T] () { () -> T } -> T
+        def verdict: (MQTT::Client client, ::Exception error) -> ::Exception
 
-        def acknowledged: ([Integer, String]? packet) -> void
+        def arrival: () { () -> untyped } -> ::Exception?
 
-        def following: (Mqtt::Link link) -> Message?
+        def ends: () -> Array[singleton(::Exception)]
 
-        def message: (Mqtt::Link link, Integer type, String body) -> Message
+        def masked: [T] (Symbol mode) { () -> T } -> T
+
+        def connect: () -> MQTT::Client
+
+        def mqtt_client: (Configuration::Settings config, String username) -> MQTT::Client
+
+        def deliver: (String topic, String payload) { (Message) -> void } -> void
+
+        def translated: (Exception error) -> Error
+
+        def message: (String topic, String payload) -> Message
       end
     end
   end

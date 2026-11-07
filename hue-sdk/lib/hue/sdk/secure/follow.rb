@@ -3,7 +3,7 @@
 require 'json'
 require 'openssl'
 require 'securerandom'
-require 'socket'
+require 'timeout'
 
 module Hue
   module Sdk
@@ -22,6 +22,29 @@ module Hue
 
         AUTHORIZER = 'app?x-amz-customauthorizer-name=mqtt-app-authorizer&token='
         private_constant :AUTHORIZER
+
+        # What the mqtt gem raises when the broker ends the connection between two packets.
+        ENDED = 'Failed to read byte from socket'
+        private_constant :ENDED
+
+        # The mqtt gem's words for CONNACK 4 and 5.
+        REFUSED = /bad user name or password|not authori[sz]ed/
+        private_constant :REFUSED
+
+        # Carries what the caller's block raised out of the gem, which would take an IOError of the caller's own code
+        # for a network failure.
+        class BlockFailure < StandardError
+          # @return [Exception] what the block raised
+          attr_reader :error
+
+          # @param error [Exception]
+          # @api private
+          def initialize(error)
+            @error = error
+            super(error.message)
+          end
+        end
+        private_constant :BlockFailure
 
         # One message of the broker.
         #
@@ -74,93 +97,137 @@ module Hue
         #
         # @yieldparam message [Message]
         # @return [void]
+        # @raise [Error] without the mqtt gem
         # @raise [AuthenticationError] if the broker refuses the token
         # @raise [TLSError] if the broker's certificate does not chain to the pinned root, or names another host
         # @raise [ConnectionError] if the broker cannot be reached, drops the connection, or leaves a ping unanswered
         # @api public
-        def each
-          link = connect
+        def each(&)
           begin
-            transport { link.write(0x82, [1].pack('n') + @topics.sum(''.b) { Mqtt.string(@prefix + it) + "\x01".b }) }
-            while (message = transport { following(link) })
-              yield message
-            end
-          ensure
-            link.close
+            require 'mqtt'
+          rescue LoadError
+            raise Error, "following a Hue Secure home needs the mqtt gem: add gem 'mqtt' to your Gemfile"
           end
+          # Only receive and arrival let in what the gem's reader thread raises.
+          masked(:never) { follow(&) }
         end
 
         private
 
-        # @return [Mqtt::Link] connected and acknowledged
+        # @yieldparam message [Message]
+        # @return [void]
+        def follow(&)
+          client = connect
+          client.subscribe(@topics.to_h { ["#{@prefix}#{it}", 1] })
+          receive(client, &)
+        rescue BlockFailure => e
+          raise e.error, cause: e.error.cause
+        rescue *ends => e
+          raise translated(e)
+        ensure
+          client&.disconnect
+          # What the reader raised after the caller stopped, by an error or a break, must not replace it.
+          arrival { Thread.pass }
+        end
+
+        # Why the connection ended gets in only while this thread waits for a message, so that none the gem read is
+        # lost; what is still queued then goes to the block, without the acknowledgement the socket can no longer carry.
+        #
+        # @param client [MQTT::Client]
+        # @yieldparam message [Message]
+        # @return [void]
+        def receive(client, &)
+          masked(:on_blocking) { client.get_packet { |packet| deliver(packet.topic, packet.payload, &) } }
+        rescue *ends => e
+          e = verdict(client, e)
+          client.get_packet { |packet| break deliver(packet.topic, packet.payload, &) } until client.queue_empty?
+          raise e unless e.message == ENDED
+        end
+
+        # An acknowledgement fails once the reader thread has closed the socket, or once the broker is gone before the
+        # reader sees it (2 follows in 2000 on 2026-11-08): why the connection ended still comes from the reader.
+        #
+        # @param client [MQTT::Client]
+        # @param error [Exception] what stopped the receiving
+        # @return [Exception] why the connection ended
+        def verdict(client, error)
+          return error unless error.is_a?(MQTT::NotConnectedException) || client.connected?
+
+          arrival { sleep } || error
+        end
+
+        # @return [Exception, nil] what the gem's reader thread raised into this thread while the block ran
+        def arrival(&)
+          masked(:immediate, &)
+          nil
+        rescue *ends => e
+          e
+        end
+
+        # @return [Array<Class>] what the gem's reader thread raises into this thread, wherever it is, when the
+        #   connection ends
+        def ends = [MQTT::Exception, *NETWORK_ERRORS]
+
+        # @param mode [Symbol] when what the gem's reader thread raises gets in
+        # @return [Object] what the block returns
+        def masked(mode, &) = Thread.handle_interrupt(ends.to_h { [it, mode] }, &)
+
+        # The gem bounds the TCP connection and the CONNACK, not the TLS handshake between them.
+        #
+        # @return [MQTT::Client] connected
         def connect
-          username = "#{AUTHORIZER}#{Secure.session.current.value}"
-          link = transport { Mqtt::Link.open(Secure.config, @keep_alive) }
-          transport do
-            link.write(0x10, hello(username))
-            acknowledged(link.receive(within: Secure.config.read_timeout))
-          end
-          link
-        rescue StandardError
-          link&.close
+          config = Secure.config
+          client = mqtt_client(config, "#{AUTHORIZER}#{Secure.session.current.value}")
+          limit = config.open_timeout.to_f + config.read_timeout
+          Timeout.timeout(limit, ConnectionError, "#{config.mqtt_host}: connecting took too long") { client.connect }
+          client
+        rescue StandardError, MQTT::Exception
+          client&.disconnect(false)
           raise
         end
 
-        # @param username [String]
-        # @return [String] the body of CONNECT: MQTT 3.1.1, a clean session, the keep-alive, the gem's own client id
-        def hello(username)
-          Mqtt.string('MQTT') + [4, 0x82, @keep_alive].pack('CCn') + Mqtt.string("hue-sdk:#{SecureRandom.uuid}") +
-            Mqtt.string(username)
-        end
-
-        # @yieldreturn [Object]
-        # @return [Object] what the block returns
-        # @raise [TLSError, ConnectionError] for a network error, without its token
-        def transport
-          yield
-        rescue *NETWORK_ERRORS => e
-          host = Secure.config.mqtt_host
-          raise TLSError, "#{host}: #{e.message}" if e.message.include?('certificate verify failed')
-
-          raise ConnectionError, "#{host}: #{e.message}"
-        end
-
-        # @param packet [Array(Integer, String), nil]
-        # @return [void]
-        # @raise [AuthenticationError] on CONNACK 4 or 5
-        # @raise [ConnectionError] on any other refusal, or a dropped connection
-        def acknowledged(packet)
-          type, body = packet
-          code = body&.getbyte(1)
-          raise AuthenticationError, "the Hue Secure broker refused the token (#{code})" if [4, 5].include?(code)
-          raise ConnectionError, "the Hue Secure broker refused the connection (#{type}, #{code})" unless code&.zero?
-        end
-
-        # @param link [Mqtt::Link]
-        # @return [Message, nil] the next message; nil when the broker ends the connection
-        def following(link)
-          loop do
-            type, body = link.receive
-            return unless type && body
-            return message(link, type, body) if type >> 4 == 3
+        # @param config [Configuration::Settings]
+        # @param username [String] the token, in the username of the authorizer
+        # @return [MQTT::Client] as the app sets its own up: TLS with ALPN +mqtt+ to the pinned root alone, MQTT 3.1.1,
+        #   the gem's own client id
+        def mqtt_client(config, username)
+          MQTT::Client.new(host: config.mqtt_host, port: config.mqtt_port, ssl: true, keep_alive: @keep_alive,
+                           client_id: "hue-sdk:#{SecureRandom.uuid}", username:, connect_timeout: config.open_timeout,
+                           ack_timeout: config.read_timeout).tap do |client|
+            client.ssl_context.set_params(cert_store: OpenSSL::X509::Store.new.tap { it.add_file(config.mqtt_ca_file) })
+            client.ssl_context.alpn_protocols = ['mqtt']
           end
         end
 
-        # Acknowledges a message at QoS 1, which the app subscribes at.
+        # The gem's reader thread raises what ends the connection into this thread; it waits until the block returns.
         #
-        # @param link [Mqtt::Link]
-        # @param type [Integer] the first byte of a PUBLISH
-        # @param body [String]
+        # @param topic [String]
+        # @param payload [String]
+        # @yieldparam message [Message]
+        # @return [void]
+        # @raise [BlockFailure] wrapping what the block raised
+        def deliver(topic, payload)
+          masked(:never) { yield message(topic, payload) }
+        rescue StandardError => e
+          raise BlockFailure, e
+        end
+
+        # @param error [Exception]
+        # @return [Error] without the token
+        def translated(error)
+          host = Secure.config.mqtt_host
+          return AuthenticationError.new("#{host}: #{error.message}") if REFUSED.match?(error.message)
+          return TLSError.new("#{host}: #{error.message}") if error.message.include?('certificate verify failed')
+
+          ConnectionError.new("#{host}: #{error.message}")
+        end
+
+        # @param topic [String]
+        # @param payload [String]
         # @return [Message]
-        def message(link, type, body)
-          length = body.unpack1('n') #: Integer
-          start = 2 + length
-          if (type >> 1).anybits?(3)
-            link.write(0x40, body.byteslice(start, 2).to_s)
-            start += 2
-          end
-          topic = body.byteslice(2, length).to_s.force_encoding(Encoding::UTF_8).delete_prefix(@prefix)
-          Message.new(topic:, payload: body.byteslice(start..).to_s.force_encoding(Encoding::UTF_8))
+        def message(topic, payload)
+          Message.new(topic: topic.dup.force_encoding(Encoding::UTF_8).delete_prefix(@prefix),
+                      payload: payload.dup.force_encoding(Encoding::UTF_8))
         end
       end
     end

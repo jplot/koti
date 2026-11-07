@@ -45,7 +45,8 @@ class FakeMqtt
   def connect = packets.find { it.type == 1 }
 
   def default(socket, publishes)
-    socket.write(suback + publishes.sum('') { |topic, payload| publish(topic, payload) })
+    socket.write(suback)
+    publishes.each { |topic, payload| socket.write(publish(topic, payload)) }
     read(socket) while socket.wait_readable(0.2)
   end
 

@@ -30,3 +30,38 @@ module GRPC
   class DeadlineExceeded < BadStatus
   end
 end
+
+# What the gem calls of the mqtt gem, which ships no signatures.
+module MQTT
+  class Exception < ::Exception
+  end
+
+  class NotConnectedException < MQTT::Exception
+  end
+
+  class Client
+    def initialize: (**untyped options) -> void
+
+    def ssl_context: () -> OpenSSL::SSL::SSLContext
+
+    def connect: () -> void
+
+    def subscribe: (Hash[String, Integer] topics) -> void
+
+    def get_packet: () { (Packet::Publish packet) -> void } -> void
+
+    def queue_empty?: () -> bool
+
+    def connected?: () -> bool
+
+    def disconnect: (?bool send_message) -> void
+  end
+
+  class Packet
+    class Publish < Packet
+      def topic: () -> String
+
+      def payload: () -> String
+    end
+  end
+end

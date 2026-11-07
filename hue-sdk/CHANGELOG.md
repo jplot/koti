@@ -61,3 +61,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   in mode 0600, kept current in the `token` setting, and renewed 30 s before it expires, once across threads; a
   client sending any request to the cloud with the token; the homes of the account over gRPC, with the `grpc` gem.
   `ResponseError` takes `source:`, so an error of the cloud reads `Hue cloud answered …`.
+- Hue Secure arming, never tested with a device: `home.arm` reads and sets the arm state, updates the configuration,
+  sounds the alarm and removes the arming or its geofence parts; `home.schedules` and `home.geofence` list, create,
+  update and delete the arming schedules and the phones whose presence arms the home. Their answers and requests are
+  classes of `Hue::Sdk::Secure::Schema`, generated from the app's into `schema/secure.json`.

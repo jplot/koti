@@ -1,0 +1,27 @@
+module Hue
+  module Sdk
+    module Secure
+      class Arm
+        GEOFENCE: Hash[Symbol?, String]
+
+        @path: String
+
+        def initialize: (String home_id) -> void
+
+        def read: () -> Schema::ArmDisarmResponse
+
+        def state: () -> Schema::ArmDisarmStateResponse?
+
+        def set_state: (String arm_state, ?delay: Integer?) -> void
+
+        def update_config: (Schema::ArmDisarmSetConfigRequest request) -> void
+
+        def sound_alarm: () -> void
+
+        def remove: () -> void
+
+        def delete_geofence_config: (?(:presence | :empty)? which) -> void
+      end
+    end
+  end
+end

@@ -28,4 +28,15 @@ RSpec.describe Hue::Sdk::Secure, :live do
     end
     expect(status).to eq(200).or eq(404)
   end
+
+  it 'reads the arming, the schedules and the geofence clients of the first home, which may have none' do
+    home = described_class.homes.first
+    read = [-> { home.arm.read }, -> { home.schedules.list }, -> { home.geofence.list }].map do |reading|
+      reading.call
+    rescue Hue::Sdk::NotFoundError
+      :none
+    end
+    expect(read).to match([be_a(Hue::Sdk::Secure::Schema::ArmDisarmResponse).or(eq(:none)),
+                           be_an(Array).or(eq(:none)), be_an(Array).or(eq(:none))])
+  end
 end

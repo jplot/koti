@@ -101,4 +101,11 @@ RSpec.describe Hue::Sdk::Schema do
     files = SchemaGenerator.load(File.expand_path('../../..', __dir__)).files
     expect(files['lib/hue/sdk/schema/responses.rb']).not_to include('BehaviorState = Data.define')
   end
+
+  it 'writes the Hue Secure classes under Hue::Sdk::Secure::Schema, on the values of the bridge', :aggregate_failures do
+    files = SchemaGenerator.load(File.expand_path('../../..', __dir__)).files
+    expect(files['lib/hue/sdk/secure/schema/arm.rb'])
+      .to include("the requests the app sends it.\n      module Schema\n", "          include Sdk::Schema::Value\n")
+    expect(files['sig/hue/sdk/secure/schema/arm.rbs']).to include("          extend Sdk::Schema::Value::ClassMethods\n")
+  end
 end

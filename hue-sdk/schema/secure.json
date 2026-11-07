@@ -1,0 +1,564 @@
+{
+  "arm": {
+    "AlarmEntity": {
+      "origin": "AlarmEntity",
+      "kind": "response",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "bridge": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "AlarmSignal": {
+      "origin": "AlarmSignal",
+      "kind": "response",
+      "fields": {
+        "light": {
+          "type": "String",
+          "required": false
+        },
+        "speaker": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ArmDisarmConfigResponse": {
+      "origin": "ArmDisarmConfigResponse",
+      "kind": "response",
+      "fields": {
+        "armed_away": {
+          "type": {
+            "class": "ArmDisarmModeConfigResponse"
+          },
+          "required": false
+        },
+        "armed_stay": {
+          "type": {
+            "class": "ArmDisarmModeConfigResponse"
+          },
+          "required": false
+        },
+        "timestamp": {
+          "type": "String",
+          "required": true
+        },
+        "schedules": {
+          "type": {
+            "class": "ArmDisarmScheduleConfigChangeResponse"
+          },
+          "required": false
+        },
+        "geofence": {
+          "type": {
+            "class": "ArmDisarmGeofenceConfigChangeResponse"
+          },
+          "required": false
+        }
+      }
+    },
+    "ArmDisarmDeviceConfigRequest": {
+      "origin": "ArmDisarmDeviceConfigRequest",
+      "kind": "request",
+      "fields": {
+        "type": {
+          "type": "Object",
+          "required": true
+        },
+        "id": {
+          "type": "Object",
+          "required": true
+        },
+        "bridge": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "ArmDisarmDeviceConfigResponse": {
+      "origin": "ArmDisarmDeviceConfigResponse",
+      "kind": "response",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "bridge": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "ArmDisarmGeofenceConfigChangeRequest": {
+      "origin": "ArmDisarmGeofenceConfigChangeRequest",
+      "kind": "request",
+      "fields": {
+        "presence": {
+          "type": "Object",
+          "required": false
+        },
+        "empty": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "ArmDisarmGeofenceConfigChangeResponse": {
+      "origin": "ArmDisarmGeofenceConfigChangeResponse",
+      "kind": "response",
+      "fields": {
+        "presence": {
+          "type": {
+            "class": "ArmDisarmGeofenceStatusConfigResponse"
+          },
+          "required": false
+        },
+        "empty": {
+          "type": {
+            "class": "ArmDisarmGeofenceStatusConfigResponse"
+          },
+          "required": false
+        }
+      }
+    },
+    "ArmDisarmGeofenceStatusConfigRequest": {
+      "origin": "ArmDisarmGeofenceStatusConfigRequest",
+      "kind": "request",
+      "fields": {
+        "active": {
+          "type": "Object",
+          "required": true
+        },
+        "arm_state": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmGeofenceStatusConfigResponse": {
+      "origin": "ArmDisarmGeofenceStatusConfigResponse",
+      "kind": "response",
+      "fields": {
+        "active": {
+          "type": "Boolean",
+          "required": true
+        },
+        "arm_state": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmModeConfigRequest": {
+      "origin": "ArmDisarmModeConfigRequest",
+      "kind": "request",
+      "fields": {
+        "entry_delay": {
+          "type": "Integer",
+          "required": true
+        },
+        "exit_delay": {
+          "type": "Integer",
+          "required": true
+        },
+        "alarm_duration": {
+          "type": "Object",
+          "required": false
+        },
+        "device": {
+          "type": "Object",
+          "required": true
+        },
+        "alarm_triggered_entities": {
+          "type": "Object",
+          "required": false
+        },
+        "alarm_triggering_entities": {
+          "type": "Object",
+          "required": false
+        },
+        "alarm_signal": {
+          "type": "Object",
+          "required": true
+        },
+        "presence_mimicking_enabled": {
+          "type": "Object",
+          "required": false
+        },
+        "alarm_automation_enabled": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "ArmDisarmModeConfigResponse": {
+      "origin": "ArmDisarmModeConfigResponse",
+      "kind": "response",
+      "fields": {
+        "entry_delay": {
+          "type": "Numeric",
+          "required": true
+        },
+        "exit_delay": {
+          "type": "Numeric",
+          "required": true
+        },
+        "device": {
+          "type": {
+            "list": {
+              "class": "ArmDisarmDeviceConfigResponse"
+            }
+          },
+          "required": true
+        },
+        "alarm_triggered_entities": {
+          "type": {
+            "list": {
+              "class": "AlarmEntity"
+            }
+          },
+          "required": false
+        },
+        "alarm_signal": {
+          "type": {
+            "class": "AlarmSignal"
+          },
+          "required": false
+        },
+        "presence_mimicking_enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "alarm_automation_enabled": {
+          "type": "Boolean",
+          "required": false
+        },
+        "alarm_triggering_entities": {
+          "type": {
+            "list": {
+              "class": "AlarmEntity"
+            }
+          },
+          "required": false
+        },
+        "alarm_duration": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    },
+    "ArmDisarmResponse": {
+      "origin": "ArmDisarmResponse",
+      "kind": "response",
+      "fields": {
+        "state": {
+          "type": {
+            "class": "ArmDisarmStateResponse"
+          },
+          "required": false
+        },
+        "config": {
+          "type": {
+            "class": "ArmDisarmConfigResponse"
+          },
+          "required": false
+        }
+      }
+    },
+    "ArmDisarmScheduleActionInfoRequest": {
+      "origin": "ArmDisarmScheduleActionInfoRequest",
+      "kind": "request",
+      "fields": {
+        "time": {
+          "type": "Object",
+          "required": true
+        },
+        "arm_state": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmScheduleActionResponse": {
+      "origin": "ArmDisarmScheduleActionResponse",
+      "kind": "response",
+      "fields": {
+        "time": {
+          "type": "String",
+          "required": true
+        },
+        "arm_state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "armed_stay",
+            "armed_away",
+            "disarmed"
+          ]
+        }
+      }
+    },
+    "ArmDisarmScheduleConfigChangeRequest": {
+      "origin": "ArmDisarmScheduleConfigChangeRequest",
+      "kind": "request",
+      "fields": {
+        "active": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmScheduleConfigChangeResponse": {
+      "origin": "ArmDisarmScheduleConfigChangeResponse",
+      "kind": "response",
+      "fields": {
+        "active": {
+          "type": "Boolean",
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmScheduleConfigurationRequest": {
+      "origin": "ArmDisarmScheduleConfigurationRequest",
+      "kind": "request",
+      "fields": {
+        "days": {
+          "type": "Object",
+          "required": true
+        },
+        "actions": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmScheduleDaysResponse": {
+      "origin": "ArmDisarmScheduleDaysResponse",
+      "kind": "response",
+      "fields": {
+        "days": {
+          "type": {
+            "list": "String"
+          },
+          "required": true,
+          "values": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ]
+        },
+        "actions": {
+          "type": {
+            "list": {
+              "class": "ArmDisarmScheduleActionResponse"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmScheduleResponse": {
+      "origin": "ArmDisarmScheduleResponse",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "active": {
+          "type": "Boolean",
+          "required": true
+        },
+        "schedules": {
+          "type": {
+            "list": {
+              "class": "ArmDisarmScheduleDaysResponse"
+            }
+          },
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmSetConfigRequest": {
+      "origin": "ArmDisarmSetConfigRequest",
+      "kind": "request",
+      "fields": {
+        "schedules": {
+          "type": "Object",
+          "required": false
+        },
+        "geofence": {
+          "type": "Object",
+          "required": false
+        },
+        "armed_away": {
+          "type": "Object",
+          "required": true
+        },
+        "armed_stay": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmSetStateRequest": {
+      "origin": "ArmDisarmSetStateRequest",
+      "kind": "request",
+      "fields": {
+        "arm_state": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmStateResponse": {
+      "origin": "ArmDisarmStateResponse",
+      "kind": "response",
+      "fields": {
+        "arm_state": {
+          "type": "String",
+          "required": true
+        },
+        "trigger_time": {
+          "type": "String",
+          "required": true
+        },
+        "apply_time": {
+          "type": "String",
+          "required": true
+        },
+        "source": {
+          "type": {
+            "class": "ArmDisarmStateSourceResponse"
+          },
+          "required": true
+        }
+      }
+    },
+    "ArmDisarmStateSourceResponse": {
+      "origin": "ArmDisarmStateSourceResponse",
+      "kind": "response",
+      "fields": {
+        "type": {
+          "type": "String",
+          "required": true
+        },
+        "id": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "CreateArmDisarmScheduleRequest": {
+      "origin": "CreateArmDisarmScheduleRequest",
+      "kind": "request",
+      "fields": {
+        "name": {
+          "type": "Object",
+          "required": true
+        },
+        "active": {
+          "type": "Object",
+          "required": true
+        },
+        "schedules": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    },
+    "CreateArmDisarmScheduleResponse": {
+      "origin": "CreateArmDisarmScheduleResponse",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "FetchGeofenceClientResponse": {
+      "origin": "FetchGeofenceClientResponse",
+      "kind": "response",
+      "fields": {
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "presence": {
+          "type": "Boolean",
+          "required": true
+        },
+        "bridge_data": {
+          "type": "Hash",
+          "required": true
+        },
+        "mobile_app_id": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "UpdateArmDisarmScheduleRequest": {
+      "origin": "UpdateArmDisarmScheduleRequest",
+      "kind": "request",
+      "fields": {
+        "name": {
+          "type": "Object",
+          "required": false
+        },
+        "active": {
+          "type": "Object",
+          "required": false
+        },
+        "schedules": {
+          "type": "Object",
+          "required": false
+        }
+      }
+    },
+    "UpdateGeofenceClientRequest": {
+      "origin": "UpdateGeofenceClientRequest",
+      "kind": "request",
+      "fields": {
+        "presence": {
+          "type": "Object",
+          "required": true
+        },
+        "name": {
+          "type": "Object",
+          "required": true
+        },
+        "bridge": {
+          "type": "Object",
+          "required": true
+        },
+        "geofence_client_id": {
+          "type": "Object",
+          "required": true
+        }
+      }
+    }
+  }
+}

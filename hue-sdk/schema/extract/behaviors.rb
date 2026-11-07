@@ -40,14 +40,16 @@ module Schema
         'TimeSpan.fromJsonNullable' => { 'class' => 'TimeSpan' }
       }.freeze
 
-      def initialize(snapshot, name)
-        super
+      # @param dropped [Array<String>] keys read, but not kept
+      def initialize(snapshot, name, dropped: DEFAULTS)
+        super(snapshot, name)
+        @dropped = dropped
         @reads = Hash.new(0)
       end
 
       # @return [Hash{String=>Hash}] by key, what {FromJson} tells of it, and how many times it was read
       def decoded(instructions)
-        fields(instructions).except(*DEFAULTS).to_h { |key, field| [key, field.merge('reads' => @reads[key])] }
+        fields(instructions).except(*@dropped).to_h { |key, field| [key, field.merge('reads' => @reads[key])] }
       end
 
       private

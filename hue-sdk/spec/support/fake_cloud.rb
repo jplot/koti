@@ -73,7 +73,8 @@ class FakeCloud
       name, value = line.chomp("\r\n").split(': ', 2)
       headers[name.downcase] = value
     end
-    Request.new(verb:, path:, headers:, body: socket.read(Integer(headers.fetch('content-length', '0'))))
+    body = socket.read(Integer(headers.fetch('content-length', '0'))).force_encoding(Encoding::UTF_8)
+    Request.new(verb:, path:, headers:, body:)
   end
 
   def answer(request)

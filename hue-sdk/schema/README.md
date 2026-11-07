@@ -51,6 +51,13 @@ description at run time, but a spec fails while the generated files differ from 
 - **Changes.** The classes of an event (`LightChange`…) are not in the data: `generate.rb` makes one from each response
   class, with every field optional. The app's 179 `*Updated` classes decode the same keys as their `*Added` classes.
 
+- **Hue Secure.** `secure.json` holds the classes the Hue cloud answers with and the requests the app sends it, for each
+  file `generate.rb` writes under `Hue::Sdk::Secure::Schema` (`lib/hue/sdk/secure/schema/arm.rb`). json_serializable
+  writes them in the app: a response is read from its `fromJson`, as an automation's class is, and a request, which
+  has none, from the keys its `toJson` writes, a key written without a null check being required. That `toJson` does
+  not tell what a pointer holds, so such a field is an `Object` and each request class is a root of
+  `SecureSchema::ROOTS`. `SetAlarmStateRequest` is not one: its `toJson` writes the one constant the app sends.
+
 ## Regenerating
 
 Edit `hue.json` or `behaviors.json`, then:
@@ -116,3 +123,13 @@ bundle exec rake schema
 
 It stops on a step type it does not know, an enum the app no longer has, or a value class of the app whose name `hue.json`
 takes.
+
+`secure.json` comes from the same output of blutter:
+
+```sh
+LLVM_OBJDUMP=… bundle exec ruby schema/extract/build_secure.rb path/to/blutter-output path/to/libapp.so \
+  > schema/secure.json
+bundle exec rake schema
+```
+
+It stops on a class with neither `fromJson` nor `toJson`, or one an earlier file already holds.

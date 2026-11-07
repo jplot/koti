@@ -418,6 +418,32 @@ none of the app's own headers.
 | `grpc_credentials` | TLS with the system's roots | `:this_channel_is_insecure` for a test server |
 | `open_timeout` / `read_timeout` | `5` / `10` s | each request |
 
+### Arming
+
+A home's arming, its schedules and the phones whose presence arms it follow the app's clients
+(`ArmDisarmHttpClient`, `ArmDisarmScheduleHttpClient`, `CloudGeofenceHttpClient`):
+
+```ruby
+home = Hue::Sdk::Secure.homes.first
+home.arm.read                       # => Schema::ArmDisarmResponse: state and configuration
+home.arm.state&.arm_state           # => "armed_away"; state is nil for a home without Hue Secure
+home.arm.set_state('armed_stay', delay: 30)
+home.schedules.list                 # => [Schema::ArmDisarmScheduleResponse]
+home.geofence.list                  # => [Schema::FetchGeofenceClientResponse]
+
+week = Hue::Sdk::Secure::Schema::ArmDisarmScheduleConfigurationRequest.new(
+  days: %w[monday friday],
+  actions: [Hue::Sdk::Secure::Schema::ArmDisarmScheduleActionInfoRequest.new(time: '22:00', arm_state: 'armed_stay')]
+)
+home.schedules.create(Hue::Sdk::Secure::Schema::CreateArmDisarmScheduleRequest.new(name: 'Night', active: true,
+                                                                                   schedules: [week]))
+```
+
+The answers and the requests are classes of `Hue::Sdk::Secure::Schema`, generated from the app's
+own (see [schema/README.md](schema/README.md)). A request leaving a required field nil raises
+`ArgumentError` before anything is sent. `arm.sound_alarm` sends the one body the app sends; when
+part of the devices do not sound, the cloud answers 207 and the gem raises `ResponseError`.
+
 ## Errors
 
 | Error | Raised when |

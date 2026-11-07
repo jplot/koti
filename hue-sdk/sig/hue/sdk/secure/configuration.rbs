@@ -11,6 +11,8 @@ module Hue
           attr_accessor token_file: String?
           attr_accessor login_url: String
           attr_accessor api_url: String
+          attr_accessor grpc_target: String
+          attr_accessor grpc_credentials: untyped
           attr_accessor open_timeout: Integer | Float
           attr_accessor read_timeout: Integer | Float
 

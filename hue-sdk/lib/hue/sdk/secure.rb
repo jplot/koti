@@ -6,6 +6,8 @@ require_relative 'secure/http'
 require_relative 'secure/token'
 require_relative 'secure/session'
 require_relative 'secure/client'
+require_relative 'secure/wire'
+require_relative 'secure/home'
 
 module Hue
   module Sdk
@@ -32,6 +34,16 @@ module Hue
       # @return [Client] requests to the cloud with the session's token
       # @api public
       def self.client = Client.new(session)
+
+      # @return [Array<Home>] the homes of the account
+      # @raise (see Home.list)
+      # @api public
+      def self.homes = Home.list(session)
+
+      # @param id [String]
+      # @return [Home] the home of this id, without a request
+      # @api public
+      def self.home(id) = Home.new(id:)
 
       # Changes the settings; the next session reads them.
       #

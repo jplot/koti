@@ -1,0 +1,32 @@
+# What the gem calls of the grpc gem, which ships no signatures.
+module GRPC
+  class ClientStub
+    def initialize: (String host, untyped creds, ?timeout: Numeric) -> void
+
+    def request_response: (String method, String request, ^(String) -> String marshal, ^(String) -> String unmarshal,
+                           ?metadata: Hash[String, String]) -> String
+  end
+
+  module Core
+    class ChannelCredentials
+      def initialize: () -> void
+    end
+  end
+
+  class BadStatus < StandardError
+    attr_reader code: Integer
+    attr_reader details: String
+  end
+
+  class Unauthenticated < BadStatus
+  end
+
+  class PermissionDenied < BadStatus
+  end
+
+  class Unavailable < BadStatus
+  end
+
+  class DeadlineExceeded < BadStatus
+  end
+end

@@ -415,6 +415,7 @@ none of the app's own headers.
 | `login_url` | `https://login.meethue.com` | OpenID discovery of the login |
 | `api_url` | `https://api.account.meethue.com` | base of the paths given to `client` |
 | `grpc_target` | `api.account.meethue.com:443` | gRPC service listing the homes |
+| `auto_responses_url` | `https://automaticresponses.eu.secure.meethue.com` | the responses a doorbell may play |
 | `grpc_credentials` | TLS with the system's roots | `:this_channel_is_insecure` for a test server |
 | `open_timeout` / `read_timeout` | `5` / `10` s | each request |
 
@@ -454,8 +455,8 @@ camera.attributes&.metadata&.name   # => "Front door"; attributes is nil for a c
 camera.data                         # => the body the cloud reported, as it came
 camera.update_motion(Hue::Sdk::Secure::Schema::CameraMotionSensitivityUpdate.new(sensitivity: 3))
 camera.snapshot
-camera.sound_chime(sound: 'ding_dong', volume: 0.6)   # volume from 0.0 to 1.0
-home.cameras.sound_group_alarm(duration: 30)          # seconds
+camera.sound_chime(sound: 'ding_dong', volume: 0.6)   # volume from 0.0 to 1.0, or none
+home.cameras.sound_group_alarm                        # the one group command the app sends
 
 Hue::Sdk::Secure.auto_responses.categories   # the responses a doorbell may play
 ```

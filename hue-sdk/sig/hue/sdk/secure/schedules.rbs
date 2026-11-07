@@ -1,0 +1,19 @@
+module Hue
+  module Sdk
+    module Secure
+      class Schedules
+        @path: String
+
+        def initialize: (String home_id) -> void
+
+        def list: () -> Array[Schema::ArmDisarmScheduleResponse]
+
+        def create: (Schema::CreateArmDisarmScheduleRequest request) -> String
+
+        def update: (String id, Schema::UpdateArmDisarmScheduleRequest request) -> void
+
+        def delete: (String id) -> void
+      end
+    end
+  end
+end

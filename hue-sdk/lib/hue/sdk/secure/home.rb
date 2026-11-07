@@ -49,6 +49,18 @@ module Hue
         # @api public
         def initialize(id:, **attributes) = super(id:, **ABSENT, **attributes)
 
+        # @return [Arm] the arming of the home and its alarm
+        # @api public
+        def arm = Arm.new(id)
+
+        # @return [Schedules] the schedules that arm and disarm the home
+        # @api public
+        def schedules = Schedules.new(id)
+
+        # @return [Geofence] the phones whose presence arms and disarms the home
+        # @api public
+        def geofence = Geofence.new(id)
+
         # The app lists the homes over gRPC, and no REST path gives them. grpc is loaded here only.
         #
         # @param session [Session]

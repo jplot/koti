@@ -26,6 +26,12 @@ module Hue
 
         def initialize: (id: String, **untyped attributes) -> void
 
+        def arm: () -> Arm
+
+        def schedules: () -> Schedules
+
+        def geofence: () -> Geofence
+
         def self.list: (Session session) -> Array[Home]
 
         TEXTS: Hash[Symbol, Integer]

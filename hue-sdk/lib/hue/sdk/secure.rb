@@ -9,6 +9,9 @@ require_relative 'secure/client'
 require_relative 'secure/wire'
 require_relative 'secure/home'
 require_relative 'secure/schema/arm'
+require_relative 'secure/arm'
+require_relative 'secure/schedules'
+require_relative 'secure/geofence'
 
 module Hue
   module Sdk

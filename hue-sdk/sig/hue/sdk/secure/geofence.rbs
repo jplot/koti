@@ -1,0 +1,21 @@
+module Hue
+  module Sdk
+    module Secure
+      class Geofence
+        @path: String
+
+        def initialize: (String home_id) -> void
+
+        def list: () -> Array[Schema::FetchGeofenceClientResponse]
+
+        def create: (String mobile_app_id, Schema::UpdateGeofenceClientRequest request) -> void
+
+        def update: (String mobile_app_id, Schema::UpdateGeofenceClientRequest request) -> void
+
+        def delete: (String mobile_app_id) -> void
+
+        def delete_bridge_client: (String mobile_app_id, String geofence_client_id) -> void
+      end
+    end
+  end
+end

@@ -58,6 +58,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   values written, reading only the blocking of plain HTTP back, as the app does.
 - Hue Secure through the Hue account's cloud, loaded apart by `require 'hue/sdk/secure'` and never tested with a
   Hue Secure device: login through Auth0 with PKCE and the Hue app's client id, given by the caller; a token saved
-  in mode 0600 and renewed 30 s before it expires, once across threads; a client sending any request to the cloud
-  with the token; the homes of the account over gRPC, with the `grpc` gem. `ResponseError` takes `source:`, so an
-  error of the cloud reads `Hue cloud answered …`.
+  in mode 0600, kept current in the `token` setting, and renewed 30 s before it expires, once across threads; a
+  client sending any request to the cloud with the token; the homes of the account over gRPC, with the `grpc` gem.
+  `ResponseError` takes `source:`, so an error of the cloud reads `Hue cloud answered …`.

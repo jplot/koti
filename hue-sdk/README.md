@@ -389,9 +389,11 @@ Once logged in, the browser fails to open
 the browser show that address, whose `code` goes to `exchange`. When the code comes back to
 another process, keep `session.verifier` and pass it as `exchange(code, verifier:)`.
 
-The token is saved in `token_file`, or given back through `token` (from `Token#to_json`). It is
-renewed 30 s before it expires, once across threads; a refused renewal raises
-`AuthenticationError` and leaves the saved token. No request is sent twice.
+The token is saved in `token_file`, replaced whole in mode 0600, or given through `token` (from
+`Token#to_json`). Auth0 rotates the refresh token on each renewal: the gem keeps `token` current,
+for the caller to save it again, and a token file serves one process. The token is renewed 30 s
+before it expires, once across threads: the threads that waited on a refused renewal raise its
+`AuthenticationError`, and the saved token stays. No request is sent twice.
 
 ```ruby
 # Gemfile: gem 'grpc'

@@ -8,6 +8,7 @@ require_relative 'secure/session'
 require_relative 'secure/client'
 require_relative 'secure/wire'
 require_relative 'secure/home'
+require_relative 'secure/schema/arm'
 
 module Hue
   module Sdk

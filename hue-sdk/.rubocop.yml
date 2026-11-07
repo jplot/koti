@@ -4,3 +4,4 @@ inherit_from: ../.rubocop.yml
 Metrics/ModuleLength:
   Exclude:
     - 'lib/hue/sdk/schema/*.rb'
+    - 'lib/hue/sdk/secure/schema/*.rb'

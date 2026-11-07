@@ -28,8 +28,7 @@ module Schema
         end
       end
 
-      private
-
+      # @return [Hash{String=>Hash}, nil] the keys the toJson of a class writes, nil when the class has none
       def written(name)
         address, size = @snapshot.function("#{name}.toJson")
         return unless address
@@ -37,6 +36,8 @@ module Schema
         address, size = body(address, size)
         address ? ToJson.new(@snapshot).written(@snapshot.instructions(address, size)) : {}
       end
+
+      private
 
       def body(address, size)
         3.times do

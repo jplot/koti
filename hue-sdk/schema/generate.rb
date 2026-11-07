@@ -2,8 +2,8 @@
 
 require 'json'
 
-# Writes the typed values of lib/hue/sdk/schema/ and their signatures from schema/hue.json and schema/behaviors.json.
-# Run `rake schema`.
+# Writes the typed values of lib/hue/sdk/schema/ and their signatures from schema/hue.json and schema/behaviors.json,
+# and those of Hue Secure from schema/secure.json. Run `rake schema`.
 class SchemaGenerator
   FILES = { 'behavior' => 'behaviors', 'response' => 'responses', 'update' => 'updates', 'add' => 'creates',
             'change' => 'changes' }.freeze
@@ -13,13 +13,16 @@ class SchemaGenerator
   WIDTH = 120
 
   # @param root [String] the folder of the gem
-  def self.load(root) = new(*%w[hue behaviors].map { JSON.parse(File.read(File.join(root, 'schema', "#{it}.json"))) })
+  def self.load(root)
+    new(*%w[hue behaviors secure].map { JSON.parse(File.read(File.join(root, 'schema', "#{it}.json"))) })
+  end
 
-  def initialize(schema, behaviors)
+  def initialize(schema, behaviors, secure)
     @classes = schema.fetch('classes').merge(behaviors.fetch('classes'))
     behaviors.fetch('overrides').each { |name, fields| override(@classes.fetch(name).fetch('fields'), fields) }
     @resources = schema.fetch('resources').merge(behaviors.fetch('resources')) { |_, slots, more| slots.merge(more) }
     @scripts = behaviors.fetch('scripts')
+    @secure = secure
     Changes.add(@classes, @resources)
   end
 
@@ -29,7 +32,7 @@ class SchemaGenerator
     FILES.each_with_object({}) do |(kind, name), files|
       files["lib/hue/sdk/schema/#{name}.rb"] = ruby.file(kind, ordered(kind))
       files["sig/hue/sdk/schema/#{name}.rbs"] = rbs.file(kind, ordered(kind))
-    end.merge('sig/hue/sdk/schema/models.rbs' => rbs.models)
+    end.merge({ 'sig/hue/sdk/schema/models.rbs' => rbs.models }, SecureWriter.new(@secure).files)
   end
 
   def write(root) = files.each { |path, content| File.write(File.join(root, path), content) }
@@ -43,22 +46,24 @@ class SchemaGenerator
     type['class'] || held(type['list'] || type['map'])
   end
 
+  # The classes named, each after the classes it holds, so that its declaration can name them.
+  def self.ordered(classes, names) = names.each_with_object([]) { |name, done| visit(classes, name, done) }
+
+  def self.visit(classes, name, done)
+    return if done.include?(name)
+
+    classes[name]['fields'].each_value { |field| (inner = held(field['type'])) && visit(classes, inner, done) }
+    done << name
+  end
+
   private
 
   def override(fields, changes) = changes.each { |key, change| fields[key] = fields.fetch(key).merge(change) }
 
-  # Classes of one kind, each after the classes it holds, so that its declaration can name them. A class of another
-  # kind stays in the file of its own.
+  # Classes of one kind, each after the classes it holds. A class of another kind stays in the file of its own.
   def ordered(kind)
     names = @classes.select { |_, c| c['kind'] == kind }.keys.sort
-    names.each_with_object([]) { |name, done| visit(name, done) }.select { @classes[it]['kind'] == kind }
-  end
-
-  def visit(name, done)
-    return if done.include?(name)
-
-    @classes[name]['fields'].each_value { |field| (inner = self.class.held(field['type'])) && visit(inner, done) }
-    done << name
+    self.class.ordered(@classes, names).select { @classes[it]['kind'] == kind }
   end
 
   # The changes of a resource as an event reports them: the classes of its response, with every field optional, as the
@@ -124,7 +129,7 @@ class SchemaGenerator
   end
 
   # Writes the Ruby value classes.
-  class RubyWriter
+  class RubyWriter # rubocop:disable Metrics/ClassLength -- SecureWriter reuses all of it, one level deeper
     YARD = { 'String' => 'String', 'Integer' => 'Integer', 'Numeric' => 'Numeric', 'Boolean' => 'Boolean',
              'Hash' => 'Hash{String=>Object}', 'Object' => 'Object',
              'BehaviorConfiguration' => 'Value, Hash{String=>Object}' }.freeze
@@ -157,11 +162,15 @@ class SchemaGenerator
     def define(name)
       fields = @classes[name]['fields']
       shadowing = fields.keys.intersect?(Data.instance_methods.map(&:to_s))
-      lines = [*docs(name), head(name, fields), '        include Value', *SchemaGenerator.script(fields),
+      lines = [*docs(name), head(name, fields), "        include #{value}", *SchemaGenerator.script(fields),
                *macros(fields), '      end']
       lines = shadow(lines) if shadowing
       "#{lines.join("\n")}\n"
     end
+
+    def value = 'Value'
+
+    def width = WIDTH
 
     def shadow(lines)
       ["      # rubocop:disable #{SHADOWING}", '', *lines, "      # rubocop:enable #{SHADOWING.split.first}"]
@@ -232,7 +241,7 @@ class SchemaGenerator
 
     def paragraph(text, indent)
       text.split.each_with_object([+indent]) do |word, lines|
-        lines << "#{indent}  " if lines.last.length + word.length + 9 > WIDTH
+        lines << "#{indent}  " if lines.last.length + word.length + 9 > width
         lines.last << (lines.last.strip.empty? ? word : " #{word}")
       end
     end
@@ -243,7 +252,7 @@ class SchemaGenerator
     end
 
     def append(lines, piece, indent)
-      lines << (' ' * indent) if lines.last.length + piece.length + 1 > WIDTH
+      lines << (' ' * indent) if lines.last.length + piece.length + 1 > width
       lines.last << (lines.last.end_with?('(', ' ') ? piece : " #{piece}")
     end
 
@@ -283,11 +292,13 @@ class SchemaGenerator
       fields = @classes[name]['fields']
       readers = fields.map { |key, field| "        attr_reader #{key}: #{type(field)}" }
       params = fields.map { |key, field| "#{'?' unless field['required']}#{key}: #{type(field)}" }
-      ["      class #{name} < Data", '        include Value', *SchemaGenerator.script(fields),
-       '        extend Value::ClassMethods', '', *readers,
+      ["      class #{name} < Data", "        include #{value}", *SchemaGenerator.script(fields),
+       "        extend #{value}::ClassMethods", '', *readers,
        ('' if readers.any?), "        def self.new: (#{params.join(', ')}) -> #{name}",
        "        def self.from: (Hash[String, untyped] data) -> #{name}", "      end\n"].compact.join("\n")
     end
+
+    def value = 'Value'
 
     def type(field) = "#{plain(field['type'])}#{'?' unless field['required']}"
 
@@ -316,6 +327,71 @@ class SchemaGenerator
 
       ["          def update: (Schema::#{request} request, **untyped attributes) -> self",
        '                    | (**untyped attributes) -> self']
+    end
+  end
+
+  # Writes the value classes of Hue Secure, one file for each part of schema/secure.json, under
+  # Hue::Sdk::Secure::Schema and on the values of the bridge.
+  class SecureWriter
+    MODULES = <<~RUBY
+      module Hue
+        module Sdk
+          module Secure
+            # Typed values of Hue Secure, generated by schema/generate.rb from the classes of the Hue app: what
+            # the cloud answers, and the requests the app sends it.
+            module Schema
+      %s      end
+          end
+        end
+      end
+    RUBY
+    HEADER = "# frozen_string_literal: true\n\n" \
+             "# Generated by schema/generate.rb from its data in schema/: do not edit.\n\n"
+
+    def initialize(parts) = @parts = parts
+
+    def files
+      @parts.each_with_object({}) do |(part, classes), files|
+        names = SchemaGenerator.ordered(classes, classes.keys.sort)
+        files["lib/hue/sdk/secure/schema/#{part}.rb"] = HEADER + format(MODULES, Ruby.new(classes).body(names))
+        files["sig/hue/sdk/secure/schema/#{part}.rbs"] = format(MODULES, Rbs.new(classes).body(names))
+      end
+    end
+
+    # One level deeper than the classes of the bridge.
+    module Nested
+      def body(names) = names.map { define(it) }.join("\n").gsub(/^(?=.)/, '  ')
+
+      private
+
+      def value = 'Sdk::Schema::Value'
+    end
+
+    # The Ruby value classes.
+    class Ruby < RubyWriter
+      include Nested
+
+      SUMMARY = { 'response' => 'Part of what the Hue cloud answers',
+                  'request' => 'Part of a request to the Hue cloud' }.freeze
+
+      def initialize(classes) = super(classes, {}, {})
+
+      private
+
+      def width = WIDTH - 2
+
+      def description(_name, cls) = "#{SUMMARY.fetch(cls['kind'])} (Hue app class +#{cls['origin']}+)."
+    end
+
+    # Their signatures.
+    class Rbs < RbsWriter
+      include Nested
+
+      def initialize(classes) = super(classes, {}, {})
+
+      private
+
+      def define(name) = declare(name)
     end
   end
 end

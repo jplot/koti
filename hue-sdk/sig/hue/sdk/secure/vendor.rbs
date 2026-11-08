@@ -48,7 +48,7 @@ module MQTT
 
     def subscribe: (Hash[String, Integer] topics) -> void
 
-    def get_packet: () { (Packet::Publish packet) -> void } -> void
+    def get_packet: () { (Packet::Publish packet) -> void } -> untyped
 
     def queue_empty?: () -> bool
 

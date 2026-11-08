@@ -23,28 +23,12 @@ module Hue
         AUTHORIZER = 'app?x-amz-customauthorizer-name=mqtt-app-authorizer&token='
         private_constant :AUTHORIZER
 
-        # What the mqtt gem raises when the broker ends the connection between two packets.
+        # What the mqtt gem raises when the broker ends the connection before a byte it waits for.
         ENDED = 'Failed to read byte from socket'
-        private_constant :ENDED
 
         # The mqtt gem's words for CONNACK 4 and 5.
         REFUSED = /bad user name or password|not authori[sz]ed/
-        private_constant :REFUSED
-
-        # Carries what the caller's block raised out of the gem, which would take an IOError of the caller's own code
-        # for a network failure.
-        class BlockFailure < StandardError
-          # @return [Exception] what the block raised
-          attr_reader :error
-
-          # @param error [Exception]
-          # @api private
-          def initialize(error)
-            @error = error
-            super(error.message)
-          end
-        end
-        private_constant :BlockFailure
+        private_constant :ENDED, :REFUSED
 
         # One message of the broker.
         #
@@ -108,82 +92,92 @@ module Hue
           rescue LoadError
             raise Error, "following a Hue Secure home needs the mqtt gem: add gem 'mqtt' to your Gemfile"
           end
-          # Only receive and arrival let in what the gem's reader thread raises.
-          masked(:never) { follow(&) }
+          follow(&)
         end
 
         private
 
+        # The gem's reader thread raises why the connection ended into the thread that connected, wherever it is: a
+        # thread of the SDK connects and relays the messages, so that the caller's thread never gets it.
+        #
         # @yieldparam message [Message]
         # @return [void]
         def follow(&)
-          client = connect
-          client.subscribe(@topics.to_h { ["#{@prefix}#{it}", 1] })
-          receive(client, &)
-        rescue BlockFailure => e
-          raise e.error, cause: e.error.cause
-        rescue *ends => e
-          raise translated(e)
+          client = mqtt_client(Secure.config, "#{AUTHORIZER}#{Secure.session.current.value}")
+          relayed = Thread::Queue.new
+          relay = Thread.new { watch(client, relayed) }
+          relaying(relayed, &)
         ensure
-          client&.disconnect
-          # What the reader raised after the caller stopped, by an error or a break, must not replace it.
-          arrival { Thread.pass }
+          relay&.kill&.join
+          hang_up(client) if client
+        end
+
+        # @param relayed [Thread::Queue]
+        # @yieldparam message [Message]
+        # @return [void]
+        def relaying(relayed)
+          while (packet = relayed.pop).is_a?(MQTT::Packet::Publish)
+            yield message(packet)
+          end
+          raise translated(packet) unless packet.message == ENDED
+        end
+
+        # @param client [MQTT::Client]
+        # @param relayed [Thread::Queue] where the messages go, then why the connection ended or could not be made
+        # @return [void]
+        def watch(client, relayed)
+          connect(client)
+          Thread.handle_interrupt(Exception => :never) { relayed << receive(client, relayed) }
+        rescue Exception => e # rubocop:disable Lint/RescueException -- the following thread raises it, or ends on it
+          relayed << e
         end
 
         # Why the connection ended gets in only while this thread waits for a message, so that none the gem read is
-        # lost; what is still queued then goes to the block, without the acknowledgement the socket can no longer carry.
+        # lost; what is still queued then goes on, without the acknowledgement the socket can no longer carry.
         #
         # @param client [MQTT::Client]
-        # @yieldparam message [Message]
-        # @return [void]
-        def receive(client, &)
-          masked(:on_blocking) { client.get_packet { |packet| deliver(packet.topic, packet.payload, &) } }
-        rescue *ends => e
-          e = verdict(client, e)
-          client.get_packet { |packet| break deliver(packet.topic, packet.payload, &) } until client.queue_empty?
-          raise e unless e.message == ENDED
+        # @param relayed [Thread::Queue]
+        # @return [Exception] why the connection ended
+        def receive(client, relayed)
+          client.subscribe(@topics.to_h { ["#{@prefix}#{it}", 1] })
+          Thread.handle_interrupt(Exception => :on_blocking) { client.get_packet { relayed << it } }
+        rescue Exception => e # rubocop:disable Lint/RescueException -- what the reader thread raised, or a failed write
+          e = awaited if e.is_a?(MQTT::NotConnectedException) || client.connected?
+          relayed << client.get_packet { break it } until client.queue_empty?
+          e
         end
 
         # An acknowledgement fails once the reader thread has closed the socket, or once the broker is gone before the
         # reader sees it (2 follows in 2000 on 2026-11-08): why the connection ended still comes from the reader.
         #
-        # @param client [MQTT::Client]
-        # @param error [Exception] what stopped the receiving
         # @return [Exception] why the connection ended
-        def verdict(client, error)
-          return error unless error.is_a?(MQTT::NotConnectedException) || client.connected?
-
-          arrival { sleep } || error
-        end
-
-        # @return [Exception, nil] what the gem's reader thread raised into this thread while the block ran
-        def arrival(&)
-          masked(:immediate, &)
-          nil
-        rescue *ends => e
+        def awaited
+          Thread.handle_interrupt(Exception => :immediate) { loop { sleep } }
+        rescue Exception => e # rubocop:disable Lint/RescueException -- why the connection ended, whatever its class
           e
         end
 
-        # @return [Array<Class>] what the gem's reader thread raises into this thread, wherever it is, when the
-        #   connection ends
-        def ends = [MQTT::Exception, *NETWORK_ERRORS]
-
-        # @param mode [Symbol] when what the gem's reader thread raises gets in
-        # @return [Object] what the block returns
-        def masked(mode, &) = Thread.handle_interrupt(ends.to_h { [it, mode] }, &)
-
         # The gem bounds the TCP connection and the CONNACK, not the TLS handshake between them.
         #
-        # @return [MQTT::Client] connected
-        def connect
+        # @param client [MQTT::Client]
+        # @return [void]
+        def connect(client)
           config = Secure.config
-          client = mqtt_client(config, "#{AUTHORIZER}#{Secure.session.current.value}")
           limit = config.open_timeout.to_f + config.read_timeout
           Timeout.timeout(limit, ConnectionError, "#{config.mqtt_host}: connecting took too long") { client.connect }
-          client
-        rescue StandardError, MQTT::Exception
-          client&.disconnect(false)
-          raise
+        rescue StandardError, MQTT::Exception => e
+          client.disconnect(false)
+          raise translated(e)
+        end
+
+        # The gem writes DISCONNECT before it closes the socket, and that write fails once the broker is gone.
+        #
+        # @param client [MQTT::Client]
+        # @return [void]
+        def hang_up(client)
+          client.disconnect
+        rescue MQTT::Exception, *NETWORK_ERRORS
+          client.disconnect(false)
         end
 
         # @param config [Configuration::Settings]
@@ -199,22 +193,11 @@ module Hue
           end
         end
 
-        # The gem's reader thread raises what ends the connection into this thread; it waits until the block returns.
-        #
-        # @param topic [String]
-        # @param payload [String]
-        # @yieldparam message [Message]
-        # @return [void]
-        # @raise [BlockFailure] wrapping what the block raised
-        def deliver(topic, payload)
-          masked(:never) { yield message(topic, payload) }
-        rescue StandardError => e
-          raise BlockFailure, e
-        end
-
         # @param error [Exception]
-        # @return [Error] without the token
+        # @return [Exception] an Error without the token for what the mqtt gem and the network raise; any other as it is
         def translated(error)
+          return error unless [Timeout::Error, MQTT::Exception, *NETWORK_ERRORS].any? { error.is_a?(it) }
+
           host = Secure.config.mqtt_host
           return AuthenticationError.new("#{host}: #{error.message}") if REFUSED.match?(error.message)
           return TLSError.new("#{host}: #{error.message}") if error.message.include?('certificate verify failed')
@@ -222,12 +205,11 @@ module Hue
           ConnectionError.new("#{host}: #{error.message}")
         end
 
-        # @param topic [String]
-        # @param payload [String]
+        # @param packet [MQTT::Packet::Publish]
         # @return [Message]
-        def message(topic, payload)
-          Message.new(topic: topic.dup.force_encoding(Encoding::UTF_8).delete_prefix(@prefix),
-                      payload: payload.dup.force_encoding(Encoding::UTF_8))
+        def message(packet)
+          Message.new(topic: packet.topic.dup.force_encoding(Encoding::UTF_8).delete_prefix(@prefix),
+                      payload: packet.payload.dup.force_encoding(Encoding::UTF_8))
         end
       end
     end

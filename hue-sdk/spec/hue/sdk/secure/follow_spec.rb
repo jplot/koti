@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'mqtt'
 require 'open3'
 
 RSpec.describe Hue::Sdk::Secure::Follow do
@@ -21,6 +22,8 @@ RSpec.describe Hue::Sdk::Secure::Follow do
   def follow(topics: described_class::TOPICS, keep_alive: 60) = described_class.new('home-1', topics:, keep_alive:).to_a
 
   def fail_in_block = raise(IOError, 'caller')
+
+  def fail_as_the_gem = raise(MQTT::ProtocolException, 'caller')
 
   def string(body, at)
     length = body.byteslice(at, 2).unpack1('n')
@@ -56,6 +59,7 @@ RSpec.describe Hue::Sdk::Secure::Follow do
       burst = FakeMqtt.start do |fake, socket|
         socket.write(fake.suback)
         3.times { socket.write(fake.publish('dt:home/home-1/arm/state', 'null', id: 1)) }
+        fake.finish(socket)
       end
       Hue::Sdk::Secure.configure { it.mqtt_port = burst.port }
       Hue::Sdk::Secure.configure { it.mqtt_ca_file = burst.ca_file }
@@ -64,8 +68,8 @@ RSpec.describe Hue::Sdk::Secure::Follow do
       burst&.stop
     end
 
-    # On 2026-11-08, 6 follows in 200 raised MQTT::NotConnectedException: the gem's reader thread had closed the socket
-    # before the acknowledgement of the last message.
+    # On 2026-11-08, 25 to 71 follows in 2000 ended in ConnectionError when the acknowledgement that found the socket
+    # closed by the gem's reader thread was taken for why the connection ended.
     it 'yields every message the gem read, however its two threads interleave' do
       expect(Array.new(200) { follow_burst }).to all(eq(3))
     end
@@ -78,6 +82,7 @@ RSpec.describe Hue::Sdk::Secure::Follow do
         socket.write(fake.publish('dt:home/home-1/arm/state', 'null', id: 1))
         sleep 0.1
         socket.write(fake.publish('dt:home/home-1/arm/state', 'null', id: 1))
+        fake.finish(socket)
       end
     end
     let(:follower) { described_class.new('home-1', topics: %w[arm/state]) }
@@ -132,20 +137,66 @@ RSpec.describe Hue::Sdk::Secure::Follow do
     let(:broker) do
       FakeMqtt.start do |fake, socket|
         socket.write(fake.suback)
-        socket.write(fake.publish('dt:home/home-1/arm/config', 'null', id: 7))
         socket.write(fake.publish('dt:home/home-1/arm/state', 'null'))
+        socket.write(fake.publish('dt:home/home-1/arm/config', 'null', id: 7))
         fake.read(socket) while socket.wait_readable(3)
       end
     end
+    let(:follower) { described_class.new('home-1', topics: %w[arm/state]) }
 
-    it 'yields at once, acknowledges a QoS 1 message, and disconnects when the caller stops', :aggregate_failures do
+    it 'yields at once, acknowledges the QoS 1 message it stops on, and disconnects', :aggregate_failures do
       started = now
       seen = []
-      described_class.new('home-1', topics: %w[arm/state]).each { break if (seen << it.topic).size == 2 }
-      expect([seen, now - started < 1]).to eq([%w[arm/config arm/state], true])
+      follower.each { break if (seen << it.topic).size == 2 }
+      expect([seen, now - started < 1]).to eq([%w[arm/state arm/config], true])
       sleep 0.3
       expect(broker.packets.select { [4, 14].include?(it.type) }.map { [it.type, it.body] })
         .to eq([[4, "\x00\x07".b], [14, '']])
+    end
+
+    it 'leaves no thread of its own once the caller stops' do
+      threads = Thread.list
+      follower.first
+      sleep 0.2
+      expect(Thread.list - threads).to be_empty
+    end
+
+    it 'lets an error of the block of a class the mqtt gem raises through, at once', :aggregate_failures do
+      started = now
+      expect { follower.each { fail_as_the_gem } }.to raise_error(MQTT::ProtocolException, 'caller')
+      expect(now - started).to be < 1
+    end
+
+    it 'leaves to the caller what another thread raises into it, at once', :aggregate_failures do
+      following = Thread.current
+      Thread.new do
+        sleep 0.3
+        following.raise(Errno::ETIMEDOUT)
+      end
+      started = now
+      expect { follower.each { nil } }.to raise_error(Errno::ETIMEDOUT)
+      expect(now - started).to be < 1
+    end
+
+    it 'lets the error of the block through when DISCONNECT cannot be written' do
+      allow(MQTT::Client).to receive(:new).and_wrap_original do |new, **options|
+        new.call(**options).tap do |client|
+          allow(client).to receive(:disconnect).and_wrap_original do |original, *send|
+            send.empty? ? raise(Errno::EPIPE) : original.call(*send)
+          end
+        end
+      end
+      expect { follower.each { fail_in_block } }.to raise_error(IOError, 'caller')
+    end
+  end
+
+  context 'when the broker never answers CONNECT' do
+    let(:broker) { FakeMqtt.start(connack: :silent) }
+
+    before { Hue::Sdk::Secure.configure { it.read_timeout = 0.5 } }
+
+    it 'raises ConnectionError after read_timeout' do
+      expect { Timeout.timeout(3) { follow } }.to raise_error(Hue::Sdk::ConnectionError)
     end
   end
 

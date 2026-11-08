@@ -14,12 +14,6 @@ module Hue
 
         REFUSED: Regexp
 
-        class BlockFailure < StandardError
-          attr_reader error: Exception
-
-          def initialize: (Exception error) -> void
-        end
-
         class Message < Data
           attr_reader topic: String
           attr_reader payload: String
@@ -43,25 +37,23 @@ module Hue
 
         def follow: () { (Message) -> void } -> void
 
-        def receive: (MQTT::Client client) { (Message) -> void } -> void
+        def relaying: (Thread::Queue relayed) { (Message) -> void } -> void
 
-        def verdict: (MQTT::Client client, ::Exception error) -> ::Exception
+        def watch: (MQTT::Client client, Thread::Queue relayed) -> void
 
-        def arrival: () { () -> untyped } -> ::Exception?
+        def receive: (MQTT::Client client, Thread::Queue relayed) -> ::Exception
 
-        def ends: () -> Array[singleton(::Exception)]
+        def awaited: () -> ::Exception
 
-        def masked: [T] (Symbol mode) { () -> T } -> T
+        def connect: (MQTT::Client client) -> void
 
-        def connect: () -> MQTT::Client
+        def hang_up: (MQTT::Client client) -> void
 
         def mqtt_client: (Configuration::Settings config, String username) -> MQTT::Client
 
-        def deliver: (String topic, String payload) { (Message) -> void } -> void
+        def translated: (::Exception error) -> ::Exception
 
-        def translated: (Exception error) -> Error
-
-        def message: (String topic, String payload) -> Message
+        def message: (MQTT::Packet::Publish packet) -> Message
       end
     end
   end

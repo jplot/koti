@@ -6,8 +6,9 @@ require 'socket'
 require 'tmpdir'
 
 # A real TLS server speaking enough MQTT 3.1.1 to stand in for the broker of Hue Secure. It answers CONNECT with
-# +connack+ (or closes on +:drop+) and reads SUBSCRIBE; then the spec's script drives the connection, or else it sends
-# SUBACK and +publishes+ and closes. It keeps the protocols the client offered over ALPN and every packet it sent.
+# +connack+ (or closes on +:drop+, keeps silent on +:silent+) and reads SUBSCRIBE; then the spec's script drives the
+# connection, or else it sends SUBACK and +publishes+ and closes. It keeps the protocols the client offered over ALPN
+# and every packet it sent.
 class FakeMqtt
   include TestCertificates
 
@@ -48,6 +49,12 @@ class FakeMqtt
     socket.write(suback)
     publishes.each { |topic, payload| socket.write(publish(topic, payload)) }
     read(socket) while socket.wait_readable(0.2)
+  end
+
+  # Ends the TLS session and reads until the client closes, so that an acknowledgement still on its way draws no reset.
+  def finish(socket)
+    socket.close_write
+    read(socket) while socket.wait_readable(1)
   end
 
   def suback = [0x90, 3, 0, 1, 1].pack('C*')
@@ -94,6 +101,7 @@ class FakeMqtt
     socket = @server.accept
     read(socket)
     return if @connack == :drop
+    return socket.wait_readable(3) if @connack == :silent
 
     socket.write([0x20, 2, 0, @connack].pack('C*'))
     @script.call(self, socket) if @connack.zero? && read(socket)

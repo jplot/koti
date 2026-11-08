@@ -495,10 +495,11 @@ reports and purges events, deletes a clip, and sends the alarm triggers.
 `follow` connects to the MQTT broker of Hue Secure as the app does: TLS with ALPN `mqtt` to the one
 root the app pins (Amazon Root CA 1), MQTT 3.1.1, the token in the username of AWS IoT's custom
 authorizer, renewed when it expires within 30 s. It subscribes, never publishes, and yields each
-message until the broker ends the connection; following it again is the caller's. It goes through the `mqtt`
-gem: a ping every 60 s, `ConnectionError` when one goes unanswered for 90 s, each message acknowledged at the
-QoS 1 the app subscribes at, DISCONNECT when the block stops it. An error the block raises goes through, and the
-messages the gem read before the broker ended the connection are still yielded.
+message until the broker ends the connection; following it again is the caller's. It connects with the `mqtt` gem
+from a thread of its own: it pings every 60 s and raises `ConnectionError` once 90 s pass without an answer, acknowledges
+each message at the QoS 1 the app subscribes at as it hands it over, and sends DISCONNECT when the block stops. An
+error the block raises goes through as it is, and the messages read before the broker ended the connection are still
+yielded.
 
 ```ruby
 # Gemfile: gem 'mqtt'

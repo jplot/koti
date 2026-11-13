@@ -10,7 +10,7 @@ apart.
 ## Requirements
 
 - Ruby 4.0 or later; no runtime dependency outside the standard library, except the `ffi` gem
-  for Entertainment streaming and the `grpc` gem to list the Hue Secure homes.
+  for Entertainment streaming, the `grpc` gem to list the Hue Secure homes and the `mqtt` gem to follow one.
 - A Hue bridge speaking CLIP v2: Hue Bridge (v2) or Hue Bridge Pro.
 
 ## Installation
@@ -495,11 +495,16 @@ reports and purges events, deletes a clip, and sends the alarm triggers.
 `follow` connects to the MQTT broker of Hue Secure as the app does: TLS with ALPN `mqtt` to the one
 root the app pins (Amazon Root CA 1), MQTT 3.1.1, the token in the username of AWS IoT's custom
 authorizer, renewed when it expires within 30 s. It subscribes, never publishes, and yields each
-message until the broker ends the connection; following it again is the caller's. It pings once 60 s have
-passed since it last sent and raises `ConnectionError` when a ping goes unanswered, acknowledges each message at
-the QoS 1 the app subscribes at, and disconnects when the block stops it. An error the block raises goes through.
+message until the broker ends the connection; following it again is the caller's. It connects with the `mqtt` gem
+from a thread of its own: it pings every 60 s and raises `ConnectionError` once 90 s pass without an answer, acknowledges
+each message at the QoS 1 the app subscribes at as it hands it over, and sends DISCONNECT when the block stops. An
+error the block raises goes through as it is, and the messages read before the broker ended the connection are still
+yielded. Until njh/ruby-mqtt#171 is released, mqtt 0.7.0 holds a packet that shares a TLS record with the one before
+it until the broker sends again, up to the next ping, and can then raise `ConnectionError` for a ping the broker did
+answer; the fork below carries the fix.
 
 ```ruby
+# Gemfile: gem 'mqtt', github: 'jplot/ruby-mqtt', branch: 'fix/ssl-buffered-packets'
 home.follow do |message|
   message.topic        # => "arm/state"
   message.attributes   # => Schema::ArmDisarmStateResponse, or nil for a payload the gem cannot read

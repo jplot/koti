@@ -39,6 +39,28 @@ module Hue
           def self.new: (id: String, public_key: String, key_type: String, upload_date: String) -> PublicKeyResponse
           def self.from: (Hash[String, untyped] data) -> PublicKeyResponse
         end
+
+        class VideoClipResponseData < Data
+          include Sdk::Schema::Value
+          extend Sdk::Schema::Value::ClassMethods
+
+          attr_reader url: String
+          attr_reader expiration: Numeric
+          attr_reader keyEnvelope: String?
+
+          def self.new: (url: String, expiration: Numeric, ?keyEnvelope: String?) -> VideoClipResponseData
+          def self.from: (Hash[String, untyped] data) -> VideoClipResponseData
+        end
+
+        class VideoClipResponse < Data
+          include Sdk::Schema::Value
+          extend Sdk::Schema::Value::ClassMethods
+
+          attr_reader data: VideoClipResponseData?
+
+          def self.new: (?data: VideoClipResponseData?) -> VideoClipResponse
+          def self.from: (Hash[String, untyped] data) -> VideoClipResponse
+        end
       end
     end
   end

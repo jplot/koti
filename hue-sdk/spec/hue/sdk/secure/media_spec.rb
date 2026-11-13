@@ -6,8 +6,10 @@ RSpec.describe Hue::Sdk::Secure::Media do
   let(:passphrase) { 'alpha bravo charlie delta echo' }
   let(:camera) { FakeCamera.new(passphrase, 'cam-1') }
   let(:cek) { Random.bytes(16) }
-  let(:error) { Hue::Sdk::Secure::E2eeError }
-  let(:snapshots) { '/security/event-service/v1/home/home-1/device/cam-1/timestamp' }
+
+  def error = Hue::Sdk::Secure::E2eeError
+
+  def snapshots = '/security/event-service/v1/home/home-1/device/cam-1/timestamp'
 
   def published(*keys)
     answer(keys.map.with_index(1) do |(pem, date), index|
@@ -92,6 +94,57 @@ RSpec.describe Hue::Sdk::Secure::Media do
       blob = camera.snapshot_blob('jpeg', cek).tap { it.setbyte(250, it.getbyte(250) ^ 1) }
       answer(snapshot: Base64.strict_encode64(blob), timestamp: '2026-11-13T10:00:00Z')
       expect { media.snapshot('cam-1') }.to raise_error(error)
+    end
+  end
+
+  describe 'clips' do
+    let(:files) do
+      { '/hls/master.m3u8' => "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1000\nclip.m3u8\n",
+        '/hls/clip.m3u8' => fixture('clip.m3u8'), '/hls/init.mp4' => init,
+        '/hls/segment1.m4s' => camera.seal_segment(segment, cek:) }
+    end
+    let(:upstream) { FakeCloud.start { |request| [200, {}, files.fetch(request.path.split('?').first)] } }
+
+    after { upstream.stop }
+
+    def fixture(name) = File.binread(File.expand_path("../../../fixtures/media/#{name}", __dir__))
+
+    def init = fixture('init.mp4')
+
+    def segment = fixture('segment1.m4s')
+
+    def clip(playlist = 'clip.m3u8')
+      media = opened
+      answer(data: { url: "#{upstream.url}/hls/#{playlist}?t=1", expiration: 300,
+                     keyEnvelope: Base64.strict_encode64(camera.envelope(cek)) })
+      media.clip('cam-1', 'clip-9')
+    end
+
+    it 'asks the event service for the clip' do
+      clip
+      expect(cloud.requests.last.path).to eq('/security/event-service/v1/home/home-1/device/cam-1/clip/clip-9')
+    end
+
+    it 'gives its playlist and init as they are, and its segments decrypted', :aggregate_failures do
+      read = clip
+      expect([read.entry, read.expiration]).to eq(['/hls/clip.m3u8?t=1', 300])
+      expect(read.get('clip.m3u8?t=1').body).to eq(files['/hls/clip.m3u8'])
+      expect(read.get('init.mp4').body).to eq(init)
+      expect(SegmentReader.samples(read.get('segment1.m4s').body, init:)).to eq(SegmentReader.samples(segment, init:))
+    end
+
+    it 'keeps the sync flags the boxes give, even where sealed data looks like a key frame' do
+      files['/hls/segment1.m4s'] = camera.seal_segment(segment, cek:, nonce: "\x00\x00\x00\x01\x65#{"\x00" * 7}".b)
+      expect(SegmentReader.samples(clip.get('segment1.m4s').body, init:)).to eq(SegmentReader.samples(segment, init:))
+    end
+
+    it 'finds the initialization segment through a master playlist' do
+      read = clip('master.m3u8')
+      expect(SegmentReader.samples(read.get('segment1.m4s').body, init:)).to eq(SegmentReader.samples(segment, init:))
+    end
+
+    it 'refuses a path of another origin' do
+      expect { clip.get('//evil.test/x') }.to raise_error(ArgumentError)
     end
   end
 end

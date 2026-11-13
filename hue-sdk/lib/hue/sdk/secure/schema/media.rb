@@ -45,6 +45,31 @@ module Hue
         PublicKeyResponse = Data.define(:id, :public_key, :key_type, :upload_date) do
           include Sdk::Schema::Value
         end
+
+        # Part of what the Hue cloud answers (Hue app class +VideoClipResponseData+).
+        #
+        # @!attribute [r] url
+        #   @return [String]
+        # @!attribute [r] expiration
+        #   @return [Numeric]
+        # @!attribute [r] keyEnvelope
+        #   @return [String, nil]
+        VideoClipResponseData = Data.define(:url, :expiration, :keyEnvelope) do
+          include Sdk::Schema::Value
+
+          optional :keyEnvelope
+        end
+
+        # Part of what the Hue cloud answers (Hue app class +VideoClipResponse+).
+        #
+        # @!attribute [r] data
+        #   @return [VideoClipResponseData, nil]
+        VideoClipResponse = Data.define(:data) do
+          include Sdk::Schema::Value
+
+          optional :data
+          nested data: VideoClipResponseData
+        end
       end
     end
   end

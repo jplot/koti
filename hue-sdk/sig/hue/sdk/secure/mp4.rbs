@@ -1,0 +1,45 @@
+module Hue
+  module Sdk
+    module Secure
+      module Mp4
+        class Sample < Data
+          attr_reader data: String
+          attr_reader dts: Integer
+          attr_reader cts_offset: Integer
+          attr_reader is_rap: Integer
+          attr_reader duration: Integer
+          attr_reader description: Integer
+
+          def self.new: (data: String, dts: Integer, cts_offset: Integer, is_rap: Integer, duration: Integer,
+                         description: Integer) -> Sample
+        end
+
+        class Track < Data
+          attr_reader id: Integer
+          attr_reader decode_time: Integer
+          attr_reader samples: Array[Sample]
+
+          def self.new: (id: Integer, decode_time: Integer, samples: Array[Sample]) -> Track
+        end
+
+        def self?.segment: (String segment, init: String) { (String data) -> String } -> String
+
+        def self?.media?: (String bytes) -> bool
+
+        def self?.files: [T] (String segment, String init) { (Hash[Symbol, String] paths) -> T } -> T
+
+        def self?.tracks: (Hash[Symbol, String] paths) ?{ (String data) -> String } -> Array[Track]
+
+        def self?.sample: (untyped reader, Integer track, Integer number) ?{ (String data) -> String } -> Sample
+
+        def self?.written: (Hash[Symbol, String] paths, Integer sequence, Array[Track] tracks) -> String
+
+        def self?.fragment: (untyped writer, Track track) -> void
+
+        def self?.sequence: (String segment) -> Integer
+
+        def self?.boxes: (String bytes) -> Array[String]
+      end
+    end
+  end
+end

@@ -24,14 +24,17 @@ class FakeCamera
 
   def pqc_envelope = [0, 64].pack('CN') + Random.bytes(64) + [0x10, 1336].pack('CN') + Random.bytes(1336)
 
-  def box(cek, plain)
+  def box(cek, plain, nonce: nil)
     cipher = OpenSSL::Cipher.new("aes-#{cek.bytesize * 8}-gcm").encrypt
     cipher.key = cek
-    nonce = cipher.random_iv
+    nonce ||= cipher.random_iv
+    cipher.iv = nonce
     nonce + cipher.update(plain) + cipher.final + cipher.auth_tag
   end
 
   def snapshot_blob(image, cek) = envelope(cek) + box(cek, image)
+
+  def seal_segment(segment, cek:, nonce: nil) = SegmentSealer.new(segment) { box(cek, it, nonce:) }.sealed
 
   private
 

@@ -28,6 +28,10 @@ module Hue
 
         def snapshot_at: (String camera_id, String url) -> String
 
+        def clip: (String camera_id, String clip_id) -> Clip
+
+        def self.load: (String library, String purpose) -> void
+
         private
 
         def decrypted: (String blob, String camera_id) -> String

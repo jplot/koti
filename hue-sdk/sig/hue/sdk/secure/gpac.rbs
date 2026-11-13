@@ -1,0 +1,87 @@
+module Hue
+  module Sdk
+    module Secure
+      module Gpac
+        class Sample
+          def initialize: (untyped pointer) -> void
+
+          def []: (Symbol field) -> untyped
+
+          def []=: (Symbol field, untyped value) -> untyped
+        end
+
+        WRITE: Integer
+
+        MOOF_FIRST: Integer
+
+        def self.check: (Integer error) -> true
+
+        def self.opened: (String path) -> untyped
+
+        def self.sample: (untyped reader, Integer track, Integer number) -> Mp4::Sample
+
+        def self.writer: (untyped reader, String dir) -> untyped
+
+        def self.started: (untyped writer, String out, Integer sequence) -> void
+
+        def self.closed: (untyped writer, Mp4::Track first) -> void
+
+        def self.add: (untyped writer, Integer track, Mp4::Sample sample) -> void
+
+        def self.filled: (Sample written, Mp4::Sample sample) -> Sample
+
+        def self.deleted: (untyped pointer) -> void
+
+        def self.gf_sys_init: (Integer, String?) -> Integer
+
+        def self.gf_isom_open: (String, Integer, String) -> untyped
+
+        def self.gf_isom_open_progressive: (String, Integer, Integer, Integer, untyped, untyped) -> Integer
+
+        def self.gf_isom_open_segment: (untyped, String, Integer, Integer, Integer) -> Integer
+
+        def self.gf_isom_close: (untyped) -> Integer
+
+        def self.gf_isom_get_timescale: (untyped) -> Integer
+
+        def self.gf_isom_set_timescale: (untyped, Integer) -> Integer
+
+        def self.gf_isom_get_track_count: (untyped) -> Integer
+
+        def self.gf_isom_get_track_id: (untyped, Integer) -> Integer
+
+        def self.gf_isom_get_sample_count: (untyped, Integer) -> Integer
+
+        def self.gf_isom_get_sample: (untyped, Integer, Integer, untyped) -> untyped
+
+        def self.gf_isom_get_sample_duration: (untyped, Integer, Integer) -> Integer
+
+        def self.gf_isom_get_current_tfdt: (untyped, Integer) -> Integer
+
+        def self.gf_isom_get_sample_sync: (untyped, Integer, Integer) -> Integer
+
+        def self.gf_isom_sample_new: () -> untyped
+
+        def self.gf_isom_sample_del: (untyped) -> void
+
+        def self.gf_isom_clone_track: (untyped, Integer, untyped, Integer, untyped) -> Integer
+
+        def self.gf_isom_setup_track_fragment: (untyped, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer) -> Integer
+
+        def self.gf_isom_finalize_for_fragment: (untyped, Integer, Integer) -> Integer
+
+        def self.gf_isom_start_segment: (untyped, String, Integer) -> Integer
+
+        def self.gf_isom_set_next_moof_number: (untyped, Integer) -> void
+
+        def self.gf_isom_start_fragment: (untyped, Integer) -> Integer
+
+        def self.gf_isom_set_traf_base_media_decode_time: (untyped, Integer, Integer) -> Integer
+
+        def self.gf_isom_fragment_add_sample: (untyped, Integer, untyped, Integer, Integer, Integer, Integer, Integer) -> Integer
+
+        def self.gf_isom_close_segment: (untyped, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, untyped, untyped, untyped) -> Integer
+      end
+    end
+  end
+end

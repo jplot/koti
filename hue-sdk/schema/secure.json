@@ -3122,6 +3122,36 @@
           "required": true
         }
       }
+    },
+    "VideoClipResponse": {
+      "origin": "VideoClipResponse",
+      "kind": "response",
+      "fields": {
+        "data": {
+          "type": {
+            "class": "VideoClipResponseData"
+          },
+          "required": false
+        }
+      }
+    },
+    "VideoClipResponseData": {
+      "origin": "VideoClipResponseData",
+      "kind": "response",
+      "fields": {
+        "url": {
+          "type": "String",
+          "required": true
+        },
+        "expiration": {
+          "type": "Numeric",
+          "required": true
+        },
+        "keyEnvelope": {
+          "type": "String",
+          "required": false
+        }
+      }
     }
   }
 }

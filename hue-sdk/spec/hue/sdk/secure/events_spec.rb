@@ -17,6 +17,32 @@ RSpec.describe Hue::Sdk::Secure::Events do
     answers.push(FakeCloud.json({ 'data' => messages }, 200, cursor ? { 'x-cursor' => cursor } : {}))
   end
 
+  describe "a camera event's clip" do
+    let(:camera) do
+      { 'id' => 'ev-1', 'type' => 'update', 'resource_uri' => '/home/home-1/device/cam-1/service/camera/0' }
+    end
+
+    def read(type, event, metadata = nil)
+      page_of(message(type, event).merge('metadata' => metadata))
+      events.page(limit: 1).events.first
+    end
+
+    it 'gives the camera and the clip of a detection event' do
+      event = read('camera', camera.merge('resource_type' => 'security_motion_eventing'),
+                   'clip' => { 'clip_event_id' => 'clip-9' })
+      expect([event.camera_id, event.clip_id]).to eq(%w[cam-1 clip-9])
+    end
+
+    it 'takes the camera event id as the clip of an upload event' do
+      expect(read('camera', camera.merge('resource_type' => 'camera_video_clips_eventing')).clip_id).to eq('ev-1')
+    end
+
+    it 'gives no camera nor clip for another event' do
+      event = read('geofence', { 'type' => 'security_empty', 'device_name' => 'phone' })
+      expect([event.camera_id, event.clip_id]).to eq([nil, nil])
+    end
+  end
+
   it 'sends the cursor as a header and reads the next one', :aggregate_failures do
     page_of(cursor: 'next-1')
     read = events.page(limit: 20, cursor: 'first')

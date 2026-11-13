@@ -74,3 +74,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   sends the all-safe and alarm triggers. Each event reads with the class the app chooses by its type.
 - `home.follow` follows a Hue Secure home over MQTT with the `mqtt` gem, as the app does, until the broker ends the
   connection, without publishing; each message reads as the app reads its topic.
+- `home.media(passphrase)` opens the end-to-end encrypted media of a Hue Secure home with its passphrase, checked
+  as the app checks it, and decrypts a camera's latest snapshot, an event's snapshot and an event's `snapshot_url`.
+  The gem now depends on the `base64` gem.

@@ -190,6 +190,21 @@ RSpec.describe Hue::Sdk::Secure::Follow do
     end
   end
 
+  context 'when the broker sends a message in the same TLS record as the SUBACK' do
+    let(:broker) do
+      FakeMqtt.start do |fake, socket|
+        socket.write(fake.suback + fake.publish('dt:home/home-1/arm/state', 'null'))
+        fake.read(socket) while socket.wait_readable(3)
+      end
+    end
+
+    it 'yields it at once' do
+      started = now
+      described_class.new('home-1', topics: %w[arm/state]).first
+      expect(now - started).to be < 1
+    end
+  end
+
   context 'when the broker never answers CONNECT' do
     let(:broker) { FakeMqtt.start(connack: :silent) }
 

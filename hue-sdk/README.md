@@ -499,10 +499,12 @@ message until the broker ends the connection; following it again is the caller's
 from a thread of its own: it pings every 60 s and raises `ConnectionError` once 90 s pass without an answer, acknowledges
 each message at the QoS 1 the app subscribes at as it hands it over, and sends DISCONNECT when the block stops. An
 error the block raises goes through as it is, and the messages read before the broker ended the connection are still
-yielded.
+yielded. Until njh/ruby-mqtt#171 is released, mqtt 0.7.0 holds a packet that shares a TLS record with the one before
+it until the broker sends again, up to the next ping, and can then raise `ConnectionError` for a ping the broker did
+answer; the fork below carries the fix.
 
 ```ruby
-# Gemfile: gem 'mqtt'
+# Gemfile: gem 'mqtt', github: 'jplot/ruby-mqtt', branch: 'fix/ssl-buffered-packets'
 home.follow do |message|
   message.topic        # => "arm/state"
   message.attributes   # => Schema::ArmDisarmStateResponse, or nil for a payload the gem cannot read

@@ -75,6 +75,13 @@ RSpec.describe Hue::Sdk::Secure::Media do
       expect(cloud.requests.last.headers).not_to include('authorization')
     end
 
+    it 'raises ResponseError, not a token error, when a snapshot_url has expired', :aggregate_failures do
+      media = opened
+      answers.push([403, { 'Content-Type' => 'application/xml' }, '<Error><Code>AccessDenied</Code></Error>'])
+      expect { media.snapshot_at('cam-1', "#{cloud.url}/snapshots/1") }
+        .to raise_error(Hue::Sdk::ResponseError) { expect(it.status).to eq(403) }
+    end
+
     it 'calls a passphrase with a capital letter wrong, as the app does' do
       published([camera.home_signing_pem, '2026-11-02T00:00:00Z'])
       expect { home.media(passphrase.capitalize) }.to raise_error(error, /wrong/)

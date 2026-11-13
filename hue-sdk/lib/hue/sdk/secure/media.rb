@@ -76,6 +76,8 @@ module Hue
         # @param at [Time, nil] the event's device time; nil for the latest snapshot
         # @return [Snapshot]
         # @raise [E2eeError] if the image does not decrypt
+        # @raise [ResponseError] if the cloud refuses
+        # @raise [ConnectionError] if the cloud cannot be reached
         def snapshot(camera_id, at: nil)
           path = "security/event-service/v1/home/#{home_id}/device/#{camera_id}/timestamp/#{at&.to_i || 'latest'}/" \
                  'snapshot'
@@ -85,13 +87,22 @@ module Hue
           Snapshot.new(image:, timestamp: answer.timestamp, refresh_timestamp: answer.to_h[:refresh_timestamp])
         end
 
-        # The image behind the +snapshot_url+ of an event, which carries its own authorization.
+        # The image behind the +snapshot_url+ of an event, which carries its own authorization: a refusal, such as an
+        # expired URL, is not the account's token.
         #
         # @param camera_id [String] the camera of the event
         # @param url [String]
         # @return [String] the JPEG
         # @raise [E2eeError] if the image does not decrypt
-        def snapshot_at(camera_id, url) = decrypted(Http.request(:get, url).body.to_s, camera_id)
+        # @raise [ResponseError] if the URL is refused
+        # @raise [ConnectionError] if its host cannot be reached
+        def snapshot_at(camera_id, url)
+          uri = URI(url) #: URI::HTTP
+          answer = Http.exchange(uri, Net::HTTP::Get.new(uri, { 'User-Agent' => "hue-sdk/#{VERSION}" }))
+          raise ResponseError.new(answer.code.to_i, [], source: uri.host.to_s) unless answer.is_a?(Net::HTTPSuccess)
+
+          decrypted(answer.body.to_s, camera_id)
+        end
 
         private
 

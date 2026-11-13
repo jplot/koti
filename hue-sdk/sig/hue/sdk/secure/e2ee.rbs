@@ -1,0 +1,50 @@
+module Hue
+  module Sdk
+    module Secure
+      class E2eeError < Error
+      end
+
+      module E2ee
+        GROUP: OpenSSL::PKey::EC::Group
+
+        ENVELOPE: Integer
+
+        class Keys
+          attr_reader app: OpenSSL::PKey::EC
+
+          attr_reader home_signing: OpenSSL::PKey::EC
+
+          @master: String
+
+          def initialize: (String passphrase) -> void
+
+          def camera: (String id) -> OpenSSL::PKey::EC
+
+          def inspect: () -> String
+        end
+
+        def self?.key: (String master, String info) -> OpenSSL::PKey::EC
+
+        def self?.raw: (OpenSSL::PKey::EC key) -> String
+
+        def self?.open: (String blob, keys: Keys, camera_id: String) -> [String, String]
+
+        def self?.decrypt: (String cek, String box) -> String
+
+        def self?.gcm: (String key, String nonce, String tag) -> OpenSSL::Cipher
+
+        def self?.check: (String blob, OpenSSL::PKey::EC app, OpenSSL::PKey::EC camera) -> void
+
+        def self?.sealed: (String blob, OpenSSL::PKey::EC app, String camera_id) -> String
+
+        def self?.ccm: (String key, String nonce, String ciphertext, String tag) -> String
+
+        def self?.public_key: (String raw) -> OpenSSL::PKey::EC
+
+        def self?.verified?: (OpenSSL::PKey::EC key, String data, String? signature) -> bool
+
+        def self?.digest: (OpenSSL::PKey::EC key) -> String
+      end
+    end
+  end
+end

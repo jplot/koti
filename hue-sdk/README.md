@@ -9,8 +9,9 @@ apart.
 
 ## Requirements
 
-- Ruby 4.0 or later; no runtime dependency outside the standard library, except the `ffi` gem
-  for Entertainment streaming, the `grpc` gem to list the Hue Secure homes and the `mqtt` gem to follow one.
+- Ruby 4.0 or later; no runtime dependency outside the standard library, except the `base64` gem, out of the
+  default gems since Ruby 3.4, the `ffi` gem for Entertainment streaming, the `grpc` gem to list the Hue Secure
+  homes and the `mqtt` gem to follow one.
 - A Hue bridge speaking CLIP v2: Hue Bridge (v2) or Hue Bridge Pro.
 
 ## Installation
@@ -515,6 +516,31 @@ It follows `Follow::TOPICS` (`arm/state`, `arm/config`, `arm/schedules`, `device
 `timeline/update`), or the `topics:` given. The gem names itself in its client id, rather than
 the app's device and build.
 
+### Media
+
+The cameras encrypt their images end to end with keys of the home's passphrase: five words the
+app keeps on the phone and no endpoint returns. The gem derives the keys as the app does and
+decrypts the media itself. Never tested on a device.
+
+```ruby
+media = home.media('alpha bravo charlie delta echo')   # the five words, exactly as the app shows them
+snapshot = media.snapshot(camera.id)                     # the latest one: image (JPEG), timestamp, refresh_timestamp
+media.snapshot(camera.id, at: Time.at(1_763_000_000)).image   # an event's, at its device time
+media.snapshot_at(camera.id, event.event.data.snapshot_url)   # the image behind an event's snapshot_url
+```
+
+`home.media` checks the passphrase as the app does: its home signing key must be the newest the
+key service publishes for the home. It raises `E2eeError` "the passphrase is an old one" when only
+an older key matches, and "the passphrase is wrong" otherwise. The passphrase is taken as it is
+given, as the app takes it: a stray space or a capital letter makes it wrong. The gem keeps it in
+no file and shows it in no message.
+
+`camera.snapshot` asks for a new image; `media.snapshot` then reads it. The app subscribes to the
+topic that would announce it under a name it builds by mistake, and so never hears of it: the gem
+does not follow it either. Envelopes in the post-quantum format, which the app reads only when a
+remote setting, off by default, gives it an ML-KEM key, raise `E2eeError`: Ruby's OpenSSL cannot
+open them.
+
 ## Errors
 
 | Error | Raised when |
@@ -526,6 +552,7 @@ the app's device and build.
 | `Hue::Sdk::ResponseError` | the bridge or the Hue cloud answers with an error status, partial success (207) included; carries `status` and `errors` |
 | `Hue::Sdk::NotFoundError` | the resource does not exist (a `ResponseError`) |
 | `Hue::Sdk::RateLimitError` | the bridge asks to slow down (a `ResponseError`) |
+| `Hue::Sdk::Secure::E2eeError` | a passphrase does not open the home, or Hue Secure media does not decrypt or verify |
 
 All of them inherit from `Hue::Sdk::Error`.
 

@@ -183,7 +183,8 @@ module Schema
                        AudioDetectionCameraEvent DoorbellButtonCameraEvent DeviceRemovedEvent BridgeConnectivityEvent
                        DeleteTimelineEntriesEvent PurgeTimelineEvent RefreshTimelineEvent ReportTimelineEntriesEvent
                        SecurityEventInsightsResponse TimelineEventsDelete TimelineEventDelete TimelineEventsReport
-                       TimelineEventReport AllSafeRequest AlarmTriggerRequest CameraConfigUpdateEventValues]
+                       TimelineEventReport AllSafeRequest AlarmTriggerRequest CameraConfigUpdateEventValues],
+        'media' => %w[PublicKeyResponse DownloadCameraLastSnapshotResponse DownloadTimelineEventSnapshotResponse]
       }.freeze
     end
   end

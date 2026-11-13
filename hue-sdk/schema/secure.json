@@ -3067,5 +3067,61 @@
         }
       }
     }
+  },
+  "media": {
+    "DownloadCameraLastSnapshotResponse": {
+      "origin": "DownloadCameraLastSnapshotResponse",
+      "kind": "response",
+      "fields": {
+        "snapshot": {
+          "type": "String",
+          "required": true
+        },
+        "timestamp": {
+          "type": "String",
+          "required": true
+        },
+        "refresh_timestamp": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "DownloadTimelineEventSnapshotResponse": {
+      "origin": "DownloadTimelineEventSnapshotResponse",
+      "kind": "response",
+      "fields": {
+        "snapshot": {
+          "type": "String",
+          "required": true
+        },
+        "timestamp": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "PublicKeyResponse": {
+      "origin": "PublicKeyResponse",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "public_key": {
+          "type": "String",
+          "required": true
+        },
+        "key_type": {
+          "type": "String",
+          "required": true
+        },
+        "upload_date": {
+          "type": "String",
+          "required": true
+        }
+      }
+    }
   }
 }

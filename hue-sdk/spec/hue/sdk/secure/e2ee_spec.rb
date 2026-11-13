@@ -23,6 +23,11 @@ RSpec.describe Hue::Sdk::Secure::E2ee do
     expect { described_class.open(envelope, keys:, camera_id: 'cam-1') }.to raise_error(error, /app/)
   end
 
+  it 'refuses an envelope whose content key the camera did not sign' do
+    envelope = camera.envelope(cek, signer: OpenSSL::PKey::EC.generate('prime256v1'))
+    expect { described_class.open(envelope, keys:, camera_id: 'cam-1') }.to raise_error(error, /signature/)
+  end
+
   it 'refuses a post-quantum envelope' do
     expect { described_class.open(camera.pqc_envelope, keys:, camera_id: 'cam-1') }
       .to raise_error(error, /post-quantum/)
@@ -44,7 +49,8 @@ RSpec.describe Hue::Sdk::Secure::E2ee do
     expect { described_class.decrypt(cek, flipped(box, 13)) }.to raise_error(error)
   end
 
-  it 'never shows the passphrase' do
-    expect([keys.inspect, keys.app.inspect, keys.camera('cam-1').inspect]).to all(satisfy { !it.include?('alpha') })
+  it 'shows neither the passphrase nor a key', :aggregate_failures do
+    expect(keys.inspect).to eq('#<Hue::Sdk::Secure::E2ee::Keys>')
+    expect(keys.app.inspect).not_to include(keys.app.private_key.to_s(16))
   end
 end

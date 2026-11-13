@@ -16,10 +16,10 @@ class FakeCamera
 
   def home_signing_pem = public_only(@home).public_to_pem
 
-  def envelope(cek)
+  def envelope(cek, signer: @device)
     ephemeral = OpenSSL::PKey::EC.generate('prime256v1')
     [@home, @app, @device].map { OpenSSL::Digest::SHA256.digest(raw(it)) }.join + raw(ephemeral) +
-      sealed(ephemeral, cek + signature(@device, cek))
+      sealed(ephemeral, cek + signature(signer, cek))
   end
 
   def pqc_envelope = [0, 64].pack('CN') + Random.bytes(64) + [0x10, 1336].pack('CN') + Random.bytes(1336)

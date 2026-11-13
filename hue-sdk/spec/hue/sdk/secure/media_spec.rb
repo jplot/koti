@@ -75,6 +75,11 @@ RSpec.describe Hue::Sdk::Secure::Media do
       expect(cloud.requests.last.headers).not_to include('authorization')
     end
 
+    it 'calls a passphrase with a capital letter wrong, as the app does' do
+      published([camera.home_signing_pem, '2026-11-02T00:00:00Z'])
+      expect { home.media(passphrase.capitalize) }.to raise_error(error, /wrong/)
+    end
+
     it 'refuses a snapshot whose image does not decrypt' do
       media = opened
       blob = camera.snapshot_blob('jpeg', cek).tap { it.setbyte(250, it.getbyte(250) ^ 1) }

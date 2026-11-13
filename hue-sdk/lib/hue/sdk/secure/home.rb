@@ -69,6 +69,15 @@ module Hue
         # @api public
         def events = Events.new(id)
 
+        # Opens the media of the home's cameras with the home's passphrase, which the app keeps on the phone and no
+        # endpoint returns.
+        #
+        # @param passphrase [String] the five words, exactly as the app was given them
+        # @return [Media]
+        # @raise [E2eeError] if the passphrase is an old one, or does not open the home
+        # @api public
+        def media(passphrase) = Media.open(id, passphrase)
+
         # Follows the home over MQTT until the broker ends the connection.
         #
         # @param topics [Array<String>] topics under +dt:home/<home>/+

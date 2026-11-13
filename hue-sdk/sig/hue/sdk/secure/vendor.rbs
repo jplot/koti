@@ -65,3 +65,16 @@ module MQTT
     end
   end
 end
+
+# What the gem calls of OpenSSL that the standard library's signatures lack.
+module OpenSSL
+  class Cipher
+    def ccm_data_len=: (Integer length) -> Integer
+  end
+
+  module PKey
+    class PKey
+      def derive: (PKey peer) -> String
+    end
+  end
+end

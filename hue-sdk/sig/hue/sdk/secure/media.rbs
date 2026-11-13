@@ -1,0 +1,37 @@
+module Hue
+  module Sdk
+    module Secure
+      class Media
+        class Snapshot < Data
+          attr_reader image: String
+          attr_reader timestamp: String
+          attr_reader refresh_timestamp: String?
+
+          def self.new: (image: String, timestamp: String, refresh_timestamp: String?) -> Snapshot
+        end
+
+        attr_reader home_id: String
+
+        attr_reader signing_key_id: String
+
+        @keys: E2ee::Keys
+
+        def self.open: (String home_id, String passphrase) -> Media
+
+        def self.published: (String home_id) -> Array[Schema::PublicKeyResponse]
+
+        def self.signed?: (Schema::PublicKeyResponse key, String derived) -> bool
+
+        def initialize: (String home_id, E2ee::Keys keys, String signing_key_id) -> void
+
+        def snapshot: (String camera_id, ?at: Time?) -> Snapshot
+
+        def snapshot_at: (String camera_id, String url) -> String
+
+        private
+
+        def decrypted: (String blob, String camera_id) -> String
+      end
+    end
+  end
+end

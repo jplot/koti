@@ -19,6 +19,7 @@ namespace :rbs do
   desc 'Validate the RBS signatures in sig/'
   task :validate do
     sh 'rbs -r singleton -r net-http -r openssl -r socket -r json -r resolv -r uri -r digest -r securerandom ' \
+       '-r base64 ' \
        '-I sig validate'
   end
 end

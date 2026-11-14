@@ -72,6 +72,13 @@ RSpec.describe Hue::Sdk::Secure::Plan do
       expect(described_class.motion_area_selectable?(nil, 'x-1')).to be(false)
     end
 
+    it "shows a motion area's arming switches only for a subscribed bridge or one in its trial", :aggregate_failures do
+      shown = statuses.keys.to_h { [it, described_class.motion_area_switches?(details(it), 'X-1')] }
+      expect(shown).to eq(subscribed: true, experience_period: true, free_tier: false,
+                          experience_period_not_enabled: false, unknown: false)
+      expect(described_class.motion_area_switches?(nil, 'x-1')).to be(false)
+    end
+
     it "tells what the app does with a camera setting the plan gates, by the camera's status", :aggregate_failures do
       actions = statuses.keys.to_h { [it, described_class.camera_action(details(it), 'x-1')] }
       expect(actions).to eq(subscribed: :run, experience_period: :inform_then_run, free_tier: :suggest_plan,

@@ -14,10 +14,11 @@ module Hue
         STATES = %w[active grace_period future cancelled].freeze
         CAMERA = /\ACM[A-Z]\d{3}\z/
         BLOCKED = %i[free_tier experience_period_not_enabled].freeze
+        ACTIVE = %i[subscribed experience_period].freeze
         ACTIONS = { subscribed: :run, experience_period: :inform_then_run, free_tier: :suggest_plan,
                     experience_period_not_enabled: :nothing, unknown: :refetch }.freeze
         GATED = %w[activity_zones package_detection_zones lighting_zones smoke_alarm_detection].freeze
-        private_constant :TYPES, :PAID, :STATES, :CAMERA, :BLOCKED, :ACTIONS, :GATED
+        private_constant :TYPES, :PAID, :STATES, :CAMERA, :BLOCKED, :ACTIVE, :ACTIONS, :GATED
 
         # The plan's state (active, cancelled…) plays no part, as in the app: a device a plan lists is subscribed.
         #
@@ -45,6 +46,17 @@ module Hue
         def self.motion_area_selectable?(details, bridge_id)
           !details.nil? && !BLOCKED.include?(status(details, bridge_id))
         end
+
+        # Whether the app's motion area screen shows the switches that use the area when armed at home or away. It
+        # shows them only for a subscribed bridge or one in its trial; a free-tier bridge gets the plan offer, one that
+        # has not started its trial the offer to start it, and an unknown one nothing.
+        #
+        # @param details (see .status)
+        # @param bridge_id (see .motion_area_selectable?)
+        # @return [Boolean]
+        # @raise (see .status)
+        # @api public
+        def self.motion_area_switches?(details, bridge_id) = ACTIVE.include?(status(details, bridge_id))
 
         # What the app does when a camera setting {.gated?} is changed: +:run+ for a subscribed camera;
         # +:inform_then_run+ in its trial, after a dialog; +:suggest_plan+, a dialog and no change, on the free tier;

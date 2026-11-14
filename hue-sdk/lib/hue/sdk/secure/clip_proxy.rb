@@ -10,9 +10,7 @@ module Hue
       class ClipProxy
         # @param clip [Clip]
         # @api public
-        def initialize(clip)
-          @clip = clip
-        end
+        def initialize(clip) = @clip = clip
 
         # @param env [Hash{String=>Object}] a Rack environment
         # @return [Array(Integer, Hash{String=>String}, Array<String>)] 404 for a path off the clip's host, 502 with

@@ -28,17 +28,15 @@ module Hue
 
         def self?.files: [T] (String segment, String init) { (Hash[Symbol, String] paths) -> T } -> T
 
-        def self?.tracks: (Hash[Symbol, String] paths) ?{ (String data) -> String } -> Array[Track]
+        def self?.tracks: (Hash[Symbol, String] paths) { (String data) -> String } -> Array[Track]
 
-        def self?.sample: (untyped reader, Integer track, Integer number) ?{ (String data) -> String } -> Sample
+        def self?.sample: (untyped reader, Integer track, Integer number) { (String data) -> String } -> Sample
 
         def self?.written: (Hash[Symbol, String] paths, Integer sequence, Array[Track] tracks) -> String
 
         def self?.fragment: (untyped writer, Track track) -> void
 
         def self?.sequence: (String segment) -> Integer
-
-        def self?.boxes: (String bytes) -> Array[String]
       end
     end
   end

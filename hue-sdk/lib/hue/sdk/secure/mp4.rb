@@ -31,7 +31,10 @@ module Hue
 
         # @param bytes [String]
         # @return [Boolean] whether it is a media segment, rather than an initialization segment or a playlist
-        def media?(bytes) = boxes(bytes).include?('moof')
+        def media?(bytes)
+          require_relative 'gpac'
+          Gpac.gf_isom_probe_data(bytes, bytes.bytesize) == Gpac::MEDIA_SEGMENT
+        end
 
         def files(segment, init)
           require_relative 'gpac'
@@ -55,10 +58,7 @@ module Hue
           Gpac.gf_isom_close(reader) if reader
         end
 
-        def sample(reader, track, number)
-          read = Gpac.sample(reader, track, number)
-          block_given? ? read.with(data: yield(read.data)) : read
-        end
+        def sample(reader, track, number) = Gpac.sample(reader, track, number).then { it.with(data: yield(it.data)) }
 
         def written(paths, sequence, tracks)
           out = File.join(paths[:dir], 'out.m4s')
@@ -78,26 +78,13 @@ module Hue
           track.samples.each { Gpac.add(writer, track.id, it) }
         end
 
-        # GPAC reads the moof's sequence number but does not give it.
+        # GPAC documents no reader of the moof's sequence number.
         def sequence(segment)
           at = segment.index('mfhd') or raise E2eeError, 'the segment has no movie fragment header'
           segment.byteslice(at + 8, 4).to_s.unpack1('N').to_i
         end
 
-        def boxes(bytes)
-          at = 0
-          types = [] #: Array[String]
-          while at + 8 <= bytes.bytesize
-            size, type = bytes.byteslice(at, 8).to_s.unpack('Na4')
-            break if size.to_i < 8
-
-            types << type.to_s
-            at += size.to_i
-          end
-          types
-        end
-
-        private_class_method :files, :tracks, :sample, :written, :fragment, :sequence, :boxes
+        private_class_method :files, :tracks, :sample, :written, :fragment, :sequence
       end
     end
   end

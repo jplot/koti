@@ -25,6 +25,9 @@ module Hue
           layout :data_length, :uint32, :data, :pointer, :dts, :uint64, :cts_offset, :int32, :is_rap, :int
         end
 
+        # What gf_isom_probe_data answers for a media segment.
+        MEDIA_SEGMENT = 3
+
         WRITE = 2
         MOOF_FIRST = 1
         private_constant :WRITE, :MOOF_FIRST
@@ -34,6 +37,7 @@ module Hue
         attach_function :gf_isom_open_progressive, %i[string uint64 uint64 int pointer pointer], :int
         attach_function :gf_isom_open_segment, %i[pointer string uint64 uint64 int], :int
         attach_function :gf_isom_close, %i[pointer], :int
+        attach_function :gf_isom_probe_data, %i[buffer_in uint32], :uint32
         attach_function :gf_isom_get_timescale, %i[pointer], :uint32
         attach_function :gf_isom_set_timescale, %i[pointer uint32], :int
         attach_function :gf_isom_get_track_count, %i[pointer], :uint32

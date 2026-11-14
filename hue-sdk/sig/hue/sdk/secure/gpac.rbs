@@ -10,6 +10,8 @@ module Hue
           def []=: (Symbol field, untyped value) -> untyped
         end
 
+        MEDIA_SEGMENT: Integer
+
         WRITE: Integer
 
         MOOF_FIRST: Integer
@@ -59,6 +61,8 @@ module Hue
         def self.gf_isom_get_current_tfdt: (untyped, Integer) -> Integer
 
         def self.gf_isom_get_sample_sync: (untyped, Integer, Integer) -> Integer
+
+        def self.gf_isom_probe_data: (String, Integer) -> Integer
 
         def self.gf_isom_sample_new: () -> untyped
 

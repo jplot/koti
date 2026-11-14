@@ -4,6 +4,8 @@ module Hue
       class Arm
         GEOFENCE: Hash[Symbol?, String]
 
+        BLOCKED: Array[Plan::status]
+
         @path: String
 
         def initialize: (String home_id) -> void
@@ -21,6 +23,14 @@ module Hue
         def remove: () -> void
 
         def delete_geofence_config: (?(:presence | :empty)? which) -> void
+
+        private
+
+        def moved_motion_areas: (Hash[String, untyped] sent) -> Array[Hash[String, untyped]]
+
+        def motion_areas: (Hash[String, untyped]? mode) -> Array[Hash[String, untyped]]
+
+        def check_plans: (Array[Hash[String, untyped]] areas) -> void
       end
     end
   end

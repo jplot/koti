@@ -6,7 +6,8 @@ module Hue
       # The arming of a home and its alarm, as the app's +ArmDisarmHttpClient+ reaches them. Never tested on a device.
       class Arm
         GEOFENCE = { nil => '', presence: '/presence', empty: '/empty' }.freeze
-        private_constant :GEOFENCE
+        BLOCKED = %i[free_tier experience_period_not_enabled].freeze
+        private_constant :GEOFENCE, :BLOCKED
 
         # @param home_id [String]
         # @api public
@@ -35,12 +36,21 @@ module Hue
           Secure.client.put("#{@path}/arm/state", body:, query: delay ? { delay: } : {})
         end
 
+        # As the app does, it refuses to let a motion area into a mode or out of it while the area's bridge is
+        # +free_tier+ or +experience_period_not_enabled+, or while the plans cannot be read. It reads the configuration
+        # first, and the plans only when a motion area moves.
+        #
         # @param request [Schema::ArmDisarmSetConfigRequest]
         # @return [void]
         # @raise [ArgumentError] if the request leaves a required field nil; nothing is sent
+        # @raise [PlanError] if a motion area moves while the app would not let it; nothing is sent
         # @raise (see Http.request)
         # @api public
-        def update_config(request) = Secure.client.put("#{@path}/arm/config", body: request)
+        def update_config(request)
+          moved = moved_motion_areas(JSON.parse(JSON.generate(request)))
+          check_plans(moved) unless moved.empty?
+          Secure.client.put("#{@path}/arm/config", body: request)
+        end
 
         # The app sends this one body to sound the alarm.
         #
@@ -62,6 +72,40 @@ module Hue
         # @api public
         def delete_geofence_config(which = nil)
           Secure.client.delete("#{@path}/arm/config/geofence#{GEOFENCE.fetch(which)}")
+        end
+
+        private
+
+        # @param sent [Hash{String=>Object}] the request as JSON
+        # @return [Array<Hash{String=>Object}>] the motion areas it adds to a mode or removes from it
+        # @api private
+        def moved_motion_areas(sent)
+          config = Secure.client.get("#{@path}/arm").body&.dig('config') || {}
+          %w[armed_stay armed_away].flat_map do |mode|
+            before = motion_areas(config[mode])
+            after = motion_areas(sent[mode])
+            (before - after) + (after - before)
+          end
+        end
+
+        # @param mode [Hash{String=>Object}, nil]
+        # @return [Array<Hash{String=>Object}>]
+        # @api private
+        def motion_areas(mode)
+          devices = mode&.dig('device') || []
+          devices.select { it['type'] == 'motion_area' }.map { it.slice('id', 'bridge') }
+        end
+
+        # @param areas [Array<Hash{String=>Object}>]
+        # @return [void]
+        # @raise [PlanError]
+        # @api private
+        def check_plans(areas)
+          details = Secure.subscription
+          areas.each do |area|
+            status = Plan.status(details, area['bridge'])
+            raise PlanError.new(area['bridge'], status) if BLOCKED.include?(status)
+          end
         end
       end
     end

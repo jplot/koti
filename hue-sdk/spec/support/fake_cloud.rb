@@ -59,7 +59,7 @@ class FakeCloud
     return if answer == :drop
 
     status, headers, body = answer
-    lines = ["HTTP/1.1 #{status} Fake", "Content-Length: #{body.bytesize}",
+    lines = ["HTTP/1.1 #{status} Fake", "Content-Length: #{body.bytesize}", 'Connection: close',
              *headers.map { |name, value| "#{name}: #{value}" }]
     socket.write("#{lines.join("\r\n")}\r\n\r\n#{body}")
   ensure

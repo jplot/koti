@@ -84,6 +84,27 @@ module Hue
         rescue TypeError
           data
         end
+
+        # @return [String, nil] the camera of a camera event, which the app reads in its +resource_uri+
+        # @api public
+        def camera_id = camera(:resource_uri)&.then { it.to_s.split('/')[4] }
+
+        # @return [String, nil] the clip of a camera event, for {Media#clip}, as the app reads it: the event itself for
+        #   an upload, the one its metadata names for another, nil when it names none
+        # @api public
+        def clip_id
+          return camera(:id)&.to_s if camera(:resource_type) == 'camera_video_clips_eventing'
+          return unless type == 'camera'
+
+          clip = field(metadata, :clip)
+          clip['clip_event_id'] if clip.is_a?(Hash)
+        end
+
+        private
+
+        def camera(name) = (field(event, name) if type == 'camera')
+
+        def field(value, name) = value.is_a?(Hash) ? value[name.to_s] : value&.to_h&.[](name)
       end
 
       # The timeline of a home and what acts on it, as the app's +EventHttpClient+ reaches them through the data API.

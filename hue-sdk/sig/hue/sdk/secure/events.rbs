@@ -22,6 +22,16 @@ module Hue
         def self.class_of: (String? type, untyped event) -> Symbol?
 
         def self.typed: (Symbol? name, untyped data) -> untyped
+
+        def camera_id: () -> String?
+
+        def clip_id: () -> String?
+
+        private
+
+        def camera: (Symbol name) -> untyped
+
+        def field: (untyped value, Symbol name) -> untyped
       end
 
       class Events

@@ -78,3 +78,50 @@ module OpenSSL
     end
   end
 end
+
+# What the gem calls of the ffi gem, whose signatures the gem does not load.
+module FFI
+  class Pointer
+    NULL: Pointer
+
+    def null?: () -> bool
+
+    def read_bytes: (Integer length) -> String
+  end
+
+  class MemoryPointer < Pointer
+    def initialize: (Symbol type) -> void
+
+    def self.from_string: (String data) -> MemoryPointer
+
+    def write_pointer: (untyped pointer) -> self
+
+    def read_pointer: () -> untyped
+
+    def read_uint32: () -> Integer
+  end
+end
+
+# What the gem calls of the m3u8 gem, which ships no signatures.
+module M3u8
+  class Playlist
+    def self.read: (String text) -> Playlist
+
+    def master?: () -> bool
+
+    def items: () -> Array[untyped]
+  end
+
+  class InvalidPlaylistError < StandardError
+  end
+
+  class PlaylistItem
+    def uri: () -> String
+
+    def iframe: () -> bool
+  end
+
+  class MapItem
+    def uri: () -> String
+  end
+end

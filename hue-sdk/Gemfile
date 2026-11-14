@@ -7,6 +7,7 @@ gemspec
 group :development do
   gem 'ffi', '~> 1.17'
   gem 'grpc', '~> 1.85'
+  gem 'm3u8', '~> 1.9'
   # mqtt 0.7.0 leaves the packets that share a TLS record waiting for the next ping: fixed by njh/ruby-mqtt#171
   gem 'mqtt', '~> 0.7', github: 'jplot/ruby-mqtt', branch: 'fix/ssl-buffered-packets'
   gem 'rake', '~> 13.4'

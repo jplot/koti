@@ -3,8 +3,8 @@
 target :lib do
   signature 'sig'
   check 'lib'
-  # FFI's attach_function DSL defines methods Steep cannot see: typed by hand in sig/…/lib_ssl.rbs.
-  ignore 'lib/hue/sdk/entertainment/lib_ssl.rb'
+  # FFI's attach_function DSL defines methods Steep cannot see: typed by hand in sig/…/lib_ssl.rbs and gpac.rbs.
+  ignore 'lib/hue/sdk/entertainment/lib_ssl.rb', 'lib/hue/sdk/secure/gpac.rb'
   library 'singleton', 'net-http', 'openssl', 'socket', 'json', 'resolv', 'time', 'uri', 'digest', 'securerandom',
-          'base64'
+          'base64', 'tmpdir'
 end

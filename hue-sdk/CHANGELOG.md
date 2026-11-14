@@ -77,3 +77,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `home.media(passphrase)` opens the end-to-end encrypted media of a Hue Secure home with its passphrase, checked
   as the app checks it, and decrypts a camera's latest snapshot, an event's snapshot and an event's `snapshot_url`.
   The gem now depends on the `base64` gem.
+- `media.clip` opens the key of a Hue Secure camera clip, and `ClipProxy`, a Rack application, serves the clip to a
+  player with its media segments decrypted, as the app's local proxy does; `MessageEvent#camera_id` and `#clip_id`
+  name the clip of a camera event. Never tested with a device. Playing clips needs the `ffi` and `m3u8` gems and
+  GPAC's libgpac, which rewrites the segments.

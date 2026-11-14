@@ -50,6 +50,14 @@ module Hue
           response.status.between?(200, 206) ? response : refuse(response)
         end
 
+        # A GET without the account's token, for an address that carries its own authorization.
+        #
+        # @param uri [URI::HTTP]
+        # @return [Net::HTTPResponse] whatever its status
+        # @raise [ConnectionError]
+        # @api private
+        def fetch(uri) = exchange(uri, REQUESTS.fetch(:get).new(uri, { 'User-Agent' => "hue-sdk/#{VERSION}" }))
+
         # @param uri [URI::HTTP]
         # @param request [Net::HTTPRequest]
         # @return [Net::HTTPResponse]

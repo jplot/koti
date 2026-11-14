@@ -11,7 +11,7 @@ apart.
 
 - Ruby 4.0 or later; no runtime dependency outside the standard library, except the `base64` gem, out of the
   default gems since Ruby 3.4, the `ffi` gem for Entertainment streaming, the `grpc` gem to list the Hue Secure
-  homes and the `mqtt` gem to follow one.
+  homes, the `mqtt` gem to follow one, and the `ffi` and `m3u8` gems with GPAC's libgpac to play camera clips.
 - A Hue bridge speaking CLIP v2: Hue Bridge (v2) or Hue Bridge Pro.
 
 ## Installation
@@ -540,6 +540,32 @@ topic that would announce it under a name it builds by mistake, and so never hea
 does not follow it either. Envelopes in the post-quantum format, which the app reads only when a
 remote setting, off by default, gives it an ML-KEM key, raise `E2eeError`: Ruby's OpenSSL cannot
 open them.
+
+The clip of a camera event is an HLS playlist that carries its own authorization, and whose media
+segments the camera encrypted. `media.clip` opens its key; `ClipProxy`, a Rack application, serves
+it to a player as the app's local proxy does: playlists and the initialization segment as they
+are, media segments decrypted. The application mounts it behind its own authentication.
+
+```ruby
+# Gemfile: gem 'ffi' and gem 'm3u8', with GPAC's libgpac installed
+clip = media.clip(message.camera_id, message.clip_id)   # a camera event of the timeline
+proxy = Hue::Sdk::Secure::ClipProxy.new(clip)
+
+# config.ru
+map('/clip') { run proxy }   # the player opens "/clip#{clip.entry}"
+```
+
+The proxy asks only the clip's host. A path to another host answers 404 without a request; a
+redirect is rewritten under the mount while it stays on the host, and answers 502 otherwise. A
+segment that does not decrypt, or a host that cannot be reached, answers 502 with no body, never
+wrong bytes; the host's other answers, the 403 of an expired playlist included, pass through.
+`clip.expiration` is given as the event service gives it: its unit is unknown, and the app does
+not read it.
+
+GPAC rewrites the segments: the gem replaces the data of their samples, GPAC writes the boxes
+around them. The gem finds `libgpac` by its name, as the system finds libraries: Homebrew's `gpac`,
+or `libgpac-dev` on Ubuntu 24.04. Ubuntu 26.04 and Debian 12 and 13 no longer package it: build it
+from its sources there.
 
 ## Errors
 

@@ -2,6 +2,9 @@ module Hue
   module Sdk
     module Secure
       class Camera
+        PLAN: Array[Plan::status]
+        ZONES: Array[String]
+
         @path: String
         @speaker: String
 
@@ -37,6 +40,10 @@ module Hue
         def sound_chime: (sound: String, ?volume: Float?) -> void
 
         def sound_alarm: () -> void
+
+        private
+
+        def check_plan: () -> void
       end
     end
   end

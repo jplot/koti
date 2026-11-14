@@ -39,8 +39,15 @@ RSpec.describe Hue::Sdk::Secure::Home do
     expect(Hue::Sdk::Secure.homes.first).to eq(
       described_class.new(id: 'home-1', name: 'Maison', user_count: 2, max_users: 20, admin_count: 1, revision: 13,
                           permissions: %w[security.arm.state.view lighting.*], country_code: 'FR',
-                          time_zone: 'Europe/Paris', security_activated: true, bridges: ['bridge-1'])
+                          time_zone: 'Europe/Paris', security_activated: true, bridges: ['bridge-1'], devices: [])
     )
+  end
+
+  it 'decodes the devices of a home, with their product type' do
+    answer(FakeHomes.message(1 => 'home-1', 6 => [FakeHomes.message(1 => 'CMB001', 2 => 'cam-1'),
+                                                  FakeHomes.message(1 => 'BSB002', 2 => 'br-1')]))
+    expect(Hue::Sdk::Secure.homes.first.devices).to eq([described_class::Device.new(type: 'CMB001', id: 'cam-1'),
+                                                        described_class::Device.new(type: 'BSB002', id: 'br-1')])
   end
 
   it 'skips a field it does not know' do

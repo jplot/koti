@@ -1,0 +1,41 @@
+module Hue
+  module Sdk
+    module Secure
+      class PlanError < Error
+        attr_reader rid: String
+
+        attr_reader status: Plan::status?
+
+        def initialize: (String rid, ?Plan::status? status) -> void
+      end
+
+      module Plan
+        type status = :subscribed | :experience_period | :free_tier | :experience_period_not_enabled | :unknown
+
+        TYPES: Array[String]
+
+        PAID: Array[String]
+
+        STATES: Array[String]
+
+        CAMERA: Regexp
+
+        def self.status: (Schema::AccountSubscriptionDetailsResponse details, String rid) -> status
+
+        def self.covers?: (Schema::AccountSubscriptionDetailsResponse details, Home home) -> bool
+
+        def self.of: (Schema::DeviceSubscriptionResponse entry) -> status
+
+        def self.paid?: (Schema::AccountSubscriptionDetailsResponse details, String home_id) -> bool
+
+        def self.camera_trial?: (Schema::AccountSubscriptionDetailsResponse details, Home home) -> bool
+
+        def self.bridge_trial?: (Schema::AccountSubscriptionDetailsResponse details, Home home) -> bool
+
+        def self.trial?: (Schema::DeviceSubscriptionResponse entry) -> bool
+
+        def self.listed?: (Schema::DeviceSubscriptionResponse entry) -> bool
+      end
+    end
+  end
+end

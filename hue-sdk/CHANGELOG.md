@@ -59,16 +59,22 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Hue Secure through the Hue account's cloud, loaded apart by `require 'hue/sdk/secure'` and never tested with a
   Hue Secure device: login through Auth0 with PKCE and the Hue app's client id, given by the caller; a token saved
   in mode 0600, kept current in the `token` setting, and renewed 30 s before it expires, once across threads; a
-  client sending any request to the cloud with the token; the homes of the account over gRPC, with the `grpc` gem.
-  `ResponseError` takes `source:`, so an error of the cloud reads `Hue cloud answered …`.
+  client sending any request to the cloud with the token; the homes of the account over gRPC, with the `grpc` gem,
+  each with its bridges and its devices by product type. `ResponseError` takes `source:`, so an error of the cloud
+  reads `Hue cloud answered …`.
 - Hue Secure arming, never tested with a device: `home.arm` reads and sets the arm state, updates the configuration,
   sounds the alarm and removes the arming or its geofence parts; `home.schedules` and `home.geofence` list, create,
   update and delete the arming schedules and the phones whose presence arms the home. Their answers and requests are
-  classes of `Hue::Sdk::Secure::Schema`, generated from the app's into `schema/secure.json`.
+  classes of `Hue::Sdk::Secure::Schema`, generated from the app's into `schema/secure.json`. As the app does,
+  `update_config` refuses, with `PlanError` and before sending, to move a motion area in or out of a mode while its
+  bridge is `free_tier` or `experience_period_not_enabled`, and to add a camera's people, pets or vehicles to what
+  triggers the alarm unless a plan or a trial covers the home.
 - Hue Secure cameras, never tested with a device: `home.cameras` lists the cameras of a home, keeping one the gem
   cannot read, reads one, and sounds the speakers of the home together; a camera updates its settings and services,
   takes a snapshot, wakes up, reboots, resets, and sounds a chime or its siren. `Hue::Sdk::Secure.auto_responses`
-  reads the responses a doorbell may play. Their classes come from the app's, which decode with `checked: true`.
+  reads the responses a doorbell may play. Their classes come from the app's, which decode with `checked: true`. As
+  the app does, turning clip recording on, the activity, package and lighting zones, and sound detection need the
+  camera subscribed or in its trial, or raise `PlanError` before sending.
 - The Hue Secure timeline, never tested with a device: `home.events` reads one page at a time with its cursor, the
   first significant event and the insights of a phone, deletes, reports and purges events, deletes a clip, and
   sends the all-safe and alarm triggers. Each event reads with the class the app chooses by its type.
@@ -89,5 +95,5 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   camera, over Kinesis Video's WebSocket, as the app does: it signs the offer with the home's keys and checks the
   camera's answer. Never tested with a device. It needs the `websocket-driver` and `aws-sigv4` gems.
 - `Secure.subscription` reads the Hue Secure plans of the account and the devices each covers, as the app reads
-  them. Never tested with a device. The gem gates nothing by plan: the app gates no media either, but keeps a
-  motion area out of arming while its bridge has no plan, which the gem leaves to the caller.
+  them. Never tested with a device. `Plan.status` gives a device's status, and `Plan.covers?` whether a plan or a
+  trial covers a home, the app's way. The app gates no media by plan, and the gem neither.

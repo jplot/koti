@@ -27,11 +27,21 @@ module Hue
       #   @return [Boolean, nil]
       # @!attribute [r] bridges
       #   @return [Array<String>, nil] ids of the home's bridges
+      # @!attribute [r] devices
+      #   @return [Array<Device>, nil]
       Home = Data.define(:id, :name, :user_count, :max_users, :admin_count, :revision, :permissions, :country_code,
-                         :time_zone, :security_activated, :bridges)
+                         :time_zone, :security_activated, :bridges, :devices)
 
       # A home of the Hue account.
       class Home
+        # A device of the home, as +BasicHome+ lists it.
+        #
+        # @!attribute [r] type
+        #   @return [String] its product type, such as +CMB001+ for a camera
+        # @!attribute [r] id
+        #   @return [String]
+        Device = Data.define(:type, :id)
+
         LIST = '/hue.accounts.v1.HomeService/ListHomes'
         private_constant :LIST
 
@@ -147,7 +157,18 @@ module Hue
           new(id: Wire.text(fields, 1), **TEXTS.transform_values { Wire.text(fields, it) },
               **NUMBERS.transform_values { Wire.number(fields, it) }, permissions: Wire.texts(fields, 9),
               security_activated: Wire.number(fields, 13).positive?,
-              bridges: Wire.texts(fields, 4).map { Wire.text(Wire.decode(it), 1) })
+              bridges: Wire.texts(fields, 4).map { Wire.text(Wire.decode(it), 1) },
+              devices: devices(fields))
+        end
+
+        # @param fields [Hash{Integer=>Array<Integer, String>}] the fields of a +BasicHome+
+        # @return [Array<Device>]
+        # @api private
+        def self.devices(fields)
+          Wire.texts(fields, 6).map do |bytes|
+            device = Wire.decode(bytes)
+            Device.new(type: Wire.text(device, 1), id: Wire.text(device, 2))
+          end
         end
       end
     end

@@ -426,18 +426,22 @@ the same changes with `PlanError`, before sending anything:
 
 | Call | Refused |
 |---|---|
-| `arm.update_config` | a motion area moved in or out of a mode while its bridge is `free_tier` or `experience_period_not_enabled`, or while the plans cannot be read |
+| `arm.update_config` | a motion area moved in or out of a mode while its bridge is `free_tier` or `experience_period_not_enabled` |
 | `arm.update_config` | a camera's `people`, `pet` or `vehicle` added to `alarm_triggering_entities`, unless `Plan.covers?` the home: a paid plan of the home, or one of its cameras or bridges in its trial |
 | `camera.update_camera` | `clips_recording: true`, `activity_zones`, `package_detection_zones` or `lighting_zones`, unless the camera is `subscribed` or in its `experience_period` |
 | `camera.update_microphone` | `smoke_alarm_detection` (sound detection), on the same condition |
 
-Turning clip recording off, removing a detection and keeping one already there always go through.
-To check, `update_config` reads the configuration first, then the plans when something gated
-changes, and the homes over gRPC when the home has no paid plan; the cameras read the plans when a
-gated field is in the request. The app lets a free-tier camera record clips kept 24 hours behind a
-remote toggle, `enable_24_hour_free_video_clips`, off by default: the gem follows the default. For a
-bridge's trial, the app also wants a motion area on the home's bridges, which the cloud does not
-give: the gem counts the trial. Never tested with a device.
+Turning clip recording off, removing a detection and keeping one already there always go through:
+an entry is known by its type and id. To check, `update_config` reads the configuration first, then
+the plans when something gated changes, and the homes over gRPC when the home has no paid plan; the
+cameras read the plans when a gated field is in the request. When the plans or the homes cannot be
+read, the call raises that error (`ResponseError`, `ConnectionError`, `AuthenticationError`, or
+`Error` without the `grpc` gem) and sends nothing, as the app then lets nothing gated change.
+
+The app lets a free-tier camera record clips kept 24 hours behind a remote toggle,
+`enable_24_hour_free_video_clips`, off by default: the gem follows the default. For a bridge's
+trial, the app also wants a motion area on the home's bridges, which the cloud does not give: the
+gem counts the trial. Never tested with a device.
 
 | Setting | Default | Purpose |
 |---|---|---|

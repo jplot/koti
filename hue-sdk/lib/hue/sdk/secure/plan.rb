@@ -40,7 +40,7 @@ module Hue
         # @param rid [String] a camera's or a bridge's id; a motion area takes its bridge's
         # @return [Symbol] +:subscribed+, +:experience_period+, +:free_tier+, +:experience_period_not_enabled+ or
         #   +:unknown+
-        # @raise [ArgumentError] if the end of the experience period is not ISO 8601
+        # @raise [ArgumentError] if the end of the experience period is not a date
         # @api public
         def self.status(details, rid)
           entry = details.devices.find { listed?(it) && it.rid.casecmp?(rid) }
@@ -53,9 +53,9 @@ module Hue
         #
         # @param details [Schema::AccountSubscriptionDetailsResponse] as {Secure.subscription} reads it
         # @param home [Home] as {Secure.homes} lists it, with its bridges and devices
-        # @return [Boolean] true under a paid plan of the home, whatever its state, or while one of its cameras or
-        #   bridges is in its trial
-        # @raise [ArgumentError] if the end of an experience period is not ISO 8601
+        # @return [Boolean] true under a paid plan of the home in a state the app knows (active, grace_period, future,
+        #   cancelled), or while one of its cameras or bridges is in its trial
+        # @raise [ArgumentError] if the end of an experience period is not a date
         # @api public
         def self.covers?(details, home)
           paid?(details, home.id) || camera_trial?(details, home) || bridge_trial?(details, home)

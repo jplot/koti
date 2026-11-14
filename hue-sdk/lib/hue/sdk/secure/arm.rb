@@ -39,15 +39,18 @@ module Hue
         end
 
         # As the app does, it refuses to let a motion area into a mode or out of it while the area's bridge is
-        # +free_tier+ or +experience_period_not_enabled+, or while the plans cannot be read. It also refuses a camera's
-        # people, pets or vehicles among what triggers the alarm unless {Plan.covers?} the home, and keeps the ones
-        # already there. It reads the configuration first, then the plans, and the homes over gRPC, only as needed.
+        # +free_tier+ or +experience_period_not_enabled+, and a camera's people, pets or vehicles among what triggers
+        # the alarm unless {Plan.covers?} the home. An entry is known by its type and id, and one already there passes.
+        # It reads the configuration first, then the plans and the homes over gRPC only as needed; a failed read
+        # raises, and nothing is sent, as the app then lets nothing gated change.
         #
         # @param request [Schema::ArmDisarmSetConfigRequest]
         # @return [void]
-        # @raise [ArgumentError] if the request leaves a required field nil; nothing is sent
+        # @raise [ArgumentError] if the request leaves a required field nil, moves a motion area without its bridge,
+        #   or a trial's end is not a date; nothing is sent
         # @raise [PlanError] if the change is one the app would not let through; nothing is sent
         # @raise (see Http.request)
+        # @raise (see Home.list) when it lists the homes: a camera's new detection on a home without a paid plan
         # @api public
         def update_config(request)
           sent = JSON.parse(JSON.generate(request))

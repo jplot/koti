@@ -67,8 +67,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   update and delete the arming schedules and the phones whose presence arms the home. Their answers and requests are
   classes of `Hue::Sdk::Secure::Schema`, generated from the app's into `schema/secure.json`. As the app does,
   `update_config` refuses, with `PlanError` and before sending, to move a motion area in or out of a mode while its
-  bridge has neither a plan nor a running trial, and to add a camera's people, pets or vehicles to what triggers the
-  alarm unless a plan or a trial covers the home.
+  bridge is `free_tier` or `experience_period_not_enabled`, and to add a camera's people, pets or vehicles to what
+  triggers the alarm unless a plan or a trial covers the home.
 - Hue Secure cameras, never tested with a device: `home.cameras` lists the cameras of a home, keeping one the gem
   cannot read, reads one, and sounds the speakers of the home together; a camera updates its settings and services,
   takes a snapshot, wakes up, reboots, resets, and sounds a chime or its siren. `Hue::Sdk::Secure.auto_responses`

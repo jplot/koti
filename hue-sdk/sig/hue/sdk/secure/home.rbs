@@ -2,6 +2,13 @@ module Hue
   module Sdk
     module Secure
       class Home < Data
+        class Device < Data
+          attr_reader type: String
+          attr_reader id: String
+
+          def self.new: (type: String, id: String) -> Device
+        end
+
         LIST: String
 
         ABSENT: Hash[Symbol, nil]
@@ -17,10 +24,11 @@ module Hue
         attr_reader time_zone: String?
         attr_reader security_activated: bool?
         attr_reader bridges: Array[String]?
+        attr_reader devices: Array[Device]?
 
         def self.new: (id: String, ?name: String?, ?user_count: Integer?, ?max_users: Integer?, ?admin_count: Integer?,
                        ?revision: Integer?, ?permissions: Array[String]?, ?country_code: String?, ?time_zone: String?,
-                       ?security_activated: bool?, ?bridges: Array[String]?) -> Home
+                       ?security_activated: bool?, ?bridges: Array[String]?, ?devices: Array[Device]?) -> Home
 
         def self.members: () -> Array[Symbol]
 
@@ -53,6 +61,8 @@ module Hue
         def self.translated: (GRPC::BadStatus status) -> Error
 
         def self.decode: (String bytes) -> Home
+
+        def self.devices: (Hash[Integer, Array[Integer | String]] fields) -> Array[Device]
       end
     end
   end

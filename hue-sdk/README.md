@@ -11,7 +11,8 @@ apart.
 
 - Ruby 4.0 or later; no runtime dependency outside the standard library, except the `base64` gem, out of the
   default gems since Ruby 3.4, the `ffi` gem for Entertainment streaming, the `grpc` gem to list the Hue Secure
-  homes, the `mqtt` gem to follow one, and the `ffi` and `m3u8` gems with GPAC's libgpac to play camera clips.
+  homes, the `mqtt` gem to follow one, the `ffi` and `m3u8` gems with GPAC's libgpac to play camera clips, and the
+  `ffi`, `aws-sdk-kinesisvideo` and `aws-sdk-kinesisvideoarchivedmedia` gems with libgpac to download them.
 - A Hue bridge speaking CLIP v2: Hue Bridge (v2) or Hue Bridge Pro.
 
 ## Installation
@@ -419,6 +420,8 @@ none of the app's own headers.
 | `auto_responses_url` | `https://automaticresponses.eu.secure.meethue.com` | the responses a doorbell may play |
 | `mqtt_host` / `mqtt_port` | `mqtt.eu.secure.meethue.com` / `443` | the broker `follow` connects to |
 | `mqtt_ca_file` | Amazon Root CA 1, embedded | the one root the broker's certificate must chain to |
+| `kinesis_region` | `eu-west-1` | the AWS region clips download from, the app's |
+| `kinesis_url` | `https://kinesisvideo.<kinesis_region>.amazonaws.com` | Kinesis Video's control plane |
 | `grpc_credentials` | TLS with the system's roots | `:this_channel_is_insecure` for a test server |
 | `open_timeout` / `read_timeout` | `5` / `10` s | each request |
 
@@ -562,10 +565,25 @@ wrong bytes; the host's other answers, the 403 of an expired playlist included, 
 `clip.expiration` is given as the event service gives it: its unit is unknown, and the app does
 not read it.
 
-GPAC rewrites the segments: the gem replaces the data of their samples, GPAC writes the boxes
-around them. The gem finds `libgpac` by its name, as the system finds libraries: Homebrew's `gpac`,
-or `libgpac-dev` on Ubuntu 24.04. Ubuntu 26.04 and Debian 12 and 13 no longer package it: build it
-from its sources there.
+`media.download_clip` gives a clip as one MP4 file in clear, as the app saves it to the gallery.
+The cloud hands out AWS credentials for that clip; Kinesis Video Streams serves the file through
+GetClip, signed with them; the gem decrypts its samples.
+
+```ruby
+# Gemfile: gem 'ffi', gem 'aws-sdk-kinesisvideo' and gem 'aws-sdk-kinesisvideoarchivedmedia', with libgpac
+File.binwrite('clip.mp4', media.download_clip(message.camera_id, message.clip_id))
+```
+
+The app asks Kinesis Video in eu-west-1 whatever the home, for the clip's time range in whole
+seconds; whether homes outside Europe are served there is unknown, and `kinesis_region` changes it.
+The app reads the file as its `moov` then its `mdat`, one sample per chunk, with 32-bit offsets;
+GPAC reads any layout. A sample that does not decrypt raises `E2eeError`, never a file with wrong
+bytes.
+
+GPAC rewrites the segments and the downloaded files: the gem replaces the data of their samples,
+GPAC writes the boxes around them. The gem finds `libgpac` by its name, as the system finds
+libraries: Homebrew's `gpac`, or `libgpac-dev` on Ubuntu 24.04. Ubuntu 26.04 and Debian 12 and 13
+no longer package it: build it from its sources there.
 
 ## Errors
 

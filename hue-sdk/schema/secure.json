@@ -3069,6 +3069,56 @@
     }
   },
   "media": {
+    "CameraTurnServer": {
+      "origin": "CameraTurnServer",
+      "kind": "response",
+      "fields": {
+        "username": {
+          "type": "String",
+          "required": true
+        },
+        "password": {
+          "type": "String",
+          "required": true
+        },
+        "urls": {
+          "type": {
+            "list": "String"
+          },
+          "required": true
+        },
+        "expires_at": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "CameraTurnServerConfig": {
+      "origin": "CameraTurnServerConfig",
+      "kind": "response",
+      "fields": {
+        "device_id": {
+          "type": "String",
+          "required": true
+        },
+        "ice_servers": {
+          "type": {
+            "list": {
+              "class": "CameraTurnServer"
+            }
+          },
+          "required": true
+        },
+        "http_signal_channel_endpoint": {
+          "type": "String",
+          "required": true
+        },
+        "wss_signal_channel_endpoint": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
     "ClipCredentials": {
       "origin": "ClipCredentials",
       "kind": "response",
@@ -3182,6 +3232,80 @@
         "upload_date": {
           "type": "String",
           "required": true
+        }
+      }
+    },
+    "SignalingChannel": {
+      "origin": "SignalingChannel",
+      "kind": "response",
+      "fields": {
+        "id": {
+          "type": "String",
+          "required": true
+        },
+        "arn": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "SignalingConfiguration": {
+      "origin": "SignalingConfiguration",
+      "kind": "response",
+      "fields": {
+        "credentials": {
+          "type": {
+            "class": "SignalingServerCredentials"
+          },
+          "required": true
+        },
+        "signaling_channels": {
+          "type": {
+            "list": {
+              "class": "SignalingChannel"
+            }
+          },
+          "required": true
+        },
+        "turn_servers": {
+          "type": {
+            "list": {
+              "class": "CameraTurnServerConfig"
+            }
+          },
+          "required": false
+        },
+        "stun_servers": {
+          "type": {
+            "list": "String"
+          },
+          "required": false
+        },
+        "earliest_expiry": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "SignalingServerCredentials": {
+      "origin": "SignalingServerCredentials",
+      "kind": "response",
+      "fields": {
+        "AccessKeyId": {
+          "type": "String",
+          "required": true
+        },
+        "SecretAccessKey": {
+          "type": "String",
+          "required": true
+        },
+        "SessionToken": {
+          "type": "String",
+          "required": false
+        },
+        "Expiration": {
+          "type": "String",
+          "required": false
         }
       }
     },

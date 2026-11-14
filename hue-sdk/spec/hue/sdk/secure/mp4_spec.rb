@@ -77,6 +77,7 @@ RSpec.describe Hue::Sdk::Secure::Mp4 do
 
   it 'drops a file whose samples it could not replace, and its open files with it', :aggregate_failures do
     failing = -> { described_class.file(File.binread(File.join(media, 'clip.mp4'))) { raise Hue::Sdk::Secure::E2eeError } }
+    GC.start
     files = Dir.children('/dev/fd').size
     5.times { expect(&failing).to raise_error(Hue::Sdk::Secure::E2eeError) }
     expect(Dir.children('/dev/fd').size).to eq(files)
@@ -84,6 +85,7 @@ RSpec.describe Hue::Sdk::Secure::Mp4 do
 
   it 'drops a file a timeout interrupts, and its open files with it', :aggregate_failures do
     clip = File.binread(File.join(media, 'clip.mp4'))
+    GC.start
     files = Dir.children('/dev/fd').size
     5.times { expect { Timeout.timeout(0.05) { described_class.file(clip) { sleep 1 } } }.to raise_error(Timeout::Error) }
     expect(Dir.children('/dev/fd').size).to eq(files)

@@ -131,6 +131,37 @@ module Aws
   end
 end
 
+module Aws
+  module Sigv4
+    class Signer
+      def initialize: (**untyped options) -> void
+
+      def presign_url: (**untyped options) -> URI::Generic
+    end
+  end
+end
+
+# What the gem calls of the websocket-driver gem, which ships no signatures.
+module WebSocket
+  class Driver
+    def self.client: (untyped socket) -> Driver
+
+    def on: (Symbol event) { (untyped event) -> void } -> void
+
+    def start: () -> bool
+
+    def parse: (String data) -> void
+
+    def text: (String message) -> bool
+
+    def close: () -> bool
+
+    def state: () -> Symbol?
+
+    def status: () -> Integer?
+  end
+end
+
 module Seahorse
   module Client
     class NetworkingError < StandardError

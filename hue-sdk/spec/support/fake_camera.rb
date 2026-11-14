@@ -38,6 +38,14 @@ class FakeCamera
 
   def seal_mp4(mp4, cek:) = Mp4Sealer.new(mp4) { box(cek, it) }.sealed
 
+  def sign(sdp) = Base64.strict_encode64(signature(@device, sdp))
+
+  def verify_app(sdp, signed)
+    raw = Base64.strict_decode64(signed)
+    pair = [0, 32].map { OpenSSL::ASN1::Integer(OpenSSL::BN.new(raw.byteslice(it, 32), 2)) }
+    public_only(@app).verify('SHA256', OpenSSL::ASN1::Sequence(pair).to_der, sdp)
+  end
+
   private
 
   def private_key(master, info)

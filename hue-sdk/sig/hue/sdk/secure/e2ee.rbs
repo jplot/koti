@@ -31,6 +31,10 @@ module Hue
 
         def self?.decrypt: (String cek, String box) -> String
 
+        def self?.sign: (OpenSSL::PKey::EC key, String text) -> String
+
+        def self?.verify: (OpenSSL::PKey::EC key, String text, String? signature) -> void
+
         def self?.gcm: (String key, String nonce, String tag) -> OpenSSL::Cipher
 
         def self?.check: (String blob, OpenSSL::PKey::EC app, OpenSSL::PKey::EC camera) -> void

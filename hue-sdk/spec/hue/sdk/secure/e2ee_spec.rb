@@ -49,6 +49,18 @@ RSpec.describe Hue::Sdk::Secure::E2ee do
     expect { described_class.decrypt(cek, flipped(box, 13)) }.to raise_error(error)
   end
 
+  it 'signs an SDP the camera can verify with the app key' do
+    expect(camera.verify_app('v=0 sdp', described_class.sign(keys.app, 'v=0 sdp'))).to be(true)
+  end
+
+  it 'verifies the SDP the camera signed, and refuses another or no signature', :aggregate_failures do
+    signed = camera.sign('v=0 sdp')
+    expect { described_class.verify(keys.camera('cam-1'), 'v=0 sdp', signed) }.not_to raise_error
+    expect { described_class.verify(keys.camera('cam-1'), 'v=0 other', signed) }.to raise_error(error, /signature/)
+    expect { described_class.verify(keys.camera('cam-2'), 'v=0 sdp', signed) }.to raise_error(error, /signature/)
+    expect { described_class.verify(keys.camera('cam-1'), 'v=0 sdp', nil) }.to raise_error(error, /signature/)
+  end
+
   it 'shows neither the passphrase nor a key', :aggregate_failures do
     expect(keys.inspect).to eq('#<Hue::Sdk::Secure::E2ee::Keys>')
     expect(keys.app.inspect).not_to include(keys.app.private_key.to_s(16))

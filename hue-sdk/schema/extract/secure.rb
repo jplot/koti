@@ -185,7 +185,7 @@ module Schema
                        SecurityEventInsightsResponse TimelineEventsDelete TimelineEventDelete TimelineEventsReport
                        TimelineEventReport AllSafeRequest AlarmTriggerRequest CameraConfigUpdateEventValues],
         'media' => %w[PublicKeyResponse DownloadCameraLastSnapshotResponse DownloadTimelineEventSnapshotResponse
-                      VideoClipResponse ClipCredentialsResponse]
+                      VideoClipResponse ClipCredentialsResponse SignalingConfiguration]
       }.freeze
     end
   end

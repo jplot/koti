@@ -11,8 +11,9 @@ apart.
 
 - Ruby 4.0 or later; no runtime dependency outside the standard library, except the `base64` gem, out of the
   default gems since Ruby 3.4, the `ffi` gem for Entertainment streaming, the `grpc` gem to list the Hue Secure
-  homes, the `mqtt` gem to follow one, the `ffi` and `m3u8` gems with GPAC's libgpac to play camera clips, and the
-  `ffi`, `aws-sdk-kinesisvideo` and `aws-sdk-kinesisvideoarchivedmedia` gems with libgpac to download them.
+  homes, the `mqtt` gem to follow one, the `ffi` and `m3u8` gems with GPAC's libgpac to play camera clips, the
+  `ffi`, `aws-sdk-kinesisvideo` and `aws-sdk-kinesisvideoarchivedmedia` gems with libgpac to download them, and the
+  `websocket-driver` and `aws-sigv4` gems for a camera's live view.
 - A Hue bridge speaking CLIP v2: Hue Bridge (v2) or Hue Bridge Pro.
 
 ## Installation
@@ -420,10 +421,10 @@ none of the app's own headers.
 | `auto_responses_url` | `https://automaticresponses.eu.secure.meethue.com` | the responses a doorbell may play |
 | `mqtt_host` / `mqtt_port` | `mqtt.eu.secure.meethue.com` / `443` | the broker `follow` connects to |
 | `mqtt_ca_file` | Amazon Root CA 1, embedded | the one root the broker's certificate must chain to |
-| `kinesis_region` | `eu-west-1` | the AWS region clips download from, the app's |
+| `kinesis_region` | `eu-west-1` | the AWS region clips download from and live views sign for, the app's |
 | `kinesis_url` | AWS's own for the region | Kinesis Video's control plane |
 | `grpc_credentials` | TLS with the system's roots | `:this_channel_is_insecure` for a test server |
-| `open_timeout` / `read_timeout` | `5` / `10` s | each request |
+| `open_timeout` / `read_timeout` | `5` / `10` s | each request, and a live view's connection and handshake |
 
 ### Arming
 
@@ -584,6 +585,51 @@ GPAC rewrites the segments and the downloaded files: the gem replaces the data o
 GPAC writes the boxes around them. The gem finds `libgpac` by its name, as the system finds
 libraries: Homebrew's `gpac`, or `libgpac-dev` on Ubuntu 24.04. Ubuntu 26.04 and Debian 12 and 13
 no longer package it: build it from its sources there.
+
+`media.live_view` opens a camera's live view as the app does, for its signaling: the browser holds
+the peer connection and the media, and the gem relays its offer and ICE candidates to the camera
+over Kinesis Video's WebSocket. The gem signs the offer with the home's app key and checks the
+camera's answer against the camera's key; an answer the camera did not sign raises `E2eeError`, as
+the app stops on it.
+
+```ruby
+# Gemfile: gem 'websocket-driver' and gem 'aws-sigv4'
+view = media.live_view(camera.id)   # the browser's RTCPeerConnection takes view.ice_servers
+view.offer(offer_sdp)                # the browser's offer, from createOffer
+view.candidate(candidate, sdp_mid: '0', sdp_mline_index: 0)   # each of the browser's ICE candidates
+begin
+  view.each do |signal|              # on this thread, until view.close from any thread
+    case signal
+    when Hue::Sdk::Secure::LiveView::Answer then browser.answer(signal.sdp)
+    when Hue::Sdk::Secure::LiveView::Candidate   # RTCIceCandidateInit's keys
+      browser.candidate(candidate: signal.candidate, sdpMid: signal.sdp_mid, sdpMLineIndex: signal.sdp_mline_index)
+    when Hue::Sdk::Secure::LiveView::Offer then view.answer(browser.answer_to(signal.sdp))
+    end
+  end
+ensure
+  view.close                         # after an E2eeError too, which ends the live view as in the app
+end
+```
+
+The gem asks the cloud for the signaling credentials of every camera of the home, as the app does,
+once per live view; `view.earliest_expiry` says when the first of them expires. Messages the app
+does not read (`GO_AWAY`, `RECONNECT_ICE_SERVER`, `STATUS_RESPONSE`) come as `Message`, as Kinesis
+Video sent them. When Kinesis Video closes the channel or drops the connection, `each` raises
+`ConnectionError`: the app signs again and reconnects after 1 s, which the gem leaves to the caller.
+
+In the browser, the app's peer connection uses `bundlePolicy: 'max-bundle'` with the browser's
+defaults for the rest (all ICE transports, unified plan, RTCP mux, ECDSA certificates). Before its
+offer it opens the data channel `LiveView::DATA_CHANNEL` describes: `PING` every second, expecting
+`PONG`, and `GO_AWAY` when it stops. To talk, it adds the microphone's track before the offer;
+there is no other channel for it. It adds the camera's candidates once the answer is set, holding
+those that come first: a browser given a candidate before its remote description refuses it. It
+gives up after 12 s for a wired camera and 20 s for a battery one.
+
+The app sends the camera `wake_up` as every live view starts, and again until the camera answers,
+up to 41 times with a growing delay. The gem leaves that to the caller: `camera.wake_up` raises
+`ResponseError` 521 while the camera sleeps. The app's settings say that with live view
+encryption off, someone with the right permission watches without the passphrase; its code signs
+and checks every live view anyway, and so does the gem.
 
 ## Errors
 

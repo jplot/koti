@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'base64'
 require 'openssl'
 
 module Hue
@@ -100,6 +101,28 @@ module Hue
           cipher.update(box.byteslice(12, box.bytesize - 28).to_s) + cipher.final
         rescue OpenSSL::Cipher::CipherError
           raise E2eeError, 'the media does not decrypt'
+        end
+
+        # Signs a text as the app signs an SDP: ECDSA over SHA-256, r and s on 32 bytes each.
+        #
+        # @param key [OpenSSL::PKey::EC]
+        # @param text [String]
+        # @return [String] r and s, in base64
+        # @api private
+        def sign(key, text)
+          pair = OpenSSL::ASN1.decode(key.sign(OpenSSL::Digest.new('SHA256'), text)).value #: Array[OpenSSL::ASN1::Integer]
+          Base64.strict_encode64(pair.map { it.value.to_s(2).rjust(32, "\0") }.join)
+        end
+
+        # @param key [OpenSSL::PKey::EC] the signer's
+        # @param text [String]
+        # @param signature [String, nil] as {sign} gives it
+        # @return [void]
+        # @raise [E2eeError] unless the key signed the text
+        # @api private
+        def verify(key, text, signature)
+          raw = Base64.decode64(signature.to_s)
+          raise E2eeError, 'the signature does not verify' unless raw.bytesize == 64 && verified?(key, text, raw)
         end
 
         def gcm(key, nonce, tag)

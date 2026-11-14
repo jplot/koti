@@ -5,6 +5,10 @@ module Hue
     module Secure
       # A camera of a home, as the app's +CamerasHttpClient+ reaches it. Never tested on a device.
       class Camera
+        PLAN = %i[subscribed experience_period].freeze
+        ZONES = %i[activity_zones package_detection_zones lighting_zones].freeze
+        private_constant :PLAN, :ZONES
+
         # @return [String]
         attr_reader :id
 
@@ -39,18 +43,35 @@ module Hue
         # @api public
         def update(request) = Secure.client.put(@path, body: request)
 
+        # As the app does, it refuses to turn clip recording on, or to change the activity, package or lighting zones,
+        # unless the camera is +subscribed+ or in its +experience_period+, and it then reads the plans first. The app
+        # lets a free-tier camera record clips kept 24 hours behind its remote toggle
+        # +enable_24_hour_free_video_clips+; the toggle is off by default, and the gem follows the default.
+        #
         # @param request [Schema::CameraCameraServiceUpdate]
         # @return [void]
         # @raise [ArgumentError] if the request leaves a required field nil; nothing is sent
+        # @raise [PlanError] if the camera's status does not allow the change; nothing is sent
         # @raise (see Http.request)
         # @api public
-        def update_camera(request) = Secure.client.put("#{@path}/service/camera/0", body: request)
+        def update_camera(request)
+          body = request.to_body
+          check_plan if body[:clips_recording] == true || ZONES.any? { body.key?(it) }
+          Secure.client.put("#{@path}/service/camera/0", body: request)
+        end
 
+        # As the app does, it refuses to change sound detection unless the camera is +subscribed+ or in its
+        # +experience_period+, and it then reads the plans first.
+        #
         # @param request [Schema::CameraMicrophoneUpdate]
         # @return [void]
+        # @raise [PlanError] if the camera's status does not allow the change; nothing is sent
         # @raise (see Http.request)
         # @api public
-        def update_microphone(request) = Secure.client.put("#{@path}/service/microphone/0", body: request)
+        def update_microphone(request)
+          check_plan if request.to_body.key?(:smoke_alarm_detection)
+          Secure.client.put("#{@path}/service/microphone/0", body: request)
+        end
 
         # @param service [String] the id of the speaker service
         # @param request [Schema::CameraSpeakerUpdate]
@@ -129,6 +150,16 @@ module Hue
         def sound_alarm
           alarm = Schema::SpeakerAlarmCommand.new(sound: 'siren', duration: 10_000)
           Secure.client.put(@speaker, body: Schema::SpeakerCommand.new(alarm:))
+        end
+
+        private
+
+        # @return [void]
+        # @raise [PlanError] unless the camera is subscribed or in its experience period
+        # @api private
+        def check_plan
+          status = Plan.status(Secure.subscription, @id)
+          raise PlanError.new(@id, status) unless PLAN.include?(status)
         end
       end
     end

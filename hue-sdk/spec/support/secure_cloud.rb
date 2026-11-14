@@ -15,6 +15,7 @@ RSpec.shared_context 'with the Hue cloud' do
       config.token = token.to_json
       config.login_url = cloud.url
       config.api_url = cloud.url
+      config.grpc_target = '127.0.0.1:1'
     end
   end
 

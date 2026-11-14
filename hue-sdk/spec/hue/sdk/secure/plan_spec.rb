@@ -99,7 +99,7 @@ RSpec.describe Hue::Sdk::Secure::Plan do
       expect(described_class.gated?(sound, free_clips: true)).to be(true)
     end
 
-    it 'leaves the other settings, also given as a plain hash', :aggregate_failures do
+    it 'leaves the other settings ungated, and reads a request given as a plain hash', :aggregate_failures do
       expect(described_class.gated?(service(hdr: true, face_blur: true), free_clips: false)).to be(false)
       expect(described_class.gated?(schema::CameraMicrophoneUpdate.new(enabled: true), free_clips: false)).to be(false)
       expect(described_class.gated?({ 'video_quality' => 'high', 'clips_recording' => true }, free_clips: false))
@@ -152,6 +152,12 @@ RSpec.describe Hue::Sdk::Secure::Plan do
     it "counts a bridge's trial only when the home has a motion area, and nothing unread", :aggregate_failures do
       expect(covers?(devices: [trial('BR-1').merge('rtype' => 'bridge')], motion_areas: false)).to be(false)
       expect(described_class.covers?(nil, home, motion_areas: true)).to be(false)
+    end
+
+    it "counts a paid plan or a camera's trial whether or not the home has a motion area", :aggregate_failures do
+      camera = Hue::Sdk::Secure::Home::Device.new(type: 'CMB001', id: 'cam-1')
+      expect(covers?(plans: [plan], motion_areas: false)).to be(true)
+      expect(covers?(home.with(devices: [camera]), devices: [trial('cam-1')], motion_areas: false)).to be(true)
     end
   end
 end

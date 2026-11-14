@@ -171,4 +171,109 @@ RSpec.describe Hue::Sdk::Secure::Media do
       expect(read.inspect + Hue::Sdk::Secure::ClipProxy.new(read).inspect).not_to include(cek.inspect[1...-1])
     end
   end
+
+  describe 'clip downloads' do
+    before { Hue::Sdk::Secure.configure { it.kinesis_url = cloud.url } }
+
+    def clip = File.binread(File.expand_path('../../../fixtures/media/clip.mp4', __dir__))
+
+    def credentials
+      answer(credential: { accessKeyId: 'AKIA-TEST', secretAccessKey: 'secret-1', sessionToken: 'session-1' },
+             clip_metadata: { fragment_selector_type: 'SERVER_TIMESTAMP', start_timestamp: '2026-11-13T10:00:00.750Z',
+                              end_timestamp: '2026-11-13T10:00:30.250Z', stream_name: 'stream-1',
+                              key_envelope: Base64.strict_encode64(camera.envelope(cek)) })
+    end
+
+    def kinesis(sealed)
+      answers.push(FakeCloud.json(DataEndpoint: cloud.url), [200, { 'Content-Type' => 'video/mp4' }, sealed])
+    end
+
+    def downloaded(sealed = camera.seal_mp4(clip, cek:))
+      media = opened
+      credentials
+      kinesis(sealed)
+      media.download_clip('cam-1', 'clip-9')
+    end
+
+    it 'asks the cloud for credentials, then Kinesis Video for the clip, and gives it in clear', :aggregate_failures do
+      expect(SegmentReader.file_samples(downloaded)).to eq(SegmentReader.file_samples(clip))
+      expect(cloud.requests.map { [it.verb, it.path] }.last(3))
+        .to eq([%w[POST /security/vss/v1/home/home-1/clip/clip-9/credentials/download], %w[POST /getDataEndpoint],
+                %w[POST /getClip]])
+    end
+
+    it 'asks Kinesis Video for the stream, then for the clip in whole seconds, as the app does' do
+      downloaded
+      range = { 'StartTimestamp' => 1_794_564_000, 'EndTimestamp' => 1_794_564_030 }
+      selector = { 'FragmentSelectorType' => 'SERVER_TIMESTAMP', 'TimestampRange' => range }
+      expect(cloud.requests.last(2).map { JSON.parse(it.body) })
+        .to eq([{ 'StreamName' => 'stream-1', 'APIName' => 'GET_CLIP' },
+                { 'StreamName' => 'stream-1', 'ClipFragmentSelector' => selector }])
+    end
+
+    it 'signs both requests to Kinesis Video with the clip credentials, in eu-west-1' do
+      downloaded
+      signed = start_with('AWS4-HMAC-SHA256 Credential=AKIA-TEST/').and(include('/eu-west-1/kinesisvideo/aws4_request'))
+      expect(cloud.requests.last(2).map { it.headers.values_at('authorization', 'x-amz-security-token') })
+        .to all(match([signed, 'session-1']))
+    end
+
+    it 'signs for the region set, when it is not eu-west-1' do
+      Hue::Sdk::Secure.configure { it.kinesis_region = 'us-east-1' }
+      downloaded
+      expect(cloud.requests.last(2).map { it.headers['authorization'] })
+        .to all(include('/us-east-1/kinesisvideo/aws4_request'))
+    end
+
+    it 'refuses a clip whose samples do not decrypt' do
+      expect { downloaded(camera.seal_mp4(clip, cek: Random.bytes(16))) }.to raise_error(error)
+    end
+
+    it 'refuses a download the cloud gives no credentials for' do
+      media = opened
+      answer({})
+      expect { media.download_clip('cam-1', 'clip-9') }.to raise_error(Hue::Sdk::ResponseError, /no credentials/)
+    end
+
+    it 'raises ResponseError, with its status, when Kinesis Video refuses the credentials', :aggregate_failures do
+      media = opened
+      credentials
+      answers.push([403, { 'X-Amzn-ErrorType' => 'NotAuthorizedException' }, '{"message":"The token has expired"}'])
+      expect { media.download_clip('cam-1', 'clip-9') }
+        .to raise_error(Hue::Sdk::ResponseError, /expired/) { expect(it.status).to eq(403) }
+    end
+
+    it 'asks Kinesis Video once, as the app does, even when it fails', :aggregate_failures do
+      media = opened
+      credentials
+      answers.push([500, { 'X-Amzn-ErrorType' => 'InternalFailure' }, '{"message":"down"}'])
+      expect { media.download_clip('cam-1', 'clip-9') }.to raise_error(Hue::Sdk::ResponseError)
+      expect(cloud.requests.count { it.path == '/getDataEndpoint' }).to eq(1)
+    end
+
+    it 'gives up on Kinesis Video after the read timeout set' do
+      slow = FakeCloud.start { sleep(1).then { [404, {}, ''] } }
+      Hue::Sdk::Secure.configure { it.kinesis_url = slow.url }
+      media = opened
+      credentials
+      Hue::Sdk::Secure.configure { it.read_timeout = 0.2 }
+      expect { media.download_clip('cam-1', 'clip-9') }.to raise_error(Hue::Sdk::ConnectionError)
+    ensure
+      slow&.stop
+    end
+
+    it 'raises ConnectionError when Kinesis Video cannot be reached' do
+      media = opened
+      credentials
+      Hue::Sdk::Secure.configure { it.kinesis_url = 'http://127.0.0.1:1' }
+      expect { media.download_clip('cam-1', 'clip-9') }.to raise_error(Hue::Sdk::ConnectionError)
+    end
+
+    it 'asks for the aws gems when they are missing' do
+      media = opened
+      credentials
+      allow(described_class).to receive(:require).with('aws-sdk-kinesisvideo').and_raise(LoadError)
+      expect { media.download_clip('cam-1', 'clip-9') }.to raise_error(Hue::Sdk::Error, /gem 'aws-sdk-kinesisvideo'/)
+    end
+  end
 end

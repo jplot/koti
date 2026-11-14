@@ -24,6 +24,8 @@ module Hue
 
         def self?.segment: (String segment, init: String) { (String data) -> String } -> String
 
+        def self?.file: (String bytes) { (String data) -> String } -> String
+
         def self?.media?: (String bytes) -> bool
 
         def self?.files: [T] (String segment, String init) { (Hash[Symbol, String] paths) -> T } -> T
@@ -31,6 +33,8 @@ module Hue
         def self?.tracks: (Hash[Symbol, String] paths) { (String data) -> String } -> Array[Track]
 
         def self?.sample: (untyped reader, Integer track, Integer number) { (String data) -> String } -> Sample
+
+        def self?.samples: (untyped file) { (String data) -> String } -> void
 
         def self?.written: (Hash[Symbol, String] paths, Integer sequence, Array[Track] tracks) -> String
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Reads back what a player relies on in an fMP4 media segment, to check a rewrite: each sample through GPAC, and the
-# moof's sequence number and decode times from the boxes themselves.
+# Reads back what a player relies on in an MP4 file or an fMP4 media segment, to check a rewrite: each sample through
+# GPAC, and the moof's sequence number and decode times from the boxes themselves.
 module SegmentReader
   module_function
 
@@ -14,10 +14,18 @@ module SegmentReader
     end
   end
 
-  def read(init, segment)
+  def file_samples(mp4)
+    require 'hue/sdk/secure/gpac'
+    Dir.mktmpdir do |dir|
+      File.binwrite(File.join(dir, 'clip.mp4'), mp4)
+      read(File.join(dir, 'clip.mp4'))
+    end
+  end
+
+  def read(init, segment = nil)
     gpac = Hue::Sdk::Secure::Gpac
     reader = gpac.opened(init)
-    gpac.check(gpac.gf_isom_open_segment(reader, segment, 0, 0, 0))
+    gpac.check(gpac.gf_isom_open_segment(reader, segment, 0, 0, 0)) if segment
     (1..gpac.gf_isom_get_track_count(reader)).flat_map do |track|
       id = gpac.gf_isom_get_track_id(reader, track)
       (1..gpac.gf_isom_get_sample_count(reader, track)).map { [id, *gpac.sample(reader, track, it).to_h.values] }

@@ -81,3 +81,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   player with its media segments decrypted, as the app's local proxy does; `MessageEvent#camera_id` and `#clip_id`
   name the clip of a camera event. Never tested with a device. Playing clips needs the `ffi` and `m3u8` gems and
   GPAC's libgpac, which rewrites the segments.
+- `media.download_clip` downloads a Hue Secure camera clip from Kinesis Video Streams, with the credentials the
+  cloud hands out for it, and gives it as one MP4 file in clear, as the app saves it. Never tested with a device.
+  It needs the `ffi`, `aws-sdk-kinesisvideo` and `aws-sdk-kinesisvideoarchivedmedia` gems and GPAC's libgpac. The
+  settings gain `kinesis_region` (`eu-west-1`, the app's) and `kinesis_url`.

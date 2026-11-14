@@ -29,6 +29,25 @@ module Hue
           files(segment, init) { |paths| written(paths, sequence(segment), tracks(paths, &)) }
         end
 
+        # Writes the file again, each sample's data replaced by the block's: GPAC moves the chunks and rewrites the
+        # sample tables.
+        #
+        # @param bytes [String] an MP4 file
+        # @yieldparam data [String] the data of a sample
+        # @yieldreturn [String] the data to write instead
+        # @return [String]
+        # @raise [E2eeError] if GPAC cannot read or write it
+        def file(bytes, &)
+          require_relative 'gpac'
+          Dir.mktmpdir('hue-sdk') do |dir|
+            input = File.join(dir, 'in.mp4')
+            out = File.join(dir, 'out.mp4')
+            File.binwrite(input, bytes)
+            Gpac.edited(input, out, dir) { samples(it, &) }
+            File.binread(out)
+          end
+        end
+
         # @param bytes [String]
         # @return [Boolean] whether it is a media segment, rather than an initialization segment or a playlist
         def media?(bytes)
@@ -60,6 +79,14 @@ module Hue
 
         def sample(reader, track, number) = Gpac.sample(reader, track, number).then { it.with(data: yield(it.data)) }
 
+        def samples(file, &)
+          (1..Gpac.gf_isom_get_track_count(file)).each do |track|
+            (1..Gpac.gf_isom_get_sample_count(file, track)).each do |number|
+              Gpac.replace(file, track, number, sample(file, track, number, &))
+            end
+          end
+        end
+
         def written(paths, sequence, tracks)
           out = File.join(paths[:dir], 'out.m4s')
           reader = Gpac.opened(paths[:init])
@@ -84,7 +111,7 @@ module Hue
           segment.byteslice(at + 8, 4).to_s.unpack1('N').to_i
         end
 
-        private_class_method :files, :tracks, :sample, :written, :fragment, :sequence
+        private_class_method :files, :tracks, :sample, :samples, :written, :fragment, :sequence
       end
     end
   end

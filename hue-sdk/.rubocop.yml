@@ -5,6 +5,8 @@ Metrics/ModuleLength:
   Exclude:
     - 'lib/hue/sdk/schema/*.rb'
     - 'lib/hue/sdk/secure/schema/*.rb'
+    # The bindings of GPAC: one attach_function per C function the gem calls.
+    - 'lib/hue/sdk/secure/gpac.rb'
 
 # Their attributes keep the app's JSON keys, camelCase ones included (keyEnvelope).
 Naming/MethodName:

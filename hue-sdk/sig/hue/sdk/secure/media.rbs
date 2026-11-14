@@ -30,11 +30,15 @@ module Hue
 
         def clip: (String camera_id, String clip_id) -> Clip
 
+        def download_clip: (String camera_id, String clip_id) -> String
+
         def self.load: (String library, String purpose) -> void
 
         private
 
         def clip_answer: (String camera_id, String clip_id) -> Schema::VideoClipResponseData?
+
+        def credentials: (String clip_id) -> [Schema::ClipCredentials?, Schema::ClipMetadata?]
 
         def decrypted: (String blob, String camera_id) -> String
       end

@@ -52,6 +52,13 @@ RSpec.describe Hue::Sdk::Secure::ClipProxy do
     expect(get('/hls/segment1.m4s')).to eq([502, {}, []])
   end
 
+  it 'answers 502, with no body, to a playlist that names no init segment or is not one', :aggregate_failures do
+    files['/hls/clip.m3u8'] = [200, fixture('clip.m3u8').sub(/^#EXT-X-MAP.*\n/, '')]
+    expect(get('/hls/segment1.m4s')).to eq([502, {}, []])
+    files['/hls/clip.m3u8'] = [200, 'not a playlist']
+    expect(get('/hls/segment1.m4s')).to eq([502, {}, []])
+  end
+
   it 'passes an expired upstream refusal through' do
     files['/hls/clip.m3u8'] = [403, '<Error>expired</Error>']
     expect(get('/hls/clip.m3u8').values_at(0, 2)).to eq([403, ['<Error>expired</Error>']])

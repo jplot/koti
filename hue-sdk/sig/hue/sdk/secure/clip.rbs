@@ -34,6 +34,8 @@ module Hue
 
         def media_playlist: () -> [URI::HTTP, M3u8::Playlist]
 
+        def playlist: (URI::HTTP target) -> M3u8::Playlist
+
         def read: (URI::HTTP target) -> String
       end
     end

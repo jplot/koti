@@ -80,11 +80,18 @@ module Hue
 
         def media_playlist
           Media.load('m3u8', 'reading a Hue Secure clip')
-          playlist = M3u8::Playlist.read(read(url))
+          playlist = playlist(url)
           return [url, playlist] unless playlist.master?
 
-          variant = URI.join(url, playlist.items.first.uri) #: URI::HTTP
-          [variant, M3u8::Playlist.read(read(variant))]
+          item = playlist.items.find { it.is_a?(M3u8::PlaylistItem) && !it.iframe }
+          variant = URI.join(url, item.uri) #: URI::HTTP
+          [variant, playlist(variant)]
+        end
+
+        def playlist(target)
+          M3u8::Playlist.read(read(target))
+        rescue M3u8::InvalidPlaylistError => e
+          raise ResponseError.new(200, [e.message], source: target.host.to_s)
         end
 
         def read(target)

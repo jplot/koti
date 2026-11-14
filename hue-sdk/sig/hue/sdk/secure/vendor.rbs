@@ -112,6 +112,15 @@ module M3u8
     def items: () -> Array[untyped]
   end
 
+  class InvalidPlaylistError < StandardError
+  end
+
+  class PlaylistItem
+    def uri: () -> String
+
+    def iframe: () -> bool
+  end
+
   class MapItem
     def uri: () -> String
   end

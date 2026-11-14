@@ -23,10 +23,11 @@ module Hue
 
           query = env['QUERY_STRING'].to_s
           path = query.empty? ? env['PATH_INFO'].to_s : "#{env['PATH_INFO']}?#{query}"
+          target = URI.join(@clip.url, path) #: URI::HTTP
+          return [404, {}, []] unless @clip.local?(target)
+
           answer = @clip.get(path)
           [answer.status, headers(env, path, answer), [answer.body]]
-        rescue ArgumentError
-          [404, {}, []]
         rescue E2eeError, ConnectionError, ResponseError
           [502, {}, []]
         end

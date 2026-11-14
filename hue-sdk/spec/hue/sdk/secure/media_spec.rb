@@ -143,6 +143,19 @@ RSpec.describe Hue::Sdk::Secure::Media do
       expect(SegmentReader.samples(read.get('segment1.m4s').body, init:)).to eq(SegmentReader.samples(segment, init:))
     end
 
+    it 'finds the initialization segment of the video variant, past the renditions listed before it' do
+      files['/hls/master.m3u8'] = <<~M3U8
+        #EXTM3U
+        #EXT-X-MEDIA:TYPE=CLOSED-CAPTIONS,GROUP-ID="cc",NAME="cc",INSTREAM-ID="CC1"
+        #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="a",NAME="a",URI="audio.m3u8"
+        #EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=10,URI="iframe.m3u8"
+        #EXT-X-STREAM-INF:BANDWIDTH=1000
+        clip.m3u8
+      M3U8
+      expect(SegmentReader.samples(clip('master.m3u8').get('segment1.m4s').body, init:))
+        .to eq(SegmentReader.samples(segment, init:))
+    end
+
     it 'refuses a path of another origin' do
       expect { clip.get('//evil.test/x') }.to raise_error(ArgumentError)
     end

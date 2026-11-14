@@ -80,9 +80,9 @@ class FakeSignaling
     @driver = WebSocket::Driver.server(Wire.new(socket))
     listen
     loop { @driver.parse(socket.readpartial(16_384)) }
-  rescue EOFError
+  rescue EOFError, OpenSSL::SSL::SSLError
     @client_closed = true
-  rescue IOError, SystemCallError, OpenSSL::SSL::SSLError
+  rescue IOError, SystemCallError
     nil
   end
 
@@ -100,6 +100,8 @@ class FakeSignaling
     socket.gets("\r\n\r\n")
     socket.write("HTTP/1.1 #{@refuse} Refused\r\nContent-Length: 0\r\n\r\n")
     socket.read
+    @client_closed = true
+  rescue OpenSSL::SSL::SSLError
     @client_closed = true
   end
 

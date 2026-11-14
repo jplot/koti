@@ -146,7 +146,15 @@ RSpec.describe Hue::Sdk::Secure::LiveView do
     expect { 100.times { dropped.offer('v=0').then { sleep 0.01 } } }.to raise_error(Hue::Sdk::ConnectionError)
   end
 
-  def pinging = on_open { |peer| Thread.new { 400.times { peer.ping.then { sleep 0.001 } } } }
+  def pinging
+    on_open do |peer|
+      Thread.new do
+        400.times { peer.ping.then { sleep 0.001 } }
+      rescue IOError, OpenSSL::SSL::SSLError
+        nil
+      end
+    end
+  end
 
   # 40 kB each, with Kinesis Video's pings answered meanwhile: a write then waits on a full socket buffer, and OpenSSL
   # lets another thread's write in (5 runs out of 5 without the lock).

@@ -64,7 +64,7 @@ module Hue
               @lock.synchronize { @driver.parse(data) }
             end
           rescue ConnectionError
-            @socket.close
+            @tcp.close
             raise
           end
 
@@ -74,7 +74,9 @@ module Hue
             @closed = true
             farewell
           ensure
-            @socket.close
+            # The TCP socket, not the TLS one: closing that first flushes a stuck writer's bytes to a peer that no
+            # longer reads, and waits with it (seen on Linux).
+            @tcp.close
           end
 
           private
@@ -88,7 +90,7 @@ module Hue
             handshake
             opened = true
           ensure
-            (@socket || @tcp)&.close unless opened
+            @tcp&.close unless opened
           end
 
           # A writer that waits on a peer which stopped reading holds the lock: the socket then closes without the

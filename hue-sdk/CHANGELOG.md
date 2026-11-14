@@ -85,3 +85,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   cloud hands out for it, and gives it as one MP4 file in clear, as the app saves it. Never tested with a device.
   It needs the `ffi`, `aws-sdk-kinesisvideo` and `aws-sdk-kinesisvideoarchivedmedia` gems and GPAC's libgpac. The
   settings gain `kinesis_region` (`eu-west-1`, the app's) and `kinesis_url`.
+- `media.live_view` relays a Hue Secure camera's live view signaling between a browser's peer connection and the
+  camera, over Kinesis Video's WebSocket, as the app does: it signs the offer with the home's keys and checks the
+  camera's answer. Never tested with a device. It needs the `websocket-driver` and `aws-sigv4` gems.

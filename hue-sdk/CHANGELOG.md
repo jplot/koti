@@ -88,3 +88,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `media.live_view` relays a Hue Secure camera's live view signaling between a browser's peer connection and the
   camera, over Kinesis Video's WebSocket, as the app does: it signs the offer with the home's keys and checks the
   camera's answer. Never tested with a device. It needs the `websocket-driver` and `aws-sigv4` gems.
+- `Secure.subscription` reads the Hue Secure plans of the account and the devices each covers, as the app reads
+  them. Never tested with a device. The gem gates nothing by plan: the app gates no media either, but keeps a
+  motion area out of arming while its bridge has no plan, which the gem leaves to the caller.

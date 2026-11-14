@@ -17,6 +17,8 @@ module Hue
 
       def self.auto_responses: () -> Schema::FetchedAutoResponseConfiguration
 
+      def self.subscription: () -> Schema::AccountSubscriptionDetailsResponse
+
       def self.configure: () { (Configuration::Settings) -> void } -> void
     end
   end

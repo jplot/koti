@@ -3339,5 +3339,190 @@
         }
       }
     }
+  },
+  "account": {
+    "AccountChosenSubscriptionResponse": {
+      "origin": "AccountChosenSubscriptionResponse",
+      "kind": "response",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "user": {
+          "type": {
+            "class": "ChosenSubscriptionUserResponse"
+          },
+          "required": true
+        },
+        "subscription_product": {
+          "type": {
+            "class": "ChosenSubscriptionProductResponse"
+          },
+          "required": true
+        },
+        "homes": {
+          "type": {
+            "list": {
+              "class": "ChosenSubscriptionHomeResponse"
+            }
+          },
+          "required": true
+        },
+        "scope": {
+          "type": {
+            "class": "SubscriptionScopeResponse"
+          },
+          "required": true
+        },
+        "subscription_state": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "active",
+            "grace_period",
+            "future",
+            "cancelled",
+            "unknown"
+          ]
+        },
+        "provider": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "google",
+            "apple",
+            "web",
+            "others"
+          ]
+        },
+        "start_date": {
+          "type": "String",
+          "required": true
+        },
+        "future_subscription_product": {
+          "type": {
+            "class": "ChosenSubscriptionProductResponse"
+          },
+          "required": false
+        },
+        "end_date": {
+          "type": "String",
+          "required": false
+        },
+        "apple_original_transaction_id": {
+          "type": "String",
+          "required": false
+        },
+        "google_order_id": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "AccountSubscriptionDetailsResponse": {
+      "origin": "AccountSubscriptionDetailsResponse",
+      "kind": "response",
+      "fields": {
+        "subscriptions": {
+          "type": {
+            "list": {
+              "class": "AccountChosenSubscriptionResponse"
+            }
+          },
+          "required": true
+        },
+        "devices": {
+          "type": {
+            "list": {
+              "class": "DeviceSubscriptionResponse"
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "ChosenSubscriptionHomeResponse": {
+      "origin": "ChosenSubscriptionHomeResponse",
+      "kind": "response",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "ChosenSubscriptionProductResponse": {
+      "origin": "ChosenSubscriptionProductResponse",
+      "kind": "response",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "ChosenSubscriptionUserResponse": {
+      "origin": "ChosenSubscriptionUserResponse",
+      "kind": "response",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "DeviceSubscriptionResponse": {
+      "origin": "DeviceSubscriptionResponse",
+      "kind": "response",
+      "fields": {
+        "rid": {
+          "type": "String",
+          "required": true
+        },
+        "rtype": {
+          "type": "String",
+          "required": true,
+          "values": [
+            "camera",
+            "tv",
+            "bridge",
+            "unknown"
+          ]
+        },
+        "subscription_ids": {
+          "type": {
+            "list": "String"
+          },
+          "required": true
+        },
+        "xp_enabled": {
+          "type": "Boolean",
+          "required": true
+        },
+        "xp_end_date": {
+          "type": "String",
+          "required": false
+        }
+      }
+    },
+    "SubscriptionScopeResponse": {
+      "origin": "SubscriptionScopeResponse",
+      "kind": "response",
+      "fields": {
+        "camera": {
+          "type": "Numeric",
+          "required": false
+        },
+        "tv": {
+          "type": "Numeric",
+          "required": false
+        },
+        "home": {
+          "type": "Numeric",
+          "required": false
+        }
+      }
+    }
   }
 }

@@ -19,6 +19,7 @@ require_relative 'secure/schema/arm'
 require_relative 'secure/schema/cameras'
 require_relative 'secure/schema/events'
 require_relative 'secure/schema/media'
+require_relative 'secure/schema/account'
 require_relative 'secure/arm'
 require_relative 'secure/schedules'
 require_relative 'secure/geofence'
@@ -70,6 +71,14 @@ module Hue
       def self.auto_responses
         manifest = client.get("#{config.auto_responses_url}/automatic_response/manifest.json").body
         Schema::FetchedAutoResponseConfiguration.from(manifest)
+      end
+
+      # @return [Schema::AccountSubscriptionDetailsResponse] the account's Hue Secure subscriptions, and those each
+      #   device is covered by
+      # @raise (see Http.request)
+      # @api public
+      def self.subscription
+        Schema::AccountSubscriptionDetailsResponse.from(client.get('security/payment/v2/user/subscription/details').body)
       end
 
       # Changes the settings; the next session reads them.

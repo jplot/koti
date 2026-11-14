@@ -404,12 +404,21 @@ Hue::Sdk::Secure.homes.map { |home| [home.name, home.security_activated] }
 
 home = Hue::Sdk::Secure.home('5c3e…')   # by its id, without a request
 Hue::Sdk::Secure.client.get("security/arm-manager/v1/home/#{home.id}/arm/state").body
+
+plans = Hue::Sdk::Secure.subscription     # the account's plans, and the devices each covers
+plans.subscriptions.map(&:subscription_state)   # => ["active"]
+plans.devices.map { [it.rid, it.subscription_ids] }
 ```
 
 The app lists the homes over gRPC: `homes` needs the `grpc` gem, nothing else does. `client`
 reaches any path under `api_url`, or an absolute address, with the token, and gives the status,
 the body (parsed when it is JSON) and the headers. The gem names itself in `User-Agent` and sends
 none of the app's own headers.
+
+`subscription` reads the plans as the app reads them. The app gates no media by plan: snapshots,
+live view and clips go through whatever the plan, and it only shows what a plan would add. It does
+keep a motion area out of arming while its bridge has neither a plan nor a started experience
+period; the gem gates nothing, and leaves that to the caller.
 
 | Setting | Default | Purpose |
 |---|---|---|

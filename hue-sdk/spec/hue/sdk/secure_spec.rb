@@ -34,4 +34,24 @@ RSpec.describe Hue::Sdk::Secure do
       expect([read.categories.first.name, read.responses['en'].first['path']]).to eq(%w[Away r-1.mp3])
     end
   end
+
+  describe '.subscription' do
+    include_context 'with the Hue cloud'
+
+    def plan
+      { rid: 'sub-1', user: { rid: 'user-1' }, subscription_product: { rid: 'hue.security.plus.monthly' },
+        homes: [{ rid: 'home-1' }], scope: { camera: 4 }, subscription_state: 'active', provider: 'web',
+        start_date: '2026-11-01T00:00:00Z' }
+    end
+
+    it 'reads the Hue Secure subscriptions of the account, with the token', :aggregate_failures do
+      answer(subscriptions: [plan], devices: [{ rid: 'cam-1', rtype: 'camera', subscription_ids: ['sub-1'],
+                                                xp_enabled: false }])
+      read = described_class.subscription
+      expect(cloud.requests.last.then { [it.verb, it.path, it.headers['authorization']] })
+        .to eq(['GET', '/security/payment/v2/user/subscription/details', 'Bearer jwt-1'])
+      expect([read.subscriptions.first.subscription_state, read.devices.first.subscription_ids])
+        .to eq(['active', ['sub-1']])
+    end
+  end
 end

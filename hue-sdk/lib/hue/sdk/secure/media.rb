@@ -146,17 +146,29 @@ module Hue
           Mp4.file(Kinesis.clip(credential, metadata)) { E2ee.decrypt(cek, it) }
         end
 
+        # A camera's live view: the signaling the browser's peer connection goes through. A camera asleep may need
+        # {Camera#wake_up} first: the app wakes it at the same time, and again until it answers.
+        #
+        # @param camera_id [String]
+        # @return [LiveView] connected
+        # @raise [Error] without the websocket-driver or aws-sigv4 gem
+        # @raise [ResponseError] if the cloud or Kinesis Video refuses, or the cloud gives no channel for the camera
+        # @raise [ConnectionError] if either cannot be reached
+        # @api public
+        def live_view(camera_id) = LiveView.open(home_id, camera_id, keys: @keys, signing_key_id:)
+
         # Loads a gem the gem calls only for some media.
         #
-        # @param library [String]
+        # @param library [String] what to require
         # @param purpose [String] what needs it
+        # @param gem [String] the gem that holds it
         # @return [void]
         # @raise [Error] without the gem
         # @api private
-        def self.load(library, purpose)
+        def self.load(library, purpose, gem: library)
           require library
         rescue LoadError
-          raise Error, "#{purpose} needs the #{library} gem: add gem '#{library}' to your Gemfile"
+          raise Error, "#{purpose} needs the #{gem} gem: add gem '#{gem}' to your Gemfile"
         end
 
         private

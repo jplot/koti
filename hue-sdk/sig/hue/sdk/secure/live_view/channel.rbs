@@ -1,0 +1,52 @@
+module Hue
+  module Sdk
+    module Secure
+      class LiveView
+        class Channel
+          ERRORS: Array[singleton(StandardError)]
+
+          class Wire < Data
+            attr_reader url: String
+            attr_reader io: OpenSSL::SSL::SSLSocket
+
+            def self.new: (url: String, io: OpenSSL::SSL::SSLSocket) -> Wire
+
+            def write: (String data) -> Integer
+          end
+
+          @lock: Thread::Mutex
+
+          @inbox: Array[String]
+
+          @socket: OpenSSL::SSL::SSLSocket
+
+          @driver: WebSocket::Driver
+
+          @tcp: Socket
+
+          @ended: bool?
+
+          @closed: bool?
+
+          def initialize: (String url) -> void
+
+          def write: (String text) -> void
+
+          def each_text: () { (String text) -> void } -> void
+
+          def close: () -> void
+
+          private
+
+          def socket: (URI::Generic uri) -> OpenSSL::SSL::SSLSocket
+
+          def tls: (String host) -> OpenSSL::SSL::SSLSocket
+
+          def handshake: () -> void
+
+          def received: () -> String?
+        end
+      end
+    end
+  end
+end

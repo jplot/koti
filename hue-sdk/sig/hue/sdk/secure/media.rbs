@@ -32,7 +32,9 @@ module Hue
 
         def download_clip: (String camera_id, String clip_id) -> String
 
-        def self.load: (String library, String purpose) -> void
+        def live_view: (String camera_id) -> LiveView
+
+        def self.load: (String library, String purpose, ?gem: String) -> void
 
         private
 

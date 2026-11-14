@@ -1,0 +1,101 @@
+module Hue
+  module Sdk
+    module Secure
+      class LiveView
+        type signal = Offer | Answer | Candidate | Message
+
+        include Enumerable[signal]
+
+        class Offer < Data
+          attr_reader sdp: String
+
+          def self.new: (sdp: String) -> Offer
+        end
+
+        class Answer < Data
+          attr_reader sdp: String
+
+          def self.new: (sdp: String) -> Answer
+        end
+
+        class Candidate < Data
+          attr_reader candidate: String?
+          attr_reader sdp_mid: String?
+          attr_reader sdp_mline_index: Integer?
+
+          def self.new: (candidate: String?, sdp_mid: String?, sdp_mline_index: Integer?) -> Candidate
+        end
+
+        class Message < Data
+          attr_reader type: String?
+          attr_reader message: Hash[String, untyped]
+
+          def self.new: (type: String?, message: Hash[String, untyped]) -> Message
+        end
+
+        DATA_CHANNEL: Hash[Symbol, String | Integer]
+
+        PURPOSE: String
+
+        UNKNOWN: String
+
+        attr_reader ice_servers: Array[Hash[Symbol, untyped]]
+
+        attr_reader earliest_expiry: String?
+
+        @client_id: String
+
+        @app_key: OpenSSL::PKey::EC
+
+        @camera_key: OpenSSL::PKey::EC
+
+        @signing_key_id: String
+
+        @channel: Channel
+
+        def self.open: (String home_id, String camera_id, keys: E2ee::Keys, signing_key_id: String) -> LiveView
+
+        def self.presign: (String endpoint, channel_arn: String, client_id: String,
+                           credentials: Schema::SignalingServerCredentials, ?time: Time) -> String
+
+        def initialize: (Schema::SignalingConfiguration configuration, String camera_id, keys: E2ee::Keys,
+                         signing_key_id: String) -> void
+
+        def inspect: () -> String
+
+        def offer: (String sdp) -> void
+
+        def answer: (String sdp) -> void
+
+        def candidate: (String? candidate, sdp_mid: String?, sdp_mline_index: Integer?) -> void
+
+        def each: () { (signal) -> void } -> void
+                | () -> Enumerator[signal, void]
+
+        def close: () -> void
+
+        private
+
+        def entries: (Schema::SignalingConfiguration configuration, String camera_id)
+                   -> [Schema::SignalingChannel, Schema::CameraTurnServerConfig]
+
+        def connected: (String endpoint, String channel_arn, Schema::SignalingServerCredentials credentials) -> Channel
+
+        def ice: (Schema::SignalingConfiguration configuration, Schema::CameraTurnServerConfig turn)
+               -> Array[Hash[Symbol, untyped]]
+
+        def signed: (String sdp, String type) -> Hash[Symbol, String]
+
+        def deliver: (String action, Hash[Symbol, untyped] payload, **String to) -> void
+
+        def signal: (String text) -> signal
+
+        def candidate_of: (Hash[String, untyped] payload) -> Candidate
+
+        def verified: (Hash[String, untyped] message) -> String
+
+        def payload: (Hash[String, untyped] message) -> Hash[String, untyped]
+      end
+    end
+  end
+end

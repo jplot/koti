@@ -7,11 +7,13 @@ module Hue
       class Arm
         GEOFENCE = { nil => '', presence: '/presence', empty: '/empty' }.freeze
         BLOCKED = %i[free_tier experience_period_not_enabled].freeze
-        private_constant :GEOFENCE, :BLOCKED
+        DETECTIONS = %w[people pet vehicle].freeze
+        private_constant :GEOFENCE, :BLOCKED, :DETECTIONS
 
         # @param home_id [String]
         # @api public
         def initialize(home_id)
+          @home_id = home_id
           @path = "security/arm-manager/v1/home/#{home_id}"
         end
 
@@ -37,18 +39,20 @@ module Hue
         end
 
         # As the app does, it refuses to let a motion area into a mode or out of it while the area's bridge is
-        # +free_tier+ or +experience_period_not_enabled+, or while the plans cannot be read. It reads the configuration
-        # first, and the plans only when a motion area moves.
+        # +free_tier+ or +experience_period_not_enabled+, or while the plans cannot be read. It also refuses a camera's
+        # people, pets or vehicles among what triggers the alarm unless {Plan.covers?} the home, and keeps the ones
+        # already there. It reads the configuration first, then the plans, and the homes over gRPC, only as needed.
         #
         # @param request [Schema::ArmDisarmSetConfigRequest]
         # @return [void]
         # @raise [ArgumentError] if the request leaves a required field nil; nothing is sent
-        # @raise [PlanError] if a motion area moves while the app would not let it; nothing is sent
+        # @raise [PlanError] if the change is one the app would not let through; nothing is sent
         # @raise (see Http.request)
         # @api public
         def update_config(request)
-          moved = moved_motion_areas(JSON.parse(JSON.generate(request)))
-          check_plans(moved) unless moved.empty?
+          sent = JSON.parse(JSON.generate(request))
+          config = Secure.client.get("#{@path}/arm").body&.dig('config') || {}
+          check_plans(moved(config, sent), picked(config, sent))
           Secure.client.put("#{@path}/arm/config", body: request)
         end
 
@@ -76,36 +80,72 @@ module Hue
 
         private
 
-        # @param sent [Hash{String=>Object}] the request as JSON
-        # @return [Array<Hash{String=>Object}>] the motion areas it adds to a mode or removes from it
+        # @param config [Hash{String=>Object}] the configuration now, as JSON
+        # @param sent [Hash{String=>Object}] the request, as JSON
+        # @return [Array<Hash{String=>Object}>] the motion areas the request lets into a mode or out of it
         # @api private
-        def moved_motion_areas(sent)
-          config = Secure.client.get("#{@path}/arm").body&.dig('config') || {}
+        def moved(config, sent)
+          changes(config, sent, 'device', 'motion_area') { |before, after| (before - after) + (after - before) }
+        end
+
+        # @param config [Hash{String=>Object}] the configuration now, as JSON
+        # @param sent [Hash{String=>Object}] the request, as JSON
+        # @return [Array<Hash{String=>Object}>] the camera detections the request adds to a mode
+        # @api private
+        def picked(config, sent)
+          changes(config, sent, 'alarm_triggering_entities', *DETECTIONS) { |before, after| after - before }
+        end
+
+        # @param config [Hash{String=>Object}] the configuration now, as JSON
+        # @param sent [Hash{String=>Object}] the request, as JSON
+        # @param key [String] the list to compare in each mode
+        # @param types [Array<String>] the types of entry to compare
+        # @yieldparam before [Array<Hash{String=>Object}>] the entries of a mode now
+        # @yieldparam after [Array<Hash{String=>Object}>] the entries the request gives it
+        # @yieldreturn [Array<Hash{String=>Object}>] those that change
+        # @return [Array<Hash{String=>Object}>]
+        # @api private
+        def changes(config, sent, key, *types)
           %w[armed_stay armed_away].flat_map do |mode|
-            before = motion_areas(config[mode])
-            after = motion_areas(sent[mode])
-            (before - after) + (after - before)
+            yield entries(config[mode], key, types), entries(sent[mode], key, types)
           end
         end
 
         # @param mode [Hash{String=>Object}, nil]
+        # @param key [String]
+        # @param types [Array<String>]
         # @return [Array<Hash{String=>Object}>]
         # @api private
-        def motion_areas(mode)
-          devices = mode&.dig('device') || []
-          devices.select { it['type'] == 'motion_area' }.map { it.slice('id', 'bridge') }
+        def entries(mode, key, types)
+          list = mode&.dig(key) || []
+          list.select { types.include?(it['type']) }.map { it.slice('type', 'id', 'bridge') }
         end
 
-        # @param areas [Array<Hash{String=>Object}>]
+        # @param moved [Array<Hash{String=>Object}>] motion areas in or out of a mode
+        # @param picked [Array<Hash{String=>Object}>] camera detections new to a mode
         # @return [void]
         # @raise [PlanError]
         # @api private
-        def check_plans(areas)
+        def check_plans(moved, picked)
+          return if moved.empty? && picked.empty?
+
           details = Secure.subscription
-          areas.each do |area|
+          moved.each do |area|
             status = Plan.status(details, area['bridge'])
             raise PlanError.new(area['bridge'], status) if BLOCKED.include?(status)
           end
+          raise PlanError, @home_id unless picked.empty? || covered?(details)
+        end
+
+        # A paid plan needs only the home's id; the homes are listed over gRPC, for their cameras and bridges, only
+        # without one.
+        #
+        # @param details [Schema::AccountSubscriptionDetailsResponse]
+        # @return [Boolean]
+        # @api private
+        def covered?(details)
+          Plan.covers?(details, Secure.home(@home_id)) ||
+            Plan.covers?(details, Secure.homes.find { it.id == @home_id } || Secure.home(@home_id))
         end
       end
     end

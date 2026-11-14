@@ -6,6 +6,10 @@ module Hue
 
         BLOCKED: Array[Plan::status]
 
+        DETECTIONS: Array[String]
+
+        @home_id: String
+
         @path: String
 
         def initialize: (String home_id) -> void
@@ -26,11 +30,19 @@ module Hue
 
         private
 
-        def moved_motion_areas: (Hash[String, untyped] sent) -> Array[Hash[String, untyped]]
+        def moved: (Hash[String, untyped] config, Hash[String, untyped] sent) -> Array[Hash[String, untyped]]
 
-        def motion_areas: (Hash[String, untyped]? mode) -> Array[Hash[String, untyped]]
+        def picked: (Hash[String, untyped] config, Hash[String, untyped] sent) -> Array[Hash[String, untyped]]
 
-        def check_plans: (Array[Hash[String, untyped]] areas) -> void
+        def changes: (Hash[String, untyped] config, Hash[String, untyped] sent, String key, *String types)
+                     { (Array[Hash[String, untyped]] before, Array[Hash[String, untyped]] after) -> Array[Hash[String, untyped]] }
+                   -> Array[Hash[String, untyped]]
+
+        def entries: (Hash[String, untyped]? mode, String key, Array[String] types) -> Array[Hash[String, untyped]]
+
+        def check_plans: (Array[Hash[String, untyped]] moved, Array[Hash[String, untyped]] picked) -> void
+
+        def covered?: (Schema::AccountSubscriptionDetailsResponse details) -> bool
       end
     end
   end

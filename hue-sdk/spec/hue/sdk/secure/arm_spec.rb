@@ -101,6 +101,72 @@ RSpec.describe Hue::Sdk::Secure::Arm do
     end
   end
 
+  describe 'a camera detection the alarm picks' do
+    let(:homes) do
+      home = FakeHomes.message(1 => 'home-1', 4 => FakeHomes.message(1 => 'br-1'),
+                               6 => FakeHomes.message(1 => 'CMB001', 2 => 'cam-1'))
+      FakeHomes.start { FakeHomes.field(1, home) }
+    end
+    let(:people) { { type: 'people', id: 'cam-1' } }
+    let(:paid) do
+      { rid: 'sub-1', user: { rid: 'user-1' }, subscription_product: { rid: 'hue.security.basic.single.yearly' },
+        homes: [{ rid: 'home-1' }], scope: {}, subscription_state: 'active', provider: 'web',
+        start_date: '2026-01-01T00:00:00Z' }
+    end
+
+    before do
+      Hue::Sdk::Secure.configure do |config|
+        config.grpc_target = homes.target
+        config.grpc_credentials = :this_channel_is_insecure
+      end
+    end
+
+    after { homes.stop }
+
+    def picked(*entities) = { 'config' => { 'armed_stay' => { 'alarm_triggering_entities' => entities } } }
+
+    def pick(*entities)
+      stay = mode.with(alarm_triggering_entities: entities)
+      arm.update_config(schema::ArmDisarmSetConfigRequest.new(armed_stay: stay, armed_away: mode))
+    end
+
+    it 'refuses a person, a pet or a vehicle unless a plan or a trial covers the home, and sends nothing',
+       :aggregate_failures do
+      %w[people pet vehicle].each do |type|
+        answer(picked)
+        answer(subscriptions: [], devices: [])
+        expect { pick({ type:, id: 'cam-1' }) }
+          .to raise_error(an_instance_of(Hue::Sdk::Secure::PlanError)
+                            .and(having_attributes(rid: 'home-1', status: nil)))
+      end
+      expect(cloud.requests.count { it.verb == 'PUT' }).to eq(0)
+    end
+
+    it 'picks one under a paid plan of the home, without listing the homes', :aggregate_failures do
+      answer(picked)
+      answer(subscriptions: [paid], devices: [])
+      answer_empty
+      pick(people)
+      expect([cloud.requests.last.verb, homes.calls.size]).to eq(['PUT', 0])
+    end
+
+    it 'picks one while a camera of the home is in its trial' do
+      answer(picked)
+      answer(subscriptions: [], devices: [{ rid: 'cam-1', rtype: 'camera', subscription_ids: [], xp_enabled: true,
+                                            xp_end_date: '2999-01-01T00:00:00Z' }])
+      answer_empty
+      pick(people)
+      expect(cloud.requests.last.verb).to eq('PUT')
+    end
+
+    it 'keeps one already picked, drops one, and picks common objects, without reading the plans' do
+      answer(picked(people.transform_keys(&:to_s), { 'type' => 'pet', 'id' => 'cam-1' }))
+      answer_empty
+      pick(people, { type: 'common_object', id: 'cam-2' })
+      expect(cloud.requests.map(&:verb)).to eq(%w[GET PUT])
+    end
+  end
+
   it 'reads the state alone, and nil for a home without Hue Secure', :aggregate_failures do
     answer('arm_state' => 'armed_stay', 'trigger_time' => 't', 'apply_time' => 'a',
            'source' => { 'type' => 'user', 'id' => 'u' })

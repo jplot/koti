@@ -1,14 +1,6 @@
 module Hue
   module Sdk
     module Secure
-      class PlanError < Error
-        attr_reader rid: String
-
-        attr_reader status: Plan::status?
-
-        def initialize: (String rid, ?Plan::status? status) -> void
-      end
-
       module Plan
         type status = :subscribed | :experience_period | :free_tier | :experience_period_not_enabled | :unknown
 
@@ -20,9 +12,27 @@ module Hue
 
         CAMERA: Regexp
 
-        def self.status: (Schema::AccountSubscriptionDetailsResponse details, String rid) -> status
+        def self.status: (Schema::AccountSubscriptionDetailsResponse? details, String rid) -> status
 
-        def self.covers?: (Schema::AccountSubscriptionDetailsResponse details, Home home) -> bool
+        BLOCKED: Array[status]
+
+        ACTIVE: Array[status]
+
+        ACTIONS: Hash[status, :run | :inform_then_run | :suggest_plan | :nothing | :refetch]
+
+        GATED: Array[String]
+
+        def self.motion_area_selectable?: (Schema::AccountSubscriptionDetailsResponse? details, String bridge_id) -> bool
+
+        def self.motion_area_switches?: (Schema::AccountSubscriptionDetailsResponse? details, String bridge_id) -> bool
+
+        def self.camera_action: (Schema::AccountSubscriptionDetailsResponse? details, String camera_id)
+                              -> (:run | :inform_then_run | :suggest_plan | :nothing | :refetch)
+
+        def self.gated?: (Schema::CameraCameraServiceUpdate | Schema::CameraMicrophoneUpdate | Hash[untyped, untyped] request,
+                         free_clips: bool) -> bool
+
+        def self.covers?: (Schema::AccountSubscriptionDetailsResponse? details, Home home, motion_areas: bool) -> bool
 
         def self.of: (Schema::DeviceSubscriptionResponse entry) -> status
 

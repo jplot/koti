@@ -5,26 +5,9 @@ require 'time'
 module Hue
   module Sdk
     module Secure
-      # The app does not allow a change while a device has the Hue Secure status it has, or while no plan or trial
-      # covers the home; nothing was sent.
-      class PlanError < Error
-        # @return [String] the device whose status the app checks, or the home
-        attr_reader :rid
-
-        # @return [Symbol, nil] the device's status, as {Plan.status} gives it; nil for the home
-        attr_reader :status
-
-        # @param rid [String]
-        # @param status [Symbol, nil]
-        # @api public
-        def initialize(rid, status = nil)
-          @rid = rid
-          @status = status
-          super("the app does not allow this change while #{rid} #{status ? "is #{status}" : 'has no plan or trial'}")
-        end
-      end
-
-      # The Hue Secure status of a device, as the app's +SubscriptionDeviceStatus+ gives it. Never tested on a device.
+      # What the app decides from the Hue Secure plans: a device's status (+SubscriptionDeviceStatus+), and what its
+      # screens offer by it. The gem sends every change as it is given; this is for the client's own screens. Never
+      # tested on a device.
       module Plan
         TYPES = %w[camera tv bridge].freeze
         PAID = %w[hue.security.basic.single.monthly hue.security.basic.single.yearly hue.security.basic.dual.monthly
@@ -32,33 +15,96 @@ module Hue
                   hue.security.rfss.monthly hue.security.rfss.yearly].freeze
         STATES = %w[active grace_period future cancelled].freeze
         CAMERA = /\ACM[A-Z]\d{3}\z/
-        private_constant :TYPES, :PAID, :STATES, :CAMERA
+        BLOCKED = %i[free_tier experience_period_not_enabled].freeze
+        ACTIVE = %i[subscribed experience_period].freeze
+        ACTIONS = { subscribed: :run, experience_period: :inform_then_run, free_tier: :suggest_plan,
+                    experience_period_not_enabled: :nothing, unknown: :refetch }.freeze
+        GATED = %w[activity_zones package_detection_zones lighting_zones smoke_alarm_detection].freeze
+        private_constant :TYPES, :PAID, :STATES, :CAMERA, :BLOCKED, :ACTIVE, :ACTIONS, :GATED
 
         # The plan's state (active, cancelled…) plays no part, as in the app: a device a plan lists is subscribed.
         #
-        # @param details [Schema::AccountSubscriptionDetailsResponse] as {Secure.subscription} reads it
+        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] the last plans {Secure.subscription} read,
+        #   kept when a later read fails, as the app keeps them; nil before any read
         # @param rid [String] a camera's or a bridge's id; a motion area takes its bridge's
         # @return [Symbol] +:subscribed+, +:experience_period+, +:free_tier+, +:experience_period_not_enabled+ or
         #   +:unknown+
         # @raise [ArgumentError] if the end of the experience period is not a date
         # @api public
         def self.status(details, rid)
-          entry = details.devices.find { listed?(it) && it.rid.casecmp?(rid) }
+          entry = details&.devices&.find { listed?(it) && it.rid.casecmp?(rid) }
           entry ? of(entry) : :unknown
         end
 
-        # Whether the app lets the alarm pick what a camera of the home detects (people, pets, vehicles), as its
-        # +hasSubscriptionOrExperiencePeriodWithMotionAreasInHome+ decides. The app also wants a motion area on the
-        # home's bridges before a bridge's trial counts; the cloud does not give motion areas, so the gem counts it.
+        # Whether the app's arming screen lets a motion area be picked for a mode, or taken out of it. It gives no
+        # handler to an area whose bridge is free tier, and opens the plan offer; or has not started its trial, and
+        # offers to start it ({.status} tells which). While the plans are not read, it disables every motion area.
         #
-        # @param details [Schema::AccountSubscriptionDetailsResponse] as {Secure.subscription} reads it
+        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] the plans; nil when the last read failed,
+        #   whatever was read before, as the app's "not fetched"
+        # @param bridge_id [String] the motion area's bridge, as an arming entry's +bridge+ or {Home#bridges} gives it
+        # @return [Boolean]
+        # @raise (see .status)
+        # @api public
+        def self.motion_area_selectable?(details, bridge_id)
+          !details.nil? && !BLOCKED.include?(status(details, bridge_id))
+        end
+
+        # Whether the app's motion area screen shows the switches that use the area when armed at home or away. It
+        # shows them only for a subscribed bridge or one in its trial; a free-tier bridge gets the plan offer, one that
+        # has not started its trial the offer to start it, and an unknown one nothing.
+        #
+        # @param details (see .status)
+        # @param bridge_id (see .motion_area_selectable?)
+        # @return [Boolean]
+        # @raise (see .status)
+        # @api public
+        def self.motion_area_switches?(details, bridge_id) = ACTIVE.include?(status(details, bridge_id))
+
+        # What the app does when a camera setting {.gated?} is changed: +:run+ for a subscribed camera;
+        # +:inform_then_run+ in its trial, after a dialog; +:suggest_plan+, a dialog and no change, on the free tier;
+        # +:nothing+ before its trial; +:refetch+, reading the plans again and no change, when its status is unknown.
+        #
+        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] the plans; nil when the last read failed,
+        #   whatever was read before: the app then reads them again
+        # @param camera_id [String]
+        # @return [Symbol]
+        # @raise (see .status)
+        # @api public
+        def self.camera_action(details, camera_id) = ACTIONS.fetch(status(details, camera_id))
+
+        # Whether the app checks the camera's plan before this change ({.camera_action}): turning clip recording on,
+        # the activity, package or lighting zones, sound detection. Turning clip recording off never is. The app checks
+        # the control being changed, so the request holds only the settings that change, as the app sends them.
+        #
+        # @param request [Schema::CameraCameraServiceUpdate, Schema::CameraMicrophoneUpdate, Hash] as it would be sent
+        # @param free_clips [Boolean] the app's remote setting +enable_24_hour_free_video_clips+ (off by default): when
+        #   on, a free-tier camera records clips kept 24 hours, and the app no longer checks clip recording
+        # @return [Boolean]
+        # @raise [ArgumentError] if the request leaves a required field nil
+        # @api public
+        def self.gated?(request, free_clips:)
+          body = JSON.parse(JSON.generate(request))
+          (body['clips_recording'] == true && !free_clips) || GATED.any? { body.key?(it) }
+        end
+
+        # Whether the app's alarm devices screen lets the alarm pick what a camera of the home detects (people, pets,
+        # vehicles), as its +hasSubscriptionOrExperiencePeriodWithMotionAreasInHome+ decides. Without, a camera offers
+        # only common objects, and turning it off clears all four.
+        #
+        # @param details (see .status)
         # @param home [Home] as {Secure.homes} lists it, with its bridges and devices
+        # @param motion_areas [Boolean] whether a bridge of the home has a motion area, as the bridge lists its
+        #   +motion_area_configuration+ resources
         # @return [Boolean] true under a paid plan of the home in a state the app knows (active, grace_period, future,
-        #   cancelled), or while one of its cameras or bridges is in its trial
+        #   cancelled), while one of its cameras is in its trial, or while one of its bridges is and the home has a
+        #   motion area
         # @raise [ArgumentError] if the end of an experience period is not a date
         # @api public
-        def self.covers?(details, home)
-          paid?(details, home.id) || camera_trial?(details, home) || bridge_trial?(details, home)
+        def self.covers?(details, home, motion_areas:)
+          return false unless details
+
+          paid?(details, home.id) || camera_trial?(details, home) || (motion_areas && bridge_trial?(details, home))
         end
 
         # @param entry [Schema::DeviceSubscriptionResponse]

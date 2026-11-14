@@ -38,9 +38,13 @@ module Hue
                      { (Array[Hash[String, untyped]] before, Array[Hash[String, untyped]] after) -> Array[Hash[String, untyped]] }
                    -> Array[Hash[String, untyped]]
 
+        def gone: (Array[Hash[String, untyped]] from, Array[Hash[String, untyped]] to) -> Array[Hash[String, untyped]]
+
         def entries: (Hash[String, untyped]? mode, String key, Array[String] types) -> Array[Hash[String, untyped]]
 
         def check_plans: (Array[Hash[String, untyped]] moved, Array[Hash[String, untyped]] picked) -> void
+
+        def check_area: (Schema::AccountSubscriptionDetailsResponse details, Hash[String, untyped] area) -> void
 
         def covered?: (Schema::AccountSubscriptionDetailsResponse details) -> bool
       end

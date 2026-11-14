@@ -85,7 +85,7 @@ module Hue
         # @return [Array<Hash{String=>Object}>] the motion areas the request lets into a mode or out of it
         # @api private
         def moved(config, sent)
-          changes(config, sent, 'device', 'motion_area') { |before, after| (before - after) + (after - before) }
+          changes(config, sent, 'device', 'motion_area') { |before, after| gone(before, after) + gone(after, before) }
         end
 
         # @param config [Hash{String=>Object}] the configuration now, as JSON
@@ -93,7 +93,17 @@ module Hue
         # @return [Array<Hash{String=>Object}>] the camera detections the request adds to a mode
         # @api private
         def picked(config, sent)
-          changes(config, sent, 'alarm_triggering_entities', *DETECTIONS) { |before, after| after - before }
+          changes(config, sent, 'alarm_triggering_entities', *DETECTIONS) { |before, after| gone(after, before) }
+        end
+
+        # The app knows an entry by its type and id; its bridge may come back empty, or in another case.
+        #
+        # @param from [Array<Hash{String=>Object}>]
+        # @param to [Array<Hash{String=>Object}>]
+        # @return [Array<Hash{String=>Object}>] the entries of +from+ that +to+ does not have
+        # @api private
+        def gone(from, to)
+          from.reject { |entry| to.any? { it.values_at('type', 'id') == entry.values_at('type', 'id') } }
         end
 
         # @param config [Hash{String=>Object}] the configuration now, as JSON
@@ -130,11 +140,21 @@ module Hue
           return if moved.empty? && picked.empty?
 
           details = Secure.subscription
-          moved.each do |area|
-            status = Plan.status(details, area['bridge'])
-            raise PlanError.new(area['bridge'], status) if BLOCKED.include?(status)
-          end
+          moved.each { check_area(details, it) }
           raise PlanError, @home_id unless picked.empty? || covered?(details)
+        end
+
+        # @param details [Schema::AccountSubscriptionDetailsResponse]
+        # @param area [Hash{String=>Object}] a motion area in or out of a mode
+        # @return [void]
+        # @raise [ArgumentError] if it has no bridge, which the app always writes
+        # @raise [PlanError]
+        # @api private
+        def check_area(details, area)
+          raise ArgumentError, "motion area #{area['id']} has no bridge" unless area['bridge']
+
+          status = Plan.status(details, area['bridge'])
+          raise PlanError.new(area['bridge'], status) if BLOCKED.include?(status)
         end
 
         # A paid plan needs only the home's id; the homes are listed over gRPC, for their cameras and bridges, only
@@ -144,8 +164,10 @@ module Hue
         # @return [Boolean]
         # @api private
         def covered?(details)
-          Plan.covers?(details, Secure.home(@home_id)) ||
-            Plan.covers?(details, Secure.homes.find { it.id == @home_id } || Secure.home(@home_id))
+          return true if Plan.covers?(details, Secure.home(@home_id))
+
+          home = Secure.homes.find { it.id == @home_id }
+          !home.nil? && Plan.covers?(details, home)
         end
       end
     end

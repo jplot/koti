@@ -85,6 +85,32 @@ RSpec.describe Hue::Sdk::Secure::Arm do
       end
     end
 
+    it 'refuses one let into away only, or moved from stay to away, while its bridge is free_tier',
+       :aggregate_failures do
+      [[armed, [], [area]], [armed(area), [], [area]]].each do |config, stay, away|
+        answer(config)
+        answer(bridge('free_tier'))
+        request = schema::ArmDisarmSetConfigRequest.new(armed_stay: mode.with(device: stay),
+                                                        armed_away: mode.with(device: away))
+        expect { arm.update_config(request) }.to raise_error(Hue::Sdk::Secure::PlanError)
+      end
+      expect(puts).to eq(0)
+    end
+
+    it 'keeps one the configuration names with its bridge in another case, without reading the plans' do
+      answer(armed(area.merge(bridge: 'BR-1')))
+      answer_empty
+      update(area)
+      expect(cloud.requests.map(&:verb)).to eq(%w[GET PUT])
+    end
+
+    it 'refuses one let in without its bridge, and sends nothing', :aggregate_failures do
+      answer(armed)
+      answer(bridge('subscribed'))
+      expect { update(area.except(:bridge)) }.to raise_error(ArgumentError, /area-1/)
+      expect(puts).to eq(0)
+    end
+
     it 'sends one kept where it was without reading the plans' do
       answer(armed(area))
       answer_empty
@@ -102,13 +128,24 @@ RSpec.describe Hue::Sdk::Secure::Arm do
   end
 
   describe 'a camera detection the alarm picks' do
+    let(:listed) { %w[home-1] }
     let(:homes) do
-      home = FakeHomes.message(1 => 'home-1', 4 => FakeHomes.message(1 => 'br-1'),
-                               6 => FakeHomes.message(1 => 'CMB001', 2 => 'cam-1'))
-      FakeHomes.start { FakeHomes.field(1, home) }
+      FakeHomes.start do
+        listed.map do |id|
+          FakeHomes.field(1, FakeHomes.message(1 => id, 4 => FakeHomes.message(1 => 'br-1'),
+                                               6 => FakeHomes.message(1 => 'CMB001', 2 => "cam-#{id}")))
+        end.join
+      end
     end
-    let(:people) { { type: 'people', id: 'cam-1' } }
-    let(:paid) do
+
+    def trial
+      { subscriptions: [], devices: [{ rid: 'cam-home-1', rtype: 'camera', subscription_ids: [], xp_enabled: true,
+                                       xp_end_date: '2999-01-01T00:00:00Z' }] }
+    end
+
+    def people = { type: 'people', id: 'cam-1' }
+
+    def paid
       { rid: 'sub-1', user: { rid: 'user-1' }, subscription_product: { rid: 'hue.security.basic.single.yearly' },
         homes: [{ rid: 'home-1' }], scope: {}, subscription_state: 'active', provider: 'web',
         start_date: '2026-01-01T00:00:00Z' }
@@ -150,13 +187,35 @@ RSpec.describe Hue::Sdk::Secure::Arm do
       expect([cloud.requests.last.verb, homes.calls.size]).to eq(['PUT', 0])
     end
 
-    it 'picks one while a camera of the home is in its trial' do
+    it 'picks one while a camera of the home is in its trial, among the homes listed' do
+      listed.unshift('home-2')
       answer(picked)
-      answer(subscriptions: [], devices: [{ rid: 'cam-1', rtype: 'camera', subscription_ids: [], xp_enabled: true,
-                                            xp_end_date: '2999-01-01T00:00:00Z' }])
+      answer(trial)
       answer_empty
       pick(people)
       expect(cloud.requests.last.verb).to eq('PUT')
+    end
+
+    it 'refuses one for a home the account does not list' do
+      listed.replace(%w[home-2])
+      answer(picked)
+      answer(trial)
+      expect { pick(people) }.to raise_error(Hue::Sdk::Secure::PlanError)
+    end
+
+    it 'refuses one picked for away only' do
+      answer(picked)
+      answer(subscriptions: [], devices: [])
+      request = schema::ArmDisarmSetConfigRequest.new(armed_stay: mode,
+                                                      armed_away: mode.with(alarm_triggering_entities: [people]))
+      expect { arm.update_config(request) }.to raise_error(Hue::Sdk::Secure::PlanError)
+    end
+
+    it 'keeps one held with an empty bridge and lets a contact sensor in, without reading the plans' do
+      answer(picked({ 'type' => 'people', 'id' => 'cam-1', 'bridge' => '' }))
+      answer_empty
+      pick(people, { type: 'contact', id: 'sensor-1', bridge: 'br-1' })
+      expect(cloud.requests.map(&:verb)).to eq(%w[GET PUT])
     end
 
     it 'keeps one already picked, drops one, and picks common objects, without reading the plans' do

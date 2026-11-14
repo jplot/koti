@@ -28,7 +28,7 @@ RSpec.describe Hue::Sdk::Secure::LiveView do
     media.live_view('cam-1').tap { opened << it }
   end
 
-  def signaling(refuse: nil, &) = FakeSignaling.start(refuse:, &).tap { opened << it }
+  def signaling(**, &) = FakeSignaling.start(**, &).tap { opened << it }
 
   def on_open = signaling { |message, peer| yield peer if message == :open }
 
@@ -99,10 +99,12 @@ RSpec.describe Hue::Sdk::Secure::LiveView do
                                  described_class::Candidate.new(**candidate(1)), go_away])
   end
 
-  it 'raises E2eeError on an answer the camera did not sign' do
-    forged = FakeCamera.new(passphrase, 'cam-2').sign('v=0 answer')
-    view = live(on_open { it.say('SDP_ANSWER', type: 'answer', sdp: 'v=0 answer', hueSignature: forged) })
-    expect { view.first }.to raise_error(Hue::Sdk::Secure::E2eeError, /signature/)
+  it 'raises E2eeError on an answer or an offer the camera did not sign', :aggregate_failures do
+    %w[SDP_ANSWER SDP_OFFER].each do |type|
+      forged = FakeCamera.new(passphrase, 'cam-2').sign('v=0 sdp')
+      view = live(on_open { it.say(type, type: 'sdp', sdp: 'v=0 sdp', hueSignature: forged) })
+      expect { view.first }.to raise_error(Hue::Sdk::Secure::E2eeError, /signature/)
+    end
   end
 
   it "answers the camera's offer to ConsumerViewer, signed", :aggregate_failures do
@@ -144,16 +146,46 @@ RSpec.describe Hue::Sdk::Secure::LiveView do
     expect { 100.times { dropped.offer('v=0').then { sleep 0.01 } } }.to raise_error(Hue::Sdk::ConnectionError)
   end
 
-  # 40 kB each: a write then waits on a full socket buffer, and OpenSSL lets another thread's write in (5 runs out
-  # of 5 without the lock).
-  it 'keeps every frame whole while 4 threads send 50 candidates each during each' do
-    view = live(fake = signaling)
+  def pinging = on_open { |peer| Thread.new { 400.times { peer.ping.then { sleep 0.001 } } } }
+
+  # 40 kB each, with Kinesis Video's pings answered meanwhile: a write then waits on a full socket buffer, and OpenSSL
+  # lets another thread's write in (5 runs out of 5 without the lock).
+  it 'keeps every frame whole while 4 threads send 50 candidates each during each', :aggregate_failures do
+    view = live(fake = pinging)
     reader = Thread.new { view.each { nil } }
     sent = Array.new(200) { "candidate:#{it}:#{'x' * 40_000}" }
     sent.each_slice(50).map { |part| Thread.new { part.each { view.candidate(it, sdp_mid: '0', sdp_mline_index: 0) } } }
         .each(&:join)
     expect(fake.wait_for(200).map { payload(it)['candidate'] }.sort).to eq(sent.sort)
-    reader.kill
+    expect(view.close.then { reader.join(5) }).to be(reader)
+  end
+
+  it 'closes while a send waits on a peer that stopped reading, and each returns', :aggregate_failures do
+    view = live(on_open { sleep })
+    reader = Thread.new { view.each { nil } }
+    writer = Thread.new { loop { view.candidate("candidate:#{'x' * 100_000}", sdp_mid: '0', sdp_mline_index: 0) } }
+    writer.report_on_exception = false
+    Thread.pass while writer.status == 'run'
+    expect(Thread.new { view.close }.join(5)).not_to be_nil
+    expect(reader.join(5)).to be(reader)
+  end
+
+  it 'closes its socket when Kinesis Video refuses the signed URL, or closes the channel', :aggregate_failures do
+    refusing = signaling(refuse: 403)
+    expect { live(refusing) }.to raise_error(Hue::Sdk::ResponseError)
+    closing = on_open(&:hang_up)
+    expect { live(closing).each { nil } }.to raise_error(Hue::Sdk::ConnectionError)
+    expect([refusing, closing].map(&:client_closed?)).to eq([true, true])
+  end
+
+  it 'refuses a certificate the system does not trust, or one for another name', :aggregate_failures do
+    expect { live(signaling(trusted: false)) }.to raise_error(Hue::Sdk::ConnectionError, /certificate verify failed/)
+    expect { live(signaling(name: 'DNS:other.example')) }.to raise_error(Hue::Sdk::ConnectionError, /hostname/)
+  end
+
+  it 'shows no session token, nor does its channel' do
+    view = live(signaling)
+    expect(view.inspect + view.instance_variable_get(:@channel).inspect).not_to include('session-1')
   end
 
   it 'refuses a camera the cloud gives no channel for' do

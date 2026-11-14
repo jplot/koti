@@ -30,6 +30,8 @@ module Hue
 
           def initialize: (String url) -> void
 
+          def inspect: () -> String
+
           def write: (String text) -> void
 
           def each_text: () { (String text) -> void } -> void
@@ -37,6 +39,10 @@ module Hue
           def close: () -> void
 
           private
+
+          def connect: (String url) -> void
+
+          def farewell: () -> void
 
           def socket: (URI::Generic uri) -> OpenSSL::SSL::SSLSocket
 

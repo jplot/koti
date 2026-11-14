@@ -31,15 +31,13 @@ module Hue
           def initialize(url)
             @lock = Mutex.new
             @inbox = []
-            @socket = socket(URI(url))
-            @driver = WebSocket::Driver.client(Wire.new(url:, io: @socket))
-            @driver.on(:message) { @inbox << it.data }
-            @driver.on(:close) { @ended = true }
-            @driver.start
-            handshake
+            connect(url)
           rescue *ERRORS => e
             raise ConnectionError, "Kinesis Video: #{e.message}"
           end
+
+          # @return [String] without the presigned URL, which carries the session token
+          def inspect = "#<#{self.class.name}>"
 
           # @param text [String]
           # @return [void]
@@ -65,20 +63,47 @@ module Hue
               data = received or break
               @lock.synchronize { @driver.parse(data) }
             end
+          rescue ConnectionError
+            @socket.close
+            raise
           end
 
           # @return [void]
           # @api private
           def close
             @closed = true
-            @lock.synchronize { @driver.close }
-          rescue *ERRORS
-            nil
+            farewell
           ensure
             @socket.close
           end
 
           private
+
+          def connect(url)
+            @socket = socket(URI(url))
+            @driver = WebSocket::Driver.client(Wire.new(url:, io: @socket))
+            @driver.on(:message) { @inbox << it.data }
+            @driver.on(:close) { @ended = true }
+            @driver.start
+            handshake
+            opened = true
+          ensure
+            (@socket || @tcp)&.close unless opened
+          end
+
+          # A writer that waits on a peer which stopped reading holds the lock: the socket then closes without the
+          # close frame, and the writer's wait ends.
+          def farewell
+            return unless @lock.try_lock
+
+            begin
+              @driver.close
+            ensure
+              @lock.unlock
+            end
+          rescue *ERRORS
+            nil
+          end
 
           def socket(uri)
             config = Secure.config

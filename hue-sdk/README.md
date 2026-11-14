@@ -421,7 +421,7 @@ none of the app's own headers.
 | `mqtt_host` / `mqtt_port` | `mqtt.eu.secure.meethue.com` / `443` | the broker `follow` connects to |
 | `mqtt_ca_file` | Amazon Root CA 1, embedded | the one root the broker's certificate must chain to |
 | `kinesis_region` | `eu-west-1` | the AWS region clips download from, the app's |
-| `kinesis_url` | `https://kinesisvideo.<kinesis_region>.amazonaws.com` | Kinesis Video's control plane |
+| `kinesis_url` | AWS's own for the region | Kinesis Video's control plane |
 | `grpc_credentials` | TLS with the system's roots | `:this_channel_is_insecure` for a test server |
 | `open_timeout` / `read_timeout` | `5` / `10` s | each request |
 
@@ -576,9 +576,9 @@ File.binwrite('clip.mp4', media.download_clip(message.camera_id, message.clip_id
 
 The app asks Kinesis Video in eu-west-1 whatever the home, for the clip's time range in whole
 seconds; whether homes outside Europe are served there is unknown, and `kinesis_region` changes it.
-The app reads the file as its `moov` then its `mdat`, one sample per chunk, with 32-bit offsets;
-GPAC reads any layout. A sample that does not decrypt raises `E2eeError`, never a file with wrong
-bytes.
+The app reads the file as its `moov` then its `mdat`, one sample per chunk, with 32-bit offsets,
+and saves it so; GPAC reads any layout, and writes that one, the movie's times kept. A sample that
+does not decrypt raises `E2eeError`, never a file with wrong bytes.
 
 GPAC rewrites the segments and the downloaded files: the gem replaces the data of their samples,
 GPAC writes the boxes around them. The gem finds `libgpac` by its name, as the system finds
@@ -589,11 +589,11 @@ no longer package it: build it from its sources there.
 
 | Error | Raised when |
 |---|---|
-| `Hue::Sdk::ConnectionError` | the bridge or the Hue cloud cannot be reached, or drops the connection |
+| `Hue::Sdk::ConnectionError` | the bridge, the Hue cloud, a clip's host or Kinesis Video cannot be reached, or drops the connection |
 | `Hue::Sdk::TLSError` | the bridge certificate fails the CA or bridge id check; the broker of Hue Secure is not the pinned root's, or names another host |
 | `Hue::Sdk::AuthenticationError` | the application key is missing, unknown or revoked; the Hue account has no token, or refuses it |
 | `Hue::Sdk::LinkButtonNotPressedError` | pairing without pressing the link button |
-| `Hue::Sdk::ResponseError` | the bridge or the Hue cloud answers with an error status, partial success (207) included; carries `status` and `errors` |
+| `Hue::Sdk::ResponseError` | the bridge, the Hue cloud, a clip's host or Kinesis Video answers with an error status, partial success (207) included; carries `status` and `errors` |
 | `Hue::Sdk::NotFoundError` | the resource does not exist (a `ResponseError`) |
 | `Hue::Sdk::RateLimitError` | the bridge asks to slow down (a `ResponseError`) |
 | `Hue::Sdk::Secure::E2eeError` | a passphrase does not open the home, or Hue Secure media does not decrypt or verify |

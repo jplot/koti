@@ -131,7 +131,7 @@ module Hue
         # @param camera_id [String]
         # @param clip_id [String] as {MessageEvent#clip_id} gives it
         # @return [String] the MP4 file
-        # @raise [Error] without the aws-sdk-kinesisvideo and aws-sdk-kinesisvideoarchivedmedia gems
+        # @raise [Error] without the ffi, aws-sdk-kinesisvideo or aws-sdk-kinesisvideoarchivedmedia gem, or libgpac
         # @raise [E2eeError] if the clip's key does not open, or a sample does not decrypt
         # @raise [ResponseError] if the cloud or Kinesis Video refuses, or the cloud gives no credentials
         # @raise [ConnectionError] if either cannot be reached

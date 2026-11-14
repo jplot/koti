@@ -5,7 +5,9 @@ require 'time'
 module Hue
   module Sdk
     module Secure
-      # The Hue Secure status of a device, as the app's +SubscriptionDeviceStatus+ gives it. Never tested on a device.
+      # What the app decides from the Hue Secure plans: a device's status (+SubscriptionDeviceStatus+), and what its
+      # screens offer by it. The gem sends every change as it is given; this is for the client's own screens. Never
+      # tested on a device.
       module Plan
         TYPES = %w[camera tv bridge].freeze
         PAID = %w[hue.security.basic.single.monthly hue.security.basic.single.yearly hue.security.basic.dual.monthly
@@ -22,8 +24,8 @@ module Hue
 
         # The plan's state (active, cancelled…) plays no part, as in the app: a device a plan lists is subscribed.
         #
-        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] as {Secure.subscription} reads it; nil when
-        #   it could not be read
+        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] the last plans {Secure.subscription} read,
+        #   kept when a later read fails, as the app keeps them; nil before any read
         # @param rid [String] a camera's or a bridge's id; a motion area takes its bridge's
         # @return [Symbol] +:subscribed+, +:experience_period+, +:free_tier+, +:experience_period_not_enabled+ or
         #   +:unknown+
@@ -38,8 +40,9 @@ module Hue
         # handler to an area whose bridge is free tier, and opens the plan offer; or has not started its trial, and
         # offers to start it ({.status} tells which). While the plans are not read, it disables every motion area.
         #
-        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] nil when the plans could not be read
-        # @param bridge_id [String] the motion area's bridge
+        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] the plans; nil when the last read failed,
+        #   whatever was read before, as the app's "not fetched"
+        # @param bridge_id [String] the motion area's bridge, as an arming entry's +bridge+ or {Home#bridges} gives it
         # @return [Boolean]
         # @raise (see .status)
         # @api public
@@ -62,7 +65,8 @@ module Hue
         # +:inform_then_run+ in its trial, after a dialog; +:suggest_plan+, a dialog and no change, on the free tier;
         # +:nothing+ before its trial; +:refetch+, reading the plans again and no change, when its status is unknown.
         #
-        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] nil when the plans could not be read
+        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] the plans; nil when the last read failed,
+        #   whatever was read before: the app then reads them again
         # @param camera_id [String]
         # @return [Symbol]
         # @raise (see .status)
@@ -70,7 +74,8 @@ module Hue
         def self.camera_action(details, camera_id) = ACTIONS.fetch(status(details, camera_id))
 
         # Whether the app checks the camera's plan before this change ({.camera_action}): turning clip recording on,
-        # the activity, package or lighting zones, sound detection. Turning clip recording off never is.
+        # the activity, package or lighting zones, sound detection. Turning clip recording off never is. The app checks
+        # the control being changed, so the request holds only the settings that change, as the app sends them.
         #
         # @param request [Schema::CameraCameraServiceUpdate, Schema::CameraMicrophoneUpdate, Hash] as it would be sent
         # @param free_clips [Boolean] the app's remote setting +enable_24_hour_free_video_clips+ (off by default): when
@@ -87,12 +92,13 @@ module Hue
         # vehicles), as its +hasSubscriptionOrExperiencePeriodWithMotionAreasInHome+ decides. Without, a camera offers
         # only common objects, and turning it off clears all four.
         #
-        # @param details [Schema::AccountSubscriptionDetailsResponse, nil] nil when the plans could not be read
+        # @param details (see .status)
         # @param home [Home] as {Secure.homes} lists it, with its bridges and devices
         # @param motion_areas [Boolean] whether a bridge of the home has a motion area, as the bridge lists its
         #   +motion_area_configuration+ resources
         # @return [Boolean] true under a paid plan of the home in a state the app knows (active, grace_period, future,
-        #   cancelled), while one of its cameras is in its trial, or one of its bridges with a motion area
+        #   cancelled), while one of its cameras is in its trial, or while one of its bridges is and the home has a
+        #   motion area
         # @raise [ArgumentError] if the end of an experience period is not a date
         # @api public
         def self.covers?(details, home, motion_areas:)

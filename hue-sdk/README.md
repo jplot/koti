@@ -421,20 +421,24 @@ a bridge's status as the app computes it: `:subscribed`, `:experience_period`, `
 
 The app gates no media by plan: snapshots, live view and clips go through whatever the plan, and it
 only shows what a plan would add. Some of its screens do follow the plan: they never refuse a write,
-but disable what the plan does not allow and open a dialog. The gem sends every change as it is
-given, and `Plan` computes what those screens decide, for the client's own:
+but disable or intercept what the plan does not allow and open a dialog. The gem sends every change
+as it is given, and `Plan` computes what those screens decide, for the client's own:
 
 | Call | The app's screen | Gives |
 |---|---|---|
 | `Plan.motion_area_selectable?(plans, bridge_id)` | arming devices | false for a motion area whose bridge is `free_tier` (the app offers a plan) or `experience_period_not_enabled` (it offers the trial), and for every area while the plans are not read |
-| `Plan.gated?(request, free_clips:)` | camera settings | whether the app checks the plan before a camera change: clip recording turned on, unless `free_clips`; activity, package or lighting zones; sound detection |
+| `Plan.motion_area_switches?(plans, bridge_id)` | motion area | whether the switches that use the area when armed show: only for a bridge `subscribed` or in its `experience_period` |
+| `Plan.gated?(request, free_clips:)` | camera settings | whether the app checks the plan before a camera change, the request holding only what changes: clip recording turned on, unless `free_clips`; activity, package or lighting zones; sound detection |
 | `Plan.camera_action(plans, camera_id)` | camera settings | what it then does: `:run`, `:inform_then_run` (in the trial, after a dialog), `:suggest_plan`, `:nothing` (before the trial) or `:refetch` |
 | `Plan.covers?(plans, home, motion_areas:)` | alarm devices | whether a camera offers people, pets and vehicles, or common objects only |
 
-Each takes the plans as `subscription` reads them, or nil when they could not be read, as the app's
-"not fetched". `home` is as `homes` lists it, with its bridges and devices. Two inputs come from the
-client, as the cloud does not give them: `motion_areas:`, whether a bridge of the home has a motion
-area (its `motion_area_configuration` resources), and `free_clips:`, the app's remote setting
+Every call but `gated?` takes the plans as `subscription` reads them. `motion_area_selectable?` and
+`camera_action` take nil when the last read failed, as the app's "not fetched"; `status`,
+`motion_area_switches?` and `covers?` keep the last plans read, as the app does, and take nil only
+before any read. A bridge's id is the form an arming entry's `bridge` and `Home#bridges` give, and
+`home` is as `homes` lists it, with its bridges and devices. Two inputs come from the client, as the
+cloud does not give them: `motion_areas:`, whether a bridge of the home has a motion area (its
+`motion_area_configuration` resources), and `free_clips:`, the app's remote setting
 `enable_24_hour_free_video_clips`, off by default. Never tested with a device.
 
 | Setting | Default | Purpose |

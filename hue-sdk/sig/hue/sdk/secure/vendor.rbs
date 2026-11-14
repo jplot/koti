@@ -102,6 +102,42 @@ module FFI
   end
 end
 
+# What the gem calls of the AWS gems, whose signatures the gem does not load.
+module Aws
+  class Credentials
+    def initialize: (String access_key_id, String secret_access_key, String session_token) -> void
+  end
+
+  module Errors
+    class ServiceError < StandardError
+      def context: () -> untyped
+    end
+  end
+
+  module KinesisVideo
+    class Client
+      def initialize: (**untyped options) -> void
+
+      def get_data_endpoint: (stream_name: String, api_name: String) -> untyped
+    end
+  end
+
+  module KinesisVideoArchivedMedia
+    class Client
+      def initialize: (**untyped options) -> void
+
+      def get_clip: (stream_name: String, clip_fragment_selector: Hash[Symbol, untyped]) -> untyped
+    end
+  end
+end
+
+module Seahorse
+  module Client
+    class NetworkingError < StandardError
+    end
+  end
+end
+
 # What the gem calls of the m3u8 gem, which ships no signatures.
 module M3u8
   class Playlist

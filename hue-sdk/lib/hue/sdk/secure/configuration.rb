@@ -49,6 +49,12 @@ module Hue
           #   the root the app pins)
           attr_accessor :mqtt_ca_file
 
+          # @return [String] AWS region of Kinesis Video, which clips download from (default: +eu-west-1+, the app's)
+          attr_accessor :kinesis_region
+
+          # @return [String, nil] address of Kinesis Video's control plane (default: nil, AWS's own for the region)
+          attr_accessor :kinesis_url
+
           # @return [Numeric] seconds to wait for a connection (default: 5)
           attr_accessor :open_timeout
 
@@ -66,6 +72,7 @@ module Hue
             @mqtt_host = 'mqtt.eu.secure.meethue.com'
             @mqtt_port = 443
             @mqtt_ca_file = File.expand_path('../certificates/amazon-root-ca-1.pem', File.dirname(__FILE__))
+            @kinesis_region = 'eu-west-1'
             @open_timeout = 5
             @read_timeout = 10
           end

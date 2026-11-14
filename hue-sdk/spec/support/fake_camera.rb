@@ -36,6 +36,8 @@ class FakeCamera
 
   def seal_segment(segment, cek:, nonce: nil) = SegmentSealer.new(segment) { box(cek, it, nonce:) }.sealed
 
+  def seal_mp4(mp4, cek:) = Mp4Sealer.new(mp4) { box(cek, it) }.sealed
+
   private
 
   def private_key(master, info)

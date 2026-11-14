@@ -24,6 +24,11 @@ RSpec.describe Hue::Sdk::Secure::Plan do
       .to eq(:experience_period)
   end
 
+  it 'reads the end of an experience period as leniently as the app' do
+    expect(status('br-1', 'rid' => 'br-1', 'rtype' => 'bridge', 'xp_end_date' => '2999-01-01 00:00:00Z'))
+      .to eq(:experience_period)
+  end
+
   it 'matches the id ignoring case, as the app does' do
     expect(status('CAM-1', 'rid' => 'cam-1', 'rtype' => 'camera', 'subscription_ids' => ['sub-1']))
       .to eq(:subscribed)
@@ -59,10 +64,10 @@ RSpec.describe Hue::Sdk::Secure::Plan do
     def trial(rid) = { 'rid' => rid, 'rtype' => 'camera', 'xp_end_date' => '2999-01-01T00:00:00Z' }
 
     it 'counts a paid plan of the home in any state the app knows, and nothing else', :aggregate_failures do
-      expect(covers?(plans: [plan])).to be(true)
+      %w[active grace_period future cancelled].each { expect(covers?(plans: [plan(state: it)])).to be(true) }
       expect(covers?(plans: [plan(product: 'hue.security.freetier')])).to be(false)
       expect(covers?(plans: [plan(state: 'paused')])).to be(false)
-      expect(covers?(plans: [plan(home: 'home-2')])).to be(false)
+      expect(covers?(plans: [plan(home: 'HOME-1')])).to be(false)
     end
 
     it 'counts a camera of the home in its trial, by product type', :aggregate_failures do
@@ -72,11 +77,14 @@ RSpec.describe Hue::Sdk::Secure::Plan do
       expect(covers?(home.with(devices: [other]), devices: [trial('cam-1')])).to be(false)
       subscribed = { 'rid' => 'cam-1', 'rtype' => 'camera', 'subscription_ids' => ['sub-1'] }
       expect(covers?(home.with(devices: [camera]), devices: [subscribed])).to be(false)
+      ended = trial('cam-1').merge('xp_end_date' => '2000-01-01T00:00:00Z')
+      expect(covers?(home.with(devices: [camera]), devices: [ended, trial('cam-1')])).to be(true)
     end
 
     it 'counts a bridge of the home in its trial, its id upper-cased as the app compares it', :aggregate_failures do
       expect(covers?(devices: [trial('BR-1').merge('rtype' => 'bridge')])).to be(true)
       expect(covers?(devices: [trial('br-1').merge('rtype' => 'bridge')])).to be(false)
+      expect(covers?(devices: [trial('BR-1').merge('rtype' => 'speaker')])).to be(false)
     end
   end
 end

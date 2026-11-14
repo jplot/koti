@@ -69,7 +69,7 @@ module Hue
           return :experience_period_not_enabled unless entry.xp_enabled
           return :unknown unless entry.xp_end_date
 
-          Time.iso8601(entry.xp_end_date) < Time.now ? :free_tier : :experience_period
+          Time.parse(entry.xp_end_date) < Time.now ? :free_tier : :experience_period
         end
 
         # @param details [Schema::AccountSubscriptionDetailsResponse]
@@ -88,7 +88,9 @@ module Hue
         # @return [Boolean] whether a camera of the home, known by its product type, is in its trial
         # @api private
         def self.camera_trial?(details, home)
-          home.devices.to_a.any? { CAMERA.match?(it.type) && status(details, it.id) == :experience_period }
+          home.devices.to_a.any? do |device|
+            CAMERA.match?(device.type) && details.devices.any? { it.rid.casecmp?(device.id) && trial?(it) }
+          end
         end
 
         # The app upper-cases a bridge's id as it reads the home, then compares it exactly.

@@ -17,7 +17,7 @@ module Hue
         begin
           ffi_lib 'gpac'
         rescue LoadError
-          raise Error, "decrypting Hue Secure clips needs GPAC's libgpac: install GPAC (libgpac-dev on Debian)"
+          raise Error, "decrypting Hue Secure clips needs GPAC's libgpac: install GPAC (libgpac-dev on Ubuntu 24.04)"
         end
 
         # The first fields of +GF_ISOSample+, the only ones the gem reads or writes: GPAC allocates the whole of it.
@@ -58,7 +58,9 @@ module Hue
                         %i[pointer int32 uint32 uint64 int32 uint64 int int int int uint32 pointer pointer pointer],
                         :int
 
-        gf_sys_init(0, nil)
+        # Profile "0" keeps GPAC's configuration in memory: by default GPAC writes one to $HOME/.gpac, and calls exit(1)
+        # when it cannot, as under a read-only HOME.
+        gf_sys_init(0, '0').zero? or raise Error, 'GPAC cannot start'
 
         # @param error [Integer] what a GPAC function answered
         # @return [true]

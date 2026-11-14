@@ -243,6 +243,25 @@ RSpec.describe Hue::Sdk::Secure::Media do
         .to raise_error(Hue::Sdk::ResponseError, /expired/) { expect(it.status).to eq(403) }
     end
 
+    it 'asks Kinesis Video once, as the app does, even when it fails', :aggregate_failures do
+      media = opened
+      credentials
+      answers.push([500, { 'X-Amzn-ErrorType' => 'InternalFailure' }, '{"message":"down"}'])
+      expect { media.download_clip('cam-1', 'clip-9') }.to raise_error(Hue::Sdk::ResponseError)
+      expect(cloud.requests.count { it.path == '/getDataEndpoint' }).to eq(1)
+    end
+
+    it 'gives up on Kinesis Video after the read timeout set' do
+      slow = FakeCloud.start { sleep(1).then { [404, {}, ''] } }
+      Hue::Sdk::Secure.configure { it.kinesis_url = slow.url }
+      media = opened
+      credentials
+      Hue::Sdk::Secure.configure { it.read_timeout = 0.2 }
+      expect { media.download_clip('cam-1', 'clip-9') }.to raise_error(Hue::Sdk::ConnectionError)
+    ensure
+      slow&.stop
+    end
+
     it 'raises ConnectionError when Kinesis Video cannot be reached' do
       media = opened
       credentials

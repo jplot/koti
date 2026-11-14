@@ -22,10 +22,17 @@ module Hue
         # @api private
         def clip(credential, metadata)
           %w[aws-sdk-kinesisvideo aws-sdk-kinesisvideoarchivedmedia].each { Media.load(it, PURPOSE) }
-          options = { region: Secure.config.kinesis_region,
-                      credentials: Aws::Credentials.new(credential.accessKeyId, credential.secretAccessKey,
-                                                        credential.sessionToken) }
-          fetched(options, metadata)
+          fetched(options(credential), metadata)
+        end
+
+        # One attempt, as the app makes, within the gem's timeouts: AWS's clients would try 3 times, and wait up to
+        # 15 s to connect and 60 s to read.
+        def options(credential)
+          config = Secure.config
+          { region: config.kinesis_region, retry_mode: 'standard', max_attempts: 1,
+            http_open_timeout: config.open_timeout, http_read_timeout: config.read_timeout,
+            credentials: Aws::Credentials.new(credential.accessKeyId, credential.secretAccessKey,
+                                              credential.sessionToken) }
         end
 
         def fetched(options, metadata)
@@ -53,7 +60,7 @@ module Hue
         # The app sends whole seconds.
         def seconds(timestamp) = Time.at(Time.parse(timestamp.to_s).to_i)
 
-        private_class_method :fetched, :data_endpoint, :selector, :seconds
+        private_class_method :options, :fetched, :data_endpoint, :selector, :seconds
       end
     end
   end

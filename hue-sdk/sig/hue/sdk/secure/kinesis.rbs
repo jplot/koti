@@ -6,6 +6,8 @@ module Hue
 
         def self?.clip: (Schema::ClipCredentials credential, Schema::ClipMetadata metadata) -> String
 
+        def self?.options: (Schema::ClipCredentials credential) -> Hash[Symbol, untyped]
+
         def self?.fetched: (Hash[Symbol, untyped] options, Schema::ClipMetadata metadata) -> String
 
         def self?.data_endpoint: (Hash[Symbol, untyped] options, String stream_name) -> String

@@ -49,7 +49,8 @@ module Hue
           #   the root the app pins)
           attr_accessor :mqtt_ca_file
 
-          # @return [String] AWS region of Kinesis Video, which clips download from (default: +eu-west-1+, the app's)
+          # @return [String] AWS region of Kinesis Video, which clips download from and live views sign for
+          #   (default: +eu-west-1+, the app's)
           attr_accessor :kinesis_region
 
           # @return [String, nil] address of Kinesis Video's control plane (default: nil, AWS's own for the region)

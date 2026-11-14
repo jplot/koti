@@ -424,7 +424,7 @@ none of the app's own headers.
 | `kinesis_region` | `eu-west-1` | the AWS region clips download from and live views sign for, the app's |
 | `kinesis_url` | AWS's own for the region | Kinesis Video's control plane |
 | `grpc_credentials` | TLS with the system's roots | `:this_channel_is_insecure` for a test server |
-| `open_timeout` / `read_timeout` | `5` / `10` s | each request |
+| `open_timeout` / `read_timeout` | `5` / `10` s | each request, and a live view's connection and handshake |
 
 ### Arming
 
@@ -597,12 +597,17 @@ the app stops on it.
 view = media.live_view(camera.id)   # the browser's RTCPeerConnection takes view.ice_servers
 view.offer(offer_sdp)                # the browser's offer, from createOffer
 view.candidate(candidate, sdp_mid: '0', sdp_mline_index: 0)   # each of the browser's ICE candidates
-view.each do |signal|                # on this thread, until view.close from any thread
-  case signal
-  when Hue::Sdk::Secure::LiveView::Answer then browser.answer(signal.sdp)
-  when Hue::Sdk::Secure::LiveView::Candidate then browser.candidate(signal.to_h)
-  when Hue::Sdk::Secure::LiveView::Offer then view.answer(browser.answer_to(signal.sdp))
+begin
+  view.each do |signal|              # on this thread, until view.close from any thread
+    case signal
+    when Hue::Sdk::Secure::LiveView::Answer then browser.answer(signal.sdp)
+    when Hue::Sdk::Secure::LiveView::Candidate   # RTCIceCandidateInit's keys
+      browser.candidate(candidate: signal.candidate, sdpMid: signal.sdp_mid, sdpMLineIndex: signal.sdp_mline_index)
+    when Hue::Sdk::Secure::LiveView::Offer then view.answer(browser.answer_to(signal.sdp))
+    end
   end
+ensure
+  view.close                         # after an E2eeError too, which ends the live view as in the app
 end
 ```
 
@@ -616,12 +621,13 @@ In the browser, the app's peer connection uses `bundlePolicy: 'max-bundle'` with
 defaults for the rest (all ICE transports, unified plan, RTCP mux, ECDSA certificates). Before its
 offer it opens the data channel `LiveView::DATA_CHANNEL` describes: `PING` every second, expecting
 `PONG`, and `GO_AWAY` when it stops. To talk, it adds the microphone's track before the offer;
-there is no other channel for it. It gives up after 12 s for a wired camera and 20 s for a battery
-one.
+there is no other channel for it. It adds the camera's candidates once the answer is set, holding
+those that come first: a browser given a candidate before its remote description refuses it. It
+gives up after 12 s for a wired camera and 20 s for a battery one.
 
-A battery camera sleeps: the app sends it `wake_up` as it starts, and again until the camera
-answers, up to 41 times with a growing delay. The gem leaves that to the caller: `camera.wake_up`
-raises `ResponseError` 521 while the camera sleeps. The app's settings say that with live view
+The app sends the camera `wake_up` as every live view starts, and again until the camera answers,
+up to 41 times with a growing delay. The gem leaves that to the caller: `camera.wake_up` raises
+`ResponseError` 521 while the camera sleeps. The app's settings say that with live view
 encryption off, someone with the right permission watches without the passphrase; its code signs
 and checks every live view anyway, and so does the gem.
 

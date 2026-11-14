@@ -37,6 +37,12 @@ RSpec.describe Hue::Sdk::Secure::Events do
       expect(read('camera', camera.merge('resource_type' => 'camera_video_clips_eventing')).clip_id).to eq('ev-1')
     end
 
+    it 'names no clip for a camera event that has none', :aggregate_failures do
+      expect(read('camera', camera.merge('resource_type' => 'device_power')).clip_id).to be_nil
+      motion = camera.merge('resource_type' => 'security_motion_eventing')
+      expect(read('camera', motion, 'clip' => 'malformed').clip_id).to be_nil
+    end
+
     it 'gives no camera nor clip for another event' do
       event = read('geofence', { 'type' => 'security_empty', 'device_name' => 'phone' })
       expect([event.camera_id, event.clip_id]).to eq([nil, nil])

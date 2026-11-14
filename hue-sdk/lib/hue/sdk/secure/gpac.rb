@@ -31,7 +31,8 @@ module Hue
         WRITE = 2
         EDIT = 3
         MOOF_FIRST = 1
-        private_constant :WRITE, :EDIT, :MOOF_FIRST
+        TIGHT = 5
+        private_constant :WRITE, :EDIT, :MOOF_FIRST, :TIGHT
 
         attach_function :gf_sys_init, %i[int string], :int
         attach_function :gf_isom_open, %i[string int string], :pointer
@@ -41,6 +42,8 @@ module Hue
         attach_function :gf_isom_delete, %i[pointer], :void
         attach_function :gf_isom_set_final_name, %i[pointer string], :int
         attach_function :gf_isom_update_sample, %i[pointer uint32 uint32 pointer int], :int
+        attach_function :gf_isom_set_storage_mode, %i[pointer int], :int
+        attach_function :gf_isom_keep_utc_times, %i[pointer int], :void
         attach_function :gf_isom_probe_data, %i[buffer_in uint32], :uint32
         attach_function :gf_isom_get_timescale, %i[pointer], :uint32
         attach_function :gf_isom_set_timescale, %i[pointer uint32], :int
@@ -168,13 +171,25 @@ module Hue
           raise E2eeError, 'GPAC cannot read the clip' if file.null?
 
           begin
-            check(gf_isom_set_final_name(file, out))
+            saved_as(file, out)
             yield file
             written = true
           ensure
             gf_isom_delete(file) unless written
           end
           check(gf_isom_close(file))
+        end
+
+        # The app keeps the moov before the mdat, one sample per chunk, and the movie's times: GPAC would write the
+        # moov last, each track's samples together, and stamp the times.
+        #
+        # @param file [FFI::Pointer] opened by {edited}
+        # @param out [String]
+        # @return [void]
+        def self.saved_as(file, out)
+          check(gf_isom_set_final_name(file, out))
+          check(gf_isom_set_storage_mode(file, TIGHT))
+          gf_isom_keep_utc_times(file, 1)
         end
 
         # @param file [FFI::Pointer] opened by {edited}

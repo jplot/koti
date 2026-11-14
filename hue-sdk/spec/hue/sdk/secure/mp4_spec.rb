@@ -49,6 +49,32 @@ RSpec.describe Hue::Sdk::Secure::Mp4 do
       .to eq(SegmentReader.file_samples(clip).map { |track, data, *rest| [track, "#{data}tail", *rest] })
   end
 
+  def layout(mp4)
+    boxes = []
+    at = 0
+    while at < mp4.bytesize
+      size, type = mp4.byteslice(at, 8).unpack('Na4')
+      boxes << [type, mp4.byteslice(at, size)]
+      at += size
+    end
+    boxes
+  end
+
+  def times(mp4)
+    moov = layout(mp4).assoc('moov').last
+    %w[mvhd tkhd mdhd].flat_map do |type|
+      moov.enum_for(:scan, type).map { Regexp.last_match.begin(0) }
+          .map { |at| moov.byteslice(at + 8, moov.getbyte(at + 4).zero? ? 8 : 16) }
+    end
+  end
+
+  it 'writes a file as the app does: its moov before its mdat, and its times kept', :aggregate_failures do
+    clip = File.binread(File.join(media, 'clip.mp4'))
+    written = described_class.file(clip) { it }
+    expect(layout(written).map(&:first) - ['free']).to eq(%w[ftyp moov mdat])
+    expect(times(written)).to eq(times(clip))
+  end
+
   it 'drops a file whose samples it could not replace, and its open files with it', :aggregate_failures do
     failing = -> { described_class.file(File.binread(File.join(media, 'clip.mp4'))) { raise Hue::Sdk::Secure::E2eeError } }
     files = Dir.children('/dev/fd').size

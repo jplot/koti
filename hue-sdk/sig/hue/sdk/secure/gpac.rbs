@@ -16,6 +16,8 @@ module Hue
 
         EDIT: Integer
 
+        TIGHT: Integer
+
         MOOF_FIRST: Integer
 
         def self.check: (Integer error) -> true
@@ -33,6 +35,8 @@ module Hue
         def self.add: (untyped writer, Integer track, Mp4::Sample sample) -> void
 
         def self.edited: (String path, String out, String dir) { (untyped file) -> void } -> void
+
+        def self.saved_as: (untyped file, String out) -> void
 
         def self.replace: (untyped file, Integer track, Integer number, Mp4::Sample sample) -> void
 
@@ -55,6 +59,10 @@ module Hue
         def self.gf_isom_set_final_name: (untyped, String) -> Integer
 
         def self.gf_isom_update_sample: (untyped, Integer, Integer, untyped, Integer) -> Integer
+
+        def self.gf_isom_set_storage_mode: (untyped, Integer) -> Integer
+
+        def self.gf_isom_keep_utc_times: (untyped, Integer) -> void
 
         def self.gf_isom_get_timescale: (untyped) -> Integer
 

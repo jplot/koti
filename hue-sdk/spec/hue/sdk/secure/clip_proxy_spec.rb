@@ -68,9 +68,10 @@ RSpec.describe Hue::Sdk::Secure::ClipProxy do
     expect(proxy.call('REQUEST_METHOD' => 'POST', 'PATH_INFO' => '/hls/clip.m3u8').first).to eq(405)
   end
 
-  it 'serves 20 concurrent segment requests, each with its own samples' do
+  it 'serves 20 concurrent segment requests, each with its own samples, reading the init once', :aggregate_failures do
     paths = Array.new(20) { "/hls/segment#{it % 2}.m4s" }
     bodies = paths.map { |path| Thread.new { get(path)[2].join } }.map(&:value)
     expect(bodies.map { samples(it) }).to eq(paths.map { samples(fixture(File.basename(it))) })
+    expect(upstream.requests.count { it.path == '/hls/init.mp4' }).to eq(1)
   end
 end

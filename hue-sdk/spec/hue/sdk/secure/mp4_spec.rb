@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'open3'
+require 'timeout'
 
 RSpec.describe Hue::Sdk::Secure::Mp4 do
   let(:media) { File.expand_path('../../../fixtures/media', __dir__) }
@@ -52,6 +53,13 @@ RSpec.describe Hue::Sdk::Secure::Mp4 do
     failing = -> { described_class.file(File.binread(File.join(media, 'clip.mp4'))) { raise Hue::Sdk::Secure::E2eeError } }
     files = Dir.children('/dev/fd').size
     5.times { expect(&failing).to raise_error(Hue::Sdk::Secure::E2eeError) }
+    expect(Dir.children('/dev/fd').size).to eq(files)
+  end
+
+  it 'drops a file a timeout interrupts, and its open files with it', :aggregate_failures do
+    clip = File.binread(File.join(media, 'clip.mp4'))
+    files = Dir.children('/dev/fd').size
+    5.times { expect { Timeout.timeout(0.05) { described_class.file(clip) { sleep 1 } } }.to raise_error(Timeout::Error) }
     expect(Dir.children('/dev/fd').size).to eq(files)
   end
 

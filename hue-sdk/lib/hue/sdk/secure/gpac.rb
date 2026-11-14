@@ -170,9 +170,9 @@ module Hue
           begin
             check(gf_isom_set_final_name(file, out))
             yield file
-          rescue StandardError
-            gf_isom_delete(file)
-            raise
+            written = true
+          ensure
+            gf_isom_delete(file) unless written
           end
           check(gf_isom_close(file))
         end

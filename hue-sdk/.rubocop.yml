@@ -5,3 +5,8 @@ Metrics/ModuleLength:
   Exclude:
     - 'lib/hue/sdk/schema/*.rb'
     - 'lib/hue/sdk/secure/schema/*.rb'
+
+# Their attributes keep the app's JSON keys, camelCase ones included (keyEnvelope).
+Naming/MethodName:
+  Exclude:
+    - 'lib/hue/sdk/secure/schema/*.rb'

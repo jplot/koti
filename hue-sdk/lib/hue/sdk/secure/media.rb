@@ -98,13 +98,52 @@ module Hue
         # @raise [ConnectionError] if its host cannot be reached
         def snapshot_at(camera_id, url)
           uri = URI(url) #: URI::HTTP
-          answer = Http.exchange(uri, Net::HTTP::Get.new(uri, { 'User-Agent' => "hue-sdk/#{VERSION}" }))
+          answer = Http.fetch(uri)
           raise ResponseError.new(answer.code.to_i, [], source: uri.host.to_s) unless answer.is_a?(Net::HTTPSuccess)
 
           decrypted(answer.body.to_s, camera_id)
         end
 
+        # A clip of a camera: its HLS playlist, and the key of its media segments, which {Clip#get} decrypts.
+        #
+        # @param camera_id [String]
+        # @param clip_id [String] as {MessageEvent#clip_id} gives it
+        # @return [Clip]
+        # @raise [E2eeError] if the clip's key does not open
+        # @raise [ResponseError] if the cloud refuses, or gives no playlist or key, as the app refuses then
+        # @raise [ConnectionError] if the cloud cannot be reached
+        # @api public
+        def clip(camera_id, clip_id)
+          read = clip_answer(camera_id, clip_id)
+          envelope = read&.keyEnvelope
+          unless read&.url && envelope
+            raise ResponseError.new(200, ['no playlist or key for the clip'], source: 'Hue cloud')
+          end
+
+          cek, = E2ee.open(Base64.strict_decode64(envelope), keys: @keys, camera_id:)
+          url = URI(read.url) #: URI::HTTP
+          Clip.new(url, read.expiration, cek)
+        end
+
+        # Loads a gem the gem calls only for some media.
+        #
+        # @param library [String]
+        # @param purpose [String] what needs it
+        # @return [void]
+        # @raise [Error] without the gem
+        # @api private
+        def self.load(library, purpose)
+          require library
+        rescue LoadError
+          raise Error, "#{purpose} needs the #{library} gem: add gem '#{library}' to your Gemfile"
+        end
+
         private
+
+        def clip_answer(camera_id, clip_id)
+          path = "security/event-service/v1/home/#{home_id}/device/#{camera_id}/clip/#{clip_id}"
+          Schema::VideoClipResponse.from(Secure.client.get(path).body).data
+        end
 
         def decrypted(blob, camera_id)
           cek, box = E2ee.open(blob, keys: @keys, camera_id:)

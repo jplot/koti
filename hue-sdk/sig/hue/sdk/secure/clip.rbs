@@ -1,0 +1,43 @@
+module Hue
+  module Sdk
+    module Secure
+      class Clip
+        attr_reader url: URI::HTTP
+
+        attr_reader expiration: Numeric
+
+        @cek: String
+
+        @lock: Thread::Mutex
+
+        @init: String?
+
+        def initialize: (URI::HTTP url, Numeric expiration, String cek) -> void
+
+        def entry: () -> String
+
+        def inspect: () -> String
+
+        def get: (String path) -> Http::Response
+
+        def local?: (URI::HTTP uri) -> bool
+
+        private
+
+        def origin: (URI::HTTP uri) -> [String?, String?, Integer?]
+
+        def clear: (Net::HTTPResponse answer) -> String
+
+        def init: () -> String
+
+        def map: () -> URI::HTTP
+
+        def media_playlist: () -> [URI::HTTP, M3u8::Playlist]
+
+        def playlist: (URI::HTTP target) -> M3u8::Playlist
+
+        def read: (URI::HTTP target) -> String
+      end
+    end
+  end
+end

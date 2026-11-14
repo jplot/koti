@@ -18,6 +18,8 @@ module Hue
 
         def self?.request: (Symbol method, String url, ?headers: Hash[String, String], ?body: String?) -> Response
 
+        def self?.fetch: (URI::HTTP uri) -> Net::HTTPResponse
+
         def self?.exchange: (URI::HTTP uri, Net::HTTPRequest request) -> Net::HTTPResponse
 
         def self?.parse: (Net::HTTPResponse answer) -> untyped

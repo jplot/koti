@@ -118,6 +118,17 @@ RSpec.describe Hue::Sdk::Secure::Camera do
       end
     end
 
+    it 'takes a request as a plain hash, as the client does', :aggregate_failures do
+      answer_empty
+      answer_empty
+      camera.update_camera(video_quality: 'high', hdr: true)
+      camera.update_microphone('enabled' => true)
+      answer(camera_plan('free_tier'))
+      expect { camera.update_camera('video_quality' => 'high', 'clips_recording' => true) }
+        .to raise_error(Hue::Sdk::Secure::PlanError)
+      expect(cloud.requests.map(&:verb)).to eq(%w[PUT PUT GET])
+    end
+
     it 'turns clip recording off without reading the plans' do
       answer_empty
       camera.update_camera(schema::CameraCameraServiceUpdate.new(video_quality: 'high', clips_recording: false))

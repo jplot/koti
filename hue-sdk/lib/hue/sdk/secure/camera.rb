@@ -6,7 +6,7 @@ module Hue
       # A camera of a home, as the app's +CamerasHttpClient+ reaches it. Never tested on a device.
       class Camera
         PLAN = %i[subscribed experience_period].freeze
-        ZONES = %i[activity_zones package_detection_zones lighting_zones].freeze
+        ZONES = %w[activity_zones package_detection_zones lighting_zones].freeze
         private_constant :PLAN, :ZONES
 
         # @return [String]
@@ -55,8 +55,8 @@ module Hue
         # @raise (see Http.request)
         # @api public
         def update_camera(request)
-          body = request.to_body
-          check_plan if body[:clips_recording] == true || ZONES.any? { body.key?(it) }
+          body = JSON.parse(JSON.generate(request))
+          check_plan if body['clips_recording'] == true || ZONES.any? { body.key?(it) }
           Secure.client.put("#{@path}/service/camera/0", body: request)
         end
 
@@ -69,7 +69,7 @@ module Hue
         # @raise (see Http.request)
         # @api public
         def update_microphone(request)
-          check_plan if request.to_body.key?(:smoke_alarm_detection)
+          check_plan if JSON.parse(JSON.generate(request)).key?('smoke_alarm_detection')
           Secure.client.put("#{@path}/service/microphone/0", body: request)
         end
 

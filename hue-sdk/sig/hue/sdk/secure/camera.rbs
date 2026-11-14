@@ -3,7 +3,7 @@ module Hue
     module Secure
       class Camera
         PLAN: Array[Plan::status]
-        ZONES: Array[Symbol]
+        ZONES: Array[String]
 
         @path: String
         @speaker: String

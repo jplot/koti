@@ -34,7 +34,9 @@ module Hue
         TIGHT = 5
         private_constant :WRITE, :EDIT, :MOOF_FIRST, :TIGHT
 
+        callback :progress, %i[pointer string uint64 uint64], :void
         attach_function :gf_sys_init, %i[int string], :int
+        attach_function :gf_set_progress_callback, %i[pointer progress], :void
         attach_function :gf_isom_open, %i[string int string], :pointer
         attach_function :gf_isom_open_progressive, %i[string uint64 uint64 int pointer pointer], :int
         attach_function :gf_isom_open_segment, %i[pointer string uint64 uint64 int], :int
@@ -72,6 +74,11 @@ module Hue
         # Profile "0" keeps GPAC's configuration in memory: by default GPAC writes one to $HOME/.gpac, and calls exit(1)
         # when it cannot, as under a read-only HOME.
         gf_sys_init(0, '0').zero? or raise Error, 'GPAC cannot start'
+
+        # GPAC draws a progress bar on the process's stderr each time it writes a file, unless a callback takes it.
+        SILENT = proc {}
+        private_constant :SILENT
+        gf_set_progress_callback(nil, SILENT)
 
         # @param error [Integer] what a GPAC function answered
         # @return [true]

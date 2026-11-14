@@ -18,6 +18,8 @@ module Hue
 
         TIGHT: Integer
 
+        SILENT: Proc
+
         MOOF_FIRST: Integer
 
         def self.check: (Integer error) -> true
@@ -45,6 +47,8 @@ module Hue
         def self.deleted: (untyped pointer) -> void
 
         def self.gf_sys_init: (Integer, String?) -> Integer
+
+        def self.gf_set_progress_callback: (untyped, Proc) -> void
 
         def self.gf_isom_open: (String, Integer, String) -> untyped
 

@@ -89,6 +89,13 @@ RSpec.describe Hue::Sdk::Secure::Mp4 do
     expect(Dir.children('/dev/fd').size).to eq(files)
   end
 
+  it "draws no progress bar on the process's stderr, as GPAC does for every file it writes" do
+    script = "require 'hue/sdk/secure'; Hue::Sdk::Secure::Mp4.file(File.binread(ARGV[0])) { it }"
+    output, = Open3.capture2e(RbConfig.ruby, '-I', File.expand_path('../../../../lib', __dir__), '-e', script,
+                              File.join(media, 'clip.mp4'))
+    expect(output).not_to include('ISO File Writing')
+  end
+
   it 'refuses a file GPAC cannot read' do
     expect { described_class.file('not an MP4 file') { it } }.to raise_error(Hue::Sdk::Secure::E2eeError, /GPAC/)
   end

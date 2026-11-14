@@ -52,8 +52,8 @@ module Hue
           # @return [String] AWS region of Kinesis Video, which clips download from (default: +eu-west-1+, the app's)
           attr_accessor :kinesis_region
 
-          # @param url [String, nil] address of Kinesis Video's control plane; nil for the region's own
-          attr_writer :kinesis_url
+          # @return [String, nil] address of Kinesis Video's control plane (default: nil, AWS's own for the region)
+          attr_accessor :kinesis_url
 
           # @return [Numeric] seconds to wait for a connection (default: 5)
           attr_accessor :open_timeout
@@ -76,10 +76,6 @@ module Hue
             @open_timeout = 5
             @read_timeout = 10
           end
-
-          # @return [String] address of Kinesis Video's control plane (default: the region's own, as the app reaches
-          #   it in eu-west-1)
-          def kinesis_url = @kinesis_url || "https://kinesisvideo.#{kinesis_region}.amazonaws.com"
         end
 
         # Returns the singleton settings.

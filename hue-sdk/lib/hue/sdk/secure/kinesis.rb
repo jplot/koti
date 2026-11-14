@@ -47,7 +47,7 @@ module Hue
         end
 
         def data_endpoint(options, stream_name)
-          Aws::KinesisVideo::Client.new(**options, endpoint: Secure.config.kinesis_url)
+          Aws::KinesisVideo::Client.new(**options, **{ endpoint: Secure.config.kinesis_url }.compact)
                                    .get_data_endpoint(stream_name:, api_name: 'GET_CLIP').data_endpoint
         end
 

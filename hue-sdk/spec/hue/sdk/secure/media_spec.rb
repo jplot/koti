@@ -218,11 +218,11 @@ RSpec.describe Hue::Sdk::Secure::Media do
         .to all(match([signed, 'session-1']))
     end
 
-    it "reaches Kinesis Video in the region's own host unless told otherwise, eu-west-1 by default" do
-      config = Hue::Sdk::Secure.config
-      config.kinesis_url = nil
-      urls = [config.kinesis_url, config.tap { it.kinesis_region = 'us-east-1' }.kinesis_url]
-      expect(urls).to eq(%w[https://kinesisvideo.eu-west-1.amazonaws.com https://kinesisvideo.us-east-1.amazonaws.com])
+    it 'signs for the region set, when it is not eu-west-1' do
+      Hue::Sdk::Secure.configure { it.kinesis_region = 'us-east-1' }
+      downloaded
+      expect(cloud.requests.last(2).map { it.headers['authorization'] })
+        .to all(include('/us-east-1/kinesisvideo/aws4_request'))
     end
 
     it 'refuses a clip whose samples do not decrypt' do

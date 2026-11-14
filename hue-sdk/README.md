@@ -415,9 +415,10 @@ reaches any path under `api_url`, or an absolute address, with the token, and gi
 the body (parsed when it is JSON) and the headers. The gem names itself in `User-Agent` and sends
 none of the app's own headers.
 
-`subscription` reads the plans as the app reads them, for display: the app blocks nothing by plan,
-it only shows what a plan would add, and the cloud decides which clips exist. The gem blocks
-nothing either.
+`subscription` reads the plans as the app reads them. The app gates no media by plan: snapshots,
+live view and clips go through whatever the plan, and it only shows what a plan would add. It does
+keep a motion area out of arming while its bridge has neither a plan nor a started experience
+period; the gem gates nothing, and leaves that to the caller.
 
 | Setting | Default | Purpose |
 |---|---|---|

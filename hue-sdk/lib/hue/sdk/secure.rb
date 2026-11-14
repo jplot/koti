@@ -74,7 +74,7 @@ module Hue
       end
 
       # @return [Schema::AccountSubscriptionDetailsResponse] the account's Hue Secure subscriptions, and those each
-      #   device is covered by; the app blocks nothing by them, and neither does the gem
+      #   device is covered by
       # @raise (see Http.request)
       # @api public
       def self.subscription

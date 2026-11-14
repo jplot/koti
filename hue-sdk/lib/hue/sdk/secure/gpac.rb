@@ -130,7 +130,7 @@ module Hue
         # @param first [Mp4::Track]
         # @return [void]
         def self.closed(writer, first)
-          check(gf_isom_close_segment(writer, 0, first.id, first.decode_time, 0, 0, 0, 0, 1, 1, 0, nil, nil, nil))
+          check(gf_isom_close_segment(writer, 0, first.id, first.decode_time, 0, 0, 0, 0, 0, 1, 0, nil, nil, nil))
         end
 
         # @param writer [FFI::Pointer]

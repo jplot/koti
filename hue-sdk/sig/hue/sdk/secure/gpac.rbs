@@ -14,6 +14,8 @@ module Hue
 
         WRITE: Integer
 
+        EDIT: Integer
+
         MOOF_FIRST: Integer
 
         def self.check: (Integer error) -> true
@@ -30,6 +32,10 @@ module Hue
 
         def self.add: (untyped writer, Integer track, Mp4::Sample sample) -> void
 
+        def self.edited: (String path, String out, String dir) { (untyped file) -> void } -> void
+
+        def self.replace: (untyped file, Integer track, Integer number, Mp4::Sample sample) -> void
+
         def self.filled: (Sample written, Mp4::Sample sample) -> Sample
 
         def self.deleted: (untyped pointer) -> void
@@ -43,6 +49,12 @@ module Hue
         def self.gf_isom_open_segment: (untyped, String, Integer, Integer, Integer) -> Integer
 
         def self.gf_isom_close: (untyped) -> Integer
+
+        def self.gf_isom_delete: (untyped) -> void
+
+        def self.gf_isom_set_final_name: (untyped, String) -> Integer
+
+        def self.gf_isom_update_sample: (untyped, Integer, Integer, untyped, Integer) -> Integer
 
         def self.gf_isom_get_timescale: (untyped) -> Integer
 

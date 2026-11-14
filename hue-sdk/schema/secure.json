@@ -3069,6 +3069,68 @@
     }
   },
   "media": {
+    "ClipCredentials": {
+      "origin": "ClipCredentials",
+      "kind": "response",
+      "fields": {
+        "accessKeyId": {
+          "type": "String",
+          "required": true
+        },
+        "secretAccessKey": {
+          "type": "String",
+          "required": true
+        },
+        "sessionToken": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
+    "ClipCredentialsResponse": {
+      "origin": "ClipCredentialsResponse",
+      "kind": "response",
+      "fields": {
+        "credential": {
+          "type": {
+            "class": "ClipCredentials"
+          },
+          "required": false
+        },
+        "clip_metadata": {
+          "type": {
+            "class": "ClipMetadata"
+          },
+          "required": false
+        }
+      }
+    },
+    "ClipMetadata": {
+      "origin": "ClipMetadata",
+      "kind": "response",
+      "fields": {
+        "fragment_selector_type": {
+          "type": "String",
+          "required": true
+        },
+        "start_timestamp": {
+          "type": "Object",
+          "required": true
+        },
+        "end_timestamp": {
+          "type": "Object",
+          "required": true
+        },
+        "stream_name": {
+          "type": "String",
+          "required": true
+        },
+        "key_envelope": {
+          "type": "String",
+          "required": true
+        }
+      }
+    },
     "DownloadCameraLastSnapshotResponse": {
       "origin": "DownloadCameraLastSnapshotResponse",
       "kind": "response",

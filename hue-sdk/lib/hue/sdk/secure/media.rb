@@ -125,6 +125,27 @@ module Hue
           Clip.new(url, read.expiration, cek)
         end
 
+        # A clip of a camera as one MP4 file in clear, which Kinesis Video serves to credentials the cloud hands out
+        # for that clip.
+        #
+        # @param camera_id [String]
+        # @param clip_id [String] as {MessageEvent#clip_id} gives it
+        # @return [String] the MP4 file
+        # @raise [Error] without the aws-sdk-kinesisvideo and aws-sdk-kinesisvideoarchivedmedia gems
+        # @raise [E2eeError] if the clip's key does not open, or a sample does not decrypt
+        # @raise [ResponseError] if the cloud or Kinesis Video refuses, or the cloud gives no credentials
+        # @raise [ConnectionError] if either cannot be reached
+        # @api public
+        def download_clip(camera_id, clip_id)
+          credential, metadata = credentials(clip_id)
+          unless credential && metadata
+            raise ResponseError.new(200, ['no credentials for the clip'], source: 'Hue cloud')
+          end
+
+          cek, = E2ee.open(Base64.strict_decode64(metadata.key_envelope), keys: @keys, camera_id:)
+          Mp4.file(Kinesis.clip(credential, metadata)) { E2ee.decrypt(cek, it) }
+        end
+
         # Loads a gem the gem calls only for some media.
         #
         # @param library [String]
@@ -143,6 +164,12 @@ module Hue
         def clip_answer(camera_id, clip_id)
           path = "security/event-service/v1/home/#{home_id}/device/#{camera_id}/clip/#{clip_id}"
           Schema::VideoClipResponse.from(Secure.client.get(path).body).data
+        end
+
+        def credentials(clip_id)
+          path = "security/vss/v1/home/#{home_id}/clip/#{clip_id}/credentials/download"
+          read = Schema::ClipCredentialsResponse.from(Secure.client.post(path).body)
+          [read.credential, read.clip_metadata]
         end
 
         def decrypted(blob, camera_id)

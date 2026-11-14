@@ -29,14 +29,18 @@ module Hue
         MEDIA_SEGMENT = 3
 
         WRITE = 2
+        EDIT = 3
         MOOF_FIRST = 1
-        private_constant :WRITE, :MOOF_FIRST
+        private_constant :WRITE, :EDIT, :MOOF_FIRST
 
         attach_function :gf_sys_init, %i[int string], :int
         attach_function :gf_isom_open, %i[string int string], :pointer
         attach_function :gf_isom_open_progressive, %i[string uint64 uint64 int pointer pointer], :int
         attach_function :gf_isom_open_segment, %i[pointer string uint64 uint64 int], :int
         attach_function :gf_isom_close, %i[pointer], :int
+        attach_function :gf_isom_delete, %i[pointer], :void
+        attach_function :gf_isom_set_final_name, %i[pointer string], :int
+        attach_function :gf_isom_update_sample, %i[pointer uint32 uint32 pointer int], :int
         attach_function :gf_isom_probe_data, %i[buffer_in uint32], :uint32
         attach_function :gf_isom_get_timescale, %i[pointer], :uint32
         attach_function :gf_isom_set_timescale, %i[pointer uint32], :int
@@ -145,6 +149,43 @@ module Hue
           pointer = gf_isom_sample_new
           written = filled(Sample.new(pointer), sample)
           check(gf_isom_fragment_add_sample(writer, track, written, sample.description, sample.duration, 0, 0, 0))
+        ensure
+          written[:data] = FFI::Pointer::NULL if written
+          deleted(pointer)
+        end
+
+        # Opens a file to change its samples, and writes it under another name once the block is done: on a failure,
+        # GPAC drops it.
+        #
+        # @param path [String]
+        # @param out [String]
+        # @param dir [String] for GPAC's own temporary files
+        # @yieldparam file [FFI::Pointer]
+        # @return [void]
+        # @raise [E2eeError] if GPAC cannot read or write it
+        def self.edited(path, out, dir)
+          file = gf_isom_open(path, EDIT, dir)
+          raise E2eeError, 'GPAC cannot read the clip' if file.null?
+
+          begin
+            check(gf_isom_set_final_name(file, out))
+            yield file
+          rescue StandardError
+            gf_isom_delete(file)
+            raise
+          end
+          check(gf_isom_close(file))
+        end
+
+        # @param file [FFI::Pointer] opened by {edited}
+        # @param track [Integer]
+        # @param number [Integer]
+        # @param sample [Mp4::Sample] whose data replaces the sample's
+        # @return [void]
+        def self.replace(file, track, number, sample)
+          pointer = gf_isom_sample_new
+          written = filled(Sample.new(pointer), sample)
+          check(gf_isom_update_sample(file, track, number, written, 1))
         ensure
           written[:data] = FFI::Pointer::NULL if written
           deleted(pointer)

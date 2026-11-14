@@ -41,4 +41,21 @@ RSpec.describe Hue::Sdk::Secure::Mp4 do
     expect { described_class.segment(segment.byteslice(0, 600), init:) { it } }
       .to raise_error(Hue::Sdk::Secure::E2eeError, /GPAC/)
   end
+
+  it 'rewrites every sample of a two-track file with what the block gives, moving every chunk' do
+    clip = File.binread(File.join(media, 'clip.mp4'))
+    expect(SegmentReader.file_samples(described_class.file(clip) { "#{it}tail" }))
+      .to eq(SegmentReader.file_samples(clip).map { |track, data, *rest| [track, "#{data}tail", *rest] })
+  end
+
+  it 'drops a file whose samples it could not replace, and its open files with it', :aggregate_failures do
+    failing = -> { described_class.file(File.binread(File.join(media, 'clip.mp4'))) { raise Hue::Sdk::Secure::E2eeError } }
+    files = Dir.children('/dev/fd').size
+    5.times { expect(&failing).to raise_error(Hue::Sdk::Secure::E2eeError) }
+    expect(Dir.children('/dev/fd').size).to eq(files)
+  end
+
+  it 'refuses a file GPAC cannot read' do
+    expect { described_class.file('not an MP4 file') { it } }.to raise_error(Hue::Sdk::Secure::E2eeError, /GPAC/)
+  end
 end

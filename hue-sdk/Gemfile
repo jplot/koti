@@ -5,6 +5,8 @@ source 'https://rubygems.org'
 gemspec
 
 group :development do
+  gem 'aws-sdk-kinesisvideo', '~> 1.109'
+  gem 'aws-sdk-kinesisvideoarchivedmedia', '~> 1.104'
   gem 'ffi', '~> 1.17'
   gem 'grpc', '~> 1.85'
   gem 'm3u8', '~> 1.9'

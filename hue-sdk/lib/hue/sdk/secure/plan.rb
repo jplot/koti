@@ -5,25 +5,6 @@ require 'time'
 module Hue
   module Sdk
     module Secure
-      # The app does not allow a change while a device has the Hue Secure status it has, or while no plan or trial
-      # covers the home; nothing was sent.
-      class PlanError < Error
-        # @return [String] the device whose status the app checks, or the home
-        attr_reader :rid
-
-        # @return [Symbol, nil] the device's status, as {Plan.status} gives it; nil for the home
-        attr_reader :status
-
-        # @param rid [String]
-        # @param status [Symbol, nil]
-        # @api public
-        def initialize(rid, status = nil)
-          @rid = rid
-          @status = status
-          super("the app does not allow this change while #{rid} #{status ? "is #{status}" : 'has no plan or trial'}")
-        end
-      end
-
       # The Hue Secure status of a device, as the app's +SubscriptionDeviceStatus+ gives it. Never tested on a device.
       module Plan
         TYPES = %w[camera tv bridge].freeze

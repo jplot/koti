@@ -46,6 +46,13 @@ RSpec.describe Hue::Sdk::Secure::Camera do
     end
   end
 
+  it 'sends a setting the app would gate by plan as it is given, reading nothing first', :aggregate_failures do
+    2.times { answer_empty }
+    camera.update_camera(schema::CameraCameraServiceUpdate.new(video_quality: 'high', clips_recording: true))
+    camera.update_microphone(schema::CameraMicrophoneUpdate.new(smoke_alarm_detection: { enabled: true }))
+    expect(cloud.requests.map(&:verb)).to eq(%w[PUT PUT])
+  end
+
   it 'uses v2 for the speaker commands, with a 10 s siren and the chime volume in hundredths', :aggregate_failures do
     2.times { answer_empty }
     camera.sound_chime(sound: 'ding', volume: 0.29)
@@ -66,80 +73,6 @@ RSpec.describe Hue::Sdk::Secure::Camera do
     expect { camera.wake_up }
       .to raise_error(an_instance_of(Hue::Sdk::ResponseError).and(having_attributes(status: 521)))
     expect { camera.sound_alarm }.to raise_error(Hue::Sdk::ResponseError)
-  end
-
-  describe 'a setting the app gates by plan' do
-    let(:plans) do
-      { 'free_tier' => { xp_end_date: '2000-01-01T00:00:00Z' },
-        'experience_period_not_enabled' => { xp_enabled: false },
-        'subscribed' => { subscription_ids: ['sub-1'] },
-        'experience_period' => { xp_end_date: '2999-01-01T00:00:00Z' } }
-    end
-    let(:gated) do
-      service = lambda do |**fields|
-        -> { camera.update_camera(schema::CameraCameraServiceUpdate.new(video_quality: 'high', **fields)) }
-      end
-      { 'turning clip recording on' => service.call(clips_recording: true),
-        'activity zones' => service.call(activity_zones: []),
-        'package zones' => service.call(package_detection_zones: []),
-        'lighting zones' => service.call(lighting_zones: []),
-        'sound detection' => lambda {
-          camera.update_microphone(schema::CameraMicrophoneUpdate.new(smoke_alarm_detection: { enabled: false }))
-        } }
-    end
-
-    def camera_plan(status)
-      entry = plans[status]&.then { [{ rid: 'CAM-1', rtype: 'camera', subscription_ids: [], xp_enabled: true, **it }] }
-      { subscriptions: [], devices: entry || [] }
-    end
-
-    def puts = cloud.requests.count { it.verb == 'PUT' }
-
-    %w[free_tier experience_period_not_enabled unknown].each do |status|
-      it "refuses each while the camera is #{status}, and sends nothing", :aggregate_failures do
-        gated.each_value do |change|
-          answer(camera_plan(status))
-          expect { instance_exec(&change) }
-            .to raise_error(an_instance_of(Hue::Sdk::Secure::PlanError)
-                              .and(having_attributes(rid: 'cam-1', status: status.to_sym)))
-        end
-        expect(puts).to eq(0)
-      end
-    end
-
-    %w[subscribed experience_period].each do |status|
-      it "sends each while the camera is #{status}" do
-        gated.each_value do |change|
-          answer(camera_plan(status))
-          answer_empty
-          instance_exec(&change)
-        end
-        expect(cloud.requests.map(&:verb)).to eq(%w[GET PUT] * gated.size)
-      end
-    end
-
-    it 'takes a request as a plain hash, as the client does', :aggregate_failures do
-      answer_empty
-      answer_empty
-      camera.update_camera(video_quality: 'high', hdr: true)
-      camera.update_microphone('enabled' => true)
-      answer(camera_plan('free_tier'))
-      expect { camera.update_camera('video_quality' => 'high', 'clips_recording' => true) }
-        .to raise_error(Hue::Sdk::Secure::PlanError)
-      expect(cloud.requests.map(&:verb)).to eq(%w[PUT PUT GET])
-    end
-
-    it 'turns clip recording off without reading the plans' do
-      answer_empty
-      camera.update_camera(schema::CameraCameraServiceUpdate.new(video_quality: 'high', clips_recording: false))
-      expect(cloud.requests.map(&:verb)).to eq(%w[PUT])
-    end
-
-    it 'sends nothing when the plans cannot be read', :aggregate_failures do
-      answer({}, 500)
-      expect { instance_exec(&gated.values.first) }.to raise_error(Hue::Sdk::ResponseError)
-      expect(puts).to eq(0)
-    end
   end
 
   it 'reads what the cloud reported as the app does, and keeps what it cannot read', :aggregate_failures do

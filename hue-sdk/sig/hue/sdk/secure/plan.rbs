@@ -1,14 +1,6 @@
 module Hue
   module Sdk
     module Secure
-      class PlanError < Error
-        attr_reader rid: String
-
-        attr_reader status: Plan::status?
-
-        def initialize: (String rid, ?Plan::status? status) -> void
-      end
-
       module Plan
         type status = :subscribed | :experience_period | :free_tier | :experience_period_not_enabled | :unknown
 

@@ -1,0 +1,19 @@
+module Hue
+  module Sdk
+    module Secure
+      class ClipProxy
+        @clip: Clip
+
+        def initialize: (Clip clip) -> void
+
+        def call: (Hash[String, untyped] env) -> [Integer, Hash[String, String], Array[String]]
+
+        private
+
+        def headers: (Hash[String, untyped] env, String path, Http::Response answer) -> Hash[String, String]
+
+        def moved: (URI::HTTP uri, Http::Response answer) -> String
+      end
+    end
+  end
+end

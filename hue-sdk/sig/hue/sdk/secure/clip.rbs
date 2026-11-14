@@ -18,6 +18,8 @@ module Hue
 
         def get: (String path) -> Http::Response
 
+        def local?: (URI::HTTP uri) -> bool
+
         private
 
         def origin: (URI::HTTP uri) -> [String?, String?, Integer?]

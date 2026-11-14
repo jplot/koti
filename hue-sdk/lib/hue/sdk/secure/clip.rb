@@ -42,11 +42,16 @@ module Hue
         # @api public
         def get(path)
           target = URI.join(url, path) #: URI::HTTP
-          raise ArgumentError, "#{path} is not a file of the clip" unless origin(target) == origin(url)
+          raise ArgumentError, "#{path} is not a file of the clip" unless local?(target)
 
           answer = Http.fetch(target)
           Http::Response.new(status: answer.code.to_i, body: clear(answer), headers: answer.each_header.to_h)
         end
+
+        # @param uri [URI::HTTP]
+        # @return [Boolean] whether it is on the clip's host: a player sent elsewhere would leave the proxy
+        # @api private
+        def local?(uri) = origin(uri) == origin(url)
 
         private
 

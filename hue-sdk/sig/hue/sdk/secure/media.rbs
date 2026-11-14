@@ -34,6 +34,8 @@ module Hue
 
         private
 
+        def clip_answer: (String camera_id, String clip_id) -> Schema::VideoClipResponseData?
+
         def decrypted: (String blob, String camera_id) -> String
       end
     end

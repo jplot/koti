@@ -125,6 +125,12 @@ RSpec.describe Hue::Sdk::Secure::Media do
       expect(cloud.requests.last.path).to eq('/security/event-service/v1/home/home-1/device/cam-1/clip/clip-9')
     end
 
+    it 'refuses a clip the event service gives no playlist for' do
+      media = opened
+      answer(data: { url: nil, expiration: 300, keyEnvelope: Base64.strict_encode64(camera.envelope(cek)) })
+      expect { media.clip('cam-1', 'clip-9') }.to raise_error(Hue::Sdk::ResponseError, /no playlist or key/)
+    end
+
     it 'gives its playlist and init as they are, and its segments decrypted', :aggregate_failures do
       read = clip
       expect([read.entry, read.expiration]).to eq(['/hls/clip.m3u8?t=1', 300])

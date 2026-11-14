@@ -114,10 +114,11 @@ module Hue
         # @raise [ConnectionError] if the cloud cannot be reached
         # @api public
         def clip(camera_id, clip_id)
-          path = "security/event-service/v1/home/#{home_id}/device/#{camera_id}/clip/#{clip_id}"
-          read = Schema::VideoClipResponse.from(Secure.client.get(path).body).data
+          read = clip_answer(camera_id, clip_id)
           envelope = read&.keyEnvelope
-          raise ResponseError.new(200, ['no playlist or key for the clip'], source: 'Hue cloud') unless read && envelope
+          unless read&.url && envelope
+            raise ResponseError.new(200, ['no playlist or key for the clip'], source: 'Hue cloud')
+          end
 
           cek, = E2ee.open(Base64.strict_decode64(envelope), keys: @keys, camera_id:)
           url = URI(read.url) #: URI::HTTP
@@ -138,6 +139,11 @@ module Hue
         end
 
         private
+
+        def clip_answer(camera_id, clip_id)
+          path = "security/event-service/v1/home/#{home_id}/device/#{camera_id}/clip/#{clip_id}"
+          Schema::VideoClipResponse.from(Secure.client.get(path).body).data
+        end
 
         def decrypted(blob, camera_id)
           cek, box = E2ee.open(blob, keys: @keys, camera_id:)

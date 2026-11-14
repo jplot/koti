@@ -86,6 +86,26 @@ RSpec.describe Hue::Sdk::Connection do
     end
   end
 
+  describe 'a bridge that drops the connection before answering' do
+    let(:dropping) { FakeBridge.start { :drop } }
+
+    before do
+      Hue::Sdk.configure do |config|
+        config.port = dropping.port
+        config.ca_file = dropping.ca_file
+      end
+    end
+
+    after { dropping.stop }
+
+    it 'gets each request once, as the app sends it', :aggregate_failures do
+      %i[get put delete].each do |method|
+        expect { described_class.request(method, '/clip/v2/resource/light') }.to raise_error(Hue::Sdk::ConnectionError)
+      end
+      expect(dropping.requests.size).to eq(3)
+    end
+  end
+
   it 'reopens a keep-alive connection after the bridge was unreachable', :aggregate_failures do
     described_class.request(:get, '/')
     bridge.down!

@@ -46,9 +46,6 @@ module Hue
       def stream(path, headers: {}, &)
         transport do
           http = establish(Sdk.config.event_read_timeout)
-          # Net::HTTP sends a GET again once when the connection fails before an answer; following the bridge again
-          # is the caller's.
-          http.max_retries = 0
           http.request(Net::HTTP::Get.new(path, headers)) do |response|
             response.read_body(&) if response.is_a?(Net::HTTPOK)
           end
@@ -99,6 +96,9 @@ module Hue
         pin(http, config)
         http.open_timeout = config.open_timeout
         http.read_timeout = read_timeout
+        # The app sends a bridge request once, whatever fails; Net::HTTP would send a GET, PUT or DELETE again
+        # after a dropped connection.
+        http.max_retries = 0
         http.start
       end
 

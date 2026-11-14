@@ -18,7 +18,8 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # libgpac is packaged by Ubuntu 24.04 (2.2.1), no longer by 26.04 nor by Debian 12 and 13.
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: hue-sdk

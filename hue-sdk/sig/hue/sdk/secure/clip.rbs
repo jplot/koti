@@ -16,6 +16,8 @@ module Hue
 
         def entry: () -> String
 
+        def inspect: () -> String
+
         def get: (String path) -> Http::Response
 
         def local?: (URI::HTTP uri) -> bool

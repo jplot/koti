@@ -146,5 +146,10 @@ RSpec.describe Hue::Sdk::Secure::Media do
     it 'refuses a path of another origin' do
       expect { clip.get('//evil.test/x') }.to raise_error(ArgumentError)
     end
+
+    it 'shows not its content key, nor does its proxy' do
+      read = clip
+      expect(read.inspect + Hue::Sdk::Secure::ClipProxy.new(read).inspect).not_to include(cek.inspect[1...-1])
+    end
   end
 end

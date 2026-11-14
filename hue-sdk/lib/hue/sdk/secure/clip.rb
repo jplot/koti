@@ -31,6 +31,9 @@ module Hue
         # @api public
         def entry = [url.path, url.query].compact.join('?')
 
+        # @return [String] without the content key
+        def inspect = "#<#{self.class.name} #{url.host}>"
+
         # A file of the clip: playlists and the initialization segment as they are, media segments decrypted.
         #
         # @param path [String] relative to the playlist, as a player asks for it

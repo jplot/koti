@@ -91,6 +91,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- A Dop1 write whose answer the app cannot parse (not JSON, no `Response`, a `Response` that is no
+  string) raises `NotAcceptedError`, as the app takes it as a failed write, instead of
+  `JSON::ParserError`, `KeyError` or `NoMethodError`, or reading the bits of a numeric `Response`
+  as an Ack.
 - Requests to the account's cloud (`/V2`, MCS login and renewal) name a language (`Accept-Language`),
   without which it answers 500.
 - `power_on` and `power_off` send what the app's oven module sends, without the 2/1583 opcode

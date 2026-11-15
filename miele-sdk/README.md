@@ -303,8 +303,8 @@ Settings (programming functions, Dop1 object 1201) go out with structure version
 sections in lower-case hex, as the app sends them. A value out of range raises `ArgumentError`
 before anything is sent. `Miele::Sdk::Dop1` builds the requests, and `hood.dop1(request)` sends any
 other one; `hood.setting(pf_id)` and `hood.write_setting(pf_id, value)` read and write a setting.
-As in the app, a Dop1 write counts only when the hood answers Ack 1: any other raises
-`Miele::Sdk::NotAcceptedError`. The fragrance stop and Miele program are the app's one exception:
+As in the app, a Dop1 write counts only when the hood answers Ack 1: any other, or an answer the app
+cannot parse, raises `Miele::Sdk::NotAcceptedError`. The fragrance stop and Miele program are the app's one exception:
 it drops the Ack of the ProcessAction they send before PF 40026.
 
 Left out: the ambient light's dimming (the app's conversion is not traced), the auto refresh

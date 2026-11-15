@@ -48,8 +48,8 @@ module Miele
         # @api public
         def wake
           require!(dop2?, 'the app has no wake request for a Dop1 dishwasher')
-          state = self.state
-          send_wake if status(state) == 1 || (status(state) == 4 && standby(state) != 1)
+          state = self.state(timeout: 15)
+          send_wake(timeout: 15) if status(state) == 1 || (status(state) == 4 && standby(state) != 1)
         end
 
         # As SwitchOffForDop2Action (IsApplianceOffObservable), nothing goes out while +State+ shows Status 1.
@@ -92,7 +92,8 @@ module Miele
           now = Time.now
           return dop1_start_delayed(minutes_until(next_time(at, now), now)) unless dop2?
 
-          bits = program_context.context_para_dw&.delayed_start_mode&.supported_bits.to_i
+          context = object(Objects::Dishwasher::GlobalPsContext, timeout: 5)
+          bits = context.context_para_dw&.delayed_start_mode&.supported_bits.to_i
           modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 1, 2]) { delayed(it, bits, next_time(at, now), now) }
           dop2_user_request(8)
         end

@@ -44,6 +44,37 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(written).to be_empty
   end
 
+  context 'when the app gives each request its own token' do
+    before do
+      Miele::Sdk.config.read_timeout = 30
+      dishwasher.fab
+    end
+
+    it 'reads and writes State within 1 s each, as ExecuteProgramForDop1Action' do
+      timeouts = read_timeouts
+      dishwasher.pause
+      expect(timeouts).to eq([1, 1])
+    end
+
+    it 'reads 8906 within 5 s to select a program, and writes it with no token of its own' do
+      timeouts = read_timeouts
+      dishwasher.select_program(28)
+      expect(timeouts).to eq([5, 30])
+    end
+
+    it 'reads State within 5 s to set the extras, as SelectExtrasForDop1Action' do
+      timeouts = read_timeouts
+      dishwasher.set_extras(:eco)
+      expect(timeouts).to eq([5, 30])
+    end
+
+    it 'opens the door within 5 s, as OpenDoorForDop1Action' do
+      timeouts = read_timeouts
+      dishwasher.open_door
+      expect(timeouts).to eq([5])
+    end
+  end
+
   context 'when State carries keys the app does not know' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1], 'ProgramName' => 'Eco', 'Light' => nil } }
 

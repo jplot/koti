@@ -1,7 +1,7 @@
 module Miele
   module Sdk
     module Dop1Access
-      def dop1: (String request) -> String
+      def dop1: (String request, ?timeout: (Integer | Float)?) -> String
 
       def fab: () -> String
 
@@ -13,7 +13,7 @@ module Miele
 
       def write_dop1: (String request) -> void
 
-      def dop1_object: (untyped klass) -> untyped
+      def dop1_object: (untyped klass, ?timeout: (Integer | Float)?) -> untyped
 
       def send_request: (Symbol method, String path, ?body: String?, ?kind: Symbol, ?timeout: (Integer | Float)?)
                       -> Connection::Response

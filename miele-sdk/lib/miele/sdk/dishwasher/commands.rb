@@ -119,7 +119,7 @@ module Miele
         def set_extras(*selected)
           return dop1_extras(selected) if extras_kind == :dop1
 
-          context = object(Objects::Dishwasher::GlobalPsContext, [2, 1574, 0, 0])
+          context = object(Objects::Dishwasher::GlobalPsContext, [2, 1574, 0, 0], timeout: pfd10? ? 5 : 15)
           modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 0, 0]) do |select|
             with_extras(select, context, offered_extras.to_h { [it, false] }.merge(selected.to_h { [it, true] }))
           end
@@ -201,7 +201,7 @@ module Miele
         # @return [void]
         def run(name)
           request, process_action = ACTIONS.fetch(name)
-          dop2? ? dop2_user_request(request) : dop1_process_action(state, process_action)
+          dop2? ? dop2_user_request(request) : dop1_process_action(state(timeout: 1), process_action)
         end
 
         # @param select [Data] 2/1577

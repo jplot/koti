@@ -24,7 +24,7 @@ module Miele
 
         def status: (State state) -> Integer
 
-        def dop1_object: (untyped klass) -> untyped
+        def dop1_object: (untyped klass, ?timeout: (Integer | Float)?) -> untyped
       end
     end
   end

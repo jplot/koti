@@ -422,6 +422,58 @@ RSpec.describe Miele::Sdk::Dishwasher do
     end
   end
 
+  context 'when the app gives each request its own token' do
+    before do
+      Miele::Sdk.config.read_timeout = 30
+      dishwasher.fab
+    end
+
+    it 'gives each request of a start 15 s, as Dop2ApiAction' do
+      timeouts = read_timeouts
+      dishwasher.start
+      expect(timeouts).to eq([15, 15])
+    end
+
+    it 'reads 2/1574 for the extras within 15 s, as SelectExtrasForDop2Action' do
+      leaves['2/1577?idx1=0&idx2=0'] = select(0, 0)
+      leaves['2/1574?idx1=0&idx2=0'] = context(0)
+      timeouts = read_timeouts
+      dishwasher.set_extras(:quick)
+      expect(timeouts).to eq([15, 15, 15])
+    end
+
+    it 'reads 2/1574 for a delayed start within 5 s, as GetGlobalPsContextMessageAsync' do
+      allow(Time).to receive(:now).and_return(Time.new(2026, 10, 31, 20, 0, 30))
+      leaves['2/1577?idx1=1&idx2=2'] = select(1, 2)
+      leaves['2/1574?idx1=0&idx2=1'] = context(1, bits: 33)
+      timeouts = read_timeouts
+      dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
+      expect(timeouts).to eq([5, 15, 15, 15, 15])
+    end
+
+    it 'gives the wake 15 s for its State read and for DeviceAction 2, as WakeUpForDop2Action' do
+      state.merge!('Status' => 1)
+      timeouts = read_timeouts
+      dishwasher.wake
+      expect(timeouts).to eq([15, 15])
+    end
+
+    context 'with a PFD10' do
+      let(:ident) do
+        Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 7, 'ProtocolVersion' => 4,
+                                                      'DeviceIdentLabel' => { 'TechType' => 'PFD102' })
+      end
+
+      it 'reads 2/1574 for the extras within 5 s, as SelectExtrasForProfiLineAction' do
+        leaves['2/1577?idx1=0&idx2=0'] = select(0, 0)
+        leaves['2/1574?idx1=0&idx2=0'] = context(0)
+        timeouts = read_timeouts
+        dishwasher.set_extras(:special_dry)
+        expect(timeouts).to eq([5, 15, 15])
+      end
+    end
+  end
+
   context 'when each round trip takes 4 s' do
     subject(:dishwasher) { described_class.new('127.0.0.1', ident:, clock: -> { fake.requests.size * 4.0 }) }
 

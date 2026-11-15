@@ -7,13 +7,14 @@ module Miele
       # @param klass [Class] a generated DOP2 class, such as {Objects::Oven::GlobalPsSelect}
       # @param address [Array<Integer, nil>] one of +klass::ADDRESSES+ (default: the first), with the indexes the app
       #   computes given
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [Data] an instance of +klass+
       # @raise [ArgumentError] when the address leaves an index to compute
       # @raise [Dop2::DecodeError]
       # @api public
-      def object(klass, address = klass::ADDRESSES.first)
+      def object(klass, address = klass::ADDRESSES.first, timeout: nil)
         unit, attribute, idx1, idx2 = settled(address)
-        klass.from(dop2(unit, attribute, idx1:, idx2:).fields)
+        klass.from(dop2(unit, attribute, idx1:, idx2:, timeout:).fields)
       end
 
       # The app writes some objects elsewhere than it reads them: the hood reads 2/426 at idx 0/0, writes it at 0/1.

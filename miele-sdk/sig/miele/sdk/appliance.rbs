@@ -64,7 +64,7 @@ module Miele
 
       def tech_type: () -> String?
 
-      def state: () -> State
+      def state: (?timeout: (Integer | Float)?) -> State
 
       def name=: (String name) -> void
 
@@ -74,7 +74,7 @@ module Miele
 
       def write_dop2: (Dop2::Leaf leaf, ?with_index: bool, ?timeout: (Integer | Float)?) -> void
 
-      def get: (String path) -> resource
+      def get: (String path, ?timeout: (Integer | Float)?) -> resource
 
       def through_cloud?: () -> bool
 
@@ -85,11 +85,11 @@ module Miele
 
       def identity: () -> Schema::DeviceIdentification
 
-      def device: (String resource) -> resource
+      def device: (String resource, ?timeout: (Integer | Float)?) -> resource
 
-      def command: (Schema::DeviceState request) -> Connection::Response
+      def command: (Schema::DeviceState request, ?timeout: (Integer | Float)?) -> Connection::Response
 
-      def send_wake: () -> void
+      def send_wake: (?timeout: (Integer | Float)?) -> void
 
       def dop2_path: (Integer unit, Integer attribute) -> String
 

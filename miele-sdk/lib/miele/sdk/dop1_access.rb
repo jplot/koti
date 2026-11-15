@@ -7,10 +7,11 @@ module Miele
       # Sends a Dop1 request, which hoods in +ProtocolVersion+ 2 answer instead of DOP2.
       #
       # @param request [String] built by {Dop1}
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [String] the hood's answer: +{"Response": hex}+ to a read
       # @api public
-      def dop1(request)
-        send_request(:post, "/Devices/#{fab}/DOP/", body: JSON.generate(Request: request)).body
+      def dop1(request, timeout: nil)
+        send_request(:post, "/Devices/#{fab}/DOP/", body: JSON.generate(Request: request), timeout:).body
       end
 
       private
@@ -41,9 +42,11 @@ module Miele
       end
 
       # @param klass [Class] a generated Dop1 object
+      # @param timeout [Numeric, nil]
       # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects
-      def dop1_object(klass)
-        answer = JSON.parse(dop1(Dop1.request(object_id: klass::ID, type: Dop1::READ, section: ''))).fetch('Response')
+      def dop1_object(klass, timeout: nil)
+        request = Dop1.request(object_id: klass::ID, type: Dop1::READ, section: '')
+        answer = JSON.parse(dop1(request, timeout:)).fetch('Response')
         klass.from([answer[8..]].pack('H*'))
       end
     end

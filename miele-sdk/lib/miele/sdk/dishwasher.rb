@@ -110,6 +110,12 @@ module Miele
       # @param value [Integer, nil]
       # @return [Float] divided by 10 and rounded to a tenth, as the app does
       def tenths(value) = (value.to_i / 10.0).round(1).to_f
+
+      # Dop2ApiAction reads and writes each leaf under a CancellationTokenSource of 15 s.
+      #
+      # @yieldparam timeout [Integer]
+      # @return [Object] what the block gives
+      def action_request = yield(15)
     end
   end
 end

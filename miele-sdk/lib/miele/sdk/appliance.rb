@@ -125,9 +125,10 @@ module Miele
       # @api public
       def tech_type = @tech_type ||= identity.device_ident_label&.tech_type
 
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [State]
       # @api public
-      def state = State.new(device('State'), device_type, protocol_version:, tech_type:)
+      def state(timeout: nil) = State.new(device('State', timeout:), device_type, protocol_version:, tech_type:)
 
       # ChangeApplianceNameAction sends it again after a 5xx or a lost connection, within the 15 s of its
       # ActionExecutionTimeout.
@@ -181,12 +182,13 @@ module Miele
       # Reads any JSON resource.
       #
       # @param path [String] absolute path
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [Hash{String=>Object}]
       # @raise [ResponseError] if the answer has no body
       # @raise [Error] see {Connection.request}
       # @api public
-      def get(path)
-        answer = send_request(:get, path)
+      def get(path, timeout: nil)
+        answer = send_request(:get, path, timeout:)
         raise ResponseError.new(answer.status, "#{path} answered #{answer.status} without a body") if answer.body.empty?
 
         JSON.parse(answer.body)
@@ -219,16 +221,19 @@ module Miele
       def identity = @identity ||= ident
 
       # @param resource [String]
+      # @param timeout [Numeric, nil]
       # @return [Hash{String=>Object}]
-      def device(resource) = get("/Devices/#{fab}/#{resource}")
+      def device(resource, timeout: nil) = get("/Devices/#{fab}/#{resource}", timeout:)
 
       # @param request [Schema::DeviceState]
+      # @param timeout [Numeric, nil]
       # @return [Connection::Response]
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
-      def command(request) = send_request(:put, "/Devices/#{fab}/State", body: request.to_json)
+      def command(request, timeout: nil) = send_request(:put, "/Devices/#{fab}/State", body: request.to_json, timeout:)
 
+      # @param timeout [Numeric, nil]
       # @return [void]
-      def send_wake = command(Schema::DeviceState.new(device_action: 2))
+      def send_wake(timeout: nil) = command(Schema::DeviceState.new(device_action: 2), timeout:)
 
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"

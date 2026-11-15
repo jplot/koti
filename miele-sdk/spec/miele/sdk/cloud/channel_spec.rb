@@ -59,6 +59,13 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
       .to eq(['appToken saved', 'appToken renewed'])
   end
 
+  it 'sends a request once when the cloud drops the connection, as the app does', :aggregate_failures do
+    answers << :drop
+    expect { channel.request(:put, "/Devices/#{fab}/State", body: '{"DeviceAction":2}') }
+      .to raise_error(Miele::Sdk::ConnectionError)
+    expect(seen("/V2/Devices/#{fab}/State").map(&:verb)).to eq(%w[PUT])
+  end
+
   context 'when two requests in flight get 401 with the same token' do
     let(:cloud) do
       FakeCloud.start(threaded: true) do |request|

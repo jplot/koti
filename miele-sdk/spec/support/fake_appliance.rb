@@ -15,13 +15,14 @@ class FakeAppliance
 
   attr_reader :port
 
-  def self.start(answer_key: GROUP_KEY, unsigned: false, &handler)
-    new(answer_key:, unsigned:, handler: handler || ->(_request) { [200, {}, '{}'] }).tap(&:start)
+  def self.start(answer_key: GROUP_KEY, unsigned: false, threaded: false, &handler)
+    new(answer_key:, unsigned:, threaded:, handler: handler || ->(_request) { [200, {}, '{}'] }).tap(&:start)
   end
 
-  def initialize(answer_key:, unsigned:, handler:)
+  def initialize(answer_key:, unsigned:, threaded:, handler:)
     @answer_key = [answer_key].pack('H*')
     @unsigned = unsigned
+    @threaded = threaded
     @handler = handler
     @requests = []
     @mutex = Mutex.new
@@ -45,7 +46,10 @@ class FakeAppliance
   def key = [GROUP_KEY].pack('H*')
 
   def accept_loop
-    loop { serve(@server.accept) }
+    loop do
+      socket = @server.accept
+      @threaded ? Thread.new { serve(socket) } : serve(socket)
+    end
   rescue IOError
     nil
   end
@@ -54,7 +58,7 @@ class FakeAppliance
     request = read_request(socket)
     @mutex.synchronize { @requests << request }
     status, headers, plaintext = @handler.call(request)
-    write_response(socket, status, headers, plaintext.to_s)
+    write_response(socket, status, headers, plaintext.to_s) unless status == :drop
   ensure
     socket.close
   end

@@ -49,8 +49,10 @@ module Miele
         def exchange(uri, request)
           config = Sdk.config
           host = uri.host.to_s
+          # The app sends a cloud request once, whatever fails (MieleHttpClientHandler, no retry); Net::HTTP would
+          # send a GET, PUT or DELETE again after a dropped connection or a read timeout.
           options = { use_ssl: uri.scheme == 'https', open_timeout: config.open_timeout,
-                      read_timeout: config.read_timeout }
+                      read_timeout: config.read_timeout, max_retries: 0 }
           Net::HTTP.start(host, uri.port, **options) { |http| http.request(request) }
         rescue *NETWORK_ERRORS => e
           raise ConnectionError, "#{host}: #{e.message}"

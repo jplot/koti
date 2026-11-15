@@ -8,6 +8,8 @@ module Miele
 
         def power_on_offered?: () -> bool
 
+        def wake: () -> void
+
         def power_off: () -> void
 
         def power_off_offered?: () -> bool

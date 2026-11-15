@@ -17,7 +17,7 @@ module Miele
         # @api public
         def power_on
           require_dop2!
-          wake if standby(state) == 2
+          send_wake if standby(state) == 2
           return unless [1, 4].include?(status(state))
 
           modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 4) }
@@ -31,6 +31,19 @@ module Miele
 
           state = self.state
           off?(state) && state.remote_control? == true
+        end
+
+        # WakeUpForDop2Action: +DeviceAction+ 2 only while +State+ shows the dishwasher off (Status 1), or waiting to
+        # start (Status 4) out of +StandbyState+ 1.
+        #
+        # @return [void]
+        # @raise [ActionUnavailableError] on a Dop1 dishwasher, which the app never wakes
+        # @raise [ResponseError] when the dishwasher refuses it, 400 included
+        # @api public
+        def wake
+          require!(dop2?, 'the app has no wake request for a Dop1 dishwasher')
+          state = self.state
+          send_wake if status(state) == 1 || (status(state) == 4 && standby(state) != 1)
         end
 
         # @return [void]

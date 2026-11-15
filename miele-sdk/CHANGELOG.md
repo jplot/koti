@@ -62,6 +62,11 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The cloud event stream yields every resource the cloud pushes, where it skipped those the app does
   not read: as JSON where it parses, else as pushed, and a push outside any appliance under its own
   path.
+- **Breaking:** every request, to an appliance or to the Miele cloud, is sent once, as the app sends
+  it: a GET, PUT or DELETE whose connection drops before the answer, or whose answer outlasts
+  `read_timeout`, raises `ConnectionError` instead of going out a second time. A request under `/V2`
+  answered 401 raises `ResponseError` (status 401) instead of going out again with a renewed token,
+  which is kept.
 
 ### Fixed
 

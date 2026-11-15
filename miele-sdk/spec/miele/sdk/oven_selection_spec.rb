@@ -193,18 +193,25 @@ RSpec.describe Miele::Sdk::Oven do
     expect(timeouts).to eq([15, 15, 30])
   end
 
-  it 'writes every required parameter though one is refused, keeps the selection and raises it',
+  it 'writes every required parameter though one is refused, keeps the selection and raises it as their error',
      :aggregate_failures do
     program_context(13, parameters: { 6 => required(:u16, 18_000), 7 => required(:u16, 6_000) })
     resources[:put] = [[204, {}, ''], [500, {}, '']]
-    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ResponseError)
+    expect { oven.select_program(13) }
+      .to raise_error(Miele::Sdk::RequiredParametersError) { expect(it.cause.status).to eq(500) }
     expect(written.drop(1)).to eq([parameter(6, :u16, 18_000), parameter(7, :u16, 6_000)])
   end
 
-  it 'writes no required parameter while 1/1574 lacks one of the eight, keeps the selection and raises',
+  it 'writes no required parameter while 1/1574 lacks one of the eight, keeps the selection and raises their error',
      :aggregate_failures do
     program_context(13, parameters: { 6 => required(:u16, 18_000), 15 => nil })
-    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionFailedError)
+    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::RequiredParametersError)
     expect(written).to eq(['001300020629000000000002000107000d00030400'])
+  end
+
+  it 'raises the refusal of the selection itself, which selects nothing', :aggregate_failures do
+    resources[:put] = [[500, {}, '']]
+    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ResponseError)
+    expect(fake.requests.map(&:path)).not_to include(a_string_including('1574'))
   end
 end

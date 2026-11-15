@@ -68,5 +68,10 @@ module Miele
     # without a value the app reads on the way; or the action's Timeout ran out before a request went out, or while
     # one was out (its +ConnectionError+ then the cause).
     class ActionFailedError < Error; end
+
+    # An oven's program is selected, but a parameter it requires went unwritten: refused, the refusal then the
+    # cause, or missing from 1/1574. Unlike a selection that fails, the Miele app has dropped the times it keeps
+    # (see {Oven::AutomaticTimes}).
+    class RequiredParametersError < Error; end
   end
 end

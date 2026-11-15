@@ -14,9 +14,9 @@ module Miele
         # @param prog_id [Integer, Symbol] a value of +GLOBAL_EnumPrgId+
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1577 to write
-        # @raise [ActionFailedError] when 1/1574 does not show the program within 15 s, or shows it without one of the
-        #   eight parameters; the program stays selected
-        # @raise [Error] the first refusal of a required parameter, once every one is sent; the program stays selected
+        # @raise [ActionFailedError] when 1/1574 does not show the program within 15 s
+        # @raise [RequiredParametersError] once 1/1574 shows the program, for the first refusal of a required
+        #   parameter, once every one is sent, or for one of the eight missing from 1/1574; the program stays selected
         # @api public
         def select_program(prog_id)
           require_dop2!
@@ -46,15 +46,16 @@ module Miele
 
         private
 
-        # The program is selected by then, so a parameter 1/1574 lacks is a value missing on the way.
+        # The program is selected by then, and SelectOvenFunctionAsync has dropped what it keeps (IL_00dc).
         #
         # @param id [Integer]
         # @param context [Objects::Oven::GlobalPsContext]
         # @return [void]
+        # @raise [RequiredParametersError] its cause the first refusal, or the parameter missing
         def write_selected_parameters(id, context)
           write_required_parameters(id, context)
-        rescue ActionUnavailableError => e
-          raise ActionFailedError, e.message
+        rescue Error => e
+          raise RequiredParametersError, e.message
         end
 
         # IsProgramWriteable. Without a ProgId the app's entity fails, and its selection stays disabled.

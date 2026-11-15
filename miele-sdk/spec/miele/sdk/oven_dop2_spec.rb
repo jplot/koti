@@ -178,11 +178,12 @@ RSpec.describe Miele::Sdk::Oven do
   end
 
   context 'when the appliance stays asleep' do
-    let(:dop2_answers) { [[500, {}, '']] * 3 }
+    let(:dop2_answers) { [[500, {}, '']] * 20 }
 
-    it 'gives up after three attempts without any user request', :aggregate_failures do
+    it "writes every 3 s until SwitchOnAction's 45 s run out, without any user request", :aggregate_failures do
       expect { appliance.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
-      expect(puts_sent).to eq(%w[DOP2/2/1586 State DOP2/2/1586 State DOP2/2/1586])
+      expect(puts_sent).to eq(%w[DOP2/2/1586 State] * 15)
+      expect(naps).to eq([3] * 14)
     end
   end
 end

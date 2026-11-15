@@ -12,6 +12,7 @@ module Miele
       include OvenState
 
       NOTIFICATION_IDS: Hash[Symbol, Objects::Enum]
+      SWITCH_ON_TIMEOUT: Integer
 
       def power_on: () -> void
 
@@ -57,7 +58,7 @@ module Miele
 
       def power_leaf: (Integer state) -> Dop2::Leaf
 
-      def rouse: () -> void
+      def rouse: (Numeric waited, ResponseError error) -> void
     end
   end
 end

@@ -1,8 +1,8 @@
 module Miele
   module Sdk
     interface _Dop2Access
-      def dop2: (Integer unit, Integer attribute, ?idx1: Integer?, ?idx2: Integer?) -> Dop2::Leaf
-      def write_dop2: (Dop2::Leaf leaf, ?with_index: bool) -> void
+      def dop2: (Integer unit, Integer attribute, ?idx1: Integer?, ?idx2: Integer?, ?timeout: (Integer | Float)?) -> Dop2::Leaf
+      def write_dop2: (Dop2::Leaf leaf, ?with_index: bool, ?timeout: (Integer | Float)?) -> void
     end
 
     module ObjectAccess : _Dop2Access
@@ -14,7 +14,7 @@ module Miele
 
       private
 
-      def action_request: [T] () { () -> T } -> T
+      def action_request: [T] () { ((Integer | Float)? timeout) -> T } -> T
 
       def settled: (::Array[::Integer?] address) -> [::Integer, ::Integer, ::Integer?, ::Integer?]
     end

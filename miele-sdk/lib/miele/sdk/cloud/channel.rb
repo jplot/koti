@@ -35,14 +35,15 @@ module Miele
         # @param body [String, nil]
         # @param kind [Symbol] +:json+ or +:dop2+, the type of the body
         # @param host [String, nil] the module's mDNS name, which the cloud routes a Dop1 request by
+        # @param timeout [Numeric, nil] as {Connection.request} takes it
         # @return [Connection::Response]
         # @raise [NotFoundError, RemoteControlDisabledError, ResponseError] on an error status, a 401 too: the token
         #   is kept and the request not sent again, as by the app's appliance client (MieleHttpClientHandler)
         # @raise [ConnectionError] if the cloud cannot be reached
         # @api public
-        def request(method, path, body: nil, kind: :json, host: nil)
+        def request(method, path, body: nil, kind: :json, host: nil, timeout: nil) # rubocop:disable Metrics/ParameterLists -- one request's body, its type, its Dop1 host and the time the app gives it
           headers = { 'Content-Type' => (TYPES.fetch(kind) if body), 'Host' => host&.delete_suffix('.') }.compact
-          exchange(@session.current, method, path, body, headers)
+          exchange(@session.current, method, path, body, headers, timeout:)
         end
 
         # @return [Array<Device>] the appliances paired with the account
@@ -74,10 +75,10 @@ module Miele
         private
 
         # @return [Connection::Response]
-        def exchange(token, method, path, body, headers)
+        def exchange(token, method, path, body, headers, timeout: nil) # rubocop:disable Metrics/ParameterLists -- #request's, with the token it goes out with
           headers = { 'Authorization' => "#{token.scheme} #{token.value}", 'Accept-Language' => @session.language,
                       **headers }
-          answer = Http.request(method, "#{@session.organization.rest}/V2#{path}", headers:, body:)
+          answer = Http.request(method, "#{@session.organization.rest}/V2#{path}", headers:, body:, timeout:)
           refuse(answer.status, method) unless answer.status.between?(200, 299)
           Connection::Response.new(status: answer.status, body: answer.body)
         end

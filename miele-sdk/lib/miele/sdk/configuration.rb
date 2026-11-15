@@ -79,6 +79,13 @@ module Miele
           @listener_fab = format('000999%06d', Zlib.crc32(Socket.gethostname) % 1_000_000)
           @locales_host = 'https://rest-eu.domestic.miele-iot.com'
         end
+
+        # @param limit [Numeric, nil] the seconds the app gives one request, nil when it gives none
+        # @return [Hash{Symbol=>Numeric}] +open_timeout+ and +read_timeout+, neither above +limit+
+        # @api private
+        def timeouts(limit = nil)
+          { open_timeout: [open_timeout, limit].compact.min, read_timeout: [read_timeout, limit].compact.min }
+        end
       end
 
       # Returns the singleton settings.

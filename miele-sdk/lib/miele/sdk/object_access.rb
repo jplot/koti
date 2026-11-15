@@ -43,18 +43,19 @@ module Miele
       # @api public
       def modify(klass, address, with_index: false)
         unit, attribute, idx1, idx2 = settled(address)
-        leaf = action_request { dop2(unit, attribute, idx1:, idx2:) }
+        leaf = action_request { |timeout| dop2(unit, attribute, idx1:, idx2:, timeout:) }
         fields = yield(klass.from(leaf.fields)).to_fields
-        action_request { write_dop2(leaf.with(fields:), with_index:) }
+        action_request { |timeout| write_dop2(leaf.with(fields:), with_index:, timeout:) }
       end
 
       private
 
-      # Only the app's laundry module sends them again.
+      # Only the app's laundry module sends them again, and bounds each.
       #
+      # @yieldparam timeout [Numeric, nil] the seconds the app gives the request, nil for the settings' timeouts
       # @yieldreturn [Object] the read or the write
       # @return [Object] what the block gives
-      def action_request = yield
+      def action_request = yield(nil)
 
       # @param address [Array<Integer, nil>]
       # @return [Array<Integer, nil>]

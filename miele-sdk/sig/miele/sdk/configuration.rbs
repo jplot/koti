@@ -22,6 +22,8 @@ module Miele
         attr_accessor locales_host: String
 
         def initialize: () -> void
+
+        def timeouts: (?(Integer | Float)? limit) -> { open_timeout: (Integer | Float)?, read_timeout: (Integer | Float)? }
       end
 
       def config: () -> Settings

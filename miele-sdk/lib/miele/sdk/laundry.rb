@@ -10,6 +10,10 @@ module Miele
       include Parameters
       include DelayedStart
 
+      # BaseAction.DefaultCancellationToken: a new 8 s CancellationTokenSource for each attempt, in seconds.
+      ATTEMPT_TIMEOUT = 8
+      private_constant :ATTEMPT_TIMEOUT
+
       # What a Dop1 laundry appliance reports of its program: its +ExtendedState+ past the first 3 bytes, and
       # +State+ for the temperature and spin speed.
       #
@@ -103,9 +107,10 @@ module Miele
       # BaseApiAction`1 sends an action's DOP2 reads and writes through RetryOnRestException; SelectParametersAsync
       # reads 2/1574 directly, once.
       #
+      # @yieldparam timeout [Integer] the seconds the app gives each attempt
       # @yieldreturn [Object] the read or the write
       # @return [Object] what the block gives
-      def action_request(&) = resent(&)
+      def action_request = resent { yield ATTEMPT_TIMEOUT }
 
       # @param context [Objects::Laundry::GlobalPsContext] 2/1574
       # @return [Data, nil] the dryer's parameters, or the washer's and the washer-dryer's

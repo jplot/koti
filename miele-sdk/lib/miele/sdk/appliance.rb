@@ -145,24 +145,26 @@ module Miele
       # @param attribute [Integer]
       # @param idx1 [Integer, nil]
       # @param idx2 [Integer, nil]
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [Dop2::Leaf]
       # @raise [Dop2::DecodeError]
       # @api public
-      def dop2(unit, attribute, idx1: nil, idx2: nil)
+      def dop2(unit, attribute, idx1: nil, idx2: nil, timeout: nil)
         path = dop2_path(unit, attribute)
         path += "?idx1=#{idx1.to_i}&idx2=#{idx2.to_i}" unless idx1.nil? && idx2.nil?
-        Dop2.decode(send_request(:get, path).body)
+        Dop2.decode(send_request(:get, path, timeout:).body)
       end
 
       # @param leaf [Dop2::Leaf]
       # @param with_index [Boolean] whether its indexes also go in the path, as the app's hood and coffee
       #   modules write; its oven, dishwasher and laundry modules leave them in the body only
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [void]
       # @api public
-      def write_dop2(leaf, with_index: false)
+      def write_dop2(leaf, with_index: false, timeout: nil)
         path = dop2_path(leaf.unit, leaf.attribute)
         path += "?idx1=#{leaf.idx1}&idx2=#{leaf.idx2}" if with_index
-        send_request(:put, path, body: Dop2.encode(leaf), kind: :dop2)
+        send_request(:put, path, body: Dop2.encode(leaf), kind: :dop2, timeout:)
       end
 
       # Sends a Dop1 request, which hoods in +ProtocolVersion+ 2 answer instead of DOP2.
@@ -201,12 +203,13 @@ module Miele
       # @param path [String]
       # @param body [String, nil]
       # @param kind [Symbol] +:json+ or +:dop2+
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [Connection::Response]
-      def send_request(method, path, body: nil, kind: :json)
+      def send_request(method, path, body: nil, kind: :json, timeout: nil)
         cloud = @cloud if path.start_with?('/Devices/')
-        return @local.request(method, path, body:, kind:) unless cloud
+        return @local.request(method, path, body:, kind:, timeout:) unless cloud
 
-        cloud.request(method, path, body:, kind:, host: (host if path.match?(%r{\A/Devices/\d+/DOP/})))
+        cloud.request(method, path, body:, kind:, host: (host if path.match?(%r{\A/Devices/\d+/DOP/})), timeout:)
       end
 
       # @return [Schema::DeviceIdentification]
@@ -232,9 +235,9 @@ module Miele
       # @param id [Integer]
       # @return [void]
       def dop2_user_request(id)
-        leaf = action_request { dop2(2, 1583, idx1: 0, idx2: 0) }
+        leaf = action_request { |timeout| dop2(2, 1583, idx1: 0, idx2: 0, timeout:) }
         request = Dop2::Field.new(type: leaf.fields[1]&.type || :e16, value: id)
-        action_request { write_dop2(leaf.with(fields: leaf.fields.merge(1 => request))) }
+        action_request { |timeout| write_dop2(leaf.with(fields: leaf.fields.merge(1 => request)), timeout:) }
       end
 
       # @param at [Time] a time of day

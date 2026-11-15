@@ -54,6 +54,15 @@ RSpec.describe Miele::Sdk::WashingMachine do
 
   def written = fake.requests.reject { it.verb == 'GET' }.map { [it.path.delete_prefix("/Devices/#{fab}/"), it.body] }
 
+  def read_timeouts
+    [].tap do |timeouts|
+      allow(Net::HTTP).to receive(:start).and_wrap_original do |start, *args, **options, &block|
+        timeouts << options[:read_timeout]
+        start.call(*args, **options, &block)
+      end
+    end
+  end
+
   it 'writes 2/1577 with the current values 2/1574 shows, then the parameters given, as the app does',
      :aggregate_failures do
     expect(washer.set_parameters_offered?).to be(true)
@@ -71,6 +80,14 @@ RSpec.describe Miele::Sdk::WashingMachine do
     washer.set_parameters(spin_speed: 1400)
     expect(fake.requests.map { [it.verb, it.path[%r{DOP2/\d+/\d+}]] }.select(&:last))
       .to eq([%w[GET DOP2/2/1577], %w[GET DOP2/2/1574], %w[PUT DOP2/2/1577]])
+  end
+
+  it 'waits 8 s for each attempt on 2/1577 and 10 s for 2/1574, as the app bounds them' do
+    Miele::Sdk.config.read_timeout = 30
+    timeouts = read_timeouts
+    washer.set_parameters(spin_speed: 1400)
+    expect(fake.requests.map { it.path[%r{DOP2/\d+/\d+}] }.zip(timeouts).select(&:first))
+      .to eq([['DOP2/2/1577', 8], ['DOP2/2/1574', 10], ['DOP2/2/1577', 8]])
   end
 
   it 'writes temperature info 2 for a cold wash' do

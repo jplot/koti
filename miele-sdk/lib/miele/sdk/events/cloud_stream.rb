@@ -23,10 +23,7 @@ module Miele
         # @return [void]
         # @api public
         def each
-          @websocket.each do |message|
-            event = event(message)
-            yield event if event
-          end
+          @websocket.each { |message| yield event(message) }
         end
 
         private

@@ -14,7 +14,7 @@ module Miele
       #
       # @!attribute [r] fab
       #   @return [String, nil] fabrication number of the appliance that pushed it, or the cloud's +mac-…+ id;
-      #     nil for the list of devices
+      #     nil for the list of devices and for a cloud push outside any appliance
       # @!attribute [r] resource
       #   @return [String] what changed: +/State/+, +/State/Light/+, +/State/Status/+ or +/Ident/+; through the
       #     cloud also +/DOP2/{unit}/{attribute}/+, +/Devices/+, any other resource of an appliance, and a push

@@ -16,7 +16,9 @@ RSpec.describe Miele::Sdk::Dishwasher do
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(current)]
       in { verb: 'POST', body: /89060100"/ } then [200, {}, '{"Response":"890611000105ff00"}']
-      in { verb: 'POST', body: /89090100"/ } then [200, {}, '{"Response":"8909110001000001"}']
+      in { verb: 'POST', body: /89090100"/ }
+        now[0] = Time.new(2026, 10, 31, 20, 1, 1)
+        [200, {}, '{"Response":"8909110001000001"}']
       else [200, {}, '{}']
       end
     end
@@ -33,6 +35,8 @@ RSpec.describe Miele::Sdk::Dishwasher do
   end
 
   def dop1_requests = written.map { it.last['Request'] }
+
+  def now = @now ||= [Time.new(2026, 10, 31, 20, 0, 58)]
 
   it 'pauses a Dop1 dishwasher with ProcessAction 2 on its state' do
     dishwasher.pause
@@ -128,6 +132,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(dishwasher.start_delayed_offered?).to be(false)
     dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
     expect(dop1_requests.last).to start_with('8909')
+  end
+
+  it 'counts the delay from when 8909 is answered, as GetTimeOffsetToNow reads the clock then' do
+    allow(Time).to receive(:now) { now.first }
+    dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
+    expect(dop1_requests).to eq(%w[89090100 89090200011d0101])
   end
 
   context 'when its program is selected' do

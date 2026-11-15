@@ -20,7 +20,8 @@ RSpec.describe Miele::Sdk::Dishwasher do
       in { verb: 'PUT', path: %r{/State\z} } if served.key?(:refused) then [400, {}, '']
       in { verb: 'GET', path: %r{/DOP2/(.+)\z} }
         leaf = Regexp.last_match(1)
-        [200, {}, served.fetch(leaf) { default_leaf(leaf) }]
+        answer = served.fetch(leaf) { default_leaf(leaf) }
+        [200, {}, answer.respond_to?(:call) ? answer.call : answer]
       in { verb: 'PUT', path: %r{/DOP2/} } if served.fetch(:refusals, []).any? then served[:refusals].shift
       else [204, {}, '']
       end
@@ -223,6 +224,15 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(dishwasher.start_delayed_offered?).to be(true)
     dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
     expect(written.map(&:last)).to eq([select(1, 2, type: 2, mode: 1, start: 90), user_request(8).last])
+  end
+
+  it 'counts the minutes from when 2/1574 is answered, as SetParameter reads the clock then' do
+    clock = [Time.new(2026, 10, 31, 20, 0, 30)]
+    allow(Time).to receive(:now) { clock.first }
+    leaves['2/1577?idx1=1&idx2=2'] = select(1, 2)
+    leaves['2/1574?idx1=0&idx2=1'] = -> { (clock[0] = Time.new(2026, 10, 31, 20, 1, 1)) && context(1, bits: 33) }
+    dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
+    expect(written.first.last).to eq(select(1, 2, type: 2, mode: 1, start: 89))
   end
 
   it 'sets a delayed start as local seconds since 1970 when the dishwasher counts to a time' do

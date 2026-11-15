@@ -76,10 +76,12 @@ module Miele
 
         # SetStartTimeForDelayStartForDop1Action reads 8909 first, then overwrites all four fields: none goes back.
         #
-        # @param minutes [Integer]
+        # @param at [Time] its time of day; the next one if it has passed
         # @return [void]
-        def dop1_start_delayed(minutes)
+        def dop1_start_delayed(at)
           dop1_object(Objects::Dishwasher::SmartControlGsdStartTime, timeout: 5)
+          now = Time.now
+          minutes = minutes_until(next_time(at, now), now)
           section = [1, minutes % 60, minutes / 60, 1].pack('C4')
           dop1(Dop1.request(object_id: '8909', type: Dop1::WRITE, section:))
         end

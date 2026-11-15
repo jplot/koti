@@ -70,38 +70,44 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(written.map(&:first)).to eq(['DOP2/1/109?idx1=24814&idx2=0'])
   end
 
-  it 'renames a profile, refusing a blank, taken or Miele name', :aggregate_failures do
+  it 'renames a profile, a blank, taken or Miele name too, which the app refuses', :aggregate_failures do
+    expect(['Ben', 'Anna', '  ', 'Carl', 'miele'].map { coffee.profile_name_allowed?(24_813, it) })
+      .to eq([true, true, false, false, false])
     coffee.rename_profile(24_813, 'Ben')
-    coffee.rename_profile(24_813, 'Anna')
-    ['  ', 'Carl', 'miele'].each do |name|
-      expect { coffee.rename_profile(24_813, name) }.to raise_error(ArgumentError)
-    end
+    coffee.rename_profile(24_813, 'Carl')
     expect(written).to eq([['DOP2/1/109?idx1=24813&idx2=0', as_written(profile(24_813, 'Ben'), 24_813)],
-                           ['DOP2/1/109?idx1=24813&idx2=0', as_written(profile(24_813, 'Anna'), 24_813)]])
+                           ['DOP2/1/109?idx1=24813&idx2=0', as_written(profile(24_813, 'Carl'), 24_813)]])
   end
 
-  it 'renames and deletes custom profiles only, as the app offers them', :aggregate_failures do
+  it 'renames and deletes the standard profile, while the app offers custom ones alone', :aggregate_failures do
     served[[2, 348, 0, 0]] = dop2_leaf(2, 348, { 132 => dop2_field(:struct, { 29 => dop2_field(:bool, true) }) })
-    expect { coffee.rename_profile(24_812, 'Ben') }.to raise_error(ArgumentError)
-    expect { coffee.delete_profile(24_812) }.to raise_error(ArgumentError)
-    expect(written).to be_empty
+    expect(coffee.custom_profiles).to eq((24_813..24_822).to_a)
+    expect([coffee.profile_name_allowed?(24_812, 'Ben'), coffee.delete_profile_offered?(24_812)]).to eq([false, false])
+    coffee.rename_profile(24_812, 'Ben')
+    coffee.delete_profile(24_812)
+    expect(written.map(&:first)).to eq(['DOP2/1/109?idx1=24812&idx2=0'] * 2)
   end
 
-  it 'refuses a blank drink name or a drink no profile holds', :aggregate_failures do
-    expect { coffee.rename_drink(24_037, ' ') }.to raise_error(ArgumentError)
-    expect { coffee.rename_drink(23_999, 'Kaffee') }.to raise_error(ArgumentError)
-    expect(written).to be_empty
+  it 'names a drink with a blank name, or one no profile holds, which the app does not', :aggregate_failures do
+    expect([coffee.drink_name_allowed?(24_037, ' '), coffee.drink_name_allowed?(23_999, 'Kaffee')])
+      .to eq([false, false])
+    served[[1, 109, 23_999, 0]] = profile(23_999, 'Tee')
+    coffee.rename_drink(24_037, ' ')
+    coffee.rename_drink(23_999, 'Kaffee')
+    expect(written.map(&:first)).to eq(%w[DOP2/1/109?idx1=24037&idx2=0 DOP2/1/109?idx1=23999&idx2=0])
   end
 
-  it 'deletes a profile only when its features list coffee profiles', :aggregate_failures do
-    expect { coffee.delete_profile(24_813) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  it 'deletes a profile though its features list no coffee profiles, which the app requires', :aggregate_failures do
+    expect(coffee.delete_profile_offered?(24_813)).to be(false)
+    coffee.delete_profile(24_813)
     feature_co = { 29 => dop2_field(:bool, true) }
     served[[2, 348, 0, 0]] = dop2_leaf(2, 348, { 132 => dop2_field(:struct, feature_co) })
-    coffee.delete_profile(24_813)
+    expect(coffee.delete_profile_offered?(24_813)).to be(true)
     expect(written).to eq([['DOP2/1/109?idx1=24813&idx2=0', as_written(profile(24_813, ''), 24_813)]])
   end
 
-  it 'edits a CVA drink and names it, outside the standard profile, as the app does' do
+  it 'edits a CVA drink and names it, outside the standard profile, as the app does', :aggregate_failures do
+    expect(coffee.drink_name_allowed?(24_037, 'Mein Kaffee')).to be(true)
     coffee.edit_drink(24_037, amount: 50, temperature: 2, pre_brewing: 1, bean_sort: 2)
     coffee.rename_drink(24_037, 'Mein Kaffee')
     edited = drink(50, bean: 2, pre: 1, amount: 50, temperature: 2)
@@ -109,15 +115,19 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
                            ['DOP2/1/109?idx1=24037&idx2=0', as_written(profile(24_037, 'Mein Kaffee'), 24_037)]])
   end
 
-  it 'names no drink of the standard profile' do
-    expect { coffee.rename_drink(24_005, 'Mein Kaffee') }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  it 'names a drink of the standard profile, which the app does not', :aggregate_failures do
+    expect(coffee.drink_name_allowed?(24_005, 'Mein Kaffee')).to be(false)
+    served[[1, 109, 24_005, 0]] = profile(24_005, 'Espresso')
+    coffee.rename_drink(24_005, 'Mein Kaffee')
+    expect(written.map(&:first)).to eq(['DOP2/1/109?idx1=24005&idx2=0'])
   end
 
-  it 'keeps a brew speed other than 255, and refuses an amount the app does not offer', :aggregate_failures do
+  it 'keeps a brew speed other than 255, and writes an amount the app does not offer', :aggregate_failures do
     served[[2, 261, 24_037, 0]] = drink(40)
-    coffee.edit_drink(24_037, amount: 50, temperature: 1, pre_brewing: 0, bean_sort: 1)
-    expect { coffee.edit_drink(24_037, amount: 40, temperature: 1, pre_brewing: 0) }.to raise_error(ArgumentError)
-    expect(written).to eq([['DOP2/2/261?idx1=24037&idx2=0', as_written(drink(40, amount: 50), 24_037)]])
+    expect(coffee.drink_settings).to eq(amount: [0, 17, 33, 50, 67, 83, 100], temperature: [0, 1, 2, 3, 4],
+                                        pre_brewing: [0, 1, 2])
+    coffee.edit_drink(24_037, amount: 40, temperature: 1, pre_brewing: 0, bean_sort: 1)
+    expect(written).to eq([['DOP2/2/261?idx1=24037&idx2=0', as_written(drink(40, amount: 40), 24_037)]])
   end
 
   context 'with a CM6160, which keeps four profiles' do
@@ -134,19 +144,23 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   context 'with a CVA Ref2' do
     let(:ident) { identity('CVA7440') }
 
-    it 'writes no bean sort and names no drink, as the app does', :aggregate_failures do
+    it 'writes no bean sort, as the app does, and names a drink, which it does not', :aggregate_failures do
+      expect(coffee.drink_name_allowed?(24_037, 'Mein Kaffee')).to be(false)
       coffee.edit_drink(24_037, amount: 50, temperature: 2, pre_brewing: 1, bean_sort: 2)
-      expect { coffee.rename_drink(24_037, 'Mein Kaffee') }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written).to eq([['DOP2/2/261?idx1=24037&idx2=0',
-                              as_written(drink(50, bean: 255, pre: 1, amount: 50, temperature: 2), 24_037)]])
+      coffee.rename_drink(24_037, 'Mein Kaffee')
+      expect(written.first).to eq(['DOP2/2/261?idx1=24037&idx2=0',
+                                   as_written(drink(50, bean: 255, pre: 1, amount: 50, temperature: 2), 24_037)])
     end
   end
 
   context 'with a CM7' do
     let(:ident) { identity('CM7550') }
 
-    it 'takes no profile, as the app does' do
+    it 'takes no profile or drink, having no 1/109 or 2/261 object', :aggregate_failures do
       expect { coffee.create_profile('Ben') }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { coffee.rename_drink(24_037, 'Mein Kaffee') }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect([coffee.delete_profile_offered?(24_813), coffee.drink_name_allowed?(24_037, 'Mein Kaffee')])
+        .to eq([false, false])
     end
   end
 end

@@ -23,16 +23,15 @@ module Miele
         # @return [void]
         # @api public
         def each
-          @websocket.each do |message|
-            event = event(message)
-            yield event if event
-          end
+          @websocket.each { |message| yield event(message) }
         end
 
         private
 
+        # The app reads State, Ident, DOP2 leaves and the device list from the websocket; the others pass too.
+        #
         # @param message [Cloud::Websocket::Message]
-        # @return [Event, nil] nil for a resource the app does not read from the websocket
+        # @return [Event] under the appliance's resource, or under its own path for a push outside any appliance
         def event(message)
           body = message.body.dup.force_encoding(Encoding::UTF_8)
           if message.path == '/V2/Devices'
@@ -40,18 +39,22 @@ module Miele
           end
 
           match = PATH.match(message.path)
-          content = match && content(match[:rest].to_s, body)
-          Event.new(fab: match[:fab], resource: "/#{match[:rest]}/", content:, source: :cloud) if match && content
+          return Event.new(fab: nil, resource: message.path, content: content('', body), source: :cloud) unless match
+
+          rest = match[:rest].to_s
+          Event.new(fab: match[:fab], resource: "/#{rest}/", content: content(rest, body), source: :cloud)
         end
 
         # @param rest [String] the path past the appliance
         # @param body [String]
-        # @return [Hash{String=>Object}, Dop2::Leaf, nil]
+        # @return [Hash{String=>Object}, Array, Dop2::Leaf, String] the leaf decoded, else the JSON parsed, else the
+        #   body as pushed
         def content(rest, body)
-          case rest
-          when 'State', 'Ident' then JSON.parse(body)
-          when %r{\ADOP2/\d+/\d+\z} then Dop2.decode(body.b)
-          end
+          return Dop2.decode(body.b) if rest.match?(%r{\ADOP2/\d+/\d+\z})
+
+          JSON.parse(body)
+        rescue JSON::ParserError
+          body
         end
       end
     end

@@ -6,9 +6,15 @@ module Miele
 
         def power_on: () -> void
 
+        def power_on_offered?: () -> bool
+
         def power_off: () -> void
 
+        def power_off_offered?: () -> bool
+
         def start_delayed: (Time at) -> void
+
+        def start_delayed_offered?: () -> bool
 
         def program_context: () -> Objects::Dishwasher::GlobalPsContext
 
@@ -23,8 +29,6 @@ module Miele
         def status: (State state) -> Integer
 
         def mobile?: (State state) -> bool
-
-        def require_start_time!: () -> void
 
         def standby: (State state) -> Integer
 

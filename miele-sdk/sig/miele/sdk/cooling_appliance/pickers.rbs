@@ -6,15 +6,15 @@ module Miele
         FN_TECH_TYPES: Array[String]
         KFN_TECH_TYPE: Regexp
 
+        def target_choices: (Zone zone) -> Array[Integer]
+
         private
 
-        def require_offered!: (Integer value, Array[Integer] choices) -> void
-
-        def new_target?: (Zone zone, Integer degrees, State state) -> bool
+        def new_target?: (Zone zone, Integer | Float degrees, State state) -> bool
 
         def target_temp: (Zone zone, State state) -> Hash[String, untyped]
 
-        def target_choices: (Zone zone, State state, Hash[String, untyped] target) -> Array[Integer]
+        def offered_targets: (Zone zone, State state, Hash[String, untyped] target) -> Array[Integer]
 
         def api_targets: (Hash[String, untyped] target) -> Array[Integer]
 

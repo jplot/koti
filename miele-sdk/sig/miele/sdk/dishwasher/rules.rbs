@@ -4,6 +4,10 @@ module Miele
       module Rules : Appliance
         STANDBY_STATES: Array[Integer]
 
+        def ready?: (?State state) -> bool
+
+        def details_bar?: (?State state) -> bool
+
         private
 
         def status: (State state) -> Integer
@@ -14,11 +18,7 @@ module Miele
 
         def mobile?: (State state) -> bool
 
-        def ready?: (State state) -> bool
-
         def off?: (State state) -> bool
-
-        def details_bar?: (State state) -> bool
 
         def second_button: (Array[Symbol] requests) -> Symbol?
 
@@ -26,7 +26,7 @@ module Miele
 
         def offered?: (Symbol request) -> bool
 
-        def require_no_info700!: () -> void
+        def info700?: () -> bool
 
         def dop2?: () -> bool
 

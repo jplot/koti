@@ -9,11 +9,12 @@ RSpec.describe Miele::Sdk::Hood do
   let(:state) { { 'Status' => 4, 'Light' => 2, 'ExtendedState' => extended(supported) } }
   let(:fake) do
     served = state
+    fragrance = pf40028
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(served)]
-      in { verb: 'POST', body: /12010100019c5c/ } then [200, {}, '{"Response":"12011100019c5c00000087"}']
+      in { verb: 'POST', body: /12010100019c5c/ } then [200, {}, "{\"Response\":\"12011100019c5c000000#{fragrance}\"}"]
       in { verb: 'POST', body: /8E0A01/ } then [200, {}, '{"Response":"8E0A1100010201000700163c00"}']
       else [200, {}, '{}']
       end
@@ -23,6 +24,8 @@ RSpec.describe Miele::Sdk::Hood do
   before { connect_to(fake) }
 
   after { fake.stop }
+
+  def pf40028 = '87'
 
   def extended(bytes)
     data = Array.new(73, 0)
@@ -57,11 +60,13 @@ RSpec.describe Miele::Sdk::Hood do
     expect(writes).to eq(%w[12010200019c4c00000001 12010200019c4d00000001])
   end
 
-  it 'sets dehumidification regulated or off with PF 40025, never controlled', :aggregate_failures do
+  it 'sets dehumidification with PF 40025, controlled too, which the app never writes', :aggregate_failures do
+    expect(hood.dehumidification_modes).to eq(%i[off regulated])
     hood.dehumidification = :regulated
     hood.dehumidification = :off
-    expect { hood.dehumidification = :controlled }.to raise_error(ArgumentError)
-    expect(writes).to eq(%w[12010200019c5900000002 12010200019c5900000000])
+    hood.dehumidification = :controlled
+    expect { hood.dehumidification = :boost }.to raise_error(ArgumentError)
+    expect(writes).to eq(%w[12010200019c5900000002 12010200019c5900000000 12010200019c5900000001])
   end
 
   it 'makes the dehumidification blower silent by rewriting what 8E0A reads', :aggregate_failures do
@@ -70,7 +75,8 @@ RSpec.describe Miele::Sdk::Hood do
     expect(reads).to eq(%w[8E0A0100010201 8E0A020001020101000700163c])
   end
 
-  it 'starts and stops the fragrance with ProcessAction 1100, and sets the Miele program' do
+  it 'starts and stops the fragrance with ProcessAction 1100, and sets the Miele program', :aggregate_failures do
+    expect(hood.fragrance_supported?).to be(true)
     hood.fragrance(:start)
     hood.fragrance(:stop)
     hood.fragrance(:miele_program)
@@ -92,13 +98,16 @@ RSpec.describe Miele::Sdk::Hood do
   context 'when the hood is off' do
     let(:state) { { 'Status' => 1, 'Light' => 2, 'ExtendedState' => '' } }
 
-    it 'asks to wake a hood that is off before what depends on its state', :aggregate_failures do
-      [-> { hood.fan_level = 2 }, -> { hood.grease_melting = true }, -> { hood.auto_refresh = true }]
-        .each { expect(&it).to raise_error(Miele::Sdk::ActionUnavailableError, /wake/) }
-      expect(writes).to be_empty
+    it 'sends what depends on its state, which it does not serve until woken', :aggregate_failures do
+      expect([hood.fan_settable?, hood.grease_melting, hood.auto_refresh_supported?]).to eq([nil, nil, nil])
+      hood.fan_level = 2
+      hood.grease_melting = true
+      hood.auto_refresh = true
+      expect(writes).to eq(%w[8E01020000ff0200 14060200010100 12010200019c5700000001])
     end
 
-    it 'wakes a sleeping Dop1 hood by writing back its Light' do
+    it 'wakes a sleeping Dop1 hood by writing back its Light', :aggregate_failures do
+      expect(hood.wake_offered?).to be(true)
       hood.wake
       request = fake.requests.last
       expect([request.verb, request.path, JSON.parse(request.body)])
@@ -106,13 +115,31 @@ RSpec.describe Miele::Sdk::Hood do
     end
   end
 
+  it 'wakes a Dop1 hood that is on too, which the app wakes only while off', :aggregate_failures do
+    expect(hood.wake_offered?).to be(false)
+    hood.wake
+    expect(fake.requests.last.path).to eq("/Devices/#{fab}/State")
+  end
+
+  context 'when PF 40028 lists no fragrance' do
+    def pf40028 = '07'
+
+    it 'tells the app offers none' do
+      expect(hood.fragrance_supported?).to be(false)
+    end
+  end
+
   context 'when the hood supports none of them' do
     let(:supported) { {} }
 
-    it 'refuses what the hood does not support, as the app hides it', :aggregate_failures do
-      [-> { hood.ambient_light = true }, -> { hood.dehumidification = :off }, -> { hood.grease_melting = true },
-       -> { hood.auto_refresh = true }].each { expect(&it).to raise_error(Miele::Sdk::ActionUnavailableError) }
-      expect(writes).to be_empty
+    it 'sends what the hood does not support, while its readings tell the app hides it', :aggregate_failures do
+      expect([hood.lights.ambient.exists, hood.dehumidification.supported, hood.grease_melting.supported,
+              hood.auto_refresh_supported?]).to eq([false, false, false, false])
+      hood.ambient_light = true
+      hood.dehumidification = :off
+      hood.grease_melting = true
+      hood.auto_refresh = true
+      expect(writes.size).to eq(4)
     end
   end
 

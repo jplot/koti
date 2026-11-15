@@ -65,9 +65,13 @@ RSpec.describe Miele::Sdk::Hood do
     expect(written).to eq([['PUT', 'DOP2/2/1577', default_select.sub('000105ffff', '0001050002')]])
   end
 
-  it 'sets the run-on of a DOP2 hood on the same message' do
+  it 'sets the run-on of a DOP2 hood on the same message, a time the picker does not offer too',
+     :aggregate_failures do
+    expect(hood.fan_run_on_times).to eq([0, 5, 15])
     hood.fan_run_on_time = 15
-    expect(written).to eq([['PUT', 'DOP2/2/1577', default_select.sub('000205ffff', '000205000f')]])
+    hood.fan_run_on_time = 10
+    expect(written.map(&:last)).to eq([default_select.sub('000205ffff', '000205000f'),
+                                       default_select.sub('000205ffff', '000205000a')])
   end
 
   it 'switches the lights of a DOP2 hood and resets its filters with user requests written back at 0/1' do
@@ -78,7 +82,8 @@ RSpec.describe Miele::Sdk::Hood do
     expect(written).to eq([13, 20_002, 20_009, 20_008].map { user_request(it) })
   end
 
-  it 'writes the settings of a DOP2 hood back on 2/105 at their SF id' do
+  it 'writes the settings of a DOP2 hood back on 2/105 at their SF id', :aggregate_failures do
+    expect(hood.fragrance_supported?).to be(true)
     hood.ambient_light_while_cooking = true
     hood.auto_refresh = true
     hood.fragrance(:miele_program)
@@ -100,8 +105,9 @@ RSpec.describe Miele::Sdk::Hood do
 
     def oc85 = written.map { it.last['Request'] if it[1] == 'Oc85/' }
 
-    it 'sets the run-on time of an Opcode hood through Oc85' do
+    it 'sets the run-on time of an Opcode hood through Oc85, in one byte', :aggregate_failures do
       hood.fan_run_on_time = 15
+      expect { hood.fan_run_on_time = 256 }.to raise_error(ArgumentError)
       expect(written).to eq([['POST', 'Oc85/', { 'Request' => '100006090F00000000' }]])
     end
 
@@ -121,8 +127,10 @@ RSpec.describe Miele::Sdk::Hood do
                              ['POST', 'Oc85/', { 'Request' => '0B0003000400' }]])
     end
 
-    it 'refuses the ambient light, which an Opcode hood has not' do
+    it 'refuses the ambient light and the fragrance, which Opcode has no request for', :aggregate_failures do
       expect { hood.ambient_light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { hood.fragrance(:start) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(hood.fragrance_supported?).to be(false)
     end
   end
 
@@ -140,8 +148,14 @@ RSpec.describe Miele::Sdk::Hood do
   context 'when the hood screen is pushed in' do
     let(:extended) { {} }
 
-    it 'refuses the fan, as the app does' do
-      expect { hood.fan_level = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'tells the app offers no fragrance without its function bit' do
+      expect(hood.fragrance_supported?).to be(false)
+    end
+
+    it 'sets the fan, which the app refuses', :aggregate_failures do
+      expect(hood.fan_settable?).to be(false)
+      hood.fan_level = 2
+      expect(written.map { it[1] }).to eq(['DOP2/2/1577'])
     end
   end
 end

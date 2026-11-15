@@ -4,9 +4,11 @@ module Miele
       module Commands : Appliance
         SUPER_MODE_ACTIONS: Hash[Symbol, [Integer, Integer]]
 
-        def set_target: (Zone zone, Integer degrees) -> void
+        def set_target: (Zone zone, Integer | Float degrees) -> void
 
         def set_super_mode: (Zone zone, bool on) -> void
+
+        def super_mode_offered?: (Zone zone) -> bool
 
         def set_fan: (Zone zone, bool on) -> void
 
@@ -20,13 +22,17 @@ module Miele
 
         def switch: (bool on) -> Hash[Symbol, untyped]
 
+        def write_cooling: (String member, **untyped body) -> void
+
+        def whole_degrees: (Integer | Float degrees) -> Integer
+
+        def cooling_api?: () -> bool
+
         def write_super_mode_duration: (Zone zone) -> void
 
         def process_action: (Zone zone, bool on) -> Integer
 
-        def new_target?: (Zone zone, Integer degrees, State state) -> bool
-
-        def require_zones_shown!: (?State state) -> void
+        def new_target?: (Zone zone, Integer | Float degrees, State state) -> bool
 
         def shown_off?: (State state) -> bool
 

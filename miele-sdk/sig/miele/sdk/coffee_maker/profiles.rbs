@@ -11,17 +11,25 @@ module Miele
 
         def rename_profile: (Integer id, String name) -> void
 
+        def profile_name_allowed?: (Integer id, String name) -> bool
+
         def delete_profile: (Integer id) -> void
+
+        def delete_profile_offered?: (Integer id) -> bool
+
+        def custom_profiles: () -> Array[Integer]
 
         def edit_drink: (Integer id, amount: Integer, temperature: Integer, pre_brewing: Integer, ?bean_sort: Integer?) -> void
 
+        def drink_settings: () -> Hash[Symbol, Array[Integer]]
+
         def rename_drink: (Integer id, String name) -> void
+
+        def drink_name_allowed?: (Integer id, String name) -> bool
 
         private
 
         def require_profiles!: () -> void
-
-        def require_custom!: (Integer id) -> void
 
         def profile_slots: () -> Integer
 

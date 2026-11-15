@@ -8,15 +8,17 @@ module Miele
 
         def microwave_power=: (Integer bit) -> void
 
+        def microwave_powers: () -> Array[Integer]
+
+        def program_context: () -> Objects::Oven::GlobalPsContext
+
         private
 
         def write_microwave_power: (Integer prog_id, Integer bit) -> void
 
         def power_message_shown?: () -> bool?
 
-        def editable_parameters: (Symbol name) -> Objects::Oven::GlobalPsContext
-
-        def selected_program: (Objects::Oven::GlobalPsContext context) -> Integer
+        def selected_prog_id: () -> Integer
 
         def write_parameter: (Integer prog_id, Integer id, Symbol type, untyped value) -> void
 

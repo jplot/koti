@@ -21,9 +21,10 @@ module Miele
         #
         # @param at [Time, :now] when an automatic program starts
         # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, with no program selected, or when the program requires a
-        #   duration not set yet
-        # @raise [ArgumentError] for a time given to a program that is not automatic, which takes +start_at=+
+        # @raise [ActionUnavailableError] on a Dop1 oven, with no program selected, or when 1/1574 lacks a parameter
+        #   the app reads before writing any
+        # @raise [ArgumentError] for a time given to a program that is not automatic: request 1 carries none, and the
+        #   program takes +start_at=+
         # @api public
         def start(at: :now)
           require_dop2!
@@ -32,51 +33,70 @@ module Miele
           return start_automatic(prog_id, context, at) if automatic?(context)
           raise ArgumentError, 'only an automatic program starts at a given time; set start_at= first' if at != :now
 
-          require_duration!(context)
           write_required_parameters(prog_id, context)
           write_dop2(Messages.user_request(supported_requests.include?(1) ? 1 : 113))
         end
 
+        # @return [Boolean] whether the app offers {#start}: on a DOP2 oven, a program selected (a ProgId on
+        #   1/1574), automatic, or with its duration set where it requires one (0 and all ones are unset)
+        # @api public
+        def start_offered?
+          return false unless dop2?
+
+          context = program_context
+          !context.prog_attributes_cca&.prog_id.nil? && (automatic?(context) || duration_given?(context))
+        end
+
         # @return [void]
-        # @raise [ActionUnavailableError] when the oven offers no stop, or a DOP2 oven is not under remote control
         # @api public
         def stop
           return stop_dop1 unless dop2?
 
           state = self.state
           context = self.context
-          requests = offered(context)
-          require!(stoppable?(context, requests), 'the oven offers no stop now')
-          require!(under_remote_control?(state), 'the oven stops only under remote control')
-          write_dop2(Messages.user_request(stop_request(state, context, requests)))
+          write_dop2(Messages.user_request(stop_request(state, context, offered(context))))
         end
 
-        # Offered while 1/131 shows message 20 (OptionsRunningAfterEndRule).
+        # The app's Dop1 rule asks for a program of raw type 0, 1 or 2 (function, own, automatic) and ignores
+        # +RemoteEnable+.
         #
-        # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or when the oven is not keeping warm
+        # @return [Boolean] whether the app offers {#stop}: on a DOP2 oven, one of requests 2, 55, 56 and 57 offered,
+        #   no pyrolysis abort running, and remote control without local control
         # @api public
-        def stop_keeping_warm = user_request(68, 'the oven is not keeping warm') { shows?(:message, 20) }
+        def stop_offered?
+          state = self.state
+          return state.program_id.to_i.positive? && [0, 1, 2].include?(state.raw['ProgramType']) unless dop2?
+
+          context = self.context
+          stoppable?(context, offered(context)) && under_remote_control?(state) == true
+        end
+
+        # @return [void]
+        # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1583 to write
+        # @api public
+        def stop_keeping_warm = user_request(68)
+
+        # OptionsRunningAfterEndRule.
+        #
+        # @return [Boolean] whether the app offers {#stop_keeping_warm}: a DOP2 oven whose 1/131 shows message 20
+        # @api public
+        def stop_keeping_warm_offered? = dop2? && shows?(:message, 20)
 
         private
 
         # @param id [Integer]
-        # @param reason [String] why the oven does not offer it
-        # @yieldreturn [Boolean] whether it does
         # @return [void]
-        def user_request(id, reason)
+        # @raise [ActionUnavailableError] on a Dop1 oven
+        def user_request(id)
           require_dop2!
-          require!(yield, reason)
           write_dop2(Messages.user_request(id))
         end
 
         # @param context [Objects::Oven::GlobalPsContext]
-        # @return [void]
-        # @raise [ActionUnavailableError] when the duration is required but unset (0 or all ones)
-        def require_duration!(context)
+        # @return [Boolean] false when the duration is required but unset (0 or all ones)
+        def duration_given?(context)
           duration = context.context_para_ca&.duration
-          require!(!mask(duration).anybits?(2) || (1...0xFFFF_FFFF).cover?(duration&.current_value.to_i),
-                   'the program requires a duration not set yet')
+          !mask(duration).anybits?(2) || (1...0xFFFF_FFFF).cover?(duration&.current_value.to_i)
         end
 
         # @param prog_id [Integer]
@@ -179,16 +199,8 @@ module Miele
           Array(shown).any? { it.id && ids.include?(NOTIFICATION_IDS.fetch(type).to_i(it.id)) }
         end
 
-        # The app's Dop1 rule asks for a program of raw type 0, 1 or 2 (function, own, automatic) and ignores
-        # +RemoteEnable+.
-        #
         # @return [void]
-        def stop_dop1
-          state = self.state
-          require!(state.program_id.to_i.positive? && [0, 1, 2].include?(state.raw['ProgramType']),
-                   'the oven runs no program')
-          command(Schema::DeviceState.new(process_action: 2))
-        end
+        def stop_dop1 = command(Schema::DeviceState.new(process_action: 2))
       end
     end
   end

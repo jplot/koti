@@ -12,9 +12,6 @@ module Miele
       # Request type that writes an object.
       WRITE = '02'
 
-      RUN_ON_TIMES = [0, 5, 15].freeze
-      private_constant :RUN_ON_TIMES
-
       SETTING_VERSION = 1
       private_constant :SETTING_VERSION
 
@@ -41,12 +38,10 @@ module Miele
 
       # @param minutes [Integer] how long the fan keeps running once switched off
       # @return [String]
-      # @raise [ArgumentError]
+      # @raise [ArgumentError] for minutes a byte does not hold
       # @api public
       def fan_run_on_time(minutes)
-        raise ArgumentError, "run-on time must be 0, 5 or 15 minutes: #{minutes}" unless RUN_ON_TIMES.include?(minutes)
-
-        request(object_id: '8E06', type: WRITE, section: [0, minutes].pack('C2'))
+        request(object_id: '8E06', type: WRITE, section: [0, unsigned(minutes, 8)].pack('C2'))
       end
 
       # @param on [Boolean]

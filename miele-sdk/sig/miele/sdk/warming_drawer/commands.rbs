@@ -4,19 +4,31 @@ module Miele
       module Commands : Appliance
         def power_on: () -> void
 
+        def power_on_offered?: () -> bool
+
         def power_off: () -> void
+
+        def power_off_offered?: () -> bool
 
         def select_program: (Integer id) -> void
 
+        def select_program_offered?: () -> bool
+
         def target_temperature=: (Integer celsius) -> void
+
+        def target_temperature_offered?: () -> bool
 
         def remaining_time=: (Integer minutes) -> void
 
+        def remaining_time_offered?: () -> bool
+
         def cups_warm_up_source=: (String? coffee_maker) -> void
 
-        private
+        def cups_warm_up_offered?: () -> bool
 
-        def switchable?: (State state) -> bool
+        def switchable?: (?State state) -> bool
+
+        private
 
         def controllable?: (State state) -> bool
 
@@ -24,9 +36,9 @@ module Miele
 
         def write_process_data: (Integer program, Integer minutes, Integer celsius) -> void
 
-        def program: (State state) -> Program?
+        def running_program: (State state) -> Integer
 
-        def picked_minutes: (Program? program, Integer minutes) -> Integer
+        def program: (State state) -> Program?
 
         def remaining_minutes: (State state) -> Integer
 

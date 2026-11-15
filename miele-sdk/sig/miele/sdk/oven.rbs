@@ -17,6 +17,10 @@ module Miele
 
       def power_off: () -> void
 
+      def power_on_offered?: () -> bool
+
+      def power_off_offered?: () -> bool
+
       def context: () -> Objects::Oven::GlobalDeviceContext
 
       def program_context: () -> Objects::Oven::GlobalPsContext
@@ -50,10 +54,6 @@ module Miele
       def require_dop2!: () -> void
 
       def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
-
-      def require_switch_on!: () -> void
-
-      def require_switch_off!: () -> void
 
       def power_leaf: (Integer state) -> Dop2::Leaf
 

@@ -5,8 +5,6 @@ module Miele
 
       WRITE: String
 
-      RUN_ON_TIMES: Array[Integer]
-
       SETTING_VERSION: Integer
 
       def self?.request: (object_id: String, type: String, section: String) -> String

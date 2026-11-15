@@ -42,6 +42,26 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   enroll, and once the block breaks those it cannot withdraw, raise a `SubscriptionError` whose
   `failures` gives the error of each host; a push whose signature fails is answered 403 and nothing
   else.
+- **Breaking:** commands no longer refuse what the Miele app's screens hide or disable, nor a value
+  its pickers do not offer: ovens, dishwashers, laundry appliances, hoods, coffee makers, cooling
+  appliances and warming drawers send what they are given, and the predicates below give the app's
+  rules. `ActionUnavailableError` now means only that the appliance's protocol or state gives no
+  request to send (a DOP2 leaf on a Dop1 appliance, a parameter with no program selected…), and
+  `ArgumentError` only a value the wire cannot carry. A hood's `wake` writes back a Dop1 or Opcode
+  hood's light whatever its status, and its `dehumidification =` takes `:controlled`. A cooling
+  appliance's `set_target` takes a fraction of a degree on the Cooling API, and a whole Float on
+  Opcode. A warming drawer's `select_program` takes 0 (Aus), its `remaining_time=` is no longer kept
+  to the program's maximum, and both its `target_temperature=` and `remaining_time=` raise
+  `ActionUnavailableError` while `State` shows no program 1 to 4. A Dop1 dishwasher's `auto_dos=`
+  raises `ActionUnavailableError`, having no 2/105. Laundry `set_parameters` writes any extra the
+  DOP2 object carries (`starch_hold`, `program_locked`, `fan_clocking`…) and `master_care` on DOP2
+  washers. An oven's parameter predicates and `ParameterGates` name a parameter after its setter
+  (`:target_temperature`). Where the app sends nothing, neither does the SDK: a coffee maker's
+  `power_on` still writes nothing once 2/1586 shows it on, nor its `light=` on DOP2, and a
+  dishwasher's `power_on` writes 2/1586 only at Status 1 or 4.
+- The cloud event stream yields every resource the cloud pushes, where it skipped those the app does
+  not read: as JSON where it parses, else as pushed, and a push outside any appliance under its own
+  path.
 
 ### Fixed
 
@@ -61,6 +81,27 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- The rules of the app's screens and pickers as public predicates and readers, read as the app reads
+  them. Ovens: `power_on_offered?`, `power_off_offered?`, `start_offered?`, `stop_offered?`,
+  `stop_keeping_warm_offered?`, `steam_burst_offered?`, `continue_cooking_offered?`,
+  `select_program_offered?`, `parameter_shown?`, `parameter_editable?`, `option_shown?`,
+  `option_editable?` and `microwave_powers`. Dishwashers: `start_offered?`, `pause_offered?`,
+  `resume_offered?`, `stop_offered?`, `cancel_offered?`, `leave_abort_offered?`,
+  `power_on_offered?`, `power_off_offered?`, `start_delayed_offered?`, `open_door_offered?`,
+  `ready?`, `details_bar?`, `offered_extras` and `offered_settings`. Laundry: `stop_end_signal_offered?`,
+  `stop_to_edit_offered?`, `wake_offered?`, `power_off_offered?`, `set_parameters_offered?` and
+  `start_delayed_offered?`, beside `supported_requests`. Hoods: `fragrance_supported?`,
+  `wake_offered?`, `fan_run_on_times`, `color_flow_intervals` and `dehumidification_modes`, beside
+  the readings. Coffee makers: `power_on_offered?`, `power_off_offered?`, `light_offered?`,
+  `brew_offered?`, `drink_stoppable?`, `barista_entry?`, `one_touch?`, `profile_name_allowed?`,
+  `delete_profile_offered?`, `drink_name_allowed?`, `custom_profiles` and `drink_settings`. Cooling
+  appliances: `zones_shown?`, `settings_shown?`, `light_shown?`, `super_mode_offered?`,
+  `ice_maker_offered?`, `light_offered?`, `ambient_light_offered?`, `presentation_light_offered?`,
+  `presentation_light_intensity_offered?`, `humidity_offered?`, `perfect_fresh_offered?`,
+  `humidifier_offered?`, `door_alarm_delay_offered?`, `target_choices` and the `*_choices`
+  readers of each setting. Warming drawers: `switchable?`, `power_on_offered?`,
+  `power_off_offered?`, `select_program_offered?`, `target_temperature_offered?`,
+  `remaining_time_offered?` and `cups_warm_up_offered?`.
 - Hoods as the app's hood module drives them, in Opcode, Dop1 and DOP2: typed reads of the fan,
   run-on, lights, filters, height, dehumidification and grease melting; fan, run-on, lights,
   filter resets, ambient colours, dehumidification, fragrance, grease melting and auto refresh,

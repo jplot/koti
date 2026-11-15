@@ -11,17 +11,18 @@ module Miele
         private_constant :STEAM_BURST_PARAMETERS
 
         # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or unless the oven offers request 59 for a REST ProgramID
-        #   and a manual steam burst is left in a function that runs or pauses
+        # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1583 to write
         # @api public
-        def steam_burst = user_request(59, 'the oven offers no steam burst now') { steam_burst? }
-
-        private
+        def steam_burst = user_request(59)
 
         # SteamBurstsSource gives no entity without a REST ProgramID.
         #
-        # @return [Boolean]
-        def steam_burst?
+        # @return [Boolean] whether the app shows its steam burst button: a DOP2 oven offering request 59 for a REST
+        #   ProgramID, with a manual steam burst left in a function that runs or pauses
+        # @api public
+        def steam_burst_offered?
+          return false unless dop2?
+
           state = self.state
           device = context
           requests = offered(device)
@@ -31,6 +32,8 @@ module Miele
           manual_steam_burst?(shown) && %i[running paused].include?(oven_state(state, device, requests)) &&
             burst_left?(shown)
         end
+
+        private
 
         # SteamBurstsRule.Convert, on the entity ConvertToEntity builds only when every value it reads is there.
         #

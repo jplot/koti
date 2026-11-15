@@ -14,49 +14,49 @@ module Miele
         # @raise [ActionUnavailableError] see {#set_parameter}
         # @api public
         def target_temperature=(celsius)
-          set_parameter(:temperature, 6, :u16, hundredths(celsius))
+          set_parameter(6, :u16, hundredths(celsius))
         end
 
         # @param celsius [Numeric] of the core probe
         # @api public
         def core_target_temperature=(celsius)
-          set_parameter(:core_temperature, 7, :u16, hundredths(celsius))
+          set_parameter(7, :u16, hundredths(celsius))
         end
 
         # @param level [Integer]
         # @api public
         def moisture=(level)
-          set_parameter(:moisture, 2, :u8, level)
+          set_parameter(2, :u8, level)
         end
 
         # @param level [Integer]
         # @api public
         def grill_level=(level)
-          set_parameter(:grill_level, 1, :u8, level)
+          set_parameter(1, :u8, level)
         end
 
         # @param level [Integer]
         # @api public
         def browning=(level)
-          set_parameter(:browning, 30, :u8, level)
+          set_parameter(30, :u8, level)
         end
 
         # @param level [Integer]
         # @api public
         def doneness=(level)
-          set_parameter(:doneness, 31, :u8, level)
+          set_parameter(31, :u8, level)
         end
 
         # @param time [Time, :now]
         # @api public
         def start_at=(time)
-          set_parameter(:start_at, 13, :u64, unix_time(time))
+          set_parameter(13, :u64, unix_time(time))
         end
 
         # @param time [Time]
         # @api public
         def end_at=(time)
-          set_parameter(:end_at, 14, :u64, time.to_i)
+          set_parameter(14, :u64, time.to_i)
         end
 
         # The app moves the start to its minimum before a zero duration only (SetDurationAction).
@@ -64,7 +64,8 @@ module Miele
         # @param seconds [Integer]
         # @api public
         def duration=(seconds)
-          context = editable_parameters(:duration)
+          require_dop2!
+          context = program_context
           prog_id = selected_program(context)
           write_parameter(prog_id, 13, :u64, context.context_para_ca&.start_at&.min.to_i) if seconds.zero?
           write_parameter(prog_id, 12, :u32, seconds)
@@ -84,20 +85,26 @@ module Miele
           options = options.compact
           return if options.empty?
 
-          prog_id = selected_program(editable_options(options.keys))
+          prog_id = selected_prog_id
           options.each { |id, on| write_parameter(prog_id, id, :bool, on) }
         end
 
         private
 
-        # @param name [Symbol] the parameter, as {ParameterGates} names it
         # @param id [Integer] its +GLOBAL_PS_SelectionParaCA+ attribute
         # @param type [Symbol] its wire type
         # @param value [Object]
         # @return [void]
-        # @raise [ActionUnavailableError]
-        def set_parameter(name, id, type, value)
-          write_parameter(selected_program(editable_parameters(name)), id, type, value)
+        # @raise [ActionUnavailableError] on a Dop1 oven, or when no program is selected: PsSelect has no ProgId to
+        #   write
+        # @raise [ArgumentError] for a value its wire type does not hold
+        def set_parameter(id, type, value) = write_parameter(selected_prog_id, id, type, value)
+
+        # @return [Integer] the ProgId of the selected program on 1/1574
+        # @raise [ActionUnavailableError] on a Dop1 oven, or when no program is selected
+        def selected_prog_id
+          require_dop2!
+          selected_program(program_context)
         end
 
         # @param context [Objects::Oven::GlobalPsContext] 1/1574

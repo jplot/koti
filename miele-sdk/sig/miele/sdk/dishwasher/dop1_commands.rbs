@@ -6,6 +6,8 @@ module Miele
 
         def open_door: () -> void
 
+        def open_door_offered?: () -> bool
+
         private
 
         def dop1_process_action: (State state, Integer action) -> void

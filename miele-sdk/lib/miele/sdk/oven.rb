@@ -23,11 +23,11 @@ module Miele
       # other families switch on in their own way.
       #
       # @return [void]
-      # @raise [ActionUnavailableError] on a Dop1 or H2 oven, or without remote control or mobile start
+      # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1586 to write
       # @raise [ResponseError] if the appliance still refuses after three attempts
       # @api public
       def power_on
-        require_switch_on!
+        require_dop2!
         3.times do |attempt|
           rouse if attempt.positive?
           return write_dop2(power_leaf(4))
@@ -39,17 +39,41 @@ module Miele
       # The app's SendSwitchOffAsync swallows a 500 on its write.
       #
       # @return [void]
-      # @raise [ActionUnavailableError] on a Dop1 oven, or without remote control or mobile start, or under local
-      #   control, or not connected
+      # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1586 to write
       # @raise [ResponseError] if the appliance refuses with another status
       # @api public
       def power_off
-        require_switch_off!
+        require_dop2!
         begin
           write_dop2(power_leaf(1))
         rescue ResponseError => e
           raise unless e.status == 500
         end
+      end
+
+      # IsDiscoveryOven, and the app's offline screen, the loosest of its switch-on paths.
+      #
+      # @return [Boolean] whether the app offers {#power_on}: a DOP2 oven other than an H2, under remote control or
+      #   mobile start
+      # @api public
+      def power_on_offered?
+        return false if !dop2? || tech_type.to_s.start_with?('H2')
+
+        state = self.state
+        state.remote_control? == true || state.mobile_start? == true
+      end
+
+      # UpdateEnabledState of the app's settings switch, the loosest of its three switch-off paths.
+      #
+      # @return [Boolean] whether the app offers {#power_off}: a DOP2 oven under remote control without local
+      #   control, or under mobile start alone, and connected (+Status+ other than 255)
+      # @api public
+      def power_off_offered?
+        return false unless dop2?
+
+        state = self.state
+        remote = under_remote_control?(state) || (!state.remote_control? && state.mobile_start?)
+        remote == true && state.status != :not_connected
       end
 
       # @return [Objects::Oven::GlobalDeviceContext] 1/1585, read without an index as the app observes it
@@ -137,8 +161,9 @@ module Miele
       def dop2? = [3, 4].include?(protocol_version)
 
       # @return [void]
-      # @raise [ActionUnavailableError] on a Dop1 oven, which the app only stops
-      def require_dop2! = require!(dop2?, 'a Dop1 oven only stops, as in the app')
+      # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no DOP2 leaf to write: it only stops,
+      #   through +ProcessAction+
+      def require_dop2! = require!(dop2?, 'a Dop1 oven has no DOP2 leaf to write: it only stops')
 
       # @param context [Objects::Oven::GlobalDeviceContext] 1/1585
       # @return [Array<Integer>]
@@ -151,29 +176,6 @@ module Miele
       def celsius(parameter)
         value = program_context.context_para_ca&.public_send(parameter)
         value&.current_value&.then { it / 100.0 }
-      end
-
-      # IsDiscoveryOven, and the app's offline screen, the loosest of its switch-on paths.
-      #
-      # @return [void]
-      # @raise [ActionUnavailableError]
-      def require_switch_on!
-        require_dop2!
-        require!(!tech_type.to_s.start_with?('H2'), 'the app does not switch on an H2 oven')
-        state = self.state
-        require!(state.remote_control? || state.mobile_start?, 'the oven is not remote enabled')
-      end
-
-      # UpdateEnabledState of the app's settings switch, the loosest of its three switch-off paths.
-      #
-      # @return [void]
-      # @raise [ActionUnavailableError]
-      def require_switch_off!
-        require_dop2!
-        state = self.state
-        require!(under_remote_control?(state) || (!state.remote_control? && state.mobile_start?),
-                 'the oven is not remote enabled, or is under local control')
-        require!(state.status != :not_connected, 'the oven is not connected')
       end
 
       # The appliance state on 2/1586: 4 switches on, 1 off.

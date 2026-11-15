@@ -6,7 +6,13 @@ module Miele
 
         def start_delayed: (Time at) -> void
 
+        def start_delayed_offered?: () -> bool
+
+        def supported_requests: () -> Array[Integer]
+
         private
+
+        def require_selection!: () -> void
 
         def offset_minutes: (Time target, Time now) -> Integer
 
@@ -15,8 +21,6 @@ module Miele
         def dop1_start_delayed: (Time target, Time now) -> void
 
         def write_start_time: (Integer hours, Integer minutes) -> void
-
-        def supported_requests: () -> Array[Integer]
 
         def dop2?: () -> bool
 

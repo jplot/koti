@@ -3,20 +3,13 @@
 module Miele
   module Sdk
     class CoolingAppliance < Appliance
-      # The rules by which the app's refrigeration screens show their controls; the SDK refuses what they hide.
+      # The rules by which the app's refrigeration screens show their controls.
       module Screen
-        private
-
-        # @param state [State]
-        # @return [void]
-        # @raise [ActionUnavailableError] while the app hides the zones
-        def require_zones_shown!(state = self.state)
-          require!(zones_shown?(state), 'the app shows no zone now')
-        end
-
-        # @param state [State]
-        # @return [Boolean] as GetVisibleElementsFields decides
-        def zones_shown?(state)
+        # @param state [State] read when not given
+        # @return [Boolean] whether the app shows the zones, and their target, fan and VarioCool controls, as
+        #   GetVisibleElementsFields decides
+        # @api public
+        def zones_shown?(state = self.state)
           case app_state(state)
           when :off then false
           when :on then !holiday_or_sabbath?(state) || failure_alarm?
@@ -24,6 +17,29 @@ module Miele
           else true
           end
         end
+
+        # The rule PresentationLightStateRule and HumidityControlRule share.
+        #
+        # @param state [State] read when not given
+        # @return [Boolean] listed, not in a failure without a door signal, nor in Holiday or Sabbath mode
+        # @api public
+        def settings_shown?(state = self.state)
+          return false if !settings_listed?(state) || (state.raw['Status'] == 8 && door_signal(state).zero?)
+
+          !holiday_or_sabbath?(state)
+        end
+
+        # The light section shows with the zones on a wine unit, the light's quick action on the dashboard; both
+        # need a light state.
+        #
+        # @param state [State] read when not given
+        # @return [Boolean] whether the app shows the light's switch
+        # @api public
+        def light_shown?(state = self.state)
+          !light_state(state).zero? && (zones_shown?(state) || quick_action_shown?(state))
+        end
+
+        private
 
         # ApplianceStateRule: a door signal turns on, running and super freezing into DoorOpen or DoorAlarm, but only
         # a door alarm turns a failure into DoorAlarm.
@@ -61,16 +77,6 @@ module Miele
         # @return [Boolean] neither at Status 1 nor 255
         def settings_listed?(state) = ![1, 255].include?(state.raw['Status'])
 
-        # The rule PresentationLightStateRule and HumidityControlRule share.
-        #
-        # @param state [State]
-        # @return [Boolean] listed, not in a failure without a door signal, nor in Holiday or Sabbath mode
-        def settings_shown?(state)
-          return false if !settings_listed?(state) || (state.raw['Status'] == 8 && door_signal(state).zero?)
-
-          !holiday_or_sabbath?(state)
-        end
-
         # PresentationLightStateRule, which shows the presenter light section and, behind it, the intensities.
         #
         # @param state [State]
@@ -97,13 +103,6 @@ module Miele
 
         # @return [Boolean] +PresentationLight+ at 1 or 2, which the app reads as on or off
         def presenter_light_state? = [1, 2].include?(cooling.dig('PresentationLight', 'Value'))
-
-        # The light section shows with the zones on a wine unit, the light's quick action on the dashboard; both
-        # need a light state.
-        #
-        # @param state [State]
-        # @return [Boolean]
-        def light_shown?(state) = !light_state(state).zero? && (zones_shown?(state) || quick_action_shown?(state))
 
         # The light section shows the ambient light where its source reads a setting, and enables it with the
         # light on.

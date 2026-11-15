@@ -652,7 +652,10 @@ actions on a CM7 or CVA6000, which have no such object; `create_profile` once th
 used (4 on a CM6160, 8 on another CM6F, 10 otherwise). `brew` takes a program id the app defines,
 not 0, and acknowledgements options 1 to 17, 1 to 16 on a CM7, as the app's mappers do; another
 raises `ArgumentError`, and so does a drink value its 2/261 member does not hold. `edit_drink`
-writes 255 as the bean sort on all but a CVA, as the app does.
+writes 255 as the bean sort on all but a CVA, as the app does. A CVA6000's `light=` writes its
+`State` back with the light changed and, as the app's LightStateAction, takes the answer only when
+its first `Success` carrying `Light` gives back the light written: otherwise it raises
+`Miele::Sdk::NotAcceptedError`.
 
 Left out: tasting, saving a tasted drink, and resetting a drink or a profile, whose values the app
 derives through helpers not traced; the message check of the app's Barista start page; the drink tables that limit two cups or a double shot to some

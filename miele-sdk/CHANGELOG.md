@@ -18,7 +18,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   while asleep, then `State` is read every half second until it shows the hood awake, raising
   `ActionFailedError` after a minute; a DOP2 dishwasher is woken only off, or waiting to start out
   of `StandbyState` 1, and a Dop1 one raises `ActionUnavailableError`. An oven's `power_on` ends
-  with the error of a `DeviceAction` 2 that fails instead of writing again.
+  with the error of a `DeviceAction` 2 that fails instead of writing again. A CVA6000's `light=`
+  raises `NotAcceptedError` unless the answer's first `Success` carrying `Light` gives back the light
+  written, as the app's LightStateAction requires.
 - **Breaking:** without `group_id` and `group_key`, the local channel no longer reads the household
   key from the Miele account: it raises `ConfigurationError`. `Miele::Sdk.cloud.group` gives the
   account's key to set them.
@@ -140,7 +142,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   selection, parameters, delayed start, answers to messages, power off, wake, the anti-crease
   setting and TwinDos filling levels. None of it has run against a real appliance.
 - `NotAcceptedError`, for a Dop1 write the appliance acknowledges with anything but success, or a
-  hood's wake answered without `Success`.
+  hood's wake or a CVA6000's light answered without the `Success` the app looks for.
 - `ActionFailedError`, for an action whose effect the appliance does not show within the app's wait.
 - Coffee makers as the app's coffee module drives them: the variant, typed reads of the contexts,
   notifications, cleaning, descaling, features, profiles and drinks, and the CVA6000's Dop1 state;

@@ -1,0 +1,9 @@
+module Miele
+  module Sdk
+    module Resends
+      private
+
+      def three_attempts: [T] () { () -> T } -> T
+    end
+  end
+end

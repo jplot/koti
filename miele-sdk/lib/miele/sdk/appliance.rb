@@ -11,6 +11,7 @@ module Miele
     #   oven.device_type # => :oven_microwave
     class Appliance
       include ObjectAccess
+      include Resends
 
       # @return [String] address or +.local+ name of the appliance; through a cloud, the name its Dop1 requests give
       attr_reader :host

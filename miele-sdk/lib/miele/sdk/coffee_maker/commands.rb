@@ -49,7 +49,7 @@ module Miele
           return write_device_action(3) if protocol_version == 2
 
           require_dop2!
-          modify(family::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
+          three_attempts { modify(family::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) } }
         end
 
         # @return [Boolean] whether the app's power switch offers {#power_off}: on (Status 2 or 3) under remote

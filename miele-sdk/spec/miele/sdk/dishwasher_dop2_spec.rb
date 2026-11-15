@@ -21,6 +21,7 @@ RSpec.describe Miele::Sdk::Dishwasher do
       in { verb: 'GET', path: %r{/DOP2/(.+)\z} }
         leaf = Regexp.last_match(1)
         [200, {}, served.fetch(leaf) { default_leaf(leaf) }]
+      in { verb: 'PUT', path: %r{/DOP2/} } if served.fetch(:refusals, []).any? then served[:refusals].shift
       else [204, {}, '']
       end
     end
@@ -337,10 +338,10 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(written.map { it[0..1] }).to eq([%w[PUT State], %w[PUT DOP2/2/1586]])
     end
 
-    it 'raises a refused DeviceAction 2 and writes no ApplianceState 4', :aggregate_failures do
+    it 'raises DeviceAction 2 refused three times in a row and writes no ApplianceState 4', :aggregate_failures do
       leaves[:refused] = true
       expect { dishwasher.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
-      expect(written.map { it[0..1] }).to eq([%w[PUT State]])
+      expect(written.map { it[0..1] }).to eq([%w[PUT State]] * 3)
     end
 
     it 'wakes it with DeviceAction 2' do
@@ -375,6 +376,13 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 1, 0, 0)]])
     end
 
+    it 'reads and writes 2/1586 three times back to back, whatever refuses it, then raises', :aggregate_failures do
+      leaves[:refusals] = [[400, {}, ''], :drop, [500, {}, '']]
+      expect { dishwasher.power_off }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+      expect(fake.requests.map { [it.verb, it.path[/DOP2.*/]] }.select(&:last))
+        .to eq([['GET', 'DOP2/2/1586?idx1=0&idx2=0'], ['PUT', 'DOP2/2/1586']] * 3)
+    end
+
     it 'tells the app offers no switch-off while the dishwasher is locked' do
       state.merge!('RemoteEnable' => [7, 0, 0])
       expect(dishwasher.power_off_offered?).to be(false)
@@ -395,6 +403,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(dishwasher.power_on_offered?).to be(true)
       dishwasher.power_on
       expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 4, 0, 0)]])
+    end
+
+    it 'powers on at the third attempt after two refusals', :aggregate_failures do
+      leaves[:refusals] = [[400, {}, ''], [500, {}, '']]
+      dishwasher.power_on
+      expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 4, 0, 0)]] * 3)
     end
 
     it 'tells the app offers no switch-on without remote control' do

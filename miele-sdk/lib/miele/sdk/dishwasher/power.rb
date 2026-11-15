@@ -18,10 +18,12 @@ module Miele
         # @api public
         def power_on
           require_dop2!
-          send_wake if standby(state) == 2
+          three_attempts { send_wake } if standby(state) == 2
           return unless [1, 4].include?(status(state))
 
-          modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 4) }
+          three_attempts do
+            modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 4) }
+          end
         end
 
         # @return [Boolean] whether the app offers {#power_on}: a DOP2 dishwasher off (Status 1, or 4 asleep) under
@@ -52,7 +54,9 @@ module Miele
         # @api public
         def power_off
           require_dop2!
-          modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
+          three_attempts do
+            modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
+          end
         end
 
         # @return [Boolean] whether the app offers {#power_off}: a DOP2 dishwasher on, under remote control and not

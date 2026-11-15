@@ -26,6 +26,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       in { verb: 'PUT', path: %r{/State\z} } if answers.delete(:refused) then [400, {}, '']
       in { verb: 'PUT', path: %r{/State\z} } then [200, {}, answers['PUT State']]
       in { verb: 'POST' } then [200, {}, answers['DOP']]
+      in { verb: 'PUT', path: %r{/DOP2/} } if answers.fetch(:refusals, []).any? then answers[:refusals].shift
       else [204, {}, '']
       end
     end
@@ -295,6 +296,14 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(coffee.power_off_offered?).to be(true)
     coffee.power_off
     expect(written).to eq([['DOP2/2/1586', combi(1, 0)]])
+  end
+
+  it 'reads and writes 2/1586 three times back to back, whatever refuses it, then raises', :aggregate_failures do
+    served[:refusals] = [[400, {}, ''], :drop, [500, {}, '']]
+    expect { coffee.power_off }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+    expect(fake.requests.map { [it.verb, it.path[/DOP2.*/]] }.select(&:last))
+      .to eq([['GET', 'DOP2/2/1586?idx1=0&idx2=0'], ['PUT', 'DOP2/2/1586']] * 3)
+    expect(waits).to be_empty
   end
 
   context 'with a CM7' do

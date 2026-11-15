@@ -14,6 +14,7 @@ module Miele
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
+        # @raise [ResponseError] when the appliance refuses DeviceAction 2, 400 included
         # @api public
         def power_on
           require_dop2!

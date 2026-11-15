@@ -19,6 +19,7 @@ module Miele
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
+        # @raise [ResponseError] when the appliance refuses DeviceAction 2, 400 included
         # @api public
         def power_on
           return write_device_action(2) if protocol_version == 2

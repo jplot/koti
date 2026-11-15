@@ -18,7 +18,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   while asleep, then `State` is read every half second until it shows the hood awake, raising
   `ActionFailedError` after a minute; a DOP2 dishwasher is woken only off, or waiting to start out
   of `StandbyState` 1, and a Dop1 one raises `ActionUnavailableError`. An oven's `power_on` ends
-  with the error of a `DeviceAction` 2 that fails instead of writing again. A CVA6000's `light=`
+  with the error of a `DeviceAction` 2 that fails instead of writing again, and a dishwasher's or a
+  DOP2 coffee maker's `power_on` raises a refused `DeviceAction` 2, 400 included. A CVA6000's `light=`
   raises `NotAcceptedError` unless the answer's first `Success` carrying `Light` gives back the light
   written, as the app's LightStateAction requires.
 - **Breaking:** without `group_id` and `group_key`, the local channel no longer reads the household

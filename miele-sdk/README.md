@@ -584,31 +584,47 @@ coffee.device_state      # a CVA6000's Dop1 1000; usage_counters reads 8D00
 ```
 
 ```ruby
+coffee.brew_offered?                  # => true where the app's drink rule allows a drink
 coffee.brew(24_005, two_cups: true)   # double_shot: true too
-coffee.start_barista
-coffee.stop
+coffee.start_barista                  # barista_entry? gives the app's rule
+coffee.stop                           # drink_stoppable? gives the app's rule
 coffee.acknowledge(:query, 3, option: 2)   # :information or :query with its id; the others the option alone
 coffee.power_on                            # and power_off
-coffee.light = true                        # a CVA6000 only
+coffee.light = true                        # the app switches a CVA6000's alone: light_offered?
 coffee.create_profile('Anna')              # rename_profile, delete_profile
-coffee.edit_drink(24_037, amount: 50, temperature: 2, pre_brewing: 1, bean_sort: 2)
+coffee.edit_drink(24_037, amount: 50, temperature: 2, pre_brewing: 1, bean_sort: 2)  # drink_settings: the pickers
 coffee.rename_drink(24_037, 'Mein Kaffee')
 ```
 
 A DOP2 coffee maker writes 2/1586 as read to switch on and off, waking first when it answers 500,
 and its other objects as the app's ModifyDop2Message does: back where they were read, the index
 read at as the header's attribute. A CVA6000 takes Dop1 1101 to switch on and off and 1100 to
-stop, and its light by writing back its `State` as the app's DeviceStateDto keeps it. A DOP2
-coffee maker stops a drink only as the app's stop button allows: a drink running, not cancelled,
-no care program, under remote control without local control. Acknowledgements take options 1 to
-17, 1 to 16 on a CM7. `brew` takes a program id the app defines, not 0, and follows the app's drink
-rule: the program info read in full, mobile start, no information or query shown, no drink,
-Barista or care program running; two cups or a double shot also need the software ids the app
-requires. `start_barista` follows the app's Barista
-entry: a CM6F, CVA or Ref2 that lists it among the special beverages of 1/1599, on under remote
-control without local control, no program running and no information shown. `delete_profile` needs
-coffee profiles in 2/348, and only custom profiles are renamed or deleted. A CM7 takes no profile,
-drink or Barista action, and a CVA6000 brews nothing and acknowledges nothing, as in the app.
+stop, and the light of any coffee maker by writing back its `State` as the app's DeviceStateDto
+keeps it.
+
+Every action sends what it is given; the predicates give the app's rules, so the client's screen
+can offer what the app's dashboard would:
+
+| Predicate | The app's rule |
+|---|---|
+| `power_on_offered?`, `power_off_offered?` | the power switch: a known variant off (Status 1), or on (2 or 3) with no Barista running, under remote control without local control; a CVA6000 off, or on, paused, ended, failed or cancelled, under its remote control |
+| `light_offered?` | a CVA6000 neither disconnected, locked nor in service |
+| `drink_stoppable?` | the stop button: a drink running, not cancelled, no care program, under remote control without local control; a CVA6000 running a drink (Status 5) |
+| `brew_offered?` | the drink rule: the program info read in full, mobile start, no information or query shown, no drink, Barista or care program running |
+| `one_touch?` | two cups or a double shot: the software ids the app requires |
+| `barista_entry?` | a CM6F, CVA or Ref2 that lists Barista among the special beverages of 1/1599, on under remote control without local control, no program running and no information shown |
+| `profile_name_allowed?(id, name)` | a custom profile (`custom_profiles`), a name neither blank, another profile's nor Miele |
+| `delete_profile_offered?(id)` | a custom profile, coffee profiles listed in 2/348 |
+| `drink_name_allowed?(id, name)` | a CVA, a drink outside the standard profile, a name not blank |
+
+`power_on` writes ApplianceState 4 even when 2/1586 shows it already. An action raises
+`Miele::Sdk::ActionUnavailableError` only where nothing can be written: `brew`, `start_barista` and
+`acknowledge` on a CVA6000, which has no DOP2 leaf for them; the profile and drink actions on a CM7
+or CVA6000, which have no such object; `create_profile` once the app's slots are used (4 on a
+CM6160, 8 on another CM6F, 10 otherwise). `brew` takes a program id the app defines, not 0, and
+acknowledgements options 1 to 17, 1 to 16 on a CM7, as the app's mappers do; another raises
+`ArgumentError`, and so does a drink value its 2/261 member does not hold. `edit_drink` writes 255
+as the bean sort on all but a CVA, as the app does.
 
 Left out: tasting, saving a tasted drink, and resetting a drink or a profile, whose values the app
 derives through helpers not traced; the message check of the app's Barista start page; the drink tables that limit two cups or a double shot to some

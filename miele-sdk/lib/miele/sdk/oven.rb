@@ -15,6 +15,17 @@ module Miele
       include ContinueCooking
       include OvenState
 
+      # The app keeps them (AutomaticProgramTimes) in memory, one per oven, until its start writes them; the client
+      # keeps them instead.
+      #
+      # @!attribute [r] prog_id
+      #   @return [Integer] the automatic program they were set for, a value of +GLOBAL_EnumPrgId+
+      # @!attribute [r] start_at
+      #   @return [Time]
+      # @!attribute [r] end_at
+      #   @return [Time]
+      AutomaticTimes = Data.define(:prog_id, :start_at, :end_at)
+
       NOTIFICATION_IDS = { info: Objects::Oven::GlobalEnumNtfctnInfoId, message: Objects::Oven::GlobalEnumNtfctnMessageId,
                            query: Objects::Oven::GlobalEnumNtfctnQueryId }.freeze
       # SwitchOnAction's ActionExecutionTimeout (SwitchOnLoadingConfiguration), in seconds.

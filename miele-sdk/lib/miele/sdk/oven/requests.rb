@@ -19,20 +19,19 @@ module Miele
 
         # An automatic program starts when its start time is written; the app sends no request for it.
         #
-        # @param at [Time, :now] when an automatic program starts
+        # @param kept [AutomaticTimes, nil] the times the client keeps for this oven: an automatic program starts at
+        #   their start when they are its own (GetStoredTime), now otherwise; another program ignores them
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, with no program selected, or when 1/1574 lacks a parameter
         #   the app reads before writing any
-        # @raise [ArgumentError] for a time given to a program that is not automatic: request 1 carries none, and the
-        #   program takes +start_at=+
+        # @raise [ArgumentError] when a 64-bit field cannot hold the kept start: nothing is sent
         # @api public
-        def start(at: :now)
+        def start(kept: nil)
           require_dop2!
           within(Polling::ACTION_TIMEOUT) do
             context = program_context
             prog_id = selected_program(context)
-            return start_automatic(prog_id, context, at) if automatic?(context)
-            raise ArgumentError, 'only an automatic program starts at a given time; set start_at= first' if at != :now
+            return start_automatic(prog_id, context, kept) if automatic?(context)
 
             write_required_parameters(prog_id, context)
             write_dop2(Messages.user_request(supported_requests.include?(1) ? 1 : 113))
@@ -103,13 +102,18 @@ module Miele
           !mask(duration).anybits?(2) || (1...0xFFFF_FFFF).cover?(duration&.current_value.to_i)
         end
 
+        # StartProgramAction builds the start (IL_0136) before it writes the required parameters (IL_0163).
+        #
         # @param prog_id [Integer]
         # @param context [Objects::Oven::GlobalPsContext]
-        # @param at [Time, :now]
+        # @param kept [AutomaticTimes, nil]
         # @return [void]
-        def start_automatic(prog_id, context, at)
+        def start_automatic(prog_id, context, kept)
+          at = kept && kept.prog_id == prog_id ? kept.start_at : :now #: Time | :now
+          start = Messages.ps_select(prog_id, 2, [13, :u64, unix_time(at)])
+          Dop2.encode(start)
           write_required_parameters(prog_id, context)
-          write_parameter(prog_id, 13, :u64, unix_time(at))
+          write_dop2(start)
         end
 
         # @param context [Objects::Oven::GlobalPsContext]

@@ -85,17 +85,33 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([user_request(113)])
   end
 
-  it 'refuses a start time for a program that is not automatic', :aggregate_failures do
-    serve([1])
-    expect { oven.start(at: Time.at(1_700_000_000)) }.to raise_error(ArgumentError)
-    expect(written).to be_empty
+  def kept(prog_id: 13, start_at: Time.at(1_700_000_000))
+    described_class::AutomaticTimes.new(prog_id:, start_at:, end_at: start_at + 3_600)
   end
 
-  it 'starts an automatic program by writing its start time, now unless given' do
+  it 'starts another program with its request, whatever times the client keeps' do
+    serve([1])
+    oven.start(kept:)
+    expect(written.map(&:last)).to eq([user_request(1)])
+  end
+
+  it 'starts an automatic program by writing the kept start, after the required parameters' do
+    serve([1], type: 3, parameters: { 6 => value(:u16, 2, 18_000) })
+    oven.start(kept:)
+    expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(13, :u64, 1_700_000_000)])
+  end
+
+  it 'starts an automatic program now without kept times, or with those of another program' do
     serve([1], type: 3)
     oven.start
-    oven.start(at: Time.at(1_700_000_000))
-    expect(written.map(&:last)).to eq([parameter(13, :u64, 0xFFFF_FFFF_FFFF_FFFF), parameter(13, :u64, 1_700_000_000)])
+    oven.start(kept: kept(prog_id: 14))
+    expect(written.map(&:last)).to eq([parameter(13, :u64, 0xFFFF_FFFF_FFFF_FFFF)] * 2)
+  end
+
+  it 'writes nothing for a kept start that a 64-bit field cannot hold', :aggregate_failures do
+    serve([1], type: 3, parameters: { 6 => value(:u16, 2, 18_000) })
+    expect { oven.start(kept: kept(start_at: Time.utc(1))) }.to raise_error(ArgumentError, /does not fit/)
+    expect(written).to be_empty
   end
 
   it 'writes the required parameters not yet confirmed before starting' do

@@ -155,13 +155,15 @@ module Miele
         #
         # @param hob [String] its fabrication number
         # @return [void]
+        # @raise [ActionFailedError] when +services+ do not list the hob within the app's 15 s
         # @api public
-        def connect_hob(hob) = update_connectivity_plus { (it + [hob]).uniq }
+        def connect_hob(hob) = update_connectivity_plus(hob, true)
 
         # @param hob [String] its fabrication number
         # @return [void]
+        # @raise [ActionFailedError] when +services+ still list the hob after the app's 15 s
         # @api public
-        def disconnect_hob(hob) = update_connectivity_plus { it - [hob] }
+        def disconnect_hob(hob) = update_connectivity_plus(hob, false)
 
         # A Dop1 or Opcode hood wakes when its State is written back, the light as it is, while +State+ shows it
         # off; only an answer carrying "Success" means woken (DefaultWakeUpAction). A DOP2 hood takes
@@ -208,17 +210,23 @@ module Miele
         def awake?(state) = [nil, 2].include?(state['SyncState']) && state['StandbyState'] == 1
 
         # The app changes one hob in the list +services+ shows and derives +activated+ from what is left
-        # (UpdateConactivityPlusSettingsHelper), reading +services+ again for each attempt its retry makes.
+        # (UpdateConactivityPlusSettingsHelper), reading +services+ again for each attempt its retry makes. Its
+        # ConnectionIsSet then joins that read's 3 s poll until +services+ show the hob as written, all within the
+        # 15 s of UpdateConactivitySettingsAction.
         #
-        # @yieldparam sources [Array<String>] the hobs followed
-        # @yieldreturn [Array<String>] those to follow
+        # @param hob [String]
+        # @param connect [Boolean] whether the hood follows it
         # @return [void]
-        def update_connectivity_plus
-          resent(retries: 3, delay: 2) do
-            sources = yield Array(connectivity_plus&.sources)
+        # @raise [ActionFailedError]
+        def update_connectivity_plus(hob, connect)
+          waits = [] #: Array[Integer | Float]
+          resent(retries: 3, delay: 2, waits:) do
+            sources = Array(connectivity_plus&.sources)
+            sources = connect ? (sources + [hob]).uniq : sources - [hob]
             body = JSON.generate('activated' => sources.any?, 'sourceDeviceIds' => sources)
             send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
           end
+          polled(waits, within: 15, first: 3) { connectivity_plus&.sources&.include?(hob) == connect }
         end
 
         # @param pf_id [Integer] its Dop1 setting

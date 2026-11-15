@@ -77,15 +77,19 @@ module Miele
       def supervision = Schema::SuperVision.from(device('SuperVision'))
 
       # Con@ctivity One: the app writes +Show+ alone and leaves +Signal+ out (UpdateConactivityOneSettingsHelper),
-      # again 2 s after a 5xx or a lost connection, three more times at most.
+      # again 2 s after a 5xx or a lost connection, three more times at most, then reads it back until +Show+ is as
+      # written (WaitForConnectionToBeSet), all within the 15 s of UpdateConactivitySettingsAction.
       #
       # @param device [String] the fabrication number of the appliance this one shows
       # @param show [Boolean]
       # @return [void]
+      # @raise [ActionFailedError] when +Show+ is not as written within those 15 s
       # @api public
       def supervise(device, show:)
-        body = JSON.generate('Show' => show)
-        resent(retries: 3, delay: 2) { send_request(:put, "/Devices/#{fab}/SuperVision/#{device}", body:) }
+        path = "/Devices/#{fab}/SuperVision/#{device}"
+        waits = [] #: Array[Integer | Float]
+        resent(retries: 3, delay: 2, waits:) { send_request(:put, path, body: JSON.generate('Show' => show)) }
+        polled(waits, within: 15) { get(path)['Show'] == show }
       end
 
       # @return [Hash{String=>Object}] the communication module's +/Info+

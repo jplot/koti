@@ -12,13 +12,22 @@ RSpec.describe Miele::Sdk::Hood do
   let(:color_flow) { [200, {}, '{"active":false,"intervalDurationSeconds":10}'] }
   let(:fake) do
     services = JSON.generate('ConnectivityPlus' => plus)
+    supervised = '{"Show":false,"Signal":false}'
     flow = color_flow
     queued = refusals
+    side = hood_side
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/services\z} } then [200, {}, services]
+      in { verb: 'GET', path: %r{/SuperVision/\d+\z} } then [200, {}, supervised]
       in { verb: 'PUT' } if (refusal = queued.shift) then refusal
+      in { verb: 'PUT', path: %r{/services/ConnectivityPlus\z} } if side[:applies]
+        services = JSON.generate('ConnectivityPlus' => JSON.parse(request.body))
+        [200, {}, '{}']
+      in { verb: 'PUT', path: %r{/SuperVision/\d+\z} } if side[:applies]
+        supervised = request.body
+        [200, {}, '{}']
       in { path: %r{/ColorFlow\z} } then flow
       else [200, {}, '{}']
       end
@@ -34,6 +43,10 @@ RSpec.describe Miele::Sdk::Hood do
   def waits = @waits ||= []
 
   def refusals = @refusals ||= []
+
+  def hood_side = @hood_side ||= { applies: true }
+
+  def gets(path) = fake.requests.count { it.verb == 'GET' && it.path.end_with?(path) }
 
   it 'reads Con@ctivity Plus from services' do
     expect(hood.connectivity_plus).to eq(described_class::ConnectivityPlus.new(
@@ -55,6 +68,28 @@ RSpec.describe Miele::Sdk::Hood do
     expect(fake.requests.map { [it.verb, it.path[/services.*/]] }.select(&:last))
       .to eq([%w[GET services], %w[PUT services/ConnectivityPlus]] * 4)
     expect(waits).to eq([2, 2, 2])
+  end
+
+  it 'reads services 3 s after its write, as the read polled before it, until they show the hob as written',
+     :aggregate_failures do
+    hood.connect_hob('000111222333')
+    expect(fake.requests.map { [it.verb, it.path[/services.*/]] }.select(&:last))
+      .to eq([%w[GET services], %w[PUT services/ConnectivityPlus], %w[GET services]])
+    expect(waits).to eq([3])
+  end
+
+  it 'reads services every 3 s and raises ActionFailedError once the 15 s are up', :aggregate_failures do
+    hood_side[:applies] = false
+    expect { hood.connect_hob('000111222333') }.to raise_error(Miele::Sdk::ActionFailedError)
+    expect([gets('/services'), waits]).to eq([5, [3, 3, 3, 3]])
+  end
+
+  it 'reads SuperVision back at once, then every 3 s, within the 15 s its write retries also take',
+     :aggregate_failures do
+    refusals.push([502, {}, ''], [503, {}, ''])
+    hood_side[:applies] = false
+    expect { hood.supervise('000111222333', show: true) }.to raise_error(Miele::Sdk::ActionFailedError)
+    expect([gets('/SuperVision/000111222333'), waits]).to eq([4, [2, 2, 3, 3, 3]])
   end
 
   it 'shows an appliance under Con@ctivity One, its Signal left out as the app leaves it' do

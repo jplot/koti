@@ -30,6 +30,10 @@ module Miele
 
         def cancel_offered?: () -> bool
 
+        def ready?: (?State state) -> bool
+
+        def details_bar?: (?State state) -> bool
+
         def select_program: (Integer | Symbol prog_id) -> void
 
         def set_extras: (*Symbol selected) -> void
@@ -81,13 +85,9 @@ module Miele
 
         def mobile?: (State state) -> bool
 
-        def ready?: (?State state) -> bool
-
         def offered?: (Symbol request) -> bool
 
         def supported_requests: () -> Array[Symbol]
-
-        def details_bar?: (?State state) -> bool
 
         def second_button: (Array[Symbol] requests) -> Symbol?
 

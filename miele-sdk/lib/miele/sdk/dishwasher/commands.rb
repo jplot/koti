@@ -131,16 +131,20 @@ module Miele
 
         # @param on [Boolean]
         # @return [void]
+        # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/105 to write
         # @api public
         def auto_dos=(on)
+          require_dop2!
           modify(Objects::Dishwasher::GlobalSfValue, [2, 105, 20_052, 1]) { it.with(current_value: on ? 1 : 0) }
         end
 
         # @param id [Integer] a +GLOBAL_EnumSfId+ value, such as one of {#offered_settings}
         # @param value [Integer]
         # @return [void]
+        # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/105 to write
         # @api public
         def write_setting(id, value)
+          require_dop2!
           modify(Objects::Dishwasher::GlobalSfValue, [2, 105, id, 1]) { it.with(current_value: value) }
         end
 

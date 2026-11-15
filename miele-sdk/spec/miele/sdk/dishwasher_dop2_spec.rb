@@ -333,8 +333,19 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 1, 0, 0)]])
     end
 
-    it 'powers on, which the app does not offer', :aggregate_failures do
+    it 'writes no ApplianceState 4 while State shows it on, as the app writes it only at Status 1 or 4',
+       :aggregate_failures do
       expect(dishwasher.power_on_offered?).to be(false)
+      dishwasher.power_on
+      expect(written).to be_empty
+    end
+  end
+
+  context 'when it is off' do
+    let(:state) { { 'Status' => 1, 'RemoteEnable' => [15, 0, 0], 'StandbyState' => 1 } }
+
+    it 'powers on with ApplianceState 4, without waking it', :aggregate_failures do
+      expect(dishwasher.power_on_offered?).to be(true)
       dishwasher.power_on
       expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 4, 0, 0)]])
     end

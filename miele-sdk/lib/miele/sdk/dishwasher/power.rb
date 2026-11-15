@@ -8,8 +8,9 @@ module Miele
         COUNTDOWN_BITS = [1, 32, 33].freeze
         private_constant :COUNTDOWN_BITS
 
-        # The app wakes a deep sleep first (+DeviceAction+ 2), then waits for the dishwasher before it writes
-        # 2/1586; the SDK writes at once.
+        # The app wakes a deep sleep first (+DeviceAction+ 2), then writes 2/1586 only while +State+ shows Status 1
+        # or 4 (SwitchOnForDop2Action, IsApplianceStateDifferentThanOff under ExecuteSequentiallyUntilTrue); the SDK
+        # reads +State+ again after the wake instead of waiting.
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
@@ -17,6 +18,8 @@ module Miele
         def power_on
           require_dop2!
           wake if standby(state) == 2
+          return unless [1, 4].include?(status(state))
+
           modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 4) }
         end
 
@@ -86,6 +89,7 @@ module Miele
         # @return [Data]
         def delayed(select, bits, target, now)
           para = select.selection_para_dw
+          # SetStartTimeForDelayStartForDop2Action.SetParameter leaves the selection as read without a start mode.
           return select if para.nil? || bits.zero?
 
           mode, start = if COUNTDOWN_BITS.include?(bits)

@@ -73,6 +73,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(dop1_requests).to eq(['89060100010d4200'])
   end
 
+  it 'writes no setting, a Dop1 dishwasher having no 2/105', :aggregate_failures do
+    expect { dishwasher.write_setting(20_002, 1) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { dishwasher.auto_dos = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
   it 'delays the start while the program runs, which the app does not offer', :aggregate_failures do
     expect(dishwasher.start_delayed_offered?).to be(false)
     dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))

@@ -116,8 +116,8 @@ RSpec.describe Miele::Sdk::Appliance do
     context 'when the appliance answers 400' do
       let(:command_answer) { [400, {}, ''] }
 
-      it 'treats a 400 answer to a command as done' do
-        expect { appliance.wake }.not_to raise_error
+      it 'raises it, as the app never takes a refused write as done' do
+        expect { appliance.wake }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
       end
     end
 

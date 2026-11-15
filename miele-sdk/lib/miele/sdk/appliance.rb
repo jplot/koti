@@ -123,11 +123,13 @@ module Miele
         send_request(:put, "/Devices/#{fab}/Ident", body: JSON.generate(DeviceName: name))
       end
 
-      # Wakes the appliance from standby.
+      # Wakes the appliance from standby with +DeviceAction+ 2, sent once as the app's laundry module sends it
+      # (WakeupAction).
       #
       # @return [void]
+      # @raise [ResponseError] when the appliance refuses it, 400 included
       # @api public
-      def wake = change(Schema::DeviceState.new(device_action: 2))
+      def wake = command(Schema::DeviceState.new(device_action: 2))
 
       # Without an index, the read is the one the app's live observation sends; its one-shot reads give
       # +idx1: 0, idx2: 0+ and its polls +idx1: 0, idx2: 1+.
@@ -211,21 +213,6 @@ module Miele
       # @return [Connection::Response]
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
       def command(request) = send_request(:put, "/Devices/#{fab}/State", body: request.to_json)
-
-      # @param request [Schema::DeviceState]
-      # @return [void]
-      def change(request) = tolerating_no_op { command(request) }
-
-      # The appliance answers 400 to a write that changes nothing, such as
-      # switching on a light already on.
-      #
-      # @yield the write
-      # @return [void]
-      def tolerating_no_op
-        yield
-      rescue ResponseError => e
-        raise unless e.status == 400
-      end
 
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"

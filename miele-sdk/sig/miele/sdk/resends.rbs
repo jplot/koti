@@ -3,11 +3,21 @@ module Miele
     module Resends
       MONOTONIC: ^() -> Float
 
+      DEADLINE: Symbol
+
       @sleeper: Appliance::_Sleeper
 
       @clock: ^() -> Float
 
       private
+
+      def within: [T] (Integer | Float seconds) { (Float since) -> T } -> T
+
+      def capped: [T] ((Integer | Float)? timeout) { (^() -> (Integer | Float)? limit) -> T } -> T
+
+      def request_timeout: ((Integer | Float)? timeout) -> (Integer | Float)?
+
+      def uncapped: [T] () { () -> T } -> T
 
       def three_attempts: [T] () { () -> T } -> T
 

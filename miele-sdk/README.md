@@ -201,10 +201,19 @@ purpose: a laundry action, a rename, an Opcode cooling target, Con@ctivity, and 
 switch-off of an oven, a dishwasher or a coffee maker, each as its section tells. A switch step of a
 dishwasher or a coffee maker goes out again whatever fails; the others never after a 4xx, nor after
 a request that outlasts the time the app gives it: 8 seconds for each attempt of a laundry action,
-`open_timeout` and `read_timeout` otherwise. The app's token bounds the whole request, where the SDK
-bounds its connection, its write and its answer each. The app's timeout around each action runs on
-the wall clock, request times included, and so do the SDK's waits, on the clock an appliance takes
-(`clock:`, monotonic by default). Within that timeout the app then waits for the change to show:
+`open_timeout` and `read_timeout` otherwise. Other requests get the token of their own the app gives
+them too: 1 to 15 seconds on a dishwasher, 8 on a laundry appliance's Dop1 selection, 15 on a
+CVA6000's Dop1 writes, 5 on a warming drawer's. The app's token bounds the whole request, where the
+SDK bounds its connection, its write and its answer each. The app's timeout around each action runs
+on the wall clock, request times included, and so do the SDK's waits, on the clock an appliance
+takes (`clock:`, monotonic by default). Where the app's requests carry the action's token, which
+that timeout cancels, each gets only what is left of it, and none goes out once it has run out
+(`Miele::Sdk::ActionFailedError`, raised too by one that times out as the timeout runs out, its
+`ConnectionError` as cause): a rename, Con@ctivity, a cooling mode, the switch sequences of a
+dishwasher or a coffee maker, and an oven's actions, but for the start reset before a zero duration,
+which the app sends with its caller's token: only the duration write after it is then refused.
+Through the cloud, a login or a token renewal counts in that time. Within that timeout the app then
+waits for the change to show:
 for a switch step and a rename, in the `State` or `Ident` its websocket pushes, for which the SDK
 sends nothing (the events stream gives them, see [Events](#events)); for Con@ctivity, by polling,
 which the SDK does too.
@@ -1045,7 +1054,7 @@ seconds (3 by default) after each read ends. A failed read ends the poll with it
 | `Miele::Sdk::RemoteControlDisabledError` | the appliance refuses a command (a `ResponseError`) |
 | `Miele::Sdk::ActionUnavailableError` | the appliance's protocol or state gives no request to send for the action: nothing is sent |
 | `Miele::Sdk::NotAcceptedError` | a Dop1 appliance acknowledges a write with anything but success |
-| `Miele::Sdk::ActionFailedError` | an appliance takes an action's write but does not show its effect within the app's 15 seconds |
+| `Miele::Sdk::ActionFailedError` | an appliance takes an action's write but does not show its effect within the app's 15 seconds, or the time the app gives an action runs out before or during one of its requests |
 | `Miele::Sdk::Dop2::DecodeError` | a DOP2 leaf has an unknown type or ends too early |
 
 All of them inherit from `Miele::Sdk::Error`. A value out of range raises `ArgumentError` before

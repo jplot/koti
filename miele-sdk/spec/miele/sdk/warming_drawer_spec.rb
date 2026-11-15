@@ -47,6 +47,15 @@ RSpec.describe Miele::Sdk::WarmingDrawer do
     expect(requests).to eq(%w[110102000102 110102000103])
   end
 
+  it 'writes 1101 and 9781 within 5 s each, as BaseDopApiAction' do
+    Miele::Sdk.config.read_timeout = 30
+    drawer.fab
+    timeouts = read_timeouts
+    drawer.power_on
+    drawer.select_program(1)
+    expect(timeouts).to eq([5, 5])
+  end
+
   it 'switches on once finished, or off with its door open' do
     state(7, [15, 0, 1])
     drawer.power_on

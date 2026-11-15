@@ -69,6 +69,14 @@ RSpec.describe Miele::Sdk::Oven do
     expect(puts_sent).to eq(['DOP2/2/1583?idx1=1&idx2=1'])
   end
 
+  it 'writes the switch-off within the 15 s of SwitchOffAction' do
+    Miele::Sdk.config.read_timeout = 30
+    appliance.fab
+    timeouts = read_timeouts
+    appliance.power_off
+    expect(timeouts).to eq([15])
+  end
+
   it 'switches off with one write' do
     appliance.power_off
     expect(puts_sent).to eq(['DOP2/2/1586'])
@@ -194,6 +202,13 @@ RSpec.describe Miele::Sdk::Oven do
 
     context 'when each round trip takes a second' do
       def round_trip = 1
+
+      it 'gives each request only what those 45 s have left', :aggregate_failures do
+        Miele::Sdk.config.read_timeout = 60
+        timeouts = read_timeouts
+        expect { appliance.power_on }.to raise_error(Miele::Sdk::ResponseError)
+        expect(timeouts.first(5)).to eq([45, 44, 43, 39, 38])
+      end
 
       it "counts them in SwitchOnAction's 45 s, as its Timeout does", :aggregate_failures do
         expect { appliance.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')

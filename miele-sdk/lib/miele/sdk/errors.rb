@@ -63,9 +63,10 @@ module Miele
     # CVA6000's light).
     class NotAcceptedError < Error; end
 
-    # The appliance took an action's write but did not show its effect within the time the Miele app waits for it
-    # (15 s, ActionExecutionTimeout; a minute for a DOP2 hood's wake), or showed a state without a value the app
-    # reads on the way; the app reports either as a failed action.
+    # An action the Miele app reports as failed: the appliance took its write but did not show its effect within the
+    # time the app waits for it (15 s, ActionExecutionTimeout; a minute for a DOP2 hood's wake), or showed a state
+    # without a value the app reads on the way; or the action's Timeout ran out before a request went out, or while
+    # one was out (its +ConnectionError+ then the cause).
     class ActionFailedError < Error; end
   end
 end

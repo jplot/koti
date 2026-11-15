@@ -118,6 +118,33 @@ RSpec.describe Miele::Sdk::Hood do
       expect { hood.supervise('000111222333', show: true) }.to raise_error(Miele::Sdk::ActionFailedError)
       expect([gets('/SuperVision/000111222333'), waits]).to eq([4, [3, 3, 3]])
     end
+
+    it 'gives each of its requests only what the 15 s have left', :aggregate_failures do
+      Miele::Sdk.config.read_timeout = 30
+      timeouts = read_timeouts
+      hood_side[:applies] = false
+      expect { hood.supervise('000111222333', show: true) }.to raise_error(Miele::Sdk::ActionFailedError)
+      expect(timeouts.drop(1)).to eq([15, 14, 10, 6, 2])
+    end
+
+    it 'gives each Con@ctivity Plus request only what the 15 s have left', :aggregate_failures do
+      Miele::Sdk.config.read_timeout = 30
+      hood.fab
+      timeouts = read_timeouts
+      refusals.push(*[[500, {}, '']] * 4)
+      expect { hood.connect_hob('000111222333') }.to raise_error(Miele::Sdk::ResponseError)
+      expect(timeouts).to eq([15, 14, 11, 10, 7, 6, 3, 2])
+    end
+  end
+
+  context 'when the services read takes the 15 s' do
+    def round_trip = 15
+
+    it 'sends no write once its token is cancelled', :aggregate_failures do
+      hood.fab
+      expect { hood.connect_hob('000111222333') }.to raise_error(Miele::Sdk::ActionFailedError, /ran out/)
+      expect(plus_requests).to eq([%w[GET services]])
+    end
   end
 
   it 'shows an appliance under Con@ctivity One, its Signal left out as the app leaves it' do

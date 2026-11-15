@@ -143,6 +143,27 @@ RSpec.describe Miele::Sdk::Oven do
     expect(%i[steam_bursts= steam_burst_times=].select { oven.respond_to?(it) }).to be_empty
   end
 
+  it 'reads 1/1574 and writes within the 15 s of each parameter action, as BaseParameterAction' do
+    Miele::Sdk.config.read_timeout = 30
+    oven.fab
+    timeouts = read_timeouts
+    oven.target_temperature = 180
+    oven.duration = 0
+    oven.set_options(crisp: true, keep_warm: false)
+    expect(timeouts.map(&:round)).to eq([15, 15, 30, 30, 15, 15, 15, 15])
+  end
+
+  context 'when the start reset before a zero duration runs past the 15 s' do
+    subject(:oven) { described_class.new('127.0.0.1', ident:, clock: -> { fake.requests.size * 16.0 }) }
+
+    it "still writes the start, which the app sends with its caller's token, but not the duration",
+       :aggregate_failures do
+      oven.fab
+      expect { oven.duration = 0 }.to raise_error(Miele::Sdk::ActionFailedError)
+      expect(written.map(&:last)).to eq([parameter(13, :u64, 1_700_000_000)])
+    end
+  end
+
   it 'sets the options one by one, keep warm last' do
     oven.set_options(keep_warm: true, rapid_heating: false)
     expect(written.map(&:last)).to eq([parameter(21, :bool, false), parameter(27, :bool, true)])

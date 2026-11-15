@@ -18,6 +18,22 @@ module SdkHelpers
                                 [FakeAppliance::GROUP_ID].pack('H*'), [group_key].pack('H*'))
     Net::HTTP.start('127.0.0.1', port, read_timeout: 5) { it.request(request) }
   end
+
+  # 0 when an action opens its window, then +at+ on in real time: the window has little left.
+  def late_clock(at)
+    now = Miele::Sdk::Resends::MONOTONIC
+    started = nil
+    -> { started ? at + now.call - started : (started = now.call) && 0.0 }
+  end
+
+  def read_timeouts
+    [].tap do |timeouts|
+      allow(Net::HTTP).to receive(:start).and_wrap_original do |start, *args, **options, &block|
+        timeouts << options[:read_timeout]
+        start.call(*args, **options, &block)
+      end
+    end
+  end
 end
 
 RSpec.configure { |config| config.include SdkHelpers }

@@ -28,13 +28,15 @@ module Miele
         # @api public
         def start(at: :now)
           require_dop2!
-          context = program_context
-          prog_id = selected_program(context)
-          return start_automatic(prog_id, context, at) if automatic?(context)
-          raise ArgumentError, 'only an automatic program starts at a given time; set start_at= first' if at != :now
+          within(Polling::ACTION_TIMEOUT) do
+            context = program_context
+            prog_id = selected_program(context)
+            return start_automatic(prog_id, context, at) if automatic?(context)
+            raise ArgumentError, 'only an automatic program starts at a given time; set start_at= first' if at != :now
 
-          write_required_parameters(prog_id, context)
-          write_dop2(Messages.user_request(supported_requests.include?(1) ? 1 : 113))
+            write_required_parameters(prog_id, context)
+            write_dop2(Messages.user_request(supported_requests.include?(1) ? 1 : 113))
+          end
         end
 
         # @return [Boolean] whether the app offers {#start}: on a DOP2 oven, a program selected (a ProgId on
@@ -52,9 +54,11 @@ module Miele
         def stop
           return stop_dop1 unless dop2?
 
-          state = self.state
-          context = self.context
-          write_dop2(Messages.user_request(stop_request(state, context, offered(context))))
+          within(Polling::ACTION_TIMEOUT) do
+            state = self.state
+            context = self.context
+            write_dop2(Messages.user_request(stop_request(state, context, offered(context))))
+          end
         end
 
         # The app's Dop1 rule asks for a program of raw type 0, 1 or 2 (function, own, automatic) and ignores
@@ -89,7 +93,7 @@ module Miele
         # @raise [ActionUnavailableError] on a Dop1 oven
         def user_request(id)
           require_dop2!
-          write_dop2(Messages.user_request(id))
+          within(Polling::ACTION_TIMEOUT) { write_dop2(Messages.user_request(id)) }
         end
 
         # @param context [Objects::Oven::GlobalPsContext]
@@ -200,7 +204,7 @@ module Miele
         end
 
         # @return [void]
-        def stop_dop1 = command(Schema::DeviceState.new(process_action: 2))
+        def stop_dop1 = within(Polling::ACTION_TIMEOUT) { command(Schema::DeviceState.new(process_action: 2)) }
       end
     end
   end

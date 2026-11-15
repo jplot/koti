@@ -53,6 +53,8 @@ module Miele
       def pg81?: () -> bool
 
       def tenths: (untyped value) -> Float
+
+      def action_request: [T] () { (Integer timeout) -> T } -> T
     end
   end
 end

@@ -13,7 +13,7 @@ module Miele
         # @api public
         def open_door
           require!(!dop2?, 'a DOP2 dishwasher has no Dop1 object 1404 to open its door')
-          dop1(Dop1.request(object_id: '1404', type: Dop1::WRITE, section: [1, 2].pack('C2')))
+          dop1(Dop1.request(object_id: '1404', type: Dop1::WRITE, section: [1, 2].pack('C2')), timeout: 5)
         end
 
         # CanOpenDoorRule.
@@ -36,7 +36,7 @@ module Miele
         # @param action [Integer]
         # @return [void]
         def dop1_process_action(state, action)
-          command(Schema::DeviceState.from(state.raw).with(process_action: action))
+          command(Schema::DeviceState.from(state.raw).with(process_action: action), timeout: 1)
         end
 
         # The app reads 8906 first and keeps the extras past bit 5.
@@ -44,7 +44,7 @@ module Miele
         # @param prog_id [Integer, Symbol]
         # @return [void]
         def dop1_select(prog_id)
-          current = dop1_object(Objects::Dishwasher::SmartControlGsdProgrammwahlSetzen).bytes
+          current = dop1_object(Objects::Dishwasher::SmartControlGsdProgrammwahlSetzen, timeout: 5).bytes
           extras = current.byteslice(2, 2).to_s.ljust(2, "\0").unpack1('v') & ~0x3F
           write_selection(Objects::Dishwasher::SmartControlGsdProgrammIdEnum.to_i(prog_id), extras)
         end
@@ -56,7 +56,7 @@ module Miele
         # @raise [ArgumentError] for another name
         def dop1_extras(selected)
           bits = selected.sum { 1 << EXTRA_BITS.fetch(it) { raise ArgumentError, "8906 has no #{it} extra" } }
-          write_selection(state.raw['ProgramID'] || 3, bits)
+          write_selection(state(timeout: 5).raw['ProgramID'] || 3, bits)
         end
 
         # The app sends 8906 with the read request type.

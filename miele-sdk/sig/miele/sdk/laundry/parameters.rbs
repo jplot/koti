@@ -26,9 +26,9 @@ module Miele
 
         def dop2?: () -> bool
 
-        def dop1_objects: () -> Hash[Symbol, untyped]
-
         def write_dop1_selection: (untyped section) -> void
+
+        def read_dop1_selection: () -> untyped
 
         def program_para: (Objects::Laundry::GlobalPsContext context) -> untyped
 

@@ -18,7 +18,7 @@ module Miele
         # @raise [ResponseError] if the oven refuses it, but for a 500 followed by info 14 on 1/131 within 6 s
         # @api public
         def microwave_power=(bit)
-          write_microwave_power(selected_prog_id, bit)
+          write_microwave_power(bit)
         end
 
         # @return [Array<Integer>] the bits the app's picker offers, those of MwPower's SupportedBits on 1/1574
@@ -34,12 +34,11 @@ module Miele
         # SelectMicrowaveLevelAsync takes a 500 as done once 1/131 shows info 14, and rethrows it on any failure of
         # that wait.
         #
-        # @param prog_id [Integer]
         # @param bit [Integer]
         # @return [void]
         # @raise [ResponseError]
-        def write_microwave_power(prog_id, bit)
-          write_parameter(prog_id, 15, :u8, bit)
+        def write_microwave_power(bit)
+          set_parameter(15, :u8, bit)
         rescue ResponseError => e
           raise e unless e.status == 500 && power_message_shown?
         end

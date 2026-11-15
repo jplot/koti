@@ -12,6 +12,7 @@ module Miele
     class Appliance
       include ObjectAccess
       include Resends
+      include Dop1Access
 
       # @return [String] address or +.local+ name of the appliance; through a cloud, the name its Dop1 requests give
       attr_reader :host
@@ -90,9 +91,10 @@ module Miele
       # @api public
       def supervise(device, show:)
         path = "/Devices/#{fab}/SuperVision/#{device}"
-        since = @clock.call
-        resent(retries: 3, delay: 2, since:) { send_request(:put, path, body: JSON.generate('Show' => show)) }
-        poll_until_shown(since:, within: 15) { get(path)['Show'] == show }
+        within(15) do |since|
+          resent(retries: 3, delay: 2, since:) { send_request(:put, path, body: JSON.generate('Show' => show)) }
+          poll_until_shown(since:, within: 15) { get(path)['Show'] == show }
+        end
       end
 
       # @return [Hash{String=>Object}] the communication module's +/Info+
@@ -123,9 +125,10 @@ module Miele
       # @api public
       def tech_type = @tech_type ||= identity.device_ident_label&.tech_type
 
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [State]
       # @api public
-      def state = State.new(device('State'), device_type, protocol_version:, tech_type:)
+      def state(timeout: nil) = State.new(device('State', timeout:), device_type, protocol_version:, tech_type:)
 
       # ChangeApplianceNameAction sends it again after a 5xx or a lost connection, within the 15 s of its
       # ActionExecutionTimeout.
@@ -134,7 +137,9 @@ module Miele
       # @raise [ResponseError, ConnectionError] a 4xx or a timeout at once, another refusal once the 15 s are up
       # @api public
       def name=(name)
-        resent(within: 15) { send_request(:put, "/Devices/#{fab}/Ident", body: JSON.generate(DeviceName: name)) }
+        within(15) do
+          resent(within: 15) { send_request(:put, "/Devices/#{fab}/Ident", body: JSON.generate(DeviceName: name)) }
+        end
       end
 
       # Wakes the appliance from standby with +DeviceAction+ 2, sent once as the app's laundry module sends it
@@ -174,24 +179,16 @@ module Miele
         send_request(:put, path, body: Dop2.encode(leaf), kind: :dop2, timeout:)
       end
 
-      # Sends a Dop1 request, which hoods in +ProtocolVersion+ 2 answer instead of DOP2.
-      #
-      # @param request [String] built by {Dop1}
-      # @return [String] the hood's answer: +{"Response": hex}+ to a read
-      # @api public
-      def dop1(request)
-        send_request(:post, "/Devices/#{fab}/DOP/", body: JSON.generate(Request: request)).body
-      end
-
       # Reads any JSON resource.
       #
       # @param path [String] absolute path
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [Hash{String=>Object}]
       # @raise [ResponseError] if the answer has no body
       # @raise [Error] see {Connection.request}
       # @api public
-      def get(path)
-        answer = send_request(:get, path)
+      def get(path, timeout: nil)
+        answer = send_request(:get, path, timeout:)
         raise ResponseError.new(answer.status, "#{path} answered #{answer.status} without a body") if answer.body.empty?
 
         JSON.parse(answer.body)
@@ -214,25 +211,31 @@ module Miele
       # @return [Connection::Response]
       def send_request(method, path, body: nil, kind: :json, timeout: nil)
         cloud = @cloud if path.start_with?('/Devices/')
-        return @local.request(method, path, body:, kind:, timeout:) unless cloud
+        dop1_host = host if path.match?(%r{\A/Devices/\d+/DOP/})
+        capped(timeout) do |limit|
+          next @local.request(method, path, body:, kind:, timeout: limit.call) unless cloud
 
-        cloud.request(method, path, body:, kind:, host: (host if path.match?(%r{\A/Devices/\d+/DOP/})), timeout:)
+          cloud.request(method, path, body:, kind:, host: dop1_host, timeout:, &limit)
+        end
       end
 
       # @return [Schema::DeviceIdentification]
       def identity = @identity ||= ident
 
       # @param resource [String]
+      # @param timeout [Numeric, nil]
       # @return [Hash{String=>Object}]
-      def device(resource) = get("/Devices/#{fab}/#{resource}")
+      def device(resource, timeout: nil) = get("/Devices/#{fab}/#{resource}", timeout:)
 
       # @param request [Schema::DeviceState]
+      # @param timeout [Numeric, nil]
       # @return [Connection::Response]
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
-      def command(request) = send_request(:put, "/Devices/#{fab}/State", body: request.to_json)
+      def command(request, timeout: nil) = send_request(:put, "/Devices/#{fab}/State", body: request.to_json, timeout:)
 
+      # @param timeout [Numeric, nil]
       # @return [void]
-      def send_wake = command(Schema::DeviceState.new(device_action: 2))
+      def send_wake(timeout: nil) = command(Schema::DeviceState.new(device_action: 2), timeout:)
 
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"
@@ -266,38 +269,6 @@ module Miele
       # @param time [Time]
       # @return [Rational] seconds since 1970 on the local wall clock
       def wall_clock(time) = time.to_r + time.utc_offset
-
-      # @param klass [Class] a generated Dop1 write section
-      # @return [Data] all its bytes 0, as the app allocates it
-      def blank(klass) = klass.from("\0" * klass::LENGTH)
-
-      # @param klass [Class] a generated Dop1 object
-      # @param section [Data] one of its write sections
-      # @param type [String] {Dop1::READ} or {Dop1::WRITE}, as the app sends that object
-      # @return [void]
-      # @raise [NotAcceptedError] for an Ack other than 1
-      def write_dop1_object(klass, section, type:)
-        write_dop1(Dop1.request(object_id: klass::ID, type:, section: section.to_bytes))
-      end
-
-      # The app accepts only Ack 1, characters 6 and 7 of the answer.
-      #
-      # @param request [String] built by {Dop1}
-      # @return [void]
-      # @raise [NotAcceptedError] for any other Ack, or an answer without one
-      def write_dop1(request)
-        answer = dop1(request)
-        ack = Dop1.ack(answer)
-        raise NotAcceptedError, "the appliance answered #{answer.inspect}" if ack.nil?
-        raise NotAcceptedError, "the appliance answered Ack #{ack.inspect}" unless ack.to_i == 1
-      end
-
-      # @param klass [Class] a generated Dop1 object
-      # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects
-      def dop1_object(klass)
-        answer = JSON.parse(dop1(Dop1.request(object_id: klass::ID, type: Dop1::READ, section: ''))).fetch('Response')
-        klass.from([answer[8..]].pack('H*'))
-      end
 
       # @param condition [Object] whether the protocol or state gives a request to send
       # @param reason [String] what is missing

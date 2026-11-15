@@ -64,7 +64,7 @@ module Miele
           write_start_time(0, 0) if start_minutes(state).zero?
           minutes = offset_minutes(target, now)
           write_start_time(minutes / 60, minutes % 60)
-          write_dop1_selection(dop1_parameters(dop1_object(dop1_objects.fetch(:write)), {}))
+          write_dop1_selection(dop1_parameters(read_dop1_selection, {}))
           command(Schema::DeviceState.new(process_action: 1))
         end
 

@@ -6,8 +6,68 @@ module Miele
     module Resends
       # The clock an appliance measures the app's timeouts on unless given one: seconds, monotonic.
       MONOTONIC = -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
+      # The app gives each action a token of its own: its deadline lives with the fiber that runs it, never on an
+      # appliance that several threads share.
+      DEADLINE = :miele_sdk_action_deadline
+      private_constant :DEADLINE
 
       private
+
+      # The app sends these requests with the action's token, which it cancels when the action's Timeout ends.
+      #
+      # @param seconds [Numeric]
+      # @yieldparam since [Float] when the action began, on the appliance's monotonic clock
+      # @return [Object] what the block gives
+      def within(seconds)
+        since = @clock.call
+        outer = Thread.current[DEADLINE]
+        Thread.current[DEADLINE] = since + seconds
+        yield since
+      ensure
+        Thread.current[DEADLINE] = outer
+      end
+
+      # The app's Timeout fails the action when it ends, the request then running included: one that times out
+      # once the action's time is up raises as the action does.
+      #
+      # @param timeout [Numeric, nil] the seconds the app gives the request itself
+      # @yieldparam limit [Proc] gives the seconds to send it with, to be called just before it goes out
+      # @return [Object] what the block gives
+      # @raise [ActionFailedError] when the request times out once the action's time is up, its ConnectionError as
+      #   cause
+      def capped(timeout)
+        yield -> { request_timeout(timeout) }
+      rescue ConnectionError => e
+        deadline = Thread.current[DEADLINE] #: Float?
+        raise unless deadline && @clock.call >= deadline && e.cause.is_a?(Timeout::Error)
+
+        raise ActionFailedError, "the action ran out of the app's time for it"
+      end
+
+      # @param timeout [Numeric, nil] the seconds the app gives the request itself
+      # @return [Numeric, nil] those, or the time the action has left when less
+      # @raise [ActionFailedError] without sending, when the action has no time left: its token is cancelled
+      def request_timeout(timeout)
+        deadline = Thread.current[DEADLINE] #: Float?
+        return timeout unless deadline
+
+        left = deadline - @clock.call
+        raise ActionFailedError, "the action ran out of the app's time for it" unless left.positive?
+
+        [timeout, left].compact.min
+      end
+
+      # For the requests the app sends inside an action with its caller's token, which the action's Timeout leaves
+      # alone: they keep their own timeout.
+      #
+      # @return [Object] what the block gives
+      def uncapped
+        outer = Thread.current[DEADLINE]
+        Thread.current[DEADLINE] = nil
+        yield
+      ensure
+        Thread.current[DEADLINE] = outer
+      end
 
       # ExecuteSequentiallyUntilTrue sends a switch step through Rx's Retry(3): three attempts back to back,
       # whatever fails, a 400 included.

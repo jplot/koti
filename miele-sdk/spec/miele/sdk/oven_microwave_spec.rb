@@ -53,6 +53,15 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to eq(['DOP2/2/1577'])
   end
 
+  it 'writes within the 15 s of the action, then reads 1/131 with no bound of its own' do
+    Miele::Sdk.config.read_timeout = 30
+    notifications(infos(14))
+    oven.fab
+    timeouts = read_timeouts
+    oven.microwave_power = 0x10
+    expect(timeouts).to eq([15, 15, 30])
+  end
+
   it 'raises the 500 when info 14 does not show within the 6 s the app waits', :aggregate_failures do
     notifications(infos)
     expect { oven.microwave_power = 0x10 }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')

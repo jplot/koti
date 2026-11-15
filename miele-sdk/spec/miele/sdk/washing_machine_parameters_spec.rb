@@ -55,15 +55,6 @@ RSpec.describe Miele::Sdk::WashingMachine do
 
   def written = fake.requests.reject { it.verb == 'GET' }.map { [it.path.delete_prefix("/Devices/#{fab}/"), it.body] }
 
-  def read_timeouts
-    [].tap do |timeouts|
-      allow(Net::HTTP).to receive(:start).and_wrap_original do |start, *args, **options, &block|
-        timeouts << options[:read_timeout]
-        start.call(*args, **options, &block)
-      end
-    end
-  end
-
   it 'writes 2/1577 with the current values 2/1574 shows, then the parameters given, as the app does',
      :aggregate_failures do
     expect(washer.set_parameters_offered?).to be(true)
@@ -186,6 +177,14 @@ RSpec.describe Miele::Sdk::WashingMachine do
       washer.set_parameters(temperature: 60, eco: true, extras: [:eco], stains: [:urine])
       expect(written.map { JSON.parse(it.last).fetch('Request') })
         .to eq(%w[82010100 82010100011c00003bb004020000000000000000000012000010000000])
+    end
+
+    it 'reads and writes 8201 within 8 s each, as BaseDopApiAction' do
+      Miele::Sdk.config.read_timeout = 30
+      washer.fab
+      timeouts = read_timeouts
+      washer.set_parameters(eco: true)
+      expect(timeouts).to eq([8, 8])
     end
 
     it 'writes both TwinDos containers only when given both', :aggregate_failures do

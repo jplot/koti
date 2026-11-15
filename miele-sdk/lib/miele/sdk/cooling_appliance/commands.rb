@@ -81,7 +81,7 @@ module Miele
         # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def set_mode(name, on)
-          write_cooling(MODES.fetch(name), Value: on ? 1 : 2)
+          within(5) { write_cooling(MODES.fetch(name), Value: on ? 1 : 2) }
         end
 
         private

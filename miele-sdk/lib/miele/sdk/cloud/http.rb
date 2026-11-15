@@ -36,7 +36,9 @@ module Miele
           uri = URI(url) #: URI::HTTP
           request = REQUESTS.fetch(method).new(uri.request_uri)
           { 'User-Agent' => "miele-sdk/#{VERSION}", **headers }.each { |name, value| request[name] = value }
-          request.body = body if body
+          # AndroidMessageHandler.SetupRequestBody sends a POST, PUT or DELETE without content as Content-Length: 0;
+          # Net::HTTP does it for a POST or a PUT only.
+          request.body = body || '' unless method == :get
           answer = exchange(uri, request)
           Response.new(status: answer.code.to_i, body: answer.body.to_s)
         end

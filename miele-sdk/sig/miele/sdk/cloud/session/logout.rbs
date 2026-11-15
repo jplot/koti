@@ -21,6 +21,8 @@ module Miele
 
           def mcs_logout: (Token token) -> void
 
+          def logout_post: (Token token) -> Http::Response
+
           def ciam_logout: (Token token) -> void
         end
       end

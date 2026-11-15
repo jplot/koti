@@ -40,9 +40,14 @@ module Miele
           # @param token [Token]
           # @return [void]
           def mcs_logout(token)
-            url = "#{@organization.rest}/V2/Logout"
-            headers = { 'Authorization' => "appToken #{token.value}", 'Accept-Language' => language }
-            Http.request(:post, url, headers:) if Http.request(:post, url, headers:).status == 401
+            logout_post(token) if logout_post(token).status == 401
+          end
+
+          # @param token [Token]
+          # @return [Http::Response]
+          def logout_post(token)
+            headers = { **MCS_JSON, 'Authorization' => "appToken #{token.value}", 'Accept-Language' => language }
+            Http.request(:post, "#{@organization.rest}/V2/Logout", headers:, body: '{}')
           end
 
           # @param token [Token]

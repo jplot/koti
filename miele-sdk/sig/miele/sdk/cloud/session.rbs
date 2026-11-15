@@ -9,6 +9,8 @@ module Miele
 
         SCOPE: String
 
+        MCS_JSON: Hash[String, String]
+
         @organization: Locales::Organization
 
         @clock: ^() -> Time

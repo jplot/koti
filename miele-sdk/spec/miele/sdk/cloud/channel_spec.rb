@@ -69,6 +69,12 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     expect(seen("/V2/Devices/#{fab}/State").map(&:verb)).to eq(%w[PUT])
   end
 
+  it "sends a DELETE without content as the app's AndroidMessageHandler does" do
+    channel.request(:delete, "/Devices/#{fab}/services/AutoStart/1")
+    expect(seen("/V2/Devices/#{fab}/services/AutoStart/1").first.headers.values_at('content-length', 'content-type'))
+      .to eq(['0', nil])
+  end
+
   it 'raises NotFoundError for a resource the cloud does not serve' do
     answers << [404, {}, '']
     expect { channel.request(:get, "/Devices/#{fab}/Ident") }.to raise_error(Miele::Sdk::NotFoundError)
@@ -112,6 +118,14 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
       expect(seen('/V2/Devices').map { it.headers['authorization'] }).to eq(['appToken saved', 'appToken token-1'])
     end
 
+    it "sends the MCS logout as JSON, as the app's ContentTypeDelegatingHandler does", :aggregate_failures do
+      answers << [401, {}, '']
+      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      logout = seen('/V2/Logout').first
+      expect([logout.body, *logout.headers.values_at('content-type', 'accept')])
+        .to eq(['{}', 'application/json; charset=utf-8', 'application/json'])
+    end
+
     it "sends the logout once more after a 401, as the app's AuthenticationHandler does", :aggregate_failures do
       answers.push([401, {}, ''], [401, {}, ''])
       expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
@@ -152,6 +166,12 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
       expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
       expect(seen('/fr/logout').map { [it.verb, it.headers['authorization']] }).to eq([['POST', 'Bearer jwt']])
       expect { channel.devices }.to raise_error(Miele::Sdk::ConfigurationError, /CIAM/)
+    end
+
+    it "sends the CIAM logout without content, as the app's AndroidMessageHandler does", :aggregate_failures do
+      answers << [401, {}, '']
+      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      expect(seen('/fr/logout').first.headers.values_at('content-length', 'content-type')).to eq(['0', nil])
     end
   end
 

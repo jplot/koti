@@ -18,6 +18,11 @@ module Miele
         SCOPE = 'openid bpdata mcs shop zuora'
         private_constant :SCOPE
 
+        # Refit's SystemTextJsonContentSerializer names the charset, and the app's MCS clients accept JSON
+        # (ApiClientFactory.CreateApiClient).
+        MCS_JSON = { 'Content-Type' => 'application/json; charset=utf-8', 'Accept' => 'application/json' }.freeze
+        private_constant :MCS_JSON
+
         # @return [Token, nil] the current token, nil before a login
         attr_reader :token
 
@@ -94,13 +99,9 @@ module Miele
 
         private
 
-        # Refit's SystemTextJsonContentSerializer names the charset, and the app's MCS clients accept JSON
-        # (ApiClientFactory.CreateApiClient).
-        #
         # @return [Hash{String=>Object}]
         def mcs_post(url, body, headers = {})
-          post(url, body, 'application/json; charset=utf-8',
-               { 'Accept' => 'application/json', 'Accept-Language' => language, **headers })
+          post(url, body, MCS_JSON.fetch('Content-Type'), { **MCS_JSON, 'Accept-Language' => language, **headers })
         end
 
         # @param url [String]

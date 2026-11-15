@@ -898,8 +898,10 @@ Given `cloud:`, `events` opens the cloud's websocket (`/websocket/V2/Devices/` o
 REST host) with the session's token and, on every connection, reads the `State` of each of the
 account's appliances, as the app does. It then yields what the cloud pushes: `/State/` and
 `/Ident/` as JSON, a DOP2 leaf as a `Dop2::Leaf` under `/DOP2/{unit}/{attribute}/`, and the
-account's device list, one entry per Wi-Fi module, under `/Devices/` with a nil `fab`. It skips
-the other resources. A module without a fabrication number is named by its `mac-…` id.
+account's device list, one entry per Wi-Fi module, under `/Devices/` with a nil `fab`. The app
+reads no other resource from the websocket; the SDK yields them all the same, as JSON where they
+parse and as pushed otherwise, and a push outside any appliance under its own path with a nil
+`fab`. A module without a fabrication number is named by its `mac-…` id.
 
 Each message is acknowledged as the app does, a keep-alive goes out every 30 s, and the websocket
 reconnects 6 s after an error or a close, and at once after a minute without a message, each time
@@ -938,7 +940,7 @@ seconds (3 by default) after each read ends. A failed read ends the poll with it
 | `Miele::Sdk::ResponseError` | the appliance answers with an error status; carries `status` |
 | `Miele::Sdk::NotFoundError` | the appliance does not serve that resource, or the GroupID is not its own (a `ResponseError`) |
 | `Miele::Sdk::RemoteControlDisabledError` | the appliance refuses a command (a `ResponseError`) |
-| `Miele::Sdk::ActionUnavailableError` | a check the app makes before an action fails: nothing is sent |
+| `Miele::Sdk::ActionUnavailableError` | the appliance's protocol or state gives no request to send for the action: nothing is sent |
 | `Miele::Sdk::NotAcceptedError` | a Dop1 appliance acknowledges a write with anything but success |
 | `Miele::Sdk::ActionFailedError` | an appliance takes an action's write but does not show its effect within the app's 15 seconds |
 | `Miele::Sdk::Dop2::DecodeError` | a DOP2 leaf has an unknown type or ends too early |

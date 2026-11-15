@@ -420,6 +420,11 @@ module Ajax
           }.flat_map { |family, kinds| kinds.map { [it, family] } }.to_h.freeze
           private_constant :PHOTO_FAMILIES
 
+          # @param device [Device]
+          # @return [Boolean] whether the app has a photo on demand button for this kind of device, which
+          #   {#take_photo} names by its family
+          def photo_on_demand?(device) = PHOTO_FAMILIES.key?(device.kind)
+
           # Asks a MotionCam for photos, as the app's photo on demand button does. They arrive as a
           # +PHOTO_ON_DEMAND+ notification, whose {#notification_media} gives their addresses.
           #

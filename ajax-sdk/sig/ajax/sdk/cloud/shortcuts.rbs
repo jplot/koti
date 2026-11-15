@@ -116,6 +116,7 @@ module Ajax
 
           PHOTO_FAMILIES: Hash[Symbol, :cam | :cam_outdoor | :cam_fibra_base | :no_device_type_info]
 
+          def photo_on_demand?: (Device device) -> bool
           def take_photo: (Device device) -> nil
           def notification_media: (String space_id, String notification_id) -> Enumerator::Lazy[NOTIFICATION::NotificationMedia, untyped]
         end

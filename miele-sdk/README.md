@@ -203,7 +203,9 @@ dishwasher or a coffee maker goes out again whatever fails; the others never aft
 a request that outlasts the time the app gives it: 8 seconds for each attempt of a laundry action,
 `open_timeout` and `read_timeout` otherwise, which bound the connection and the answer each, those
 8 seconds too. The waits are counted against the app's timeout around each action, request times
-left out.
+left out. Within that timeout the app then waits for the change to show: for a switch step and a
+rename, in the `State` or `Ident` its websocket pushes, for which the SDK sends nothing (the events
+stream gives them, see [Events](#events)); for Con@ctivity, by polling, which the SDK does too.
 
 `power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app's oven module does; its other families
 switch on in their own way, which will come with them. An appliance asleep answers 500:
@@ -343,8 +345,11 @@ of its three on a hood whose `color_flow` is not nil, and a 404 raises `NotFound
 `supervise` writes `SuperVision/{fab}` of the appliance that shows another one, with `Show` alone:
 the app leaves `Signal` out. As the app's Con@ctivity helpers, `supervise`, `connect_hob` and
 `disconnect_hob` write again 2 seconds after a 5xx or a lost connection, four attempts at most, the
-last two reading `services` again for each. ColorFlow and Con@ctivity Plus have been read from a
-real hood through the cloud.
+last two reading `services` again for each. Then, as the app polls them, `supervise` reads
+`SuperVision/{fab}` back at once, and `connect_hob` and `disconnect_hob` read `services` 3 seconds
+after the read they wrote from, every 3 seconds until it shows what was written: past the app's 15
+seconds, write retries included, they raise `ActionFailedError`, and a read that fails ends them.
+ColorFlow and Con@ctivity Plus have been read from a real hood through the cloud.
 
 ## Hobs
 

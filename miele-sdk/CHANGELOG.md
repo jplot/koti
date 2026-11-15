@@ -84,12 +84,15 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   as the app's BaseApiAction`1 does: an action the appliance keeps answering 500 no longer raises.
   `name=` does the same within 15 s; an Opcode `set_target` posts again 5 s apart, three attempts
   within 15 s; `supervise`, `connect_hob` and `disconnect_hob` write again 2 s apart, four attempts
-  at most, the last two reading `services` again each time. A dishwasher's `power_on` (its wake,
+  at most, the last two reading `services` again once its last answer is 3 s old, as the app's
+  poll keeps it until then. A dishwasher's `power_on` (its wake,
   then 2/1586) and `power_off`, and a DOP2 coffee maker's `power_off`, send each step up to three
   times back to back, whatever fails, a 400 included. A DOP2 coffee maker's `power_on` starts again
   5 s after any failure, three attempts in all, and wakes one that answers 500 every 5 s within
-  45 s; an oven's `power_on` wakes it every 3 s until 45 s are up instead of giving up after three
-  attempts.
+  45 s, a wake's own time counting in its 5 s; an oven's `power_on` wakes it every 3 s until 45 s are
+  up instead of giving up after three attempts. These bounds, and those of an oven's waits, run on
+  the wall clock, request times included, as the app's Timeouts do: an appliance takes `clock:`, a
+  monotonic clock by default.
 - **Breaking:** a dishwasher's `power_off`, and a DOP2 coffee maker's `power_off` and `power_on`,
   read `State` first, as the app's ExecuteSequentiallyUntilTrue does, and send nothing while it shows
   the appliance off already (Status 1) or, for the coffee maker's `power_on`, on already (a Status
@@ -98,12 +101,12 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   the 2/1574 read of `set_parameters` and `start_delayed` 10 s, as the app's tokens bound them; a
   request that runs out of time is not sent again. `Connection.request`, `Cloud::Channel#request`,
   `Cloud::Http.request`, `dop2` and `write_dop2` take that `timeout:`, which `open_timeout` and
-  `read_timeout` still cap. `set_parameters` and `start_delayed` read 2/1577 before 2/1574, as the
-  app's SelectParametersAsync does.
+  `read_timeout` still cap and which bounds the write too. `set_parameters` and `start_delayed` read
+  2/1577 before 2/1574, as the app's SelectParametersAsync does.
 - **Breaking:** `supervise`, `connect_hob` and `disconnect_hob` read back what they wrote, as the
   app polls it, every 3 s within its 15 s, write retries included: `SuperVision/{fab}` right after
-  the write, `services` 3 s after the read the write was made from. They raise `ActionFailedError`
-  when it does not show in time.
+  the write, `services` 3 s after the answer the write was made from, unless that answer already
+  shows it. They raise `ActionFailedError` when it does not show in time.
 - **Breaking:** a 401 from the cloud is handled as the app handles it. A request under `/V2` answered
   401 raises `ResponseError` (status 401) instead of going out again with a renewed token, which is
   kept, and the websocket no longer renews a token its handshake is refused with: it connects again

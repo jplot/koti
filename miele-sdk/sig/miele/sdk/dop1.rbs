@@ -21,6 +21,8 @@ module Miele
 
       def self?.setting_value: (String response) -> Integer?
 
+      def self?.ack: (String answer) -> String?
+
       def self?.unsigned: (Integer value, Integer bits) -> Integer
     end
   end

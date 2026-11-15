@@ -267,9 +267,11 @@ module Miele
       #
       # @param request [String] built by {Dop1}
       # @return [void]
-      # @raise [NotAcceptedError] for any other Ack
+      # @raise [NotAcceptedError] for any other Ack, or an answer without one
       def write_dop1(request)
-        ack = JSON.parse(dop1(request)).fetch('Response')[6, 2]
+        answer = dop1(request)
+        ack = Dop1.ack(answer)
+        raise NotAcceptedError, "the appliance answered #{answer.inspect}" if ack.nil?
         raise NotAcceptedError, "the appliance answered Ack #{ack.inspect}" unless ack.to_i == 1
       end
 

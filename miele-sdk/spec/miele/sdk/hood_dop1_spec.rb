@@ -51,6 +51,17 @@ RSpec.describe Miele::Sdk::Hood do
     end
   end
 
+  context 'when the hood answers a write with nothing the app can parse' do
+    let(:dop1_answer) { [200, {}, 'Success'] }
+
+    it 'raises NotAcceptedError, as the app takes a Dop1 answer it cannot parse as a failure', :aggregate_failures do
+      ['Success', '{}', '{"Response":null}', '{"Response":64}', '[]'].each do |answer|
+        dop1_answer[2] = answer
+        expect { appliance.fan_level = 0 }.to raise_error(Miele::Sdk::NotAcceptedError)
+      end
+    end
+  end
+
   context 'when the hood acknowledges a write with Ack 0' do
     let(:dop1_answer) { [200, {}, '{"Response":"8E011200"}'] }
 

@@ -1,9 +1,15 @@
 module Miele
   module Sdk
     module Resends
+      @sleeper: Appliance::_Sleeper
+
       private
 
       def three_attempts: [T] () { () -> T } -> T
+
+      def resent: [T] () { () -> T } -> T
+
+      def resent?: (ResponseError | ConnectionError error) -> bool
     end
   end
 end

@@ -49,6 +49,8 @@ module Miele
 
       def dryer?: () -> bool
 
+      def action_request: [T] () { () -> T } -> T
+
       def program_para: (Objects::Laundry::GlobalPsContext context) -> untyped
 
       def dop2_door: (Objects::Laundry::GlobalDeviceContext context) -> (Symbol | Integer)

@@ -100,6 +100,13 @@ module Miele
       # @return [Boolean]
       def dryer? = is_a?(TumbleDryer)
 
+      # BaseApiAction`1 sends an action's DOP2 reads and writes through RetryOnRestException; SelectParametersAsync
+      # reads 2/1574 directly, once.
+      #
+      # @yieldreturn [Object] the read or the write
+      # @return [Object] what the block gives
+      def action_request(&) = resent(&)
+
       # @param context [Objects::Laundry::GlobalPsContext] 2/1574
       # @return [Data, nil] the dryer's parameters, or the washer's and the washer-dryer's
       def program_para(context) = dryer? ? context.context_para_td : context.context_para_wm

@@ -226,9 +226,9 @@ module Miele
       # @param id [Integer]
       # @return [void]
       def dop2_user_request(id)
-        leaf = dop2(2, 1583, idx1: 0, idx2: 0)
+        leaf = action_request { dop2(2, 1583, idx1: 0, idx2: 0) }
         request = Dop2::Field.new(type: leaf.fields[1]&.type || :e16, value: id)
-        write_dop2(leaf.with(fields: leaf.fields.merge(1 => request)))
+        action_request { write_dop2(leaf.with(fields: leaf.fields.merge(1 => request))) }
       end
 
       # @param at [Time] a time of day

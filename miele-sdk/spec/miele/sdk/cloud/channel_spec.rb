@@ -140,6 +140,34 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     end
   end
 
+  context 'when a kill lands in the middle of a logout' do
+    let(:gate) { Thread::Queue.new }
+    let(:file) { File.join(Dir.mktmpdir, 'token.json') }
+    let(:cloud) do
+      FakeCloud.start do |request|
+        case request.path
+        when '/V2/Devices' then [401, {}, '']
+        when '/V2/Logout' then [gate.pop, {}, '']
+        end
+      end
+    end
+
+    before do
+      File.write(file, '{}')
+      Miele::Sdk.configure { it.token_file = file }
+    end
+
+    it 'finishes the logout and forgets the token before the thread stops' do
+      channel.session.current
+      reader = Thread.new { channel.devices }
+      Timeout.timeout(5) { Thread.pass until seen('/V2/Logout').any? }
+      reader.kill
+      gate << 200
+      reader.join
+      expect([channel.session.token, File.exist?(file)]).to eq([nil, false])
+    end
+  end
+
   context 'when the cloud refuses the renewal of a token past half its life' do
     let(:file) { File.join(Dir.mktmpdir, 'token.json') }
 

@@ -14,10 +14,12 @@ module Miele
           # @return [void]
           # @api public
           def invalidate(refused)
-            @mutex.synchronize do
-              next unless @token.equal?(refused)
+            Thread.handle_interrupt(Object => :never) do
+              @mutex.synchronize do
+                next unless @token.equal?(refused)
 
-              lose(refused)
+                lose(refused)
+              end
             end
           end
 

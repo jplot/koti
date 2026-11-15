@@ -146,7 +146,7 @@ module Ajax
           @settings.password_sha256 || Digest::SHA256.hexdigest(@settings.password.to_s)
         end
 
-        def reason(failure) = failure.error || :bad_request
+        def reason(failure) = failure.error || :unknown
 
         def app_metadata
           { 'client-device-id' => @settings.client_device_id, 'client-device-model' => @settings.client_device_model,

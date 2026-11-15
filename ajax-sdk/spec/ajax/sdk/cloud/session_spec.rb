@@ -94,6 +94,14 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     expect(client).to have_received(:authenticate).once
   end
 
+  it 'names a refusal the gateway gives no reason for :unknown, as the app does', :aggregate_failures do
+    allow(client).to receive(:authenticate).and_return(password({ failure: {} }))
+
+    expect { session.ensure_login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
+      expect(error.reason).to eq(:unknown)
+    end
+  end
+
   def login_outcome
     session.ensure_login
   rescue Ajax::Sdk::Cloud::AuthenticationError => e

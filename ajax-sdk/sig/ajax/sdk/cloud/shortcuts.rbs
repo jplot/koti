@@ -59,6 +59,7 @@ module Ajax
           def close_shutter: (Device device) -> nil
           def move_shutter: (Device device, Integer percent) -> nil
           def stop_shutter: (Device device) -> nil
+          def press_shutter: (Device device) -> nil
           def lock: (Device device) -> nil
           def unlock: (Device device) -> nil
           def unlatch: (Device device) -> nil

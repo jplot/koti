@@ -158,6 +158,14 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         .to eq([{ shutter_target_position: -1 }, { shutter_target_position: 101 }])
     end
 
+    it 'presses a shutter like the tile of the app, sending no command and its exact type' do
+      client.press_shutter(device(:roller_shutter_ls))
+      client.press_shutter(device(:door_protect))
+
+      expect(sent.map(&:last)).to eq([{ **target, device_type: { roller_shutter_ls: {} } },
+                                      { **target, device_type: { door_protect: {} } }])
+    end
+
     it 'moves any device as a shutter of its exact type, as the app does' do
       client.close_shutter(device(:door_protect))
 
@@ -549,6 +557,10 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         relay.call(answer(path, { success: { snapshot: {} } }))
       end
       allow(grpc).to receive(:request_response) { |path, *| answer(path, {}) }
+    end
+
+    it 'refuses a shutter press' do
+      expect { client.press_shutter(device(:roller_shutter_ls)) }.to raise_error(Ajax::Sdk::Cloud::ReadOnlyError)
     end
 
     it 'refuses an archive export' do

@@ -162,6 +162,16 @@ RSpec.describe Miele::Sdk::Cloud::Session do
       .to eq([2, ['Bearer jwt-1']])
   end
 
+  ['?error=invalid_grant', 'error=invalid_grant&state={}', '{"error":"INVALID_GRANT",}'].each do |body|
+    it "reads #{body} as a refused CIAM renewal, as the app's WebExDecoder does" do
+      Miele::Sdk.configure { it.ciam_client_id = 'com.example.app' }
+      session.exchange('code-1')
+      renewals << [400, {}, body]
+      times << (now + 3250)
+      expect { session.authorization }.to raise_error(Miele::Sdk::AuthenticationError)
+    end
+  end
+
   it 'renews a CIAM token past 90 % of its life, with the refresh form', :aggregate_failures do
     Miele::Sdk.configure { it.ciam_client_id = 'com.example.app' }
     session.exchange('code-1')

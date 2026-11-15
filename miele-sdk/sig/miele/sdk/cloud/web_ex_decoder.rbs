@@ -1,0 +1,15 @@
+module Miele
+  module Sdk
+    module Cloud
+      module WebExDecoder
+        def self?.decode: (String body) -> Hash[String, untyped]
+
+        def self?.object: (String body) -> Hash[String, untyped]?
+
+        def self?.form: (String body) -> Hash[String, String]
+
+        def self?.unescape: (String text) -> String
+      end
+    end
+  end
+end

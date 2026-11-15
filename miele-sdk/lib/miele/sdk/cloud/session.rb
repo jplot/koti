@@ -113,13 +113,7 @@ module Miele
         # @param answer [Http::Response]
         # @return [Boolean]
         def invalid_grant?(answer)
-          return false unless answer.status == 400
-
-          body = answer.body
-          fields = body.include?('{') ? JSON.parse(body) : URI.decode_www_form(body).to_h
-          fields.is_a?(Hash) && fields['error'].to_s.casecmp?('invalid_grant')
-        rescue JSON::ParserError, ArgumentError
-          false
+          answer.status == 400 && WebExDecoder.decode(answer.body)['error'].to_s.casecmp?('invalid_grant')
         end
 
         # @param url [String]

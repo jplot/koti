@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::Hood do
-  subject(:hood) { described_class.new('127.0.0.1', ident:) }
+  subject(:hood) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }) }
 
   let(:fab) { '000123456789' }
   let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 18, 'ProtocolVersion' => 2) }
@@ -13,10 +13,12 @@ RSpec.describe Miele::Sdk::Hood do
   let(:fake) do
     services = JSON.generate('ConnectivityPlus' => plus)
     flow = color_flow
+    queued = refusals
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/services\z} } then [200, {}, services]
+      in { verb: 'PUT' } if (refusal = queued.shift) then refusal
       in { path: %r{/ColorFlow\z} } then flow
       else [200, {}, '{}']
       end
@@ -28,6 +30,10 @@ RSpec.describe Miele::Sdk::Hood do
   after { fake.stop }
 
   def written = fake.requests.reject { it.verb == 'GET' }.map { [it.verb, it.path, JSON.parse(it.body)] }
+
+  def waits = @waits ||= []
+
+  def refusals = @refusals ||= []
 
   it 'reads Con@ctivity Plus from services' do
     expect(hood.connectivity_plus).to eq(described_class::ConnectivityPlus.new(
@@ -42,9 +48,25 @@ RSpec.describe Miele::Sdk::Hood do
                             { 'activated' => true, 'sourceDeviceIds' => %w[000111222333] }]])
   end
 
+  it 'reads services and writes Con@ctivity Plus again 2 s after a 5xx or a lost connection, four times at most',
+     :aggregate_failures do
+    refusals.push([500, {}, ''], :drop, [503, {}, ''], [500, {}, ''])
+    expect { hood.connect_hob('000111222333') }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+    expect(fake.requests.map { [it.verb, it.path[/services.*/]] }.select(&:last))
+      .to eq([%w[GET services], %w[PUT services/ConnectivityPlus]] * 4)
+    expect(waits).to eq([2, 2, 2])
+  end
+
   it 'shows an appliance under Con@ctivity One, its Signal left out as the app leaves it' do
     hood.supervise('000111222333', show: true)
     expect(written).to eq([['PUT', "/Devices/#{fab}/SuperVision/000111222333", { 'Show' => true }]])
+  end
+
+  it 'writes Con@ctivity One again 2 s after a 5xx, and a 4xx at once', :aggregate_failures do
+    refusals.push([502, {}, ''], [404, {}, ''])
+    expect { hood.supervise('000111222333', show: true) }.to raise_error(Miele::Sdk::NotFoundError)
+    expect(written.map { it[1] }).to eq(["/Devices/#{fab}/SuperVision/000111222333"] * 2)
+    expect(waits).to eq([2])
   end
 
   it 'sets ColorFlow with its interval in seconds, one the app does not offer too', :aggregate_failures do

@@ -208,15 +208,17 @@ module Miele
         def awake?(state) = [nil, 2].include?(state['SyncState']) && state['StandbyState'] == 1
 
         # The app changes one hob in the list +services+ shows and derives +activated+ from what is left
-        # (UpdateConactivityPlusSettingsHelper).
+        # (UpdateConactivityPlusSettingsHelper), reading +services+ again for each attempt its retry makes.
         #
         # @yieldparam sources [Array<String>] the hobs followed
         # @yieldreturn [Array<String>] those to follow
         # @return [void]
         def update_connectivity_plus
-          sources = yield Array(connectivity_plus&.sources)
-          body = JSON.generate('activated' => sources.any?, 'sourceDeviceIds' => sources)
-          send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
+          resent(retries: 3, delay: 2) do
+            sources = yield Array(connectivity_plus&.sources)
+            body = JSON.generate('activated' => sources.any?, 'sourceDeviceIds' => sources)
+            send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
+          end
         end
 
         # @param pf_id [Integer] its Dop1 setting

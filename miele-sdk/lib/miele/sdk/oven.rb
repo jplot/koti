@@ -24,15 +24,16 @@ module Miele
       #
       # @return [void]
       # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1586 to write
-      # @raise [ResponseError] if the appliance still refuses after three attempts
+      # @raise [ResponseError] if the appliance still refuses after three attempts, or refuses DeviceAction 2
       # @api public
       def power_on
         require_dop2!
         3.times do |attempt|
-          rouse if attempt.positive?
           return write_dop2(power_leaf(4))
         rescue ResponseError => e
           raise unless e.status == 500 && attempt < 2
+
+          rouse
         end
       end
 
@@ -188,15 +189,12 @@ module Miele
       end
 
       # A sleeping appliance answers 500 to the state write; the app then sends DeviceAction 2, waits 3 s and
-      # tries again, with no limit: three attempts here.
+      # tries again, with no limit: three attempts here. A refused DeviceAction 2 ends it (SwitchOnHelper).
       #
       # @return [void]
+      # @raise [ResponseError] when the appliance refuses DeviceAction 2
       def rouse
-        begin
-          wake
-        rescue ResponseError
-          nil
-        end
+        wake
         @sleeper.call(3)
       end
     end

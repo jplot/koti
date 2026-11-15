@@ -3,104 +3,117 @@
 module Miele
   module Sdk
     class WarmingDrawer < Appliance
-      # The actions of the app's drawer module, each after the rule the app enables it by: Dop1 writes on 1101 and
-      # 9781, which raise {NotAcceptedError} on an Ack other than 1, and the cup warm-up in +services+.
+      # The actions of the app's drawer module: Dop1 writes on 1101 and 9781, which raise {NotAcceptedError} on an
+      # Ack other than 1, and the cup warm-up in +services+. The predicates give the rule the app enables each by.
       module Commands
+        # @return [void]
+        # @api public
+        def power_on = write_device_action(2)
+
         # The app's settings switch shows off, and so offers on, in these states only.
         #
-        # @return [void]
-        # @raise [ActionUnavailableError] without mobile start, under local control, or unless off, off with the door
-        #   open, finished or idle
+        # @return [Boolean] whether the app offers {#power_on}: {#switchable?}, and off, off with the door open,
+        #   finished or idle
         # @api public
-        def power_on
+        def power_on_offered?
           state = self.state
-          require!(switchable?(state) && %i[off off_and_door_open finished idle].include?(drawer_state(state)),
-                   'the drawer cannot be switched on now')
-          write_device_action(2)
+          switchable?(state) && %i[off off_and_door_open finished idle].include?(drawer_state(state))
         end
 
-        # The app's settings switch, action bar and dashboard each allow it; the SDK when any of them does.
-        #
         # @return [void]
-        # @raise [ActionUnavailableError] without mobile start, under local control, or off, off with the door open,
-        #   finished or not connected
         # @api public
-        def power_off
+        def power_off = write_device_action(3)
+
+        # The app's settings switch, action bar and dashboard each allow it; the SDK tells when any of them does.
+        #
+        # @return [Boolean] whether the app offers {#power_off}: {#switchable?}, and neither off, off with the door
+        #   open, finished nor not connected
+        # @api public
+        def power_off_offered?
           state = self.state
-          off = %i[off off_and_door_open finished not_connected].include?(drawer_state(state))
-          require!(switchable?(state) && !off, 'the drawer cannot be switched off now')
-          write_device_action(3)
+          switchable?(state) && !%i[off off_and_door_open finished not_connected].include?(drawer_state(state))
         end
 
         # @param id [Integer] 1 cups, 2 plates, 3 food, 4 low-temperature cooking
         # @return [void]
-        # @raise [ActionUnavailableError] unless under remote control and mobile start without local control, the
-        #   drawer on, running or off
+        # @raise [ArgumentError] for another program, which +Betriebsart+ does not define
         # @api public
         def select_program(id)
           raise ArgumentError, 'the drawer runs programs 1 to 4' unless (1..4).cover?(id)
 
-          state = self.state
-          require!(controllable?(state) && %i[on running off off_and_door_open].include?(drawer_state(state)),
-                   'the drawer takes a program only when on, running or off')
           write_process_data(id, 0, 0)
+        end
+
+        # @return [Boolean] whether the app offers {#select_program}: under remote control and mobile start without
+        #   local control, the drawer on, running or off
+        # @api public
+        def select_program_offered?
+          state = self.state
+          controllable?(state) && %i[on running off off_and_door_open].include?(drawer_state(state))
         end
 
         # The app re-sends the remaining time +State+ shows.
         #
-        # @param celsius [Integer] one of the program's temperatures (see {#programs})
+        # @param celsius [Integer] such as one of the program's temperatures, which {#programs} gives
         # @return [void]
-        # @raise [ActionUnavailableError] without mobile start, under local control, or without a program
-        # @raise [ArgumentError] for a temperature the program does not offer
+        # @raise [ArgumentError] for degrees a byte does not hold
         # @api public
         def target_temperature=(celsius)
-          state = self.state
-          require!(switchable?(state), 'the drawer takes a temperature only under mobile start')
-          steps = program(state)&.temperatures.to_a
-          require!(!steps.empty?, 'the drawer runs no program to set')
-          raise ArgumentError, "#{celsius} °C is not one of #{steps}" unless steps.include?(celsius)
+          raise ArgumentError, "#{celsius} °C does not fit the temperature's byte" unless (0..255).cover?(celsius)
 
+          state = self.state
           write_process_data(state.raw['ProgramID'].to_i, remaining_minutes(state), celsius)
         end
 
-        # The app keeps to the program's maximum and re-sends the target temperature +State+ shows; 0 resets it.
+        # @return [Boolean] whether the app sets the temperature: {#switchable?}, with a program
+        # @api public
+        def target_temperature_offered?
+          state = self.state
+          switchable?(state) && !program(state).nil?
+        end
+
+        # The app keeps the time to the program's maximum hours, 0 without a program, and re-sends the target
+        # temperature +State+ shows; 0 resets it. {#programs} gives the minimum hours its picker offers past 0.
         #
         # @param minutes [Integer]
         # @return [void]
-        # @raise [ActionUnavailableError] unless under remote control and mobile start without local control, the
-        #   program set or running (Status 3 to 6)
-        # @raise [ArgumentError] for a time other than 0 under the program's minimum hours, which the app's picker
-        #   does not offer
+        # @raise [ArgumentError] for a negative time
         # @api public
         def remaining_time=(minutes)
+          raise ArgumentError, "a remaining time of #{minutes} min is negative" if minutes.negative?
+
           state = self.state
-          require!(controllable?(state) && [3, 4, 5, 6].include?(state.raw['Status']),
-                   'the drawer takes a remaining time only while its program is set or runs')
-          minutes = picked_minutes(program(state), minutes)
+          minutes = [minutes, program(state)&.max_hours.to_i * 60].min
           write_process_data(state.raw['ProgramID'].to_i, minutes, target_celsius(state))
         end
 
-        # @param coffee_maker [String, nil] the fab of a coffee maker the drawer lists, nil to stop
+        # @return [Boolean] whether the app sets the remaining time: under remote control and mobile start without
+        #   local control, the program set or running (Status 3 to 6)
+        # @api public
+        def remaining_time_offered?
+          state = self.state
+          controllable?(state) && [3, 4, 5, 6].include?(state.raw['Status'])
+        end
+
+        # @param coffee_maker [String, nil] the fab of a coffee maker, such as one {#cups_warm_up} lists, nil to stop
         # @return [void]
-        # @raise [ActionUnavailableError] while the drawer is disconnected or offers no cup warm-up
-        # @raise [ArgumentError] for a coffee maker the drawer does not list
         # @api public
         def cups_warm_up_source=(coffee_maker)
-          warm_up = cups_warm_up || {}
-          require!(state.raw['Status'] != 255 && warm_up['available'] == true, 'the drawer offers no cup warm-up')
-          if coffee_maker && !Array(warm_up['availableSourceDeviceIDs']).include?(coffee_maker)
-            raise ArgumentError, "#{coffee_maker} is not a coffee maker the drawer lists"
-          end
-
           body = coffee_maker ? { activated: true, sourceDeviceId: coffee_maker } : { activated: false }
           send_request(:put, "/Devices/#{fab}/services/CupsWarmUp", body: JSON.generate(body))
         end
 
-        private
+        # @return [Boolean] whether the app offers the cup warm-up: the drawer connected and {#cups_warm_up}
+        #   available
+        # @api public
+        def cups_warm_up_offered? = state.raw['Status'] != 255 && cups_warm_up.to_h['available'] == true
 
-        # @param state [State]
-        # @return [Boolean] mobile start without local control
-        def switchable?(state) = state.mobile_start? == true && state.local_control? != true
+        # @param state [State] read when not given
+        # @return [Boolean] mobile start without local control, which every switch and setting of the app needs
+        # @api public
+        def switchable?(state = self.state) = state.mobile_start? == true && state.local_control? != true
+
+        private
 
         # @param state [State]
         # @return [Boolean] remote control and mobile start without local control
@@ -129,19 +142,6 @@ module Miele
         # @param state [State]
         # @return [Program, nil] the program +State+ shows
         def program(state) = programs.find { it.id == state.raw['ProgramID'] }
-
-        # @param program [Program, nil]
-        # @param minutes [Integer]
-        # @return [Integer] the minutes kept to the program's maximum hours, which the app takes as 0 without one
-        # @raise [ArgumentError] for a time other than 0 under its minimum hours
-        def picked_minutes(program, minutes)
-          min_hours = program&.min_hours.to_i
-          unless minutes.zero? || minutes >= min_hours * 60
-            raise ArgumentError, "the app sets 0 or at least #{min_hours} h"
-          end
-
-          [minutes, program&.max_hours.to_i * 60].min
-        end
 
         # @param state [State]
         # @return [Integer] +RemainingTime+ [h, m] in minutes, 0 without both

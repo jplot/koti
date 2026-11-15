@@ -8,13 +8,13 @@ module Miele
 
         def switch_on: () -> void
 
-        def send_switch_on: (Array[Integer | Float] waits) -> void
+        def send_switch_on: (Float since) -> void
 
-        def read_combi_state: (Array[Integer | Float] waits) -> Dop2::Leaf
+        def read_combi_state: (Float since) -> Dop2::Leaf
 
-        def rouse: (Array[Integer | Float] waits, ResponseError error) -> void
+        def rouse: (Float since, ResponseError error) -> void
 
-        def paused?: (Array[Integer | Float] waits, Integer seconds) -> bool
+        def paused?: (Float since, Integer | Float seconds) -> bool
 
         def switched_on: (Dop2::Leaf leaf) -> Dop2::Leaf?
       end

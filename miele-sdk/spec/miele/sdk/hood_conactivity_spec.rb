@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::Hood do
-  subject(:hood) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }) }
+  subject(:hood) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }, clock:) }
 
   let(:fab) { '000123456789' }
   let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 18, 'ProtocolVersion' => 2) }
@@ -41,6 +41,10 @@ RSpec.describe Miele::Sdk::Hood do
   def written = fake.requests.reject { it.verb == 'GET' }.map { [it.verb, it.path, JSON.parse(it.body)] }
 
   def waits = @waits ||= []
+
+  def clock = -> { waits.sum + (fake.requests.size * round_trip) }
+
+  def round_trip = 0
 
   def refusals = @refusals ||= []
 
@@ -90,6 +94,16 @@ RSpec.describe Miele::Sdk::Hood do
     hood_side[:applies] = false
     expect { hood.supervise('000111222333', show: true) }.to raise_error(Miele::Sdk::ActionFailedError)
     expect([gets('/SuperVision/000111222333'), waits]).to eq([4, [2, 2, 3, 3, 3]])
+  end
+
+  context 'when each round trip takes a second' do
+    def round_trip = 1
+
+    it 'counts them in the 15 s, which then leave room for four reads of SuperVision', :aggregate_failures do
+      hood_side[:applies] = false
+      expect { hood.supervise('000111222333', show: true) }.to raise_error(Miele::Sdk::ActionFailedError)
+      expect([gets('/SuperVision/000111222333'), waits]).to eq([4, [3, 3, 3]])
+    end
   end
 
   it 'shows an appliance under Con@ctivity One, its Signal left out as the app leaves it' do

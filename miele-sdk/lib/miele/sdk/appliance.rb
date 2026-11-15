@@ -29,17 +29,19 @@ module Miele
       # @param host [String] address or +.local+ name of the appliance; given +cloud:+, the name of its module as
       #   the cloud lists it for its Dop1 requests to reach it
       # @param sleeper [#call] waits the given number of seconds
+      # @param clock [#call] seconds, monotonic
       # @param fab [String, nil] its fabrication number, when already known
       # @param ident [Schema::DeviceIdentification, nil] its identity, which gives its type and protocol without a read
       # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, as the app does once it is paired;
       #   without one, every request goes to the appliance itself
       # @raise [ArgumentError] with a cloud but no fab, which the cloud names appliances by
-      def initialize(host, sleeper: method(:sleep), fab: nil, ident: nil, cloud: nil)
+      def initialize(host, sleeper: method(:sleep), clock: MONOTONIC, fab: nil, ident: nil, cloud: nil) # rubocop:disable Metrics/ParameterLists -- the appliance, how it is reached, and the two time sources a spec replaces
         raise ArgumentError, 'an appliance reached through the cloud needs its fab' if cloud && !fab
 
         @host = host
         @identity = ident
         @sleeper = sleeper
+        @clock = clock
         @fab = fab
         @cloud = cloud
         @local = Connection.local(host)
@@ -87,9 +89,9 @@ module Miele
       # @api public
       def supervise(device, show:)
         path = "/Devices/#{fab}/SuperVision/#{device}"
-        waits = [] #: Array[Integer | Float]
-        resent(retries: 3, delay: 2, waits:) { send_request(:put, path, body: JSON.generate('Show' => show)) }
-        poll_until_shown(waits, within: 15) { get(path)['Show'] == show }
+        since = @clock.call
+        resent(retries: 3, delay: 2, since:) { send_request(:put, path, body: JSON.generate('Show' => show)) }
+        poll_until_shown(since:, within: 15) { get(path)['Show'] == show }
       end
 
       # @return [Hash{String=>Object}] the communication module's +/Info+

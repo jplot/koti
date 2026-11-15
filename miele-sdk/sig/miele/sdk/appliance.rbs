@@ -24,11 +24,13 @@ module Miele
 
       @sleeper: _Sleeper
 
+      @clock: ^() -> Float
+
       attr_reader host: String
 
       def self.for: (String host, ?ident: Schema::DeviceIdentification?, **untyped) -> Appliance
 
-      def initialize: (String host, ?sleeper: _Sleeper, ?fab: String?, ?ident: Schema::DeviceIdentification?,
+      def initialize: (String host, ?sleeper: _Sleeper, ?clock: ^() -> Float, ?fab: String?, ?ident: Schema::DeviceIdentification?,
                        ?cloud: Cloud::Channel?) -> void
 
       def fab: () -> String

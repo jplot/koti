@@ -19,56 +19,59 @@ module Miele
         def switch_on
           return unless [1, 8, 255].include?(state.raw['Status'])
 
-          waits = [] #: Array[Integer | Float]
+          since = @clock.call
           3.times do |attempt|
-            return send_switch_on(waits)
+            return send_switch_on(since)
           rescue Error
-            raise if attempt == 2 || !paused?(waits, 5)
+            raise if attempt == 2 || !paused?(since, 5)
           end
         end
 
-        # @param waits [Array<Integer, Float>] the seconds this switch-on has waited
+        # @param since [Numeric] when the switch-on began, on the appliance's monotonic clock
         # @return [void]
-        def send_switch_on(waits)
-          leaf = switched_on(read_combi_state(waits))
+        # @raise [ActionFailedError] when the 45 s end within SwitchOnDelay, before the write
+        def send_switch_on(since)
+          leaf = switched_on(read_combi_state(since))
           return unless leaf
+          raise ActionFailedError, "the coffee maker's switch-on ran past #{TIMEOUT} s" unless paused?(since, 1.5)
 
-          @sleeper.call(1.5)
-          waits << 1.5
           write_dop2(leaf)
         end
 
-        # @param waits [Array<Integer, Float>]
+        # @param since [Numeric]
         # @return [Dop2::Leaf] 2/1586 at 0/0, which SwitchOnHelper writes back as read
-        def read_combi_state(waits)
+        def read_combi_state(since)
           dop2(2, 1586, idx1: 0, idx2: 0)
         rescue ResponseError => e
           raise unless e.status == 500
 
-          rouse(waits, e)
+          rouse(since, e)
           retry
         end
 
         # HandleErrorDuringCombiStateRequest waits its 5 s beside the wake (Task.WhenAll): they go by even when the
-        # wake fails.
+        # wake fails, and the wake's own time counts in them.
         #
-        # @param waits [Array<Integer, Float>]
+        # @param since [Numeric]
         # @param error [ResponseError] the 500, raised once the 45 s are up
         # @return [void]
-        def rouse(waits, error)
-          wake
-        ensure
-          raise error unless paused?(waits, 5)
+        def rouse(since, error)
+          started = @clock.call
+          begin
+            wake
+          ensure
+            pause = 5 - (@clock.call - started)
+            raise error unless paused?(since, pause.positive? ? pause : 0)
+          end
         end
 
-        # @param waits [Array<Integer, Float>]
-        # @param seconds [Integer]
+        # @param since [Numeric]
+        # @param seconds [Numeric]
         # @return [Boolean] whether the pause fits in the 45 s, waited then
-        def paused?(waits, seconds)
-          return false if waits.sum + seconds >= TIMEOUT
+        def paused?(since, seconds)
+          return false if @clock.call - since + seconds >= TIMEOUT
 
-          @sleeper.call(seconds)
-          waits << seconds
+          @sleeper.call(seconds) if seconds.positive?
           true
         end
       end

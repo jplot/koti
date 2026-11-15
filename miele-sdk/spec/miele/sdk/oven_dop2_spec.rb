@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::Oven do
-  subject(:appliance) { described_class.new('127.0.0.1', sleeper: ->(seconds) { naps << seconds }, ident:) }
+  subject(:appliance) do
+    described_class.new('127.0.0.1', sleeper: ->(seconds) { naps << seconds }, clock:, ident:)
+  end
 
   let(:fab) { '000123456789' }
   let(:naps) { [] }
@@ -33,6 +35,10 @@ RSpec.describe Miele::Sdk::Oven do
   def puts_sent = fake.requests.select { it.verb == 'PUT' }.map { it.path.delete_prefix("/Devices/#{fab}/") }
 
   def tech_type = 'H7464BP'
+
+  def clock = -> { naps.sum + (fake.requests.size * round_trip) }
+
+  def round_trip = 0
 
   def remote_enable = [15, 0, 0]
 
@@ -184,6 +190,16 @@ RSpec.describe Miele::Sdk::Oven do
       expect { appliance.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
       expect(puts_sent).to eq(%w[DOP2/2/1586 State] * 15)
       expect(naps).to eq([3] * 14)
+    end
+
+    context 'when each round trip takes a second' do
+      def round_trip = 1
+
+      it "counts them in SwitchOnAction's 45 s, as its Timeout does", :aggregate_failures do
+        expect { appliance.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+        expect(puts_sent).to eq(%w[DOP2/2/1586 State] * 9)
+        expect(naps).to eq([3] * 8)
+      end
     end
   end
 end

@@ -68,6 +68,8 @@ module Miele
 
         def update_connectivity_plus: (String hob, bool connect) -> void
 
+        def followed: (Array[String] sources, String hob, bool connect) -> Array[String]
+
         def route: (Symbol kind) -> Symbol
 
         def opcode: (String request) -> void

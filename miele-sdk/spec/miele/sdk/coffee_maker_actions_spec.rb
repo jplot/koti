@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::CoffeeMaker do
-  subject(:coffee) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }) }
+  subject(:coffee) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }, clock:) }
 
   let(:fab) { '000123456789' }
   let(:ident) { identity('CVA 7440', 4) }
@@ -44,6 +44,10 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   end
 
   def struct(fields) = dop2_field(:struct, fields)
+
+  def clock = -> { waits.sum + (fake.requests.size * round_trip) }
+
+  def round_trip = 0
 
   def ps_context(prog, phase, unit: 1, missing: [], sub: 0)
     attributes = { 1 => dop2_field(:e16, phase), 2 => dop2_field(:e16, sub), 3 => struct({}), 10 => dop2_field(:e8, 0),
@@ -255,6 +259,26 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect { coffee.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
       expect(written.map(&:first)).to eq(%w[State] * 9)
       expect(waits).to eq([5] * 8)
+    end
+
+    context 'when each round trip takes a second' do
+      def round_trip = 1
+
+      it 'waits only the 4 s a 1 s wake leaves of its 5, as Task.WhenAll does' do
+        served[:asleep] = 1
+        coffee.power_on
+        expect(waits).to eq([4, 1.5])
+      end
+    end
+
+    context 'when each round trip takes 5 s' do
+      def round_trip = 5
+
+      it 'raises ActionFailedError without writing when the 45 s end within SwitchOnDelay', :aggregate_failures do
+        served[:asleep] = 4
+        expect { coffee.power_on }.to raise_error(Miele::Sdk::ActionFailedError)
+        expect(written.map(&:first)).to eq(%w[State] * 4)
+      end
     end
 
     it 'switches on with the header 2/1586 answered, as the app writes it back', :aggregate_failures do

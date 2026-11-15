@@ -58,7 +58,7 @@ module Miele
 
       def power_leaf: (Integer state) -> Dop2::Leaf
 
-      def rouse: (Numeric waited, ResponseError error) -> void
+      def rouse: (Float since, ResponseError error) -> void
     end
   end
 end

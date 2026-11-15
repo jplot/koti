@@ -219,15 +219,20 @@ module Miele
         # @return [void]
         # @raise [ActionFailedError]
         def update_connectivity_plus(hob, connect)
-          waits = [] #: Array[Integer | Float]
-          resent(retries: 3, delay: 2, waits:) do
-            sources = Array(connectivity_plus&.sources)
-            sources = connect ? (sources + [hob]).uniq : sources - [hob]
+          since = @clock.call
+          resent(retries: 3, delay: 2, since:) do
+            sources = followed(Array(connectivity_plus&.sources), hob, connect)
             body = JSON.generate('activated' => sources.any?, 'sourceDeviceIds' => sources)
             send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
           end
-          poll_until_shown(waits, within: 15, first: 3) { connectivity_plus&.sources&.include?(hob) == connect }
+          poll_until_shown(since:, within: 15, first: 3) { connectivity_plus&.sources&.include?(hob) == connect }
         end
+
+        # @param sources [Array<String>] the hobs followed
+        # @param hob [String]
+        # @param connect [Boolean]
+        # @return [Array<String>] those to follow
+        def followed(sources, hob, connect) = connect ? (sources + [hob]).uniq : sources - [hob]
 
         # @param pf_id [Integer] its Dop1 setting
         # @param request [Integer] its DOP2 user request

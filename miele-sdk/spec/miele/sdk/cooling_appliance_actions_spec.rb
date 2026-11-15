@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::CoolingAppliance do
-  subject(:fridge) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }) }
+  subject(:fridge) do
+    described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }, clock: -> { waits.sum })
+  end
 
   let(:fab) { '000123456789' }
   let(:waits) { [] }

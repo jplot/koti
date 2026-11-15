@@ -1,18 +1,20 @@
 module Miele
   module Sdk
     module Resends
+      MONOTONIC: ^() -> Float
+
       @sleeper: Appliance::_Sleeper
+
+      @clock: ^() -> Float
 
       private
 
       def three_attempts: [T] () { () -> T } -> T
 
       def resent: [T] (?retries: Integer | Float, ?delay: Integer?, ?within: Integer | Float,
-                       ?waits: Array[Integer | Float]) { () -> T } -> T
+                       ?since: Float) { () -> T } -> T
 
-      def poll_until_shown: (Array[Integer | Float] waits, within: Integer | Float, ?first: Integer | Float) { () -> bool } -> void
-
-      def sleep_counted: (Array[Integer | Float] waits, Integer | Float seconds) -> void
+      def poll_until_shown: (since: Float, within: Integer | Float, ?first: Integer | Float) { () -> bool } -> void
 
       def resent?: (ResponseError | ConnectionError error) -> bool
     end

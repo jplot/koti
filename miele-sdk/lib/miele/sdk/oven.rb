@@ -32,12 +32,13 @@ module Miele
       # @api public
       def power_on
         require_dop2!
-        0.step(by: 3) do |waited|
+        since = @clock.call
+        loop do
           return write_dop2(power_leaf(4))
         rescue ResponseError => e
           raise unless e.status == 500
 
-          rouse(waited, e)
+          rouse(since, e)
         end
       end
 
@@ -195,13 +196,13 @@ module Miele
       # A sleeping appliance answers 500 to the state write; the app then sends DeviceAction 2, waits 3 s and
       # tries again, with no limit but the switch-on's 45 s. A refused DeviceAction 2 ends it (SwitchOnHelper).
       #
-      # @param waited [Integer] the seconds since the first write
+      # @param since [Numeric] when the switch-on began, on the appliance's monotonic clock
       # @param error [ResponseError] the 500, raised once the 45 s are up
       # @return [void]
       # @raise [ResponseError] when the appliance refuses DeviceAction 2
-      def rouse(waited, error)
+      def rouse(since, error)
         wake
-        raise error if waited + 3 >= SWITCH_ON_TIMEOUT
+        raise error if @clock.call - since + 3 >= SWITCH_ON_TIMEOUT
 
         @sleeper.call(3)
       end

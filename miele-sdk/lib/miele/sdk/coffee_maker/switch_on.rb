@@ -17,13 +17,14 @@ module Miele
         # @return [void]
         # @raise [Error] what fails the third attempt, or the 500 still answered once the 45 s are up
         def switch_on
-          return unless [1, 8, 255].include?(state.raw['Status'])
+          within(TIMEOUT) do |since|
+            return unless [1, 8, 255].include?(state.raw['Status'])
 
-          since = @clock.call
-          3.times do |attempt|
-            return send_switch_on(since)
-          rescue Error
-            raise if attempt == 2 || !paused?(since, 5)
+            3.times do |attempt|
+              return send_switch_on(since)
+            rescue Error
+              raise if attempt == 2 || !paused?(since, 5)
+            end
           end
         end
 

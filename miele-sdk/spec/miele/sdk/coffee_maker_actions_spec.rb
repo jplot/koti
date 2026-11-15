@@ -269,15 +269,23 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
         coffee.power_on
         expect(waits).to eq([4, 1.5])
       end
+
+      it 'gives each request of the switch-on only what the 45 s have left' do
+        Miele::Sdk.config.read_timeout = 60
+        timeouts = read_timeouts
+        served[:asleep] = 1
+        coffee.power_on
+        expect(timeouts).to eq([45, 44, 43, 42, 37, 34.5])
+      end
     end
 
     context 'when each round trip takes 5 s' do
       def round_trip = 5
 
       it 'raises ActionFailedError without writing when the 45 s end within SwitchOnDelay', :aggregate_failures do
-        served[:asleep] = 4
+        served[:asleep] = 3
         expect { coffee.power_on }.to raise_error(Miele::Sdk::ActionFailedError)
-        expect(written.map(&:first)).to eq(%w[State] * 4)
+        expect(written.map(&:first)).to eq(%w[State] * 3)
       end
     end
 
@@ -299,6 +307,16 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(coffee.power_off_offered?).to be(false)
       coffee.power_off
       expect(fake.requests.map(&:path).grep(/DOP2/)).to be_empty
+    end
+  end
+
+  context 'when each round trip takes 4 s' do
+    def round_trip = 4
+
+    it 'sends no switch-off attempt once the 15 s of SwitchOffActionTimeout are up', :aggregate_failures do
+      served[:refusals] = [[500, {}, '']] * 3
+      expect { coffee.power_off }.to raise_error(Miele::Sdk::ActionFailedError)
+      expect(written.size).to eq(1)
     end
   end
 

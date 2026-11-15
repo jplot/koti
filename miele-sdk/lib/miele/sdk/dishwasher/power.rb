@@ -15,14 +15,17 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
         # @raise [Error] what the third attempt of the wake or of 2/1586 raises, 400 included
+        # @raise [ActionFailedError] when the 15 s the app gives the wake, or the switch-on, run out before a request
         # @api public
         def power_on
           require_dop2!
-          three_attempts { send_wake } if standby(state) == 2
-          return unless [1, 4].include?(status(state))
+          within(15) { three_attempts { send_wake } if standby(state) == 2 }
+          within(15) do
+            return unless [1, 4].include?(status(state))
 
-          three_attempts do
-            modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 4) }
+            three_attempts do
+              modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 4) }
+            end
           end
         end
 
@@ -53,15 +56,18 @@ module Miele
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
+        # @raise [ActionFailedError] when the 15 s the app gives the switch-off run out before a request
         # @raise [Error] what the third attempt raises, which SwitchOffForDop2Action logs and swallows: the SDK
         #   raises it, as it raises every refused write
         # @api public
         def power_off
           require_dop2!
-          return if status(state) == 1
+          within(15) do
+            return if status(state) == 1
 
-          three_attempts do
-            modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
+            three_attempts do
+              modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
+            end
           end
         end
 

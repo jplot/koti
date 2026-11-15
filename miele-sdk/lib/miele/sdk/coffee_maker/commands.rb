@@ -20,6 +20,7 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
         # @raise [Error] what fails the third attempt, 400 included, or the 500 still answered after 45 s
+        # @raise [ActionFailedError] when those 45 s run out before a request
         # @api public
         def power_on
           return write_device_action(2) if protocol_version == 2
@@ -43,14 +44,17 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
         # @raise [Error] on a DOP2 coffee maker, what the third attempt raises, 400 included
+        # @raise [ActionFailedError] when the 15 s of SwitchOffActionTimeout run out before a request
         # @api public
         def power_off
           return write_device_action(3) if protocol_version == 2
 
           require_dop2!
-          return if status(state) == 1
+          within(15) do
+            return if status(state) == 1
 
-          three_attempts { modify(family::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) } }
+            three_attempts { modify(family::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) } }
+          end
         end
 
         # @return [Boolean] whether the app's power switch offers {#power_off}: on (Status 2 or 3) under remote

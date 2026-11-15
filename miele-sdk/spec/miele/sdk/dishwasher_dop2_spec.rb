@@ -422,6 +422,26 @@ RSpec.describe Miele::Sdk::Dishwasher do
     end
   end
 
+  context 'when each round trip takes 4 s' do
+    subject(:dishwasher) { described_class.new('127.0.0.1', ident:, clock: -> { fake.requests.size * 4.0 }) }
+
+    let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 2 } }
+
+    it "gives the wake and the switch-on each their own 15 s, as the app's two sequences" do
+      Miele::Sdk.config.read_timeout = 30
+      timeouts = read_timeouts
+      dishwasher.power_on
+      expect(timeouts).to eq([15, 11, 7, 15, 11, 7])
+    end
+
+    it 'sends no switch-off attempt once its 15 s are up', :aggregate_failures do
+      state.merge!('Status' => 2, 'StandbyState' => 1)
+      leaves[:refusals] = [[500, {}, '']] * 3
+      expect { dishwasher.power_off }.to raise_error(Miele::Sdk::ActionFailedError)
+      expect(written.size).to eq(1)
+    end
+  end
+
   context 'without remote control' do
     let(:state) { { 'Status' => 2, 'RemoteEnable' => [0, 0, 0], 'StandbyState' => 1 } }
 

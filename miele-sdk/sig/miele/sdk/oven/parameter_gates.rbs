@@ -20,6 +20,8 @@ module Miele
 
         def option_editable?: (Symbol name) -> bool
 
+        def kept_times_shown?: (AutomaticTimes? kept, Objects::Oven::GlobalDeviceContext device) -> bool
+
         def context: () -> Objects::Oven::GlobalDeviceContext
 
         def program_context: () -> Objects::Oven::GlobalPsContext

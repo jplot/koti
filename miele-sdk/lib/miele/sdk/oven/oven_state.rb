@@ -12,7 +12,27 @@ module Miele
         APP_STATES = { off: :off, on: :on, waiting_to_start: :waiting_for_start, running: :running, pause: :paused,
                        end_programmed: :end, not_connected: :not_connected }.freeze
         STARTED = %i[waiting_for_start running paused end].freeze
-        private_constant :INFO_QUERY_DOOR_PHASES, :FUNCTIONAL_PROGRAM_TYPES, :APP_STATES, :STARTED
+        RUNNING = %i[waiting_for_start running paused].freeze
+        # GLOBAL_PPHASE_PARA_CONSTRAINT, WARTEN_AUF_MANUELLENSTART and CONFIRM_START.
+        STARTING_PHASES = [10_000, 28_004, 28_204].freeze
+        private_constant :INFO_QUERY_DOOR_PHASES, :FUNCTIONAL_PROGRAM_TYPES, :APP_STATES, :STARTED, :RUNNING,
+                         :STARTING_PHASES
+
+        # ObserveProgramIsRunning, which StartProgramAction waits for within its 15 s; the SDK returns from
+        # {Requests#start} once the oven takes the write, and the client reads what follows.
+        #
+        # @param state [State]
+        # @param device [Objects::Oven::GlobalDeviceContext] 1/1585, as {Oven#context} reads it
+        # @param selected [Objects::Oven::GlobalPsContext] 1/1574, as {Oven#program_context} reads it
+        # @return [Boolean] whether the oven shows a started program: waiting to start, running or paused, and 1/1574
+        #   in a phase other than 10000, 28004 and 28204
+        # @api public
+        def program_running?(state, device, selected)
+          shown = phase(selected.prog_attributes_cca)
+          return false unless shown && RUNNING.include?(oven_state(state, device, offered(device)))
+
+          !STARTING_PHASES.include?(shown)
+        end
 
         private
 

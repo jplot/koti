@@ -17,22 +17,21 @@ module Miele
         PYROLYSIS_ABORTS = [324, 325].freeze
         private_constant :REQUIRED_PARAMETERS, :TEMPERATURES, :PYROLYSIS_ABORTS
 
-        # An automatic program starts when its start time is written; the app sends no request for it.
+        # An automatic program starts when its start time is written; the app sends no request for it. The client
+        # then drops what it keeps as {AutomaticTimes} says.
         #
-        # @param at [Time, :now] when an automatic program starts
+        # @param kept [AutomaticTimes, nil] the times the client keeps for this oven: an automatic program starts at
+        #   their start when they are its own (GetStoredTime), now otherwise; another program ignores them
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, with no program selected, or when 1/1574 lacks a parameter
         #   the app reads before writing any
-        # @raise [ArgumentError] for a time given to a program that is not automatic: request 1 carries none, and the
-        #   program takes +start_at=+
         # @api public
-        def start(at: :now)
+        def start(kept: nil)
           require_dop2!
           within(Polling::ACTION_TIMEOUT) do
             context = program_context
             prog_id = selected_program(context)
-            return start_automatic(prog_id, context, at) if automatic?(context)
-            raise ArgumentError, 'only an automatic program starts at a given time; set start_at= first' if at != :now
+            return start_automatic(prog_id, context, kept) if automatic?(context)
 
             write_required_parameters(prog_id, context)
             write_dop2(Messages.user_request(supported_requests.include?(1) ? 1 : 113))
@@ -105,9 +104,10 @@ module Miele
 
         # @param prog_id [Integer]
         # @param context [Objects::Oven::GlobalPsContext]
-        # @param at [Time, :now]
+        # @param kept [AutomaticTimes, nil]
         # @return [void]
-        def start_automatic(prog_id, context, at)
+        def start_automatic(prog_id, context, kept)
+          at = kept && kept.prog_id == prog_id ? kept.start_at : :now #: Time | :now
           write_required_parameters(prog_id, context)
           write_parameter(prog_id, 13, :u64, unix_time(at))
         end

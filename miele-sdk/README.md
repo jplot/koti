@@ -211,9 +211,10 @@ that timeout cancels, each gets only what is left of it, and none goes out once 
 (`Miele::Sdk::ActionFailedError`, raised too by one that times out as the timeout runs out, its
 `ConnectionError` as cause): a rename, Con@ctivity, a cooling mode, the switch sequences of a
 dishwasher or a coffee maker, and an oven's actions, but for the start reset before a zero duration,
-which the app sends with its caller's token: only the duration write after it is then refused.
-Through the cloud, a login or a token renewal counts in that time. Within that timeout the app then
-waits for the change to show:
+which the app sends with its caller's token: only the duration write after it is then refused. The
+1/1574 read of an oven's `set_start_at` and `set_end_at` carries that token too, before the timeout
+of their write begins. Through the cloud, a login or a token renewal counts in that time. Within
+that timeout the app then waits for the change to show:
 for a switch step and a rename, in the `State` or `Ident` its websocket pushes, for which the SDK
 sends nothing (the events stream gives them, see [Events](#events)); for Con@ctivity, by polling,
 which the SDK does too.
@@ -424,9 +425,9 @@ oven.select_program(13)          # a GLOBAL_EnumPrgId value, or its symbol
 oven.parameter_editable?(:target_temperature)  # => true where the app lets it change
 oven.target_temperature = 180    # °C, truncated to hundredths as the app does: 37.3 writes 3729
 oven.duration = 1800             # seconds
-oven.start_at = :now             # or a Time; end_at= takes a Time
+kept = oven.set_start_at(:now, kept:)  # or a Time; set_end_at takes a Time: see below
 oven.set_options(pre_heating: true, keep_warm: true)
-oven.start                       # an automatic program: start(at: time), now by default
+oven.start(kept:)                # an automatic program at its kept start, now without one
 oven.stop
 oven.acknowledge(:query, 4, option: 12)  # or query.id and one of query.ack_options
 ```
@@ -445,9 +446,10 @@ Every action sends what it is given, whatever the app's screens would offer: the
 and the predicates below give it the app's rule for each, read as the app reads it. An action
 raises `Miele::Sdk::ActionUnavailableError` without sending anything only when there is nothing
 to send: on a Dop1 oven, which only stops (through `ProcessAction` 2), for a parameter with no
-program selected on 1/1574 (no ProgId to write), and for `start` when 1/1574 lacks one of the
-parameters the app reads before writing any. A value its wire type does not hold raises
-`ArgumentError`.
+program selected on 1/1574 (no ProgId to write), for `start` when 1/1574 lacks one of the
+parameters the app reads before writing any, and for `set_start_at` and `set_end_at` when it lacks
+the program type, an automatic program's phase or a minimum time the app reads. A value its wire
+type does not hold raises `ArgumentError`.
 
 | Predicate | The app's rule |
 |---|---|
@@ -460,18 +462,21 @@ parameters the app reads before writing any. A value its wire type does not hold
 | `stop_offered?` | one of requests 2, 55, 56 and 57 offered, no pyrolysis abort running, and remote control without local control; on a Dop1 oven, a function, own or automatic program |
 | `continue_cooking_offered?` | the continue bubble and button: the oven offering it (baking or cooking), a finished program (OvenState End) other than a cleaning, no keep warm or rapid cooling running after it, and mobile start under remote control without local control |
 | `stop_keeping_warm_offered?` | message 20 shown |
+| `kept_times_shown?(kept, device)` | TimeSource, over a 1/1585 the client has read (`context`): an automatic program whose ProgId, above 0, is `kept`'s; the start and end cells then show the kept times instead of 1/1574's |
+| `program_running?(state, device, selected)` | ObserveProgramIsRunning, over what the client has read (`state`, `context`, `program_context`): the oven waiting to start, running or paused, and 1/1574 in a phase other than 10000, 28004 and 28204 |
 | `steam_burst_offered?` | request 59 offered for a REST `ProgramID`, a manual steam burst (`NumberOfSteamBursts` readable, 1 to 3) in a function 1/1585 and 1/1574 both show, the oven running or paused, and a burst left, or the last one under way (`BitField` 16); every value the app reads for the button must be there, the three steam burst times and `BitField` among them |
 
-A parameter takes the names of its setter (`:target_temperature`, `:duration`…), an option those
-of `set_options` (`:keep_warm`…). `duration = 0` first moves the start to its minimum, as the app
-does.
+A parameter takes the names of its setter (`:target_temperature`, `:duration`…), the times
+`:start_at` and `:end_at`, an option those of `set_options` (`:keep_warm`…). `duration = 0` first
+moves the start to its minimum, as the app does.
 
 - Selecting a program reads 1/1574 every 3 seconds until it shows the program, as the app does,
   retrying a read refused with other than a 4xx after 1.5^n seconds (the n-th in a row), and
   writes the parameters the program requires, as `start` does. Where the app only logs it, the
   first refusal of those raises once the program is selected, and so does a parameter missing
-  from 1/1574, as an `ActionFailedError`. When 1/1574 has not shown the program within the app's
-  15 seconds, it raises `Miele::Sdk::ActionFailedError` and writes no parameter.
+  from 1/1574, as a `Miele::Sdk::RequiredParametersError`, the refusal as its cause. When 1/1574
+  has not shown the program within the app's 15 seconds, it raises `Miele::Sdk::ActionFailedError`
+  and writes no parameter.
 - `start` first writes the parameters the program requires and the user has not confirmed, with
   the values they show, a temperature through degrees and back as the app does (3730 writes
   3729), then sends request 1, or 113 when the oven does not offer 1. Like the app, it writes
@@ -479,9 +484,26 @@ does.
   app reads all eight it may write (temperature, core temperature, moisture, grill level,
   microwave power, duration, browning, doneness) before writing any: when 1/1574 lacks one,
   `start` writes none and raises `Miele::Sdk::ActionUnavailableError`, and a selection writes
-  none. An automatic program starts by writing its start time instead; another program takes
-  `start_at=` beforehand, and `start(at:)` raises `ArgumentError` for it, request 1 carrying no
-  time.
+  none. An automatic program starts by writing its start time instead, as below; another program
+  takes `set_start_at` beforehand, request 1 carrying no time.
+- `set_start_at(time, kept:)` and `set_end_at(time, kept:)` read 1/1574 once, as the app does,
+  whose second read is answered by the same 3-second poll. They write the start (all ones for
+  `:now`) or the end of a program that is not automatic, or of an automatic one counting down its
+  delayed start (phase 28002), and return `kept` as given; a time before 1970 goes out wrapped into
+  64 bits, as the app writes it. For an automatic program in any other
+  phase they write nothing, as the app does, since writing its start starts it: the app keeps its
+  times in memory, one set per oven, until its start writes them. The client keeps them instead:
+  the two return an `Oven::AutomaticTimes` (ProgId, start, end), the end put after the start, or
+  the start before the end, as far apart as the oven's minimums (`EndAt.Min − StartAt.Min`, 0 and
+  all ones counting from 0001-01-01, as the app reads them), and nil for a start now.
+- The client passes what it keeps to `start(kept:)`, which writes the kept start when its ProgId
+  is the one 1/1574 shows, and now otherwise (GetStoredTime), before 1970 wrapped as above. The
+  client drops what it keeps where the app does: once `select_program` has selected a program (it
+  returns, or raises `RequiredParametersError`; any other error leaves the times kept), and once
+  `program_running?` holds within 15 seconds of `start`, read from what follows the start, its
+  events included. The app waits that long for the oven to show the program running and keeps its
+  times otherwise; the SDK returns once the oven takes the write, a departure the client makes up
+  for that way. `kept_times_shown?` gives the app's rule for showing them.
 - `stop` sends request 2 for a program not started yet, and for a started one the first of 55, 56
   and 57 the oven offers, else 2, started as the app derives its oven state.
 - `continue_cooking` then reads 1/1585 every 3 seconds, as the app does, until the oven asks for

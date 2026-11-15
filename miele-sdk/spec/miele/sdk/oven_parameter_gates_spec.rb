@@ -26,12 +26,12 @@ RSpec.describe Miele::Sdk::Oven do
   after { fake.stop }
 
   def serve(status: 3, remote: [15, 0, 1], type: 5, parameters: {}, prog: 13)
-    shown = { 10 => dop2_field(:e8, type), 28 => dop2_field(:e16, prog) }
+    shown = { 1 => dop2_field(:e16, 0), 10 => dop2_field(:e8, type), 28 => dop2_field(:e16, prog) }
     resources['State'] = JSON.generate('Status' => status, 'RemoteEnable' => remote)
     resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown) })
     resources['DOP2/1/1574?idx1=0&idx2=1'] =
       dop2_leaf(1, 1574, { 4 => dop2_field(:struct, shown_parameters(parameters)),
-                           7 => dop2_field(:struct, { 28 => dop2_field(:e16, prog) }) }, idx2: 1)
+                           7 => dop2_field(:struct, shown) }, idx2: 1)
   end
 
   def messages(*ids)
@@ -51,7 +51,7 @@ RSpec.describe Miele::Sdk::Oven do
   def sent_unoffered(*names, shown: false)
     names.each do |name|
       expect([oven.parameter_shown?(name), oven.parameter_editable?(name)]).to eq([shown, false])
-      oven.public_send(:"#{name}=", setters.fetch(name).first)
+      set_parameter(oven, name, setters.fetch(name).first)
     end
   end
 
@@ -60,7 +60,7 @@ RSpec.describe Miele::Sdk::Oven do
   it 'writes every parameter whose section the app shows, as it lets each change', :aggregate_failures do
     expect(setters.keys.map { [oven.parameter_shown?(it), oven.parameter_editable?(it)] }.uniq).to eq([[true, true]])
     expect([oven.option_shown?(:rapid_heating), oven.option_editable?(:rapid_heating)]).to eq([true, true])
-    setters.each { |name, (value)| oven.public_send(:"#{name}=", value) }
+    setters.each { |name, (value)| set_parameter(oven, name, value) }
     oven.set_options(rapid_heating: true)
     expect(written).to eq([6, 7, 2, 1, 15, 30, 31, 12, 13, 14, 21])
   end
@@ -146,7 +146,7 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to eq([30, 31])
   end
 
-  it 'writes the times of an own or automatic program without mobile start, which the app needs',
+  it 'sets the times of an own or automatic program without mobile start, which the app needs',
      :aggregate_failures do
     [2, 3, 4].each do |type|
       serve(type:, remote: [15, 0, 0])
@@ -154,7 +154,7 @@ RSpec.describe Miele::Sdk::Oven do
     end
     serve(type: 4)
     expect(oven.parameter_editable?(:duration)).to be(true)
-    expect(written).to eq([12, 13, 14] * 3)
+    expect(written).to eq([12, 13, 14, 12, 12, 13, 14])
   end
 
   it 'writes the options of an automatic program without mobile start, which the app needs', :aggregate_failures do

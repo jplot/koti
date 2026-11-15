@@ -24,6 +24,13 @@ module OvenParameters
   def shown_parameter(type, current, mask: 9, min: 0)
     dop2_field(:struct, { 1 => dop2_field(:u8, mask), 2 => dop2_field(type, min), 4 => dop2_field(type, current) })
   end
+
+  # The times have no setter: their methods return what the client keeps.
+  def set_parameter(oven, name, value)
+    return oven.public_send(:"set_#{name}", value, kept: nil) if %i[start_at end_at].include?(name)
+
+    oven.public_send(:"#{name}=", value)
+  end
 end
 
 RSpec.configure { it.include OvenParameters }

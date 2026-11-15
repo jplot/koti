@@ -85,17 +85,65 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([user_request(113)])
   end
 
-  it 'refuses a start time for a program that is not automatic', :aggregate_failures do
-    serve([1])
-    expect { oven.start(at: Time.at(1_700_000_000)) }.to raise_error(ArgumentError)
-    expect(written).to be_empty
+  def kept(prog_id: 13, start_at: Time.at(1_700_000_000))
+    described_class::AutomaticTimes.new(prog_id:, start_at:, end_at: start_at + 3_600)
   end
 
-  it 'starts an automatic program by writing its start time, now unless given' do
+  it 'starts another program with its request, whatever times the client keeps' do
+    serve([1])
+    oven.start(kept:)
+    expect(written.map(&:last)).to eq([user_request(1)])
+  end
+
+  it 'starts an automatic program by writing the kept start, after the required parameters' do
+    serve([1], type: 3, parameters: { 6 => value(:u16, 2, 18_000) })
+    oven.start(kept:)
+    expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(13, :u64, 1_700_000_000)])
+  end
+
+  it 'starts an automatic program now without kept times, or with those of another program' do
     serve([1], type: 3)
     oven.start
-    oven.start(at: Time.at(1_700_000_000))
-    expect(written.map(&:last)).to eq([parameter(13, :u64, 0xFFFF_FFFF_FFFF_FFFF), parameter(13, :u64, 1_700_000_000)])
+    oven.start(kept: kept(prog_id: 14))
+    expect(written.map(&:last)).to eq([parameter(13, :u64, 0xFFFF_FFFF_FFFF_FFFF)] * 2)
+  end
+
+  it 'writes a kept start before 1970 wrapped into 64 bits, after the required parameters, as the app does' do
+    serve([1], type: 3, parameters: { 6 => value(:u16, 2, 18_000) })
+    oven.start(kept: kept(start_at: Time.utc(1)))
+    expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(13, :u64, 0xFFFF_FFF1_886E_0900)])
+  end
+
+  def program_running? = oven.program_running?(oven.state, oven.context, oven.program_context)
+
+  it 'tells the oven runs a started program once it waits, runs or pauses, reading nothing of its own' do
+    running = [[4, 0], [5, 0], [6, 10_001]].map do |status, phase|
+      state(status)
+      serve([2], type: 3, phase:)
+      shown = [oven.state, oven.context, oven.program_context]
+      sent = fake.requests.size
+      [oven.program_running?(*shown), fake.requests.size - sent]
+    end
+    expect(running).to eq([[true, 0]] * 3)
+  end
+
+  it 'tells the oven does not run it in the phases the app waits through, nor before it starts' do
+    state(5)
+    waiting = [10_000, 28_004, 28_204].map do |phase|
+      serve([2], type: 3, phase:)
+      program_running?
+    end
+    state(3)
+    serve([1, 2], type: 3)
+    expect(waiting << program_running?).to eq([false] * 4)
+  end
+
+  it "tells the oven does not run it while 1/1574 gives no phase, which fails the app's wait" do
+    state(5)
+    serve([2], type: 3)
+    shown = { 10 => dop2_field(:e8, 3), 28 => dop2_field(:e16, 13) }
+    resources['DOP2/1/1574?idx1=0&idx2=1'] = dop2_leaf(1, 1574, { 7 => dop2_field(:struct, shown) }, idx2: 1)
+    expect(program_running?).to be(false)
   end
 
   it 'writes the required parameters not yet confirmed before starting' do

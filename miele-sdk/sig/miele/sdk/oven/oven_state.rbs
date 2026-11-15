@@ -10,6 +10,12 @@ module Miele
 
         STARTED: Array[Symbol]
 
+        RUNNING: Array[Symbol]
+
+        STARTING_PHASES: Array[Integer]
+
+        def program_running?: (State state, Objects::Oven::GlobalDeviceContext device, Objects::Oven::GlobalPsContext selected) -> bool
+
         private
 
         def started?: (State state, Objects::Oven::GlobalDeviceContext context) -> bool

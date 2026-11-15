@@ -27,7 +27,7 @@ RSpec.describe Miele::Sdk::Oven do
     parameters = shown_parameters(13 => shown_parameter(:u64, 0, min: 1_700_000_000),
                                   15 => dop2_field(:struct, microwave))
     dop2_leaf(1, 1574, { 4 => dop2_field(:struct, parameters),
-                         7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
+                         7 => dop2_field(:struct, { 10 => dop2_field(:e8, 5), 28 => dop2_field(:e16, 13) }) }, idx2: 1)
   end
 
   def microwave_bits = 0x7F
@@ -59,7 +59,7 @@ RSpec.describe Miele::Sdk::Oven do
     it 'writes those the app hides with ShouldHideProgramParameters, and tells it hides them', :aggregate_failures do
       expect(hidden_parameters.keys.map { oven.parameter_shown?(it) }.uniq).to eq([false])
       expect([oven.option_shown?(:keep_warm), oven.parameter_shown?(:browning)]).to eq([false, true])
-      hidden_parameters.each { |name, value| oven.public_send(:"#{name}=", value) }
+      hidden_parameters.each { |name, value| set_parameter(oven, name, value) }
       oven.set_options(keep_warm: true)
       expect(written.size).to eq(hidden_parameters.size + 1)
     end
@@ -93,7 +93,7 @@ RSpec.describe Miele::Sdk::Oven do
   it 'writes each parameter under the id and wire type the app gives it' do
     parameters = { core_target_temperature: 60, moisture: 3, microwave_power: 4, browning: 2, doneness: 1,
                    end_at: Time.at(1_700_003_600) }
-    parameters.each { |name, value| oven.public_send(:"#{name}=", value) }
+    parameters.each { |name, value| set_parameter(oven, name, value) }
     expect(written.map(&:last)).to eq([parameter(7, :u16, 6000), parameter(2, :u8, 3), parameter(15, :u8, 4),
                                        parameter(30, :u8, 2), parameter(31, :u8, 1),
                                        parameter(14, :u64, 1_700_003_600)])
@@ -125,7 +125,7 @@ RSpec.describe Miele::Sdk::Oven do
   end
 
   it 'sends start at now as all ones' do
-    oven.start_at = :now
+    oven.set_start_at(:now, kept: nil)
     expect(written.map(&:last)).to eq([parameter(13, :u64, 0xFFFF_FFFF_FFFF_FFFF)])
   end
 

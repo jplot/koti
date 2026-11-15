@@ -41,5 +41,8 @@ module Miele
 
     class ActionFailedError < Error
     end
+
+    class RequiredParametersError < Error
+    end
   end
 end

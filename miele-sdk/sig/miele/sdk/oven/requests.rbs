@@ -8,7 +8,7 @@ module Miele
 
         PYROLYSIS_ABORTS: Array[Integer]
 
-        def start: (?at: Time | :now) -> void
+        def start: (?kept: AutomaticTimes?) -> void
 
         def start_offered?: () -> bool
 
@@ -34,7 +34,7 @@ module Miele
 
         def duration_given?: (Objects::Oven::GlobalPsContext context) -> bool
 
-        def start_automatic: (Integer prog_id, Objects::Oven::GlobalPsContext context, Time | :now at) -> void
+        def start_automatic: (Integer prog_id, Objects::Oven::GlobalPsContext context, AutomaticTimes? kept) -> void
 
         def automatic?: (Objects::Oven::GlobalPsContext context) -> bool
 

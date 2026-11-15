@@ -11,6 +11,15 @@ module Miele
       include ContinueCooking
       include OvenState
 
+      class AutomaticTimes < Data
+        attr_reader prog_id: Integer
+        attr_reader start_at: Time
+        attr_reader end_at: Time
+
+        def self.new: (Integer prog_id, Time start_at, Time end_at) -> AutomaticTimes
+                    | (prog_id: Integer, start_at: Time, end_at: Time) -> AutomaticTimes
+      end
+
       NOTIFICATION_IDS: Hash[Symbol, Objects::Enum]
       SWITCH_ON_TIMEOUT: Integer
 

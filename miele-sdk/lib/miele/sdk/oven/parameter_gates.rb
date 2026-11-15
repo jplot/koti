@@ -23,7 +23,7 @@ module Miele
         #
         # @param name [Symbol] a parameter as its setter names it: +:target_temperature+, +:core_target_temperature+,
         #   +:moisture+, +:grill_level+, +:microwave_power+, +:browning+, +:doneness+, +:duration+, +:start_at+ or
-        #   +:end_at+
+        #   +:end_at+ ({ProgramSelection#set_start_at}, {ProgramSelection#set_end_at})
         # @return [Boolean] whether the app's details page shows its section, never on a Dop1 oven
         # @raise [KeyError] for another name
         # @api public
@@ -68,6 +68,22 @@ module Miele
           value = selected.context_para_ca&.public_send(OPTIONS.fetch(name))
           parameters_allowed?(state, device) && option_listed?(name, device, selected) && writable?(value) &&
             options_cell_enabled?(state, device)
+        end
+
+        # TimeSource puts the times the app keeps on the start and end cells, in place of 1/1574's.
+        #
+        # @param kept [AutomaticTimes, nil] the times the client keeps for this oven
+        # @param device [Objects::Oven::GlobalDeviceContext] 1/1585, as {Oven#context} reads it
+        # @return [Boolean] whether the app's time cells show +kept+: 1/1585 shows an automatic program, its ProgId
+        #   +kept+'s and above 0
+        # @api public
+        def kept_times_shown?(kept, device)
+          attributes = device.prog_attributes_cca
+          prog_id = attributes&.prog_id
+          return false unless kept && prog_id && program_type(attributes) == 3
+
+          shown = Objects::Oven::GlobalEnumPrgId.to_i(prog_id)
+          shown.positive? && shown == kept.prog_id
         end
 
         private

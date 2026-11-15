@@ -90,6 +90,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   5 s after any failure, three attempts in all, and wakes one that answers 500 every 5 s within
   45 s; an oven's `power_on` wakes it every 3 s until 45 s are up instead of giving up after three
   attempts.
+- **Breaking:** a dishwasher's `power_off`, and a DOP2 coffee maker's `power_off` and `power_on`,
+  read `State` first, as the app's ExecuteSequentiallyUntilTrue does, and send nothing while it shows
+  the appliance off already (Status 1) or, for the coffee maker's `power_on`, on already (a Status
+  other than 1, 8 and 255, or none).
 - **Breaking:** a 401 from the cloud is handled as the app handles it. A request under `/V2` answered
   401 raises `ResponseError` (status 401) instead of going out again with a renewed token, which is
   kept, and the websocket no longer renews a token its handshake is refused with: it connects again

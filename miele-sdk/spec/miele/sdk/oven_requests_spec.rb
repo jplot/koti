@@ -114,6 +114,38 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(13, :u64, 0xFFFF_FFF1_886E_0900)])
   end
 
+  def program_running? = oven.program_running?(oven.state, oven.context, oven.program_context)
+
+  it 'tells the oven runs a started program once it waits, runs or pauses, reading nothing of its own' do
+    running = [[4, 0], [5, 0], [6, 10_001]].map do |status, phase|
+      state(status)
+      serve([2], type: 3, phase:)
+      shown = [oven.state, oven.context, oven.program_context]
+      sent = fake.requests.size
+      [oven.program_running?(*shown), fake.requests.size - sent]
+    end
+    expect(running).to eq([[true, 0]] * 3)
+  end
+
+  it 'tells the oven does not run it in the phases the app waits through, nor before it starts' do
+    state(5)
+    waiting = [10_000, 28_004, 28_204].map do |phase|
+      serve([2], type: 3, phase:)
+      program_running?
+    end
+    state(3)
+    serve([1, 2], type: 3)
+    expect(waiting << program_running?).to eq([false] * 4)
+  end
+
+  it "tells the oven does not run it while 1/1574 gives no phase, which fails the app's wait" do
+    state(5)
+    serve([2], type: 3)
+    shown = { 10 => dop2_field(:e8, 3), 28 => dop2_field(:e16, 13) }
+    resources['DOP2/1/1574?idx1=0&idx2=1'] = dop2_leaf(1, 1574, { 7 => dop2_field(:struct, shown) }, idx2: 1)
+    expect(program_running?).to be(false)
+  end
+
   it 'writes the required parameters not yet confirmed before starting' do
     serve([1], parameters: { 6 => value(:u16, 2, 18_000), 7 => value(:u16, 6, 6_000),
                              12 => value(:u32, 2, 1_800, min: 60, max: 3_600), 30 => value(:u8, 0, 2) })

@@ -17,7 +17,8 @@ RSpec.describe Miele::Sdk::Cloud::Session do
       when '/V3/Login?org=FR' then FakeCloud.json(appToken: 'token-1', appTokenValidity: now.to_i + 100)
       when '/V2/AppTokenRefresh'
         renewals.shift || FakeCloud.json(appToken: 'renewed', appTokenValidity: now.to_i + 3600)
-      when '/fr/token' then FakeCloud.json(access_token: 'jwt-1', refresh_token: 'refresh-1', expires_in: 3600)
+      when '/fr/token'
+        renewals.shift || FakeCloud.json(access_token: 'jwt-1', refresh_token: 'refresh-1', expires_in: 3600)
       end
     end
   end
@@ -34,7 +35,8 @@ RSpec.describe Miele::Sdk::Cloud::Session do
   def organization
     Miele::Sdk::Cloud::Locales::Organization.new(
       iso: 'FR', rest: cloud.url, ciam: false,
-      ciam_endpoints: { 'authorize' => "#{cloud.url}/fr/authorize", 'token' => "#{cloud.url}/fr/token" }
+      ciam_endpoints: { 'authorize' => "#{cloud.url}/fr/authorize", 'token' => "#{cloud.url}/fr/token",
+                        'logout' => "#{cloud.url}/fr/logout" }
     )
   end
 
@@ -49,7 +51,7 @@ RSpec.describe Miele::Sdk::Cloud::Session do
     expect(session.authorization).to eq('appToken token-1')
     login = posts('/V3/Login?org=FR').first
     expect([login.verb, login.headers['content-type'], JSON.parse(login.body)])
-      .to eq(['POST', 'application/json', { 'email' => 'koti@example.com', 'password' => 'secret' }])
+      .to eq(['POST', 'application/json; charset=utf-8', { 'email' => 'koti@example.com', 'password' => 'secret' }])
   end
 
   context 'when a kill lands in the middle of a renewal' do
@@ -86,6 +88,13 @@ RSpec.describe Miele::Sdk::Cloud::Session do
       expect(languages).to eq(%w[en-FR en-FR])
     end
 
+    it 'sends its MCS requests as JSON with the Accept of the app' do
+      session.authorization
+      sent = %w[/V3/Login?org=FR /V2/AppTokenRefresh].map { posts(it).first.headers }
+      expect(sent.map { it.values_at('content-type', 'accept') })
+        .to eq([['application/json; charset=utf-8', 'application/json']] * 2)
+    end
+
     it 'renews once when several threads find the same token expired' do
       Array.new(8) { Thread.new { session.authorization } }.each(&:join)
       expect(posts('/V2/AppTokenRefresh').size).to eq(1)
@@ -97,10 +106,17 @@ RSpec.describe Miele::Sdk::Cloud::Session do
       expect([posts('/V2/AppTokenRefresh').size, naps]).to eq([3, [1, 1]])
     end
 
-    it 'logs in again when the renewal is refused' do
-      renewals.push([401, {}, ''])
-      session.authorization
-      expect(posts('/V3/Login?org=FR').size).to eq(2)
+    it 'sends a refused renewal once more, then logs out and forgets the token, as the app does', :aggregate_failures do
+      renewals.push([401, {}, ''], [401, {}, ''])
+      expect { session.authorization }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect(posts('/V2/AppTokenRefresh').map { it.headers['authorization'] }).to eq(['appToken token-1'] * 2)
+      expect([posts('/V2/Logout').size, posts('/V3/Login?org=FR').size, session.token]).to eq([1, 1, nil])
+    end
+
+    it 'logs in again on the request after a refused renewal', :aggregate_failures do
+      renewals.push([401, {}, ''], [401, {}, ''])
+      expect { session.authorization }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect([session.authorization, posts('/V3/Login?org=FR').size]).to eq(['appToken token-1', 2])
     end
   end
 
@@ -134,6 +150,26 @@ RSpec.describe Miele::Sdk::Cloud::Session do
     session.authorization
     expect([File.stat(path).mode & 0o777, JSON.parse(File.read(path))['value']]).to eq([0o600, 'token-1'])
     expect(described_class.new(organization).token.value).to eq('token-1')
+  end
+
+  it 'takes a CIAM invalid_grant for a refused renewal and logs out, as the app does', :aggregate_failures do
+    Miele::Sdk.configure { it.ciam_client_id = 'com.example.app' }
+    session.exchange('code-1')
+    renewals << FakeCloud.json({ error: 'invalid_grant' }, 400)
+    times << (now + 3250)
+    expect { session.authorization }.to raise_error(Miele::Sdk::AuthenticationError)
+    expect([posts('/fr/token').size, posts('/fr/logout').map { it.headers['authorization'] }])
+      .to eq([2, ['Bearer jwt-1']])
+  end
+
+  ['?error=invalid_grant', 'error=invalid_grant&state={}', '{"error":"INVALID_GRANT",}'].each do |body|
+    it "reads #{body} as a refused CIAM renewal, as the app's WebExDecoder does" do
+      Miele::Sdk.configure { it.ciam_client_id = 'com.example.app' }
+      session.exchange('code-1')
+      renewals << [400, {}, body]
+      times << (now + 3250)
+      expect { session.authorization }.to raise_error(Miele::Sdk::AuthenticationError)
+    end
   end
 
   it 'renews a CIAM token past 90 % of its life, with the refresh form', :aggregate_failures do

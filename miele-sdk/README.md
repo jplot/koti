@@ -845,13 +845,23 @@ not answer. Then:
   the network tab of its developer tools. The token is renewed past 90 % of its life. Keep it in
   `token_file` so that the next run starts from it.
 
+A request the cloud answers 401 raises `ResponseError` and keeps the token, as the app's appliance
+client does. The appliance list is handled as the app handles a lost session: a 401 or 403 on
+`devices` (and so on `Miele::Sdk.appliances` and the cloud event stream) logs the account out, at
+`/V2/Logout` or the CIAM logout address, forgets the token and deletes `token_file`, then raises
+`AuthenticationError`. An MCS logout that cannot reach the cloud keeps the token and its file, as
+the app keeps them. The next request logs in again with `email` and `password`; without them (a
+`token_file` or `cloud_token` alone), or for a CIAM account until a new code is exchanged, it raises
+`ConfigurationError`. A `cloud_token` setting is left as given. A renewal the cloud refuses (a 401,
+or a CIAM `invalid_grant`) ends the session the same way and raises `AuthenticationError`.
+
 `ciam_client_id` is the Miele app's OAuth client id (`MA.Constants.CdcKeys.ClientId` in
 `Miele.Modules.Authentication`); the gem does not ship it. The cloud client follows the
 environment's proxy settings; the local one never does.
 
 The cloud channel has run against the live cloud with a French account: the CIAM code exchange, the
 saved token, the account's appliances, their states, the household key, and the DOP2 leaves of an
-oven that serves none locally. The token's renewal and MCS logins have not run yet.
+oven that serves none locally. The token's renewal, MCS logins and the logout have not run yet.
 
 ## Events
 
@@ -918,10 +928,11 @@ parse and as pushed otherwise, and a push outside any appliance under its own pa
 
 Each message is acknowledged as the app does, a keep-alive goes out every 30 s, and the websocket
 reconnects 6 s after an error or a close, and at once after a minute without a message, each time
-with the session's current token, renewed when the cloud refuses it. An account the cloud refuses
-ends the stream with `AuthenticationError`. A frame that stops halfway counts as silence: when the
-minute runs out, it reconnects at once, as the app's library does. A handshake that stalls gives up
-after a minute. It connects directly, without the environment's proxy.
+with the session's current token, which a refused handshake does not renew, as in the app. An
+account the cloud refuses, or an appliance list it refuses, ends the stream with
+`AuthenticationError`, as the app stops observing. A frame that stops halfway counts as silence:
+when the minute runs out, it reconnects at once, as the app's library does. A handshake that stalls
+gives up after a minute. It connects directly, without the environment's proxy.
 
 It has run against the live cloud with a French account. The cloud pushes its messages as `POST`
 requests behind a `CloudConnect: sc-data-…` header, the device list first, then `State` changes;
@@ -949,7 +960,7 @@ seconds (3 by default) after each read ends. A failed read ends the poll with it
 | `Miele::Sdk::ConfigurationError` | the GroupID or GroupKey is missing or malformed |
 | `Miele::Sdk::ConnectionError` | the appliance cannot be reached, or drops the connection |
 | `Miele::Sdk::SignatureError` | an answer is not signed or encrypted with the household key |
-| `Miele::Sdk::AuthenticationError` | the appliance refuses a read: the key does not match its own |
+| `Miele::Sdk::AuthenticationError` | the appliance refuses a read: the key does not match its own; or the cloud refuses the account or its renewal |
 | `Miele::Sdk::ResponseError` | the appliance answers with an error status; carries `status` |
 | `Miele::Sdk::NotFoundError` | the appliance does not serve that resource, or the GroupID is not its own (a `ResponseError`) |
 | `Miele::Sdk::RemoteControlDisabledError` | the appliance refuses a command (a `ResponseError`) |

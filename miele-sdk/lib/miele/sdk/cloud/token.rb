@@ -37,6 +37,14 @@ module Miele
           json && from_json(json)
         end
 
+        # @return [void] +token_file+ removed, when one is set
+        def self.forget
+          file = Sdk.config.token_file
+          File.delete(file) if file
+        rescue Errno::ENOENT
+          nil
+        end
+
         # @return [Token] itself, written to +token_file+ when one is set
         def save
           file = Sdk.config.token_file

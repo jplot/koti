@@ -2,9 +2,14 @@ module Miele
   module Sdk
     module Cloud
       class Session
+        include Logout
+        include Renewal
+
         REDIRECT: String
 
         SCOPE: String
+
+        MCS_JSON: Hash[String, String]
 
         @organization: Locales::Organization
 
@@ -36,23 +41,15 @@ module Miele
 
         def current: () -> Token
 
-        def renew: (Token expired) -> Token
-
         private
-
-        def replaced: (Token expired) -> Token
-
-        def refreshed: (Token expired) -> Token
-
-        def three_times: () { () -> Token } -> Token
-
-        def mcs_refresh: (Token expired) -> Token
-
-        def ciam_refresh: (Token expired) -> Token
 
         def mcs_post: (String url, String body, ?Hash[String, String] headers) -> Hash[String, untyped]
 
-        def post: (String url, String body, String type, ?Hash[String, String] headers) -> Hash[String, untyped]
+        def ciam_post: (String form) -> Hash[String, untyped]
+
+        def invalid_grant?: (Http::Response answer) -> bool
+
+        def post: (String url, String body, String type, ?Hash[String, String] headers) ?{ (Http::Response answer) -> boolish } -> Hash[String, untyped]
 
         def mcs_token: (Hash[String, untyped] answer) -> Token
 

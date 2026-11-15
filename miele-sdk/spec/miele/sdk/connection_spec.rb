@@ -73,6 +73,32 @@ RSpec.describe Miele::Sdk::Connection do
     expect { call(:get, '/Devices/') }.to raise_error(Miele::Sdk::ConnectionError, /127\.0\.0\.1:/)
   end
 
+  context 'when the appliance drops the connection before answering' do
+    let(:answer) { :drop }
+
+    it 'sends the request once, as the app does', :aggregate_failures do
+      expect { call(:put, '/Devices/000123456789/State', body: '{"Light":1}') }
+        .to raise_error(Miele::Sdk::ConnectionError)
+      expect(appliance.requests.map(&:verb)).to eq(%w[PUT])
+    end
+  end
+
+  context 'when the appliance answers after the read timeout' do
+    let(:appliance) do
+      FakeAppliance.start(threaded: true) do
+        sleep 0.4
+        answer
+      end
+    end
+
+    it 'sends the request once, as the app does', :aggregate_failures do
+      Miele::Sdk.config.read_timeout = 0.1
+      expect { call(:put, '/Devices/000123456789/State', body: '{"Light":1}') }
+        .to raise_error(Miele::Sdk::ConnectionError)
+      expect(appliance.requests.map(&:verb)).to eq(%w[PUT])
+    end
+  end
+
   context 'when the environment names a proxy' do
     around do |example|
       saved = ENV.fetch('http_proxy', nil)

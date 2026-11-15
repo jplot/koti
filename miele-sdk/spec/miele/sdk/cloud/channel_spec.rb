@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'tmpdir'
+
 RSpec.describe Miele::Sdk::Cloud::Channel do
   subject(:channel) { described_class.new(Miele::Sdk::Cloud::Session.new(organization)) }
 
@@ -8,7 +10,6 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
   let(:cloud) do
     FakeCloud.start do |request|
       case request.path
-      when '/V2/AppTokenRefresh' then FakeCloud.json(appToken: 'renewed', appTokenValidity: Time.now.to_i + 3600)
       when %r{\A/V2/} then answers.shift || FakeCloud.json({})
       end
     end
@@ -52,31 +53,26 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     expect(seen("/V2/Devices/#{fab}/DOP/").first.headers['host']).to eq('Miele-0000000000000000.local')
   end
 
-  it 'renews and retries once on 401', :aggregate_failures do
-    answers.push([401, {}, ''], FakeCloud.json({}))
+  it 'raises a 401 and keeps the token, as the app does', :aggregate_failures do
+    answers << [401, {}, '']
+    expect { channel.request(:put, "/Devices/#{fab}/State", body: '{"DeviceAction":2}') }
+      .to raise_error(Miele::Sdk::ResponseError) { expect(it.status).to eq(401) }
     channel.request(:get, "/Devices/#{fab}/State")
-    expect(seen("/V2/Devices/#{fab}/State").map { it.headers['authorization'] })
-      .to eq(['appToken saved', 'appToken renewed'])
+    expect(seen("/V2/Devices/#{fab}/State").map { [it.verb, it.headers['authorization']] })
+      .to eq([['PUT', 'appToken saved'], ['GET', 'appToken saved']])
   end
 
-  context 'when two requests in flight get 401 with the same token' do
-    let(:cloud) do
-      FakeCloud.start(threaded: true) do |request|
-        case request.path
-        when '/V2/AppTokenRefresh' then FakeCloud.json(appToken: 'renewed', appTokenValidity: Time.now.to_i + 3600)
-        when %r{/V2/Devices/(\d+)/State}
-          next FakeCloud.json({}) unless request.headers['authorization'] == 'appToken saved'
+  it 'sends a request once when the cloud drops the connection, as the app does', :aggregate_failures do
+    answers << :drop
+    expect { channel.request(:put, "/Devices/#{fab}/State", body: '{"DeviceAction":2}') }
+      .to raise_error(Miele::Sdk::ConnectionError)
+    expect(seen("/V2/Devices/#{fab}/State").map(&:verb)).to eq(%w[PUT])
+  end
 
-          sleep 0.5 if Regexp.last_match(1) == '2'
-          [401, {}, '']
-        end
-      end
-    end
-
-    it 'renews the token once' do
-      %w[1 2].map { |id| Thread.new { channel.request(:get, "/Devices/#{id}/State") } }.each(&:join)
-      expect(seen('/V2/AppTokenRefresh').size).to eq(1)
-    end
+  it "sends a DELETE without content as the app's AndroidMessageHandler does" do
+    channel.request(:delete, "/Devices/#{fab}/services/AutoStart/1")
+    expect(seen("/V2/Devices/#{fab}/services/AutoStart/1").first.headers.values_at('content-length', 'content-type'))
+      .to eq(['0', nil])
   end
 
   it 'raises NotFoundError for a resource the cloud does not serve' do
@@ -90,6 +86,161 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     expect(channel.devices).to contain_exactly(
       have_attributes(fab:, host: 'Miele-0000000000000000.local.', ident: { 'DeviceType' => 13 })
     )
+  end
+
+  context 'when the cloud refuses the appliance list' do
+    let(:file) { File.join(Dir.mktmpdir, 'token.json') }
+
+    before do
+      File.write(file, '{}')
+      Miele::Sdk.configure do |config|
+        config.email = 'koti@example.com'
+        config.password = 'secret'
+        config.token_file = file
+      end
+    end
+
+    [401, 403].each do |status|
+      it "logs out and forgets the token on a #{status}, as the app does", :aggregate_failures do
+        answers << [status, {}, '']
+        expect { channel.devices }
+          .to raise_error(Miele::Sdk::AuthenticationError) { expect(it.cause).to have_attributes(status:) }
+        logout = seen('/V2/Logout')
+        expect(logout.map { [it.headers['authorization'], it.headers['accept-language']] })
+          .to eq([['appToken saved', 'en-FR']])
+        expect([channel.session.token, File.exist?(file)]).to eq([nil, false])
+      end
+    end
+
+    it 'logs in again on the next request', :aggregate_failures do
+      answers << [401, {}, '']
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
+      channel.devices
+      expect(seen('/V2/Devices').map { it.headers['authorization'] }).to eq(['appToken saved', 'appToken token-1'])
+    end
+
+    it 'keeps the token when the MCS logout cannot reach the cloud, as the app does', :aggregate_failures do
+      answers.push([401, {}, ''], :drop)
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect([channel.session.token&.value, File.exist?(file)]).to eq(['saved', true])
+    end
+
+    it "sends the MCS logout as JSON, as the app's ContentTypeDelegatingHandler does", :aggregate_failures do
+      answers << [401, {}, '']
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
+      logout = seen('/V2/Logout').first
+      expect([logout.body, *logout.headers.values_at('content-type', 'accept')])
+        .to eq(['{}', 'application/json; charset=utf-8', 'application/json'])
+    end
+
+    it "sends the logout once more after a 401, as the app's AuthenticationHandler does", :aggregate_failures do
+      answers.push([401, {}, ''], [401, {}, ''])
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect(seen('/V2/Logout').map { it.headers['authorization'] }).to eq(['appToken saved'] * 2)
+    end
+  end
+
+  context 'when a kill lands in the middle of a logout' do
+    let(:gate) { Thread::Queue.new }
+    let(:file) { File.join(Dir.mktmpdir, 'token.json') }
+    let(:cloud) do
+      FakeCloud.start do |request|
+        case request.path
+        when '/V2/Devices' then [401, {}, '']
+        when '/V2/Logout' then [gate.pop, {}, '']
+        end
+      end
+    end
+
+    before do
+      File.write(file, '{}')
+      Miele::Sdk.configure { it.token_file = file }
+    end
+
+    it 'finishes the logout and forgets the token before the thread stops' do
+      channel.session.current
+      reader = Thread.new { channel.devices }
+      Timeout.timeout(5) { Thread.pass until seen('/V2/Logout').any? }
+      reader.kill
+      gate << 200
+      reader.join
+      expect([channel.session.token, File.exist?(file)]).to eq([nil, false])
+    end
+  end
+
+  context 'when the cloud refuses the renewal of a token past half its life' do
+    let(:file) { File.join(Dir.mktmpdir, 'token.json') }
+
+    before do
+      token = Miele::Sdk::Cloud::Token.new(value: 'saved', refresh: 'saved', scheme: 'appToken',
+                                           created_at: Time.now - 3600, expires_at: Time.now + 60)
+      File.write(file, '{}')
+      Miele::Sdk.configure do |config|
+        config.cloud_token = token.to_json
+        config.token_file = file
+      end
+    end
+
+    it "resends a refused logout with the token renewed, as the app's TokenService gives it", :aggregate_failures do
+      renewed = FakeCloud.json(appToken: 'renewed', appTokenValidity: Time.now.to_i + 3600)
+      answers.push([401, {}, ''], [401, {}, ''], [401, {}, ''], renewed)
+      expect { channel.request(:get, "/Devices/#{fab}/State") }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect(seen('/V2/Logout').map { it.headers['authorization'] }).to eq(['appToken saved', 'appToken renewed'])
+    end
+
+    it 'sends no second logout when that renewal is refused too, as the app then has no token', :aggregate_failures do
+      answers.push(*Array.new(5) { [401, {}, ''] })
+      expect { channel.request(:get, "/Devices/#{fab}/State") }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect([seen('/V2/AppTokenRefresh').size, seen('/V2/Logout').size]).to eq([4, 1])
+    end
+
+    it 'keeps the token when the refused logout finds no token to resend with, as the app does', :aggregate_failures do
+      answers.push(*Array.new(5) { [401, {}, ''] })
+      expect { channel.request(:get, "/Devices/#{fab}/State") }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect([channel.session.token&.value, File.exist?(file)]).to eq(['saved', true])
+    end
+  end
+
+  context 'when two list reads in flight are refused with the same token' do
+    let(:cloud) do
+      FakeCloud.start(threaded: true) do |request|
+        sleep 0.2
+        [401, {}, ''] if request.path == '/V2/Devices'
+      end
+    end
+
+    it 'logs out once', :aggregate_failures do
+      channel.session.current
+      readers = Array.new(2) { Thread.new { expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError) } }
+      readers.each(&:join)
+      expect(seen('/V2/Logout').size).to eq(1)
+    end
+  end
+
+  context 'when the cloud refuses the appliance list of a CIAM account' do
+    before do
+      token = Miele::Sdk::Cloud::Token.new(value: 'jwt', refresh: 'refresh', scheme: 'Bearer',
+                                           created_at: Time.now, expires_at: Time.now + 3600)
+      Miele::Sdk.configure { it.cloud_token = token.to_json }
+    end
+
+    def organization
+      Miele::Sdk::Cloud::Locales::Organization.new(iso: 'FR', rest: cloud.url, ciam: true,
+                                                   ciam_endpoints: { 'logout' => "#{cloud.url}/fr/logout" })
+    end
+
+    it 'logs out of CIAM with its bearer token, then asks for a new code', :aggregate_failures do
+      answers << [401, {}, '']
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect(seen('/fr/logout').map { [it.verb, it.headers['authorization']] }).to eq([['POST', 'Bearer jwt']])
+      expect { channel.devices }.to raise_error(Miele::Sdk::ConfigurationError, /CIAM/)
+    end
+
+    it "sends the CIAM logout without content, as the app's AndroidMessageHandler does", :aggregate_failures do
+      answers << [401, {}, '']
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect(seen('/fr/logout').first.headers.values_at('content-length', 'content-type')).to eq(['0', nil])
+    end
   end
 
   it 'reads the household key from the cloud' do

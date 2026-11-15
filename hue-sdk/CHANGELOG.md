@@ -31,6 +31,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- After a 429, the next request to the same bridge resource waits as the app's rate limiter does, and
+  `RateLimitError#retry_after` gives the seconds the bridge's Retry-After named.
 - Configuration of the bridge address, identity, keys and timeouts through `Hue::Sdk.configure`.
 - HTTPS connections pinned to the Signify root CA and to the configured bridge id, one
   keep-alive connection per thread and per fiber.

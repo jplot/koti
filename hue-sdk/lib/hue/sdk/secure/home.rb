@@ -75,6 +75,20 @@ module Hue
         # @api public
         def cameras = Cameras.new(id)
 
+        # Starts a bridge's free trial (its experience period), as the app does from its motion area screens for a
+        # bridge that has not started it ({Plan.status} +:experience_period_not_enabled+). The app then reads the
+        # plans again.
+        #
+        # @param bridge_id [String] the bridge, as {#bridges} gives it
+        # @param model_id [String] its model, such as +BSB002+
+        # @return [void]
+        # @raise (see Http.request)
+        # @api public
+        def start_trial(bridge_id, model_id:)
+          Secure.client.put("security/payment/v2/home/#{id}/device/experience_period/enable",
+                            body: { device: bridge_id, model_id: })
+        end
+
         # @return [Events] the timeline of the home
         # @api public
         def events = Events.new(id)

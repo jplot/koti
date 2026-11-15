@@ -14,6 +14,13 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** a refused TOTP code is no longer followed by the next window's: the login sends the current
+  code once, as the app sends the one typed, and raises `AuthenticationError` `:invalid_totp`. The next call
+  answers the same two-factor request with the code of that time, as the app's next try does, and the calls
+  that waited on a failed login raise its error instead of signing in again.
+- **Breaking:** a login refusal without a reason has the reason `:unknown`, not `:bad_request`, as the app
+  tells them apart; a two-factor request with no id raises `:two_fa_required` before anything is sent, as the
+  app refuses it.
 - **Breaking:** `events` no longer reopens its streams: the feed ends with the first stream that ends and
   raises what breaks one. It takes a `tracker:` to reopen with, which reports only the changes made meanwhile
   and reads back the notifications created since the last one yielded; `sleeper:` is gone.
@@ -32,6 +39,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `Session#restart_login`: drops the two-factor request, as the app's back button on its code screen does,
+  so the next call signs in from the password.
 - `refused:` on `Ajax::Sdk.sia_events` and `Sia::Receiver.new`: a callable given each frame the receiver
   refuses, as a `Sia::Refusal` (the frame, the reply `:duh`, `:nak` or nil, and why), such as a frame
   another SIA key encrypted.

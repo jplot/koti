@@ -17,6 +17,7 @@ RSpec.describe Miele::Sdk::Dishwasher do
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(current)]
+      in { verb: 'PUT', path: %r{/State\z} } if served.key?(:refused) then [400, {}, '']
       in { verb: 'GET', path: %r{/DOP2/(.+)\z} }
         leaf = Regexp.last_match(1)
         [200, {}, served.fetch(leaf) { default_leaf(leaf) }]
@@ -334,6 +335,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(dishwasher.power_on_offered?).to be(true)
       dishwasher.power_on
       expect(written.map { it[0..1] }).to eq([%w[PUT State], %w[PUT DOP2/2/1586]])
+    end
+
+    it 'raises a refused DeviceAction 2 and writes no ApplianceState 4', :aggregate_failures do
+      leaves[:refused] = true
+      expect { dishwasher.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+      expect(written.map { it[0..1] }).to eq([%w[PUT State]])
     end
 
     it 'wakes it with DeviceAction 2' do

@@ -23,6 +23,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
         key = Regexp.last_match.captures.map(&:to_i)
         [200, {}, answers.fetch(key) { dop2_leaf(key[0], key[1], {}, idx1: key[2], idx2: key[3]) }]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(answers['State'])]
+      in { verb: 'PUT', path: %r{/State\z} } if answers.delete(:refused) then [400, {}, '']
       in { verb: 'PUT', path: %r{/State\z} } then [200, {}, answers['PUT State']]
       in { verb: 'POST' } then [200, {}, answers['DOP']]
       else [204, {}, '']
@@ -227,6 +228,13 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(written.map(&:first)).to eq(%w[State DOP2/2/1586])
       expect(written.last.last).to eq(combi(4, 0))
       expect(waits).to eq([5, 1.5])
+    end
+
+    it 'raises a refused DeviceAction 2 without reading 2/1586 again', :aggregate_failures do
+      served.merge!(asleep: true, refused: true)
+      expect { coffee.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+      expect(written.map(&:first)).to eq(%w[State])
+      expect(fake.requests.count { it.path.include?('/DOP2/2/1586') }).to eq(1)
     end
 
     it 'switches on with the header 2/1586 answered, as the app writes it back', :aggregate_failures do

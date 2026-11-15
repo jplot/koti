@@ -115,6 +115,14 @@ RSpec.describe Miele::Sdk::WashingMachine do
     end
   end
 
+  context 'when the washer offers request 8 alone' do
+    let(:shown) { { requests: [8], supported: 3, current: 1 } }
+
+    it 'tells the app offers a delayed start' do
+      expect(washer.start_delayed_offered?).to be(true)
+    end
+  end
+
   context 'when its program runs' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] } }
     let(:shown) { { requests: [2, 3], supported: 3, current: 0 } }

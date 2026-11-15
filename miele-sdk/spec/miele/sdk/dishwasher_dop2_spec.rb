@@ -99,6 +99,11 @@ RSpec.describe Miele::Sdk::Dishwasher do
       %i[stop pause cancel].each { dishwasher.public_send(it) }
       expect(written.map(&:last)).to eq([user_request(2).last, user_request(3).last, user_request(52).last])
     end
+
+    it 'tells the app offers no stop once the dishwasher is locked' do
+      state.merge!('RemoteEnable' => [7, 0, 0])
+      expect(dishwasher.stop_offered?).to be(false)
+    end
   end
 
   context 'when it runs and offers only to cancel' do
@@ -198,6 +203,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(dishwasher.resume_offered?).to be(true)
       dishwasher.resume
       expect(written.map(&:last)).to eq([user_request(1).last])
+    end
+
+    it 'tells the app offers no pause while paused, and no resume without request 1', :aggregate_failures do
+      expect(dishwasher.pause_offered?).to be(false)
+      leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [2, 3]) }, idx2: 1)
+      expect(dishwasher.resume_offered?).to be(false)
     end
   end
 
@@ -333,6 +344,11 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 1, 0, 0)]])
     end
 
+    it 'tells the app offers no switch-off while the dishwasher is locked' do
+      state.merge!('RemoteEnable' => [7, 0, 0])
+      expect(dishwasher.power_off_offered?).to be(false)
+    end
+
     it 'writes no ApplianceState 4 while State shows it on, as the app writes it only at Status 1 or 4',
        :aggregate_failures do
       expect(dishwasher.power_on_offered?).to be(false)
@@ -348,6 +364,11 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(dishwasher.power_on_offered?).to be(true)
       dishwasher.power_on
       expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 4, 0, 0)]])
+    end
+
+    it 'tells the app offers no switch-on without remote control' do
+      state.merge!('RemoteEnable' => [0, 0, 0])
+      expect(dishwasher.power_on_offered?).to be(false)
     end
   end
 

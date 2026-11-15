@@ -215,6 +215,13 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([user_request(68)])
   end
 
+  it 'tells the app offers no end of keeping warm for rapid cooling, message 19' do
+    serve([59])
+    resources['DOP2/1/131?idx1=0&idx2=1'] =
+      dop2_leaf(1, 131, { 2 => dop2_field(:struct_array, [{ 1 => dop2_field(:e16, 19) }]) }, idx2: 1)
+    expect(oven.stop_keeping_warm_offered?).to be(false)
+  end
+
   it 'sends the requests the oven does not offer, while telling the app offers none of them', :aggregate_failures do
     serve([1, 2])
     resources['DOP2/1/131?idx1=0&idx2=1'] = dop2_leaf(1, 131, {}, idx2: 1)

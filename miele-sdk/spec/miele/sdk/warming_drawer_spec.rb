@@ -86,6 +86,16 @@ RSpec.describe Miele::Sdk::WarmingDrawer do
     expect(requests).to eq(['110102000102'])
   end
 
+  it 'tells the app offers no switch-off while the drawer is not connected' do
+    state(255, [15, 0, 1])
+    expect(drawer.power_off_offered?).to be(false)
+  end
+
+  it 'tells the app offers no program change without remote control, mobile start or not' do
+    state(2, [0, 0, 1])
+    expect(drawer.select_program_offered?).to be(false)
+  end
+
   it 'switches off without mobile start, which the app does not offer', :aggregate_failures do
     state(5, [15, 0, 0])
     expect(drawer.power_off_offered?).to be(false)

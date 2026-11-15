@@ -9,11 +9,12 @@ RSpec.describe Miele::Sdk::Hood do
   let(:state) { { 'Status' => 4, 'Light' => 2, 'ExtendedState' => extended(supported) } }
   let(:fake) do
     served = state
+    fragrance = pf40028
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(served)]
-      in { verb: 'POST', body: /12010100019c5c/ } then [200, {}, '{"Response":"12011100019c5c00000087"}']
+      in { verb: 'POST', body: /12010100019c5c/ } then [200, {}, "{\"Response\":\"12011100019c5c000000#{fragrance}\"}"]
       in { verb: 'POST', body: /8E0A01/ } then [200, {}, '{"Response":"8E0A1100010201000700163c00"}']
       else [200, {}, '{}']
       end
@@ -23,6 +24,8 @@ RSpec.describe Miele::Sdk::Hood do
   before { connect_to(fake) }
 
   after { fake.stop }
+
+  def pf40028 = '87'
 
   def extended(bytes)
     data = Array.new(73, 0)
@@ -116,6 +119,14 @@ RSpec.describe Miele::Sdk::Hood do
     expect(hood.wake_offered?).to be(false)
     hood.wake
     expect(fake.requests.last.path).to eq("/Devices/#{fab}/State")
+  end
+
+  context 'when PF 40028 lists no fragrance' do
+    def pf40028 = '07'
+
+    it 'tells the app offers none' do
+      expect(hood.fragrance_supported?).to be(false)
+    end
   end
 
   context 'when the hood supports none of them' do

@@ -320,6 +320,12 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       expect(fridge.humidity_offered?).to be(false)
     end
 
+    it 'tells the app sets no ambient light on a KWTUS, though its light is on and listed' do
+      resources['State'] = { 'Status' => 5, 'Light' => 1 }
+      resources['Cooling']['Light'] = { 'Value' => 3 }
+      expect(fridge.ambient_light_offered?).to be(false)
+    end
+
     it 'tells the app shows its humidity level in a failure with a door signal' do
       resources['State'] = { 'Status' => 8, 'SignalDoor' => true, 'SignalFailure' => false }
       expect(fridge.humidity_offered?).to be(true)
@@ -463,6 +469,10 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       resources['State'] = { 'Status' => 5 }
       resources['Cooling'].merge!('Sabbath' => { 'Value' => 1 }, 'DustFilter' => { 'Value' => 3 })
       expect(fridge.presentation_light_offered?).to be(true)
+    end
+
+    it 'tells the app switches no light on a Rioja, though its light section shows', :aggregate_failures do
+      expect([fridge.light_shown?, fridge.light_offered?]).to eq([true, false])
     end
 
     it 'tells the app hides the light in Sabbath mode with no notice ranked before it' do

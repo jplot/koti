@@ -136,6 +136,11 @@ RSpec.describe Miele::Sdk::WashingMachine do
   context 'when its program runs' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] } }
 
+    it 'tells the app sets none on a selected program without mobile start' do
+      state.merge!('Status' => 3, 'RemoteEnable' => [15, 0, 0])
+      expect(washer.set_parameters_offered?).to be(false)
+    end
+
     it 'sets parameters, which the app does not offer', :aggregate_failures do
       expect(washer.set_parameters_offered?).to be(false)
       washer.set_parameters(spin_speed: 1400)

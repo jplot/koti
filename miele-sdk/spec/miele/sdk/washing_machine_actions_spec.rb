@@ -128,6 +128,11 @@ RSpec.describe Miele::Sdk::WashingMachine do
       washer.stop_end_signal
       expect(written.map(&:last)).to eq([user_request(3), user_request(2), user_request(28)].map(&:last))
     end
+
+    it 'tells the app offers no end signal stop unless 2/1585 lists request 28' do
+      leaves['2/1585'] = device_context(requests: [1, 2, 3])
+      expect(washer.stop_end_signal_offered?).to be(false)
+    end
   end
 
   context 'without remote control' do
@@ -164,6 +169,11 @@ RSpec.describe Miele::Sdk::WashingMachine do
       expect(washer.wake_offered?).to be(true)
       washer.wake
       expect(written.map { [it[1], JSON.parse(it[2])] }).to eq([['State', { 'DeviceAction' => 2 }]])
+    end
+
+    it 'tells the app wakes it only from a deep sleep' do
+      state['StandbyState'] = 1
+      expect(washer.wake_offered?).to be(false)
     end
   end
 

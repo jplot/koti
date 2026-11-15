@@ -148,6 +148,10 @@ RSpec.describe Miele::Sdk::Hood do
   context 'when the hood screen is pushed in' do
     let(:extended) { {} }
 
+    it 'tells the app offers no fragrance without its function bit' do
+      expect(hood.fragrance_supported?).to be(false)
+    end
+
     it 'sets the fan, which the app refuses', :aggregate_failures do
       expect(hood.fan_settable?).to be(false)
       hood.fan_level = 2

@@ -331,6 +331,11 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   context 'with an unknown DOP2 coffee maker' do
     let(:ident) { identity('CM 9000', 4) }
 
+    it 'tells the app offers no switch-on while off either' do
+      served['State'] = { 'Status' => 1, 'RemoteEnable' => [15, 0, 1] }
+      expect(coffee.power_on_offered?).to be(false)
+    end
+
     it 'switches it on, which the app does not offer', :aggregate_failures do
       expect(coffee.power_on_offered?).to be(false)
       coffee.power_on
@@ -367,6 +372,11 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       coffee.stop
       coffee.light = true
       expect(dop1_requests).to eq(%w[110102000102 110002000102])
+    end
+
+    it 'tells the app stops no drink while paused (Status 6)' do
+      served['State'] = { 'Status' => 6, 'RemoteEnable' => [15, 0, 1] }
+      expect(coffee.drink_stoppable?).to be(false)
     end
 
     it 'switches its light by writing back its State', :aggregate_failures do

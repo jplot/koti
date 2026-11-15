@@ -25,13 +25,13 @@ RSpec.describe Miele::Sdk::Oven do
 
   after { fake.stop }
 
-  def serve(status: 3, remote: [15, 0, 1], type: 5, parameters: {})
-    shown = { 10 => dop2_field(:e8, type), 28 => dop2_field(:e16, 13) }
+  def serve(status: 3, remote: [15, 0, 1], type: 5, parameters: {}, prog: 13)
+    shown = { 10 => dop2_field(:e8, type), 28 => dop2_field(:e16, prog) }
     resources['State'] = JSON.generate('Status' => status, 'RemoteEnable' => remote)
     resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown) })
     resources['DOP2/1/1574?idx1=0&idx2=1'] =
       dop2_leaf(1, 1574, { 4 => dop2_field(:struct, shown_parameters(parameters)),
-                           7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
+                           7 => dop2_field(:struct, { 28 => dop2_field(:e16, prog) }) }, idx2: 1)
   end
 
   def messages(*ids)
@@ -164,6 +164,18 @@ RSpec.describe Miele::Sdk::Oven do
     serve(type: 4, remote: [15, 0, 0])
     expect(oven.option_editable?(:keep_warm)).to be(true)
     expect(written).to eq([27])
+  end
+
+  it 'tells the app lets program 361 change only under mobile start, started or not', :aggregate_failures do
+    serve(prog: 361, remote: [15, 0, 0])
+    expect(oven.parameter_editable?(:moisture)).to be(false)
+    serve(prog: 361)
+    expect(oven.parameter_editable?(:moisture)).to be(true)
+  end
+
+  it 'tells the app lets no option change without remote control, though it shows it' do
+    serve(remote: [0, 0, 0])
+    expect([oven.option_shown?(:rapid_heating), oven.option_editable?(:rapid_heating)]).to eq([true, false])
   end
 
   it 'raises for a parameter the app has no section for' do

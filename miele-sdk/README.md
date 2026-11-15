@@ -847,11 +847,13 @@ not answer. Then:
 
 A request the cloud answers 401 raises `ResponseError` and keeps the token, as the app's appliance
 client does. The appliance list is handled as the app handles a lost session: a 401 or 403 on
-`devices` (and so on `Miele::Sdk.appliances`) logs the account out, at `/V2/Logout` or the CIAM
-logout address, forgets the token and deletes `token_file`, then raises `ResponseError`. The next
-request logs in again with `email` and `password`, or raises `ConfigurationError` until a new CIAM
-code is exchanged; a `cloud_token` setting is left as given. A renewal the cloud refuses (a 401, or a
-CIAM `invalid_grant`) ends the session the same way and raises `AuthenticationError`.
+`devices` (and so on `Miele::Sdk.appliances` and the cloud event stream) logs the account out, at
+`/V2/Logout` or the CIAM logout address, forgets the token and deletes `token_file`, then raises
+`AuthenticationError`. An MCS logout that cannot reach the cloud keeps the token and its file, as
+the app keeps them. The next request logs in again with `email` and `password`; without them (a
+`token_file` or `cloud_token` alone), or for a CIAM account until a new code is exchanged, it raises
+`ConfigurationError`. A `cloud_token` setting is left as given. A renewal the cloud refuses (a 401,
+or a CIAM `invalid_grant`) ends the session the same way and raises `AuthenticationError`.
 
 `ciam_client_id` is the Miele app's OAuth client id (`MA.Constants.CdcKeys.ClientId` in
 `Miele.Modules.Authentication`); the gem does not ship it. The cloud client follows the
@@ -927,10 +929,10 @@ parse and as pushed otherwise, and a push outside any appliance under its own pa
 Each message is acknowledged as the app does, a keep-alive goes out every 30 s, and the websocket
 reconnects 6 s after an error or a close, and at once after a minute without a message, each time
 with the session's current token, which a refused handshake does not renew, as in the app. An
-account the cloud refuses ends the stream with `AuthenticationError`. A frame that stops halfway
-counts as silence: when the
-minute runs out, it reconnects at once, as the app's library does. A handshake that stalls gives up
-after a minute. It connects directly, without the environment's proxy.
+account the cloud refuses, or an appliance list it refuses, ends the stream with
+`AuthenticationError`, as the app stops observing. A frame that stops halfway counts as silence:
+when the minute runs out, it reconnects at once, as the app's library does. A handshake that stalls
+gives up after a minute. It connects directly, without the environment's proxy.
 
 It has run against the live cloud with a French account. The cloud pushes its messages as `POST`
 requests behind a `CloudConnect: sc-data-…` header, the device list first, then `State` changes;

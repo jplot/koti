@@ -69,9 +69,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   401 raises `ResponseError` (status 401) instead of going out again with a renewed token, which is
   kept, and the websocket no longer renews a token its handshake is refused with: it connects again
   6 s later with the session's current token. A 401 or 403 on the appliance list
-  (`Cloud::Channel#devices`, so `Miele::Sdk.appliances`) logs the account out and forgets its token,
-  `token_file` included, then raises `ResponseError`; the next request logs in again
-  (`Cloud::Session#invalidate`). A renewal the cloud refuses (a 401, which an MCS renewal gets twice
+  (`Cloud::Channel#devices`, so `Miele::Sdk.appliances` and the cloud event stream) logs the account
+  out and forgets its token, `token_file` included, then raises `AuthenticationError`, which ends the
+  stream; the next request logs in again (`Cloud::Session#invalidate`). An MCS logout that cannot
+  reach the cloud keeps the token, as the app keeps it. A renewal the cloud refuses (a 401, which an MCS renewal gets twice
   as the app's client sends it once more, or a CIAM 400 `invalid_grant`) does the same and raises
   `AuthenticationError`, instead of logging in again at once.
 

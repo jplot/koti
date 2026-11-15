@@ -66,21 +66,30 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(dop1_requests).to eq(%w[89060100 89060100011cc000])
   end
 
-  it 'sets the extras on 8906 for the program State shows', :aggregate_failures do
+  it 'sets the extras on 8906 for the program State shows, but none it has no bit for', :aggregate_failures do
+    expect(dishwasher.offered_extras).to eq(%i[short eco dry intensive_low soak prerinse additional_drying])
     dishwasher.set_extras(:eco, :additional_drying)
     expect { dishwasher.set_extras(:quick) }.to raise_error(ArgumentError)
     expect(dop1_requests).to eq(['89060100010d4200'])
   end
 
-  it 'refuses a delayed start while the program runs, as the app does' do
-    expect { dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30)) }
-      .to raise_error(Miele::Sdk::ActionUnavailableError)
+  it 'writes no setting, a Dop1 dishwasher having no 2/105', :aggregate_failures do
+    expect { dishwasher.write_setting(20_002, 1) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { dishwasher.auto_dos = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
+  it 'delays the start while the program runs, which the app does not offer', :aggregate_failures do
+    expect(dishwasher.start_delayed_offered?).to be(false)
+    dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
+    expect(dop1_requests.last).to start_with('8909')
   end
 
   context 'when its program is selected' do
     let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 1], 'SignalDoor' => false, 'ProgramID' => 13 } }
 
-    it 'opens the door under mobile start' do
+    it 'opens the door under mobile start', :aggregate_failures do
+      expect([dishwasher.open_door_offered?, dishwasher.start_delayed_offered?]).to eq([true, true])
       dishwasher.open_door
       expect(dop1_requests).to eq(['140402000102'])
     end
@@ -95,9 +104,10 @@ RSpec.describe Miele::Sdk::Dishwasher do
   context 'with the door open' do
     let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 1], 'SignalDoor' => true, 'ProgramID' => 13 } }
 
-    it 'refuses to open it, as the app does', :aggregate_failures do
-      expect { dishwasher.open_door }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written).to be_empty
+    it 'opens it again, which the app does not offer', :aggregate_failures do
+      expect(dishwasher.open_door_offered?).to be(false)
+      dishwasher.open_door
+      expect(dop1_requests).to eq(['140402000102'])
     end
   end
 end

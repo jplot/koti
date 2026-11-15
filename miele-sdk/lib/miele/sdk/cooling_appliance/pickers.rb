@@ -13,26 +13,21 @@ module Miele
         KFN_TECH_TYPE = /KFN 37692 iDE|K 3.473 iD/
         private_constant :OPCODE_TARGETS, :FN_TECH_TYPES, :KFN_TECH_TYPE
 
+        # @param zone [Zone] one of {#zones}
+        # @return [Array<Integer>] the whole degrees the app's target picker offers the zone
+        # @api public
+        def target_choices(zone)
+          state = self.state
+          offered_targets(zone, state, target_temp(zone, state))
+        end
+
         private
 
-        # @param value [Integer]
-        # @param choices [Array<Integer>]
-        # @return [void]
-        # @raise [ArgumentError] unless +value+ is one of +choices+
-        def require_offered!(value, choices)
-          raise ArgumentError, "the app offers #{choices.uniq}, not #{value}" unless choices.include?(value)
-        end
-
         # @param zone [Zone]
-        # @param degrees [Integer]
+        # @param degrees [Numeric]
         # @param state [State]
         # @return [Boolean] false for the zone's current target
-        # @raise [ArgumentError] for a value the app's picker does not offer
-        def new_target?(zone, degrees, state)
-          target = target_temp(zone, state)
-          require_offered!(degrees, target_choices(zone, state, target))
-          degrees * 100 != target['Value']
-        end
+        def new_target?(zone, degrees, state) = (degrees * 100).round != target_temp(zone, state)['Value']
 
         # @param zone [Zone]
         # @param state [State]
@@ -48,7 +43,7 @@ module Miele
         # @param target [Hash{String=>Object}] its +TargetTemp+
         # @return [Array<Integer>] the whole degrees the app's picker offers, rounded half away from zero as it
         #   shows them
-        def target_choices(zone, state, target)
+        def offered_targets(zone, state, target)
           return opcode_targets(zone, state) if opcode?
 
           api_targets(target).map { it.fdiv(100).round }

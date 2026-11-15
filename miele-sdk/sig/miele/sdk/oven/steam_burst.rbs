@@ -6,13 +6,13 @@ module Miele
 
         def steam_burst: () -> void
 
+        def steam_burst_offered?: () -> bool
+
         def context: () -> Objects::Oven::GlobalDeviceContext
 
         def program_context: () -> Objects::Oven::GlobalPsContext
 
         private
-
-        def steam_burst?: () -> bool
 
         def manual_steam_burst?: (Objects::Oven::GlobalPsAttributesCCA shown) -> bool
 
@@ -20,7 +20,9 @@ module Miele
 
         def burst_left?: (Objects::Oven::GlobalPsAttributesCCA shown) -> bool
 
-        def user_request: (Integer id, String reason) { () -> boolish } -> void
+        def user_request: (Integer id) -> void
+
+        def dop2?: () -> bool
 
         def offered: (Objects::Oven::GlobalDeviceContext context) -> Array[Integer]
 

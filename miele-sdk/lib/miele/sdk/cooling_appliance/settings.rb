@@ -3,31 +3,31 @@
 module Miele
   module Sdk
     class CoolingAppliance < Appliance
-      # The settings and lights of the app's refrigeration module, refused where the app shows no control for them.
+      # The settings and lights of the app's refrigeration module; the predicates tell where the app shows a control
+      # for them, and the choices what its pickers offer.
       module Settings
         HUMIDITY = { low: 1, medium: 2, high: 3 }.freeze
         private_constant :HUMIDITY
 
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] at Status 1 or 255, or on an appliance without an ice maker, or whose
-        #   +IceMaker+ is not 1, 2 or 3, where the app hides its switch
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def ice_maker=(on)
-          require!(settings_listed?(state), 'the app shows no settings at Status 1 or 255')
-          require!(ice_maker?, 'the appliance has no ice maker')
-          require!([1, 2, 3].include?(cooling.dig('IceMaker', 'Value')), 'the appliance reports no ice maker state')
-          put('Cooling', 'IceMaker', Value: on ? 1 : 2)
+          write_cooling('IceMaker', Value: on ? 1 : 2)
+        end
+
+        # @return [Boolean] whether the app shows the ice maker's switch: neither at Status 1 nor 255, on an
+        #   appliance with an ice maker whose +IceMaker+ is 1, 2 or 3
+        # @api public
+        def ice_maker_offered?
+          settings_listed?(state) && ice_maker? && [1, 2, 3].include?(cooling.dig('IceMaker', 'Value'))
         end
 
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] but on a wine unit the app lights, where its light section or dashboard
-        #   quick action shows
         # @api public
         def light=(on)
-          require!(wine? && !rioja?, 'the app switches no light on this appliance')
-          require!(light_shown?(state), 'the app shows no light switch now')
           if state_light?
             put('State', 'Light', Light: on ? 1 : 2)
           else
@@ -35,34 +35,50 @@ module Miele
           end
         end
 
+        # @return [Boolean] whether the app switches the light: on a wine unit it lights, but a Rioja, where its
+        #   light section or dashboard quick action {Screen#light_shown? shows}
+        # @api public
+        def light_offered? = wine? && !rioja? && light_shown?
+
         # @param value [Integer] the mode's number on a BSH wine unit, from 1 in its picker's order; the light's
-        #   level on a Liebherr one, 1 to 7
+        #   level on a Liebherr one
         # @return [void]
-        # @raise [ActionUnavailableError] but on a BSH wine unit, or a protocol 203 one neither KWTUS nor Rioja, with
-        #   the light on and its setting listed, while the app shows its light section
-        # @raise [ArgumentError] for a number or level the app's picker or slider does not offer
+        # @raise [ActionUnavailableError] on a protocol but 200 and 203, which has no ambient light setting
         # @api public
         def ambient_light_mode=(value)
-          bsh = protocol_version == 200
-          require!(wine? && !rioja? && (bsh || (protocol_version == 203 && !kwtus?)),
-                   'the app sets no ambient light on this appliance')
-          key = bsh ? 'AmbientLightMode' : 'Light'
-          require!(ambient_light_shown?(state, key), 'the app shows no ambient light now')
-          require_offered!(value, ambient_light_numbers(key))
-          put('Cooling', key, Value: value)
+          require!([200, 203].include?(protocol_version), 'only protocols 200 and 203 have an ambient light setting')
+          put('Cooling', ambient_light_key, Value: value)
         end
+
+        # @return [Boolean] whether the app sets the ambient light: on a BSH wine unit, or a protocol 203 one
+        #   neither KWTUS nor Rioja, with the light on and its setting listed, while its light section shows
+        # @api public
+        def ambient_light_offered?
+          bsh = protocol_version == 200
+          wine? && !rioja? && (bsh || (protocol_version == 203 && !kwtus?)) &&
+            ambient_light_shown?(state, ambient_light_key)
+        end
+
+        # @return [Array<Integer>] the numbers the app's ambient light picker or seven-option slider offers
+        # @api public
+        def ambient_light_choices = ambient_light_numbers(ambient_light_key)
 
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with one, where the app's presenter light
-        #   section or dashboard quick action shows it
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def presentation_light=(on)
-          require!(presentation_light?, 'the appliance has no presentation light')
+          write_cooling('PresentationLight', Value: on ? 1 : 2)
+        end
+
+        # @return [Boolean] whether the app switches the presentation light: on a KWTUS or Rioja wine unit with
+        #   one, where its presenter light section or dashboard quick action shows it
+        # @api public
+        def presentation_light_offered?
+          return false unless presentation_light?
+
           state = self.state
-          require!(presenter_light_shown?(state) || presenter_quick_action?(state),
-                   'the app shows no presentation light now')
-          put('Cooling', 'PresentationLight', Value: on ? 1 : 2)
+          presenter_light_shown?(state) || presenter_quick_action?(state)
         end
 
         # The app's seven-option slider sends its index plus 1.
@@ -70,72 +86,108 @@ module Miele
         # @param zone [Zone] one of {#zones}
         # @param value [Integer] 0 switches the zone's light off, 1 to 7 sets its level
         # @return [void]
-        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit with a presentation light, while the
-        #   app's presenter light section shows
-        # @raise [ArgumentError] outside 0 to 7
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def set_presentation_light_intensity(zone, value)
-          require!(presentation_light?, 'the appliance has no presentation light')
-          require!(presenter_light_shown?(state), 'the app shows no presentation light now')
-          require_offered!(value, (0..7).to_a)
-          put('Cooling', "#{zone.rank}/PresentationLightIntensity", Value: value)
+          write_cooling("#{zone.rank}/PresentationLightIntensity", Value: value)
         end
+
+        # @return [Boolean] whether the app sets a zone's intensity: on a KWTUS or Rioja wine unit with a
+        #   presentation light, while its presenter light section shows
+        # @api public
+        def presentation_light_intensity_offered? = presentation_light? && presenter_light_shown?(state)
+
+        # @return [Array<Integer>] what the app offers: 0, and its slider's seven options
+        # @api public
+        def presentation_light_intensity_choices = (0..7).to_a
 
         # @param level [Symbol] +:low+, +:medium+ or +:high+
         # @return [void]
-        # @raise [ActionUnavailableError] but on a KWTUS or Rioja wine unit, while the app shows its humidity control
-        # @raise [ArgumentError] for a level off +HumidityControl+'s +Min+ to +Max+ by +Step+, which the app offers
+        # @raise [KeyError] for another level
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def humidity=(level)
-          require!(rioja? || kwtus?, 'the appliance has no humidity control')
-          require!(humidity_control_shown?(state), 'the app shows no humidity control now')
-          value = HUMIDITY.fetch(level)
-          require_offered!(value, picker(cooling['HumidityControl']))
-          put('Cooling', 'HumidityControl', Value: value)
+          write_cooling('HumidityControl', Value: HUMIDITY.fetch(level))
+        end
+
+        # @return [Boolean] whether the app shows its humidity control: on a KWTUS or Rioja wine unit, as
+        #   HumidityControlRule
+        # @api public
+        def humidity_offered? = (rioja? || kwtus?) && humidity_control_shown?(state)
+
+        # @return [Array<Symbol>] the levels the app offers: those on +HumidityControl+'s +Min+ to +Max+ by +Step+
+        # @api public
+        def humidity_choices
+          offered = picker(cooling['HumidityControl'])
+          HUMIDITY.filter_map { |level, value| level if offered.include?(value) }
+        end
+
+        # @param value [Integer]
+        # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
+        # @api public
+        def perfect_fresh=(value)
+          write_cooling('PerfectFresh', Value: value)
         end
 
         # The app shows PerfectFresh for a +Step+ above 0 compared unsigned, so for any but 0.
         #
-        # @param value [Integer]
-        # @return [void]
-        # @raise [ActionUnavailableError] at Status 1 or 255, on protocol 201, where the app reads none, or without a
-        #   +Step+
-        # @raise [ArgumentError] off +PerfectFresh+'s +Min+ to +Max+ by +Step+, which the app's picker offers
+        # @return [Boolean] whether the app shows it: neither at Status 1 nor 255, not on protocol 201, where it
+        #   reads none, and with a +Step+
         # @api public
-        def perfect_fresh=(value)
-          require!(settings_listed?(state), 'the app shows no settings at Status 1 or 255')
-          setting = cooling['PerfectFresh']
-          require!(protocol_version != 201 && !setting.to_h['Step'].to_i.zero?, 'the app shows no PerfectFresh here')
-          require_offered!(value, picker(setting))
-          put('Cooling', 'PerfectFresh', Value: value)
+        def perfect_fresh_offered?
+          settings_listed?(state) && protocol_version != 201 && !cooling.dig('PerfectFresh', 'Step').to_i.zero?
         end
+
+        # @return [Array<Integer>] what the app's picker offers: +PerfectFresh+'s +Min+ to +Max+ by +Step+
+        # @api public
+        def perfect_fresh_choices = picker(cooling['PerfectFresh'])
 
         # @param value [Integer]
         # @return [void]
-        # @raise [ActionUnavailableError] at Status 1 or 255, without +Humidifier+ or at its +Value+ -1, where the app
-        #   hides the cell
-        # @raise [ArgumentError] off +Humidifier+'s +Min+ to +Max+ by +Step+, which the app's picker offers
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def humidifier=(value)
-          require!(settings_listed?(state), 'the app shows no settings at Status 1 or 255')
-          setting = cooling['Humidifier']
-          require!(setting && setting['Value'] != -1, 'the app shows no humidifier')
-          require_offered!(value, picker(setting))
-          put('Cooling', 'Humidifier', Value: value)
+          write_cooling('Humidifier', Value: value)
         end
+
+        # @return [Boolean] whether the app shows the humidifier's cell: neither at Status 1 nor 255, with a
+        #   +Humidifier+ whose +Value+ is not -1
+        # @api public
+        def humidifier_offered? = setting_shown?('Humidifier')
+
+        # @return [Array<Integer>] what the app's picker offers: +Humidifier+'s +Min+ to +Max+ by +Step+
+        # @api public
+        def humidifier_choices = picker(cooling['Humidifier'])
 
         # @param seconds [Integer]
         # @return [void]
-        # @raise [ActionUnavailableError] at Status 1 or 255, without +DoorAlarmTime+ or at its +Value+ -1, where the
-        #   app hides the cell
-        # @raise [ArgumentError] off +DoorAlarmTime+'s +Min+ to +Max+ by +Step+, which the app's picker offers
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def door_alarm_delay=(seconds)
-          require!(settings_listed?(state), 'the app shows no settings at Status 1 or 255')
-          setting = cooling['DoorAlarmTime']
-          require!(setting && setting['Value'] != -1, 'the app shows no door alarm delay')
-          require_offered!(seconds, picker(setting))
-          put('Cooling', 'DoorAlarmTime', Value: seconds)
+          write_cooling('DoorAlarmTime', Value: seconds)
+        end
+
+        # @return [Boolean] whether the app shows the door alarm delay's cell: neither at Status 1 nor 255, with a
+        #   +DoorAlarmTime+ whose +Value+ is not -1
+        # @api public
+        def door_alarm_delay_offered? = setting_shown?('DoorAlarmTime')
+
+        # @return [Array<Integer>] what the app's picker offers: +DoorAlarmTime+'s +Min+ to +Max+ by +Step+, in
+        #   seconds
+        # @api public
+        def door_alarm_delay_choices = picker(cooling['DoorAlarmTime'])
+
+        private
+
+        # @return [String] +AmbientLightMode+ on a BSH appliance (protocol 200), +Light+ otherwise
+        def ambient_light_key = protocol_version == 200 ? 'AmbientLightMode' : 'Light'
+
+        # @param key [String] a +Cooling+ setting
+        # @return [Boolean] listed, and at a +Value+ but -1
+        def setting_shown?(key)
+          setting = cooling[key]
+          settings_listed?(state) && !setting.nil? && setting['Value'] != -1
         end
       end
     end

@@ -10,9 +10,15 @@ module Miele
 
         def start: (?at: Time | :now) -> void
 
+        def start_offered?: () -> bool
+
         def stop: () -> void
 
+        def stop_offered?: () -> bool
+
         def stop_keeping_warm: () -> void
+
+        def stop_keeping_warm_offered?: () -> bool
 
         def context: () -> Objects::Oven::GlobalDeviceContext
 
@@ -24,9 +30,9 @@ module Miele
 
         private
 
-        def user_request: (Integer id, String reason) { () -> boolish } -> void
+        def user_request: (Integer id) -> void
 
-        def require_duration!: (Objects::Oven::GlobalPsContext context) -> void
+        def duration_given?: (Objects::Oven::GlobalPsContext context) -> bool
 
         def start_automatic: (Integer prog_id, Objects::Oven::GlobalPsContext context, Time | :now at) -> void
 

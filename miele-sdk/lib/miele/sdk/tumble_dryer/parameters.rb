@@ -36,7 +36,8 @@ module Miele
 
         # @return [Hash{Symbol=>Array<Symbol>}]
         def setting_choices
-          { extras: dop2? ? DOP2_EXTRAS : DOP1_EXTRAS.keys, drying_level: Laundry::DRYING_LEVELS.keys }
+          { extras: dop2? ? Objects::Laundry::GlobalPsExtrasTD::MEMBERS.keys : DOP1_EXTRAS.keys,
+            drying_level: Laundry::DRYING_LEVELS.keys }
         end
 
         # @param para [Objects::Laundry::GlobalPsSelectionParaTD]

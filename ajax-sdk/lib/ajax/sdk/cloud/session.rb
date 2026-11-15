@@ -26,23 +26,36 @@ module Ajax
           @token = settings.session_token
           @user_id = settings.user_id
           @mutex = Mutex.new
+          @attempts = 0
         end
 
         # @return [String] a description that never prints the token or the account's secrets
         def inspect = "#<#{self.class.name} logged_in=#{!@token.nil?}>"
 
         # Signs in with the password hash, then with the TOTP code when two-factor is required, unless a session is
-        # held; concurrent callers sign in once. The metadata is read under the same lock, so a session another
-        # thread forgets meanwhile never sends a call without its token.
+        # held; concurrent callers sign in once, and those that waited on a failed sign-in raise its error. A
+        # refused TOTP code keeps the two-factor request, which the next call answers with the current code. The
+        # metadata is read under the same lock, so a session another thread forgets meanwhile never sends a call
+        # without its token.
         #
         # @return [Hash{String=>String}] the call metadata
         # @raise [AuthenticationError] when the gateway refuses the login
         def ensure_login
+          attempt = @attempts
           @mutex.synchronize do
-            sign_in_flow unless @token && @user_id
+            refusal = @refusal
+            raise refusal if refusal && @attempts != attempt
+
+            attempt_sign_in unless @token && @user_id
             metadata
           end
         end
+
+        # Drops the two-factor request, as the app's back button on its code screen does, so the next call signs in
+        # from the password again.
+        #
+        # @return [void]
+        def restart_login = @mutex.synchronize { @request_id = nil }
 
         # Drops the session the gateway refused, as the app does, so the next call signs in again.
         #
@@ -64,7 +77,19 @@ module Ajax
 
         private
 
+        def attempt_sign_in
+          sign_in_flow
+          @refusal = nil
+        rescue StandardError => e
+          @refusal = e
+          raise
+        ensure
+          @attempts += 1
+        end
+
         def sign_in_flow
+          return login_with_totp if @request_id
+
           require_credentials
           failure = sign_in(PASSWORD, password_request) or return
           return two_factor(failure.two_fa_required.request_id) if failure.two_fa_required
@@ -81,8 +106,10 @@ module Ajax
         # Raises rather than send an empty TOTP that only burns a login attempt.
         def two_factor(request_id)
           raise AuthenticationError.new(:two_fa_required, 'no totp_secret set') if @settings.totp_secret.nil?
+          raise AuthenticationError.new(:two_fa_required, 'no two-factor request id') if request_id.to_s.empty?
 
-          login_with_totp(request_id)
+          @request_id = request_id
+          login_with_totp
         end
 
         # @return [Data, nil] the failure, or nil once the session is accepted
@@ -93,27 +120,17 @@ module Ajax
           answer.failure
         end
 
-        def login_with_totp(request_id, sent = nil)
-          code = totp_code(sent)
-          failure = sign_in(TOTP, totp_request(request_id, code)) or return
-          return login_with_totp(request_id, code) if failure.invalid_totp && sent.nil?
+        def login_with_totp
+          code = ROTP::TOTP.new(@settings.totp_secret.to_s).now
+          failure = sign_in(TOTP, totp_request(@request_id, code)) or return
 
           raise AuthenticationError.new(reason(failure), 'two-factor login refused')
-        end
-
-        # A refused code that has since expired gives way to the current one; one still current gives
-        # way to the next window's, for a gateway whose clock runs ahead.
-        def totp_code(sent)
-          totp = ROTP::TOTP.new(@settings.totp_secret.to_s)
-          now = Time.now
-          code = totp.at(now)
-          code == sent ? totp.at(now + 30) : code
         end
 
         def accept(success)
           @token = success.session_token.unpack1('H*').upcase
           @user_id = success.lite_account&.user_hex_id
-          nil
+          @request_id = nil
         end
 
         def password_request
@@ -129,7 +146,7 @@ module Ajax
           @settings.password_sha256 || Digest::SHA256.hexdigest(@settings.password.to_s)
         end
 
-        def reason(failure) = failure.error || :bad_request
+        def reason(failure) = failure.error || :unknown
 
         def app_metadata
           { 'client-device-id' => @settings.client_device_id, 'client-device-model' => @settings.client_device_model,

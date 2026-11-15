@@ -53,7 +53,9 @@ module Miele
     # The appliance refused a command.
     class RemoteControlDisabledError < ResponseError; end
 
-    # An action the appliance does not offer now, refused before anything is sent, as the Miele app refuses it.
+    # The appliance's protocol or state gives no request to send for this action, such as a DOP2 leaf on a Dop1
+    # appliance or a parameter with no program selected: nothing is sent. Whether the Miele app offers an action
+    # is the appliance's predicates' to tell, never a refusal.
     class ActionUnavailableError < Error; end
 
     # The appliance answered a Dop1 write with an Ack other than success (1), which the Miele app reports as

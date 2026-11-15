@@ -15,12 +15,12 @@ module Miele
         private_constant :PARA_CONSTRAINT, :CONTINUED_PHASES, :CLEANING_TYPE
 
         # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or unless the app offers its continue button
+        # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1583 to write
         # @raise [ActionFailedError] when the oven does not cook on within the 15 s the app waits, 1/1585 shows no
         #   program phase, or 1/1574 lacks the doneness, browning or ProgId the app reads
         # @api public
         def continue_cooking
-          require_continue_offered!
+          require_dop2!
           write_dop2(Messages.user_request(72))
           phase, waited = timed_poll(Polling::ACTION_TIMEOUT) { shown_phase([PARA_CONSTRAINT, *CONTINUED_PHASES]) }
           waited += raise_cooking_level(Polling::ACTION_TIMEOUT - waited) if phase == PARA_CONSTRAINT
@@ -28,24 +28,22 @@ module Miele
           raise ActionFailedError, "the oven did not cook on within #{Polling::ACTION_TIMEOUT} s" unless continued
         end
 
-        private
-
         # ProgramFinishedSpeechBubblesService, the only caller of the action: its continue bubble for ContinueCooking
         # 1 or 2 (ContinueProgramOptionRule) shows for a finished program while no option runs after the end, and
         # IsContinueButtonActive enables its button under RemoteEnableType MobileStart alone.
         #
-        # @return [void]
-        # @raise [ActionUnavailableError]
-        def require_continue_offered!
-          require_dop2!
+        # @return [Boolean] whether the app offers {#continue_cooking}, never on a Dop1 oven
+        # @api public
+        def continue_cooking_offered?
+          return false unless dop2?
+
           state = self.state
           device = context
-          require!(continue_cooking?(device), 'the oven offers no continue cooking now')
-          require!(program_finished?(state, device), 'the program is not finished')
-          require!(!option_running?, 'an option runs after the end of the program')
-          require!(under_remote_control?(state) && state.mobile_start? == true,
-                   'the app continues by mobile start only')
+          continue_cooking?(device) && program_finished?(state, device) && !option_running? &&
+            under_remote_control?(state) == true && state.mobile_start? == true
         end
+
+        private
 
         # @param device [Objects::Oven::GlobalDeviceContext] 1/1585
         # @return [Boolean]

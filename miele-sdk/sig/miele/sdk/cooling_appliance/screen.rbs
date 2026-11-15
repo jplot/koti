@@ -2,11 +2,13 @@ module Miele
   module Sdk
     class CoolingAppliance < Appliance
       module Screen : Appliance
+        def zones_shown?: (?State state) -> bool
+
+        def settings_shown?: (?State state) -> bool
+
+        def light_shown?: (?State state) -> bool
+
         private
-
-        def require_zones_shown!: (?State state) -> void
-
-        def zones_shown?: (State state) -> bool
 
         def app_state: (State state) -> Symbol
 
@@ -18,8 +20,6 @@ module Miele
 
         def settings_listed?: (State state) -> bool
 
-        def settings_shown?: (State state) -> bool
-
         def presenter_light_shown?: (State state) -> bool
 
         def humidity_control_shown?: (State state) -> bool
@@ -29,8 +29,6 @@ module Miele
         def quick_action_shown?: (State state) -> bool
 
         def presenter_light_state?: () -> bool
-
-        def light_shown?: (State state) -> bool
 
         def ambient_light_shown?: (State state, String key) -> bool
 

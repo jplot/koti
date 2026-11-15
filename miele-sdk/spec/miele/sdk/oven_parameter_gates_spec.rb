@@ -25,13 +25,13 @@ RSpec.describe Miele::Sdk::Oven do
 
   after { fake.stop }
 
-  def serve(status: 3, remote: [15, 0, 1], type: 5, parameters: {})
-    shown = { 10 => dop2_field(:e8, type), 28 => dop2_field(:e16, 13) }
+  def serve(status: 3, remote: [15, 0, 1], type: 5, parameters: {}, prog: 13)
+    shown = { 10 => dop2_field(:e8, type), 28 => dop2_field(:e16, prog) }
     resources['State'] = JSON.generate('Status' => status, 'RemoteEnable' => remote)
     resources['DOP2/1/1585'] = dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown) })
     resources['DOP2/1/1574?idx1=0&idx2=1'] =
       dop2_leaf(1, 1574, { 4 => dop2_field(:struct, shown_parameters(parameters)),
-                           7 => dop2_field(:struct, { 28 => dop2_field(:e16, 13) }) }, idx2: 1)
+                           7 => dop2_field(:struct, { 28 => dop2_field(:e16, prog) }) }, idx2: 1)
   end
 
   def messages(*ids)
@@ -46,34 +46,42 @@ RSpec.describe Miele::Sdk::Oven do
 
   def written = fake.requests.select { it.verb == 'PUT' }.map { Miele::Sdk::Dop2.decode(it.body).fields[2].value }
 
-  def refused(*names, error: /hides/)
+  def ids(*names) = names.map { setters.fetch(it)[1] }
+
+  def sent_unoffered(*names, shown: false)
     names.each do |name|
-      expect { oven.public_send(:"#{name}=", setters.fetch(name).first) }.to raise_error(error)
+      expect([oven.parameter_shown?(name), oven.parameter_editable?(name)]).to eq([shown, false])
+      oven.public_send(:"#{name}=", setters.fetch(name).first)
     end
   end
 
-  it 'writes every parameter whose section the app shows' do
+  def option(mask) = dop2_field(:struct, { 1 => dop2_field(:u8, mask), 2 => dop2_field(:bool, false) })
+
+  it 'writes every parameter whose section the app shows, as it lets each change', :aggregate_failures do
+    expect(setters.keys.map { [oven.parameter_shown?(it), oven.parameter_editable?(it)] }.uniq).to eq([[true, true]])
+    expect([oven.option_shown?(:rapid_heating), oven.option_editable?(:rapid_heating)]).to eq([true, true])
     setters.each { |name, (value)| oven.public_send(:"#{name}=", value) }
     oven.set_options(rapid_heating: true)
     expect(written).to eq([6, 7, 2, 1, 15, 30, 31, 12, 13, 14, 21])
   end
 
-  it 'refuses every parameter while keeping warm or rapid cooling runs, but not an option', :aggregate_failures do
+  it 'writes every parameter while keeping warm or rapid cooling runs, which hides them but no option in the app',
+     :aggregate_failures do
     [20, 19].each do |message|
       resources['DOP2/1/131?idx1=0&idx2=1'] = messages(message)
-      refused(*setters.keys, error: /keeping warm/)
+      sent_unoffered(*setters.keys)
+      expect(oven.option_editable?(:rapid_heating)).to be(true)
     end
-    oven.set_options(rapid_heating: true)
-    expect(written).to eq([21])
+    expect(written).to eq(ids(*setters.keys) * 2)
   end
 
-  it 'refuses a parameter whose section the app removes while its value is not readable', :aggregate_failures do
+  it 'writes a parameter whose section the app removes while its value is not readable', :aggregate_failures do
     setters.each do |name, (_value, id, type)|
       current = type == :u8 ? 1 : 1_800
       serve(parameters: { id => shown_parameter(type, current, mask: 1) })
-      refused(name)
+      sent_unoffered(name)
     end
-    expect(written).to be_empty
+    expect(written).to eq(ids(*setters.keys))
   end
 
   it 'sends and reads nothing for no option, even while the app hides the options', :aggregate_failures do
@@ -82,73 +90,95 @@ RSpec.describe Miele::Sdk::Oven do
     expect(fake.requests.map(&:path)).not_to include(a_string_including('/DOP2/'))
   end
 
-  it 'refuses an option the oven does not make readable, and writes the others', :aggregate_failures do
-    serve(parameters: { 27 => dop2_field(:struct, { 1 => dop2_field(:u8, 1), 2 => dop2_field(:bool, false) }) })
-    expect { oven.set_options(keep_warm: true) }.to raise_error(Miele::Sdk::ActionUnavailableError, /hides/)
-    oven.set_options(rapid_heating: true)
-    expect(written).to eq([21])
+  it 'writes an option the oven does not make readable, which the app hides', :aggregate_failures do
+    serve(parameters: { 27 => option(1) })
+    expect([oven.option_shown?(:keep_warm), oven.option_editable?(:keep_warm)]).to eq([false, false])
+    expect(oven.option_editable?(:rapid_heating)).to be(true)
+    oven.set_options(keep_warm: true)
+    expect(written).to eq([27])
   end
 
-  it 'refuses the duration and the start time while the oven runs with a duration set', :aggregate_failures do
+  it 'writes the duration and the start time while the oven runs with a duration set, which the app hides',
+     :aggregate_failures do
     serve(status: 5)
-    refused(:duration, :start_at)
-    oven.end_at = Time.at(1_700_003_600)
-    expect(written).to eq([14])
+    sent_unoffered(:duration, :start_at)
+    expect(oven.parameter_editable?(:end_at)).to be(true)
+    expect(written).to eq([12, 13])
   end
 
-  it 'refuses the start and end times while a readable duration is unset', :aggregate_failures do
+  it 'writes the start and end times while a readable duration is unset, which the app hides', :aggregate_failures do
     [0, 0xFFFF_FFFF].each do |unset|
       serve(parameters: { 12 => shown_parameter(:u32, unset) })
-      refused(:start_at, :end_at)
+      sent_unoffered(:start_at, :end_at)
     end
-    oven.duration = 1_800
-    expect(written).to eq([12])
+    expect(oven.parameter_editable?(:duration)).to be(true)
+    expect(written).to eq([13, 14] * 2)
   end
 
-  it 'refuses a target temperature while the current one is not above zero, but not a core one', :aggregate_failures do
+  it 'writes a target temperature while the current one is not above zero, which the app hides',
+     :aggregate_failures do
     serve(parameters: { 6 => shown_parameter(:u16, 0), 7 => shown_parameter(:u16, 0) })
-    refused(:target_temperature)
-    oven.core_target_temperature = 60
-    expect(written).to eq([7])
+    sent_unoffered(:target_temperature)
+    expect(oven.parameter_editable?(:core_target_temperature)).to be(true)
+    expect(written).to eq([6])
   end
 
-  it 'refuses a parameter the oven does not make writable', :aggregate_failures do
+  it 'writes a parameter the oven does not make writable, which the app shows disabled', :aggregate_failures do
     setters.each do |name, (_value, id, type)|
       current = type == :u8 ? 1 : 1_800
       serve(parameters: { id => shown_parameter(type, current, mask: 8) })
-      refused(name, error: /change/)
+      sent_unoffered(name, shown: true)
     end
-    expect(written).to be_empty
+    expect(written).to eq(ids(*setters.keys))
   end
 
-  it 'refuses an option the oven does not make writable', :aggregate_failures do
-    serve(parameters: { 27 => dop2_field(:struct, { 1 => dop2_field(:u8, 8), 2 => dop2_field(:bool, false) }) })
-    expect { oven.set_options(keep_warm: true) }.to raise_error(Miele::Sdk::ActionUnavailableError, /change/)
-    expect(written).to be_empty
-  end
-
-  it 'refuses browning and doneness without mobile start, as the cooking level cells', :aggregate_failures do
-    serve(remote: [15, 0, 0])
-    refused(:browning, :doneness, error: /change/)
-    oven.moisture = 3
-    expect(written).to eq([2])
-  end
-
-  it 'refuses the times of an own or automatic program without mobile start', :aggregate_failures do
-    [2, 3, 4].each do |type|
-      serve(type:, remote: [15, 0, 0])
-      refused(:duration, :start_at, :end_at, error: /change/)
-    end
-    serve(type: 4)
-    oven.duration = 1_800
-    expect(written).to eq([12])
-  end
-
-  it 'refuses the options of an automatic program without mobile start', :aggregate_failures do
-    serve(type: 3, remote: [15, 0, 0])
-    expect { oven.set_options(keep_warm: true) }.to raise_error(Miele::Sdk::ActionUnavailableError, /change/)
-    serve(type: 4, remote: [15, 0, 0])
+  it 'writes an option the oven does not make writable, which the app shows disabled', :aggregate_failures do
+    serve(parameters: { 27 => option(8) })
+    expect([oven.option_shown?(:keep_warm), oven.option_editable?(:keep_warm)]).to eq([true, false])
     oven.set_options(keep_warm: true)
     expect(written).to eq([27])
+  end
+
+  it 'writes browning and doneness without mobile start, which the cooking level cells need', :aggregate_failures do
+    serve(remote: [15, 0, 0])
+    sent_unoffered(:browning, :doneness, shown: true)
+    expect(oven.parameter_editable?(:moisture)).to be(true)
+    expect(written).to eq([30, 31])
+  end
+
+  it 'writes the times of an own or automatic program without mobile start, which the app needs',
+     :aggregate_failures do
+    [2, 3, 4].each do |type|
+      serve(type:, remote: [15, 0, 0])
+      sent_unoffered(:duration, :start_at, :end_at, shown: true)
+    end
+    serve(type: 4)
+    expect(oven.parameter_editable?(:duration)).to be(true)
+    expect(written).to eq([12, 13, 14] * 3)
+  end
+
+  it 'writes the options of an automatic program without mobile start, which the app needs', :aggregate_failures do
+    serve(type: 3, remote: [15, 0, 0])
+    expect([oven.option_shown?(:keep_warm), oven.option_editable?(:keep_warm)]).to eq([true, false])
+    oven.set_options(keep_warm: true)
+    serve(type: 4, remote: [15, 0, 0])
+    expect(oven.option_editable?(:keep_warm)).to be(true)
+    expect(written).to eq([27])
+  end
+
+  it 'tells the app lets program 361 change only under mobile start, started or not', :aggregate_failures do
+    serve(prog: 361, remote: [15, 0, 0])
+    expect(oven.parameter_editable?(:moisture)).to be(false)
+    serve(prog: 361)
+    expect(oven.parameter_editable?(:moisture)).to be(true)
+  end
+
+  it 'tells the app lets no option change without remote control, though it shows it' do
+    serve(remote: [0, 0, 0])
+    expect([oven.option_shown?(:rapid_heating), oven.option_editable?(:rapid_heating)]).to eq([true, false])
+  end
+
+  it 'raises for a parameter the app has no section for' do
+    expect { oven.parameter_shown?(:steam_bursts) }.to raise_error(KeyError)
   end
 end

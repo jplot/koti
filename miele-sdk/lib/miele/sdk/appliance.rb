@@ -284,7 +284,7 @@ module Miele
         klass.from([answer[8..]].pack('H*'))
       end
 
-      # @param condition [Object] what the app checks before the action
+      # @param condition [Object] whether the protocol or state gives a request to send
       # @param reason [String] what is missing
       # @return [void]
       # @raise [ActionUnavailableError] unless +condition+ holds

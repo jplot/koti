@@ -28,90 +28,100 @@ module Miele
                                  type: 10)
         end
 
-        # @param id [Integer] a custom profile, 24813 to 24822
+        # @param id [Integer] a profile, such as one of {#custom_profiles}
         # @param name [String]
         # @return [void]
-        # @raise [ArgumentError] for another profile, a blank name, another profile's, or Miele in any case
-        # @raise [ActionUnavailableError] on a CM7 or CVA6000
+        # @raise [ActionUnavailableError] on a CM7 or CVA6000, which have no 1/109 to write
         # @api public
         def rename_profile(id, name)
-          require_custom!(id)
-          taken = profiles.except(id).values.map(&:name)
-          if name.strip.empty? || taken.include?(name) || name.upcase == 'MIELE'
-            raise ArgumentError, "#{name.inspect} is blank, taken or reserved"
-          end
-
+          require_profiles!
           write_profile(id, active: true, name:, clear_list: false, program_id: id, display_position: 255, type: 10)
+        end
+
+        # @param id [Integer]
+        # @param name [String]
+        # @return [Boolean] whether the app renames the profile so: a custom one, to a name neither blank, nor
+        #   another profile's, nor Miele in any case
+        # @api public
+        def profile_name_allowed?(id, name)
+          return false unless gen7? && CUSTOM_PROFILES.cover?(id)
+
+          !name.strip.empty? && !profiles.except(id).values.map(&:name).include?(name) && name.upcase != 'MIELE'
         end
 
         # The app clears the name and marks the profile active.
         #
-        # @param id [Integer] a custom profile, 24813 to 24822
+        # @param id [Integer] a profile, such as one of {#custom_profiles}
         # @return [void]
-        # @raise [ArgumentError] for another profile
-        # @raise [ActionUnavailableError] on a CM7 or CVA6000, or unless 2/348 lists coffee profiles
+        # @raise [ActionUnavailableError] on a CM7 or CVA6000, which have no 1/109 to write
         # @api public
         def delete_profile(id)
-          require_custom!(id)
-          require!(features&.feature_co&.has_coffee_profiles == true,
-                   'the coffee maker lists no coffee profiles to delete')
+          require_profiles!
           write_profile(id, name: '', active: true, clear_list: false)
         end
 
-        # A CVA takes the bean sort; the others 255.
+        # @param id [Integer]
+        # @return [Boolean] whether the app deletes the profile: a custom one, while 2/348 lists coffee profiles
+        # @api public
+        def delete_profile_offered?(id)
+          gen7? && CUSTOM_PROFILES.cover?(id) && features&.feature_co&.has_coffee_profiles == true
+        end
+
+        # @return [Array<Integer>] the profiles the app lets rename and delete, 24813 to 24822
+        # @api public
+        def custom_profiles = CUSTOM_PROFILES.to_a
+
+        # A CVA takes the bean sort; the others 255, as the app writes them.
         #
         # @param id [Integer] the drink's program id
-        # @param amount [Integer] 0, 17, 33, 50, 67, 83 or 100
-        # @param temperature [Integer] 0 to 4
-        # @param pre_brewing [Integer] 0 to 2
+        # @param amount [Integer] such as one of {#drink_settings}
+        # @param temperature [Integer]
+        # @param pre_brewing [Integer]
         # @param bean_sort [Integer, nil] on a CVA; the one read otherwise
         # @return [void]
-        # @raise [ArgumentError] for a value the app does not offer
-        # @raise [ActionUnavailableError] on a CM7 or CVA6000
+        # @raise [ArgumentError] for a value its 2/261 member does not hold
+        # @raise [ActionUnavailableError] on a CM7 or CVA6000, which have no 2/261 to write
         # @api public
         def edit_drink(id, amount:, temperature:, pre_brewing:, bean_sort: nil)
           require_profiles!
-          unless AMOUNTS.include?(amount) && (0..4).cover?(temperature) && (0..2).cover?(pre_brewing)
-            raise ArgumentError, 'the app offers amounts 0 to 100 in sixths, temperatures 0 to 4, pre-brewing 0 to 2'
-          end
-
           modify_dop2(Objects::CoffeeGen7::GlobalDrinkconfDrinkData, 2, 261, id, 0) do |drink|
             drink.with(amount_of_coffee: amount, bean_sort: variant == :cva ? bean_sort || drink.bean_sort : 255,
                        brew_speed: brew_speed(drink), temperature:, pre_brewing:)
           end
         end
 
-        # The app names a drink only on a CVA and outside the standard profile.
-        #
+        # @return [Hash{Symbol=>Array<Integer>}] what the app's pickers offer {#edit_drink}: amounts 0 to 100 in
+        #   sixths, temperatures 0 to 4, pre-brewing 0 to 2
+        # @api public
+        def drink_settings = { amount: AMOUNTS, temperature: (0..4).to_a, pre_brewing: (0..2).to_a }
+
         # @param id [Integer] the drink's program id
-        # @param name [String] not blank, as the app writes no other
+        # @param name [String]
         # @return [void]
-        # @raise [ArgumentError] for a blank name, or a drink no profile holds
-        # @raise [ActionUnavailableError] on another coffee maker, or for a drink of the standard profile
+        # @raise [ActionUnavailableError] on a CM7 or CVA6000, which have no 1/109 to write
         # @api public
         def rename_drink(id, name)
-          if name.strip.empty? || !DRINKS.cover?(id)
-            raise ArgumentError, "#{name.inspect} is blank, or #{id} no profile's drink"
-          end
-
-          profile = STANDARD_PROFILE + ((id - DRINKS.first) / 32)
-          require!(variant == :cva && profile != STANDARD_PROFILE, 'the app names no such drink')
+          require_profiles!
           write_profile(id, active: true, clear_list: false, display_position: 255, name:)
+        end
+
+        # The app names a drink only on a CVA and outside the standard profile, and writes no blank name.
+        #
+        # @param id [Integer] the drink's program id
+        # @param name [String]
+        # @return [Boolean] whether the app names the drink so
+        # @api public
+        def drink_name_allowed?(id, name)
+          return false unless variant == :cva && DRINKS.cover?(id) && !name.strip.empty?
+
+          STANDARD_PROFILE + ((id - DRINKS.first) / 32) != STANDARD_PROFILE
         end
 
         private
 
         # @return [void]
         # @raise [ActionUnavailableError]
-        def require_profiles! = require!(gen7?, 'the app keeps no profiles or drinks on this coffee maker')
-
-        # @param id [Integer]
-        # @return [void]
-        # @raise [ArgumentError] for the standard profile or none
-        def require_custom!(id)
-          require_profiles!
-          raise ArgumentError, "#{id} is not a custom profile" unless CUSTOM_PROFILES.cover?(id)
-        end
+        def require_profiles! = require!(gen7?, 'a CM7 or CVA6000 has no profile or drink object to write')
 
         # @return [Integer]
         def profile_slots

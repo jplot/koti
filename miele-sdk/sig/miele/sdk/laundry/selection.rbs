@@ -6,6 +6,8 @@ module Miele
 
         private
 
+        def require_selection!: () -> void
+
         def write_dop1_selection: (untyped section) -> void
 
         def dop2?: () -> bool

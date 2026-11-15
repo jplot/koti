@@ -39,7 +39,7 @@ RSpec.describe Miele::Sdk::Oven do
   end
 
   def phases(*values, type: 5)
-    resources['DOP2/1/1585'] = [0, *values].map do |phase|
+    resources['DOP2/1/1585'] = values.map do |phase|
       shown = { 1 => phase&.then { dop2_field(:e16, it) }, 10 => dop2_field(:e8, type), 16 => dop2_field(:e8, 1),
                 28 => dop2_field(:e16, 13) }
       dop2_leaf(1, 1585, { 7 => dop2_field(:struct, shown.compact) })
@@ -58,9 +58,10 @@ RSpec.describe Miele::Sdk::Oven do
 
   def written = fake.requests.select { it.verb == 'PUT' }.map { it.body.unpack1('H*') }
 
-  def expect_refused(reason)
-    expect { oven.continue_cooking }.to raise_error(Miele::Sdk::ActionUnavailableError, reason)
-    expect(written).to be_empty
+  def expect_sent_unoffered
+    expect(oven.continue_cooking_offered?).to be(false)
+    oven.continue_cooking
+    expect(written).to eq([user_request(72)])
   end
 
   def user_request(id) = dop2_leaf(2, 1583, { 1 => dop2_field(:e16, id) }).unpack1('H*')
@@ -70,42 +71,49 @@ RSpec.describe Miele::Sdk::Oven do
                          7 => dop2_field(:struct, { id => dop2_field(:u8, value) }) }).unpack1('H*')
   end
 
-  it 'refuses a program that is not finished, as the app shows no continue bubble then', :aggregate_failures do
+  it 'tells the app offers its continue button for a finished program under mobile start' do
+    phases(28_100)
+    expect(oven.continue_cooking_offered?).to be(true)
+  end
+
+  it 'continues a program that is not finished, the app showing no continue bubble then', :aggregate_failures do
     phases(28_100)
     state(status: 5)
-    expect_refused(/finished/)
+    expect_sent_unoffered
   end
 
-  it 'refuses a cleaning or maintenance program, which the app never offers to continue', :aggregate_failures do
+  it 'continues a cleaning or maintenance program, which the app never offers to continue', :aggregate_failures do
     phases(28_100, type: 7)
-    expect_refused(/finished/)
+    expect_sent_unoffered
   end
 
-  it 'refuses while keeping warm or rapid cooling runs after the end', :aggregate_failures do
+  it 'continues while keeping warm or rapid cooling runs after the end, which the app does not offer',
+     :aggregate_failures do
     phases(28_100)
     [20, 19].each do |id|
       messages(id)
-      expect { oven.continue_cooking }.to raise_error(Miele::Sdk::ActionUnavailableError, /after the end/)
+      expect(oven.continue_cooking_offered?).to be(false)
+      oven.continue_cooking
     end
-    expect(written).to be_empty
+    expect(written).to eq([user_request(72)] * 2)
   end
 
-  it 'refuses without mobile start, as the app keeps its continue button disabled', :aggregate_failures do
+  it 'continues without mobile start, while the app keeps its continue button disabled', :aggregate_failures do
     phases(28_100)
     state(remote: [15, 0, 0])
-    expect_refused(/mobile start/)
+    expect_sent_unoffered
   end
 
-  it 'refuses under local control', :aggregate_failures do
+  it 'continues under local control, which the app does not offer', :aggregate_failures do
     phases(28_100)
     state(remote: [7, 0, 1])
-    expect_refused(/mobile start/)
+    expect_sent_unoffered
   end
 
-  it 'refuses without remote control', :aggregate_failures do
+  it 'continues without remote control, which the app does not offer', :aggregate_failures do
     phases(28_100)
     state(remote: [0, 0, 1])
-    expect_refused(/mobile start/)
+    expect_sent_unoffered
   end
 
   it 'raises the doneness the oven asks for by one step, then sees it cook on' do

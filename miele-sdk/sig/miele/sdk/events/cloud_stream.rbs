@@ -12,7 +12,7 @@ module Miele
 
         private
 
-        def event: (Cloud::Websocket::Message message) -> Event?
+        def event: (Cloud::Websocket::Message message) -> Event
 
         def content: (String rest, String body) -> untyped
       end

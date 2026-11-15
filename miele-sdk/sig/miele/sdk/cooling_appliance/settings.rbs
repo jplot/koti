@@ -6,21 +6,53 @@ module Miele
 
         def ice_maker=: (bool on) -> void
 
+        def ice_maker_offered?: () -> bool
+
         def light=: (bool on) -> void
+
+        def light_offered?: () -> bool
 
         def ambient_light_mode=: (Integer value) -> void
 
+        def ambient_light_offered?: () -> bool
+
+        def ambient_light_choices: () -> Array[Integer]
+
         def presentation_light=: (bool on) -> void
+
+        def presentation_light_offered?: () -> bool
 
         def set_presentation_light_intensity: (Zone zone, Integer value) -> void
 
+        def presentation_light_intensity_offered?: () -> bool
+
+        def presentation_light_intensity_choices: () -> Array[Integer]
+
         def humidity=: (Symbol level) -> void
+
+        def humidity_offered?: () -> bool
+
+        def humidity_choices: () -> Array[Symbol]
 
         def perfect_fresh=: (Integer value) -> void
 
+        def perfect_fresh_offered?: () -> bool
+
+        def perfect_fresh_choices: () -> Array[Integer]
+
         def humidifier=: (Integer value) -> void
 
+        def humidifier_offered?: () -> bool
+
+        def humidifier_choices: () -> Array[Integer]
+
         def door_alarm_delay=: (Integer seconds) -> void
+
+        def door_alarm_delay_offered?: () -> bool
+
+        def door_alarm_delay_choices: () -> Array[Integer]
+
+        def light_shown?: (?State state) -> bool
 
         private
 
@@ -28,7 +60,11 @@ module Miele
 
         def switch: (bool on) -> Hash[Symbol, untyped]
 
-        def require_offered!: (Integer value, Array[Integer] choices) -> void
+        def write_cooling: (String member, **untyped body) -> void
+
+        def ambient_light_key: () -> String
+
+        def setting_shown?: (String key) -> bool
 
         def picker: (Hash[String, untyped]? setting) -> Array[Integer]
 
@@ -41,8 +77,6 @@ module Miele
         def presenter_quick_action?: (State state) -> bool
 
         def humidity_control_shown?: (State state) -> bool
-
-        def light_shown?: (State state) -> bool
 
         def ambient_light_shown?: (State state, String key) -> bool
 

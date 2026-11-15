@@ -12,23 +12,27 @@ module Miele
 
         AUTOMATIC_TYPES: Array[Integer]
 
+        def parameter_shown?: (Symbol name) -> bool
+
+        def parameter_editable?: (Symbol name) -> bool
+
+        def option_shown?: (Symbol name) -> bool
+
+        def option_editable?: (Symbol name) -> bool
+
         def context: () -> Objects::Oven::GlobalDeviceContext
 
         def program_context: () -> Objects::Oven::GlobalPsContext
 
         private
 
-        def editable_parameters: (Symbol name) -> Objects::Oven::GlobalPsContext
-
         def option_running?: () -> bool
 
-        def editable_options: (Array[Integer] ids) -> Objects::Oven::GlobalPsContext
+        def option_listed?: (Symbol name, Objects::Oven::GlobalDeviceContext device, Objects::Oven::GlobalPsContext selected) -> bool
 
-        def allowed_parameters: () -> [State, Objects::Oven::GlobalDeviceContext, Objects::Oven::GlobalPsContext]
+        def parameters_allowed?: (State state, Objects::Oven::GlobalDeviceContext device) -> bool
 
-        def require_parameters_allowed!: (State state, Objects::Oven::GlobalDeviceContext device) -> void
-
-        def parameter_shown?: (Symbol name, State state, Objects::Oven::GlobalDeviceContext device, Objects::Oven::GlobalPsContext selected) -> bool
+        def section_shown?: (Symbol name, State state, Objects::Oven::GlobalDeviceContext device, Objects::Oven::GlobalPsContext selected) -> bool
 
         def rule_shows?: (Symbol name, untyped value, Objects::Oven::GlobalPsContextParaCA? parameters, bool running) -> bool
 
@@ -40,7 +44,7 @@ module Miele
 
         def options_cell_enabled?: (State state, Objects::Oven::GlobalDeviceContext device) -> bool
 
-        def parameter_editable?: (Symbol name, State state, Objects::Oven::GlobalDeviceContext device, untyped value) -> bool
+        def cell_enabled?: (Symbol name, State state, Objects::Oven::GlobalDeviceContext device, untyped value) -> bool
 
         def program_type: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
 
@@ -50,7 +54,7 @@ module Miele
 
         def writable?: (untyped value) -> bool
 
-        def require_dop2!: () -> void
+        def dop2?: () -> bool
 
         def under_remote_control?: (?State state) -> bool?
 

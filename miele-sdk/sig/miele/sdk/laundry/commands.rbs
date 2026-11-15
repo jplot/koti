@@ -12,21 +12,29 @@ module Miele
 
         def stop_end_signal: () -> void
 
+        def stop_end_signal_offered?: () -> bool
+
         def stop_to_edit: () -> void
+
+        def stop_to_edit_offered?: () -> bool
 
         def extend_anti_crease: () -> void
 
-        def wake: () -> void
+        def wake_offered?: () -> bool
 
         def acknowledge: (message: Integer | Symbol, option: Integer | Symbol) -> void
 
         def power_off: () -> void
+
+        def power_off_offered?: () -> bool
 
         def anti_crease=: (Integer value) -> void
 
         private
 
         def run_request: (Integer id) -> void
+
+        def dop2_request: (Integer id) -> void
 
         def wakeable?: () -> bool
 

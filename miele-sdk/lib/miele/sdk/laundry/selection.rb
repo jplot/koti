@@ -8,17 +8,23 @@ module Miele
       module Selection
         # @param prog_id [Integer, Symbol]
         # @return [void]
-        # @raise [ActionUnavailableError] on an Opcode appliance
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no selection object
         # @raise [NotAcceptedError] when a Dop1 appliance refuses it
         # @api public
         def select_program(prog_id)
-          require!(protocol_version == 2 || dop2?, 'the app selects no program on an Opcode appliance')
+          require_selection!
           return write_dop1_selection(dop1_selection(prog_id)) unless dop2?
 
           modify(Objects::Laundry::GlobalPsSelect, [2, 1577, 0, 0]) { it.with(prog_id:, selection_type: 0) }
         end
 
         private
+
+        # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance
+        def require_selection!
+          require!(protocol_version == 2 || dop2?, 'an Opcode appliance has no selection object to write')
+        end
 
         # The app sends it with the read request type.
         #

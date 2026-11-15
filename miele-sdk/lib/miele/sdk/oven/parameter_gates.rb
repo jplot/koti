@@ -7,51 +7,83 @@ module Miele
       # IsUserAllowedToModifyFunctionParametersRule for every cell, the Rules.ProgramParameters rule of each section,
       # and the section view model that enables its cell.
       module ParameterGates
-        MEMBERS = { temperature: :temperature, core_temperature: :core_temperature, moisture: :moisture,
+        MEMBERS = { target_temperature: :temperature, core_target_temperature: :core_temperature, moisture: :moisture,
                     grill_level: :grill_level, microwave_power: :mw_power, browning: :browning,
                     doneness: :doneness, duration: :duration, start_at: :start_at, end_at: :end_at }.freeze
         # BrowningLevelRule and DonenessLevelRule alone ignore ShouldHideProgramParameters.
         SHOWN_WITH_ANY_PROGRAM = %i[browning doneness].freeze
-        OPTIONS = { 21 => :use_rapid_heating, 24 => :use_pre_heating, 25 => :use_crisp_function,
-                    26 => :use_rapid_cooling, 27 => :use_holding }.freeze
+        OPTIONS = { rapid_heating: :use_rapid_heating, pre_heating: :use_pre_heating, crisp: :use_crisp_function,
+                    rapid_cooling: :use_rapid_cooling, keep_warm: :use_holding }.freeze
         # The raw programtypes ConvertProgramType makes Own or Automatic, and Automatic alone.
         FIXED_TIME_TYPES = [2, 3, 4].freeze
         AUTOMATIC_TYPES = [2, 3].freeze
         private_constant :MEMBERS, :SHOWN_WITH_ANY_PROGRAM, :OPTIONS, :FIXED_TIME_TYPES, :AUTOMATIC_TYPES
 
-        private
+        # DetailParameterSectionViewModel and the temperature sections hide while IsOptionRunning holds.
+        #
+        # @param name [Symbol] a parameter as its setter names it: +:target_temperature+, +:core_target_temperature+,
+        #   +:moisture+, +:grill_level+, +:microwave_power+, +:browning+, +:doneness+, +:duration+, +:start_at+ or
+        #   +:end_at+
+        # @return [Boolean] whether the app's details page shows its section, never on a Dop1 oven
+        # @raise [KeyError] for another name
+        # @api public
+        def parameter_shown?(name) = dop2? && !option_running? && section_shown?(name, state, context, program_context)
 
-        # @param name [Symbol] the parameter, as the setter names it
-        # @return [Objects::Oven::GlobalPsContext] 1/1574
-        # @raise [ActionUnavailableError] on a Dop1 oven, or unless the app shows the parameter and lets it change
-        def editable_parameters(name)
-          state, device, selected = allowed_parameters
-          require!(!option_running?, "the app hides the #{name} while keeping warm or rapid cooling")
-          require!(parameter_shown?(name, state, device, selected), "the app hides the #{name} now")
+        # @param name [Symbol] a parameter, as {#parameter_shown?} names it
+        # @return [Boolean] whether the app lets it change: its section shown, the parameters allowed
+        #   (IsUserAllowedToModifyFunctionParametersRule) and its cell enabled
+        # @raise [KeyError] for another name
+        # @api public
+        def parameter_editable?(name)
+          return false unless dop2?
+
+          state = self.state
+          device = context
+          selected = program_context
           value = selected.context_para_ca&.public_send(MEMBERS.fetch(name))
-          require!(parameter_editable?(name, state, device, value), "the app does not let the #{name} change now")
-          selected
+          parameters_allowed?(state, device) && !option_running? && section_shown?(name, state, device, selected) &&
+            cell_enabled?(name, state, device, value)
         end
 
+        # ProgramOptionsRule lists the readable options of a function that 1/1585 and 1/1574 both show.
+        #
+        # @param name [Symbol] +:rapid_heating+, +:pre_heating+, +:crisp+, +:rapid_cooling+ or +:keep_warm+, as
+        #   {ProgramSelection#set_options} names it
+        # @return [Boolean] whether the app shows the option, never on a Dop1 oven
+        # @raise [KeyError] for another name
+        # @api public
+        def option_shown?(name) = dop2? && option_listed?(name, context, program_context)
+
+        # @param name [Symbol] an option, as {#option_shown?} names it
+        # @return [Boolean] whether the app lets it change: shown, the parameters allowed, the option writable and
+        #   the options cell enabled
+        # @raise [KeyError] for another name
+        # @api public
+        def option_editable?(name)
+          return false unless dop2?
+
+          state = self.state
+          device = context
+          selected = program_context
+          value = selected.context_para_ca&.public_send(OPTIONS.fetch(name))
+          parameters_allowed?(state, device) && option_listed?(name, device, selected) && writable?(value) &&
+            options_cell_enabled?(state, device)
+        end
+
+        private
+
         # IsOptionRunning: OptionsRunningAfterEndSource reads keep warm (message 20) or rapid cooling (19) on 1/131.
-        # DetailParameterSectionViewModel and the temperature sections hide while it holds.
         #
         # @return [Boolean]
         def option_running? = shows?(:message, 20, 19)
 
-        # ProgramOptionsRule lists the readable options of a function that 1/1585 and 1/1574 both show.
-        #
-        # @param ids [Array<Integer>] +GLOBAL_PS_SelectionParaCA+ attributes of options
-        # @return [Objects::Oven::GlobalPsContext] 1/1574
-        # @raise [ActionUnavailableError]
-        def editable_options(ids)
-          state, device, selected = allowed_parameters
-          options = ids.map { selected.context_para_ca&.public_send(OPTIONS.fetch(it)) }
-          shown = function_shown?(device.prog_attributes_cca, selected.prog_attributes_cca)
-          require!(shown && options.all? { readable?(it) }, 'the app hides these options now')
-          require!(options.all? { writable?(it) } && options_cell_enabled?(state, device),
-                   'the app does not let these options change now')
-          selected
+        # @param name [Symbol]
+        # @param device [Objects::Oven::GlobalDeviceContext] 1/1585
+        # @param selected [Objects::Oven::GlobalPsContext] 1/1574
+        # @return [Boolean]
+        def option_listed?(name, device, selected)
+          function_shown?(device.prog_attributes_cca, selected.prog_attributes_cca) &&
+            readable?(selected.context_para_ca&.public_send(OPTIONS.fetch(name)))
         end
 
         # UpdateProgramOptionsIsEnabled: an automatic program's options need RemoteEnableType MobileStart or
@@ -64,31 +96,18 @@ module Miele
           state.mobile_start? == true || !AUTOMATIC_TYPES.include?(program_type(device.prog_attributes_cca))
         end
 
-        # @return [Array(State, Objects::Oven::GlobalDeviceContext, Objects::Oven::GlobalPsContext)]
-        # @raise [ActionUnavailableError]
-        def allowed_parameters
-          require_dop2!
-          state = self.state
-          device = context
-          require_parameters_allowed!(state, device)
-          [state, device, program_context]
-        end
-
         # IsUserAllowedToModifyFunctionParametersRule: remote control and a program on the oven (1/1585), and
         # mobile start too once the program has started, or for program 361.
         #
         # @param state [State]
         # @param device [Objects::Oven::GlobalDeviceContext] 1/1585
-        # @return [void]
-        # @raise [ActionUnavailableError]
-        def require_parameters_allowed!(state, device)
+        # @return [Boolean]
+        def parameters_allowed?(state, device)
           shown = device.prog_attributes_cca&.prog_id
           prog_id = shown ? Objects::Oven::GlobalEnumPrgId.to_i(shown) : 0
-          require!(under_remote_control?(state), 'the oven takes parameters only under remote control')
-          require!(prog_id.positive?, 'the oven shows no program')
-          return unless prog_id == 361 || started?(state, device)
+          return false unless under_remote_control?(state) == true && prog_id.positive?
 
-          require!(state.mobile_start?, 'the oven takes parameters only by mobile start once a program has started')
+          (prog_id != 361 && !started?(state, device)) || state.mobile_start? == true
         end
 
         # An unreadable value empties every section, and ShouldHideProgramParameters all but two.
@@ -98,7 +117,7 @@ module Miele
         # @param device [Objects::Oven::GlobalDeviceContext] 1/1585
         # @param selected [Objects::Oven::GlobalPsContext] 1/1574
         # @return [Boolean]
-        def parameter_shown?(name, state, device, selected)
+        def section_shown?(name, state, device, selected)
           parameters = selected.context_para_ca
           value = parameters&.public_send(MEMBERS.fetch(name))
           return false unless readable?(value)
@@ -117,7 +136,7 @@ module Miele
         # @return [Boolean]
         def rule_shows?(name, value, parameters, running)
           case name
-          when :temperature then value.current_value.to_i.positive?
+          when :target_temperature then value.current_value.to_i.positive?
           when :duration, :start_at, :end_at then time_shown?(name, value, parameters, running)
           else true
           end
@@ -170,7 +189,7 @@ module Miele
         # @param device [Objects::Oven::GlobalDeviceContext] 1/1585
         # @param value [Object, nil] the parameter's +GLOBAL_GenericParameterValue+
         # @return [Boolean]
-        def parameter_editable?(name, state, device, value)
+        def cell_enabled?(name, state, device, value)
           return false unless writable?(value)
 
           case name

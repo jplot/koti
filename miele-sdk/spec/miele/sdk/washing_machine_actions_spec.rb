@@ -80,6 +80,18 @@ RSpec.describe Miele::Sdk::WashingMachine do
       expect([written, waits]).to eq([[], []])
     end
 
+    it 'raises a 499 at once too, the last of the 4xx', :aggregate_failures do
+      leaves[:refusals] = [[499, {}, '']]
+      expect { washer.start }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 499')
+      expect([written, waits]).to eq([[], []])
+    end
+
+    it 'waits 1.5^n s up to the sixth time, then 15 s' do
+      leaves[:refusals] = [[500, {}, '']] * 7
+      washer.start
+      expect(waits).to eq([1.5, 2.25, 3.375, 5.0625, 7.59375, 11.390625, 15])
+    end
+
     it 'raises a read that outlasts read_timeout, as the app never sends a cancelled one again',
        :aggregate_failures do
       Miele::Sdk.config.read_timeout = 0.1

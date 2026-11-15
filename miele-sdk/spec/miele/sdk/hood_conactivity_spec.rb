@@ -125,6 +125,12 @@ RSpec.describe Miele::Sdk::Hood do
     expect(written).to eq([['PUT', "/Devices/#{fab}/SuperVision/000111222333", { 'Show' => true }]])
   end
 
+  it 'raises Con@ctivity One refused a fourth time, as its helper retries three times', :aggregate_failures do
+    refusals.push(*[[502, {}, '']] * 4)
+    expect { hood.supervise('000111222333', show: true) }.to raise_error(Miele::Sdk::ResponseError)
+    expect([written.size, waits]).to eq([4, [2, 2, 2]])
+  end
+
   it 'writes Con@ctivity One again 2 s after a 5xx, and a 4xx at once', :aggregate_failures do
     refusals.push([502, {}, ''], [404, {}, ''])
     expect { hood.supervise('000111222333', show: true) }.to raise_error(Miele::Sdk::NotFoundError)

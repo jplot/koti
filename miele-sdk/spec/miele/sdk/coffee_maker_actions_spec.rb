@@ -338,6 +338,14 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     end
   end
 
+  it 'switches on at Status 8 and 255, which IsApplianceOn takes for off' do
+    [8, 255].each do |status|
+      served['State'] = { 'Status' => status, 'RemoteEnable' => [15, 0, 1] }
+      coffee.power_on
+    end
+    expect(written.map(&:first)).to eq(%w[DOP2/2/1586] * 2)
+  end
+
   it 'switches off with ApplianceState 1, written as read without an index', :aggregate_failures do
     expect(coffee.power_off_offered?).to be(true)
     coffee.power_off

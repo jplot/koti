@@ -14,6 +14,7 @@ RSpec.describe Miele::Sdk::WashingMachine do
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(current)]
+      in { verb: 'GET', path: %r{/DOP2/2/1574} } if served.delete(:context_refused) then [503, {}, '']
       in { verb: 'GET', path: %r{/DOP2/2/1574} } then [200, {}, served.fetch(1574) { ps_context }]
       in { verb: 'GET', path: %r{/DOP2/2/1577} } then [200, {}, served.fetch(1577) { select }]
       in { verb: 'POST', body: /"82010100"/ } then [200, {}, JSON.generate(Response: "82011101#{active}")]
@@ -74,6 +75,13 @@ RSpec.describe Miele::Sdk::WashingMachine do
   it 'writes the spin speed in tens of rpm and keeps the current values otherwise' do
     washer.set_parameters(spin_speed: 1400)
     expect(written).to eq([['DOP2/2/1577', select(prog: 28, type: 2, temperature: 40, spin: 140, eco: true)]])
+  end
+
+  it 'raises a 5xx on 2/1574 at once, as SelectParametersAsync reads it outside its retries', :aggregate_failures do
+    leaves[:context_refused] = true
+    expect { washer.set_parameters(spin_speed: 1400) }
+      .to raise_error(Miele::Sdk::ResponseError, 'appliance answered 503')
+    expect(fake.requests.count { it.path.include?('/DOP2/2/1574') }).to eq(1)
   end
 
   it 'reads 2/1577, then 2/1574, then writes 2/1577, in the order of SelectParametersAsync' do

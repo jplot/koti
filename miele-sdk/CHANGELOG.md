@@ -9,6 +9,16 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** a write the appliance refuses raises, 400 included, as the Miele app never takes a
+  refusal as done: `wake` and a hood's Dop1 writes no longer take a 400 as done, and a hood's Dop1
+  writes raise `NotAcceptedError` for an Ack other than 1, but for the ProcessAction of the
+  fragrance stop and Miele program, whose Ack the app drops. `wake` reads `State` first where the
+  app does: a Dop1 or Opcode hood gets its light written back only while off, and raises
+  `NotAcceptedError` unless the answer carries `Success`; a DOP2 hood gets `DeviceAction` 2 only
+  while asleep, then `State` is read every half second until it shows the hood awake, raising
+  `ActionFailedError` after a minute; a DOP2 dishwasher is woken only off, or waiting to start out
+  of `StandbyState` 1, and a Dop1 one raises `ActionUnavailableError`. An oven's `power_on` ends
+  with the error of a `DeviceAction` 2 that fails instead of writing again.
 - **Breaking:** without `group_id` and `group_key`, the local channel no longer reads the household
   key from the Miele account: it raises `ConfigurationError`. `Miele::Sdk.cloud.group` gives the
   account's key to set them.
@@ -47,8 +57,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   appliances and warming drawers send what they are given, and the predicates below give the app's
   rules. `ActionUnavailableError` now means only that the appliance's protocol or state gives no
   request to send (a DOP2 leaf on a Dop1 appliance, a parameter with no program selected…), and
-  `ArgumentError` only a value the wire cannot carry. A hood's `wake` writes back a Dop1 or Opcode
-  hood's light whatever its status, and its `dehumidification =` takes `:controlled`. A cooling
+  `ArgumentError` only a value the wire cannot carry. A hood's `dehumidification =` takes
+  `:controlled`. A cooling
   appliance's `set_target` takes a fraction of a degree on the Cooling API, and a whole Float on
   Opcode. A warming drawer's `select_program` takes 0 (Aus), its `remaining_time=` is no longer kept
   to the program's maximum, and both its `target_temperature=` and `remaining_time=` raise
@@ -129,7 +139,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   readings and TwinDos; the user requests after the app's SupportedRequestsRule, program
   selection, parameters, delayed start, answers to messages, power off, wake, the anti-crease
   setting and TwinDos filling levels. None of it has run against a real appliance.
-- `NotAcceptedError`, for a Dop1 write the appliance acknowledges with anything but success.
+- `NotAcceptedError`, for a Dop1 write the appliance acknowledges with anything but success, or a
+  hood's wake answered without `Success`.
 - `ActionFailedError`, for an action whose effect the appliance does not show within the app's wait.
 - Coffee makers as the app's coffee module drives them: the variant, typed reads of the contexts,
   notifications, cleaning, descaling, features, profiles and drinks, and the CVA6000's Dop1 state;

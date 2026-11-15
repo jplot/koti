@@ -190,13 +190,16 @@ oven.wake         # out of standby
 oven.power_on     # and power_off
 ```
 
-An appliance answers 400 to a write that changes nothing: `wake` and the hood commands treat it as
-done.
+A write the appliance refuses raises, 400 included (`Miele::Sdk::ResponseError`, with its
+`status`): the app never takes a refusal as done. `wake` sends `DeviceAction` 2 once, as the app's
+laundry module does; hoods and dishwashers read `State` first, as theirs do (see [Hoods](#hoods) and
+[Dishwashers](#dishwashers)).
 
 `power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app's oven module does; its other families
 switch on in their own way, which will come with them. An appliance asleep answers 500:
 like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, giving up
-after three attempts where the app sets no limit. `power_off` writes 1 to the same leaf and takes a
+after three attempts where the app sets no limit; a `DeviceAction` 2 that fails ends it, as in the
+app. `power_off` writes 1 to the same leaf and takes a
 500 as done, as the app does. Both belong to `Miele::Sdk::Oven` and raise
 `Miele::Sdk::ActionUnavailableError` on a Dop1 oven, whose protocol has no such leaf. They send in
 any other state: `power_on_offered?` tells whether the app's offline screen offers the switch-on
@@ -284,14 +287,25 @@ when `fan_level` already shows the level picked, and its light switch sends the 
 shows, then shows the hood's light again (PowerLevelViewModel, MainLightSourceViewModel): those are
 the screen's to follow, and `fan_level=` and `main_light=` send what they are given. A hood that is
 off does not say what it supports: those readings are nil until it is woken. The Opcode fan level
-goes out twice, half a second apart, as the app sends it. `wake` writes back the light of a Dop1 or Opcode hood, and sends
-`DeviceAction` 2 to a DOP2 one; the app wakes a Dop1 or Opcode hood only while it is off
-(`wake_offered?`).
+goes out twice, half a second apart, as the app sends it.
+
+`wake` does what the app's wake actions do. A Dop1 or Opcode hood gets its light written back
+only while `State` shows it off, and counts as woken only on an answer carrying `Success`, else
+`Miele::Sdk::NotAcceptedError` (DefaultWakeUpAction). A DOP2 hood gets `DeviceAction` 2 once, only
+while `State` shows it asleep; `State` is then read every half second until it shows the hood awake
+(`SyncState` absent or 2, `StandbyState` 1), `Miele::Sdk::ActionFailedError` after a minute
+(WakeUpAction). While its page stays open, the app goes on watching `State` and wakes the hood
+once more the first time it shows it asleep (StartWakeUpObservation); `wake` returns once the hood
+is awake, so a client that wants the same calls `wake` again on such an event. `wake_offered?`
+tells whether the app wakes the hood at all.
 
 Settings (programming functions, Dop1 object 1201) go out with structure version 1 and Dop1
 sections in lower-case hex, as the app sends them. A value out of range raises `ArgumentError`
 before anything is sent. `Miele::Sdk::Dop1` builds the requests, and `hood.dop1(request)` sends any
 other one; `hood.setting(pf_id)` and `hood.write_setting(pf_id, value)` read and write a setting.
+As in the app, a Dop1 write counts only when the hood answers Ack 1: any other raises
+`Miele::Sdk::NotAcceptedError`. The fragrance stop and Miele program are the app's one exception:
+it drops the Ack of the ProcessAction they send before PF 40026.
 
 Left out: the ambient light's dimming (the app's conversion is not traced), the auto refresh
 schedule, a DOP2 hood's ambient colours, the write that switches a downdraft hood on before its
@@ -464,6 +478,7 @@ dishwasher.start_offered?                   # => true where the app's start rule
 dishwasher.start                            # or start_delayed(time): today's or tomorrow's time of day
 dishwasher.pause                            # resume, stop, cancel
 dishwasher.power_on                         # and power_off, on DOP2
+dishwasher.wake                             # DOP2, only while State shows it off or asleep
 dishwasher.auto_dos = true                  # write_setting(id, value); offered_settings for this model
 dishwasher.acknowledge(info: 700, option: 1)
 dishwasher.leave_abort                      # DOP2
@@ -500,7 +515,10 @@ Not traced, so left to the dishwasher: where a Dop1 dishwasher shows info 700, a
 Dop1 consumption. The app sends the steps of `power_on` and `power_off` again while it watches
 `State` for 15 s; the SDK sends each once. As the app's SwitchOnForDop2Action, `power_on` writes
 2/1586 only while `State` shows Status 1 or 4, which it reads again after waking the dishwasher, and
-writes nothing otherwise.
+writes nothing otherwise. `wake` does what the app's WakeUpForDop2Action does: `DeviceAction` 2
+only while `State` shows the dishwasher off (Status 1) or waiting to start out of `StandbyState` 1,
+nothing otherwise. The app has no wake request for a Dop1 dishwasher: `wake` raises
+`ActionUnavailableError` on it.
 
 ## Laundry
 

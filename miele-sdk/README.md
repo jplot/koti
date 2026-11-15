@@ -218,6 +218,21 @@ for a switch step and a rename, in the `State` or `Ident` its websocket pushes, 
 sends nothing (the events stream gives them, see [Events](#events)); for Con@ctivity, by polling,
 which the SDK does too.
 
+Three things the app does around its requests belong to its screens and its cache, so the SDK
+leaves them to the client:
+
+- An action of the app runs one call at a time (`Action.IsExecutable`): a second call while it runs
+  sends nothing and returns at once, with `false` for a hood write, a failed wake, an empty value
+  for a coffee maker, and nothing elsewhere. Each screen builds its own actions, so two screens, or a
+  screen and the app's wake service, do send the same request side by side. The SDK sends every call
+  the client makes; the client's screens hold their controls while an action runs.
+- The app queues nothing per appliance: requests to one appliance go out in parallel, as the SDK
+  sends them.
+- Reads of one path made at the same time share a request in the app (`State`, `Ident`, services and
+  the DOP1 or DOP2 reads it caches), and a path it observes by polling is read every 3 seconds, its
+  last answer replayed to a new reader. The SDK sends each read the client asks for, except within a
+  Con@ctivity Plus action, which reuses an answer under 3 seconds old as the app's poll does.
+
 `power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app's oven module does; its other families
 switch on in their own way, which will come with them. An appliance asleep answers 500:
 like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, until the

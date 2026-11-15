@@ -123,6 +123,26 @@ RSpec.describe Hue::Sdk::Connection do
     end
   end
 
+  context 'when the bridge answers 429' do
+    let(:answers) { [[429, { 'Retry-After' => '1' }, '']] }
+    let(:bridge) { FakeBridge.start { answers.shift || [200, {}, 'ok'] } }
+
+    def seconds
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      yield
+      Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+    end
+
+    it 'waits what it asked before the next request to that resource only, once', :aggregate_failures do
+      described_class.request(:put, '/clip/v2/resource/light/1')
+      other = seconds { described_class.request(:get, '/clip/v2/resource/light/2') }
+      same = seconds { described_class.request(:get, '/clip/v2/resource/light/1?x=1') }
+      again = seconds { described_class.request(:get, '/clip/v2/resource/light/1') }
+      expect([other, again]).to all(be < 0.5)
+      expect(same).to be_between(0.8, 1.5)
+    end
+  end
+
   it 'reopens a keep-alive connection after the bridge was unreachable', :aggregate_failures do
     described_class.request(:get, '/')
     bridge.down!

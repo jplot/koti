@@ -93,7 +93,7 @@ module Hue
           headers = body ? { 'Content-Type' => 'application/json' } : {} #: Hash[String, String]
           response = Connection.request(method, "/api/#{key}/#{path}", body: body && JSON.generate(body), headers:)
           status = response.code.to_i
-          Client.instance.refuse(status, []) unless status == 200
+          Client.instance.refuse(status, [], response) unless status == 200
 
           parse(response.body.to_s).tap { refuse(it) }
         end

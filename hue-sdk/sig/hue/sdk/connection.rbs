@@ -5,6 +5,10 @@ module Hue
 
       REQUESTS: Hash[Symbol, singleton(Net::HTTPRequest)]
 
+      LIMITERS: Thread::Mutex
+
+      self.@limiters: Hash[untyped, RateLimiter]
+
       class KeepAlive < Net::HTTP
         @socket: untyped
 
@@ -18,6 +22,8 @@ module Hue
       end
 
       def self?.request: (Symbol method, String path, ?body: String?, ?headers: Hash[String, String]) -> Net::HTTPResponse
+
+      def self?.limited: (String path) { () -> Net::HTTPResponse } -> Net::HTTPResponse
 
       def self?.stream: (String path, ?headers: Hash[String, String]) { (String chunk) -> void } -> Net::HTTPResponse
 

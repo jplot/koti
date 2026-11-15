@@ -43,6 +43,18 @@ module Hue
     class NotFoundError < ResponseError; end
 
     # The bridge refused the request because too many were sent.
-    class RateLimitError < ResponseError; end
+    class RateLimitError < ResponseError
+      # @return [Float, nil] seconds the bridge asked to wait (Retry-After), nil when it named none
+      attr_reader :retry_after
+
+      # @param status [Integer]
+      # @param errors [Array<String>]
+      # @param retry_after [Float, nil]
+      # @api public
+      def initialize(status, errors, retry_after: nil, **)
+        @retry_after = retry_after
+        super(status, errors, **)
+      end
+    end
   end
 end

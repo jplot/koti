@@ -1,0 +1,33 @@
+module Hue
+  module Sdk
+    class RateLimiter
+      type state = { failures: Integer, retry_after: Float?, at: Float }
+
+      BASE: Float
+
+      CAP: Float
+
+      MAX_FAILURES: Integer
+
+      @lock: Thread::Mutex
+
+      @state: Hash[String, state]
+
+      def initialize: () -> void
+
+      def self.delay: (failures: Integer, retry_after: Float?, elapsed: Float, draw: Float) -> Float
+
+      def self.retry_after: (String? header) -> Float?
+
+      def through: (String key) { () -> Net::HTTPResponse } -> Net::HTTPResponse
+
+      private
+
+      def wait: (String key) -> void
+
+      def refused: (String key, String? header) -> void
+
+      def cleared: (String key) -> void
+    end
+  end
+end

@@ -12,7 +12,8 @@ module Hue
       private_constant :NETWORK_ERRORS
 
       REQUESTS = { get: Net::HTTP::Get, post: Net::HTTP::Post, put: Net::HTTP::Put, delete: Net::HTTP::Delete }.freeze
-      private_constant :REQUESTS
+      LIMITERS = Mutex.new
+      private_constant :REQUESTS, :LIMITERS
 
       # Net::HTTP checks a reused connection for an end of stream before writing the next request, and OpenSSL
       # raises there when the bridge closed it without close_notify: nothing was sent yet, so it reconnects.
@@ -56,7 +57,21 @@ module Hue
       def request(method, path, body: nil, headers: {})
         request = REQUESTS.fetch(method).new(path, headers)
         request.body = body
-        transport { http.request(request) }
+        limited(path) { transport { http.request(request) } }
+      end
+
+      # The app keeps one limiter per bridge connection, keyed by host and path.
+      #
+      # @param path [String]
+      # @yieldreturn [Net::HTTPResponse]
+      # @return [Net::HTTPResponse]
+      # @api private
+      def limited(path, &)
+        limiter = LIMITERS.synchronize do
+          @limiters ||= {} #: Hash[untyped, RateLimiter]
+          @limiters[connection_key] ||= RateLimiter.new
+        end
+        limiter.through("#{Sdk.config.host}#{path.split('?').first}", &)
       end
 
       # Opens a long-lived request and passes its body on as it arrives. The

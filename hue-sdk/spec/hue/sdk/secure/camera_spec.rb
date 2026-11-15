@@ -75,6 +75,37 @@ RSpec.describe Hue::Sdk::Secure::Camera do
     expect { camera.sound_alarm }.to raise_error(Hue::Sdk::ResponseError)
   end
 
+  describe '#detections' do
+    let(:four) { %w[people pet vehicle common_object] }
+
+    def detections(zones, service: { 'camera' => { '0' => { 'activity_zones' => zones } } })
+      described_class.new('home-1', 'cam-1', 'id' => 'cam-1', 'service' => service).detections
+    end
+
+    def zone(types, entire_area: false, area: [{ 'x' => 0.1, 'y' => 0.2 }])
+      { 'entire_area' => entire_area, 'detection_type' => types, 'area' => area }
+    end
+
+    it 'offers all four without activity zones, as the app reads a camera over HTTP', :aggregate_failures do
+      expect([detections(nil), detections([]), detections(nil, service: nil)]).to all(eq(four))
+    end
+
+    it 'offers what a single zone over the entire area detects', :aggregate_failures do
+      expect(detections([zone(%w[pet], entire_area: true, area: nil)])).to eq(%w[pet])
+      expect(detections([zone(nil, entire_area: true, area: nil)])).to eq([])
+    end
+
+    it "offers what any of several zones detects, in the order of the app's rows" do
+      expect(detections([zone(%w[vehicle]), zone(%w[vehicle people]), zone(nil)])).to eq(%w[people vehicle])
+    end
+
+    it 'gives nil where the app cannot read the zones, and shows no row for the camera', :aggregate_failures do
+      expect(detections([zone(%w[dog])])).to be_nil
+      expect(detections([zone(%w[people], area: nil)])).to be_nil
+      expect(described_class.new('home-1', 'cam-1', 'id' => 'cam-1', 'metadata' => 'x').detections).to be_nil
+    end
+  end
+
   it 'reads what the cloud reported as the app does, and keeps what it cannot read', :aggregate_failures do
     read = described_class.new('home-1', 'cam-1', 'id' => 'cam-1', 'metadata' => { 'name' => 'Porte' })
     unread = described_class.new('home-1', 'cam-2', 'id' => 'cam-2', 'metadata' => 'Porte')

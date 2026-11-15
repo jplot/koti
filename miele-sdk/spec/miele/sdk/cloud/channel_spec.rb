@@ -103,7 +103,8 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     [401, 403].each do |status|
       it "logs out and forgets the token on a #{status}, as the app does", :aggregate_failures do
         answers << [status, {}, '']
-        expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError) { expect(it.status).to eq(status) }
+        expect { channel.devices }
+          .to raise_error(Miele::Sdk::AuthenticationError) { expect(it.cause).to have_attributes(status:) }
         logout = seen('/V2/Logout')
         expect(logout.map { [it.headers['authorization'], it.headers['accept-language']] })
           .to eq([['appToken saved', 'en-FR']])
@@ -113,14 +114,14 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
 
     it 'logs in again on the next request', :aggregate_failures do
       answers << [401, {}, '']
-      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
       channel.devices
       expect(seen('/V2/Devices').map { it.headers['authorization'] }).to eq(['appToken saved', 'appToken token-1'])
     end
 
     it "sends the MCS logout as JSON, as the app's ContentTypeDelegatingHandler does", :aggregate_failures do
       answers << [401, {}, '']
-      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
       logout = seen('/V2/Logout').first
       expect([logout.body, *logout.headers.values_at('content-type', 'accept')])
         .to eq(['{}', 'application/json; charset=utf-8', 'application/json'])
@@ -128,7 +129,7 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
 
     it "sends the logout once more after a 401, as the app's AuthenticationHandler does", :aggregate_failures do
       answers.push([401, {}, ''], [401, {}, ''])
-      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
       expect(seen('/V2/Logout').map { it.headers['authorization'] }).to eq(['appToken saved'] * 2)
     end
   end
@@ -164,7 +165,7 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
 
     it 'logs out once', :aggregate_failures do
       channel.session.current
-      readers = Array.new(2) { Thread.new { expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError) } }
+      readers = Array.new(2) { Thread.new { expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError) } }
       readers.each(&:join)
       expect(seen('/V2/Logout').size).to eq(1)
     end
@@ -184,14 +185,14 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
 
     it 'logs out of CIAM with its bearer token, then asks for a new code', :aggregate_failures do
       answers << [401, {}, '']
-      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
       expect(seen('/fr/logout').map { [it.verb, it.headers['authorization']] }).to eq([['POST', 'Bearer jwt']])
       expect { channel.devices }.to raise_error(Miele::Sdk::ConfigurationError, /CIAM/)
     end
 
     it "sends the CIAM logout without content, as the app's AndroidMessageHandler does", :aggregate_failures do
       answers << [401, {}, '']
-      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
       expect(seen('/fr/logout').first.headers.values_at('content-length', 'content-type')).to eq(['0', nil])
     end
   end

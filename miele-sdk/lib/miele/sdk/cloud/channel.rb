@@ -46,8 +46,10 @@ module Miele
         end
 
         # @return [Array<Device>] the appliances paired with the account
-        # @raise [ResponseError] on an error status; a 401 or 403 also logs out and forgets the token
-        #   ({Session#invalidate}), as the app's appliance list does (PairedAppliancesRepository.OnObservationError)
+        # @raise [AuthenticationError] on a 401 or 403, once logged out with the token forgotten ({Session#invalidate}):
+        #   the app stops observing its appliance list and loses the session (PairedAppliancesRepository
+        #   OnObservationError, AppLifeCycleViewModel.PairedAppliancesRepository_OnAuthorizationError)
+        # @raise [ResponseError] on any other error status
         # @api public
         def devices
           JSON.parse(listed(@session.current).body).flat_map do |wifi|
@@ -85,8 +87,10 @@ module Miele
         def listed(token)
           exchange(token, :get, '/Devices', nil, {})
         rescue ResponseError => e
-          @session.invalidate(token) if [401, 403].include?(e.status)
-          raise
+          raise unless [401, 403].include?(e.status)
+
+          @session.invalidate(token)
+          raise AuthenticationError, "the Miele cloud refused the appliance list (#{e.status}): the session is lost"
         end
 
         # @param status [Integer]

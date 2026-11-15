@@ -515,36 +515,46 @@ washer.start_delayed(Time.new(2026, 11, 1, 6, 30))   # today's or tomorrow's tim
 washer.start                                         # pause, stop
 washer.stop_end_signal                               # 28; stop_to_edit 12102, extend_anti_crease 12144
 washer.acknowledge(message: 3, option: 1)
-washer.power_off                                     # wake
+washer.power_off                                     # power_off_offered? gives the app's rule; wake too
 washer.anti_crease = 2
 washer.twin_dos_levels = [{ number: 1, percent: 50 }]
 ```
 
-The requests follow the app's SupportedRequestsRule: without remote control only stop, no stop while
-a program waits (Status 2 or 3), start only with the door locked, request 8 only while 2/1574 shows a
-start mode, and nothing while the appliance sleeps deeply. A Dop1 appliance offers start under
-remote control (Status 4, or 3 under mobile start without a start time), stop while it waits or
-runs (Status 4 or 5), and never pause; it takes `ProcessAction` alone. `stop_to_edit` also needs a program waiting for its
-start time, `power_off` a DOP2 program done (Status 7, process state 10 or 13) outside phases 264,
-519 and 531, and `wake` a DOP2 model the app wakes (its series letter, from some software id up)
-sleeping deeply.
+Each action sends what it is given; the client decides, with the app's rules at hand.
+`supported_requests` gives the requests the app's SupportedRequestsRule offers (start, stop, pause,
+12102, 12144…): without remote control only stop, no stop while a program waits (Status 2 or 3),
+start only with the door locked, request 8 only while 2/1574 shows a start mode, and nothing while
+the appliance sleeps deeply. A Dop1 appliance offers start under remote control (Status 4, or 3
+under mobile start without a start time), stop while it waits or runs (Status 4 or 5), and never
+pause; it takes `ProcessAction` alone, pause as 3. The other rules come as predicates:
 
-`set_parameters` needs a program selected (Status 3) under mobile start. A washer takes
+| Predicate | The app's rule |
+|---|---|
+| `stop_end_signal_offered?` | a DOP2 appliance listing request 28 on 2/1585 |
+| `stop_to_edit_offered?` | a program waiting for its start time (Status 4), request 12102 offered |
+| `power_off_offered?` | a DOP2 program done (Status 7, process state 10 or 13) outside phases 264, 519 and 531 |
+| `wake_offered?` | a DOP2 model the app wakes (its series letter, from some software id up) sleeping deeply |
+| `set_parameters_offered?` | a program selected (Status 3) under mobile start, on DOP2 or Dop1 |
+| `start_delayed_offered?` | start or request 8 offered |
+
+`stop_end_signal` and `power_off` raise `Miele::Sdk::ActionUnavailableError` on a Dop1 or Opcode
+appliance, whose protocol has no DOP2 leaf to write them to; so do `select_program` and
+`set_parameters` on an Opcode appliance, which has no selection object. A washer takes
 `temperature` (°C, with `eco`), `spin_speed` (rpm), `soiling`, `cap`, `extras`, `stains`,
 `twin_dos`, and on DOP2 `drying_level`, `drying_time` and `program_mode`, or on Dop1 `master_care`;
-a dryer takes `extras`, `drying_level` and `drying_time`. On DOP2 the SDK first copies into 2/1577
+a dryer takes `extras`, `drying_level` and `drying_time`; another parameter, or a name the SDK has
+no encoding for, raises `ArgumentError`, as the app writes none. On DOP2 the SDK first copies into 2/1577
 the current values 2/1574 shows, as the app does, then writes the parameters given; it writes only
 members 2/1577 carries. On Dop1 it reads 8201 or 8602 and writes it back with the read request type
-and the app's encodings (a temperature it has no code for goes out as 0, an eco 40 °C as 39), and
-`NotAcceptedError` reports an Ack other than 1. `start_delayed` lets the appliance choose the mode
+and the app's encodings (a temperature it has no code for goes out as 0, an eco 40 °C as 39, and
+the TwinDos containers only when given both), and `NotAcceptedError` reports an Ack other than 1. `start_delayed` lets the appliance choose the mode
 as the app does: whole minutes from a minute before now, or local seconds since 1970, both on the
 wall clock, then request 8; a Dop1 appliance takes `StartTime`, its selection written back, then
 `ProcessAction` 1.
 
 Left out: requests 12106 (add laundry) and 12116 (TwinDos care), which the app declares and never
-sends; its limit of three anti-crease extensions; its start time kept until start, for which
-`start_delayed` needs start or request 8 offered. An Opcode appliance selects no program, as in
-the app, and the SDK sends it no parameters, which the app would send it as DOP2. A tumble dryer of
+sends; its limit of three anti-crease extensions; its start time kept until start. The SDK sends
+an Opcode appliance no parameters, which the app would send it as DOP2. A tumble dryer of
 device type 4 takes the dryer's objects (8602, `selection_para_td`), where the app's parameter copy
 and Dop1 delayed start send it the washer's.
 

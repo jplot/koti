@@ -3,6 +3,8 @@ module Miele
     class Oven < Appliance
       module ProgramSelection : Appliance
         NOW: Integer
+        DELAYED_START: Integer
+        MIN_VALUE: Integer
 
         def target_temperature=: (Integer | Float celsius) -> void
 
@@ -16,9 +18,9 @@ module Miele
 
         def doneness=: (Integer level) -> void
 
-        def start_at=: (Time | :now time) -> void
+        def set_start_at: (Time | :now time, kept: AutomaticTimes?) -> AutomaticTimes?
 
-        def end_at=: (Time time) -> void
+        def set_end_at: (Time time, kept: AutomaticTimes?) -> AutomaticTimes?
 
         def duration=: (Integer seconds) -> void
 
@@ -29,6 +31,18 @@ module Miele
         private
 
         def set_parameter: (Integer id, Symbol type, untyped value) -> void
+
+        def write_time: (Objects::Oven::GlobalPsContext context, Integer id, Integer value, AutomaticTimes? kept) -> AutomaticTimes?
+
+        def keeps_times?: (Objects::Oven::GlobalPsContext context) -> bool
+
+        def span: (Objects::Oven::GlobalPsContext context) -> Integer
+
+        def date_time: (Integer seconds) -> Integer
+
+        def program_type: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
+
+        def phase: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
 
         def start_reset: () -> Objects::Oven::GlobalPsContext
 

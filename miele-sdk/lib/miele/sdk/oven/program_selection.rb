@@ -8,7 +8,11 @@ module Miele
       module ProgramSelection
         # +StartAt+ meaning now.
         NOW = 0xFFFF_FFFF_FFFF_FFFF
-        private_constant :NOW
+        # GLOBAL_PPHASE_STARTZEIT_LAEUFT: an automatic program counting down its delayed start.
+        DELAYED_START = 28_002
+        # InterpretAsDateTime reads a time of 0 or all ones as DateTime.MinValue, 0001-01-01.
+        MIN_VALUE = Time.utc(1).to_i
+        private_constant :NOW, :DELAYED_START, :MIN_VALUE
 
         # @param celsius [Numeric]
         # @raise [ActionUnavailableError] see {#set_parameter}
@@ -47,16 +51,40 @@ module Miele
           set_parameter(31, :u8, level)
         end
 
+        # SetProgramStartTimeAction writes the start of a program that is not automatic, or of an automatic one
+        # counting down its delayed start. It writes nothing otherwise: AutomaticProgramHelper keeps the start, with
+        # the end the oven's minimums put after it, until {Requests#start} writes the start.
+        #
         # @param time [Time, :now]
+        # @param kept [AutomaticTimes, nil] the times the client keeps for this oven
+        # @return [AutomaticTimes, nil] the times to keep from now on: +kept+ once the start is written, none for an
+        #   automatic program to start now
+        # @raise [ActionUnavailableError] on a Dop1 oven, or when 1/1574 lacks a value the app reads: nothing is sent
         # @api public
-        def start_at=(time)
-          set_parameter(13, :u64, unix_time(time))
+        def set_start_at(time, kept:)
+          require_dop2!
+          context = program_context
+          return write_time(context, 13, unix_time(time), kept) unless keeps_times?(context)
+          return unless time.is_a?(Time)
+
+          AutomaticTimes.new(prog_id: selected_program(context), start_at: time, end_at: time + span(context))
         end
 
+        # SetProgramEndTimeAction, as {#set_start_at}: an automatic program keeps the start the oven's minimums put
+        # before the end.
+        #
         # @param time [Time]
+        # @param kept [AutomaticTimes, nil] the times the client keeps for this oven
+        # @return [AutomaticTimes, nil] the times to keep from now on: +kept+ once the end is written; a minimum of 0
+        #   or all ones counts from 0001-01-01, as the app reads it, which can give a start {Requests#start} refuses
+        # @raise [ActionUnavailableError] on a Dop1 oven, or when 1/1574 lacks a value the app reads: nothing is sent
         # @api public
-        def end_at=(time)
-          set_parameter(14, :u64, time.to_i)
+        def set_end_at(time, kept:)
+          require_dop2!
+          context = program_context
+          return write_time(context, 14, time.to_i, kept) unless keeps_times?(context)
+
+          AutomaticTimes.new(prog_id: selected_program(context), start_at: time - span(context), end_at: time)
         end
 
         # The app moves the start to its minimum before a zero duration only (SetDurationAction).
@@ -103,6 +131,46 @@ module Miele
         def set_parameter(id, type, value)
           within(Polling::ACTION_TIMEOUT) { write_parameter(selected_prog_id, id, type, value) }
         end
+
+        # @param context [Objects::Oven::GlobalPsContext] 1/1574
+        # @param id [Integer] 13 for the start, 14 for the end
+        # @param value [Integer] Unix seconds, all ones for now
+        # @param kept [AutomaticTimes, nil]
+        # @return [AutomaticTimes, nil] +kept+, which the app's write leaves alone
+        # @raise [ActionUnavailableError] when no program is selected
+        def write_time(context, id, value, kept)
+          within(Polling::ACTION_TIMEOUT) { write_parameter(selected_program(context), id, :u64, value) }
+          kept
+        end
+
+        # @param context [Objects::Oven::GlobalPsContext] 1/1574
+        # @return [Boolean] whether the app keeps the times instead of writing them: an automatic program, but in
+        #   phase 28002
+        # @raise [ActionUnavailableError] without the program type, or an automatic program's phase
+        def keeps_times?(context)
+          attributes = context.prog_attributes_cca
+          type = program_type(attributes) || raise(ActionUnavailableError, '1/1574 gives no program type')
+          return false unless type == 3
+
+          shown = phase(attributes) || raise(ActionUnavailableError, '1/1574 gives no phase')
+          shown != DELAYED_START
+        end
+
+        # @param context [Objects::Oven::GlobalPsContext] 1/1574
+        # @return [Integer] seconds from the minimum start to the minimum end
+        # @raise [ActionUnavailableError] when 1/1574 lacks either minimum
+        def span(context)
+          parameters = context.context_para_ca
+          ends = parameters&.end_at&.min || raise(ActionUnavailableError, '1/1574 gives no minimum end')
+          starts = parameters&.start_at&.min || raise(ActionUnavailableError, '1/1574 gives no minimum start')
+          date_time(ends) - date_time(starts)
+        end
+
+        # InterpretAsDateTime, in Unix seconds.
+        #
+        # @param seconds [Integer]
+        # @return [Integer]
+        def date_time(seconds) = [0, NOW].include?(seconds) ? MIN_VALUE : seconds
 
         # SetDurationAction's ResetStartTimeAsync, which the app sends with its caller's token.
         #

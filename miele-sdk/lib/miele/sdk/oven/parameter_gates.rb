@@ -23,7 +23,7 @@ module Miele
         #
         # @param name [Symbol] a parameter as its setter names it: +:target_temperature+, +:core_target_temperature+,
         #   +:moisture+, +:grill_level+, +:microwave_power+, +:browning+, +:doneness+, +:duration+, +:start_at+ or
-        #   +:end_at+
+        #   +:end_at+ ({ProgramSelection#set_start_at}, {ProgramSelection#set_end_at})
         # @return [Boolean] whether the app's details page shows its section, never on a Dop1 oven
         # @raise [KeyError] for another name
         # @api public

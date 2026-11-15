@@ -56,6 +56,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `press_shutter(device)`: the shutter control request with no command, which the app's shutter tile button
+  sends while the shutter's position is known; while it moves or its position is unknown, the button stops it.
 - `Session#restart_login`: drops the two-factor request, as the app's back button on its code screen does,
   so the next call signs in from the password.
 - `photo_on_demand?(device)`: whether the app shows a photo on demand button for the device, which the

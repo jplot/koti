@@ -132,6 +132,15 @@ module Ajax
             nil
           end
 
+          # Sends the control request with no command, as the app's shutter tile button does while the shutter's
+          # position is known (+device.shutter.position+ set: opened, closed or partly open); while it moves or its
+          # position is unknown, that button stops it ({#stop_shutter}).
+          #
+          # @param (see #open_shutter)
+          # @return [nil]
+          # @raise (see #open_shutter)
+          def press_shutter(device) = device_command_roller_shutter_control(**shutter(device)).then { nil }
+
           # Sends a device of the hub +device_off+ as a smart lock on channel 1, and any other device the cloud's
           # lock action, as the app does.
           #

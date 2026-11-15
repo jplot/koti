@@ -246,10 +246,10 @@ hood.grease_filter      # => #<data Filter threshold=200, hours=50, reached=true
 hood.dehumidification   # also grease_melting, height_position, fan_settable? and auto_refresh_supported?
 
 hood.fan_level = 2         # 0 (off) to 3, 4 for boost, 5 for interval
-hood.fan_run_on_time = 15  # 0, 5 or 15 minutes
+hood.fan_run_on_time = 15  # minutes; fan_run_on_times gives the app's picker: 0, 5 and 15
 hood.main_light = true     # and ambient_light=
 hood.reset_grease_filter   # and reset_charcoal_filter
-hood.wake
+hood.wake                  # wake_offered? tells whether the app would
 ```
 
 The reads come from `ExtendedState`, which a hood serves only while it is on: they read nil while
@@ -268,17 +268,22 @@ lights as an Opcode one:
 | Ambient colours, dehumidification, silent blower, grease melting | — | Dop1 | — | — |
 
 The Dop1-only ones are `configure_ambient_light(mode:, rgb:, brightness:, colour_temperature:)`,
-`dehumidification =` (`:off` or `:regulated`, the only ones the app writes),
+`dehumidification =` (`:off`, `:controlled` or `:regulated`; `dehumidification_modes` gives the
+app's picker, without `:controlled`),
 `dehumidification_silent =`, `grease_melting =` and `grease_melting_at(minutes)`; the others are
 `ambient_light_while_cooking =`, `fragrance(:start)` (also `:stop` and `:miele_program`) and
 `auto_refresh =`.
 
-An action the hood's protocol has not raises `Miele::Sdk::ActionUnavailableError`, and so does one
-the hood does not support (ambient light, dehumidification, grease melting, auto refresh,
-fragrance), as the app hides it, and the fan while the hood's screen is pushed in, as the app
-refuses it. A hood that is off does not say what it supports: those actions ask to `wake` it first. The Opcode fan level goes out twice, half a second apart, as the app sends it. `wake`
-writes back the light of a Dop1 or Opcode hood that is off, and sends `DeviceAction` 2 to a DOP2
-one, as the app wakes them.
+An action the hood's protocol has no request for raises `Miele::Sdk::ActionUnavailableError` (the
+dashes above). Every other action is sent as given, even one the app hides or refuses: the
+readings give the app's rules, so the client's screen can follow them. The app hides what the hood
+does not support (`lights.ambient.exists`, `dehumidification.supported`,
+`grease_melting.supported`, `auto_refresh_supported?`, `fragrance_supported?`), and refuses the fan
+while the hood's screen is pushed in (`fan_settable?` false). A hood that is off does not say what
+it supports: those readings are nil until it is woken. The Opcode fan level goes out twice, half a
+second apart, as the app sends it. `wake` writes back the light of a Dop1 or Opcode hood, and sends
+`DeviceAction` 2 to a DOP2 one; the app wakes a Dop1 or Opcode hood only while it is off
+(`wake_offered?`).
 
 Settings (programming functions, Dop1 object 1201) go out with structure version 1 and Dop1
 sections in lower-case hex, as the app sends them. A value out of range raises `ArgumentError`
@@ -298,15 +303,16 @@ hood switched off, serving no `ExtendedState`; Opcode and DOP2 hoods have never 
 hood.connectivity_plus  # => #<data ConnectivityPlus available=true, activated=false, available_sources=[…], sources=[]>
 hood.connect_hob('000111222333')    # and disconnect_hob: Con@ctivity Plus follows the hob
 hood.color_flow         # => #<data ColorFlow active=true, interval=10>, nil when the hood has none
-hood.configure_color_flow(active: true, interval: 20)  # 5, 10 or 20 seconds
+hood.configure_color_flow(active: true, interval: 20)  # color_flow_intervals: 5, 10 and 20 seconds
 hood.supervise('000111222333', show: true)              # Con@ctivity One
 ```
 
 Con@ctivity Plus makes a hood follow hobs. As in the app, `connect_hob` and `disconnect_hob` change
-one hob in the list `services` shows and switch Con@ctivity Plus on while one is left; the SDK
-refuses them unless `services` shows it available, as the app hides it. ColorFlow reads a 404
-through the cloud, and a 500 on a DOP2 hood, as none, and an interval the app does not know as 10
-seconds; the SDK refuses to set it on a hood that has none. Locally, its 404 raises `NotFoundError`.
+one hob in the list `services` shows and switch Con@ctivity Plus on while one is left; the app
+hides them unless `connectivity_plus.available`, and the SDK sends them all the same. ColorFlow
+reads a 404 through the cloud, and a 500 on a DOP2 hood, as none, and an interval the app does not
+know as 10 seconds; `configure_color_flow` sends any interval to any hood, where the app sets one
+of its three on a hood whose `color_flow` is not nil, and a 404 raises `NotFoundError`.
 `supervise` writes `SuperVision/{fab}` of the appliance that shows another one, with `Show` alone:
 the app leaves `Signal` out. ColorFlow and Con@ctivity Plus have been read from a real hood through
 the cloud.

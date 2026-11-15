@@ -51,6 +51,14 @@ RSpec.describe Miele::Sdk::Hood do
     end
   end
 
+  context 'when the hood acknowledges a write with Ack 0' do
+    let(:dop1_answer) { [200, {}, '{"Response":"8E011200"}'] }
+
+    it 'raises NotAcceptedError, as the app accepts only Ack 1' do
+      expect { appliance.fan_level = 0 }.to raise_error(Miele::Sdk::NotAcceptedError, 'the appliance answered Ack "00"')
+    end
+  end
+
   context 'when the hood acknowledges a write with anything but success' do
     let(:dop1_answer) { [200, {}, '{"Response":"8E011202"}'] }
 

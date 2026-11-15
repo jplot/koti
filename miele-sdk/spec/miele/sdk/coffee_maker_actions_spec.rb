@@ -398,6 +398,18 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       end
     end
 
+    it 'reads only the first Success with a Light, which every such Light must let GetInt32 read',
+       :aggregate_failures do
+      served['State'] = { 'Status' => 2, 'RemoteEnable' => [15, 0, 1], 'Light' => 2 }
+      %w[[{"Success":{"Light":1}},{"Success":{"Light":"x"}}] [{"Success":{"Light":2}},{"Success":{"Light":1}}]
+         [1,{"Success":{"Light":1}}]].each do |answer|
+        served['PUT State'] = answer
+        expect { coffee.light = true }.to raise_error(Miele::Sdk::NotAcceptedError)
+      end
+      served['PUT State'] = '[{"Success":{}},{"Success":{"Light":1}}]'
+      expect { coffee.light = true }.not_to raise_error
+    end
+
     it 'leaves out of that State the keys the app does not know, as its DeviceStateDto does' do
       served['State'] = { 'Status' => 2, 'RemoteEnable' => [15, 0, 1], 'Light' => 2, 'ProgramName' => 'Espresso' }
       coffee.light = true

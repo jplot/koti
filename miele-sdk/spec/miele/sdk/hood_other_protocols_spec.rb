@@ -132,6 +132,15 @@ RSpec.describe Miele::Sdk::Hood do
       end
     end
 
+    context 'when State shows it synchronized without a StandbyState' do
+      def states = [{ 'SyncState' => 2 }, { 'SyncState' => 2, 'StandbyState' => 1 }]
+
+      it 'takes it as asleep and wakes it, as the app reads no StandbyState as 0', :aggregate_failures do
+        hood.wake
+        expect(exchanged).to eq([['GET', nil], ['PUT', { 'DeviceAction' => 2 }], ['GET', nil]])
+      end
+    end
+
     context 'when State never shows it awake' do
       def states = [{ 'StandbyState' => 2 }]
 

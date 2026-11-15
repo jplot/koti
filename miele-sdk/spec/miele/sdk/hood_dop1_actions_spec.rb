@@ -11,6 +11,7 @@ RSpec.describe Miele::Sdk::Hood do
     served = state
     fragrance = pf40028
     process = process_ack
+    other = other_ack
     woken = wake_answer
     FakeAppliance.start do |request|
       case request
@@ -20,7 +21,7 @@ RSpec.describe Miele::Sdk::Hood do
       in { verb: 'POST', body: /12010100019c5c/ } then [200, {}, "{\"Response\":\"12011100019c5c000000#{fragrance}\"}"]
       in { verb: 'POST', body: /8E0A01/ } then [200, {}, '{"Response":"8E0A1100010201000700163c00"}']
       in { verb: 'POST', body: /"1100/ } then [200, {}, "{\"Response\":\"110012#{process}\"}"]
-      in { verb: 'POST' } then [200, {}, '{"Response":"8E111201"}']
+      in { verb: 'POST' } then [200, {}, "{\"Response\":\"8E1112#{other}\"}"]
       else [200, {}, '{}']
       end
     end
@@ -33,6 +34,8 @@ RSpec.describe Miele::Sdk::Hood do
   def pf40028 = '87'
 
   def process_ack = '01'
+
+  def other_ack = '01'
 
   def wake_answer = [200, {}, '[{"Success":{"Light":2}}]']
 
@@ -153,6 +156,16 @@ RSpec.describe Miele::Sdk::Hood do
       expect { hood.fragrance(:start) }.to raise_error(Miele::Sdk::NotAcceptedError, 'the appliance answered Ack "02"')
       hood.fragrance(:stop)
       expect(writes).to eq(%w[110002000134 110002000135 12010200019c5a00000000])
+    end
+  end
+
+  context 'when the hood acknowledges a section write with anything but success' do
+    def other_ack = '02'
+
+    it 'raises NotAcceptedError, as the app accepts only Ack 1', :aggregate_failures do
+      refused = 'the appliance answered Ack "02"'
+      expect { hood.grease_melting = true }.to raise_error(Miele::Sdk::NotAcceptedError, refused)
+      expect { hood.ambient_light = true }.to raise_error(Miele::Sdk::NotAcceptedError, refused)
     end
   end
 

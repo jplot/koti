@@ -92,9 +92,11 @@ module Miele
           now = Time.now
           return dop1_start_delayed(minutes_until(next_time(at, now), now)) unless dop2?
 
-          context = object(Objects::Dishwasher::GlobalPsContext, timeout: 5)
-          bits = context.context_para_dw&.delayed_start_mode&.supported_bits.to_i
-          modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 1, 2]) { delayed(it, bits, next_time(at, now), now) }
+          modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 1, 2]) do |select|
+            context = object(Objects::Dishwasher::GlobalPsContext, timeout: 5)
+            bits = context.context_para_dw&.delayed_start_mode&.supported_bits.to_i
+            delayed(select, bits, next_time(at, now), now)
+          end
           dop2_user_request(8)
         end
 

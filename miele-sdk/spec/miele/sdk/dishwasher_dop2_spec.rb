@@ -434,21 +434,22 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(timeouts).to eq([15, 15])
     end
 
-    it 'reads 2/1574 for the extras within 15 s, as SelectExtrasForDop2Action' do
+    it 'reads 2/1577, then 2/1574 within 15 s, for the extras, as SelectExtrasForDop2Action', :aggregate_failures do
       leaves['2/1577?idx1=0&idx2=0'] = select(0, 0)
       leaves['2/1574?idx1=0&idx2=0'] = context(0)
       timeouts = read_timeouts
       dishwasher.set_extras(:quick)
       expect(timeouts).to eq([15, 15, 15])
+      expect(fake.requests.filter_map { it.path[%r{DOP2/(\d+/\d+)}, 1] }).to eq(%w[2/1577 2/1574 2/1577])
     end
 
-    it 'reads 2/1574 for a delayed start within 5 s, as GetGlobalPsContextMessageAsync' do
+    it 'reads 2/1577, then 2/1574 within 5 s, for a delayed start, as SetDelayStartActionAsync' do
       allow(Time).to receive(:now).and_return(Time.new(2026, 10, 31, 20, 0, 30))
       leaves['2/1577?idx1=1&idx2=2'] = select(1, 2)
       leaves['2/1574?idx1=0&idx2=1'] = context(1, bits: 33)
       timeouts = read_timeouts
       dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
-      expect(timeouts).to eq([5, 15, 15, 15, 15])
+      expect(timeouts).to eq([15, 5, 15, 15, 15])
     end
 
     it 'gives the wake 15 s for its State read and for DeviceAction 2, as WakeUpForDop2Action' do
@@ -464,12 +465,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
                                                       'DeviceIdentLabel' => { 'TechType' => 'PFD102' })
       end
 
-      it 'reads 2/1574 for the extras within 5 s, as SelectExtrasForProfiLineAction' do
+      it 'reads 2/1577, then 2/1574 within 5 s, for the extras, as SelectExtrasHelperAsync' do
         leaves['2/1577?idx1=0&idx2=0'] = select(0, 0)
         leaves['2/1574?idx1=0&idx2=0'] = context(0)
         timeouts = read_timeouts
         dishwasher.set_extras(:special_dry)
-        expect(timeouts).to eq([5, 15, 15])
+        expect(timeouts).to eq([15, 5, 15])
       end
     end
   end

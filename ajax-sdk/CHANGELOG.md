@@ -14,6 +14,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- The shortcuts send as given what the app's screens would not offer, and leave the answer to the gateway:
+  `set_brightness` and `move_shutter` take any percentage, `turn_on` and `turn_off` any channel, and
+  `life_quality_history` any device; `Streams.live` adds metadata other than the app's four after them. They
+  still raise `ArgumentError` for a device their request has no type, route or command for.
 - **Breaking:** `events` no longer reopens its streams: the feed ends with the first stream that ends and
   raises what breaks one. It takes a `tracker:` to reopen with, which reports only the changes made meanwhile
   and reads back the notifications created since the last one yielded; `sleeper:` is gone.
@@ -32,6 +36,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `photo_on_demand?(device)`: whether the app has a photo on demand button for that kind of device, the
+  MotionCams `take_photo` names by their family.
 - `refused:` on `Ajax::Sdk.sia_events` and `Sia::Receiver.new`: a callable given each frame the receiver
   refuses, as a `Sia::Refusal` (the frame, the reply `:duh`, `:nak` or nil, and why), such as a frame
   another SIA key encrypted.

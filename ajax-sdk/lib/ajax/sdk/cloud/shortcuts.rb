@@ -84,7 +84,7 @@ module Ajax
           # Sends the percentage as the app does: on the first channel, as a relative brightness.
           #
           # @param device [Device] a dimmer
-          # @param percent [Integer] sent as given
+          # @param percent [Integer] sent as given; the app's sliders give 1 to 100
           # @return [nil]
           # @raise [ArgumentError] for another device
           def set_brightness(device, percent)
@@ -106,7 +106,8 @@ module Ajax
           def close_shutter(device) = move_shutter(device, 0)
 
           # @param device [Device] a roller shutter
-          # @param percent [Integer] the opening, 0 closed and 100 open, sent as given
+          # @param percent [Integer] the opening, 0 closed and 100 open, sent as given; the app's control gives
+          #   multiples of 5
           # @return [nil]
           # @raise [ArgumentError] for another device
           def move_shutter(device, percent)

@@ -205,8 +205,8 @@ method (its service, for an `…/execute` path), which ends its Ruby name, start
 | Shortcut | What it sends |
 |---|---|
 | `turn_on(device, channel: 1)`, `turn_off` | `device_command_device_on` / `_off`, with the family type the app sends: `light_switch`, `socket_base` or `water_stop_base` by the device's channels; `relay` with no channel, `relay_fibra_base` or `transmitter_fibra_base` by its kind |
-| `set_brightness(device, percent)` | `device_command_brightness`: 1 to 100, relative, on the first channel |
-| `open_shutter`, `close_shutter`, `stop_shutter(device)`, `move_shutter(device, percent)` | `device_command_roller_shutter_control`: the opening, 100 open and 0 closed, or stop |
+| `set_brightness(device, percent)` | `device_command_brightness`: the percentage as given (the app's sliders give 1 to 100), relative, on the first channel |
+| `open_shutter`, `close_shutter`, `stop_shutter(device)`, `move_shutter(device, percent)` | `device_command_roller_shutter_control`: the opening as given, 100 open and 0 closed (the app's control gives multiples of 5), or stop |
 | `bypass(device, tamper_only: false, once: false)`, `unbypass(device, once: false)` | `device_command_device_bypass` |
 | `arm_group(space_id, group_id, ignore_alarms: false)`, `disarm_group` | `space_security_arm_group`, `space_security_disarm_group` |
 | `set_security_mode(space_id, mode)` | `space_security_set_security_mode`: `:regular` or `:group` |
@@ -220,12 +220,14 @@ method (its service, for an `…/execute` path), which ends its Ruby name, start
 | `scenarios(space_id)`, `enable_scenario` / `disable_scenario(space_id, scenario_id)` | `stream_light_scenarios`, `set_scenario_state` |
 | `rooms(space_id)`, `groups(space_id)`, `current_member(space_id)` | the first message of `space_stream` |
 | `life_quality_history(device, from:, to:, step: :hour, time_zone: 'UTC')` | `life_quality_data_get_life_quality_data`, as a `LifeQualityHistory`: each measure by the start of its bucket |
-| `take_photo(device)` | `photo_on_demand_capture_photo`, with the camera's family as the app names it: `:cam`, `:cam_outdoor` or `:cam_fibra_base` |
+| `take_photo(device)` | `photo_on_demand_capture_photo`, with the camera's family as the app names it: `:cam`, `:cam_outdoor` or `:cam_fibra_base`; `photo_on_demand?(device)` tells whether the app has the button for that kind of device |
 | `notification_media(space_id, notification_id)` | `notification_log_stream_notification_media`: each state of the notification's media, as an `Enumerator::Lazy` |
 
 Each shortcut calls a named method (below), so Steep checks its request and read-only mode refuses its
-commands. A device the shortcut does not fit raises `ArgumentError` before anything is sent; commands return
-nil. They send what the app 3.59 sends, which differs from what one would guess in three places:
+commands. A device the request has no type, route or command for raises `ArgumentError` before anything is
+sent. A value, a channel or a device the app's screens would not offer goes as given, and the gateway answers
+it; [Permissions](#permissions) lists what the app checks. Commands return nil. They send what the app 3.59
+sends, which differs from what one would guess in three places:
 
 - The app never sends a slat command and never reads `SlatPosition`, so there is no slat shortcut.
 - To turn a device on or off, it sends the type of its family, not the device's exact type. It always turns

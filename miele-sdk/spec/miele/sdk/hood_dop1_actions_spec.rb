@@ -10,12 +10,15 @@ RSpec.describe Miele::Sdk::Hood do
   let(:fake) do
     served = state
     fragrance = pf40028
+    process = process_ack
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(served)]
       in { verb: 'POST', body: /12010100019c5c/ } then [200, {}, "{\"Response\":\"12011100019c5c000000#{fragrance}\"}"]
       in { verb: 'POST', body: /8E0A01/ } then [200, {}, '{"Response":"8E0A1100010201000700163c00"}']
+      in { verb: 'POST', body: /"1100/ } then [200, {}, "{\"Response\":\"110012#{process}\"}"]
+      in { verb: 'POST' } then [200, {}, '{"Response":"8E111201"}']
       else [200, {}, '{}']
       end
     end
@@ -26,6 +29,8 @@ RSpec.describe Miele::Sdk::Hood do
   after { fake.stop }
 
   def pf40028 = '87'
+
+  def process_ack = '01'
 
   def extended(bytes)
     data = Array.new(73, 0)
@@ -119,6 +124,16 @@ RSpec.describe Miele::Sdk::Hood do
     expect(hood.wake_offered?).to be(false)
     hood.wake
     expect(fake.requests.last.path).to eq("/Devices/#{fab}/State")
+  end
+
+  context 'when the hood acknowledges its ProcessAction with anything but success' do
+    def process_ack = '02'
+
+    it 'refuses the fragrance start, and still sets PF 40026 to stop, as the app drops that Ack', :aggregate_failures do
+      expect { hood.fragrance(:start) }.to raise_error(Miele::Sdk::NotAcceptedError, 'the appliance answered Ack "02"')
+      hood.fragrance(:stop)
+      expect(writes).to eq(%w[110002000134 110002000135 12010200019c5a00000000])
+    end
   end
 
   context 'when PF 40028 lists no fragrance' do

@@ -264,15 +264,21 @@ module Miele
       # @return [Data] all its bytes 0, as the app allocates it
       def blank(klass) = klass.from("\0" * klass::LENGTH)
 
-      # The app accepts only Ack 1, characters 6 and 7 of the answer.
-      #
       # @param klass [Class] a generated Dop1 object
       # @param section [Data] one of its write sections
       # @param type [String] {Dop1::READ} or {Dop1::WRITE}, as the app sends that object
       # @return [void]
-      # @raise [NotAcceptedError] for any other Ack
+      # @raise [NotAcceptedError] for an Ack other than 1
       def write_dop1_object(klass, section, type:)
-        request = Dop1.request(object_id: klass::ID, type:, section: section.to_bytes)
+        write_dop1(Dop1.request(object_id: klass::ID, type:, section: section.to_bytes))
+      end
+
+      # The app accepts only Ack 1, characters 6 and 7 of the answer.
+      #
+      # @param request [String] built by {Dop1}
+      # @return [void]
+      # @raise [NotAcceptedError] for any other Ack
+      def write_dop1(request)
         ack = JSON.parse(dop1(request)).fetch('Response')[6, 2]
         raise NotAcceptedError, "the appliance answered Ack #{ack.inspect}" unless ack.to_i == 1
       end

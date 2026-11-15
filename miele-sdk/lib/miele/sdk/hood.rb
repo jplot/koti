@@ -19,8 +19,9 @@ module Miele
       # @param value [Integer] unsigned 32-bit value
       # @return [void]
       # @raise [ArgumentError] if the id or the value is out of range
+      # @raise [NotAcceptedError] when the hood answers an Ack other than 1
       # @api public
-      def write_setting(pf_id, value) = tolerating_no_op { dop1(Dop1.write_setting(pf_id, value)) }
+      def write_setting(pf_id, value) = write_dop1(Dop1.write_setting(pf_id, value))
     end
   end
 end

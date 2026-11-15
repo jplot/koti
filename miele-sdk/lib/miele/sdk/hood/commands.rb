@@ -16,12 +16,13 @@ module Miele
         # @return [void]
         # @raise [ArgumentError] if the level is out of range
         # @raise [ActionUnavailableError] on a hood of a protocol the app has no fan action for
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def fan_level=(level)
           raise ArgumentError, "fan level #{level} is out of 0..5" unless FAN_LEVELS.cover?(level)
 
           case route(:fan)
-          when :dop1 then tolerating_no_op { dop1(Dop1.fan_level(level)) }
+          when :dop1 then write_dop1(Dop1.fan_level(level))
           when :opcode then opcode_twice("10000608010#{level}000000")
           else write_dop2(hood_select(1 => level))
           end
@@ -30,10 +31,11 @@ module Miele
         # @param minutes [Integer] such as one of {#fan_run_on_times}
         # @return [void]
         # @raise [ArgumentError] for minutes a Dop1 or Opcode hood's byte, or a DOP2 hood's u16, does not hold
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def fan_run_on_time=(minutes)
           case route(:fan)
-          when :dop1 then tolerating_no_op { dop1(Dop1.fan_run_on_time(minutes)) }
+          when :dop1 then write_dop1(Dop1.fan_run_on_time(minutes))
           when :opcode then opcode(format('10000609%02X00000000', Dop1.unsigned(minutes, 8)))
           else write_dop2(hood_select(2 => minutes))
           end
@@ -45,10 +47,11 @@ module Miele
 
         # @param on [Boolean]
         # @return [void]
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def main_light=(on)
           case route(:fan)
-          when :dop1 then tolerating_no_op { dop1(Dop1.main_light(on)) }
+          when :dop1 then write_dop1(Dop1.main_light(on))
           when :opcode then send_request(:put, "/Devices/#{fab}/State/", body: JSON.generate('Light' => on ? '1' : '2'))
           else dop2_user_request(on ? 13 : 14)
           end
@@ -60,6 +63,7 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] when the hood drives its lights by Opcode, which has no request for a
         #   second light
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def ambient_light=(on)
           path = route(:fan)
@@ -71,6 +75,7 @@ module Miele
         # @param on [Boolean]
         # @return [void]
         # @raise [ActionUnavailableError] on an Opcode hood
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def ambient_light_while_cooking=(on)
           value = on ? 1 : 0
@@ -78,10 +83,12 @@ module Miele
         end
 
         # @return [void]
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def reset_grease_filter = reset_filter(40_012, 20_009, '0B0003000300')
 
         # @return [void]
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def reset_charcoal_filter = reset_filter(40_013, 20_008, '0B0003000400')
 
@@ -89,6 +96,7 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on an Opcode hood
         # @raise [ArgumentError] for another action
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def fragrance(action)
           value = FRAGRANCE_SETTINGS.fetch(action) { raise ArgumentError, "no fragrance action #{action.inspect}" }
@@ -113,6 +121,7 @@ module Miele
         # @param on [Boolean]
         # @return [void]
         # @raise [ActionUnavailableError] on an Opcode hood
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def auto_refresh=(on)
           value = on ? 1 : 0

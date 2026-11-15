@@ -104,6 +104,8 @@ module Miele
 
       def write_dop1_object: (untyped klass, untyped section, type: String) -> void
 
+      def write_dop1: (String request) -> void
+
       def dop1_object: (untyped klass) -> untyped
 
       def require!: (untyped condition, String reason) -> void

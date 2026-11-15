@@ -73,10 +73,15 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(written).to eq([['DOP2/2/1577?idx1=0&idx2=1', select(24_005, 0, two: true, attribute: 0)]])
   end
 
-  it 'refuses a drink while 1/1574 lacks a member the app reads', :aggregate_failures do
+  def brewed_unoffered
+    expect(coffee.brew_offered?).to be(false)
+    coffee.brew(24_005)
+  end
+
+  it 'brews a drink while 1/1574 lacks a member the app reads, which its drink rule refuses', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(0, 0, missing: [2])
-    expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
-    expect(written).to be_empty
+    brewed_unoffered
+    expect(written.size).to eq(1)
   end
 
   it 'refuses program 0 or an id the app does not define, before sending anything', :aggregate_failures do
@@ -85,47 +90,55 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(written).to be_empty
   end
 
-  it 'refuses the double shot the software ids do not allow', :aggregate_failures do
+  it 'brews the double shot the software ids do not allow, which the app does not offer', :aggregate_failures do
     served[[1, 17, 0, 0]] = software_id(1, 6226)
-    expect { coffee.brew(24_005, double_shot: true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
-    expect(written).to be_empty
+    expect(coffee.one_touch?).to be(false)
+    coffee.brew(24_005, double_shot: true)
+    expect(written).to eq([['DOP2/2/1577?idx1=0&idx2=1', select(24_005, 0, double: true, attribute: 0)]])
   end
 
-  it 'refuses to brew while a query shows, as the app does' do
+  it 'brews while a query shows, which the app refuses', :aggregate_failures do
     served[[1, 131, 0, 1]] = dop2_leaf(1, 131, { 4 => dop2_field(:struct_array, [{ 1 => dop2_field(:e16, 3) }]) },
                                        idx2: 1)
-    expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    brewed_unoffered
+    expect(written.size).to eq(1)
   end
 
-  it 'refuses to brew while a drink is dispensing' do
+  it 'brews while a drink is dispensing, which the app refuses', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(24_010, 0)
-    expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    brewed_unoffered
+    expect(written.size).to eq(1)
   end
 
-  it 'brews once the drink running has reached its phase 10003' do
+  it 'brews once the drink running has reached its phase 10003', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(24_010, 10_003)
+    expect([coffee.brew_offered?, coffee.one_touch?]).to eq([true, true])
     coffee.brew(24_005)
     expect(written.size).to eq(1)
   end
 
-  it 'refuses to brew while Barista or a care program runs', :aggregate_failures do
+  it 'brews while Barista or a care program runs, which the app refuses', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(24_407, 0)
-    expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    brewed_unoffered
     served[[1, 1574, 0, 1]] = ps_context(0, 0)
     served[[2, 1586, 0, 0]] = combi(2, 8)
-    expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    brewed_unoffered
+    expect(written.size).to eq(2)
   end
 
-  it 'refuses to brew without mobile start' do
+  it 'brews without mobile start, which the app refuses', :aggregate_failures do
     served['State'] = { 'Status' => 2, 'RemoteEnable' => [15, 0, 0] }
-    expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    brewed_unoffered
+    expect(written.size).to eq(1)
   end
 
-  it 'starts Barista when the coffee maker lists it among its special beverages', :aggregate_failures do
-    expect { coffee.start_barista }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  it 'starts Barista, which the app offers once the coffee maker lists it among its special beverages',
+     :aggregate_failures do
+    expect(coffee.barista_entry?).to be(false)
+    coffee.start_barista
     group = { 1 => dop2_field(:u16, 24_400), 4 => dop2_field(:u32_array, [0x80]) }
     served[[1, 1599, 0, 1]] = dop2_leaf(1, 1599, { 1 => dop2_field(:struct_array, [group]) }, idx2: 1)
-    coffee.start_barista
+    expect(coffee.barista_entry?).to be(true)
     expect(written).to eq([['DOP2/2/1577?idx1=0&idx2=1', select(24_407, 0, attribute: 0)]])
   end
 
@@ -141,38 +154,48 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(written.size).to eq(1)
     end
 
-    it 'refuses Barista while any program runs' do
+    it 'starts Barista while any program runs, which the app does not offer', :aggregate_failures do
       served[[1, 1574, 0, 1]] = ps_context(24_500, 0)
-      expect { coffee.start_barista }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(coffee.barista_entry?).to be(false)
+      coffee.start_barista
+      expect(written.size).to eq(1)
     end
   end
 
-  it 'stops a running drink with request 2 on 2/1583 at 0/1, the header naming idx1' do
+  it 'stops a running drink with request 2 on 2/1583 at 0/1, the header naming idx1', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(24_010, 0)
+    expect(coffee.drink_stoppable?).to be(true)
     coffee.stop
     expect(written).to eq([['DOP2/2/1583?idx1=0&idx2=1', dop2_leaf(2, 0, { 1 => dop2_field(:e16, 2) }, idx2: 1)]])
   end
 
-  it 'stops no drink cancelled, done or not a drink, as the app hides its stop button', :aggregate_failures do
+  def stopped_unoffered
+    expect(coffee.drink_stoppable?).to be(false)
+    coffee.stop
+  end
+
+  it 'stops a drink cancelled, done or not a drink, while the app hides its stop button', :aggregate_failures do
     [ps_context(24_010, 0, sub: 24_057), ps_context(24_010, 10_003), ps_context(24_407, 0)].each do |context|
       served[[1, 1574, 0, 1]] = context
-      expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      stopped_unoffered
     end
-    expect(written).to be_empty
+    expect(written.size).to eq(3)
   end
 
-  it 'stops no drink whose program info lacks a member the app reads' do
+  it 'stops a drink whose program info lacks a member the app reads', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(24_010, 0, missing: [3])
-    expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    stopped_unoffered
+    expect(written.size).to eq(1)
   end
 
-  it 'stops nothing under local control or during care', :aggregate_failures do
+  it 'stops under local control or during care, which the app does not offer', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(24_010, 0)
     served['State'] = { 'Status' => 5, 'RemoteEnable' => [7, 0, 1] }
-    expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    stopped_unoffered
     served['State'] = { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] }
     served[[2, 1586, 0, 0]] = combi(2, 8)
-    expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    stopped_unoffered
+    expect(written.size).to eq(2)
   end
 
   it 'refuses an option the app does not map, before reading anything', :aggregate_failures do
@@ -204,36 +227,52 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(waits).to eq([5, 1.5])
     end
 
-    it 'switches on with the header 2/1586 answered, as the app writes it back' do
+    it 'switches on with the header 2/1586 answered, as the app writes it back', :aggregate_failures do
       served[[2, 1586, 0, 0]] = combi(1, 0, idx2: 1)
+      expect(coffee.power_on_offered?).to be(true)
       coffee.power_on
       expect(written.last).to eq(['DOP2/2/1586', combi(4, 0, idx2: 1)])
     end
 
-    it 'writes nothing when 2/1586 already shows it on' do
+    it 'writes ApplianceState 4 though 2/1586 shows it already' do
       served[[2, 1586, 0, 0]] = combi(4, 0)
       coffee.power_on
-      expect(written).to be_empty
+      expect(written).to eq([['DOP2/2/1586', combi(4, 0)]])
     end
 
-    it 'refuses to switch off a coffee maker that is off' do
-      expect { coffee.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'switches off a coffee maker that is off, which the app does not offer', :aggregate_failures do
+      expect(coffee.power_off_offered?).to be(false)
+      coffee.power_off
+      expect(written).to eq([['DOP2/2/1586', combi(1, 0)]])
     end
   end
 
-  it 'refuses to switch off while Barista runs, or under local control, as the app does', :aggregate_failures do
+  it 'switches off while Barista runs, or under local control, which the app does not offer', :aggregate_failures do
     served[[1, 1574, 0, 1]] = ps_context(24_407, 0)
-    expect { coffee.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(coffee.power_off_offered?).to be(false)
+    coffee.power_off
     served[[1, 1574, 0, 1]] = ps_context(0, 0)
     served['State'] = { 'Status' => 2, 'RemoteEnable' => [7, 0, 1] }
-    expect { coffee.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(coffee.power_off_offered?).to be(false)
+    coffee.power_off
+    expect(written.size).to eq(2)
   end
 
-  it 'refuses to switch on a coffee maker that is on, as the app switches it off then' do
-    expect { coffee.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
+  it 'switches on a coffee maker that is on, which the app switches off then', :aggregate_failures do
+    expect(coffee.power_on_offered?).to be(false)
+    coffee.power_on
+    expect(written).to eq([['DOP2/2/1586', combi(4, 0)]])
   end
 
-  it 'switches off with ApplianceState 1, written as read without an index' do
+  it 'switches the light of a DOP2 coffee maker by its State, which the app switches on a CVA6000 alone',
+     :aggregate_failures do
+    expect(coffee.light_offered?).to be(false)
+    coffee.light = true
+    expect(written.map(&:first)).to eq(['State'])
+  end
+
+  it 'switches off with ApplianceState 1, written as read without an index', :aggregate_failures do
+    expect(coffee.power_off_offered?).to be(true)
     coffee.power_off
     expect(written).to eq([['DOP2/2/1586', combi(1, 0)]])
   end
@@ -259,10 +298,11 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(written.size).to eq(1)
     end
 
-    it 'stops only its own drinks, 24001 to 24031', :aggregate_failures do
+    it 'stops any program, while the app stops only its own drinks, 24001 to 24031', :aggregate_failures do
       served[[2, 1574, 0, 1]] = ps_context(24_100, 0, unit: 2)
-      expect { coffee.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(coffee.drink_stoppable?).to be(false)
       served[[2, 1574, 0, 1]] = ps_context(24_010, 0, unit: 2)
+      expect(coffee.drink_stoppable?).to be(true)
       coffee.stop
       expect(written.map(&:first)).to eq(['DOP2/2/1583?idx1=0&idx2=1'])
     end
@@ -271,37 +311,57 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect { coffee.acknowledge(:message, option: 17) }.to raise_error(ArgumentError)
     end
 
-    it 'refuses to brew while one of its drinks runs' do
+    it 'brews while one of its drinks runs, which the app refuses', :aggregate_failures do
       served[[2, 1574, 0, 1]] = ps_context(24_010, 0, unit: 2)
-      expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      brewed_unoffered
+      expect(written.size).to eq(1)
     end
   end
 
   context 'with an unknown DOP2 coffee maker' do
     let(:ident) { identity('CM 9000', 4) }
 
-    it 'refuses to switch it on, as the app does' do
-      expect { coffee.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'switches it on, which the app does not offer', :aggregate_failures do
+      expect(coffee.power_on_offered?).to be(false)
+      coffee.power_on
+      expect(written).to eq([['DOP2/2/1586', combi(4, 0)]])
     end
   end
 
   context 'with a CVA6000' do
     let(:ident) { identity('CVA6805', 2) }
 
-    it 'acknowledges nothing on a CVA6000', :aggregate_failures do
+    it 'acknowledges, brews and starts Barista on nothing, a CVA6000 having no DOP2 leaf', :aggregate_failures do
       expect { coffee.acknowledge(:query, 3, option: 2) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { coffee.brew(24_005) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { coffee.start_barista }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect([coffee.brew_offered?, coffee.barista_entry?]).to eq([false, false])
       expect(fake.requests.reject { it.verb == 'GET' }).to be_empty
     end
 
-    it 'switches off on 1101 and stops a running drink on 1100' do
+    it 'switches off on 1101 and stops a running drink on 1100', :aggregate_failures do
+      expect([coffee.power_off_offered?, coffee.power_on_offered?]).to eq([true, false])
       coffee.power_off
       served['State'] = { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] }
+      expect(coffee.drink_stoppable?).to be(true)
       coffee.stop
       expect(dop1_requests).to eq(%w[110102000103 110002000102])
     end
 
-    it 'switches its light by writing back its State' do
+    it 'switches on, stops and switches its light in any status, which the app does not offer',
+       :aggregate_failures do
+      served['State'] = { 'Status' => 12, 'RemoteEnable' => [0, 0, 0], 'Light' => 2 }
+      expect(%i[power_on_offered? drink_stoppable? light_offered?].map { coffee.public_send(it) })
+        .to eq([false, false, false])
+      coffee.power_on
+      coffee.stop
+      coffee.light = true
+      expect(dop1_requests).to eq(%w[110102000102 110002000102])
+    end
+
+    it 'switches its light by writing back its State', :aggregate_failures do
       served['State'] = { 'Status' => 2, 'RemoteEnable' => [15, 0, 1], 'Light' => 2 }
+      expect(coffee.light_offered?).to be(true)
       coffee.light = true
       expect(written.map { [it.first, JSON.parse(it.last)] })
         .to eq([['State', { 'Status' => 2, 'RemoteEnable' => [15, 0, 1], 'Light' => 1 }]])

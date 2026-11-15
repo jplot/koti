@@ -8,19 +8,27 @@ module Miele
 
         def power_on: () -> void
 
+        def power_on_offered?: () -> bool
+
         def power_off: () -> void
+
+        def power_off_offered?: () -> bool
 
         def light=: (bool on) -> void
 
+        def light_offered?: () -> bool
+
         def stop: () -> void
+
+        def drink_stoppable?: () -> bool
 
         def acknowledge: (Symbol type, ?(Integer | Symbol)? id, option: Integer | Symbol) -> void
 
         private
 
-        def require_option!: (Integer | Symbol option) -> void
+        def stop_button?: (State state) -> bool
 
-        def drink_stoppable?: () -> bool
+        def require_option!: (Integer | Symbol option) -> void
 
         def sub_phase_of: (untyped program) -> Integer
 
@@ -32,13 +40,13 @@ module Miele
 
         def care?: (Integer id) -> bool
 
-        def switched_on: (Dop2::Leaf leaf) -> Dop2::Leaf?
+        def switched_on: (Dop2::Leaf leaf) -> Dop2::Leaf
 
         def read_combi_state: () -> Dop2::Leaf
 
         def switchable?: (State state, Array[Integer] statuses) -> bool
 
-        def dop1_switch?: (State state, Array[Integer] statuses) -> bool
+        def dop1_switchable?: (State state, Array[Integer] statuses) -> bool
 
         def status: (State state) -> Integer
 

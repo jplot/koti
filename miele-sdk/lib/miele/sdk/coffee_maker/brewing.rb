@@ -14,37 +14,72 @@ module Miele
         PROGRAM_MEMBERS = %i[prog_id prog_phase prog_sub_phase programtype progress_bar].freeze
         private_constant :ONE_TOUCH_IDS, :PROGRAM_MEMBERS
 
+        # {#one_touch?} gives whether the app offers two cups or a double shot.
+        #
         # @param drink [Integer, Symbol] its program id
         # @param two_cups [Boolean]
         # @param double_shot [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] on a CVA6000, or unless the app's rule allows a drink: mobile start, no
-        #   information or query shown, no drink, Barista or care program running; two cups or a double shot also
-        #   need the software ids the app requires
+        # @raise [ActionUnavailableError] on a CVA6000, which has no 2/1577 to write
         # @raise [ArgumentError] for program 0 or an id the app does not define, or when 2/1577 carries no coffee
         #   parameters
         # @api public
         def brew(drink, two_cups: false, double_shot: false)
-          require!(dop2?, 'the app brews nothing on a CVA6000')
+          require_dop2!
           require_drink!(drink)
-          require_dispensable!
-          if two_cups || double_shot
-            require!(one_touch?, 'the coffee maker takes two cups or a double shot only from newer software')
-          end
           write_drink(drink, two_cups, double_shot)
         end
 
+        # IsDrinkDispensableStatusRule; the app's program info source fails, and the rule with it, when 1574 lacks
+        # a member it reads.
+        #
+        # @return [Boolean] whether the app offers {#brew}: a DOP2 coffee maker under mobile start, no information
+        #   or query shown, no drink, Barista or care program running
+        # @api public
+        def brew_offered?
+          return false unless dop2?
+
+          program = program_context&.prog_attributes_cca
+          complete?(program) && mobile_start_on?(state) && !notified? && !busy?(program)
+        end
+
         # @return [void]
-        # @raise [ActionUnavailableError] unless a CM6F, CVA or Ref2 that lists Barista among its special beverages
-        #   is on (Status 2 or 3) under remote control without local control, runs no program and shows no
-        #   information
+        # @raise [ActionUnavailableError] on a CVA6000, which has no 2/1577 to write
         # @api public
         def start_barista
-          require!(barista_entry?(state), 'the coffee maker cannot start Barista now')
+          require_dop2!
           modify_dop2(family::GlobalPsSelect, 2, 1577, 0, 1) { it.with(prog_id: BARISTA, selection_type: 0) }
         end
 
+        # BaristaAssistantEntryPointRule; the start page's further message check is not traced.
+        #
+        # @param state [State] read when not given
+        # @return [Boolean] whether the app offers {#start_barista}: a CM6F, CVA or Ref2 that lists Barista among
+        #   its special beverages, on (Status 2 or 3) under remote control without local control, running no
+        #   program and showing no information
+        # @api public
+        def barista_entry?(state = self.state)
+          %i[cm6f cva cva_ref2].include?(variant) && [2, 3].include?(state.raw['Status']) &&
+            state.remote_control? == true && state.local_control? != true && program_id.zero? && !informed? &&
+            barista?
+        end
+
+        # IsOneTouchDoubleShotSupportedRule; a CM7 reads no 1/17.
+        #
+        # @return [Boolean] whether the app offers two cups or a double shot: from the software ids it requires
+        # @api public
+        def one_touch?
+          system, board = ONE_TOUCH_IDS[variant]
+          return false unless system && board
+
+          main_id(2) >= system && (variant == :cm7 || main_id(1) >= board)
+        end
+
         private
+
+        # @return [void]
+        # @raise [ActionUnavailableError] on a CVA6000
+        def require_dop2! = require!(dop2?, 'a CVA6000 has no 2/1577 to write')
 
         # The app writes both flags every time.
         #
@@ -73,28 +108,10 @@ module Miele
           raise ArgumentError, "no drink #{drink}" if id.zero? || !family::GlobalEnumPrgId.from(id).is_a?(Symbol)
         end
 
-        # @return [void]
-        # @raise [ActionUnavailableError]
-        def require_dispensable!
-          program = program_context&.prog_attributes_cca
-          require!(complete?(program) && mobile_start_on?(state) && !notified? && !busy?(program),
-                   'the coffee maker cannot dispense a drink now')
-        end
-
         # @param state [State]
         # @return [Boolean] remote control and mobile start without local control
         def mobile_start_on?(state)
           state.remote_control? == true && state.local_control? != true && state.mobile_start? == true
-        end
-
-        # BaristaAssistantEntryPointRule; the start page's further message check is not traced.
-        #
-        # @param state [State]
-        # @return [Boolean]
-        def barista_entry?(state)
-          %i[cm6f cva cva_ref2].include?(variant) && [2, 3].include?(state.raw['Status']) &&
-            state.remote_control? == true && state.local_control? != true && program_id.zero? && !informed? &&
-            barista?
         end
 
         # @return [Boolean] any information or query with an id
@@ -150,16 +167,6 @@ module Miele
           return false if operation.nil? || family::GlobalEnumOperationState.to_i(operation) != 8
 
           variant != :cm7 || ![24_060, 24_063].include?(id)
-        end
-
-        # IsOneTouchDoubleShotSupportedRule; a CM7 reads no 1/17.
-        #
-        # @return [Boolean]
-        def one_touch?
-          system, board = ONE_TOUCH_IDS[variant]
-          return false unless system && board
-
-          main_id(2) >= system && (variant == :cm7 || main_id(1) >= board)
         end
 
         # @param unit [Integer]

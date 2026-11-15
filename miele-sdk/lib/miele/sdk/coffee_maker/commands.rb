@@ -5,7 +5,7 @@ module Miele
     class CoffeeMaker < Appliance
       # Power, light, stop and acknowledgements as the app's coffee module sends them: a DOP2 coffee maker takes
       # 2/1586 as read, and its other objects through ModifyDop2Message; a CVA6000 takes Dop1 1101 and 1100, and
-      # its light in +State+, after the checks of the app's dashboard.
+      # its light in +State+. The predicates give the checks of the app's dashboard.
       module Commands
         # The notification member each type acknowledges with its id; the others take their option only.
         MESSAGE_TYPES = { information: :info, message: nil, query: :query, warning: nil, error: nil }.freeze
@@ -18,58 +18,63 @@ module Miele
         # 2/1586 again, then waits 1.5 s before it writes it.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] unless off (Status 1) under remote control without local control, a
-        #   known variant on DOP2, as the app's power switch allows it
         # @api public
         def power_on
-          state = self.state
-          return write_device_action(2) if dop1_switch?(state, [1])
+          return write_device_action(2) if protocol_version == 2
 
-          require!(variant != :unknown && switchable?(state, [1]), 'the coffee maker cannot be switched on now')
           leaf = switched_on(read_combi_state)
-          return unless leaf
-
           @sleeper.call(1.5)
           write_dop2(leaf)
         end
 
+        # @return [Boolean] whether the app's power switch offers {#power_on}: a known variant off (Status 1) under
+        #   remote control without local control; on a CVA6000, off under its remote control
+        # @api public
+        def power_on_offered?
+          state = self.state
+          return dop1_switchable?(state, [1]) if protocol_version == 2
+
+          variant != :unknown && switchable?(state, [1])
+        end
+
         # @return [void]
-        # @raise [ActionUnavailableError] unless on (Status 2 or 3) under remote control without local control and
-        #   no Barista running, as the app's power switch allows it; on a CVA6000, unless on, paused, ended, failed
-        #   or cancelled
         # @api public
         def power_off
-          state = self.state
-          return write_device_action(3) if dop1_switch?(state, SWITCH_OFF_STATUSES)
+          return write_device_action(3) if protocol_version == 2
 
-          require!(switchable?(state, [2, 3]) && program_id != Brewing::BARISTA,
-                   'the coffee maker cannot be switched off now')
           modify(family::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
+        end
+
+        # @return [Boolean] whether the app's power switch offers {#power_off}: on (Status 2 or 3) under remote
+        #   control without local control and no Barista running; on a CVA6000, on, paused, ended, failed or
+        #   cancelled under its remote control
+        # @api public
+        def power_off_offered?
+          state = self.state
+          return dop1_switchable?(state, SWITCH_OFF_STATUSES) if protocol_version == 2
+
+          switchable?(state, [2, 3]) && program_id != Brewing::BARISTA
         end
 
         # The app writes back the whole +State+ it read, the light changed.
         #
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] but on a CVA6000 neither disconnected, locked nor in service
         # @api public
         def light=(on)
-          state = self.state
-          require!(dop1_switch?(state, LIGHT_STATUSES), 'the app switches the light of a CVA6000 only')
           command(Schema::DeviceState.from(state.raw).with(light: on ? 1 : 2))
         end
 
+        # @return [Boolean] whether the app switches the light: a CVA6000 neither disconnected, locked nor in
+        #   service, under its remote control
+        # @api public
+        def light_offered? = protocol_version == 2 && dop1_switchable?(state, LIGHT_STATUSES)
+
         # @return [void]
-        # @raise [ActionUnavailableError] unless a drink runs, not cancelled, no care program, and on DOP2 under
-        #   remote control without local control
         # @api public
         def stop
-          if dop2?
-            require!(drink_stoppable?, 'the coffee maker cannot stop now')
-            return modify_dop2(family::GlobalUserReqRequest, 2, 1583, 0, 1) { it.with(request: 2) }
-          end
+          return modify_dop2(family::GlobalUserReqRequest, 2, 1583, 0, 1) { it.with(request: 2) } if dop2?
 
-          require!(dop1_switch?(state, [5]), 'the coffee maker runs no drink to stop')
           klass = Objects::CoffeeGen7::ProcessActionCva
           section = blank(klass::ProcessActionWriteSection).with(struktur_version: 1, action: 2)
           write_dop1_object(klass, section, type: Dop1::WRITE)
@@ -79,26 +84,34 @@ module Miele
         # @param id [Integer, Symbol, nil] an information's or a query's id
         # @param option [Integer, Symbol]
         # @return [void]
-        # @raise [ActionUnavailableError] on a CVA6000, where the app acknowledges nothing
+        # @raise [ActionUnavailableError] on a CVA6000, which has no 2/138 to write
         # @raise [ArgumentError] for an option outside 1 to 17, or 1 to 16 on a CM7
         # @api public
         def acknowledge(type, id = nil, option:)
           member = MESSAGE_TYPES.fetch(type) { raise ArgumentError, "no #{type} notification" }
-          require!(dop2?, 'the app acknowledges nothing on a CVA6000')
+          require!(dop2?, 'a CVA6000 has no 2/138 to acknowledge on')
           require_option!(option)
           modify_dop2(family::GlobalNtfctnAcknowledge, 2, 138, 0, 1) do |ack|
             member ? ack.with(member => id, ack_option: option) : ack.with(ack_option: option)
           end
         end
 
+        # @return [Boolean] whether the app offers {#stop}: its progress bar's stop button under remote control
+        #   without local control; on a CVA6000, a drink running (Status 5) under its remote control
+        # @api public
+        def drink_stoppable?
+          state = self.state
+          protocol_version == 2 ? dop1_switchable?(state, [5]) : stop_button?(state)
+        end
+
         private
 
         # ActionProgressBarViewModel shows its stop button for a drink, not cancelled (24057), with no care program.
         #
+        # @param state [State]
         # @return [Boolean]
-        def drink_stoppable?
+        def stop_button?(state)
           program = program_context&.prog_attributes_cca
-          state = self.state
           return false unless complete?(program) && state.remote_control? == true && state.local_control? != true
 
           id = family::GlobalEnumPrgId.to_i(program.prog_id)
@@ -118,12 +131,9 @@ module Miele
         end
 
         # @param leaf [Dop2::Leaf] 2/1586 as read
-        # @return [Dop2::Leaf, nil] it with ApplianceState 4, nil when it shows that already
+        # @return [Dop2::Leaf] it with ApplianceState 4
         def switched_on(leaf)
-          combi = family::GlobalDeviceCombiState.from(leaf.fields)
-          return if family::GlobalEnumApplianceState.to_i(combi.appliance_state) == 4
-
-          leaf.with(fields: combi.with(appliance_state: 4).to_fields)
+          leaf.with(fields: family::GlobalDeviceCombiState.from(leaf.fields).with(appliance_state: 4).to_fields)
         end
 
         # @return [Dop2::Leaf] 2/1586 at 0/0, which SwitchOnHelper writes back as read
@@ -146,14 +156,10 @@ module Miele
 
         # @param state [State]
         # @param statuses [Array<Integer>] those the action takes
-        # @return [Boolean] a Dop1 coffee maker in one of them under the CVA6000's remote control
-        # @raise [ActionUnavailableError] on a Dop1 coffee maker in another status
-        def dop1_switch?(state, statuses)
-          return false unless protocol_version == 2
-
+        # @return [Boolean] in one of them under the CVA6000's remote control
+        def dop1_switchable?(state, statuses)
           remote = ![0, 8].include?(state.raw.dig('RemoteEnable', 0).to_i) || [12, 145].include?(status(state))
-          require!(statuses.include?(status(state)) && remote, 'the coffee maker cannot do that now')
-          true
+          statuses.include?(status(state)) && remote
         end
 
         # @param state [State]

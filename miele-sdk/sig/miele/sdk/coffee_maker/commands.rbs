@@ -44,7 +44,7 @@ module Miele
 
         def require_dop2!: () -> void
 
-        def read_combi_state: () -> Dop2::Leaf
+        def switch_on: () -> void
 
         def switchable?: (State state, Array[Integer] statuses) -> bool
 

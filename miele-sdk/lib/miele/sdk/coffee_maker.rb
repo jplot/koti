@@ -7,6 +7,7 @@ module Miele
     # unit 1, and the app reads a CM7 no cleaning, descaling, feature, ident, profile or drink.
     class CoffeeMaker < Appliance
       include Commands
+      include SwitchOn
       include Brewing
       include Profiles
 

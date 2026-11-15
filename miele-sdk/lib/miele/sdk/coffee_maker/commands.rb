@@ -15,21 +15,17 @@ module Miele
         private_constant :MESSAGE_TYPES, :LIGHT_STATUSES, :SWITCH_OFF_STATUSES
 
         # A sleeping DOP2 coffee maker answers 500: the app wakes it (+DeviceAction+ 2), waits 5 s and reads
-        # 2/1586 again, then waits 1.5 s before it writes it.
+        # 2/1586 again, then waits 1.5 s before it writes it; {SwitchOn} tells how it starts again.
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
-        # @raise [ResponseError] when the appliance refuses DeviceAction 2, 400 included
+        # @raise [Error] what fails the third attempt, 400 included, or the 500 still answered after 45 s
         # @api public
         def power_on
           return write_device_action(2) if protocol_version == 2
 
           require_dop2!
-          leaf = switched_on(read_combi_state)
-          return unless leaf
-
-          @sleeper.call(1.5)
-          write_dop2(leaf)
+          switch_on
         end
 
         # @return [Boolean] whether the app's power switch offers {#power_on}: a known variant off (Status 1) under
@@ -151,17 +147,6 @@ module Miele
           return if family::GlobalEnumApplianceState.to_i(combi.appliance_state) == 4
 
           leaf.with(fields: combi.with(appliance_state: 4).to_fields)
-        end
-
-        # @return [Dop2::Leaf] 2/1586 at 0/0, which SwitchOnHelper writes back as read
-        def read_combi_state
-          dop2(2, 1586, idx1: 0, idx2: 0)
-        rescue ResponseError => e
-          raise unless e.status == 500
-
-          wake
-          @sleeper.call(5)
-          dop2(2, 1586, idx1: 0, idx2: 0)
         end
 
         # @param state [State]

@@ -2,6 +2,8 @@ module Hue
   module Sdk
     module Secure
       class Camera
+        DETECTIONS: Array[String]
+
         @path: String
         @speaker: String
 
@@ -11,6 +13,8 @@ module Hue
         def initialize: (String home_id, String id, Hash[String, untyped] data) -> void
 
         def attributes: () -> Schema::CameraResponse?
+
+        def detections: () -> Array[String]?
 
         def update: (Schema::CameraConfigUpdate request) -> void
 
@@ -37,6 +41,18 @@ module Hue
         def sound_chime: (sound: String, ?volume: Float?) -> void
 
         def sound_alarm: () -> void
+
+        private
+
+        def decoded_zones: () -> Array[Schema::ActivityZoneResponse]?
+
+        def decodable?: (Schema::ActivityZoneResponse? zone) -> bool
+
+        def listed?: () -> bool
+
+        def allowed: (Array[Schema::ActivityZoneResponse] zones) -> Array[String]?
+
+        def entire_area?: (Array[Schema::ActivityZoneResponse] zones) -> bool
       end
     end
   end

@@ -100,3 +100,5 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   then does, and whether the alarm may pick a camera's people, pets and vehicles. The client gives what the cloud
   does not: whether a bridge of the home has a motion area, and the app's remote free-clips setting. The gem sends
   every change as it is given, as the app's screens shape what they offer rather than refuse a write.
+- `camera.detections` gives the detection types a camera's activity zones allow, which the app's alarm devices screen
+  offers for that camera. Never tested with a device.

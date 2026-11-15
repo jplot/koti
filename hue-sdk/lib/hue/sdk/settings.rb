@@ -25,8 +25,8 @@ module Hue
     # @!attribute [r] utc
     #   @return [String, nil] the clock of the bridge, such as +2026-11-03T10:00:00+
     # @!attribute [r] portal_services
-    #   @return [Boolean, nil] +portalservices+, which the app writes once, at onboarding, from its question whether to
-    #     share extended analytics
+    #   @return [Boolean, nil] +portalservices+, which the app's onboarding writes from its question whether to share
+    #     extended analytics, asked only while the bridge does not report it on
     # @!attribute [r] analytics_consent
     #   @return [Boolean, nil] whether the bridge may share statistics
     # @!attribute [r] http_blocked
@@ -66,14 +66,16 @@ module Hue
       # @param time_zone [String, nil] one of {.time_zones}
       # @param utc [String, nil] the clock of the bridge
       # @param http_blocked [Boolean, nil] whether the bridge refuses plain HTTP
-      # @param analytics_consent [Boolean, nil] whether the bridge may share statistics
-      # @param portal_services [Boolean, nil] +portalservices+, as the app's onboarding writes it
+      # @param analytics_consent [Boolean, nil] whether the bridge may share statistics; the app's onboarding asks it
+      #   only while the bridge does not report it enabled, and of a member who may update the home
+      # @param portal_services [Boolean, nil] +portalservices+; the app's onboarding asks it first, and only while the
+      #   bridge does not report it on, so it never turns it off
       # @return [Settings] these settings with the values written, as the app keeps them; it reads only +http_blocked+
       #   back from the bridge, which is nil on a bridge that does not report it
       # @raise (see .read)
       # @api public
       def update(time_zone: nil, utc: nil, http_blocked: nil, analytics_consent: nil, portal_services: nil)
-        written = { time_zone:, utc:, http_blocked:, analytics_consent:, portal_services: }.compact
+        written = { time_zone:, utc:, http_blocked:, portal_services:, analytics_consent: }.compact
         written.each { |name, value| ClipV1.request(:put, 'config', { WRITE.fetch(name) => value }) }
         written[:http_blocked] = http_blocked_read_back if written.key?(:http_blocked)
         with(**written)

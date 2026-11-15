@@ -12,6 +12,8 @@ module Ajax
         @token: String?
         @user_id: String?
         @mutex: Thread::Mutex
+        @attempts: Integer
+        @refusal: StandardError?
 
         def initialize: (Client client, Configuration::Settings settings) -> void
         def inspect: () -> String
@@ -21,6 +23,7 @@ module Ajax
 
         private
 
+        def attempt_sign_in: () -> void
         def sign_in_flow: () -> void
         def require_credentials: () -> void
         def two_factor: (untyped request_id) -> void

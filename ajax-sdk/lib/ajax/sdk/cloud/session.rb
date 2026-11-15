@@ -26,20 +26,26 @@ module Ajax
           @token = settings.session_token
           @user_id = settings.user_id
           @mutex = Mutex.new
+          @attempts = 0
         end
 
         # @return [String] a description that never prints the token or the account's secrets
         def inspect = "#<#{self.class.name} logged_in=#{!@token.nil?}>"
 
         # Signs in with the password hash, then with the TOTP code when two-factor is required, unless a session is
-        # held; concurrent callers sign in once. The metadata is read under the same lock, so a session another
-        # thread forgets meanwhile never sends a call without its token.
+        # held; concurrent callers sign in once, and those that waited on a failed sign-in raise its error. The
+        # metadata is read under the same lock, so a session another thread forgets meanwhile never sends a call
+        # without its token.
         #
         # @return [Hash{String=>String}] the call metadata
         # @raise [AuthenticationError] when the gateway refuses the login
         def ensure_login
+          attempt = @attempts
           @mutex.synchronize do
-            sign_in_flow unless @token && @user_id
+            refusal = @refusal
+            raise refusal if refusal && @attempts != attempt
+
+            attempt_sign_in unless @token && @user_id
             metadata
           end
         end
@@ -63,6 +69,16 @@ module Ajax
         end
 
         private
+
+        def attempt_sign_in
+          sign_in_flow
+          @refusal = nil
+        rescue StandardError => e
+          @refusal = e
+          raise
+        ensure
+          @attempts += 1
+        end
 
         def sign_in_flow
           require_credentials

@@ -58,6 +58,32 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     expect(client).to have_received(:authenticate).twice
   end
 
+  def login_outcome
+    session.ensure_login
+  rescue Ajax::Sdk::Cloud::AuthenticationError => e
+    e
+  end
+
+  def queued?(threads) = threads.size == 5 && (threads - [Thread.current]).all? { it.status == 'sleep' }
+
+  def refuse_totp_once_all_are_queued(threads)
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 5
+    allow(client).to receive(:authenticate) do |path|
+      Thread.pass while Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline && !queued?(threads)
+      deadline = 0
+      path.include?('login_by_password') ? two_factor : invalid_totp
+    end
+  end
+
+  it 'raises a refusal to the callers that waited on it, sending nothing more', :aggregate_failures do
+    threads = []
+    refuse_totp_once_all_are_queued(threads)
+    5.times { threads << Thread.new { login_outcome } }
+
+    expect(threads.map { it.value.reason }).to eq([:invalid_totp] * 5)
+    expect(client).to have_received(:authenticate).twice
+  end
+
   it 'raises AuthenticationError naming the reason and attempts left', :aggregate_failures do
     refused = password({ failure: { invalid_credentials: {}, attempts_left: 2 } })
     allow(client).to receive(:authenticate).and_return(refused)

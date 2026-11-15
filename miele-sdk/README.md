@@ -450,33 +450,45 @@ dishwasher.program_list        # Dop1 8905; selection reads 8907
 
 ```ruby
 dishwasher.select_program(28)
-dishwasher.set_extras(:express, :dry)       # the extras this model's app writes; ArgumentError for others
+dishwasher.set_extras(:express, :dry)       # offered_extras gives those the app writes on this model
+dishwasher.start_offered?                   # => true where the app's start rule allows it
 dishwasher.start                            # or start_delayed(time): today's or tomorrow's time of day
 dishwasher.pause                            # resume, stop, cancel
 dishwasher.power_on                         # and power_off, on DOP2
-dishwasher.auto_dos = true                  # write_setting(id, value) on a G38, G58, G7 or PFD10
+dishwasher.auto_dos = true                  # write_setting(id, value); offered_settings for this model
 dishwasher.acknowledge(info: 700, option: 1)
 dishwasher.leave_abort                      # DOP2
 dishwasher.open_door                        # Dop1, under mobile start with the door closed
 ```
 
-Each action makes the checks of the app's rule for it and raises `ActionUnavailableError` without
-sending anything when one fails. `start` needs mobile start (and AppSupport bit 4 on DOP2), the door
-closed, request 1 offered and the dishwasher ready (Status 3, or 4 awake); `pause` and `resume` need
-mobile start and a running or paused program; `stop` needs no mobile start, only a program that
-runs, pauses or waits awake, stop or cancel offered, and a dishwasher not locked; `cancel` follows
-the app's details bar, where it is the second button only while neither pause nor stop comes
-first, from Status 3 to 6, under mobile start, while a program runs or pauses, or while one waits
-under remote control (the bar's other Cancel, which reverts the selected extras, is left out);
-`start_delayed` needs a program selected (Status 3) under mobile start, the dishwasher not locked. A
-DOP2 dishwasher refuses while it shows info 700. A Dop1 dishwasher takes `ProcessAction` on its
+Each action sends what it is given; a predicate gives the app's rule for it, so the client's
+screen can offer what the app's would. An action raises `ActionUnavailableError` only where the
+protocol has nothing to write it to: `power_on`, `power_off` and `leave_abort` on a Dop1
+dishwasher, `open_door` on a DOP2 one. `set_extras` raises `ArgumentError` for an extra the
+dishwasher's object has no place for (a member `GLOBAL_PS_ExtrasDW` lacks, a name without a bit on
+8906); it sets the model's extras on or off as named, and another one named on.
+
+| Predicate | The app's rule |
+|---|---|
+| `start_offered?` | mobile start (and AppSupport bit 4 on DOP2), the door closed, request 1 offered and the dishwasher `ready?` (Status 3, or 4 awake) |
+| `pause_offered?`, `resume_offered?` | mobile start and a running (pause offered) or paused (start offered) program |
+| `stop_offered?` | no mobile start needed: a program that runs, pauses or waits awake, stop or cancel offered, and a dishwasher not locked |
+| `cancel_offered?` | the details bar (`details_bar?`: Status 3 to 6, not asleep waiting to start, not locked), where cancel is the second button only while neither pause nor stop comes first, under mobile start, while a program runs or pauses, or while one waits under remote control; the bar's other Cancel, which reverts the selected extras, is left out |
+| `start_delayed_offered?` | a program selected (Status 3) under mobile start, the dishwasher not locked |
+| `power_on_offered?`, `power_off_offered?` | DOP2, remote control, and the dishwasher off (Status 1, or 4 asleep) or on and not locked |
+| `leave_abort_offered?` | DOP2 under remote control |
+| `open_door_offered?` | Dop1, waiting for its program (Status 2 or 3) under mobile start with the door closed |
+
+`start_offered?`, `pause_offered?`, `resume_offered?`, `stop_offered?` and `cancel_offered?` are
+false while a DOP2 dishwasher shows info 700. A Dop1 dishwasher takes `ProcessAction` on its
 `State`, as the app's DeviceStateDto keeps it, its program and extras on 8906 and its delayed start
 on 8909. Delays are counted on the wall clock, as the app counts them, so on the day the clocks
 change they follow the clock.
 
 Not traced, so left to the dishwasher: where a Dop1 dishwasher shows info 700, and the units of the
 Dop1 consumption. The app sends the steps of `power_on` and `power_off` again while it watches
-`State` for 15 s; the SDK sends each once.
+`State` for 15 s, and waits for a woken dishwasher before writing 2/1586; the SDK sends each once,
+at once.
 
 ## Laundry
 

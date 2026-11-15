@@ -395,7 +395,7 @@ parameters the app reads before writing any. A value its wire type does not hold
 | `parameter_shown?(name)` | the section the app shows: none while 1/131 shows message 20 or 19 (keep warm or rapid cooling running after the program); a value readable on 1/1574 (request mask 8); for all but browning and doneness, a function on 1/1585 (program type 2, 3, 4, 5, 7, 8, 38 or 50) that 1/1574 shows too (ShouldHideProgramParameters); a current target temperature above zero; no duration or start time while the oven runs or pauses with a duration set; no start or end time while a readable duration is unset |
 | `parameter_editable?(name)` | the section shown, remote control without local control and a program on the oven, mobile start too once the program has started (waiting, running, paused or ended) or for program 361, and the cell enabled: a writable value (request mask 1), and mobile start for browning and doneness and for the duration, start and end times of an own or automatic program |
 | `option_shown?(name)`, `option_editable?(name)` | that function and the option readable; to change it, the parameters allowed as above, the option writable, and mobile start for an automatic program's options |
-| `start_offered?` | an automatic program, or a duration set where the program requires one |
+| `start_offered?` | a program selected (a ProgId on 1/1574), automatic, or with a duration set where it requires one |
 | `stop_offered?` | one of requests 2, 55, 56 and 57 offered, no pyrolysis abort running, and remote control without local control; on a Dop1 oven, a function, own or automatic program |
 | `continue_cooking_offered?` | the continue bubble and button: the oven offering it (baking or cooking), a finished program (OvenState End) other than a cleaning, no keep warm or rapid cooling running after it, and mobile start under remote control without local control |
 | `stop_keeping_warm_offered?` | message 20 shown |
@@ -467,12 +467,14 @@ dishwasher.leave_abort                      # DOP2
 dishwasher.open_door                        # Dop1, under mobile start with the door closed
 ```
 
-Each action sends what it is given; a predicate gives the app's rule for it, so the client's
-screen can offer what the app's would. An action raises `ActionUnavailableError` only where the
-protocol has nothing to write it to: `power_on`, `power_off` and `leave_abort` on a Dop1
-dishwasher, `open_door` on a DOP2 one. `set_extras` raises `ArgumentError` for an extra the
-dishwasher's object has no place for (a member `GLOBAL_PS_ExtrasDW` lacks, a name without a bit on
-8906); it sets the model's extras on or off as named, and another one named on.
+Each action sends what it is given; a predicate gives the app's rule for it, so the client's screen
+can offer what the app's would. An action raises `ActionUnavailableError`, sending nothing, only
+where the dishwasher's protocol has no address for it. A Dop1 dishwasher has no DOP2 leaf:
+`power_on`, `power_off` and `leave_abort` (2/1586), `acknowledge` (2/138), `write_setting` and
+`auto_dos=` (2/105) raise on it. A DOP2 dishwasher has no Dop1 object 1404: `open_door` raises on
+it. `set_extras` raises `ArgumentError` for an extra the dishwasher's object has no place for (a
+member `GLOBAL_PS_ExtrasDW` lacks, a name without a bit on 8906); it sets the model's extras on or
+off as named, and another one named on.
 
 | Predicate | The app's rule |
 |---|---|
@@ -493,8 +495,9 @@ change they follow the clock.
 
 Not traced, so left to the dishwasher: where a Dop1 dishwasher shows info 700, and the units of the
 Dop1 consumption. The app sends the steps of `power_on` and `power_off` again while it watches
-`State` for 15 s, and waits for a woken dishwasher before writing 2/1586; the SDK sends each once,
-at once.
+`State` for 15 s; the SDK sends each once. As the app's SwitchOnForDop2Action, `power_on` writes
+2/1586 only while `State` shows Status 1 or 4, which it reads again after waking the dishwasher, and
+writes nothing otherwise.
 
 ## Laundry
 
@@ -543,20 +546,23 @@ pause; it takes `ProcessAction` alone, pause as 3. The other rules come as predi
 | `set_parameters_offered?` | a program selected (Status 3) under mobile start, on DOP2 or Dop1 |
 | `start_delayed_offered?` | start or request 8 offered |
 
-`stop_end_signal` and `power_off` raise `Miele::Sdk::ActionUnavailableError` on a Dop1 or Opcode
-appliance, whose protocol has no DOP2 leaf to write them to; so do `select_program` and
-`set_parameters` on an Opcode appliance, which has no selection object. A washer takes
-`temperature` (°C, with `eco`), `spin_speed` (rpm), `soiling`, `cap`, `extras`, `stains`,
-`twin_dos`, and on DOP2 `drying_level`, `drying_time` and `program_mode`, or on Dop1 `master_care`;
-a dryer takes `extras`, `drying_level` and `drying_time`; another parameter, or a name the SDK has
-no encoding for, raises `ArgumentError`, as the app writes none. On DOP2 the SDK first copies into 2/1577
+`stop_end_signal`, `stop_to_edit`, `extend_anti_crease`, `power_off` and `anti_crease=` raise
+`Miele::Sdk::ActionUnavailableError` on a Dop1 or Opcode appliance, whose protocol has no DOP2 leaf
+to write them to (`ProcessAction` has no value for requests 28, 12102 and 12144); so do
+`select_program`, `set_parameters` and `start_delayed` on an Opcode appliance, which has no
+selection object. A washer takes `temperature` (°C, with `eco`), `spin_speed` (rpm), `soiling`,
+`cap`, `master_care`, `extras`, `stains`, `twin_dos`, and on DOP2 `drying_level`, `drying_time` and
+`program_mode`; a dryer takes `extras`, `drying_level` and `drying_time`. On DOP2 an extra is any
+member of `GLOBAL_PS_ExtrasWM` or `GLOBAL_PS_ExtrasTD`: those the app writes are set on when named
+and off otherwise, another named is set on, each where 2/1577 carries it. Another parameter, or a
+name the object has no place for, raises `ArgumentError`. On DOP2 the SDK first copies into 2/1577
 the current values 2/1574 shows, as the app does, then writes the parameters given; it writes only
 members 2/1577 carries. On Dop1 it reads 8201 or 8602 and writes it back with the read request type
-and the app's encodings (a temperature it has no code for goes out as 0, an eco 40 °C as 39, and
-the TwinDos containers only when given both), and `NotAcceptedError` reports an Ack other than 1. `start_delayed` lets the appliance choose the mode
-as the app does: whole minutes from a minute before now, or local seconds since 1970, both on the
-wall clock, then request 8; a Dop1 appliance takes `StartTime`, its selection written back, then
-`ProcessAction` 1.
+and the app's encodings (a temperature it has no code for goes out as 0, an eco 40 °C as 39, and the
+TwinDos containers only when given both), and `NotAcceptedError` reports an Ack other than 1.
+`start_delayed` lets the appliance choose the mode as the app does: whole minutes from a minute
+before now, or local seconds since 1970, both on the wall clock, then request 8; a Dop1 appliance
+takes `StartTime`, its selection written back, then `ProcessAction` 1.
 
 Left out: requests 12106 (add laundry) and 12116 (TwinDos care), which the app declares and never
 sends; its limit of three anti-crease extensions; its start time kept until start. The SDK sends
@@ -590,7 +596,7 @@ coffee.start_barista                  # barista_entry? gives the app's rule
 coffee.stop                           # drink_stoppable? gives the app's rule
 coffee.acknowledge(:query, 3, option: 2)   # :information or :query with its id; the others the option alone
 coffee.power_on                            # and power_off
-coffee.light = true                        # the app switches a CVA6000's alone: light_offered?
+coffee.light = true                        # a CVA6000's; light_offered? gives the app's rule
 coffee.create_profile('Anna')              # rename_profile, delete_profile
 coffee.edit_drink(24_037, amount: 50, temperature: 2, pre_brewing: 1, bean_sort: 2)  # drink_settings: the pickers
 coffee.rename_drink(24_037, 'Mein Kaffee')
@@ -599,8 +605,7 @@ coffee.rename_drink(24_037, 'Mein Kaffee')
 A DOP2 coffee maker writes 2/1586 as read to switch on and off, waking first when it answers 500,
 and its other objects as the app's ModifyDop2Message does: back where they were read, the index
 read at as the header's attribute. A CVA6000 takes Dop1 1101 to switch on and off and 1100 to
-stop, and the light of any coffee maker by writing back its `State` as the app's DeviceStateDto
-keeps it.
+stop, and its light by writing back its `State` as the app's DeviceStateDto keeps it.
 
 Every action sends what it is given; the predicates give the app's rules, so the client's screen
 can offer what the app's dashboard would:
@@ -617,14 +622,16 @@ can offer what the app's dashboard would:
 | `delete_profile_offered?(id)` | a custom profile, coffee profiles listed in 2/348 |
 | `drink_name_allowed?(id, name)` | a CVA, a drink outside the standard profile, a name not blank |
 
-`power_on` writes ApplianceState 4 even when 2/1586 shows it already. An action raises
-`Miele::Sdk::ActionUnavailableError` only where nothing can be written: `brew`, `start_barista` and
-`acknowledge` on a CVA6000, which has no DOP2 leaf for them; the profile and drink actions on a CM7
-or CVA6000, which have no such object; `create_profile` once the app's slots are used (4 on a
-CM6160, 8 on another CM6F, 10 otherwise). `brew` takes a program id the app defines, not 0, and
-acknowledgements options 1 to 17, 1 to 16 on a CM7, as the app's mappers do; another raises
-`ArgumentError`, and so does a drink value its 2/261 member does not hold. `edit_drink` writes 255
-as the bean sort on all but a CVA, as the app does.
+As the app's SwitchOnHelper, `power_on` writes nothing, and does not wait, once 2/1586 shows
+ApplianceState 4. An action raises `Miele::Sdk::ActionUnavailableError` only where nothing can be
+written: `brew`, `start_barista` and `acknowledge` on a CVA6000, which has no DOP2 leaf for them;
+`light=` on a DOP2 coffee maker, for which the app has no light request (its DOP2 light action sends
+nothing); `power_on` and `power_off` on a coffee maker neither DOP2 nor Dop1; the profile and drink
+actions on a CM7 or CVA6000, which have no such object; `create_profile` once the app's slots are
+used (4 on a CM6160, 8 on another CM6F, 10 otherwise). `brew` takes a program id the app defines,
+not 0, and acknowledgements options 1 to 17, 1 to 16 on a CM7, as the app's mappers do; another
+raises `ArgumentError`, and so does a drink value its 2/261 member does not hold. `edit_drink`
+writes 255 as the bean sort on all but a CVA, as the app does.
 
 Left out: tasting, saving a tasted drink, and resetting a drink or a profile, whose values the app
 derives through helpers not traced; the message check of the app's Barista start page; the drink tables that limit two cups or a double shot to some
@@ -668,9 +675,13 @@ nothing for a zone's current target.
 
 The app reads no `RemoteEnable` and checks nothing before these writes but the controls its
 screens show; the SDK sends what it is given, and the predicates and pickers below give the app's
-rules. An Opcode target that is not whole degrees in 16 bits raises `ArgumentError`, an
-`ambient_light_mode=` on a protocol but 200 and 203, which has no such setting, raises
-`ActionUnavailableError`, and an unknown mode or humidity name raises `KeyError`.
+rules. An Opcode target that is not whole degrees in 16 bits (a whole Float such as 5.0 is) raises
+`ArgumentError` before anything is read. An Opcode appliance has no `Cooling` resource: `set_fan`,
+`set_vario_cool`, `set_mode` and the settings written there (`ice_maker=`, `presentation_light=`,
+`set_presentation_light_intensity`, `humidity=`, `perfect_fresh=`, `humidifier=`,
+`door_alarm_delay=`) raise `ActionUnavailableError` on it, and so does `ambient_light_mode=` on a
+protocol but 200 and 203, which has no such setting. An unknown mode or humidity name raises
+`KeyError`.
 
 `target_choices(zone)` gives what the app's target picker offers: the zone's `TargetTemp`
 `AllValues`, else `Min` to `Max` by `Step`, else its current value, each in whole degrees rounded
@@ -712,9 +723,9 @@ tested on an appliance: every read and write follows the app's code.
 drawer.drawer_state          # => :programmed; an open door shows over off, on, running and paused
 drawer.programs              # Dop1 9788: #<data Program id=1, min_hours=1, max_hours=4, temperatures=[30, …]>
 drawer.power_on              # Dop1 1101; power_off too
-drawer.select_program(1)     # 1 cups, 2 plates, 3 food, 4 low-temperature cooking: Dop1 9781
+drawer.select_program(1)     # 1 cups, 2 plates, 3 food, 4 low-temperature cooking, 0 off: Dop1 9781
 drawer.target_temperature = 70
-drawer.remaining_time = 135  # minutes, kept to the program's maximum; 0 resets it
+drawer.remaining_time = 135  # minutes; 0 resets it
 drawer.cups_warm_up_source = '000111111111'   # a coffee maker's fab; nil to stop
 ```
 
@@ -729,13 +740,15 @@ program), `cups_warm_up` the coffee makers it lists.
 | `power_off_offered?` | the drawer in any state but off, off with its door open, finished or not connected, idle included |
 | `select_program_offered?` | remote control too, the drawer on, running or off |
 | `target_temperature_offered?` | a program |
-| `remaining_time_offered?` | remote control too, the program set or running (Status 3 to 6); the picker offers 0 or at least the program's minimum hours |
+| `remaining_time_offered?` | remote control too, the program set or running (Status 3 to 6); the picker offers 0, or the program's minimum to maximum hours |
 | `cups_warm_up_offered?` | the drawer connected and `cups_warm_up` available |
 
-`select_program` raises `ArgumentError` for a program `Betriebsart` does not define, a temperature
-for degrees its byte does not hold, and a remaining time when negative. The app keeps a remaining
-time to the program's maximum hours, 0 without a program, and so does the SDK. A temperature
-re-sends the remaining time, and a remaining time the target, as the app writes them.
+`select_program` takes any program `Betriebsart` defines, 0 (Aus) included, where the app's
+picker offers 1 to 4, and raises `ArgumentError` for another; a temperature raises it for degrees
+its byte does not hold, and a remaining time when negative. A temperature and a remaining time
+raise `ActionUnavailableError` while `State` shows no program 1 to 4, Betriebsart 0 being Aus. A
+temperature re-sends the remaining time, and a remaining time the target, as the app writes them;
+the maximum hours of `programs` are the app's picker, not a limit on the write.
 `NotAcceptedError` reports an Ack other than 1.
 
 Left out: the cup warm-up's check that its source is a coffee maker by its ident, Con@ctivity One

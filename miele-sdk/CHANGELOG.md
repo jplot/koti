@@ -47,11 +47,18 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   appliances and warming drawers send what they are given, and the predicates below give the app's
   rules. `ActionUnavailableError` now means only that the appliance's protocol or state gives no
   request to send (a DOP2 leaf on a Dop1 appliance, a parameter with no program selected…), and
-  `ArgumentError` only a value the wire cannot carry. A coffee maker's `power_on` writes 2/1586 even
-  when it shows the appliance on. A hood's `wake` writes back a Dop1 or Opcode hood's light whatever
-  its status, and its `dehumidification =` takes `:controlled`. A cooling appliance's `set_target`
-  takes a fraction of a degree on the Cooling API. An oven's parameter predicates and
-  `ParameterGates` name a parameter after its setter (`:target_temperature`).
+  `ArgumentError` only a value the wire cannot carry. A hood's `wake` writes back a Dop1 or Opcode
+  hood's light whatever its status, and its `dehumidification =` takes `:controlled`. A cooling
+  appliance's `set_target` takes a fraction of a degree on the Cooling API, and a whole Float on
+  Opcode. A warming drawer's `select_program` takes 0 (Aus), its `remaining_time=` is no longer kept
+  to the program's maximum, and both its `target_temperature=` and `remaining_time=` raise
+  `ActionUnavailableError` while `State` shows no program 1 to 4. A Dop1 dishwasher's `auto_dos=`
+  raises `ActionUnavailableError`, having no 2/105. Laundry `set_parameters` writes any extra the
+  DOP2 object carries (`starch_hold`, `program_locked`, `fan_clocking`…) and `master_care` on DOP2
+  washers. An oven's parameter predicates and `ParameterGates` name a parameter after its setter
+  (`:target_temperature`). Where the app sends nothing, neither does the SDK: a coffee maker's
+  `power_on` still writes nothing once 2/1586 shows it on, nor its `light=` on DOP2, and a
+  dishwasher's `power_on` writes 2/1586 only at Status 1 or 4.
 - The cloud event stream yields every resource the cloud pushes, where it skipped those the app does
   not read: as JSON where it parses, else as pushed, and a push outside any appliance under its own
   path.

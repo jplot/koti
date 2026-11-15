@@ -62,7 +62,6 @@ end
 module ROTP
   class TOTP
     def initialize: (String, **untyped) -> void
-    def at: (Time | Integer) -> String
     def now: () -> String
   end
 end

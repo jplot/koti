@@ -58,6 +58,42 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     expect(client).to have_received(:authenticate).twice
   end
 
+  def login_paths
+    paths = []
+    allow(client).to receive(:authenticate) { |path, request, _metadata| (paths << [path, request]) && yield }
+    paths
+  end
+
+  it 'answers the same two-factor request at the next call, as the app does', :aggregate_failures do
+    answers = [two_factor, invalid_totp, totp_success]
+    sent = login_paths { answers.shift }
+    expect { session.ensure_login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError)
+    session.ensure_login
+
+    expect(sent.map { it.first[/login_by_\w+/] }).to eq(%w[login_by_password login_by_totp login_by_totp])
+    expect(sent.drop(1).map { it.last.request_id }).to eq(%w[req-1 req-1])
+  end
+
+  it 'signs in from the password again once the two-factor request is dropped', :aggregate_failures do
+    answers = [two_factor, invalid_totp, two_factor, totp_success]
+    sent = login_paths { answers.shift }
+    expect { session.ensure_login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError)
+    session.restart_login
+    session.ensure_login
+
+    expect(sent.map { it.first[/login_by_\w+/] })
+      .to eq(%w[login_by_password login_by_totp login_by_password login_by_totp])
+  end
+
+  it 'raises rather than answer a two-factor request with no id, as the app does', :aggregate_failures do
+    allow(client).to receive(:authenticate).and_return(password({ failure: { two_fa_required: { request_id: '' } } }))
+
+    expect { session.ensure_login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
+      expect(error.reason).to eq(:two_fa_required)
+    end
+    expect(client).to have_received(:authenticate).once
+  end
+
   def login_outcome
     session.ensure_login
   rescue Ajax::Sdk::Cloud::AuthenticationError => e

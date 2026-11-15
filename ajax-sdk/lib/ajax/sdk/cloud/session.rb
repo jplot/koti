@@ -33,7 +33,8 @@ module Ajax
         def inspect = "#<#{self.class.name} logged_in=#{!@token.nil?}>"
 
         # Signs in with the password hash, then with the TOTP code when two-factor is required, unless a session is
-        # held; concurrent callers sign in once, and those that waited on a failed sign-in raise its error. The
+        # held; concurrent callers sign in once, and those that waited on a failed sign-in raise its error. A
+        # refused TOTP code keeps the two-factor request, which the next call answers with the current code. The
         # metadata is read under the same lock, so a session another thread forgets meanwhile never sends a call
         # without its token.
         #
@@ -49,6 +50,12 @@ module Ajax
             metadata
           end
         end
+
+        # Drops the two-factor request, as the app's back button on its code screen does, so the next call signs in
+        # from the password again.
+        #
+        # @return [void]
+        def restart_login = @mutex.synchronize { @request_id = nil }
 
         # Drops the session the gateway refused, as the app does, so the next call signs in again.
         #
@@ -81,6 +88,8 @@ module Ajax
         end
 
         def sign_in_flow
+          return login_with_totp if @request_id
+
           require_credentials
           failure = sign_in(PASSWORD, password_request) or return
           return two_factor(failure.two_fa_required.request_id) if failure.two_fa_required
@@ -97,8 +106,10 @@ module Ajax
         # Raises rather than send an empty TOTP that only burns a login attempt.
         def two_factor(request_id)
           raise AuthenticationError.new(:two_fa_required, 'no totp_secret set') if @settings.totp_secret.nil?
+          raise AuthenticationError.new(:two_fa_required, 'no two-factor request id') if request_id.to_s.empty?
 
-          login_with_totp(request_id)
+          @request_id = request_id
+          login_with_totp
         end
 
         # @return [Data, nil] the failure, or nil once the session is accepted
@@ -109,9 +120,9 @@ module Ajax
           answer.failure
         end
 
-        def login_with_totp(request_id)
+        def login_with_totp
           code = ROTP::TOTP.new(@settings.totp_secret.to_s).now
-          failure = sign_in(TOTP, totp_request(request_id, code)) or return
+          failure = sign_in(TOTP, totp_request(@request_id, code)) or return
 
           raise AuthenticationError.new(reason(failure), 'two-factor login refused')
         end
@@ -119,7 +130,7 @@ module Ajax
         def accept(success)
           @token = success.session_token.unpack1('H*').upcase
           @user_id = success.lite_account&.user_hex_id
-          nil
+          @request_id = nil
         end
 
         def password_request

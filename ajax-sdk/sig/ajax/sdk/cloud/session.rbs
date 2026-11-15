@@ -14,10 +14,12 @@ module Ajax
         @mutex: Thread::Mutex
         @attempts: Integer
         @refusal: StandardError?
+        @request_id: String?
 
         def initialize: (Client client, Configuration::Settings settings) -> void
         def inspect: () -> String
         def ensure_login: () -> Hash[String, String]
+        def restart_login: () -> void
         def forget: (String? expired) -> void
         def metadata: () -> Hash[String, String]
 
@@ -28,7 +30,7 @@ module Ajax
         def require_credentials: () -> void
         def two_factor: (untyped request_id) -> void
         def sign_in: (String path, untyped request) -> untyped
-        def login_with_totp: (untyped request_id) -> void
+        def login_with_totp: () -> void
         def accept: (untyped success) -> nil
         def password_request: () -> LOGIN::LoginByPassword::LoginByPasswordRequest
         def totp_request: (untyped request_id, String totp) -> LOGIN::LoginByTotp::LoginByTotpRequest

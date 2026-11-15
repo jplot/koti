@@ -60,7 +60,7 @@ module Miele
 
     # The appliance answered a write without the success the Miele app looks for: a Dop1 Ack other than 1, which
     # it reports as settings not accepted, or a +State+ write answered without its "Success" (a hood's wake, a
-    # CVA6000's light).
+    # CVA6000's light); or answered a Dop1 read without a +Response+ the SDK can read.
     class NotAcceptedError < Error; end
 
     # An action the Miele app reports as failed: the appliance took its write but did not show its effect within the

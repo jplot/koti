@@ -44,19 +44,25 @@ module Miele
         # @param prog_id [Integer, Symbol]
         # @return [void]
         def dop1_select(prog_id)
-          current = dop1_object(Objects::Dishwasher::SmartControlGsdProgrammwahlSetzen, timeout: 5).bytes
-          extras = current.byteslice(2, 2).to_s.ljust(2, "\0").unpack1('v') & ~0x3F
-          write_selection(Objects::Dishwasher::SmartControlGsdProgrammIdEnum.to_i(prog_id), extras)
+          write_selection(Objects::Dishwasher::SmartControlGsdProgrammIdEnum.to_i(prog_id), extras_as_read(~0x3F))
         end
 
-        # The app takes the program from +State+, 3 when it shows none.
+        # SelectExtrasForDop1Action keeps 8906's reserve bits as read; the program comes from +State+, 3 without one.
         #
         # @param selected [Array<Symbol>] keys of {EXTRA_BITS}
         # @return [void]
         # @raise [ArgumentError] for another name
         def dop1_extras(selected)
           bits = selected.sum { 1 << EXTRA_BITS.fetch(it) { raise ArgumentError, "8906 has no #{it} extra" } }
-          write_selection(state(timeout: 5).raw['ProgramID'] || 3, bits)
+          reserve = extras_as_read(~0x7F)
+          write_selection(state(timeout: 5).raw['ProgramID'] || 3, reserve | bits)
+        end
+
+        # @param kept [Integer] a mask of the 16 extras bits
+        # @return [Integer] those bits as 8906 reads
+        def extras_as_read(kept)
+          current = dop1_object(Objects::Dishwasher::SmartControlGsdProgrammwahlSetzen, timeout: 5).bytes
+          current.byteslice(2, 2).to_s.ljust(2, "\0").unpack1('v') & kept
         end
 
         # The app sends 8906 with the read request type.
@@ -68,9 +74,14 @@ module Miele
           dop1(Dop1.request(object_id: '8906', type: Dop1::READ, section: [1, prog_id, extras].pack('CCv')))
         end
 
-        # @param minutes [Integer]
+        # SetStartTimeForDelayStartForDop1Action reads 8909 first, then overwrites all four fields: none goes back.
+        #
+        # @param at [Time] its time of day; the next one if it has passed
         # @return [void]
-        def dop1_start_delayed(minutes)
+        def dop1_start_delayed(at)
+          dop1_object(Objects::Dishwasher::SmartControlGsdStartTime, timeout: 5)
+          now = Time.now
+          minutes = minutes_until(next_time(at, now), now)
           section = [1, minutes % 60, minutes / 60, 1].pack('C4')
           dop1(Dop1.request(object_id: '8909', type: Dop1::WRITE, section:))
         end

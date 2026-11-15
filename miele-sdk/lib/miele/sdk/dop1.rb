@@ -85,9 +85,15 @@ module Miele
       # @return [String, nil] the acknowledgement, characters 6 and 7 of its +Response+; nil for an answer the
       #   app's Dop1ResponseInterpreter fails to parse
       # @api private
-      def ack(answer)
+      def ack(answer) = response(answer)&.[](6, 2)
+
+      # @param answer [String] the body answering a request
+      # @return [String, nil] its +Response+, hexadecimal digits; nil for an answer the app's Dop1ResponseInterpreter
+      #   fails to parse
+      # @api private
+      def response(answer)
         parsed = JSON.parse(answer)
-        parsed['Response'][6, 2] if parsed.is_a?(Hash) && parsed['Response'].is_a?(String)
+        parsed['Response'] if parsed.is_a?(Hash) && parsed['Response'].is_a?(String)
       rescue JSON::ParserError
         nil
       end

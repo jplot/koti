@@ -23,6 +23,8 @@ module Miele
 
       def self?.ack: (String answer) -> String?
 
+      def self?.response: (String answer) -> String?
+
       def self?.unsigned: (Integer value, Integer bits) -> Integer
     end
   end

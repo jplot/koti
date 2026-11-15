@@ -119,8 +119,8 @@ module Miele
         def set_extras(*selected)
           return dop1_extras(selected) if extras_kind == :dop1
 
-          context = object(Objects::Dishwasher::GlobalPsContext, [2, 1574, 0, 0], timeout: pfd10? ? 5 : 15)
           modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 0, 0]) do |select|
+            context = object(Objects::Dishwasher::GlobalPsContext, [2, 1574, 0, 0], timeout: pfd10? ? 5 : 15)
             with_extras(select, context, offered_extras.to_h { [it, false] }.merge(selected.to_h { [it, true] }))
           end
         end

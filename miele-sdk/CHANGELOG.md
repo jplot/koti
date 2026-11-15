@@ -155,6 +155,14 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- A Dop1 dishwasher's `set_extras` reads 8906 first, as the app's SelectExtrasForDop1Action does,
+  and writes its reserve bits 7 to 15 back as read instead of 0; its `start_delayed` reads 8909
+  first. A DOP2 dishwasher's `set_extras` and `start_delayed` read 2/1577 before 2/1574, in the
+  app's order. A delayed start counts its minutes or its time from when those reads are answered,
+  as the app reads the clock only then, no longer from before them.
+- A Dop1 read whose answer the SDK cannot parse (not JSON, no `Response`, a `Response` that is no
+  string or shorter than its header) raises `NotAcceptedError`, as a write's does, instead of
+  `JSON::ParserError`, `KeyError` or `TypeError`, or reading nothing.
 - A Dop1 write whose answer the app cannot parse (not JSON, no `Response`, a `Response` that is no
   string) raises `NotAcceptedError`, as the app takes it as a failed write, instead of
   `JSON::ParserError`, `KeyError` or `NoMethodError`, or reading the bits of a numeric `Response`

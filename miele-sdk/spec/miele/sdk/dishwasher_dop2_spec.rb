@@ -20,7 +20,8 @@ RSpec.describe Miele::Sdk::Dishwasher do
       in { verb: 'PUT', path: %r{/State\z} } if served.key?(:refused) then [400, {}, '']
       in { verb: 'GET', path: %r{/DOP2/(.+)\z} }
         leaf = Regexp.last_match(1)
-        [200, {}, served.fetch(leaf) { default_leaf(leaf) }]
+        answer = served.fetch(leaf) { default_leaf(leaf) }
+        [200, {}, answer.respond_to?(:call) ? answer.call : answer]
       in { verb: 'PUT', path: %r{/DOP2/} } if served.fetch(:refusals, []).any? then served[:refusals].shift
       else [204, {}, '']
       end
@@ -223,6 +224,15 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(dishwasher.start_delayed_offered?).to be(true)
     dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
     expect(written.map(&:last)).to eq([select(1, 2, type: 2, mode: 1, start: 90), user_request(8).last])
+  end
+
+  it 'counts the minutes from when 2/1574 is answered, as SetParameter reads the clock then' do
+    clock = [Time.new(2026, 10, 31, 20, 0, 30)]
+    allow(Time).to receive(:now) { clock.first }
+    leaves['2/1577?idx1=1&idx2=2'] = select(1, 2)
+    leaves['2/1574?idx1=0&idx2=1'] = -> { (clock[0] = Time.new(2026, 10, 31, 20, 1, 1)) && context(1, bits: 33) }
+    dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
+    expect(written.first.last).to eq(select(1, 2, type: 2, mode: 1, start: 89))
   end
 
   it 'sets a delayed start as local seconds since 1970 when the dishwasher counts to a time' do
@@ -434,21 +444,22 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(timeouts).to eq([15, 15])
     end
 
-    it 'reads 2/1574 for the extras within 15 s, as SelectExtrasForDop2Action' do
+    it 'reads 2/1577, then 2/1574 within 15 s, for the extras, as SelectExtrasForDop2Action', :aggregate_failures do
       leaves['2/1577?idx1=0&idx2=0'] = select(0, 0)
       leaves['2/1574?idx1=0&idx2=0'] = context(0)
       timeouts = read_timeouts
       dishwasher.set_extras(:quick)
       expect(timeouts).to eq([15, 15, 15])
+      expect(fake.requests.filter_map { it.path[%r{DOP2/(\d+/\d+)}, 1] }).to eq(%w[2/1577 2/1574 2/1577])
     end
 
-    it 'reads 2/1574 for a delayed start within 5 s, as GetGlobalPsContextMessageAsync' do
+    it 'reads 2/1577, then 2/1574 within 5 s, for a delayed start, as SetDelayStartActionAsync' do
       allow(Time).to receive(:now).and_return(Time.new(2026, 10, 31, 20, 0, 30))
       leaves['2/1577?idx1=1&idx2=2'] = select(1, 2)
       leaves['2/1574?idx1=0&idx2=1'] = context(1, bits: 33)
       timeouts = read_timeouts
       dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
-      expect(timeouts).to eq([5, 15, 15, 15, 15])
+      expect(timeouts).to eq([15, 5, 15, 15, 15])
     end
 
     it 'gives the wake 15 s for its State read and for DeviceAction 2, as WakeUpForDop2Action' do
@@ -464,12 +475,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
                                                       'DeviceIdentLabel' => { 'TechType' => 'PFD102' })
       end
 
-      it 'reads 2/1574 for the extras within 5 s, as SelectExtrasForProfiLineAction' do
+      it 'reads 2/1577, then 2/1574 within 5 s, for the extras, as SelectExtrasHelperAsync' do
         leaves['2/1577?idx1=0&idx2=0'] = select(0, 0)
         leaves['2/1574?idx1=0&idx2=0'] = context(0)
         timeouts = read_timeouts
         dishwasher.set_extras(:special_dry)
-        expect(timeouts).to eq([5, 15, 15])
+        expect(timeouts).to eq([15, 5, 15])
       end
     end
   end

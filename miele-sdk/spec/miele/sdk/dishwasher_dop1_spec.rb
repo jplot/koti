@@ -15,7 +15,10 @@ RSpec.describe Miele::Sdk::Dishwasher do
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(current)]
-      in { verb: 'POST', body: /89060100"/ } then [200, {}, '{"Response":"890611000105ff00"}']
+      in { verb: 'POST', body: /89060100"/ } then [200, {}, extras_bodies.shift || JSON.generate(Response: extras_read)]
+      in { verb: 'POST', body: /89090100"/ }
+        now[0] = Time.new(2026, 10, 31, 20, 1, 1)
+        [200, {}, '{"Response":"8909110001000001"}']
       else [200, {}, '{}']
       end
     end
@@ -32,6 +35,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
   end
 
   def dop1_requests = written.map { it.last['Request'] }
+
+  def now = @now ||= [Time.new(2026, 10, 31, 20, 0, 58)]
+
+  def extras_read = '890611000105ff00'
+
+  def extras_bodies = @extras_bodies ||= []
 
   it 'pauses a Dop1 dishwasher with ProcessAction 2 on its state' do
     dishwasher.pause
@@ -62,9 +71,15 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(timeouts).to eq([5, 30])
     end
 
-    it 'reads State within 5 s to set the extras, as SelectExtrasForDop1Action' do
+    it 'reads 8906, then State, within 5 s each to set the extras, as SelectExtrasForDop1Action' do
       timeouts = read_timeouts
       dishwasher.set_extras(:eco)
+      expect(timeouts).to eq([5, 5, 30])
+    end
+
+    it 'reads 8909 within 5 s before the delayed start, as SetStartTimeForDelayStartForDop1Action' do
+      timeouts = read_timeouts
+      dishwasher.start_delayed(Time.now + 3600)
       expect(timeouts).to eq([5, 30])
     end
 
@@ -103,11 +118,26 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(dop1_requests).to eq(%w[89060100 89060100011cc000])
   end
 
-  it 'sets the extras on 8906 for the program State shows, but none it has no bit for', :aggregate_failures do
+  it 'writes the extras on 8906 as read, its reserve bits kept, for the program State shows', :aggregate_failures do
     expect(dishwasher.offered_extras).to eq(%i[short eco dry intensive_low soak prerinse additional_drying])
     dishwasher.set_extras(:eco, :additional_drying)
     expect { dishwasher.set_extras(:quick) }.to raise_error(ArgumentError)
-    expect(dop1_requests).to eq(['89060100010d4200'])
+    expect(dop1_requests).to eq(%w[89060100 89060100010dc200])
+    expect(fake.requests.map(&:verb).last(3)).to eq(%w[POST GET POST])
+  end
+
+  context 'when 8906 shows every extras bit set' do
+    def extras_read = '890611000105ffff'
+
+    it 'writes back its nine reserve bits as read, and each extra as named, additional drying off too' do
+      dishwasher.set_extras(:eco)
+      expect(dop1_requests.last).to eq('89060100010d82ff')
+    end
+  end
+
+  it 'raises NotAcceptedError for an 8906 answer it cannot read, as for a Dop1 write', :aggregate_failures do
+    extras_bodies.push('x', '{}', '{"Response":5}', '{"Response":"8906"}')
+    4.times { expect { dishwasher.set_extras(:eco) }.to raise_error(Miele::Sdk::NotAcceptedError) }
   end
 
   it 'writes no setting, a Dop1 dishwasher having no 2/105', :aggregate_failures do
@@ -122,6 +152,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(dop1_requests.last).to start_with('8909')
   end
 
+  it 'counts the delay from when 8909 is answered, as GetTimeOffsetToNow reads the clock then' do
+    allow(Time).to receive(:now) { now.first }
+    dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
+    expect(dop1_requests).to eq(%w[89090100 89090200011d0101])
+  end
+
   context 'when its program is selected' do
     let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 1], 'SignalDoor' => false, 'ProgramID' => 13 } }
 
@@ -134,7 +170,7 @@ RSpec.describe Miele::Sdk::Dishwasher do
     it 'delays the start on 8909 in minutes and hours, sending no start request after' do
       allow(Time).to receive(:now).and_return(Time.new(2026, 10, 31, 20, 0, 30))
       dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
-      expect(dop1_requests).to eq(['89090200011e0101'])
+      expect(dop1_requests).to eq(%w[89090100 89090200011e0101])
     end
   end
 

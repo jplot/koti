@@ -65,6 +65,8 @@ module Miele
         def family: () -> untyped
 
         def program_context: () -> untyped
+
+        def write_light: (Integer light) -> void
       end
     end
   end

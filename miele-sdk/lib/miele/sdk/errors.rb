@@ -59,7 +59,8 @@ module Miele
     class ActionUnavailableError < Error; end
 
     # The appliance answered a write without the success the Miele app looks for: a Dop1 Ack other than 1, which
-    # it reports as settings not accepted, or a hood's wake answered without "Success".
+    # it reports as settings not accepted, or a +State+ write answered without its "Success" (a hood's wake, a
+    # CVA6000's light).
     class NotAcceptedError < Error; end
 
     # The appliance took an action's write but did not show its effect within the time the Miele app waits for it

@@ -68,10 +68,11 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] but on a CVA6000: the app's DOP2 light action sends nothing
         #   (SwitchLightOnAction, Task.CompletedTask)
+        # @raise [NotAcceptedError] unless the answer gives the light written back under +Success+
         # @api public
         def light=(on)
           require!(protocol_version == 2, 'only a CVA6000 has a light request')
-          command(Schema::DeviceState.from(state.raw).with(light: on ? 1 : 2))
+          write_light(on ? 1 : 2)
         end
 
         # @return [Boolean] whether the app switches the light: a CVA6000 neither disconnected, locked nor in

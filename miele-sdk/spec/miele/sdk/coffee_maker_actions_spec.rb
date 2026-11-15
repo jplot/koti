@@ -10,7 +10,8 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     { 'State' => { 'Status' => 2, 'RemoteEnable' => [15, 0, 1] }, [1, 1574, 0, 1] => ps_context(0, 0),
       [2, 1586, 0, 0] => combi(2, 0), [2, 17, 0, 0] => software_id(2, 6228), [1, 17, 0, 0] => software_id(1, 6227),
       [2, 1577, 0, 1] => select(0, 0), [2, 1583, 0, 1] => dop2_leaf(2, 1583, { 1 => dop2_field(:e16, 0) }, idx2: 1),
-      [2, 138, 0, 1] => acknowledgement(0, 0, 0), 'DOP' => '{"Response":"11011201"}' }
+      [2, 138, 0, 1] => acknowledgement(0, 0, 0), 'DOP' => '{"Response":"11011201"}',
+      'PUT State' => '[{"Success":{"Light":1}}]' }
   end
   let(:fake) do
     answers = served
@@ -22,6 +23,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
         key = Regexp.last_match.captures.map(&:to_i)
         [200, {}, answers.fetch(key) { dop2_leaf(key[0], key[1], {}, idx1: key[2], idx2: key[3]) }]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(answers['State'])]
+      in { verb: 'PUT', path: %r{/State\z} } then [200, {}, answers['PUT State']]
       in { verb: 'POST' } then [200, {}, answers['DOP']]
       else [204, {}, '']
       end
@@ -385,6 +387,15 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       coffee.light = true
       expect(written.map { [it.first, JSON.parse(it.last)] })
         .to eq([['State', { 'Status' => 2, 'RemoteEnable' => [15, 0, 1], 'Light' => 1 }]])
+    end
+
+    it 'raises NotAcceptedError unless the first Success with a Light gives back the light written, as an integer',
+       :aggregate_failures do
+      served['State'] = { 'Status' => 2, 'RemoteEnable' => [15, 0, 1], 'Light' => 2 }
+      ['[{"Success":{"Light":2}}]', '[{"Success":{"Light":"1"}}]', '{"Success":{"Light":1}}', '[]', ''].each do |answer|
+        served['PUT State'] = answer
+        expect { coffee.light = true }.to raise_error(Miele::Sdk::NotAcceptedError)
+      end
     end
 
     it 'leaves out of that State the keys the app does not know, as its DeviceStateDto does' do

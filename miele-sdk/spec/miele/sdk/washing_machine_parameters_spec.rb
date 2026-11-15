@@ -67,6 +67,12 @@ RSpec.describe Miele::Sdk::WashingMachine do
     expect(written).to eq([['DOP2/2/1577', select(prog: 28, type: 2, temperature: 40, spin: 140, eco: true)]])
   end
 
+  it 'reads 2/1577, then 2/1574, then writes 2/1577, in the order of SelectParametersAsync' do
+    washer.set_parameters(spin_speed: 1400)
+    expect(fake.requests.map { [it.verb, it.path[%r{DOP2/\d+/\d+}]] }.select(&:last))
+      .to eq([%w[GET DOP2/2/1577], %w[GET DOP2/2/1574], %w[PUT DOP2/2/1577]])
+  end
+
   it 'writes temperature info 2 for a cold wash' do
     washer.set_parameters(temperature: 0)
     expect(written.last.last).to eq(select(prog: 28, type: 2, temperature: 0, info: 2, spin: 120, eco: true))

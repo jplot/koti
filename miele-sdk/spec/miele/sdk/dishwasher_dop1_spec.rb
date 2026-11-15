@@ -15,7 +15,7 @@ RSpec.describe Miele::Sdk::Dishwasher do
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(current)]
-      in { verb: 'POST', body: /89060100"/ } then [200, {}, '{"Response":"890611000105ff00"}']
+      in { verb: 'POST', body: /89060100"/ } then [200, {}, JSON.generate(Response: extras_read)]
       in { verb: 'POST', body: /89090100"/ }
         now[0] = Time.new(2026, 10, 31, 20, 1, 1)
         [200, {}, '{"Response":"8909110001000001"}']
@@ -37,6 +37,8 @@ RSpec.describe Miele::Sdk::Dishwasher do
   def dop1_requests = written.map { it.last['Request'] }
 
   def now = @now ||= [Time.new(2026, 10, 31, 20, 0, 58)]
+
+  def extras_read = '890611000105ff00'
 
   it 'pauses a Dop1 dishwasher with ProcessAction 2 on its state' do
     dishwasher.pause
@@ -120,6 +122,15 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect { dishwasher.set_extras(:quick) }.to raise_error(ArgumentError)
     expect(dop1_requests).to eq(%w[89060100 89060100010dc200])
     expect(fake.requests.map(&:verb).last(3)).to eq(%w[POST GET POST])
+  end
+
+  context 'when 8906 shows every extras bit set' do
+    def extras_read = '890611000105ffff'
+
+    it 'writes back its nine reserve bits as read, and each extra as named, additional drying off too' do
+      dishwasher.set_extras(:eco)
+      expect(dop1_requests.last).to eq('89060100010d82ff')
+    end
   end
 
   it 'writes no setting, a Dop1 dishwasher having no 2/105', :aggregate_failures do

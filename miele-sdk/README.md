@@ -845,13 +845,20 @@ not answer. Then:
   the network tab of its developer tools. The token is renewed past 90 % of its life. Keep it in
   `token_file` so that the next run starts from it.
 
+A request the cloud answers 401 raises `ResponseError` and keeps the token, as the app's appliance
+client does. The appliance list is handled as the app handles a lost session: a 401 or 403 on
+`devices` (and so on `Miele::Sdk.appliances`) logs the account out, at `/V2/Logout` or the CIAM
+logout address, forgets the token and deletes `token_file`, then raises `ResponseError`. The next
+request logs in again with `email` and `password`, or raises `ConfigurationError` until a new CIAM
+code is exchanged; a `cloud_token` setting is left as given.
+
 `ciam_client_id` is the Miele app's OAuth client id (`MA.Constants.CdcKeys.ClientId` in
 `Miele.Modules.Authentication`); the gem does not ship it. The cloud client follows the
 environment's proxy settings; the local one never does.
 
 The cloud channel has run against the live cloud with a French account: the CIAM code exchange, the
 saved token, the account's appliances, their states, the household key, and the DOP2 leaves of an
-oven that serves none locally. The token's renewal and MCS logins have not run yet.
+oven that serves none locally. The token's renewal, MCS logins and the logout have not run yet.
 
 ## Events
 
@@ -918,8 +925,9 @@ parse and as pushed otherwise, and a push outside any appliance under its own pa
 
 Each message is acknowledged as the app does, a keep-alive goes out every 30 s, and the websocket
 reconnects 6 s after an error or a close, and at once after a minute without a message, each time
-with the session's current token, renewed when the cloud refuses it. An account the cloud refuses
-ends the stream with `AuthenticationError`. A frame that stops halfway counts as silence: when the
+with the session's current token, which a refused handshake does not renew, as in the app. An
+account the cloud refuses ends the stream with `AuthenticationError`. A frame that stops halfway
+counts as silence: when the
 minute runs out, it reconnects at once, as the app's library does. A handshake that stalls gives up
 after a minute. It connects directly, without the environment's proxy.
 

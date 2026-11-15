@@ -64,9 +64,14 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   path.
 - **Breaking:** every request, to an appliance or to the Miele cloud, is sent once, as the app sends
   it: a GET, PUT or DELETE whose connection drops before the answer, or whose answer outlasts
-  `read_timeout`, raises `ConnectionError` instead of going out a second time. A request under `/V2`
-  answered 401 raises `ResponseError` (status 401) instead of going out again with a renewed token,
-  which is kept.
+  `read_timeout`, raises `ConnectionError` instead of going out a second time.
+- **Breaking:** a 401 from the cloud is handled as the app handles it. A request under `/V2` answered
+  401 raises `ResponseError` (status 401) instead of going out again with a renewed token, which is
+  kept, and the websocket no longer renews a token its handshake is refused with: it connects again
+  6 s later with the session's current token. A 401 or 403 on the appliance list
+  (`Cloud::Channel#devices`, so `Miele::Sdk.appliances`) logs the account out and forgets its token,
+  `token_file` included, then raises `ResponseError`; the next request logs in again
+  (`Cloud::Session#invalidate`).
 
 ### Fixed
 

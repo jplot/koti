@@ -10,15 +10,16 @@ module Miele
         FRAGRANCE_SETTINGS = { stop: 0, start: 1, miele_program: 2 }.freeze
         private_constant :FAN_LEVELS, :RUN_ON_TIMES, :FRAGRANCE_SETTINGS
 
+        # {Readings#fan_settable?} gives whether the app sets it: never while the hood's screen is pushed in.
+        #
         # @param level [Integer] 0 (off) to 3, 4 (boost) or 5 (interval)
         # @return [void]
         # @raise [ArgumentError] if the level is out of range
-        # @raise [ActionUnavailableError] while the hood's screen is pushed in, as the app refuses then
+        # @raise [ActionUnavailableError] on a hood of a protocol the app has no fan action for
         # @api public
         def fan_level=(level)
           raise ArgumentError, "fan level #{level} is out of 0..5" unless FAN_LEVELS.cover?(level)
 
-          require_reading!(fan_settable?, 'the fan cannot be set while the screen is pushed in')
           case route(:fan)
           when :dop1 then tolerating_no_op { dop1(Dop1.fan_level(level)) }
           when :opcode then opcode_twice("10000608010#{level}000000")
@@ -26,19 +27,21 @@ module Miele
           end
         end
 
-        # @param minutes [Integer] 0, 5 or 15
+        # @param minutes [Integer] such as one of {#fan_run_on_times}
         # @return [void]
-        # @raise [ArgumentError] for any other duration
+        # @raise [ArgumentError] for minutes a Dop1 or Opcode hood's byte, or a DOP2 hood's u16, does not hold
         # @api public
         def fan_run_on_time=(minutes)
-          raise ArgumentError, "run-on time #{minutes} is not 0, 5 or 15" unless RUN_ON_TIMES.include?(minutes)
-
           case route(:fan)
           when :dop1 then tolerating_no_op { dop1(Dop1.fan_run_on_time(minutes)) }
-          when :opcode then opcode(format('10000609%02X00000000', minutes))
+          when :opcode then opcode(format('10000609%02X00000000', Dop1.unsigned(minutes, 8)))
           else write_dop2(hood_select(2 => minutes))
           end
         end
+
+        # @return [Array<Integer>] the run-on times, in minutes, the app's picker offers
+        # @api public
+        def fan_run_on_times = RUN_ON_TIMES
 
         # @param on [Boolean]
         # @return [void]
@@ -51,15 +54,16 @@ module Miele
           end
         end
 
+        # {Readings#lights} gives whether the hood has one.
+        #
         # @param on [Boolean]
         # @return [void]
-        # @raise [ActionUnavailableError] when the hood has no ambient light, or drives its lights by Opcode, whose
-        #   second light the app never switches
+        # @raise [ActionUnavailableError] when the hood drives its lights by Opcode, which has no request for a
+        #   second light
         # @api public
         def ambient_light=(on)
           path = route(:fan)
-          require!(path != :opcode, 'an Opcode hood has no ambient light the app switches')
-          require_reading!(lights&.ambient&.exists, 'the hood has no ambient light')
+          require!(path != :opcode, 'an Opcode hood has no request for an ambient light')
           request = on ? 20_001 : 20_002
           path == :dop1 ? dop1_ambient_light(on) : dop2_user_request(request)
         end
@@ -83,54 +87,64 @@ module Miele
 
         # @param action [Symbol] +:start+ (20 minutes), +:stop+ or +:miele_program+
         # @return [void]
-        # @raise [ActionUnavailableError] on an Opcode hood, or when the hood has no fragrance
+        # @raise [ActionUnavailableError] on an Opcode hood
         # @raise [ArgumentError] for another action
         # @api public
         def fragrance(action)
           value = FRAGRANCE_SETTINGS.fetch(action) { raise ArgumentError, "no fragrance action #{action.inspect}" }
           return dop1_fragrance(action) if route(:setting) == :dop1
 
-          require_reading!(extended&.then { second_functions(it)[5] == 1 }, 'the hood has no fragrance')
           write_sf(9009, value)
         end
 
-        # @param on [Boolean]
-        # @return [void]
-        # @raise [ActionUnavailableError] on an Opcode hood, or when the hood has no auto refresh
+        # @return [Boolean, nil] whether the app offers {#fragrance}: PF 40028 bit 7 on a Dop1 hood, function bit 5
+        #   of ExtendedState on a DOP2 one, never on an Opcode one; nil when the DOP2 hood serves no ExtendedState
         # @api public
-        def auto_refresh=(on)
-          path = route(:setting)
-          require_reading!(auto_refresh_supported?, 'the hood has no auto refresh')
-          value = on ? 1 : 0
-          path == :dop1 ? write_setting(40_023, value) : write_sf(9007, value)
+        def fragrance_supported?
+          case protocol_version
+          when 2 then setting(40_028).to_i[7] == 1
+          when 3, 4 then extended&.then { second_functions(it)[5] == 1 }
+          else false
+          end
         end
 
-        # @param active [Boolean]
-        # @param interval [Integer] 5, 10 or 20 seconds
+        # {Readings#auto_refresh_supported?} gives whether the app offers it.
+        #
+        # @param on [Boolean]
         # @return [void]
-        # @raise [ArgumentError] for another interval
-        # @raise [ActionUnavailableError] when the hood has no ColorFlow
-        # @raise [NotFoundError] when the hood, reached locally, answers 404
+        # @raise [ActionUnavailableError] on an Opcode hood
+        # @api public
+        def auto_refresh=(on)
+          value = on ? 1 : 0
+          route(:setting) == :dop1 ? write_setting(40_023, value) : write_sf(9007, value)
+        end
+
+        # {Readings#color_flow} gives whether the hood has ColorFlow.
+        #
+        # @param active [Boolean]
+        # @param interval [Integer] seconds, such as one of {#color_flow_intervals}
+        # @return [void]
+        # @raise [NotFoundError] when the hood answers 404
         # @api public
         def configure_color_flow(active:, interval: 10)
-          raise ArgumentError, "no ColorFlow interval #{interval}" unless COLOR_FLOW_INTERVALS.include?(interval)
-
-          require!(color_flow, 'the hood has no ColorFlow')
           body = JSON.generate('active' => active, 'intervalDurationSeconds' => interval)
           send_request(:put, "/Devices/#{fab}/ColorFlow", body:)
         end
 
-        # Con@ctivity Plus: the hood follows one more hob.
+        # @return [Array<Integer>] the ColorFlow intervals, in seconds, the app's picker offers
+        # @api public
+        def color_flow_intervals = COLOR_FLOW_INTERVALS
+
+        # Con@ctivity Plus: the hood follows one more hob. {Readings#connectivity_plus} gives whether the app offers
+        # it.
         #
         # @param hob [String] its fabrication number
         # @return [void]
-        # @raise [ActionUnavailableError] when the hood does not offer Con@ctivity Plus
         # @api public
         def connect_hob(hob) = update_connectivity_plus { (it + [hob]).uniq }
 
         # @param hob [String] its fabrication number
         # @return [void]
-        # @raise [ActionUnavailableError] when the hood does not offer Con@ctivity Plus
         # @api public
         def disconnect_hob(hob) = update_connectivity_plus { it - [hob] }
 
@@ -142,9 +156,13 @@ module Miele
         def wake
           return super if [3, 4].include?(protocol_version)
 
-          state = self.state
-          command(Schema::DeviceState.new(light: state.raw['Light'])) if state.status == :off
+          command(Schema::DeviceState.new(light: state.raw['Light']))
         end
+
+        # @return [Boolean] whether the app wakes the hood: a DOP2 one always, a Dop1 or Opcode one while +State+
+        #   shows it off
+        # @api public
+        def wake_offered? = [3, 4].include?(protocol_version) || state.status == :off
 
         private
 
@@ -154,24 +172,10 @@ module Miele
         # @yieldparam sources [Array<String>] the hobs followed
         # @yieldreturn [Array<String>] those to follow
         # @return [void]
-        # @raise [ActionUnavailableError] when the hood does not offer Con@ctivity Plus
         def update_connectivity_plus
-          plus = connectivity_plus
-          require!(plus&.available, 'the hood offers no Con@ctivity Plus')
-          sources = yield Array(plus&.sources)
+          sources = yield Array(connectivity_plus&.sources)
           body = JSON.generate('activated' => sources.any?, 'sourceDeviceIds' => sources)
           send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
-        end
-
-        # The hood serves +ExtendedState+, and so what it supports, only while it is on.
-        #
-        # @param value [Boolean, nil] read from +ExtendedState+, nil when it serves none
-        # @param reason [String] why the hood refuses when the value is false
-        # @return [void]
-        # @raise [ActionUnavailableError]
-        def require_reading!(value, reason)
-          require!(!value.nil?, 'the hood is off and serves no ExtendedState: wake it first')
-          require!(value, reason)
         end
 
         # @param pf_id [Integer] its Dop1 setting

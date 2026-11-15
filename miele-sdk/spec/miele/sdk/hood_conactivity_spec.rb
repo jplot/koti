@@ -17,7 +17,7 @@ RSpec.describe Miele::Sdk::Hood do
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/services\z} } then [200, {}, services]
-      in { verb: 'GET', path: %r{/ColorFlow\z} } then flow
+      in { path: %r{/ColorFlow\z} } then flow
       else [200, {}, '{}']
       end
     end
@@ -47,10 +47,11 @@ RSpec.describe Miele::Sdk::Hood do
     expect(written).to eq([['PUT', "/Devices/#{fab}/SuperVision/000111222333", { 'Show' => true }]])
   end
 
-  it 'sets ColorFlow with its interval in seconds, refusing another interval', :aggregate_failures do
+  it 'sets ColorFlow with its interval in seconds, one the app does not offer too', :aggregate_failures do
+    expect(hood.color_flow_intervals).to eq([5, 10, 20])
     hood.configure_color_flow(active: true, interval: 20)
-    expect { hood.configure_color_flow(active: true, interval: 15) }.to raise_error(ArgumentError)
-    expect(written).to eq([['PUT', "/Devices/#{fab}/ColorFlow", { 'active' => true, 'intervalDurationSeconds' => 20 }]])
+    hood.configure_color_flow(active: true, interval: 15)
+    expect(written.map { it.last['intervalDurationSeconds'] }).to eq([20, 15])
   end
 
   context 'when the hood has no ColorFlow' do
@@ -60,12 +61,12 @@ RSpec.describe Miele::Sdk::Hood do
       expect { hood.configure_color_flow(active: true) }.to raise_error(Miele::Sdk::NotFoundError)
     end
 
-    it 'refuses ColorFlow on a hood the cloud says has none', :aggregate_failures do
+    it 'sends ColorFlow to a hood the cloud says has none, and raises its 404', :aggregate_failures do
       cloud = instance_double(Miele::Sdk::Cloud::Channel)
       allow(cloud).to receive(:request).and_raise(Miele::Sdk::NotFoundError.new(404))
       reached = described_class.new('127.0.0.1', ident:, fab:, cloud:)
-      expect { reached.configure_color_flow(active: true) }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(cloud).to have_received(:request)
+      expect(reached.color_flow).to be_nil
+      expect { reached.configure_color_flow(active: true) }.to raise_error(Miele::Sdk::NotFoundError)
     end
   end
 
@@ -82,9 +83,10 @@ RSpec.describe Miele::Sdk::Hood do
   context 'when the hood does not offer Con@ctivity Plus' do
     let(:plus) { { 'available' => false } }
 
-    it 'refuses to follow a hob', :aggregate_failures do
-      expect { hood.connect_hob('000111222333') }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written).to be_empty
+    it 'follows a hob, while Con@ctivity Plus tells the app does not offer it', :aggregate_failures do
+      expect(hood.connectivity_plus.available).to be(false)
+      hood.connect_hob('000111222333')
+      expect(written.map { it.last['sourceDeviceIds'] }).to eq([%w[000111222333]])
     end
   end
 end

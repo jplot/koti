@@ -13,8 +13,9 @@ RSpec.describe Miele::Sdk::Dop1 do
     expect(described_class.fan_run_on_time(15)).to eq('8E060200000f')
   end
 
-  it 'rejects a run-on time of 10 minutes' do
-    expect { described_class.fan_run_on_time(10) }.to raise_error(ArgumentError, /0, 5 or 15/)
+  it 'builds a run-on time the app does not offer, but none past a byte', :aggregate_failures do
+    expect(described_class.fan_run_on_time(10)).to eq('8E060200000a')
+    expect { described_class.fan_run_on_time(256) }.to raise_error(ArgumentError)
   end
 
   it 'builds the main light request' do

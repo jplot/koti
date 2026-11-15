@@ -6,6 +6,8 @@ module Miele
 
         DEHUMIDIFICATION_SETTINGS: Hash[Symbol, Integer]
 
+        DEHUMIDIFICATION_OFFERED: Array[Symbol]
+
         FRAGRANCE_ACTIONS: Hash[Symbol, Integer]
 
         SILENCE_KEPT: Array[Symbol]
@@ -14,6 +16,8 @@ module Miele
                                       colour_temperature: Integer) -> void
 
         def dehumidification=: (Symbol mode) -> void
+
+        def dehumidification_modes: () -> Array[Symbol]
 
         def dehumidification_silent=: (bool silent) -> void
 
@@ -38,12 +42,6 @@ module Miele
         def dop1_fragrance: (Symbol action) -> void
 
         def require_dop1!: () -> void
-
-        def require_feature!: (bool? supported, String reason) -> void
-
-        def require_reading!: (bool? value, String reason) -> void
-
-        def require_ambient_light!: () -> void
 
         def write_section: (untyped object, **Integer values) -> void
 

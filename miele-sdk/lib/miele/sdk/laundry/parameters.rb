@@ -27,7 +27,7 @@ module Miele
         def set_parameters(**settings)
           require_selection!
           check_settings!(settings)
-          return write_dop1_selection(dop1_parameters(dop1_object(dop1_objects.fetch(:write)), settings)) unless dop2?
+          return write_dop1_selection(dop1_parameters(read_dop1_selection, settings)) unless dop2?
 
           write_dop2_selection { |para, _| dop2_parameters(para, settings) }
         end

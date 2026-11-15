@@ -466,6 +466,15 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(dop1_requests).to eq(%w[110102000102 110002000102])
     end
 
+    it 'writes 1101 and 1100 within the 15 s of DefaultActionTimeout, as Dop1BaseAction' do
+      Miele::Sdk.config.read_timeout = 30
+      coffee.fab
+      timeouts = read_timeouts
+      coffee.power_on
+      coffee.stop
+      expect(timeouts).to eq([15, 15])
+    end
+
     it 'tells the app stops no drink while paused (Status 6)' do
       served['State'] = { 'Status' => 6, 'RemoteEnable' => [15, 0, 1] }
       expect(coffee.drink_stoppable?).to be(false)

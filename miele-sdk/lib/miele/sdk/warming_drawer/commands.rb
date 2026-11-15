@@ -126,7 +126,7 @@ module Miele
         # @return [void]
         def write_device_action(action)
           section = blank(Objects::Drawer::DeviceAction::DeviceActionWriteSection).with(struktur_version: 1, action:)
-          write_dop1_object(Objects::Drawer::DeviceAction, section, type: Dop1::WRITE)
+          write_dop1_object(Objects::Drawer::DeviceAction, section, type: Dop1::WRITE, timeout: 5)
         end
 
         # The app writes the hours of the time left without its days.
@@ -139,7 +139,7 @@ module Miele
           section = blank(Objects::Drawer::ServiceExtEswProcessData::ServiceExtEswProcessDataWriteSection)
                     .with(struktur_version: 1, betriebsart: program, restzeit_minuten: minutes % 60,
                           restzeit_stunden: minutes / 60 % 24, prozess_temperatur: celsius)
-          write_dop1_object(Objects::Drawer::ServiceExtEswProcessData, section, type: Dop1::WRITE)
+          write_dop1_object(Objects::Drawer::ServiceExtEswProcessData, section, type: Dop1::WRITE, timeout: 5)
         end
 
         # Betriebsart 0 is Aus: the process data of no program.

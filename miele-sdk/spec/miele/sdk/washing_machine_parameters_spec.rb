@@ -179,6 +179,14 @@ RSpec.describe Miele::Sdk::WashingMachine do
         .to eq(%w[82010100 82010100011c00003bb004020000000000000000000012000010000000])
     end
 
+    it 'reads and writes 8201 within 8 s each, as BaseDopApiAction' do
+      Miele::Sdk.config.read_timeout = 30
+      washer.fab
+      timeouts = read_timeouts
+      washer.set_parameters(eco: true)
+      expect(timeouts).to eq([8, 8])
+    end
+
     it 'writes both TwinDos containers only when given both', :aggregate_failures do
       washer.set_parameters(twin_dos: [1, 2])
       washer.set_parameters(twin_dos: [1])

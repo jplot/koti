@@ -93,7 +93,7 @@ module Miele
 
           klass = Objects::CoffeeGen7::ProcessActionCva
           section = blank(klass::ProcessActionWriteSection).with(struktur_version: 1, action: 2)
-          write_dop1_object(klass, section, type: Dop1::WRITE)
+          write_dop1_object(klass, section, type: Dop1::WRITE, timeout: 15)
         end
 
         # @param type [Symbol] +:information+, +:message+, +:query+, +:warning+ or +:error+
@@ -188,7 +188,7 @@ module Miele
         def write_device_action(action)
           klass = Objects::CoffeeGen7::DeviceAction
           section = blank(klass::DeviceActionWriteSection).with(struktur_version: 1, action:)
-          write_dop1_object(klass, section, type: Dop1::WRITE)
+          write_dop1_object(klass, section, type: Dop1::WRITE, timeout: 15)
         end
 
         # ModifyDop2ObjectAsync: the app writes back where it read, with idx1 as the header's attribute and as

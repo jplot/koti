@@ -10,6 +10,8 @@ module Miele
 
         def write_dop1_selection: (untyped section) -> void
 
+        def read_dop1_selection: () -> untyped
+
         def dop2?: () -> bool
 
         def dop1_objects: () -> Hash[Symbol, untyped]

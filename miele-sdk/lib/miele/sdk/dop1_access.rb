@@ -23,19 +23,21 @@ module Miele
       # @param klass [Class] a generated Dop1 object
       # @param section [Data] one of its write sections
       # @param type [String] {Dop1::READ} or {Dop1::WRITE}, as the app sends that object
+      # @param timeout [Numeric, nil]
       # @return [void]
       # @raise [NotAcceptedError] for an Ack other than 1
-      def write_dop1_object(klass, section, type:)
-        write_dop1(Dop1.request(object_id: klass::ID, type:, section: section.to_bytes))
+      def write_dop1_object(klass, section, type:, timeout: nil)
+        write_dop1(Dop1.request(object_id: klass::ID, type:, section: section.to_bytes), timeout:)
       end
 
       # The app accepts only Ack 1, characters 6 and 7 of the answer.
       #
       # @param request [String] built by {Dop1}
+      # @param timeout [Numeric, nil]
       # @return [void]
       # @raise [NotAcceptedError] for any other Ack, or an answer without one
-      def write_dop1(request)
-        answer = dop1(request)
+      def write_dop1(request, timeout: nil)
+        answer = dop1(request, timeout:)
         ack = Dop1.ack(answer)
         raise NotAcceptedError, "the appliance answered #{answer.inspect}" if ack.nil?
         raise NotAcceptedError, "the appliance answered Ack #{ack.inspect}" unless ack.to_i == 1

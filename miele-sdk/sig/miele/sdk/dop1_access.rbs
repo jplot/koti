@@ -9,9 +9,9 @@ module Miele
 
       def blank: (untyped klass) -> untyped
 
-      def write_dop1_object: (untyped klass, untyped section, type: String) -> void
+      def write_dop1_object: (untyped klass, untyped section, type: String, ?timeout: (Integer | Float)?) -> void
 
-      def write_dop1: (String request) -> void
+      def write_dop1: (String request, ?timeout: (Integer | Float)?) -> void
 
       def dop1_object: (untyped klass, ?timeout: (Integer | Float)?) -> untyped
 

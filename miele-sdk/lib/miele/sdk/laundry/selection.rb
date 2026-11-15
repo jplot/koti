@@ -31,7 +31,12 @@ module Miele
         # @param section [Data] the washer's or the dryer's write section
         # @return [void]
         # @raise [NotAcceptedError] when the appliance refuses it
-        def write_dop1_selection(section) = write_dop1_object(dop1_objects.fetch(:write), section, type: Dop1::READ)
+        def write_dop1_selection(section)
+          write_dop1_object(dop1_objects.fetch(:write), section, type: Dop1::READ, timeout: ATTEMPT_TIMEOUT)
+        end
+
+        # @return [Data] the washer's or the dryer's write section, which the app reads before it writes one
+        def read_dop1_selection = dop1_object(dop1_objects.fetch(:write), timeout: ATTEMPT_TIMEOUT)
       end
     end
   end

@@ -442,6 +442,11 @@ cloud does not give them: `motion_areas:`, whether a bridge of the home has a mo
 `motion_area_configuration` resources), and `free_clips:`, the app's remote setting
 `enable_24_hour_free_video_clips`, off by default. Never tested with a device.
 
+`home.start_trial(bridge_id, model_id:)` starts a bridge's trial as the app does from its arming
+devices and motion area screens, which offer it only when the home's `permissions` include
+`home.devices.create`. `model_id` is the bridge's own, as its settings or discovery give it; the
+app then reads the plans again.
+
 | Setting | Default | Purpose |
 |---|---|---|
 | `client_id` | — | Auth0 client id of the Hue app |

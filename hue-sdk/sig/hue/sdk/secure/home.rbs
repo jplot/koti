@@ -42,6 +42,8 @@ module Hue
 
         def cameras: () -> Cameras
 
+        def start_trial: (String bridge_id, model_id: String) -> void
+
         def events: () -> Events
 
         def media: (String passphrase) -> Media

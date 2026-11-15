@@ -75,6 +75,20 @@ module Hue
         # @api public
         def cameras = Cameras.new(id)
 
+        # A bridge's experience period, which the app offers from its arming devices and motion area screens for a
+        # bridge that has not started it ({Plan.status} +:experience_period_not_enabled+), and only when the home's
+        # {#permissions} include +home.devices.create+. The app then reads the plans again ({Secure.subscription}).
+        #
+        # @param bridge_id [String] the bridge in any case, as {#bridges} gives it; sent upper-cased as the app holds it
+        # @param model_id [String] its model as the bridge reports it, such as +BSB002+
+        # @return [void]
+        # @raise (see Http.request)
+        # @api public
+        def start_trial(bridge_id, model_id:)
+          Secure.client.put("security/payment/v2/home/#{id}/device/experience_period/enable",
+                            body: { device: bridge_id.upcase, model_id: })
+        end
+
         # @return [Events] the timeline of the home
         # @api public
         def events = Events.new(id)

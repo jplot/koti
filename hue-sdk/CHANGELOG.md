@@ -102,3 +102,5 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   every change as it is given, as the app's screens shape what they offer rather than refuse a write.
 - `camera.detections` gives the detection types a camera's activity zones allow, which the app's alarm devices screen
   offers for that camera. Never tested with a device.
+- `home.start_trial(bridge_id, model_id:)` starts a bridge's free trial, as the app does for a bridge that has not
+  started it. Never tested with a device.

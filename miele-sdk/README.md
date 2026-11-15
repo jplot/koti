@@ -527,7 +527,8 @@ Dop1 consumption. As the app's ExecuteSequentiallyUntilTrue, `power_on` and `pow
 step (the wake, then 2/1586 read and written) up to three times back to back, whatever fails; the
 app then watches `State` for 15 s, which the SDK leaves out. As the app's SwitchOnForDop2Action,
 `power_on` writes 2/1586 only while `State` shows Status 1 or 4, which it reads again after waking
-the dishwasher, and writes nothing otherwise. `wake` does what the app's WakeUpForDop2Action does: `DeviceAction` 2
+the dishwasher, and writes nothing otherwise; as its SwitchOffForDop2Action, `power_off` sends nothing
+while `State` shows Status 1. `wake` does what the app's WakeUpForDop2Action does: `DeviceAction` 2
 only while `State` shows the dishwasher off (Status 1) or waiting to start out of `StandbyState` 1,
 nothing otherwise. The app has no wake request for a Dop1 dishwasher: `wake` raises
 `ActionUnavailableError` on it. A `DeviceAction` 2 the dishwasher refuses, 400 included, raises from
@@ -662,12 +663,14 @@ can offer what the app's dashboard would:
 | `delete_profile_offered?(id)` | a custom profile, coffee profiles listed in 2/348 |
 | `drink_name_allowed?(id, name)` | a CVA, a drink outside the standard profile, a name not blank |
 
-As the app's SwitchOnHelper, `power_on` writes nothing, and does not wait, once 2/1586 shows
+As the app's SwitchOnHelper, a DOP2 coffee maker's `power_on` sends nothing while `State` shows it
+on (a Status other than 1, 8 and 255, or none), and writes nothing, nor waits, once 2/1586 shows
 ApplianceState 4. A DOP2 coffee maker that answers 500 to 2/1586 is woken with `DeviceAction` 2 and
 read again 5 seconds later, while the app's 45 seconds last. An attempt that fails, a refused
 `DeviceAction` 2 or a 400 included, starts again 5 seconds later, three attempts in all, as
-SwitchOnHelper`1 does; `power_off` sends its read and write up to three times back to back, whatever
-fails (ExecuteSequentiallyUntilTrue). An action raises `Miele::Sdk::ActionUnavailableError` only where nothing can be
+SwitchOnHelper`1 does. `power_off` sends nothing while `State` shows Status 1, and otherwise its read
+and write up to three times back to back, whatever fails (SwitchOffAction under
+ExecuteSequentiallyUntilTrue). An action raises `Miele::Sdk::ActionUnavailableError` only where nothing can be
 written: `brew`, `start_barista` and `acknowledge` on a CVA6000, which has no DOP2 leaf for them;
 `light=` on a DOP2 coffee maker, for which the app has no light request (its DOP2 light action sends
 nothing); `power_on` and `power_off` on a coffee maker neither DOP2 nor Dop1; the profile and drink

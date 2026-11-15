@@ -49,11 +49,15 @@ module Miele
           send_wake if status(state) == 1 || (status(state) == 4 && standby(state) != 1)
         end
 
+        # As SwitchOffForDop2Action (IsApplianceOffObservable), nothing goes out while +State+ shows Status 1.
+        #
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
         # @api public
         def power_off
           require_dop2!
+          return if status(state) == 1
+
           three_attempts do
             modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
           end

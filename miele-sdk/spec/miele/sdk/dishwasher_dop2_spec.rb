@@ -411,6 +411,11 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 4, 0, 0)]] * 3)
     end
 
+    it 'sends no switch-off while State shows it off, as SwitchOffForDop2Action checks State first' do
+      dishwasher.power_off
+      expect(fake.requests.map(&:path).grep(/DOP2/)).to be_empty
+    end
+
     it 'tells the app offers no switch-on without remote control' do
       state.merge!('RemoteEnable' => [0, 0, 0])
       expect(dishwasher.power_on_offered?).to be(false)

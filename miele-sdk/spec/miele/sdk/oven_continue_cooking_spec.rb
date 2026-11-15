@@ -133,6 +133,26 @@ RSpec.describe Miele::Sdk::Oven do
     end
   end
 
+  context 'when 1/1585 answers after what the 15 s leave' do
+    let(:fake) do
+      FakeAppliance.start do |request|
+        case request
+        in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
+        in { verb: 'GET', path: %r{/1585\z} } then sleep(1.5) && [200, {}, '']
+        else [204, {}, '']
+        end
+      end
+    end
+
+    def clock = late_clock(13.9)
+
+    it 'raises ActionFailedError for the poll read the Timeout cuts, as the app fails the action',
+       :aggregate_failures do
+      expect { oven.continue_cooking }
+        .to raise_error(Miele::Sdk::ActionFailedError) { expect(it.cause).to be_a(Miele::Sdk::ConnectionError) }
+    end
+  end
+
   it 'raises the doneness the oven asks for by one step, then sees it cook on' do
     phases(10_000, 28_100)
     oven.continue_cooking

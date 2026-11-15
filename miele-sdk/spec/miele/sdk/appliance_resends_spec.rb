@@ -59,11 +59,7 @@ RSpec.describe Miele::Sdk::Appliance do
   context 'when the appliance answers after what the 15 s leave' do
     let(:fake) { FakeAppliance.start { sleep(1) && [204, {}, ''] } }
 
-    def clock
-      now = Miele::Sdk::Resends::MONOTONIC
-      started = nil
-      -> { started ? 14.8 + now.call - started : (started = now.call) && 0.0 }
-    end
+    def clock = late_clock(14.8)
 
     it 'raises ActionFailedError, the timed-out connection as its cause, as the Timeout fails the action',
        :aggregate_failures do

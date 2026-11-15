@@ -156,6 +156,16 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to eq(['001300020629000000000002000107000d00030400'])
   end
 
+  context 'when each round trip takes half a second' do
+    def round_trip = 0.5
+
+    it 'counts the 15 s from before the write, which leave room for three waits only', :aggregate_failures do
+      program_context(0)
+      expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionFailedError, /did not show program 13/)
+      expect(naps).to eq([3, 3, 3])
+    end
+  end
+
   context 'when each round trip takes a second' do
     def round_trip = 1
 

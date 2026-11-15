@@ -382,15 +382,15 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       expect(sent.map { it.last.except(:device_type) }).to all(eq(target))
     end
 
-    it 'tells which devices the app asks for photos on demand', :aggregate_failures do
-      expect(photo_families.values.flatten.map { client.photo_on_demand?(device(it)) }).to all(be(true))
-      expect(%i[motion_cam_video_base door_protect].map { client.photo_on_demand?(device(it)) }).to eq([false, false])
+    it 'tells which devices the app shows a photo on demand button for', :aggregate_failures do
+      expect(client.photo_on_demand?(device(:door_protect, { photo_on_demand: {} }))).to be(true)
+      expect(client.photo_on_demand?(device(:motion_cam_phod))).to be(false)
     end
 
-    it 'refuses a photo from a device the app has no family for, sending nothing', :aggregate_failures do
-      expect { client.take_photo(device(:motion_cam_video_base)) }.to raise_error(ArgumentError, /video_base/)
-      expect { client.take_photo(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
-      expect(sent).to be_empty
+    it 'asks any other device for photos with no family, as the app does' do
+      client.take_photo(device(:door_protect))
+
+      expect(sent.last.last[:device_type]).to eq(:NO_DEVICE_TYPE_INFO)
     end
 
     it 'reads the media of a notification, each state as the cloud sends it', :aggregate_failures do

@@ -115,7 +115,9 @@ module Ajax
         module Media : Methods
           include Targets
 
-          PHOTO_FAMILIES: Hash[Symbol, :cam | :cam_outdoor | :cam_fibra_base | :no_device_type_info]
+          type photo_family = :cam | :cam_outdoor | :cam_fibra_base | :no_device_type_info
+
+          PHOTO_FAMILIES: Hash[Symbol, photo_family]
 
           def photo_on_demand?: (Device device) -> bool
           def take_photo: (Device device) -> nil

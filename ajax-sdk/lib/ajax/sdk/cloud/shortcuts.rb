@@ -416,8 +416,8 @@ module Ajax
         module Media
           include Targets
 
-          # The app 3.59 names a MotionCam by its family in a photo request, the Fibra ones without a family; it
-          # names no other device there.
+          # The app 3.59 names a MotionCam by its family in a photo request, the Fibra ones and any other device
+          # without a family.
           PHOTO_FAMILIES = {
             cam: %i[motion_cam motion_cam_phod motion_cam_s_phod motion_cam_superior_phod motion_cam_s_phod_am
                     motion_cam_g3],
@@ -430,19 +430,20 @@ module Ajax
           private_constant :PHOTO_FAMILIES
 
           # @param device [Device]
-          # @return [Boolean] whether the app has a photo on demand button for this kind of device, which
-          #   {#take_photo} names by its family
-          def photo_on_demand?(device) = PHOTO_FAMILIES.key?(device.kind)
+          # @return [Boolean] whether the app shows a photo on demand button for the device: the gateway sends it a
+          #   +photo_on_demand+ property, whatever its kind
+          def photo_on_demand?(device)
+            (device.raw.dig(:hub_device, :spread_properties) || []).any? { it.key?(:photo_on_demand) }
+          end
 
           # Asks a MotionCam for photos, as the app's photo on demand button does. They arrive as a
           # +PHOTO_ON_DEMAND+ notification, whose {#notification_media} gives their addresses.
           #
           # @param device [Device] a MotionCam
           # @return [nil]
-          # @raise [ArgumentError] for another device
+          # @raise [ArgumentError] for a device outside the hub
           def take_photo(device)
-            family = PHOTO_FAMILIES[device.kind] or raise ArgumentError, "#{device.kind} takes no photo on demand"
-
+            family = PHOTO_FAMILIES.fetch(device.kind, :no_device_type_info) #: photo_family
             photo_on_demand_capture_photo(**hub_target(device), device_type: family)
             nil
           end

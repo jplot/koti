@@ -49,7 +49,7 @@ RSpec.describe Miele::Sdk::Cloud::Session do
     expect(session.authorization).to eq('appToken token-1')
     login = posts('/V3/Login?org=FR').first
     expect([login.verb, login.headers['content-type'], JSON.parse(login.body)])
-      .to eq(['POST', 'application/json', { 'email' => 'koti@example.com', 'password' => 'secret' }])
+      .to eq(['POST', 'application/json; charset=utf-8', { 'email' => 'koti@example.com', 'password' => 'secret' }])
   end
 
   context 'when a kill lands in the middle of a renewal' do
@@ -84,6 +84,13 @@ RSpec.describe Miele::Sdk::Cloud::Session do
       session.authorization
       languages = %w[/V3/Login?org=FR /V2/AppTokenRefresh].map { posts(it).first.headers['accept-language'] }
       expect(languages).to eq(%w[en-FR en-FR])
+    end
+
+    it 'sends its MCS requests as JSON with the Accept of the app' do
+      session.authorization
+      sent = %w[/V3/Login?org=FR /V2/AppTokenRefresh].map { posts(it).first.headers }
+      expect(sent.map { it.values_at('content-type', 'accept') })
+        .to eq([['application/json; charset=utf-8', 'application/json']] * 2)
     end
 
     it 'renews once when several threads find the same token expired' do

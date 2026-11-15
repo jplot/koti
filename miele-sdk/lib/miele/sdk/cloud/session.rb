@@ -94,9 +94,13 @@ module Miele
 
         private
 
+        # Refit's SystemTextJsonContentSerializer names the charset, and the app's MCS clients accept JSON
+        # (ApiClientFactory.CreateApiClient).
+        #
         # @return [Hash{String=>Object}]
         def mcs_post(url, body, headers = {})
-          post(url, body, 'application/json', { 'Accept-Language' => language, **headers })
+          post(url, body, 'application/json; charset=utf-8',
+               { 'Accept' => 'application/json', 'Accept-Language' => language, **headers })
         end
 
         # @param url [String]

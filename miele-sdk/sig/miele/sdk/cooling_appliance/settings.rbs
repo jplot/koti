@@ -60,6 +60,8 @@ module Miele
 
         def switch: (bool on) -> Hash[Symbol, untyped]
 
+        def write_cooling: (String member, **untyped body) -> void
+
         def ambient_light_key: () -> String
 
         def setting_shown?: (String key) -> bool

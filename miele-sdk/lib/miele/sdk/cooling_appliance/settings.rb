@@ -11,9 +11,10 @@ module Miele
 
         # @param on [Boolean]
         # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def ice_maker=(on)
-          put('Cooling', 'IceMaker', Value: on ? 1 : 2)
+          write_cooling('IceMaker', Value: on ? 1 : 2)
         end
 
         # @return [Boolean] whether the app shows the ice maker's switch: neither at Status 1 nor 255, on an
@@ -64,9 +65,10 @@ module Miele
 
         # @param on [Boolean]
         # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def presentation_light=(on)
-          put('Cooling', 'PresentationLight', Value: on ? 1 : 2)
+          write_cooling('PresentationLight', Value: on ? 1 : 2)
         end
 
         # @return [Boolean] whether the app switches the presentation light: on a KWTUS or Rioja wine unit with
@@ -84,9 +86,10 @@ module Miele
         # @param zone [Zone] one of {#zones}
         # @param value [Integer] 0 switches the zone's light off, 1 to 7 sets its level
         # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def set_presentation_light_intensity(zone, value)
-          put('Cooling', "#{zone.rank}/PresentationLightIntensity", Value: value)
+          write_cooling("#{zone.rank}/PresentationLightIntensity", Value: value)
         end
 
         # @return [Boolean] whether the app sets a zone's intensity: on a KWTUS or Rioja wine unit with a
@@ -101,9 +104,10 @@ module Miele
         # @param level [Symbol] +:low+, +:medium+ or +:high+
         # @return [void]
         # @raise [KeyError] for another level
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def humidity=(level)
-          put('Cooling', 'HumidityControl', Value: HUMIDITY.fetch(level))
+          write_cooling('HumidityControl', Value: HUMIDITY.fetch(level))
         end
 
         # @return [Boolean] whether the app shows its humidity control: on a KWTUS or Rioja wine unit, as
@@ -120,9 +124,10 @@ module Miele
 
         # @param value [Integer]
         # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def perfect_fresh=(value)
-          put('Cooling', 'PerfectFresh', Value: value)
+          write_cooling('PerfectFresh', Value: value)
         end
 
         # The app shows PerfectFresh for a +Step+ above 0 compared unsigned, so for any but 0.
@@ -140,9 +145,10 @@ module Miele
 
         # @param value [Integer]
         # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def humidifier=(value)
-          put('Cooling', 'Humidifier', Value: value)
+          write_cooling('Humidifier', Value: value)
         end
 
         # @return [Boolean] whether the app shows the humidifier's cell: neither at Status 1 nor 255, with a
@@ -156,9 +162,10 @@ module Miele
 
         # @param seconds [Integer]
         # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def door_alarm_delay=(seconds)
-          put('Cooling', 'DoorAlarmTime', Value: seconds)
+          write_cooling('DoorAlarmTime', Value: seconds)
         end
 
         # @return [Boolean] whether the app shows the door alarm delay's cell: neither at Status 1 nor 255, with a

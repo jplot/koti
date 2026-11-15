@@ -22,6 +22,12 @@ module Miele
 
         def switch: (bool on) -> Hash[Symbol, untyped]
 
+        def write_cooling: (String member, **untyped body) -> void
+
+        def whole_degrees: (Integer | Float degrees) -> Integer
+
+        def cooling_api?: () -> bool
+
         def write_super_mode_duration: (Zone zone) -> void
 
         def process_action: (Zone zone, bool on) -> Integer

@@ -505,6 +505,24 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       expect(written).to be_empty
     end
 
+    it 'takes a whole Float, and refuses a fraction before reading anything', :aggregate_failures do
+      zone = fridge.zones.first
+      reads = fake.requests.size
+      expect { fridge.set_target(zone, 4.5) }.to raise_error(ArgumentError)
+      expect(fake.requests.size).to eq(reads)
+      fridge.set_target(zone, 5.0)
+      expect(written).to eq([['POST', 'Oc85/', { 'Request' => '100006170001000005' }]])
+    end
+
+    it 'writes no Cooling setting, an Opcode appliance having no Cooling resource', :aggregate_failures do
+      zone = fridge.zones.last
+      calls = { set_fan: [zone, true], set_vario_cool: [zone, true], set_mode: [:eco, true],
+                set_presentation_light_intensity: [zone, 1], 'ice_maker=': [true], 'presentation_light=': [true],
+                'humidity=': [:low], 'perfect_fresh=': [1], 'humidifier=': [1], 'door_alarm_delay=': [60] }
+      calls.each { |name, args| expect { fridge.public_send(name, *args) }.to raise_error(Miele::Sdk::ActionUnavailableError) }
+      expect(written).to be_empty
+    end
+
     context 'with a KFN 37692 iDE' do
       let(:ident) do
         Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 21, 'ProtocolVersion' => 1,

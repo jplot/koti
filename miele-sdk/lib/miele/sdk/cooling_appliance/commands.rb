@@ -20,14 +20,11 @@ module Miele
         # @raise [ArgumentError] on Opcode, for a fraction of a degree or a value out of 16 bits
         # @api public
         def set_target(zone, degrees)
+          whole = whole_degrees(degrees) if opcode?
           return unless new_target?(zone, degrees, state)
-          return put('Cooling', "#{zone.number}/TargetTemp", Value: (degrees * 100).round) unless opcode?
+          return put('Cooling', "#{zone.number}/TargetTemp", Value: (degrees * 100).round) unless whole
 
-          unless degrees.is_a?(Integer) && (-0x8000...0x8000).cover?(degrees)
-            raise ArgumentError, "Oc85 carries whole degrees in 16 bits, not #{degrees}"
-          end
-
-          request = "10000617000#{zone.number}00#{format('%04X', degrees & 0xFFFF)}"
+          request = "10000617000#{zone.number}00#{format('%04X', whole & 0xFFFF)}"
           send_request(:post, "/Devices/#{fab}/Oc85/", body: JSON.generate(Request: request))
         end
 
@@ -55,9 +52,10 @@ module Miele
         # @param zone [Zone] one of {#zones}
         # @param on [Boolean]
         # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def set_fan(zone, on)
-          put('Cooling', "#{zone.position}/Fan", **switch(on))
+          write_cooling("#{zone.position}/Fan", **switch(on))
         end
 
         # The app shows it for a zone with VarioCool while {Screen#zones_shown? it shows the zones}.
@@ -65,9 +63,10 @@ module Miele
         # @param zone [Zone] one of {#zones}
         # @param on [Boolean]
         # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def set_vario_cool(zone, on)
-          put('Cooling', "#{zone.rank}/VarioCool", Value: on ? 1 : 2)
+          write_cooling("#{zone.rank}/VarioCool", Value: on ? 1 : 2)
         end
 
         # The app sets a mode {#modes} lists as editable.
@@ -76,9 +75,10 @@ module Miele
         # @param on [Boolean]
         # @return [void]
         # @raise [KeyError] for another name
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no Cooling resource
         # @api public
         def set_mode(name, on)
-          put('Cooling', MODES.fetch(name), Value: on ? 1 : 2)
+          write_cooling(MODES.fetch(name), Value: on ? 1 : 2)
         end
 
         private
@@ -89,6 +89,25 @@ module Miele
         # @return [void]
         def put(resource, member, **body)
           send_request(:put, "/Devices/#{fab}/#{resource}/#{member}", body: JSON.generate(body))
+        end
+
+        # @param member [String] what follows +Cooling+ in the path
+        # @param body [Hash{Symbol=>Object}]
+        # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance
+        def write_cooling(member, **body)
+          require!(cooling_api?, 'an Opcode appliance has no Cooling resource to write')
+          put('Cooling', member, **body)
+        end
+
+        # @param degrees [Integer, Float]
+        # @return [Integer] as Oc85 carries it, in 16 bits
+        # @raise [ArgumentError] for a fraction of a degree or a value out of 16 bits
+        def whole_degrees(degrees)
+          whole = degrees.to_i
+          return whole if whole == degrees && (-0x8000...0x8000).cover?(whole)
+
+          raise ArgumentError, "Oc85 carries whole degrees in 16 bits, not #{degrees}"
         end
 
         # @param on [Boolean]

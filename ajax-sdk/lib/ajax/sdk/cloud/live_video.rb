@@ -42,15 +42,13 @@ module Ajax
 
         # @param view [View]
         # @param tag [Integer]
-        # @param metadata [Array<String>] the metadata frames to add, among {METADATA}
+        # @param metadata [Array<String>] the metadata frames to add: those of {METADATA} in the app's order, then
+        #   the others as given, each once
         # @param ptz [Boolean] whether the view drives PTZ, which takes the capability and the +PTZ+ permission
         # @return [Data] a +Stream+ of live video
-        # @raise [ArgumentError] for metadata outside {METADATA}
         def live(view, tag:, metadata: [], ptz: false)
-          unknown = metadata - METADATA
-          raise ArgumentError, "unknown metadata #{unknown.join(', ')}" unless unknown.empty?
-
-          frames = [frame(:video), *(METADATA & metadata).map { frame(:metadata, it) }]
+          names = (METADATA & metadata) + (metadata - METADATA).uniq
+          frames = [frame(:video), *names.map { frame(:metadata, it) }]
           live = WEBRTC::Stream::Live.new(use_ptz: ptz)
           stream(view, "l#{view.quality == :sub ? 's' : 'm'}", tag, frames, live:)
         end

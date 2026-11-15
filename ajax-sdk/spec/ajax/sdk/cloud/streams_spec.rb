@@ -29,8 +29,10 @@ RSpec.describe Ajax::Sdk::Cloud::Streams do
     expect(stream.to_message[:filter].map { it[:metadata_type] }).to eq(['', 'Figures', 'RadarMotion'])
   end
 
-  it 'refuses metadata the app never asks a live stream for' do
-    expect { described_class.live(view(2), tag: 5, metadata: %w[Thumbnail]) }.to raise_error(ArgumentError, /Thumbnail/)
+  it 'asks for other metadata after the ones the app names, each once' do
+    stream = described_class.live(view(2), tag: 5, metadata: %w[Thumbnail RadarMotion Figures Thumbnail])
+
+    expect(stream.to_message[:filter].map { it[:metadata_type] }).to eq(['', 'Figures', 'RadarMotion', 'Thumbnail'])
   end
 
   it 'asks for the live sound, with talk-back on the voice stream' do

@@ -25,8 +25,9 @@ module Ajax
       end
 
       # Everyday device and space actions, mixed into {Client}. Each one calls a method of {Methods}, so Steep
-      # checks its request and read-only mode refuses its commands. A device the action does not fit raises
-      # ArgumentError before anything is sent. Commands return nil, reads typed values.
+      # checks its request and read-only mode refuses its commands. A device its request has no type, route or
+      # command for raises ArgumentError before anything is sent; values go as given. Commands return nil, reads
+      # typed values.
       module Shortcuts
         SERVICE = Messages::Api::Ecosystem::V3::Mobilegwsvc::Service
         LOCATOR = Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Locator
@@ -70,9 +71,9 @@ module Ajax
           private_constant :ROLLER, :FAMILIES
 
           # @param device [Device] a relay, light switch, socket or valve
-          # @param channel [Integer] its channel or gang, from 1
+          # @param channel [Integer] its channel or gang, from 1, sent as given: the app offers those in +channels+
           # @return [nil]
-          # @raise [ArgumentError] for a device with nothing to switch, or without that channel
+          # @raise [ArgumentError] for a device with nothing to switch
           def turn_on(device, channel: 1) = device_command_device_on(**switched(device, channel)).then { nil }
 
           # @param (see #turn_on)
@@ -83,12 +84,11 @@ module Ajax
           # Sends the percentage as the app does: on the first channel, as a relative brightness.
           #
           # @param device [Device] a dimmer
-          # @param percent [Integer] from 1 to 100
+          # @param percent [Integer] sent as given
           # @return [nil]
-          # @raise [ArgumentError] for another device or a percentage outside 1..100
+          # @raise [ArgumentError] for another device
           def set_brightness(device, percent)
             raise ArgumentError, "#{device.kind} is not a dimmer" unless device.kind == :light_switch_dimmer
-            raise ArgumentError, "brightness #{percent} is outside 1..100" unless (1..100).cover?(percent)
 
             device_command_brightness(device_type: family_type(:light_switch_dimmer), brightness_in_percentage: percent,
                                       channels: [1], brightness_type: :relative, **hub_target(device))
@@ -106,12 +106,10 @@ module Ajax
           def close_shutter(device) = move_shutter(device, 0)
 
           # @param device [Device] a roller shutter
-          # @param percent [Integer] the opening, from 0 (closed) to 100 (open)
+          # @param percent [Integer] the opening, 0 closed and 100 open, sent as given
           # @return [nil]
-          # @raise [ArgumentError] for another device or an opening outside 0..100
+          # @raise [ArgumentError] for another device
           def move_shutter(device, percent)
-            raise ArgumentError, "opening #{percent} is outside 0..100" unless (0..100).cover?(percent)
-
             goal = ROLLER::DeviceCommandRollerShutterControlRequest::TargetPosition
                    .new(shutter_target_position: percent)
             device_command_roller_shutter_control(**shutter(device), target_position: goal)
@@ -156,10 +154,6 @@ module Ajax
 
           def switched(device, channel)
             family = switch_family(device) or raise ArgumentError, "#{device.kind} has nothing to switch"
-            unless family == :relay || device.channels.any? { it.number == channel }
-              raise ArgumentError, "#{device.kind} has no channel #{channel}"
-            end
-
             channels = family == :relay ? [] : [channel] #: Array[Integer]
             { hub_id: hub_id_of(device), device_id: device.id, device_type: family_type(family), channels: }
           end
@@ -389,16 +383,13 @@ module Ajax
           # @raise [ReadError] when the gateway refuses the read
           def current_member(space_id) = space_snapshot(space_id)&.current_member
 
-          # @param device [Device] a device with LifeQuality measures
+          # @param device [Device] the app asks for one whose +life_quality+ is set
           # @param from [Time]
           # @param to [Time]
           # @param step [Symbol] the width of a bucket: +:minute+, +:hour+, +:day+ or +:month+
           # @param time_zone [String] the IANA zone that sets where days and months start
           # @return [LifeQualityHistory]
-          # @raise [ArgumentError] for a device without LifeQuality measures
           def life_quality_history(device, from:, to:, step: :hour, time_zone: 'UTC')
-            raise ArgumentError, "#{device.kind} has no LifeQuality measures" unless device.life_quality
-
             zone = Messages::Google::Type::TimeZone.new(id: time_zone)
             LifeQualityHistory.from(
               life_quality_data_get_life_quality_data(hub_hex_id: hub_id_of(device), device_hex_id: device.id,

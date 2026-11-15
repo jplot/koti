@@ -98,10 +98,15 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         .to raise_error(ArgumentError, /wall_switch/)
     end
 
-    it 'refuses to switch a device with no switchable channel, or a channel it does not have', :aggregate_failures do
+    it 'refuses to switch a device with no switchable channel', :aggregate_failures do
       expect { client.turn_on(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
-      expect { client.turn_on(device(:light_switch_one_gang, gang(1)), channel: 2) }.to raise_error(ArgumentError, /2/)
       expect(client).not_to have_received(:call)
+    end
+
+    it 'switches a channel the device does not list, as given' do
+      client.turn_on(device(:light_switch_one_gang, gang(1)), channel: 2)
+
+      expect(sent.last.last[:channels]).to eq([2])
     end
 
     it 'sets a dimmer brightness the way the app does' do
@@ -111,10 +116,14 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                                                channels: [1], brightness_type: :BRIGHTNESS_TYPE_RELATIVE })
     end
 
-    it 'refuses a brightness outside 1 to 100, or a device that is not a dimmer', :aggregate_failures do
+    it 'sends a brightness outside 1 to 100 as given' do
       dimmer = device(:light_switch_dimmer, gang(1))
+      [0, 101].each { client.set_brightness(dimmer, it) }
 
-      expect([0, 101].map { |percent| error_of { client.set_brightness(dimmer, percent) } }).to eq([ArgumentError] * 2)
+      expect(sent.map { it.last[:brightness_in_percentage] }).to eq([0, 101])
+    end
+
+    it 'refuses a device that is not a dimmer', :aggregate_failures do
       expect { client.set_brightness(device(:relay), 50) }.to raise_error(ArgumentError, /relay/)
       expect(client).not_to have_received(:call)
     end
@@ -137,8 +146,14 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         .to eq([{ shutter_target_position: 0 }, { shutter_target_position: 30 }])
     end
 
-    it 'refuses a shutter opening outside 0 to 100, or a device that is not a shutter', :aggregate_failures do
-      expect { client.move_shutter(device(:roller_shutter_ws), 101) }.to raise_error(ArgumentError, /101/)
+    it 'sends a shutter opening outside 0 to 100 as given' do
+      [-1, 101].each { client.move_shutter(device(:roller_shutter_ws), it) }
+
+      expect(sent.map { it.last[:target_position] })
+        .to eq([{ shutter_target_position: -1 }, { shutter_target_position: 101 }])
+    end
+
+    it 'refuses a device that is not a shutter', :aggregate_failures do
       expect { client.close_shutter(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
       expect(client).not_to have_received(:call)
     end
@@ -462,6 +477,13 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       expect(sent.last.last).to eq({ hub_hex_id: '0000ABCD', device_hex_id: '0000BEEF', start_timestamp: 0,
                                      end_timestamp: 7200, discreteness: :LIFE_QUALITY_DATA_DISCRETENESS_HOUR,
                                      time_zone: { id: 'Europe/Brussels', version: '' } })
+    end
+
+    it 'asks the life quality history of a device that reports no measures' do
+      replying(quality_answer)
+      client.life_quality_history(device(:door_protect), from: Time.at(0), to: Time.at(7200))
+
+      expect(sent.last.last).to include(hub_hex_id: '0000ABCD', device_hex_id: '0000BEEF')
     end
   end
 

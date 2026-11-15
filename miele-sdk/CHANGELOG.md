@@ -11,15 +11,19 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - **Breaking:** where the Miele app sends an action's requests with the action's token, which its
   Timeout cancels, each request gets only what that Timeout has left, and none goes out once it has
-  run out: `ActionFailedError` is raised instead. That holds for a rename and Con@ctivity One and
-  Plus (15 s), a cooling appliance's `set_mode` (5 s), each of a DOP2 dishwasher's wake, switch-on
-  and switch-off sequences (15 s each, `State` read and three attempts included), a DOP2 coffee
-  maker's `power_on` (45 s) and `power_off` (15 s), and an oven's actions (15 s, 45 s for
-  `power_on`). A coffee maker's `power_on` counts its 45 s from before its `State` read, and an
-  oven's `select_program` and `continue_cooking` their 15 s from before their write, as the app's
-  Timeouts do; an oven's `select_program` writes the required parameters after them, with no bound
-  of their own. A 500 on the 1/1574 read of an oven's `microwave_power=` is taken as one on its
-  write, which the app sends under the same action.
+  run out: `ActionFailedError` is raised instead, as it is, with the `ConnectionError` as cause, by
+  a request that times out as that Timeout runs out. That holds for a rename and Con@ctivity One
+  and Plus (15 s), a cooling appliance's `set_mode` (5 s), a DOP2 dishwasher's `power_on`, its
+  wake step and its switch step each, and its `power_off` (15 s each, `State` read and three
+  attempts included), a DOP2 coffee maker's `power_on` (45 s) and `power_off` (15 s), and an
+  oven's actions (15 s, 45 s for `power_on`), but for the start reset before a zero duration,
+  which the app sends with its caller's token: only the duration write after it is refused. Through
+  the cloud, a login or a token renewal counts in that time: `Cloud::Channel#request` takes a block
+  that gives the timeout once its token is in hand. A coffee maker's `power_on` counts its 45 s from
+  before its `State` read, and an oven's `select_program` and `continue_cooking` their 15 s from
+  before their write, as the app's Timeouts do; an oven's `select_program` writes the required
+  parameters after them, with no bound of their own. A 500 on the 1/1574 read of an oven's
+  `microwave_power=` is taken as one on its write, which the app sends under the same action.
 - Requests the app sends under a token of their own wait no longer than it gives them: a DOP2
   dishwasher's reads and writes 15 s, its 2/1574 read 5 s before a delayed start or ProfiLine
   extras and 15 s before other extras, and its wake's `State` read and `DeviceAction` 2 15 s each;

@@ -71,7 +71,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   6 s later with the session's current token. A 401 or 403 on the appliance list
   (`Cloud::Channel#devices`, so `Miele::Sdk.appliances`) logs the account out and forgets its token,
   `token_file` included, then raises `ResponseError`; the next request logs in again
-  (`Cloud::Session#invalidate`).
+  (`Cloud::Session#invalidate`). A renewal the cloud refuses (a 401, which an MCS renewal gets twice
+  as the app's client sends it once more, or a CIAM 400 `invalid_grant`) does the same and raises
+  `AuthenticationError`, instead of logging in again at once.
 
 ### Fixed
 
@@ -88,6 +90,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   the stream. An interrupted withdrawal still stops the server and the announcements.
 - `Appliance#get` raises a `ResponseError` carrying the status for an answer without a body, instead
   of `JSON::ParserError`, an error outside `Miele::Sdk::Error`.
+- MCS logins, renewals and logouts go out as the app's MCS clients send them, as
+  `application/json; charset=utf-8` with `Accept: application/json`, the logout with an empty JSON
+  object; a DELETE to the cloud without content carries `Content-Length: 0`.
 
 ### Added
 

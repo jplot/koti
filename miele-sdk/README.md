@@ -850,7 +850,8 @@ client does. The appliance list is handled as the app handles a lost session: a 
 `devices` (and so on `Miele::Sdk.appliances`) logs the account out, at `/V2/Logout` or the CIAM
 logout address, forgets the token and deletes `token_file`, then raises `ResponseError`. The next
 request logs in again with `email` and `password`, or raises `ConfigurationError` until a new CIAM
-code is exchanged; a `cloud_token` setting is left as given.
+code is exchanged; a `cloud_token` setting is left as given. A renewal the cloud refuses (a 401, or a
+CIAM `invalid_grant`) ends the session the same way and raises `AuthenticationError`.
 
 `ciam_client_id` is the Miele app's OAuth client id (`MA.Constants.CdcKeys.ClientId` in
 `Miele.Modules.Authentication`); the gem does not ship it. The cloud client follows the
@@ -957,7 +958,7 @@ seconds (3 by default) after each read ends. A failed read ends the poll with it
 | `Miele::Sdk::ConfigurationError` | the GroupID or GroupKey is missing or malformed |
 | `Miele::Sdk::ConnectionError` | the appliance cannot be reached, or drops the connection |
 | `Miele::Sdk::SignatureError` | an answer is not signed or encrypted with the household key |
-| `Miele::Sdk::AuthenticationError` | the appliance refuses a read: the key does not match its own |
+| `Miele::Sdk::AuthenticationError` | the appliance refuses a read: the key does not match its own; or the cloud refuses the account or its renewal |
 | `Miele::Sdk::ResponseError` | the appliance answers with an error status; carries `status` |
 | `Miele::Sdk::NotFoundError` | the appliance does not serve that resource, or the GroupID is not its own (a `ResponseError`) |
 | `Miele::Sdk::RemoteControlDisabledError` | the appliance refuses a command (a `ResponseError`) |

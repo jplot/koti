@@ -97,7 +97,7 @@ module Miele
         # @raise [ActionUnavailableError] on a Dop1 or Opcode appliance
         # @api public
         def anti_crease=(value)
-          require!(dop2?, 'only a DOP2 appliance takes its anti-crease setting from the app')
+          require!(dop2?, 'only a DOP2 appliance has 2/105 to write its anti-crease setting')
           modify(Objects::Laundry::GlobalSfValue, [2, 105, 12_037, 0]) { it.with(current_value: value) }
         end
 

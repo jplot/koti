@@ -18,8 +18,9 @@ are computed with [`rotp`](https://github.com/mdp/rotp), and the SIA checksums w
 
 Use a **dedicated account** added to your space, not your personal one, with **two-factor
 authentication** turned on. koti answers the 2FA challenge itself from the TOTP secret the app shows
-when you enable it. The password is never stored: pass its lowercase SHA-256 hash, which is what the
-app sends over the wire.
+when you enable it: it sends the current code once, as the app sends the one typed, and a refused code
+raises `AuthenticationError` `:invalid_totp`; the next call logs in again. The password is never stored:
+pass its lowercase SHA-256 hash, which is what the app sends over the wire.
 
 ```ruby
 require "ajax/sdk"

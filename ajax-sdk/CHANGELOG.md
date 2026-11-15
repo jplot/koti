@@ -14,6 +14,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** a refused TOTP code is no longer followed by the next window's: the login sends the current
+  code once, as the app sends the one typed, and raises `AuthenticationError` `:invalid_totp`. The next call
+  logs in again.
 - **Breaking:** `events` no longer reopens its streams: the feed ends with the first stream that ends and
   raises what breaks one. It takes a `tracker:` to reopen with, which reports only the changes made meanwhile
   and reads back the notifications created since the last one yielded; `sleeper:` is gone.

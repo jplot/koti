@@ -426,7 +426,7 @@ as it is given, and `Plan` computes what those screens decide, for the client's 
 
 | Call | The app's screen | Gives |
 |---|---|---|
-| `Plan.motion_area_selectable?(plans, bridge_id)` | arming devices | false for a motion area whose bridge is `free_tier` (the app offers a plan) or `experience_period_not_enabled` (it offers the trial, which `home.start_trial(bridge_id, model_id:)` starts) and for every area while the plans are not read |
+| `Plan.motion_area_selectable?(plans, bridge_id)` | arming devices | false for a motion area whose bridge is `free_tier` (the app offers a plan) or `experience_period_not_enabled` (it offers the trial), and for every area while the plans are not read |
 | `Plan.motion_area_switches?(plans, bridge_id)` | motion area | whether the switches that use the area when armed show: only for a bridge `subscribed` or in its `experience_period` |
 | `Plan.gated?(request, free_clips:)` | camera settings | whether the app checks the plan before a camera change, the request holding only what changes: clip recording turned on, unless `free_clips`; activity, package or lighting zones; sound detection |
 | `Plan.camera_action(plans, camera_id)` | camera settings | what it then does: `:run`, `:inform_then_run` (in the trial, after a dialog), `:suggest_plan`, `:nothing` (before the trial) or `:refetch` |
@@ -441,6 +441,11 @@ before any read. A bridge's id is the form an arming entry's `bridge` and `Home#
 cloud does not give them: `motion_areas:`, whether a bridge of the home has a motion area (its
 `motion_area_configuration` resources), and `free_clips:`, the app's remote setting
 `enable_24_hour_free_video_clips`, off by default. Never tested with a device.
+
+`home.start_trial(bridge_id, model_id:)` starts a bridge's trial as the app does from its arming
+devices and motion area screens, which offer it only when the home's `permissions` include
+`home.devices.create`. `model_id` is the bridge's own, as its settings or discovery give it; the
+app then reads the plans again.
 
 | Setting | Default | Purpose |
 |---|---|---|

@@ -157,15 +157,21 @@ module Miele
         # @api public
         def disconnect_hob(hob) = update_connectivity_plus { it - [hob] }
 
-        # A Dop1 or Opcode hood wakes when its State is written back, the light as it is; DOP2 takes
-        # +DeviceAction+ 2 (DefaultWakeUpAction).
+        # A Dop1 or Opcode hood wakes when its State is written back, the light as it is, while +State+ shows it
+        # off; only an answer carrying "Success" means woken (DefaultWakeUpAction). DOP2 takes +DeviceAction+ 2.
         #
         # @return [void]
+        # @raise [ResponseError] when the hood refuses the write, 400 included
+        # @raise [NotAcceptedError] when a Dop1 or Opcode hood answers without "Success"
         # @api public
         def wake
           return super if [3, 4].include?(protocol_version)
 
-          command(Schema::DeviceState.new(light: state.raw['Light']))
+          state = self.state
+          return unless state.status == :off
+
+          answer = command(Schema::DeviceState.new(light: state.raw['Light'])).body
+          raise NotAcceptedError, "the hood answered #{answer.inspect} to its wake" unless answer.include?('"Success"')
         end
 
         # @return [Boolean] whether the app wakes the hood: a DOP2 one always, a Dop1 or Opcode one while +State+

@@ -58,8 +58,8 @@ module Miele
     # is the appliance's predicates' to tell, never a refusal.
     class ActionUnavailableError < Error; end
 
-    # The appliance answered a Dop1 write with an Ack other than success (1), which the Miele app reports as
-    # settings not accepted.
+    # The appliance answered a write without the success the Miele app looks for: a Dop1 Ack other than 1, which
+    # it reports as settings not accepted, or a hood's wake answered without "Success".
     class NotAcceptedError < Error; end
 
     # The appliance took an action's write but did not show its effect within the 15 s the Miele app waits for it

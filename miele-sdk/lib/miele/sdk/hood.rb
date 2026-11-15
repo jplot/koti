@@ -7,6 +7,7 @@ module Miele
       include Readings
       include Wire
       include Commands
+      include Conactivity
       include Dop1Commands
 
       # @param pf_id [Integer] programming function id: 40010 and 40011 are the current grease and charcoal filter

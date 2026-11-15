@@ -4,6 +4,7 @@ module Miele
       include Readings
       include Wire
       include Commands
+      include Conactivity
       include Dop1Commands
 
       def setting: (Integer pf_id) -> Integer?

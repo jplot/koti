@@ -38,17 +38,11 @@ module Miele
 
         def color_flow: () -> ColorFlow?
 
-        def connect_hob: (String hob) -> void
-
-        def disconnect_hob: (String hob) -> void
-
         def wake: () -> void
 
         def wake_offered?: () -> bool
 
         def setting: (Integer pf_id) -> Integer?
-
-        def connectivity_plus: () -> ConnectivityPlus?
 
         def fan_settable?: () -> bool?
 
@@ -65,10 +59,6 @@ module Miele
         def awake?: (Hash[String, untyped] state) -> bool
 
         def reset_filter: (Integer pf_id, Integer request, String opcode_request) -> void
-
-        def update_connectivity_plus: (String hob, bool connect) -> void
-
-        def followed: (Array[String] sources, String hob, bool connect) -> Array[String]
 
         def route: (Symbol kind) -> Symbol
 

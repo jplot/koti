@@ -52,6 +52,8 @@ RSpec.describe Miele::Sdk::Hood do
 
   def gets(path) = fake.requests.count { it.verb == 'GET' && it.path.end_with?(path) }
 
+  def plus_requests = fake.requests.map { [it.verb, it.path[/services.*/]] }.select(&:last)
+
   it 'reads Con@ctivity Plus from services' do
     expect(hood.connectivity_plus).to eq(described_class::ConnectivityPlus.new(
                                            available: true, activated: false,
@@ -65,13 +67,25 @@ RSpec.describe Miele::Sdk::Hood do
                             { 'activated' => true, 'sourceDeviceIds' => %w[000111222333] }]])
   end
 
-  it 'reads services and writes Con@ctivity Plus again 2 s after a 5xx or a lost connection, four times at most',
-     :aggregate_failures do
+  it 'writes Con@ctivity Plus again 2 s after a 5xx or a lost connection, four times at most, reading services ' \
+     'again once their last answer is 3 s old', :aggregate_failures do
     refusals.push([500, {}, ''], :drop, [503, {}, ''], [500, {}, ''])
     expect { hood.connect_hob('000111222333') }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
-    expect(fake.requests.map { [it.verb, it.path[/services.*/]] }.select(&:last))
-      .to eq([%w[GET services], %w[PUT services/ConnectivityPlus]] * 4)
+    expect(plus_requests.map(&:first)).to eq(%w[GET PUT PUT GET PUT PUT])
     expect(waits).to eq([2, 2, 2])
+  end
+
+  it 'reads services 1 s after a write the second attempt sent 2 s after the read it reuses', :aggregate_failures do
+    refusals.push([500, {}, ''])
+    hood.connect_hob('000111222333')
+    expect(plus_requests.map(&:first)).to eq(%w[GET PUT PUT GET])
+    expect(waits).to eq([2, 1])
+  end
+
+  it 'reads nothing more when the services it wrote from already show the hob as written', :aggregate_failures do
+    hood.disconnect_hob('000111222333')
+    expect(plus_requests.map(&:first)).to eq(%w[GET PUT])
+    expect(waits).to be_empty
   end
 
   it 'reads services 3 s after its write, as the read polled before it, until they show the hob as written',

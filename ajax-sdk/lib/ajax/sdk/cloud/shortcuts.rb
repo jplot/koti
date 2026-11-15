@@ -71,7 +71,8 @@ module Ajax
           private_constant :ROLLER, :FAMILIES
 
           # @param device [Device] a relay, light switch, socket or valve
-          # @param channel [Integer] its channel or gang, from 1, sent as given: the app offers those in +channels+
+          # @param channel [Integer] its channel or gang, from 1, sent as given but to a legacy relay, which gets
+          #   none; the app offers those in +channels+
           # @return [nil]
           # @raise [ArgumentError] for a device with nothing to switch
           def turn_on(device, channel: 1) = device_command_device_on(**switched(device, channel)).then { nil }
@@ -87,8 +88,10 @@ module Ajax
           # @param percent [Integer] sent as given; the app's sliders give 1 to 100
           # @return [nil]
           # @raise [ArgumentError] for another device
+          # @raise [TypeError] for a percentage that is not an Integer
           def set_brightness(device, percent)
             raise ArgumentError, "#{device.kind} is not a dimmer" unless device.kind == :light_switch_dimmer
+            raise TypeError, "brightness #{percent.inspect} is not an Integer" unless percent.is_a?(Integer)
 
             device_command_brightness(device_type: family_type(:light_switch_dimmer), brightness_in_percentage: percent,
                                       channels: [1], brightness_type: :relative, **hub_target(device))
@@ -110,7 +113,10 @@ module Ajax
           #   multiples of 5
           # @return [nil]
           # @raise [ArgumentError] for another device
+          # @raise [TypeError] for an opening that is not an Integer
           def move_shutter(device, percent)
+            raise TypeError, "opening #{percent.inspect} is not an Integer" unless percent.is_a?(Integer)
+
             goal = ROLLER::DeviceCommandRollerShutterControlRequest::TargetPosition
                    .new(shutter_target_position: percent)
             device_command_roller_shutter_control(**shutter(device), target_position: goal)
@@ -390,6 +396,7 @@ module Ajax
           # @param step [Symbol] the width of a bucket: +:minute+, +:hour+, +:day+ or +:month+
           # @param time_zone [String] the IANA zone that sets where days and months start
           # @return [LifeQualityHistory]
+          # @raise [ArgumentError] for a device outside the hub
           def life_quality_history(device, from:, to:, step: :hour, time_zone: 'UTC')
             zone = Messages::Google::Type::TimeZone.new(id: time_zone)
             LifeQualityHistory.from(

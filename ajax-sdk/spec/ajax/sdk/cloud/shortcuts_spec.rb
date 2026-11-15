@@ -123,6 +123,12 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       expect(sent.map { it.last[:brightness_in_percentage] }).to eq([0, 101])
     end
 
+    it 'refuses a brightness or an opening that is not an integer, sending nothing', :aggregate_failures do
+      expect { client.set_brightness(device(:light_switch_dimmer, gang(1)), nil) }.to raise_error(TypeError)
+      expect { client.move_shutter(device(:roller_shutter_ws), nil) }.to raise_error(TypeError)
+      expect(client).not_to have_received(:call)
+    end
+
     it 'refuses a device that is not a dimmer', :aggregate_failures do
       expect { client.set_brightness(device(:relay), 50) }.to raise_error(ArgumentError, /relay/)
       expect(client).not_to have_received(:call)

@@ -31,7 +31,7 @@ module Ajax
       module Streams
         WEBRTC = Messages::Api::Mobile::V2::Common::Video::Webrtc
         VIDEO = Messages::Api::Mobile::V2::Common::Video
-        # The metadata frames a live stream can carry, in the order the app asks for them.
+        # The metadata frames the app asks a live stream for, in its order.
         METADATA = %w[Figures A PirMotion RadarMotion].freeze
         private_constant :WEBRTC, :VIDEO
 
@@ -46,7 +46,10 @@ module Ajax
         #   the others as given, each once
         # @param ptz [Boolean] whether the view drives PTZ, which takes the capability and the +PTZ+ permission
         # @return [Data] a +Stream+ of live video
+        # @raise [TypeError] for a metadata name that is not a String
         def live(view, tag:, metadata: [], ptz: false)
+          raise TypeError, "metadata #{metadata.inspect} holds a name that is not a String" unless metadata.all?(String)
+
           names = (METADATA & metadata) + (metadata - METADATA).uniq
           frames = [frame(:video), *names.map { frame(:metadata, it) }]
           live = WEBRTC::Stream::Live.new(use_ptz: ptz)

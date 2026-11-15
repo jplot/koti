@@ -15,8 +15,7 @@ module Miele
         private_constant :MESSAGE_TYPES, :LIGHT_STATUSES, :SWITCH_OFF_STATUSES
 
         # A sleeping DOP2 coffee maker answers 500: the app wakes it (+DeviceAction+ 2), waits 5 s and reads
-        # 2/1586 again, then waits 1.5 s before it writes it; {SwitchOn} tells how it starts again. The app then waits,
-        # within its 45 s, for the +State+ its websocket pushes to show it on; the SDK sends nothing for it.
+        # 2/1586 again, then waits 1.5 s before it writes it; {SwitchOn} tells how it starts again.
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
@@ -40,11 +39,10 @@ module Miele
         end
 
         # SwitchOffAction sends nothing to a DOP2 coffee maker while +State+ shows Status 1 (IsApplianceOffObservable).
-        # That check reads +State+ once beside its websocket stream, on which the app then waits up to 15 s for
-        # Status 1; the SDK sends nothing for that wait.
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
+        # @raise [Error] on a DOP2 coffee maker, what the third attempt raises, 400 included
         # @api public
         def power_off
           return write_device_action(3) if protocol_version == 2

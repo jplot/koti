@@ -22,8 +22,7 @@ module Miele
       private_constant :NOTIFICATION_IDS, :SWITCH_ON_TIMEOUT
 
       # Switches the appliance on as the app's oven module does, waking it first when it sleeps. The app's
-      # other families switch on in their own way. Within the same 45 s, the app then waits for the +State+ its
-      # websocket pushes to show the oven on (IsApplianceOnObservable); the SDK sends nothing for it.
+      # other families switch on in their own way.
       #
       # @return [void]
       # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1586 to write

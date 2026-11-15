@@ -10,12 +10,14 @@ module Miele
         #
         # @param hob [String] its fabrication number
         # @return [void]
+        # @raise [ResponseError, ConnectionError] a 4xx or a timeout at once, another refusal at the fourth attempt
         # @raise [ActionFailedError] when +services+ do not list the hob within the app's 15 s
         # @api public
         def connect_hob(hob) = update_connectivity_plus(hob, true)
 
         # @param hob [String] its fabrication number
         # @return [void]
+        # @raise [ResponseError, ConnectionError] a 4xx or a timeout at once, another refusal at the fourth attempt
         # @raise [ActionFailedError] when +services+ still list the hob after the app's 15 s
         # @api public
         def disconnect_hob(hob) = update_connectivity_plus(hob, false)

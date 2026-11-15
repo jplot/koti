@@ -131,6 +131,12 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([user_request(1)])
   end
 
+  it 'tells the app offers no start without a ProgId on 1/1574' do
+    serve([1])
+    resources['DOP2/1/1574?idx1=0&idx2=1'] = dop2_leaf(1, 1574, { 4 => dop2_field(:struct, oven_parameters) }, idx2: 1)
+    expect(oven.start_offered?).to be(false)
+  end
+
   it 'tells the app offers a start once a required duration is set, or for an automatic program', :aggregate_failures do
     serve([1], parameters: { 12 => value(:u32, 2, 1_800) })
     expect(oven.start_offered?).to be(true)

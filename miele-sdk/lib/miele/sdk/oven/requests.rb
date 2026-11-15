@@ -37,14 +37,14 @@ module Miele
           write_dop2(Messages.user_request(supported_requests.include?(1) ? 1 : 113))
         end
 
-        # @return [Boolean] whether the app offers {#start}: on a DOP2 oven, an automatic program, or another whose
-        #   duration is set where it is required (0 and all ones are unset)
+        # @return [Boolean] whether the app offers {#start}: on a DOP2 oven, a program selected (a ProgId on
+        #   1/1574), automatic, or with its duration set where it requires one (0 and all ones are unset)
         # @api public
         def start_offered?
           return false unless dop2?
 
           context = program_context
-          automatic?(context) || duration_given?(context)
+          !context.prog_attributes_cca&.prog_id.nil? && (automatic?(context) || duration_given?(context))
         end
 
         # @return [void]

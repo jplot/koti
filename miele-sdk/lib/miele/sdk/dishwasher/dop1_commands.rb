@@ -74,9 +74,12 @@ module Miele
           dop1(Dop1.request(object_id: '8906', type: Dop1::READ, section: [1, prog_id, extras].pack('CCv')))
         end
 
+        # SetStartTimeForDelayStartForDop1Action reads 8909 first, then overwrites all four fields: none goes back.
+        #
         # @param minutes [Integer]
         # @return [void]
         def dop1_start_delayed(minutes)
+          dop1_object(Objects::Dishwasher::SmartControlGsdStartTime, timeout: 5)
           section = [1, minutes % 60, minutes / 60, 1].pack('C4')
           dop1(Dop1.request(object_id: '8909', type: Dop1::WRITE, section:))
         end

@@ -16,6 +16,7 @@ RSpec.describe Miele::Sdk::Dishwasher do
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(current)]
       in { verb: 'POST', body: /89060100"/ } then [200, {}, '{"Response":"890611000105ff00"}']
+      in { verb: 'POST', body: /89090100"/ } then [200, {}, '{"Response":"8909110001000001"}']
       else [200, {}, '{}']
       end
     end
@@ -66,6 +67,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
       timeouts = read_timeouts
       dishwasher.set_extras(:eco)
       expect(timeouts).to eq([5, 5, 30])
+    end
+
+    it 'reads 8909 within 5 s before the delayed start, as SetStartTimeForDelayStartForDop1Action' do
+      timeouts = read_timeouts
+      dishwasher.start_delayed(Time.now + 3600)
+      expect(timeouts).to eq([5, 30])
     end
 
     it 'opens the door within 5 s, as OpenDoorForDop1Action' do
@@ -135,7 +142,7 @@ RSpec.describe Miele::Sdk::Dishwasher do
     it 'delays the start on 8909 in minutes and hours, sending no start request after' do
       allow(Time).to receive(:now).and_return(Time.new(2026, 10, 31, 20, 0, 30))
       dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
-      expect(dop1_requests).to eq(['89090200011e0101'])
+      expect(dop1_requests).to eq(%w[89090100 89090200011e0101])
     end
   end
 

@@ -20,11 +20,11 @@ module Miele
 
         def program_writeable?: (Objects::Oven::GlobalDeviceContext device) -> bool
 
-        def shown_program_context: (Integer id) -> Objects::Oven::GlobalPsContext
+        def shown_program_context: (Integer id, Float since) -> Objects::Oven::GlobalPsContext
 
         def program_shown?: (Objects::Oven::GlobalPsContext context, Integer id) -> bool
 
-        def poll: (Integer timeout) { () -> untyped } -> untyped
+        def poll: (Integer timeout, ?since: Float) { () -> untyped } -> untyped
 
         def require_dop2!: () -> void
 

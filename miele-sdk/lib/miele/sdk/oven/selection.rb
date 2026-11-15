@@ -21,8 +21,11 @@ module Miele
         def select_program(prog_id)
           require_dop2!
           id = Objects::Oven::GlobalEnumPrgId.to_i(prog_id)
-          write_dop2(Messages.ps_select(id, 0))
-          write_selected_parameters(id, shown_program_context(id))
+          context = within(Polling::ACTION_TIMEOUT) do |since|
+            write_dop2(Messages.ps_select(id, 0))
+            shown_program_context(id, since)
+          end
+          write_selected_parameters(id, context)
         end
 
         # DetermineIsProgramWriteable, which enables the app's program selection.
@@ -66,10 +69,11 @@ module Miele
         # WaitForProgramToBeSet, under the app's timeout.
         #
         # @param id [Integer] the ProgId selected
+        # @param since [Float] when the action began, before its write
         # @return [Objects::Oven::GlobalPsContext] 1/1574 showing it
         # @raise [ActionFailedError]
-        def shown_program_context(id)
-          poll(Polling::ACTION_TIMEOUT) { program_context.then { it if program_shown?(it, id) } } ||
+        def shown_program_context(id, since)
+          poll(Polling::ACTION_TIMEOUT, since:) { program_context.then { it if program_shown?(it, id) } } ||
             raise(ActionFailedError, "the oven did not show program #{id} within #{Polling::ACTION_TIMEOUT} s")
         end
 

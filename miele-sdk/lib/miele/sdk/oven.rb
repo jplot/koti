@@ -31,13 +31,14 @@ module Miele
       # @api public
       def power_on
         require_dop2!
-        since = @clock.call
-        loop do
-          return write_dop2(power_leaf(4))
-        rescue ResponseError => e
-          raise unless e.status == 500
+        within(SWITCH_ON_TIMEOUT) do |since|
+          loop do
+            return write_dop2(power_leaf(4))
+          rescue ResponseError => e
+            raise unless e.status == 500
 
-          rouse(since, e)
+            rouse(since, e)
+          end
         end
       end
 
@@ -50,7 +51,7 @@ module Miele
       def power_off
         require_dop2!
         begin
-          write_dop2(power_leaf(1))
+          within(Polling::ACTION_TIMEOUT) { write_dop2(power_leaf(1)) }
         rescue ResponseError => e
           raise unless e.status == 500
         end
@@ -149,7 +150,7 @@ module Miele
         require_dop2!
         id = NOTIFICATION_IDS[type]&.to_i(id) || id
         option = Objects::Oven::GlobalEnumNTFCTNAckOptions.to_i(option)
-        write_dop2(Messages.acknowledge(second_cavity ? 5 : 2, type, id, option))
+        within(Polling::ACTION_TIMEOUT) { write_dop2(Messages.acknowledge(second_cavity ? 5 : 2, type, id, option)) }
       end
 
       # @return [Array<Integer>] the user requests the oven offers now, numbered as the app numbers them

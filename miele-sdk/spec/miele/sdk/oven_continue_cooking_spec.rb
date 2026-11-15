@@ -120,6 +120,19 @@ RSpec.describe Miele::Sdk::Oven do
     expect_sent_unoffered
   end
 
+  context 'when each round trip takes a second' do
+    def round_trip = 1
+
+    it 'gives each request only what the 15 s have left, from before the write' do
+      Miele::Sdk.config.read_timeout = 30
+      phases(10_000, 28_100)
+      oven.fab
+      timeouts = read_timeouts
+      oven.continue_cooking
+      expect(timeouts).to eq([15, 14, 13, 12, 11])
+    end
+  end
+
   it 'raises the doneness the oven asks for by one step, then sees it cook on' do
     phases(10_000, 28_100)
     oven.continue_cooking

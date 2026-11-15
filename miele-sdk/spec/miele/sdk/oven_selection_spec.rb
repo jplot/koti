@@ -164,6 +164,23 @@ RSpec.describe Miele::Sdk::Oven do
       expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionFailedError)
       expect(naps).to eq([3, 3, 3])
     end
+
+    it 'gives each request only what the 15 s have left, from before the write', :aggregate_failures do
+      Miele::Sdk.config.read_timeout = 30
+      timeouts = read_timeouts
+      program_context(0)
+      expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionFailedError)
+      expect(timeouts).to eq([15, 14, 13, 9, 5, 1])
+    end
+  end
+
+  it 'writes the required parameters after the 15 s, with no bound of their own' do
+    Miele::Sdk.config.read_timeout = 30
+    program_context(13, parameters: { 6 => required(:u16, 18_000) })
+    oven.fab
+    timeouts = read_timeouts
+    oven.select_program(13)
+    expect(timeouts).to eq([15, 15, 30])
   end
 
   it 'writes every required parameter though one is refused, keeps the selection and raises it',

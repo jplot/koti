@@ -28,6 +28,14 @@ RSpec.describe Miele::Sdk::Oven do
                             '00240002008a000000000005000107000000020700000003080000000000040700040005040c']])
   end
 
+  it 'answers within the 15 s of AcknowledgeOptionAction' do
+    Miele::Sdk.config.read_timeout = 30
+    oven.fab
+    timeouts = read_timeouts
+    oven.acknowledge(:query, 4, option: 12)
+    expect(timeouts.map(&:round)).to eq([15])
+  end
+
   it 'answers on 5/138 for the second cavity' do
     oven.acknowledge(:info, 14, option: 1, second_cavity: true)
     expect(written).to eq([['DOP2/5/138',

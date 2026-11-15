@@ -21,12 +21,13 @@ module Miele
         # @api public
         def continue_cooking
           require_dop2!
-          write_dop2(Messages.user_request(72))
-          since = @clock.call
-          phase = poll(Polling::ACTION_TIMEOUT, since:) { shown_phase([PARA_CONSTRAINT, *CONTINUED_PHASES]) }
-          phase = nil if phase == PARA_CONSTRAINT && !cooking_level_raised?(since)
-          continued = phase && poll(Polling::ACTION_TIMEOUT, since:) { shown_phase(CONTINUED_PHASES) }
-          raise ActionFailedError, "the oven did not cook on within #{Polling::ACTION_TIMEOUT} s" unless continued
+          within(Polling::ACTION_TIMEOUT) do |since|
+            write_dop2(Messages.user_request(72))
+            phase = poll(Polling::ACTION_TIMEOUT, since:) { shown_phase([PARA_CONSTRAINT, *CONTINUED_PHASES]) }
+            phase = nil if phase == PARA_CONSTRAINT && !cooking_level_raised?(since)
+            continued = phase && poll(Polling::ACTION_TIMEOUT, since:) { shown_phase(CONTINUED_PHASES) }
+            raise ActionFailedError, "the oven did not cook on within #{Polling::ACTION_TIMEOUT} s" unless continued
+          end
         end
 
         # ProgramFinishedSpeechBubblesService, the only caller of the action: its continue bubble for ContinueCooking

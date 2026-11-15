@@ -152,6 +152,34 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([user_request(56)])
   end
 
+  it 'starts within the 15 s of the action, its reads included' do
+    Miele::Sdk.config.read_timeout = 30
+    serve([1, 2])
+    oven.fab
+    timeouts = read_timeouts
+    oven.start
+    expect(timeouts.map(&:round)).to eq([15, 15, 15])
+  end
+
+  it 'reads and writes the stop within the 15 s of StopProgramHelper, as DetermineStopRequestAsync reads' do
+    Miele::Sdk.config.read_timeout = 30
+    state(5)
+    serve([2, 56, 57])
+    oven.fab
+    timeouts = read_timeouts
+    oven.stop
+    expect(timeouts.map(&:round)).to eq([15, 15, 15])
+  end
+
+  it 'sends the end of keeping warm and a steam burst within the 15 s of their action' do
+    Miele::Sdk.config.read_timeout = 30
+    oven.fab
+    timeouts = read_timeouts
+    oven.stop_keeping_warm
+    oven.steam_burst
+    expect(timeouts.map(&:round)).to eq([15, 15])
+  end
+
   it 'stops with request 2 a program that could still start' do
     state(4)
     serve([1, 2, 55])
@@ -279,6 +307,14 @@ RSpec.describe Miele::Sdk::Oven do
 
   context 'with a Dop1 oven' do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 12, 'ProtocolVersion' => 2) }
+
+    it 'stops a Dop1 oven within the 15 s of its action' do
+      Miele::Sdk.config.read_timeout = 30
+      oven.fab
+      timeouts = read_timeouts
+      oven.stop
+      expect(timeouts.map(&:round)).to eq([15])
+    end
 
     it 'stops a Dop1 oven through State', :aggregate_failures do
       resources['State'] = JSON.generate('Status' => 5, 'ProgramID' => 13, 'ProgramType' => 0)

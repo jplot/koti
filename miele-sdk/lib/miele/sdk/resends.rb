@@ -35,6 +35,18 @@ module Miele
         [timeout, left].compact.min
       end
 
+      # For the requests the app sends inside an action with its caller's token, which the action's Timeout leaves
+      # alone: they keep their own timeout.
+      #
+      # @return [Object] what the block gives
+      def uncapped
+        deadline = @deadline
+        @deadline = nil
+        yield
+      ensure
+        @deadline = deadline
+      end
+
       # ExecuteSequentiallyUntilTrue sends a switch step through Rx's Retry(3): three attempts back to back,
       # whatever fails, a 400 included.
       #

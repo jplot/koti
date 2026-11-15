@@ -65,10 +65,10 @@ module Miele
         # @api public
         def duration=(seconds)
           require_dop2!
-          context = program_context
-          prog_id = selected_program(context)
-          write_parameter(prog_id, 13, :u64, context.context_para_ca&.start_at&.min.to_i) if seconds.zero?
-          write_parameter(prog_id, 12, :u32, seconds)
+          within(Polling::ACTION_TIMEOUT) do
+            context = seconds.zero? ? uncapped { start_reset } : program_context
+            write_parameter(selected_program(context), 12, :u32, seconds)
+          end
         end
 
         # Keep warm goes last, as in the app (WriteProgramOptionsAsync).
@@ -85,8 +85,10 @@ module Miele
           options = options.compact
           return if options.empty?
 
-          prog_id = selected_prog_id
-          options.each { |id, on| write_parameter(prog_id, id, :bool, on) }
+          within(Polling::ACTION_TIMEOUT) do
+            prog_id = selected_prog_id
+            options.each { |id, on| write_parameter(prog_id, id, :bool, on) }
+          end
         end
 
         private
@@ -98,7 +100,19 @@ module Miele
         # @raise [ActionUnavailableError] on a Dop1 oven, or when no program is selected: PsSelect has no ProgId to
         #   write
         # @raise [ArgumentError] for a value its wire type does not hold
-        def set_parameter(id, type, value) = write_parameter(selected_prog_id, id, type, value)
+        def set_parameter(id, type, value)
+          within(Polling::ACTION_TIMEOUT) { write_parameter(selected_prog_id, id, type, value) }
+        end
+
+        # SetDurationAction's ResetStartTimeAsync, which the app sends with its caller's token.
+        #
+        # @return [Objects::Oven::GlobalPsContext] 1/1574 as read before the start moves to its minimum
+        # @raise [ActionUnavailableError] when no program is selected
+        def start_reset
+          context = program_context
+          write_parameter(selected_program(context), 13, :u64, context.context_para_ca&.start_at&.min.to_i)
+          context
+        end
 
         # @return [Integer] the ProgId of the selected program on 1/1574
         # @raise [ActionUnavailableError] on a Dop1 oven, or when no program is selected

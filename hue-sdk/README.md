@@ -276,14 +276,18 @@ settings.update(time_zone: 'Europe/London')      # sends a request per setting, 
 settings.update(utc: '2026-11-03T10:00:00')      # the clock of the bridge
 settings.update(http_blocked: true)              # refuse plain HTTP
 settings.update(analytics_consent: false)        # do not share statistics
+settings.update(portal_services: true)           # the app's onboarding answer on extended analytics
 ```
 
 `update` returns the settings with the values written, as the app keeps them. Only `http_blocked` is read back, as the
 app does: it stays nil on a bridge that does not report it, and keeps its value if that read fails.
 
-`remote_access` can only be read, as the app sets it when pairing. The network of the bridge and its software updates,
-which the app also writes there, stay out of the SDK, and so do the application keys of other clients, which the same
-answer holds. The SDK never wrote these settings on a real bridge.
+`portal_services` is the bridge's `portalservices`, which the app's onboarding writes from its question whether to
+share extended analytics. It asks that question only while the bridge does not report it on (off, absent, or its
+config unreadable), so it never turns it off; it then asks the consent to share statistics, only while the bridge does
+not report it enabled and of a member who may update the home. `settings` tells both. The network of the bridge and its
+software updates, which the app also writes in the config, stay out of the SDK, and so do the application keys of other
+clients, which the same answer holds. The SDK never wrote these settings on a real bridge.
 
 ## Associations
 

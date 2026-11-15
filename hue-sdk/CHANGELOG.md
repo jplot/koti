@@ -9,6 +9,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** `Settings#remote_access` is now `portal_services`, named after the bridge's `portalservices`, which the
+  app's onboarding writes from its extended analytics question.
 - After a 429, the next request to the same bridge resource waits as the app's rate limiter does: up to 30 s,
   whatever its method. `RateLimitError#retry_after` gives the seconds a CLIP request's Retry-After named.
 - **Breaking:** every bridge request is sent once, as the app sends it: a GET, PUT or DELETE whose connection
@@ -59,8 +61,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `tap_switch`, `motion_sensor` (cameras) and `contact_sensor`. A configuration that would not go back whole stays a hash.
 - `Event#attributes` gives the changes of an event as a typed value, without a request.
 - `Hue::Sdk.settings` reads the time zone of the bridge over CLIP v2 and its other settings over CLIP v1. `update` writes
-  its time zone, its clock, the blocking of plain HTTP and the consent to share statistics over CLIP v1, and keeps the
-  values written, reading only the blocking of plain HTTP back, as the app does.
+  its time zone, its clock, the blocking of plain HTTP, the portal services and the consent to share statistics over
+  CLIP v1, and keeps the values written, reading only the blocking of plain HTTP back, as the app does.
 - Hue Secure through the Hue account's cloud, loaded apart by `require 'hue/sdk/secure'` and never tested with a
   Hue Secure device: login through Auth0 with PKCE and the Hue app's client id, given by the caller; a token saved
   in mode 0600, kept current in the `token` setting, and renewed 30 s before it expires, once across threads; a

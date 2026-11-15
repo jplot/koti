@@ -28,7 +28,7 @@ RSpec.describe Hue::Sdk::Settings do
   it 'reads the settings' do
     expect(Hue::Sdk.settings).to have_attributes(
       name: 'Hue Bridge', bridge_id: 'ECB5FAFFFE000001', model_id: 'BSB003', software_version: '1970000000',
-      api_version: '1.70.0', utc: '2026-11-03T10:00:00', remote_access: true,
+      api_version: '1.70.0', utc: '2026-11-03T10:00:00', portal_services: true,
       analytics_consent: false, http_blocked: true
     )
   end
@@ -63,6 +63,17 @@ RSpec.describe Hue::Sdk::Settings do
   it 'writes the consent to share statistics as the app does' do
     Hue::Sdk.settings.update(analytics_consent: true)
     expect(written).to eq([{ 'analyticsconsent' => true }])
+  end
+
+  it 'writes the portal services as the app does at onboarding, while the bridge reports them off' do
+    config[:portalservices] = false
+    Hue::Sdk.settings.update(portal_services: true)
+    expect(written).to eq([{ 'portalservices' => true }])
+  end
+
+  it 'writes the portal services before the consent to share statistics, as the onboarding asks them' do
+    Hue::Sdk.settings.update(analytics_consent: true, portal_services: true)
+    expect(written).to eq([{ 'portalservices' => true }, { 'analyticsconsent' => true }])
   end
 
   it 'writes each setting in a request of its own' do

@@ -56,6 +56,27 @@ RSpec.describe Miele::Sdk::Appliance do
     end
   end
 
+  context 'when the appliance answers after what the 15 s leave' do
+    let(:fake) { FakeAppliance.start { sleep(1) && [204, {}, ''] } }
+
+    def clock
+      now = Miele::Sdk::Resends::MONOTONIC
+      started = nil
+      -> { started ? 14.8 + now.call - started : (started = now.call) && 0.0 }
+    end
+
+    it 'raises ActionFailedError, the timed-out connection as its cause, as the Timeout fails the action',
+       :aggregate_failures do
+      expect { appliance.name = 'Cuisine' }
+        .to raise_error(Miele::Sdk::ActionFailedError) { expect(it.cause).to be_a(Miele::Sdk::ConnectionError) }
+    end
+
+    it 'raises ConnectionError when the request runs out of its own timeout first' do
+      Miele::Sdk.config.read_timeout = 0.1
+      expect { appliance.name = 'Cuisine' }.to raise_error(Miele::Sdk::ConnectionError)
+    end
+  end
+
   it 'raises a 4xx to a rename at once', :aggregate_failures do
     answers.push([400, {}, ''])
     expect { appliance.name = 'Cuisine' }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')

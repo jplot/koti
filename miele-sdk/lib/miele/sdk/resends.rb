@@ -27,6 +27,23 @@ module Miele
         Thread.current[DEADLINE] = outer
       end
 
+      # The app's Timeout fails the action when it ends, the request then running included: one that times out
+      # once the action's time is up raises as the action does.
+      #
+      # @param timeout [Numeric, nil] the seconds the app gives the request itself
+      # @yieldparam limit [Numeric, nil] the seconds to send it with
+      # @return [Object] what the block gives
+      # @raise [ActionFailedError] when the request times out once the action's time is up, its ConnectionError as
+      #   cause
+      def capped(timeout)
+        yield request_timeout(timeout)
+      rescue ConnectionError => e
+        deadline = Thread.current[DEADLINE] #: Float?
+        raise unless deadline && @clock.call >= deadline && e.cause.is_a?(Timeout::Error)
+
+        raise ActionFailedError, "the action ran out of the app's time for it"
+      end
+
       # @param timeout [Numeric, nil] the seconds the app gives the request itself
       # @return [Numeric, nil] those, or the time the action has left when less
       # @raise [ActionFailedError] without sending, when the action has no time left: its token is cancelled

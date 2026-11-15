@@ -210,11 +210,13 @@ module Miele
       # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [Connection::Response]
       def send_request(method, path, body: nil, kind: :json, timeout: nil)
-        timeout = request_timeout(timeout)
         cloud = @cloud if path.start_with?('/Devices/')
-        return @local.request(method, path, body:, kind:, timeout:) unless cloud
+        dop1_host = host if path.match?(%r{\A/Devices/\d+/DOP/})
+        capped(timeout) do |limit|
+          next @local.request(method, path, body:, kind:, timeout: limit) unless cloud
 
-        cloud.request(method, path, body:, kind:, host: (host if path.match?(%r{\A/Devices/\d+/DOP/})), timeout:)
+          cloud.request(method, path, body:, kind:, host: dop1_host, timeout: limit)
+        end
       end
 
       # @return [Schema::DeviceIdentification]

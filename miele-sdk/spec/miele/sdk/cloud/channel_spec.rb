@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'tmpdir'
+
 RSpec.describe Miele::Sdk::Cloud::Channel do
   subject(:channel) { described_class.new(Miele::Sdk::Cloud::Session.new(organization)) }
 
@@ -78,6 +80,79 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     expect(channel.devices).to contain_exactly(
       have_attributes(fab:, host: 'Miele-0000000000000000.local.', ident: { 'DeviceType' => 13 })
     )
+  end
+
+  context 'when the cloud refuses the appliance list' do
+    let(:file) { File.join(Dir.mktmpdir, 'token.json') }
+
+    before do
+      File.write(file, '{}')
+      Miele::Sdk.configure do |config|
+        config.email = 'koti@example.com'
+        config.password = 'secret'
+        config.token_file = file
+      end
+    end
+
+    [401, 403].each do |status|
+      it "logs out and forgets the token on a #{status}, as the app does", :aggregate_failures do
+        answers << [status, {}, '']
+        expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError) { expect(it.status).to eq(status) }
+        logout = seen('/V2/Logout')
+        expect(logout.map { [it.headers['authorization'], it.headers['accept-language']] })
+          .to eq([['appToken saved', 'en-FR']])
+        expect([channel.session.token, File.exist?(file)]).to eq([nil, false])
+      end
+    end
+
+    it 'logs in again on the next request', :aggregate_failures do
+      answers << [401, {}, '']
+      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      channel.devices
+      expect(seen('/V2/Devices').map { it.headers['authorization'] }).to eq(['appToken saved', 'appToken token-1'])
+    end
+
+    it "sends the logout once more after a 401, as the app's AuthenticationHandler does", :aggregate_failures do
+      answers.push([401, {}, ''], [401, {}, ''])
+      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      expect(seen('/V2/Logout').map { it.headers['authorization'] }).to eq(['appToken saved'] * 2)
+    end
+  end
+
+  context 'when two list reads in flight are refused with the same token' do
+    let(:cloud) do
+      FakeCloud.start(threaded: true) do |request|
+        sleep 0.2
+        [401, {}, ''] if request.path == '/V2/Devices'
+      end
+    end
+
+    it 'logs out once', :aggregate_failures do
+      channel.session.current
+      readers = Array.new(2) { Thread.new { expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError) } }
+      readers.each(&:join)
+      expect(seen('/V2/Logout').size).to eq(1)
+    end
+  end
+
+  context 'when the cloud refuses the appliance list of a CIAM account' do
+    before do
+      token = Miele::Sdk::Cloud::Token.new(value: 'jwt', refresh: 'refresh', scheme: 'Bearer',
+                                           created_at: Time.now, expires_at: Time.now + 3600)
+      Miele::Sdk.configure { it.cloud_token = token.to_json }
+    end
+
+    def organization
+      Miele::Sdk::Cloud::Locales::Organization.new(iso: 'FR', rest: cloud.url, ciam: true,
+                                                   ciam_endpoints: { 'logout' => "#{cloud.url}/fr/logout" })
+    end
+
+    it 'logs out of CIAM with its bearer token, then asks for a new code', :aggregate_failures do
+      answers << [401, {}, '']
+      expect { channel.devices }.to raise_error(Miele::Sdk::ResponseError)
+      expect(seen('/fr/logout').map { [it.verb, it.headers['authorization']] }).to eq([['POST', 'Bearer jwt']])
+      expect { channel.devices }.to raise_error(Miele::Sdk::ConfigurationError, /CIAM/)
+    end
   end
 
   it 'reads the household key from the cloud' do

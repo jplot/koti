@@ -2,6 +2,8 @@ module Miele
   module Sdk
     module Cloud
       class Session
+        include Logout
+
         REDIRECT: String
 
         SCOPE: String

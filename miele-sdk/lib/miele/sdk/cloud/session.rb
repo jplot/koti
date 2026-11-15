@@ -9,6 +9,8 @@ module Miele
     module Cloud
       # The Miele account's token, obtained and renewed the way the Miele app does it.
       class Session
+        include Logout
+
         REDIRECT = 'miele://oauth2-code/'
         private_constant :REDIRECT
 

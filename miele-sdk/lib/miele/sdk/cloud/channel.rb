@@ -42,15 +42,15 @@ module Miele
         # @api public
         def request(method, path, body: nil, kind: :json, host: nil)
           headers = { 'Content-Type' => (TYPES.fetch(kind) if body), 'Host' => host&.delete_suffix('.') }.compact
-          answer = exchange(@session.current, method, path, body, headers)
-          refuse(answer.status, method) unless answer.status.between?(200, 299)
-          Connection::Response.new(status: answer.status, body: answer.body)
+          exchange(@session.current, method, path, body, headers)
         end
 
         # @return [Array<Device>] the appliances paired with the account
+        # @raise [ResponseError] on an error status; a 401 or 403 also logs out and forgets the token
+        #   ({Session#invalidate}), as the app's appliance list does (PairedAppliancesRepository.OnObservationError)
         # @api public
         def devices
-          JSON.parse(request(:get, '/Devices').body).flat_map do |wifi|
+          JSON.parse(listed(@session.current).body).flat_map do |wifi|
             devices = wifi['devices'] || [] #: Array[Hash[String, untyped]]
             devices.map do |device|
               Device.new(fab: device.fetch('mac'), host: wifi.fetch('host'), ident: device['ident'],
@@ -71,11 +71,22 @@ module Miele
 
         private
 
-        # @return [Http::Response]
+        # @return [Connection::Response]
         def exchange(token, method, path, body, headers)
           headers = { 'Authorization' => "#{token.scheme} #{token.value}", 'Accept-Language' => @session.language,
                       **headers }
-          Http.request(method, "#{@session.organization.rest}/V2#{path}", headers:, body:)
+          answer = Http.request(method, "#{@session.organization.rest}/V2#{path}", headers:, body:)
+          refuse(answer.status, method) unless answer.status.between?(200, 299)
+          Connection::Response.new(status: answer.status, body: answer.body)
+        end
+
+        # @param token [Token]
+        # @return [Connection::Response]
+        def listed(token)
+          exchange(token, :get, '/Devices', nil, {})
+        rescue ResponseError => e
+          @session.invalidate(token) if [401, 403].include?(e.status)
+          raise
         end
 
         # @param status [Integer]

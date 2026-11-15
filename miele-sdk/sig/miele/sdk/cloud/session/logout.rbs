@@ -1,0 +1,29 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Session
+        interface _Language
+          def language: () -> String
+        end
+
+        module Logout : _Language
+          @mutex: Thread::Mutex
+
+          @token: Token?
+
+          @organization: Locales::Organization
+
+          def invalidate: (Token refused) -> void
+
+          private
+
+          def logout: (Token token) -> void
+
+          def mcs_logout: (Token token) -> void
+
+          def ciam_logout: (Token token) -> void
+        end
+      end
+    end
+  end
+end

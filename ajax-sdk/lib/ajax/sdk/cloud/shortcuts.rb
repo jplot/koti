@@ -25,9 +25,10 @@ module Ajax
       end
 
       # Everyday device and space actions, mixed into {Client}. Each one calls a method of {Methods}, so Steep
-      # checks its request and read-only mode refuses its commands. A device its request has no type, route or
-      # command for raises ArgumentError before anything is sent; values go as given. Commands return nil, reads
-      # typed values.
+      # checks its request and read-only mode refuses its commands. Each sends what it is given, encoded as the
+      # app's request builders encode it; ArgumentError comes only where the app's builder has nothing to send (a
+      # hub command for a device outside the hub, a mute without a mute button). Commands return nil, reads typed
+      # values.
       module Shortcuts
         SERVICE = Messages::Api::Ecosystem::V3::Mobilegwsvc::Service
         LOCATOR = Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Locator
@@ -84,13 +85,12 @@ module Ajax
 
           # Sends the percentage as the app does: on the first channel, as a relative brightness.
           #
-          # @param device [Device] a dimmer
+          # @param device [Device] a dimmer, as the request names any device
           # @param percent [Integer] sent as given; the app's sliders give 1 to 100
           # @return [nil]
-          # @raise [ArgumentError] for another device
+          # @raise [ArgumentError] for a device outside the hub
           # @raise [TypeError] for a percentage that is not an Integer
           def set_brightness(device, percent)
-            raise ArgumentError, "#{device.kind} is not a dimmer" unless device.kind == :light_switch_dimmer
             raise TypeError, "brightness #{percent.inspect} is not an Integer" unless percent.is_a?(Integer)
 
             device_command_brightness(device_type: family_type(:light_switch_dimmer), brightness_in_percentage: percent,
@@ -98,9 +98,9 @@ module Ajax
             nil
           end
 
-          # @param device [Device] a roller shutter
+          # @param device [Device] a roller shutter, as the request names any device by its exact type
           # @return [nil]
-          # @raise [ArgumentError] for another device
+          # @raise [ArgumentError] for a device outside the hub
           def open_shutter(device) = move_shutter(device, 100)
 
           # @param (see #open_shutter)
@@ -108,11 +108,11 @@ module Ajax
           # @raise (see #open_shutter)
           def close_shutter(device) = move_shutter(device, 0)
 
-          # @param device [Device] a roller shutter
+          # @param device (see #open_shutter)
           # @param percent [Integer] the opening, 0 closed and 100 open, sent as given; the app's control gives
           #   multiples of 5
           # @return [nil]
-          # @raise [ArgumentError] for another device
+          # @raise (see #open_shutter)
           # @raise [TypeError] for an opening that is not an Integer
           def move_shutter(device, percent)
             raise TypeError, "opening #{percent.inspect} is not an Integer" unless percent.is_a?(Integer)
@@ -132,9 +132,11 @@ module Ajax
             nil
           end
 
+          # Sends a device of the hub +device_off+ as a smart lock on channel 1, and any other device the cloud's
+          # lock action, as the app does.
+          #
           # @param device [Device] a lock of the hub or a cloud lock
           # @return [nil]
-          # @raise [ArgumentError] for another device, such as a Yale lock of the hub
           def lock(device)
             return cloud_lock(device, :lock) unless hub_lock?(device)
 
@@ -144,7 +146,6 @@ module Ajax
 
           # @param (see #lock)
           # @return [nil]
-          # @raise (see #lock)
           def unlock(device)
             return cloud_lock(device, :unlock) unless hub_lock?(device)
 
@@ -152,17 +153,25 @@ module Ajax
             nil
           end
 
-          # @param device [Device] a cloud lock
+          # A lock of the hub gets the same +device_off+ as {#lock}: the app sends it that to unlatch.
+          #
+          # @param (see #lock)
           # @return [nil]
-          # @raise [ArgumentError] for another device: a lock of the hub cannot unlatch
-          def unlatch(device) = cloud_lock(device, :unlatch)
+          def unlatch(device)
+            return cloud_lock(device, :unlatch) unless hub_lock?(device)
+
+            device_command_device_off(**hub_lock(device))
+            nil
+          end
 
           private
 
+          # A device of no family goes by its exact type, as the app's relay channel tile sends it.
           def switched(device, channel)
-            family = switch_family(device) or raise ArgumentError, "#{device.kind} has nothing to switch"
+            family = switch_family(device)
             channels = family == :relay ? [] : [channel] #: Array[Integer]
-            { hub_id: hub_id_of(device), device_id: device.id, device_type: family_type(family), channels: }
+            device_type = family ? family_type(family) : exact_type(device)
+            { hub_id: hub_id_of(device), device_id: device.id, device_type:, channels: }
           end
 
           # Relays go by their kind, as the app's z221 dispatches them: a legacy relay sends no channel.
@@ -178,24 +187,15 @@ module Ajax
             end
           end
 
-          def shutter(device)
-            unless device.kind.start_with?('roller_shutter')
-              raise ArgumentError, "#{device.kind} is not a roller shutter"
-            end
+          def shutter(device) = { hub_id: hub_id_of(device), device_id: device.id, device_type: exact_type(device) }
 
-            { hub_id: hub_id_of(device), device_id: device.id, device_type: exact_type(device) }
-          end
-
-          def hub_lock?(device) = device.kind == :smart_lock && !device.hub_id.nil?
+          def hub_lock?(device) = !device.hub_id.nil?
 
           def hub_lock(device)
             { hub_id: hub_id_of(device), device_id: device.id, device_type: family_type(:smart_lock), channels: [1] }
           end
 
           def cloud_lock(device, action)
-            raise ArgumentError, "#{device.kind} cannot #{action} through the cloud" unless device.kind == :smart_lock
-            raise ArgumentError, "a lock of the hub cannot #{action}" unless device.hub_id.nil?
-
             switch_smart_lock(space_id: device.space_id, smart_lock_id: device.id, action:)
             nil
           end
@@ -262,19 +262,20 @@ module Ajax
             nil
           end
 
-          # @param device [Device] a fire detector with a mute command
+          # Silences what the mute button's command names, and no source when it names none, as the app does.
+          #
+          # @param device [Device] a fire detector with a mute button
           # @return [nil]
           # @raise [ArgumentError] for a device without one
           def mute(device)
-            external = case device.mute_command
-                       when :own then false
-                       when :own_plus_external then true
-                       else raise ArgumentError, "#{device.kind} has no mute command"
-                       end
-            device_command_sound_off(
-              object_type: exact_type(device), mute_source_alarm: external ? %i[mute_own mute_external] : %i[mute_own],
-              **hub_target(device)
-            )
+            # @type var sources: Array[mute_source]
+            sources = case device.mute_command
+                      when :own then %i[mute_own]
+                      when :own_plus_external then %i[mute_own mute_external]
+                      when nil then raise ArgumentError, "#{device.kind} has no mute button"
+                      else []
+                      end
+            device_command_sound_off(object_type: exact_type(device), mute_source_alarm: sources, **hub_target(device))
             nil
           end
 

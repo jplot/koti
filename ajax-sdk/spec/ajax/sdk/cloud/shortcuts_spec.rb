@@ -93,14 +93,12 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                            { **target, device_type: { relay_fibra_base: {} }, channels: [3] }]])
     end
 
-    it 'refuses a channelled device whose on and off flow the app does not show' do
-      expect { client.turn_on(device(:wall_switch, { channel: { channel_id: 1 } })) }
-        .to raise_error(ArgumentError, /wall_switch/)
-    end
+    it 'switches a device the app has no family for by its exact type, as its relay channel tile does' do
+      client.turn_on(device(:wall_switch, { channel: { channel_id: 1 } }), channel: 2)
+      client.turn_off(device(:door_protect))
 
-    it 'refuses to switch a device with no switchable channel', :aggregate_failures do
-      expect { client.turn_on(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
-      expect(client).not_to have_received(:call)
+      expect(sent.map(&:last)).to eq([{ **target, device_type: { wall_switch: {} }, channels: [2] },
+                                      { **target, device_type: { door_protect: {} }, channels: [1] }])
     end
 
     it 'switches a channel the device does not list, as given' do
@@ -129,9 +127,10 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       expect(client).not_to have_received(:call)
     end
 
-    it 'refuses a device that is not a dimmer', :aggregate_failures do
-      expect { client.set_brightness(device(:relay), 50) }.to raise_error(ArgumentError, /relay/)
-      expect(client).not_to have_received(:call)
+    it 'sets the brightness of any device as a dimmer, as the app does' do
+      client.set_brightness(device(:relay), 50)
+
+      expect(sent.last.last[:device_type]).to eq({ light_switch_dimmer: {} })
     end
 
     it 'opens a shutter to 100 and stops it' do
@@ -159,9 +158,11 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         .to eq([{ shutter_target_position: -1 }, { shutter_target_position: 101 }])
     end
 
-    it 'refuses a device that is not a shutter', :aggregate_failures do
-      expect { client.close_shutter(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
-      expect(client).not_to have_received(:call)
+    it 'moves any device as a shutter of its exact type, as the app does' do
+      client.close_shutter(device(:door_protect))
+
+      expect(sent.last.last).to eq({ **target, device_type: { door_protect: {} },
+                                               target_position: { shutter_target_position: 0 } })
     end
 
     it 'bypasses the lid only, once, then lifts a permanent bypass' do
@@ -230,10 +231,19 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                            { space_id: 'space-1', smart_lock_id: '0000BEEF', action: :ACTION_UNLATCH }]])
     end
 
-    it 'refuses to unlatch a jeweller lock, and any Yale lock', :aggregate_failures do
-      expect { client.unlatch(device(:smart_lock)) }.to raise_error(ArgumentError, /unlatch/)
-      expect { client.lock(device(:smart_lock_yale)) }.to raise_error(ArgumentError, /smart_lock_yale/)
-      expect(client).not_to have_received(:call)
+    it 'unlatches a lock of the hub with device_off and locks a Yale one as a smart lock, as the app does' do
+      client.unlatch(device(:smart_lock))
+      client.lock(device(:smart_lock_yale))
+
+      expect(sent).to eq([['DeviceCommandDeviceOffService/execute',
+                           { **target, device_type: { smart_lock: {} }, channels: [1] }]] * 2)
+    end
+
+    it 'sends a lock action through the cloud for any device outside the hub' do
+      client.unlock(device(:chime, hub: false))
+
+      expect(sent).to eq([['SwitchSmartLockService/execute',
+                           { space_id: 'space-1', smart_lock_id: '0000BEEF', action: :ACTION_UNLOCK }]])
     end
 
     it 'mutes own and external alarms' do
@@ -252,7 +262,13 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                           ['DeviceCommandMuteAllFireDetectorsService/execute', { hub_id: '0000ABCD' }]])
     end
 
-    it 'refuses to mute a device without a mute command' do
+    it 'mutes no alarm source when the mute button names no command, as the app does' do
+      client.mute(device(:fire_protect_two, mute_button(:MUTE_COMMAND_UNSPECIFIED)))
+
+      expect(sent.last.last[:mute_source_alarm]).to eq([])
+    end
+
+    it 'refuses to mute a device without a mute button, as the app does' do
       expect { client.mute(device(:door_protect)) }.to raise_error(ArgumentError, /mute/)
     end
 

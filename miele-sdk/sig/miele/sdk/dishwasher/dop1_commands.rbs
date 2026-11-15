@@ -16,6 +16,8 @@ module Miele
 
         def dop1_extras: (Array[Symbol] selected) -> void
 
+        def extras_as_read: (Integer kept) -> Integer
+
         def write_selection: (Integer prog_id, Integer extras) -> void
 
         def dop1_start_delayed: (Integer minutes) -> void

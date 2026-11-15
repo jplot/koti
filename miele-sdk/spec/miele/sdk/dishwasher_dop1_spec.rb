@@ -62,10 +62,10 @@ RSpec.describe Miele::Sdk::Dishwasher do
       expect(timeouts).to eq([5, 30])
     end
 
-    it 'reads State within 5 s to set the extras, as SelectExtrasForDop1Action' do
+    it 'reads 8906, then State, within 5 s each to set the extras, as SelectExtrasForDop1Action' do
       timeouts = read_timeouts
       dishwasher.set_extras(:eco)
-      expect(timeouts).to eq([5, 30])
+      expect(timeouts).to eq([5, 5, 30])
     end
 
     it 'opens the door within 5 s, as OpenDoorForDop1Action' do
@@ -103,11 +103,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(dop1_requests).to eq(%w[89060100 89060100011cc000])
   end
 
-  it 'sets the extras on 8906 for the program State shows, but none it has no bit for', :aggregate_failures do
+  it 'writes the extras on 8906 as read, its reserve bits kept, for the program State shows', :aggregate_failures do
     expect(dishwasher.offered_extras).to eq(%i[short eco dry intensive_low soak prerinse additional_drying])
     dishwasher.set_extras(:eco, :additional_drying)
     expect { dishwasher.set_extras(:quick) }.to raise_error(ArgumentError)
-    expect(dop1_requests).to eq(['89060100010d4200'])
+    expect(dop1_requests).to eq(%w[89060100 89060100010dc200])
+    expect(fake.requests.map(&:verb).last(3)).to eq(%w[POST GET POST])
   end
 
   it 'writes no setting, a Dop1 dishwasher having no 2/105', :aggregate_failures do

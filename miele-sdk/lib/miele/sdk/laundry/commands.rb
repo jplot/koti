@@ -11,57 +11,62 @@ module Miele
                      2 => { 'R' => 0, 'V' => 0 }, 24 => { 'R' => 0, 'W' => 0, 'D' => 5757 } }.freeze
         private_constant :WAKEABLE
 
+        # {Rules#supported_requests} gives whether the app offers it: under remote control, the door locked.
+        #
         # @return [void]
-        # @raise [ActionUnavailableError] unless the app offers request 1: under remote control, the door locked
         # @api public
         def start = run_request(1)
 
         # @return [void]
-        # @raise [ActionUnavailableError] unless the app offers request 2
         # @api public
         def stop = run_request(2)
 
+        # A Dop1 appliance takes it as +ProcessAction+ 3, which the app never offers.
+        #
         # @return [void]
-        # @raise [ActionUnavailableError] unless the app offers request 3, which a Dop1 appliance never does
         # @api public
         def pause = run_request(3)
 
-        # The app checks the requests 2/1585 lists, before its SupportedRequestsRule.
-        #
         # @return [void]
-        # @raise [ActionUnavailableError] unless a DOP2 appliance lists request 28
+        # @raise [ActionUnavailableError] on a Dop1 or Opcode appliance, whose protocol has no 2/1583 to write
         # @api public
         def stop_end_signal
-          require!(dop2? && raw_requests(context).include?(28), 'the appliance does not offer to stop its signal')
+          require!(dop2?, 'only a DOP2 appliance has 2/1583 to stop its end signal')
           dop2_user_request(28)
         end
 
+        # The app checks the requests 2/1585 lists, before its SupportedRequestsRule.
+        #
+        # @return [Boolean] whether the app offers {#stop_end_signal}: a DOP2 appliance listing request 28
+        # @api public
+        def stop_end_signal_offered? = dop2? && raw_requests(context).include?(28)
+
+        # @return [void]
+        # @api public
+        def stop_to_edit = run_request(12_102)
+
         # The app shows it while the program waits for its start time (Status 4).
         #
-        # @return [void]
-        # @raise [ActionUnavailableError] unless the program waits and the app offers request 12102
+        # @return [Boolean] whether the app offers {#stop_to_edit}: a program waiting, and request 12102 offered
         # @api public
-        def stop_to_edit
-          require!(status(state) == 4, 'only a program waiting for its start time stops to be edited')
-          run_request(12_102)
+        def stop_to_edit_offered?
+          state = self.state
+          status(state) == 4 && offered_requests(state, dop2? ? context : nil).include?(12_102)
         end
 
-        # The app also stops offering it after three extensions in a row, which the SDK does not count.
+        # The app also stops offering it after three extensions in a row, which the SDK does not count;
+        # {Rules#supported_requests} gives whether it offers request 12144.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] unless the app offers request 12144
         # @api public
         def extend_anti_crease = run_request(12_144)
 
-        # @return [void]
-        # @raise [ActionUnavailableError] unless a DOP2 appliance that the app wakes sleeps deeply (Status 4,
-        #   +StandbyState+ 2)
+        # @return [Boolean] whether the app wakes the appliance: a DOP2 one of a series it wakes, sleeping deeply
+        #   (Status 4, +StandbyState+ 2)
         # @api public
-        def wake
+        def wake_offered?
           state = self.state
-          require!(dop2? && wakeable? && status(state) == 4 && state.raw['StandbyState'] == 2,
-                   'the app does not wake this appliance now')
-          super
+          dop2? && wakeable? && status(state) == 4 && state.raw['StandbyState'] == 2
         end
 
         # @param message [Integer, Symbol] the message shown
@@ -73,16 +78,19 @@ module Miele
         end
 
         # @return [void]
-        # @raise [ActionUnavailableError] unless a DOP2 appliance shows its program done (Status 7) and its process
-        #   state done or anti-crease (10 or 13), outside phases 264, 519 and 531
+        # @raise [ActionUnavailableError] on a Dop1 or Opcode appliance, whose protocol has no 2/1586 to write
         # @api public
         def power_off
-          state = self.state
-          require!(dop2? && finished?(state), 'the appliance cannot be switched off now')
+          require!(dop2?, 'only a DOP2 appliance has 2/1586 to switch off')
           modify(Objects::Laundry::GlobalDeviceCombiState, [2, 1586, 0, 0]) do |combi|
             combi.with(appliance_state: 1, operation_state: 0, process_state: 0)
           end
         end
+
+        # @return [Boolean] whether the app offers {#power_off}: a DOP2 appliance showing its program done (Status 7)
+        #   and its process state done or anti-crease (10 or 13), outside phases 264, 519 and 531
+        # @api public
+        def power_off_offered? = dop2? && finished?(state)
 
         # @param value [Integer]
         # @return [void]
@@ -97,12 +105,7 @@ module Miele
 
         # @param id [Integer]
         # @return [void]
-        # @raise [ActionUnavailableError] unless the app offers it
-        def run_request(id)
-          state = self.state
-          require!(offered_requests(state, dop2? ? context : nil).include?(id), "request #{id} is not offered now")
-          dop2? ? dop2_user_request(id) : command(Schema::DeviceState.new(process_action: id))
-        end
+        def run_request(id) = dop2? ? dop2_user_request(id) : command(Schema::DeviceState.new(process_action: id))
 
         # SupportsWakeup: the series letter at +TechType+[2], from a software id up on some.
         #

@@ -54,7 +54,9 @@ RSpec.describe Miele::Sdk::WashingMachine do
 
   def written = fake.requests.reject { it.verb == 'GET' }.map { [it.path.delete_prefix("/Devices/#{fab}/"), it.body] }
 
-  it 'writes 2/1577 with the current values 2/1574 shows, then the parameters given, as the app does' do
+  it 'writes 2/1577 with the current values 2/1574 shows, then the parameters given, as the app does',
+     :aggregate_failures do
+    expect(washer.set_parameters_offered?).to be(true)
     washer.set_parameters(temperature: 60, eco: true, extras: [:intensive])
     expect(written).to eq([['DOP2/2/1577', select(prog: 28, type: 2, temperature: 60, info: 1, spin: 120,
                                                   intensive: true)]])
@@ -129,8 +131,10 @@ RSpec.describe Miele::Sdk::WashingMachine do
   context 'when its program runs' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] } }
 
-    it 'refuses to set parameters, as the app does' do
-      expect { washer.set_parameters(spin_speed: 1400) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'sets parameters, which the app does not offer', :aggregate_failures do
+      expect(washer.set_parameters_offered?).to be(false)
+      washer.set_parameters(spin_speed: 1400)
+      expect(written.map(&:first)).to eq(['DOP2/2/1577'])
     end
   end
 

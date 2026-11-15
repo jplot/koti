@@ -59,14 +59,17 @@ RSpec.describe Miele::Sdk::WashingMachine do
       expect(written).to eq([user_request(1)])
     end
 
-    it 'refuses to stop, as the app does' do
-      expect { washer.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'stops, which the app does not offer', :aggregate_failures do
+      expect(washer.supported_requests).not_to include(2)
+      washer.stop
+      expect(written).to eq([user_request(2)])
     end
 
-    it 'refuses to start with the door only closed', :aggregate_failures do
+    it 'starts with the door only closed, which the app does not offer', :aggregate_failures do
       leaves['2/1585'] = device_context(door: 2)
-      expect { washer.start }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written).to be_empty
+      expect(washer.supported_requests).not_to include(1)
+      washer.start
+      expect(written).to eq([user_request(1)])
     end
   end
 
@@ -91,17 +94,21 @@ RSpec.describe Miele::Sdk::WashingMachine do
   context 'when its program waits for its start time' do
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 1 } }
 
-    it 'stops it to edit with request 12102' do
+    it 'stops it to edit with request 12102', :aggregate_failures do
       leaves['2/1585'] = device_context(requests: [1, 2, 12_102])
       leaves['2/1583?idx1=0&idx2=0'] = dop2_leaf(2, 1583, { 1 => dop2_field(:e16, 0) })
+      expect(washer.stop_to_edit_offered?).to be(true)
       washer.stop_to_edit
       expect(written).to eq([user_request(12_102)])
     end
   end
 
-  it 'refuses to stop a running program to edit it' do
+  it 'stops a running program to edit it, which the app does not offer', :aggregate_failures do
     leaves['2/1585'] = device_context(requests: [2, 12_102])
-    expect { washer.stop_to_edit }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    leaves['2/1583?idx1=0&idx2=0'] = dop2_leaf(2, 1583, { 1 => dop2_field(:e16, 0) })
+    expect(washer.stop_to_edit_offered?).to be(false)
+    washer.stop_to_edit
+    expect(written).to eq([user_request(12_102)])
   end
 
   it 'extends the anti-crease phase with request 12144 when the washer offers it' do
@@ -114,7 +121,8 @@ RSpec.describe Miele::Sdk::WashingMachine do
   context 'when it runs' do
     before { leaves['2/1583?idx1=0&idx2=0'] = dop2_leaf(2, 1583, { 1 => dop2_field(:e16, 0) }) }
 
-    it 'pauses with request 3, stops with 2 and silences its end signal with 28' do
+    it 'pauses with request 3, stops with 2 and silences its end signal with 28', :aggregate_failures do
+      expect(washer.stop_end_signal_offered?).to be(true)
       washer.pause
       washer.stop
       washer.stop_end_signal
@@ -125,20 +133,23 @@ RSpec.describe Miele::Sdk::WashingMachine do
   context 'without remote control' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [0, 0, 0], 'StandbyState' => 1 } }
 
-    it 'offers only stop, as the app does' do
-      expect { washer.pause }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'pauses, while the app offers only stop', :aggregate_failures do
+      leaves['2/1583?idx1=0&idx2=0'] = dop2_leaf(2, 1583, { 1 => dop2_field(:e16, 0) })
+      expect(washer.supported_requests).to eq([2])
+      washer.pause
+      expect(written).to eq([user_request(3)])
     end
   end
 
   context 'when it sleeps deeply' do
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 2 } }
 
-    it 'offers no request' do
-      expect { washer.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
-    end
-
-    it 'refuses to wake a washer the app does not wake' do
-      expect { washer.wake }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'stops and wakes, while the app offers no request and does not wake this washer', :aggregate_failures do
+      leaves['2/1583?idx1=0&idx2=0'] = dop2_leaf(2, 1583, { 1 => dop2_field(:e16, 0) })
+      expect([washer.supported_requests, washer.wake_offered?]).to eq([[], false])
+      washer.stop
+      washer.wake
+      expect(written.map { it[1] }).to eq(%w[DOP2/2/1583 State])
     end
   end
 
@@ -149,7 +160,8 @@ RSpec.describe Miele::Sdk::WashingMachine do
     end
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 2 } }
 
-    it 'wakes it with DeviceAction 2' do
+    it 'wakes it with DeviceAction 2', :aggregate_failures do
+      expect(washer.wake_offered?).to be(true)
       washer.wake
       expect(written.map { [it[1], JSON.parse(it[2])] }).to eq([['State', { 'DeviceAction' => 2 }]])
     end
@@ -162,8 +174,10 @@ RSpec.describe Miele::Sdk::WashingMachine do
     end
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 2 } }
 
-    it 'refuses to wake it, as the app does' do
-      expect { washer.wake }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'wakes it, which the app does not offer', :aggregate_failures do
+      expect(washer.wake_offered?).to be(false)
+      washer.wake
+      expect(written.map { it[1] }).to eq(['State'])
     end
   end
 
@@ -179,14 +193,17 @@ RSpec.describe Miele::Sdk::WashingMachine do
 
     before { leaves['2/1586?idx1=0&idx2=0'] = combi_state(2, 3, 10) }
 
-    it 'switches off with 1/0/0 on 2/1586' do
+    it 'switches off with 1/0/0 on 2/1586', :aggregate_failures do
       leaves['2/1585'] = device_context(process: 10)
+      expect(washer.power_off_offered?).to be(true)
       washer.power_off
       expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(1, 0, 0)]])
     end
 
-    it 'refuses to switch off while the program runs' do
-      expect { washer.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'switches off while the program runs, which the app does not offer', :aggregate_failures do
+      expect(washer.power_off_offered?).to be(false)
+      washer.power_off
+      expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(1, 0, 0)]])
     end
   end
 
@@ -222,10 +239,18 @@ RSpec.describe Miele::Sdk::WashingMachine do
       expect(JSON.parse(written.first.last)).to eq('Request' => "82010100011c00#{'00' * 22}")
     end
 
-    it 'stops with ProcessAction 2 alone and never pauses', :aggregate_failures do
+    it 'stops and pauses with ProcessAction, while the app offers stop alone', :aggregate_failures do
+      expect(washer.supported_requests).to eq([2])
       washer.stop
-      expect { washer.pause }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written.map { [it[1], JSON.parse(it[2])] }).to eq([['State', { 'ProcessAction' => 2 }]])
+      washer.pause
+      expect(written.map { JSON.parse(it[2]) }).to eq([{ 'ProcessAction' => 2 }, { 'ProcessAction' => 3 }])
+    end
+
+    it 'neither silences its end signal nor switches off, its protocol having no DOP2 leaf', :aggregate_failures do
+      expect { washer.stop_end_signal }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { washer.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect([washer.stop_end_signal_offered?, washer.power_off_offered?, washer.wake_offered?])
+        .to eq([false, false, false])
     end
   end
 
@@ -244,8 +269,10 @@ RSpec.describe Miele::Sdk::WashingMachine do
   context 'with an Opcode washer' do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 1, 'ProtocolVersion' => 1) }
 
-    it 'refuses to select a program, as the app does' do
+    it 'neither selects a program nor sets its parameters, having no selection object', :aggregate_failures do
       expect { washer.select_program(28) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { washer.set_parameters(spin_speed: 1400) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(washer.set_parameters_offered?).to be(false)
     end
   end
 

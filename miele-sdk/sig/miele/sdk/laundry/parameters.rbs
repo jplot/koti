@@ -6,6 +6,8 @@ module Miele
       module Parameters : Appliance
         def set_parameters: (**untyped settings) -> void
 
+        def set_parameters_offered?: () -> bool
+
         private
 
         def check_settings!: (Hash[Symbol, untyped] settings) -> void

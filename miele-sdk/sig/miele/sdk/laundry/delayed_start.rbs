@@ -6,6 +6,8 @@ module Miele
 
         def start_delayed: (Time at) -> void
 
+        def start_delayed_offered?: () -> bool
+
         private
 
         def offset_minutes: (Time target, Time now) -> Integer

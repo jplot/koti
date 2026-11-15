@@ -15,20 +15,29 @@ module Miele
         # @param settings [Hash{Symbol=>Object}] what the app writes, among +temperature+ (°C, with +eco+),
         #   +spin_speed+ (rpm), +soiling+, +cap+, +master_care+, +extras+ and +stains+ (names), +drying_level+ (a key
         #   of {DRYING_LEVELS}), +drying_time+ (minutes), +program_mode+ and +twin_dos+ (container values), as the
-        #   appliance takes them
+        #   appliance takes them. A Dop1 washer, as the app writes it, takes 0 for a temperature other than 20 to
+        #   95 °C in steps of 5 (eco 40 or 60), and the TwinDos containers only when given both.
         # @return [void]
-        # @raise [ActionUnavailableError] unless a program is selected (Status 3) under mobile start, on DOP2 or Dop1
-        # @raise [ArgumentError] for a parameter, extra, stain or drying level the app does not write here
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no selection object, or without a
+        #   program on 2/1574
+        # @raise [ArgumentError] for a parameter, extra, stain or drying level the SDK has no encoding for here, as
+        #   the app writes none
         # @raise [NotAcceptedError] when a Dop1 appliance refuses them
         # @api public
         def set_parameters(**settings)
-          state = self.state
-          require!(state.mobile_start? == true && status(state) == 3 && (protocol_version == 2 || dop2?),
-                   'the app sets parameters only on a selected program under mobile start')
+          require!(protocol_version == 2 || dop2?, 'an Opcode appliance has no selection object to write')
           check_settings!(settings)
           return write_dop1_selection(dop1_parameters(dop1_object(dop1_objects.fetch(:write)), settings)) unless dop2?
 
           write_dop2_selection { |para, _| dop2_parameters(para, settings) }
+        end
+
+        # @return [Boolean] whether the app sets parameters: a program selected (Status 3) under mobile start, on
+        #   DOP2 or Dop1
+        # @api public
+        def set_parameters_offered?
+          state = self.state
+          state.mobile_start? == true && status(state) == 3 && (protocol_version == 2 || dop2?)
         end
 
         private

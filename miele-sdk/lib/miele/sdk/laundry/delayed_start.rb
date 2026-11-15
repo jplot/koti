@@ -11,18 +11,20 @@ module Miele
 
         # @param at [Time] its time of day; the next one if it has passed today
         # @return [void]
-        # @raise [ActionUnavailableError] unless the app offers start or request 8
         # @raise [NotAcceptedError] when a Dop1 appliance refuses its selection written back
         # @api public
         def start_delayed(at)
           now = Time.now
           target = next_time(at, now)
-          require!(supported_requests.intersect?([1, 8]), 'the appliance cannot start later now')
           return dop1_start_delayed(target, now) unless dop2?
 
           write_dop2_selection { |para, source| delayed(para, source, target, now) }
           dop2_user_request(8)
         end
+
+        # @return [Boolean] whether the app offers {#start_delayed}: start or request 8 offered
+        # @api public
+        def start_delayed_offered? = supported_requests.intersect?([1, 8])
 
         private
 

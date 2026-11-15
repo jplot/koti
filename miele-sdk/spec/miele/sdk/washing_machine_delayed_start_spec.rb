@@ -54,7 +54,8 @@ RSpec.describe Miele::Sdk::WashingMachine do
 
   def json_written = written.map { |path, body| [path, JSON.parse(body)] }
 
-  it 'counts down in minutes from a minute ago, as the app does, then sends request 8' do
+  it 'counts down in minutes from a minute ago, as the app does, then sends request 8', :aggregate_failures do
+    expect(washer.start_delayed_offered?).to be(true)
     washer.start_delayed(Time.new(2026, 10, 31, 21, 30))
     expect(written).to eq([['DOP2/2/1577', select(28, 2, 91, 1)],
                            ['DOP2/2/1583', dop2_leaf(2, 1583, { 1 => dop2_field(:e16, 8) })]])
@@ -118,9 +119,10 @@ RSpec.describe Miele::Sdk::WashingMachine do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1] } }
     let(:shown) { { requests: [2, 3], supported: 3, current: 0 } }
 
-    it 'refuses a delayed start, as the app offers neither start nor request 8' do
-      expect { washer.start_delayed(Time.new(2026, 10, 31, 21, 30)) }
-        .to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'delays the start, while the app offers neither start nor request 8', :aggregate_failures do
+      expect(washer.start_delayed_offered?).to be(false)
+      washer.start_delayed(Time.new(2026, 10, 31, 21, 30))
+      expect(written.last).to eq(['DOP2/2/1583', dop2_leaf(2, 1583, { 1 => dop2_field(:e16, 8) })])
     end
   end
 

@@ -174,6 +174,15 @@ RSpec.describe Hue::Sdk::Settings do
     end
   end
 
+  context 'when the bridge answers 429 with Retry-After' do
+    let(:bridge) { FakeBridge.start { [429, { 'Retry-After' => '4' }, '[]'] } }
+
+    it 'gives the seconds it asked on RateLimitError, as a request of CLIP v2 does' do
+      expect { Hue::Sdk.settings }
+        .to raise_error(an_instance_of(Hue::Sdk::RateLimitError).and(having_attributes(retry_after: 4)))
+    end
+  end
+
   [[], nil, 'text'].each do |answer|
     context "when the config is #{answer.inspect}" do
       let(:routes) { { "GET /api/#{key}/config" => [200, answer] } }

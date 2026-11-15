@@ -44,7 +44,7 @@ module Hue
 
       module_function
 
-      # Sends one request to the bridge.
+      # Sends one request to the bridge. After a 429 on the same path, it first waits up to 30 s, as the app does.
       #
       # @param method [Symbol] +:get+, +:post+, +:put+ or +:delete+
       # @param path [String] absolute path on the bridge
@@ -60,18 +60,17 @@ module Hue
         limited(path) { transport { http.request(request) } }
       end
 
-      # The app keeps one limiter per bridge connection, keyed by host and path.
-      #
       # @param path [String]
       # @yieldreturn [Net::HTTPResponse]
       # @return [Net::HTTPResponse]
       # @api private
       def limited(path, &)
+        connection = connection_key
         limiter = LIMITERS.synchronize do
           @limiters ||= {} #: Hash[untyped, RateLimiter]
-          @limiters[connection_key] ||= RateLimiter.new
+          @limiters[connection] ||= RateLimiter.new
         end
-        limiter.through("#{Sdk.config.host}#{path.split('?').first}", &)
+        limiter.through("#{connection.first}#{path.split('?').first}", &)
       end
 
       # Opens a long-lived request and passes its body on as it arrives. The

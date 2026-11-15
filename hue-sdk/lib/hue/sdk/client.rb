@@ -19,7 +19,7 @@ module Hue
     class Client
       include Singleton
 
-      ERRORS = { 404 => NotFoundError, 429 => RateLimitError }.freeze
+      ERRORS = { 404 => NotFoundError }.freeze
       private_constant :ERRORS
 
       # Reads resources.

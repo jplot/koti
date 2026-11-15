@@ -4,8 +4,9 @@ require 'time'
 
 module Hue
   module Sdk
-    # The app's BridgeRateLimiter for one bridge connection: after a 429 it delays the next request to the same host
-    # and path, and never sends the refused one again. Any other outcome clears that delay.
+    # The app's BridgeRateLimiter, one per bridge connection: after a 429 it delays the next request to the same host
+    # and path, whatever the method, and never sends the refused one again. Any other outcome, a failure included,
+    # clears that delay.
     class RateLimiter
       BASE = 2.0
       CAP = 30.0
@@ -19,7 +20,7 @@ module Hue
       end
 
       # The app's wait: Retry-After less the time since the refusal, at most 30 s; without it, a full random draw
-      # over 2 s times 2^n − 1 for n consecutive 429s, n at most 4 (expBackOffDelay).
+      # over 2 s × (2^n − 1) for n consecutive 429s, n at most 4 (expBackOffDelay).
       #
       # @param failures [Integer] consecutive 429s
       # @param retry_after [Float, nil] seconds the bridge asked
@@ -36,12 +37,17 @@ module Hue
         [pause, 0.0].max
       end
 
+      # The app reads seconds with Dart's int.tryParse, which takes a sign and 64 bits, and keeps them from 0 up;
+      # else an HTTP date.
+      #
       # @param header [String, nil] a Retry-After value
-      # @return [Float, nil] seconds: a whole number of them, or an HTTP date less now, floored at 0
+      # @return [Float, nil] seconds, or an HTTP date less now floored at 0
       # @api private
       def self.retry_after(header)
         return if header.nil?
-        return header.to_f if header.match?(/\A\d+\z/)
+
+        seconds = Integer(header, 10) if header.match?(/\A[+-]?\d+\z/)
+        return seconds.to_f if seconds && seconds >= 0 && seconds < 2**63
 
         [Time.httpdate(header) - Time.now, 0.0].max
       rescue ArgumentError
@@ -53,16 +59,16 @@ module Hue
       # @param key [String] host and path, without the query
       # @yieldreturn [Net::HTTPResponse] the answer to the one request
       # @return [Net::HTTPResponse]
-      # @raise [Error] what the request raises, which clears the delay
+      # @raise [Exception] what the request raises, which clears the delay
       # @api private
       def through(key)
         wait(key)
-        response = yield
-        response.code == '429' ? refused(key, response['Retry-After']) : cleared(key)
+        begin
+          response = yield
+        ensure
+          response&.code == '429' ? refused(key, response['Retry-After']) : cleared(key)
+        end
         response
-      rescue Error
-        cleared(key)
-        raise
       end
 
       private

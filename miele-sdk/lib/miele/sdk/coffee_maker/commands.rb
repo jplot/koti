@@ -19,6 +19,7 @@ module Miele
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
+        # @raise [ResponseError] when the appliance refuses DeviceAction 2, 400 included
         # @api public
         def power_on
           return write_device_action(2) if protocol_version == 2
@@ -68,10 +69,11 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] but on a CVA6000: the app's DOP2 light action sends nothing
         #   (SwitchLightOnAction, Task.CompletedTask)
+        # @raise [NotAcceptedError] unless the answer gives the light written back under +Success+
         # @api public
         def light=(on)
           require!(protocol_version == 2, 'only a CVA6000 has a light request')
-          command(Schema::DeviceState.from(state.raw).with(light: on ? 1 : 2))
+          write_light(on ? 1 : 2)
         end
 
         # @return [Boolean] whether the app switches the light: a CVA6000 neither disconnected, locked nor in

@@ -86,9 +86,7 @@ module Miele
 
       def command: (Schema::DeviceState request) -> Connection::Response
 
-      def change: (Schema::DeviceState request) -> void
-
-      def tolerating_no_op: () { () -> untyped } -> void
+      def send_wake: () -> void
 
       def dop2_path: (Integer unit, Integer attribute) -> String
 
@@ -103,6 +101,8 @@ module Miele
       def blank: (untyped klass) -> untyped
 
       def write_dop1_object: (untyped klass, untyped section, type: String) -> void
+
+      def write_dop1: (String request) -> void
 
       def dop1_object: (untyped klass) -> untyped
 

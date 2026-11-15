@@ -13,10 +13,12 @@ RSpec.describe Miele::Sdk::Oven do
   let(:fake) do
     answers = dop2_answers
     state = state_answer
+    woken = wake_answer
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then state
+      in { verb: 'PUT', path: %r{/State\z} } then woken
       in { verb: 'GET' } then [200, {}, "#{['000e00020631000000000001000104'].pack('H*')}\x07"]
       in { path: /DOP2/ } then answers.shift || [204, {}, '']
       else [200, {}, '']
@@ -35,6 +37,8 @@ RSpec.describe Miele::Sdk::Oven do
   def remote_enable = [15, 0, 0]
 
   def state_answer = [200, {}, JSON.generate('Status' => 1, 'RemoteEnable' => remote_enable)]
+
+  def wake_answer = [200, {}, '']
 
   def power_written = fake.requests.select { it.verb == 'PUT' }.map { it.body.unpack1('H*') }
 
@@ -76,6 +80,24 @@ RSpec.describe Miele::Sdk::Oven do
     it 'switches off despite a 500, as the app does', :aggregate_failures do
       expect { appliance.power_off }.not_to raise_error
       expect(puts_sent).to eq(['DOP2/2/1586'])
+    end
+
+    context 'when it refuses DeviceAction 2' do
+      def wake_answer = [400, {}, '']
+
+      it "ends the switch-on with the refusal, as the app's SwitchOnHelper does", :aggregate_failures do
+        expect { appliance.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+        expect(puts_sent).to eq(%w[DOP2/2/1586 State])
+      end
+    end
+
+    context 'when it answers 500 to DeviceAction 2 too' do
+      def wake_answer = [500, {}, '']
+
+      it 'ends the switch-on there, as the app resends only the state write', :aggregate_failures do
+        expect { appliance.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+        expect(puts_sent).to eq(%w[DOP2/2/1586 State])
+      end
     end
   end
 

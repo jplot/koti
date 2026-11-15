@@ -81,6 +81,17 @@ module Miele
         digits.size == 8 ? digits.to_i(16) : nil
       end
 
+      # @param answer [String] the body answering a request
+      # @return [String, nil] the acknowledgement, characters 6 and 7 of its +Response+; nil for an answer the
+      #   app's Dop1ResponseInterpreter fails to parse
+      # @api private
+      def ack(answer)
+        parsed = JSON.parse(answer)
+        parsed['Response'][6, 2] if parsed.is_a?(Hash) && parsed['Response'].is_a?(String)
+      rescue JSON::ParserError
+        nil
+      end
+
       # @param value [Integer]
       # @param bits [Integer]
       # @return [Integer]

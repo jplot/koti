@@ -190,13 +190,16 @@ oven.wake         # out of standby
 oven.power_on     # and power_off
 ```
 
-An appliance answers 400 to a write that changes nothing: `wake` and the hood commands treat it as
-done.
+A write the appliance refuses raises, 400 included (`Miele::Sdk::ResponseError`, with its
+`status`): the app never takes a refusal as done. `wake` sends `DeviceAction` 2 once, as the app's
+laundry module does; hoods and dishwashers read `State` first, as theirs do (see [Hoods](#hoods) and
+[Dishwashers](#dishwashers)).
 
 `power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app's oven module does; its other families
 switch on in their own way, which will come with them. An appliance asleep answers 500:
 like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, giving up
-after three attempts where the app sets no limit. `power_off` writes 1 to the same leaf and takes a
+after three attempts where the app sets no limit; a `DeviceAction` 2 that fails ends it, as in the
+app. `power_off` writes 1 to the same leaf and takes a
 500 as done, as the app does. Both belong to `Miele::Sdk::Oven` and raise
 `Miele::Sdk::ActionUnavailableError` on a Dop1 oven, whose protocol has no such leaf. They send in
 any other state: `power_on_offered?` tells whether the app's offline screen offers the switch-on
@@ -279,16 +282,30 @@ dashes above). Every other action is sent as given, even one the app hides or re
 readings give the app's rules, so the client's screen can follow them. The app hides what the hood
 does not support (`lights.ambient.exists`, `dehumidification.supported`,
 `grease_melting.supported`, `auto_refresh_supported?`, `fragrance_supported?`), and refuses the fan
-while the hood's screen is pushed in (`fan_settable?` false). A hood that is off does not say what
-it supports: those readings are nil until it is woken. The Opcode fan level goes out twice, half a
-second apart, as the app sends it. `wake` writes back the light of a Dop1 or Opcode hood, and sends
-`DeviceAction` 2 to a DOP2 one; the app wakes a Dop1 or Opcode hood only while it is off
-(`wake_offered?`).
+while the hood's screen is pushed in (`fan_settable?` false). Its fan picker also sends nothing
+when `fan_level` already shows the level picked, and its light switch sends the opposite of what it
+shows, then shows the hood's light again (PowerLevelViewModel, MainLightSourceViewModel): those are
+the screen's to follow, and `fan_level=` and `main_light=` send what they are given. A hood that is
+off does not say what it supports: those readings are nil until it is woken. The Opcode fan level
+goes out twice, half a second apart, as the app sends it.
+
+`wake` does what the app's wake actions do. A Dop1 or Opcode hood gets its light written back
+only while `State` shows it off, and counts as woken only on an answer carrying `Success`, else
+`Miele::Sdk::NotAcceptedError` (DefaultWakeUpAction). A DOP2 hood gets `DeviceAction` 2 once, only
+while `State` shows it asleep; `State` is then read every half second until it shows the hood awake
+(`SyncState` absent or 2, `StandbyState` 1), `Miele::Sdk::ActionFailedError` after a minute
+(WakeUpAction). The app wakes the hood again once per page, after the page's first wake has
+returned and never while one runs: the first time `State` then shows it asleep
+(StartWakeUpObservation). That follows the page, so the client does it by calling `wake` on such a
+`State` event. `wake_offered?` tells whether the app wakes the hood at all.
 
 Settings (programming functions, Dop1 object 1201) go out with structure version 1 and Dop1
 sections in lower-case hex, as the app sends them. A value out of range raises `ArgumentError`
 before anything is sent. `Miele::Sdk::Dop1` builds the requests, and `hood.dop1(request)` sends any
 other one; `hood.setting(pf_id)` and `hood.write_setting(pf_id, value)` read and write a setting.
+As in the app, a Dop1 write counts only when the hood answers Ack 1: any other, or an answer the app
+cannot parse, raises `Miele::Sdk::NotAcceptedError`. The fragrance stop and Miele program are the app's one exception:
+it drops the Ack of the ProcessAction they send before PF 40026.
 
 Left out: the ambient light's dimming (the app's conversion is not traced), the auto refresh
 schedule, a DOP2 hood's ambient colours, the write that switches a downdraft hood on before its
@@ -461,6 +478,7 @@ dishwasher.start_offered?                   # => true where the app's start rule
 dishwasher.start                            # or start_delayed(time): today's or tomorrow's time of day
 dishwasher.pause                            # resume, stop, cancel
 dishwasher.power_on                         # and power_off, on DOP2
+dishwasher.wake                             # DOP2, only while State shows it off or asleep
 dishwasher.auto_dos = true                  # write_setting(id, value); offered_settings for this model
 dishwasher.acknowledge(info: 700, option: 1)
 dishwasher.leave_abort                      # DOP2
@@ -497,7 +515,11 @@ Not traced, so left to the dishwasher: where a Dop1 dishwasher shows info 700, a
 Dop1 consumption. The app sends the steps of `power_on` and `power_off` again while it watches
 `State` for 15 s; the SDK sends each once. As the app's SwitchOnForDop2Action, `power_on` writes
 2/1586 only while `State` shows Status 1 or 4, which it reads again after waking the dishwasher, and
-writes nothing otherwise.
+writes nothing otherwise. `wake` does what the app's WakeUpForDop2Action does: `DeviceAction` 2
+only while `State` shows the dishwasher off (Status 1) or waiting to start out of `StandbyState` 1,
+nothing otherwise. The app has no wake request for a Dop1 dishwasher: `wake` raises
+`ActionUnavailableError` on it. A `DeviceAction` 2 the dishwasher refuses, 400 included, raises from
+`wake` and ends `power_on` before 2/1586.
 
 ## Laundry
 
@@ -623,7 +645,8 @@ can offer what the app's dashboard would:
 | `drink_name_allowed?(id, name)` | a CVA, a drink outside the standard profile, a name not blank |
 
 As the app's SwitchOnHelper, `power_on` writes nothing, and does not wait, once 2/1586 shows
-ApplianceState 4. An action raises `Miele::Sdk::ActionUnavailableError` only where nothing can be
+ApplianceState 4. A DOP2 coffee maker that answers 500 to 2/1586 is woken with `DeviceAction` 2: one
+it refuses, 400 included, raises from `power_on`. An action raises `Miele::Sdk::ActionUnavailableError` only where nothing can be
 written: `brew`, `start_barista` and `acknowledge` on a CVA6000, which has no DOP2 leaf for them;
 `light=` on a DOP2 coffee maker, for which the app has no light request (its DOP2 light action sends
 nothing); `power_on` and `power_off` on a coffee maker neither DOP2 nor Dop1; the profile and drink
@@ -631,7 +654,10 @@ actions on a CM7 or CVA6000, which have no such object; `create_profile` once th
 used (4 on a CM6160, 8 on another CM6F, 10 otherwise). `brew` takes a program id the app defines,
 not 0, and acknowledgements options 1 to 17, 1 to 16 on a CM7, as the app's mappers do; another
 raises `ArgumentError`, and so does a drink value its 2/261 member does not hold. `edit_drink`
-writes 255 as the bean sort on all but a CVA, as the app does.
+writes 255 as the bean sort on all but a CVA, as the app does. A CVA6000's `light=` writes its
+`State` back with the light changed and, as the app's LightStateAction, takes the answer only when
+its first `Success` carrying `Light` gives back the light written: otherwise it raises
+`Miele::Sdk::NotAcceptedError`.
 
 Left out: tasting, saving a tasted drink, and resetting a drink or a profile, whose values the app
 derives through helpers not traced; the message check of the app's Barista start page; the drink tables that limit two cups or a double shot to some

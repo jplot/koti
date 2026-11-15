@@ -95,7 +95,8 @@ RSpec.describe Miele::Sdk, :live do
   end
 
   it 'cannot write' do
-    expect { appliances.first.wake }.to raise_error(RuntimeError, /read-only: PUT refused/)
+    plain = Miele::Sdk::Appliance.new(appliances.first.host)
+    expect { plain.wake }.to raise_error(RuntimeError, /read-only: PUT refused/)
   end
 
   context 'with the Miele account' do

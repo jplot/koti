@@ -45,6 +45,8 @@ module Miele
 
         def write_section: (untyped object, **Integer values) -> void
 
+        def section_request: (untyped object, **Integer values) -> String
+
         def read_drying_slot: () -> untyped
       end
     end

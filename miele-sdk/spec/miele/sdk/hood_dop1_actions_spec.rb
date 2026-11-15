@@ -10,12 +10,18 @@ RSpec.describe Miele::Sdk::Hood do
   let(:fake) do
     served = state
     fragrance = pf40028
+    process = process_ack
+    other = other_ack
+    woken = wake_answer
     FakeAppliance.start do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(served)]
+      in { verb: 'PUT', path: %r{/State\z} } then woken
       in { verb: 'POST', body: /12010100019c5c/ } then [200, {}, "{\"Response\":\"12011100019c5c000000#{fragrance}\"}"]
       in { verb: 'POST', body: /8E0A01/ } then [200, {}, '{"Response":"8E0A1100010201000700163c00"}']
+      in { verb: 'POST', body: /"1100/ } then [200, {}, "{\"Response\":\"110012#{process}\"}"]
+      in { verb: 'POST' } then [200, {}, "{\"Response\":\"8E1112#{other}\"}"]
       else [200, {}, '{}']
       end
     end
@@ -26,6 +32,12 @@ RSpec.describe Miele::Sdk::Hood do
   after { fake.stop }
 
   def pf40028 = '87'
+
+  def process_ack = '01'
+
+  def other_ack = '01'
+
+  def wake_answer = [200, {}, '[{"Success":{"Light":2}}]']
 
   def extended(bytes)
     data = Array.new(73, 0)
@@ -113,12 +125,48 @@ RSpec.describe Miele::Sdk::Hood do
       expect([request.verb, request.path, JSON.parse(request.body)])
         .to eq(['PUT', "/Devices/#{fab}/State", { 'Light' => 2 }])
     end
+
+    context 'when its answer to the wake carries no Success' do
+      def wake_answer = [200, {}, '{}']
+
+      it 'raises NotAcceptedError, as the app takes the hood as woken only on "Success"' do
+        expect { hood.wake }.to raise_error(Miele::Sdk::NotAcceptedError)
+      end
+    end
+
+    context 'when it refuses the wake' do
+      def wake_answer = [400, {}, '']
+
+      it 'raises the refusal, which the app reports as a failed wake' do
+        expect { hood.wake }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+      end
+    end
   end
 
-  it 'wakes a Dop1 hood that is on too, which the app wakes only while off', :aggregate_failures do
+  it 'leaves a Dop1 hood that is on as it is, as the app wakes it only while off', :aggregate_failures do
     expect(hood.wake_offered?).to be(false)
     hood.wake
-    expect(fake.requests.last.path).to eq("/Devices/#{fab}/State")
+    expect(fake.requests.map(&:verb)).not_to include('PUT')
+  end
+
+  context 'when the hood acknowledges its ProcessAction with anything but success' do
+    def process_ack = '02'
+
+    it 'refuses the fragrance start, and still sets PF 40026 to stop, as the app drops that Ack', :aggregate_failures do
+      expect { hood.fragrance(:start) }.to raise_error(Miele::Sdk::NotAcceptedError, 'the appliance answered Ack "02"')
+      hood.fragrance(:stop)
+      expect(writes).to eq(%w[110002000134 110002000135 12010200019c5a00000000])
+    end
+  end
+
+  context 'when the hood acknowledges a section write with anything but success' do
+    def other_ack = '02'
+
+    it 'raises NotAcceptedError, as the app accepts only Ack 1', :aggregate_failures do
+      refused = 'the appliance answered Ack "02"'
+      expect { hood.grease_melting = true }.to raise_error(Miele::Sdk::NotAcceptedError, refused)
+      expect { hood.ambient_light = true }.to raise_error(Miele::Sdk::NotAcceptedError, refused)
+    end
   end
 
   context 'when PF 40028 lists no fragrance' do

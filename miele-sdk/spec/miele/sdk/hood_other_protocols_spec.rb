@@ -97,6 +97,71 @@ RSpec.describe Miele::Sdk::Hood do
     expect(written).to be_empty
   end
 
+  context 'when waking a DOP2 hood' do
+    let(:fake) do
+      answers = states
+      woken = wake_answer
+      FakeAppliance.start do |request|
+        case request
+        in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
+        in { verb: 'GET' } then [200, {}, JSON.generate(answers.size > 1 ? answers.shift : answers.first)]
+        else woken
+        end
+      end
+    end
+
+    def states = [{ 'StandbyState' => 2 }, { 'SyncState' => 1, 'StandbyState' => 1 }, { 'StandbyState' => 1 }]
+
+    def wake_answer = [200, {}, '{}']
+
+    def exchanged = fake.requests.drop(1).map { [it.verb, (JSON.parse(it.body) unless it.body.empty?)] }
+
+    it 'sends DeviceAction 2 once, then reads State every half second until it shows the hood awake',
+       :aggregate_failures do
+      hood.wake
+      expect(exchanged).to eq([['GET', nil], ['PUT', { 'DeviceAction' => 2 }], ['GET', nil], ['GET', nil]])
+      expect(naps).to eq([0.5, 0.5])
+    end
+
+    context 'when State shows it awake' do
+      def states = [{ 'SyncState' => 2, 'StandbyState' => 1 }]
+
+      it 'sends nothing, as the app finds it already awake' do
+        hood.wake
+        expect(exchanged).to eq([['GET', nil]])
+      end
+    end
+
+    context 'when State shows it synchronized without a StandbyState' do
+      def states = [{ 'SyncState' => 2 }, { 'SyncState' => 2, 'StandbyState' => 1 }]
+
+      it 'takes it as asleep and wakes it, as the app reads no StandbyState as 0', :aggregate_failures do
+        hood.wake
+        expect(exchanged).to eq([['GET', nil], ['PUT', { 'DeviceAction' => 2 }], ['GET', nil]])
+      end
+    end
+
+    context 'when State never shows it awake' do
+      def states = [{ 'StandbyState' => 2 }]
+
+      it 'raises ActionFailedError after a minute of reads, as the app gives up', :aggregate_failures do
+        expect { hood.wake }.to raise_error(Miele::Sdk::ActionFailedError)
+        expect(exchanged.tally).to eq(['GET', nil] => 120, ['PUT', { 'DeviceAction' => 2 }] => 1)
+        expect(naps).to eq([0.5] * 120)
+      end
+    end
+
+    context 'when the hood refuses DeviceAction 2' do
+      def wake_answer = [400, {}, '']
+
+      it 'raises the refusal without reading State again, which the app reports as a failed wake',
+         :aggregate_failures do
+        expect { hood.wake }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+        expect(exchanged).to eq([['GET', nil], ['PUT', { 'DeviceAction' => 2 }]])
+      end
+    end
+  end
+
   context 'with an Opcode hood' do
     let(:protocol) { 1 }
     let(:extended) { { 25 => 0b1000 } }

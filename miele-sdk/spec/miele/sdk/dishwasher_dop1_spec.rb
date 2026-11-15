@@ -38,6 +38,12 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(written).to eq([['PUT', 'State', state.merge('ProcessAction' => 2)]])
   end
 
+  it 'refuses to wake it, the app having no wake request for a Dop1 dishwasher', :aggregate_failures do
+    state['Status'] = 1
+    expect { dishwasher.wake }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(written).to be_empty
+  end
+
   context 'when State carries keys the app does not know' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1], 'ProgramName' => 'Eco', 'Light' => nil } }
 

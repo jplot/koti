@@ -22,6 +22,7 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on another protocol, which has no Dop1 object to write
         # @raise [ArgumentError] for another mode, or a value out of 16 bits
+        # @raise [NotAcceptedError] when the hood answers an Ack other than 1
         # @api public
         def configure_ambient_light(mode:, rgb:, brightness:, colour_temperature:)
           selection = AMBIENT_MODES.fetch(mode) { raise ArgumentError, "no ambient light mode #{mode.inspect}" }
@@ -37,6 +38,7 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on another protocol, which has no Dop1 object to write
         # @raise [ArgumentError] for another mode
+        # @raise [NotAcceptedError] when the hood answers an Ack other than 1
         # @api public
         def dehumidification=(mode)
           value = DEHUMIDIFICATION_SETTINGS.fetch(mode) { raise ArgumentError, "no dehumidification #{mode.inspect}" }
@@ -53,6 +55,7 @@ module Miele
         # @param silent [Boolean]
         # @return [void]
         # @raise [ActionUnavailableError] on another protocol, which has no Dop1 object to write
+        # @raise [NotAcceptedError] when the hood answers an Ack other than 1
         # @api public
         def dehumidification_silent=(silent)
           require_dop1!
@@ -65,6 +68,7 @@ module Miele
         # @param on [Boolean]
         # @return [void]
         # @raise [ActionUnavailableError] on another protocol, which has no Dop1 object to write
+        # @raise [NotAcceptedError] when the hood answers an Ack other than 1
         # @api public
         def grease_melting=(on)
           require_dop1!
@@ -74,6 +78,7 @@ module Miele
         # @param minutes [Integer] from now
         # @return [void]
         # @raise [ActionUnavailableError] on another protocol, which has no Dop1 object to write
+        # @raise [NotAcceptedError] when the hood answers an Ack other than 1
         # @api public
         def grease_melting_at(minutes)
           require_dop1!
@@ -91,13 +96,18 @@ module Miele
           write_section(Objects::Hood::SetLightW, **values)
         end
 
-        # The app sends the stop request before PF 40026 for the Miele program too.
+        # The app sends the stop request before PF 40026 for the Miele program too, and drops its Ack
+        # (StopAnyProgramAsync, StartMieleProgramTodayAsync).
         #
         # @param action [Symbol] +:start+, +:stop+ or +:miele_program+
         # @return [void]
         def dop1_fragrance(action)
-          write_section(Objects::Hood::ProcessAction, struktur_version: 1, action: FRAGRANCE_ACTIONS.fetch(action))
-          write_setting(40_026, action == :miele_program ? 1 : 0) unless action == :start
+          id = FRAGRANCE_ACTIONS.fetch(action)
+          request = section_request(Objects::Hood::ProcessAction, struktur_version: 1, action: id)
+          return write_dop1(request) if action == :start
+
+          dop1(request)
+          write_setting(40_026, action == :miele_program ? 1 : 0)
         end
 
         # @return [void]
@@ -107,10 +117,16 @@ module Miele
         # @param object [Class] a generated Dop1 object with one write section
         # @param values [Hash{Symbol=>Integer}] its members; the others stay 0
         # @return [void]
-        def write_section(object, **values)
+        # @raise [NotAcceptedError] when the hood answers an Ack other than 1
+        def write_section(object, **values) = write_dop1(section_request(object, **values))
+
+        # @param object [Class] a generated Dop1 object with one write section
+        # @param values [Hash{Symbol=>Integer}] its members; the others stay 0
+        # @return [String]
+        def section_request(object, **values)
           section = object.const_get(object.constants.grep(/WriteSection\z/).first)
           bytes = section.from("\0" * section::LENGTH).with(**values).to_bytes
-          tolerating_no_op { dop1(Dop1.request(object_id: object::ID, type: Dop1::WRITE, section: bytes)) }
+          Dop1.request(object_id: object::ID, type: Dop1::WRITE, section: bytes)
         end
 
         # @return [Data] the first drying slot, as 8E0A answers it

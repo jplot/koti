@@ -123,11 +123,13 @@ module Miele
         send_request(:put, "/Devices/#{fab}/Ident", body: JSON.generate(DeviceName: name))
       end
 
-      # Wakes the appliance from standby.
+      # Wakes the appliance from standby with +DeviceAction+ 2, sent once as the app's laundry module sends it
+      # (WakeupAction).
       #
       # @return [void]
+      # @raise [ResponseError] when the appliance refuses it, 400 included
       # @api public
-      def wake = change(Schema::DeviceState.new(device_action: 2))
+      def wake = send_wake
 
       # Without an index, the read is the one the app's live observation sends; its one-shot reads give
       # +idx1: 0, idx2: 0+ and its polls +idx1: 0, idx2: 1+.
@@ -212,20 +214,8 @@ module Miele
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
       def command(request) = send_request(:put, "/Devices/#{fab}/State", body: request.to_json)
 
-      # @param request [Schema::DeviceState]
       # @return [void]
-      def change(request) = tolerating_no_op { command(request) }
-
-      # The appliance answers 400 to a write that changes nothing, such as
-      # switching on a light already on.
-      #
-      # @yield the write
-      # @return [void]
-      def tolerating_no_op
-        yield
-      rescue ResponseError => e
-        raise unless e.status == 400
-      end
+      def send_wake = command(Schema::DeviceState.new(device_action: 2))
 
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"
@@ -264,16 +254,24 @@ module Miele
       # @return [Data] all its bytes 0, as the app allocates it
       def blank(klass) = klass.from("\0" * klass::LENGTH)
 
-      # The app accepts only Ack 1, characters 6 and 7 of the answer.
-      #
       # @param klass [Class] a generated Dop1 object
       # @param section [Data] one of its write sections
       # @param type [String] {Dop1::READ} or {Dop1::WRITE}, as the app sends that object
       # @return [void]
-      # @raise [NotAcceptedError] for any other Ack
+      # @raise [NotAcceptedError] for an Ack other than 1
       def write_dop1_object(klass, section, type:)
-        request = Dop1.request(object_id: klass::ID, type:, section: section.to_bytes)
-        ack = JSON.parse(dop1(request)).fetch('Response')[6, 2]
+        write_dop1(Dop1.request(object_id: klass::ID, type:, section: section.to_bytes))
+      end
+
+      # The app accepts only Ack 1, characters 6 and 7 of the answer.
+      #
+      # @param request [String] built by {Dop1}
+      # @return [void]
+      # @raise [NotAcceptedError] for any other Ack, or an answer without one
+      def write_dop1(request)
+        answer = dop1(request)
+        ack = Dop1.ack(answer)
+        raise NotAcceptedError, "the appliance answered #{answer.inspect}" if ack.nil?
         raise NotAcceptedError, "the appliance answered Ack #{ack.inspect}" unless ack.to_i == 1
       end
 

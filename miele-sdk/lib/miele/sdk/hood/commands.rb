@@ -8,20 +8,24 @@ module Miele
         FAN_LEVELS = (0..5)
         RUN_ON_TIMES = [0, 5, 15].freeze
         FRAGRANCE_SETTINGS = { stop: 0, start: 1, miele_program: 2 }.freeze
-        private_constant :FAN_LEVELS, :RUN_ON_TIMES, :FRAGRANCE_SETTINGS
+        # WakeUpAction reads State every 500 ms for a minute: MaxTimeToWakeUp / _delayBetweenChecks.
+        WAKE_READS = 120
+        private_constant :FAN_LEVELS, :RUN_ON_TIMES, :FRAGRANCE_SETTINGS, :WAKE_READS
 
-        # {Readings#fan_settable?} gives whether the app sets it: never while the hood's screen is pushed in.
+        # {Readings#fan_settable?} gives whether the app sets it: never while the hood's screen is pushed in. Its
+        # picker also sends nothing while {Readings#fan_level} shows that level already (PowerLevelViewModel).
         #
         # @param level [Integer] 0 (off) to 3, 4 (boost) or 5 (interval)
         # @return [void]
         # @raise [ArgumentError] if the level is out of range
         # @raise [ActionUnavailableError] on a hood of a protocol the app has no fan action for
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def fan_level=(level)
           raise ArgumentError, "fan level #{level} is out of 0..5" unless FAN_LEVELS.cover?(level)
 
           case route(:fan)
-          when :dop1 then tolerating_no_op { dop1(Dop1.fan_level(level)) }
+          when :dop1 then write_dop1(Dop1.fan_level(level))
           when :opcode then opcode_twice("10000608010#{level}000000")
           else write_dop2(hood_select(1 => level))
           end
@@ -30,10 +34,11 @@ module Miele
         # @param minutes [Integer] such as one of {#fan_run_on_times}
         # @return [void]
         # @raise [ArgumentError] for minutes a Dop1 or Opcode hood's byte, or a DOP2 hood's u16, does not hold
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def fan_run_on_time=(minutes)
           case route(:fan)
-          when :dop1 then tolerating_no_op { dop1(Dop1.fan_run_on_time(minutes)) }
+          when :dop1 then write_dop1(Dop1.fan_run_on_time(minutes))
           when :opcode then opcode(format('10000609%02X00000000', Dop1.unsigned(minutes, 8)))
           else write_dop2(hood_select(2 => minutes))
           end
@@ -43,12 +48,16 @@ module Miele
         # @api public
         def fan_run_on_times = RUN_ON_TIMES
 
+        # The app's switch sends the opposite of what it shows, then shows {Readings#lights} again
+        # (MainLightSourceViewModel).
+        #
         # @param on [Boolean]
         # @return [void]
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def main_light=(on)
           case route(:fan)
-          when :dop1 then tolerating_no_op { dop1(Dop1.main_light(on)) }
+          when :dop1 then write_dop1(Dop1.main_light(on))
           when :opcode then send_request(:put, "/Devices/#{fab}/State/", body: JSON.generate('Light' => on ? '1' : '2'))
           else dop2_user_request(on ? 13 : 14)
           end
@@ -60,6 +69,7 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] when the hood drives its lights by Opcode, which has no request for a
         #   second light
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def ambient_light=(on)
           path = route(:fan)
@@ -71,6 +81,7 @@ module Miele
         # @param on [Boolean]
         # @return [void]
         # @raise [ActionUnavailableError] on an Opcode hood
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def ambient_light_while_cooking=(on)
           value = on ? 1 : 0
@@ -78,10 +89,12 @@ module Miele
         end
 
         # @return [void]
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def reset_grease_filter = reset_filter(40_012, 20_009, '0B0003000300')
 
         # @return [void]
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def reset_charcoal_filter = reset_filter(40_013, 20_008, '0B0003000400')
 
@@ -89,6 +102,7 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on an Opcode hood
         # @raise [ArgumentError] for another action
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def fragrance(action)
           value = FRAGRANCE_SETTINGS.fetch(action) { raise ArgumentError, "no fragrance action #{action.inspect}" }
@@ -113,6 +127,7 @@ module Miele
         # @param on [Boolean]
         # @return [void]
         # @raise [ActionUnavailableError] on an Opcode hood
+        # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1
         # @api public
         def auto_refresh=(on)
           value = on ? 1 : 0
@@ -148,15 +163,23 @@ module Miele
         # @api public
         def disconnect_hob(hob) = update_connectivity_plus { it - [hob] }
 
-        # A Dop1 or Opcode hood wakes when its State is written back, the light as it is; DOP2 takes
-        # +DeviceAction+ 2 (DefaultWakeUpAction).
+        # A Dop1 or Opcode hood wakes when its State is written back, the light as it is, while +State+ shows it
+        # off; only an answer carrying "Success" means woken (DefaultWakeUpAction). A DOP2 hood takes
+        # +DeviceAction+ 2 once +State+ shows it asleep, then +State+ is read until it shows it awake (WakeUpAction).
         #
         # @return [void]
+        # @raise [ResponseError] when the hood refuses the write, 400 included
+        # @raise [NotAcceptedError] when a Dop1 or Opcode hood answers without "Success"
+        # @raise [ActionFailedError] when a DOP2 hood's +State+ does not show it awake within a minute
         # @api public
         def wake
-          return super if [3, 4].include?(protocol_version)
+          return wake_dop2 if [3, 4].include?(protocol_version)
 
-          command(Schema::DeviceState.new(light: state.raw['Light']))
+          state = self.state
+          return unless state.status == :off
+
+          answer = command(Schema::DeviceState.new(light: state.raw['Light'])).body
+          raise NotAcceptedError, "the hood answered #{answer.inspect} to its wake" unless answer.include?('"Success"')
         end
 
         # @return [Boolean] whether the app wakes the hood: a DOP2 one always, a Dop1 or Opcode one while +State+
@@ -165,6 +188,24 @@ module Miele
         def wake_offered? = [3, 4].include?(protocol_version) || state.status == :off
 
         private
+
+        # @return [void]
+        # @raise [ActionFailedError]
+        def wake_dop2
+          woken = WAKE_READS.times.any? do |read|
+            next true if awake?(state.raw)
+
+            send_wake if read.zero?
+            @sleeper.call(0.5)
+            false
+          end
+          raise ActionFailedError, 'the hood did not show itself awake within a minute' unless woken
+        end
+
+        # @param state [Hash{String=>Object}] +State+ as served
+        # @return [Boolean] synchronized (+SyncState+ absent or 2) and out of standby (+StandbyState+ 1), as
+        #   WakeUpAction.IsApplianceAwoken reads it
+        def awake?(state) = [nil, 2].include?(state['SyncState']) && state['StandbyState'] == 1
 
         # The app changes one hob in the list +services+ shows and derives +activated+ from what is left
         # (UpdateConactivityPlusSettingsHelper).

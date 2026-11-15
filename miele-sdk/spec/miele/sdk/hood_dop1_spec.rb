@@ -9,10 +9,11 @@ RSpec.describe Miele::Sdk::Hood do
     extended = [*[0] * 30, 0b1000, *[0] * 42].pack('C*').unpack1('H*')
     JSON.generate('Status' => 4, 'ExtendedState' => extended)
   end
-  let(:dop1_answer) { [200, {}, '{"Response":"12011100009C4A000000030000000000000005"}'] }
+  let(:dop1_answer) { [200, {}, '{"Response":"8E011201"}'] }
   let(:fake) do
     served = state
     FakeAppliance.start do |request|
+      next [200, {}, '{"Response":"12011100009C4A000000030000000000000005"}'] if request.body.include?('"12010100')
       next dop1_answer if request.verb == 'POST'
 
       request.path.end_with?('/State') ? [200, {}, served] : [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
@@ -44,8 +45,39 @@ RSpec.describe Miele::Sdk::Hood do
   context 'when the hood answers 400' do
     let(:dop1_answer) { [400, {}, ''] }
 
-    it 'treats a 400 answer to a hood write as done' do
-      expect { appliance.fan_level = 0 }.not_to raise_error
+    it 'raises it, as the app never takes a refused write as done', :aggregate_failures do
+      expect { appliance.fan_level = 0 }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+      expect { appliance.write_setting(40_010, 0) }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+    end
+  end
+
+  context 'when the hood answers a write with nothing the app can parse' do
+    let(:dop1_answer) { [200, {}, 'Success'] }
+
+    it 'raises NotAcceptedError, as the app takes a Dop1 answer it cannot parse as a failure', :aggregate_failures do
+      ['Success', '{}', '{"Response":null}', '{"Response":64}', '[]'].each do |answer|
+        dop1_answer[2] = answer
+        expect { appliance.fan_level = 0 }.to raise_error(Miele::Sdk::NotAcceptedError)
+      end
+    end
+  end
+
+  context 'when the hood acknowledges a write with Ack 0' do
+    let(:dop1_answer) { [200, {}, '{"Response":"8E011200"}'] }
+
+    it 'raises NotAcceptedError, as the app accepts only Ack 1' do
+      expect { appliance.fan_level = 0 }.to raise_error(Miele::Sdk::NotAcceptedError, 'the appliance answered Ack "00"')
+    end
+  end
+
+  context 'when the hood acknowledges a write with anything but success' do
+    let(:dop1_answer) { [200, {}, '{"Response":"8E011202"}'] }
+
+    it 'raises NotAcceptedError, as the app accepts only Ack 1', :aggregate_failures do
+      expect { appliance.fan_level = 0 }.to raise_error(Miele::Sdk::NotAcceptedError, 'the appliance answered Ack "02"')
+      expect { appliance.fan_run_on_time = 5 }.to raise_error(Miele::Sdk::NotAcceptedError)
+      expect { appliance.main_light = true }.to raise_error(Miele::Sdk::NotAcceptedError)
+      expect { appliance.write_setting(40_010, 0) }.to raise_error(Miele::Sdk::NotAcceptedError)
     end
   end
 end

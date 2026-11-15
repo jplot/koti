@@ -123,6 +123,30 @@ module Miele
       # @param address [Array<Integer>]
       # @return [Data, nil]
       def gen7_object(klass, address) = gen7? ? object(klass, address) : nil
+
+      # @param light [Integer] 1 on, 2 off
+      # @return [void]
+      # @raise [NotAcceptedError] unless the answer gives it back
+      def write_light(light)
+        answer = command(Schema::DeviceState.from(state.raw).with(light:)).body
+        raise NotAcceptedError, "the coffee maker answered #{answer.inspect}" unless light_accepted?(answer, light)
+      end
+
+      # LightStateAction.IsUpdateDeviceStateAsyncSuccessfully: a list of objects whose first +Success+ carrying
+      # +Light+ gives the light written; a +Light+ that is no integer fails GetInt32, so the whole answer.
+      #
+      # @param answer [String] the body answering the +State+ write
+      # @param light [Integer] the light written
+      # @return [Boolean]
+      def light_accepted?(answer, light)
+        entries = JSON.parse(answer)
+        return false unless entries.is_a?(Array) && entries.all?(Hash)
+
+        lights = entries.map { it['Success'] }.select { it.is_a?(Hash) && it.key?('Light') }.map { it['Light'] }
+        lights.all?(Integer) && lights.first == light
+      rescue JSON::ParserError
+        false
+      end
     end
   end
 end

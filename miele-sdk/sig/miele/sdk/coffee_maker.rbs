@@ -51,6 +51,10 @@ module Miele
       def unit: () -> Integer
 
       def gen7_object: (untyped klass, Array[Integer] address) -> untyped
+
+      def write_light: (Integer light) -> void
+
+      def light_accepted?: (String answer, Integer light) -> bool
     end
   end
 end

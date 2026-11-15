@@ -1,0 +1,47 @@
+module Miele
+  module Sdk
+    module Cloud
+      class Session
+        interface _Login
+          def login: () -> Token
+        end
+
+        module Renewal : _Login
+          @mutex: Thread::Mutex
+
+          @token: Token?
+
+          @organization: Locales::Organization
+
+          @sleeper: _Sleeper
+
+          def renew: (Token expired) -> Token
+
+          private
+
+          def replaced: (Token expired) -> Token
+
+          def refreshed: (Token expired) -> Token
+
+          def three_times: () { () -> Token } -> Token
+
+          def mcs_refresh: (Token expired) -> Token
+
+          def ciam_refresh: (Token expired) -> Token
+
+          def mcs_post: (String url, String body, ?Hash[String, String] headers) -> Hash[String, untyped]
+
+          def post: (String url, String body, String type, ?Hash[String, String] headers) -> Hash[String, untyped]
+
+          def mcs_token: (Hash[String, untyped] answer) -> Token
+
+          def ciam_token: (Hash[String, untyped] answer) -> Token
+
+          def client_id: () -> String
+
+          def endpoint: (String type) -> String
+        end
+      end
+    end
+  end
+end

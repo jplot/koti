@@ -3,6 +3,7 @@ module Miele
     module Cloud
       class Session
         include Logout
+        include Renewal
 
         REDIRECT: String
 
@@ -38,19 +39,7 @@ module Miele
 
         def current: () -> Token
 
-        def renew: (Token expired) -> Token
-
         private
-
-        def replaced: (Token expired) -> Token
-
-        def refreshed: (Token expired) -> Token
-
-        def three_times: () { () -> Token } -> Token
-
-        def mcs_refresh: (Token expired) -> Token
-
-        def ciam_refresh: (Token expired) -> Token
 
         def mcs_post: (String url, String body, ?Hash[String, String] headers) -> Hash[String, untyped]
 

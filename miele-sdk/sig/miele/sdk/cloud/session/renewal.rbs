@@ -38,7 +38,6 @@ module Miele
           def ciam_token: (Hash[String, untyped] answer) -> Token
 
           def client_id: () -> String
-
         end
       end
     end

@@ -42,7 +42,7 @@ end
 | `group_id` | — | household GroupID |
 | `group_key` | — | household GroupKey, which signs and encrypts every exchange |
 | `port` | `80` | HTTP port of the appliances |
-| `open_timeout` / `read_timeout` | `5` / `10` s | requests to the appliances |
+| `open_timeout` / `read_timeout` | `5` / `10` s | requests to the appliances, and less where the app gives a request less |
 | `listener_port` | `18082` | port the event listener binds |
 | `listener_fab` | `000999` and six digits from the host name | identity of this host as a household peer |
 | `advertise_address` | the local address that routes to the appliances | address announced for pushed events |
@@ -200,9 +200,10 @@ A request goes out once, as the app sends it, but where one of its actions sends
 purpose: a laundry action, a rename, an Opcode cooling target, Con@ctivity, and the switch-on or
 switch-off of an oven, a dishwasher or a coffee maker, each as its section tells. A switch step of a
 dishwasher or a coffee maker goes out again whatever fails; the others never after a 4xx, nor after
-a request that outlasts `read_timeout`, which stands for the time the app gives each attempt (8
-seconds for a laundry action): the SDK has one timeout for all. The waits are counted against the
-app's timeout around each action, request times left out.
+a request that outlasts the time the app gives it: 8 seconds for each attempt of a laundry action,
+`open_timeout` and `read_timeout` otherwise, which bound the connection and the answer each, those
+8 seconds too. The waits are counted against the app's timeout around each action, request times
+left out.
 
 `power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app's oven module does; its other families
 switch on in their own way, which will come with them. An appliance asleep answers 500:
@@ -601,9 +602,10 @@ takes `StartTime`, its selection written back, then `ProcessAction` 1.
 
 As the app's BaseApiAction`1, a DOP2 action sends each of its reads and writes again 1.5^n seconds
 after a 5xx or a lost connection, 15 seconds from the seventh time, with no limit: an appliance that
-keeps answering 500 keeps the call waiting. The 2/1574 read of `set_parameters` and `start_delayed`
-goes out once, as the app reads it, and so do Dop1 requests and the readers. The app stops waiting
-for a switch-off after 10 seconds while its retries go on; `power_off` returns once they end.
+keeps answering 500 keeps the call waiting. Each attempt waits 8 seconds at most. The 2/1574 read of
+`set_parameters` and `start_delayed` goes out once, after 2/1577 is read and within 10 seconds, as
+the app reads it, and so do Dop1 requests and the readers. The app stops waiting for a switch-off
+after 10 seconds while its retries go on; `power_off` returns once they end, the wire being the same.
 
 Left out: requests 12106 (add laundry) and 12116 (TwinDos care), which the app declares and never
 sends; its limit of three anti-crease extensions; its start time kept until start. The SDK sends

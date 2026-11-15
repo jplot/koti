@@ -74,6 +74,19 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The cloud event stream yields every resource the cloud pushes, where it skipped those the app does
   not read: as JSON where it parses, else as pushed, and a push outside any appliance under its own
   path.
+- **Breaking:** every request, to an appliance or to the Miele cloud, is sent once, as the app sends
+  it: a GET, PUT or DELETE whose connection drops before the answer, or whose answer outlasts
+  `read_timeout`, raises `ConnectionError` instead of going out a second time.
+- **Breaking:** a 401 from the cloud is handled as the app handles it. A request under `/V2` answered
+  401 raises `ResponseError` (status 401) instead of going out again with a renewed token, which is
+  kept, and the websocket no longer renews a token its handshake is refused with: it connects again
+  6 s later with the session's current token. A 401 or 403 on the appliance list
+  (`Cloud::Channel#devices`, so `Miele::Sdk.appliances` and the cloud event stream) logs the account
+  out and forgets its token, `token_file` included, then raises `AuthenticationError`, which ends the
+  stream; the next request logs in again (`Cloud::Session#invalidate`). An MCS logout that cannot
+  reach the cloud keeps the token, as the app keeps it. A renewal the cloud refuses (a 401, which an MCS renewal gets twice
+  as the app's client sends it once more, or a CIAM 400 `invalid_grant`) does the same and raises
+  `AuthenticationError`, instead of logging in again at once.
 
 ### Fixed
 
@@ -90,6 +103,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   the stream. An interrupted withdrawal still stops the server and the announcements.
 - `Appliance#get` raises a `ResponseError` carrying the status for an answer without a body, instead
   of `JSON::ParserError`, an error outside `Miele::Sdk::Error`.
+- MCS logins, renewals and logouts go out as the app's MCS clients send them, as
+  `application/json; charset=utf-8` with `Accept: application/json`, the logout with an empty JSON
+  object; a DELETE to the cloud without content carries `Content-Length: 0`.
 
 ### Added
 

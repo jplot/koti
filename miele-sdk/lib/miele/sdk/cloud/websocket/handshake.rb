@@ -25,7 +25,7 @@ module Miele
             socket = @url.scheme == 'wss' ? tls(tcp) : tcp
             key = [SecureRandom.random_bytes(16)].pack('m0')
             socket.write(request(key, token))
-            check(socket, key, token)
+            check(socket, key)
             connected = socket
           ensure
             tcp&.close unless connected
@@ -56,19 +56,16 @@ module Miele
              ''].join("\r\n")
           end
 
-          # A refused token is renewed for the next attempt, as {Channel#request} renews it.
-          #
           # @param socket [IO]
           # @param key [String]
-          # @param token [Token] the token sent
           # @return [void]
-          # @raise [ConnectionError]
-          def check(socket, key, token)
+          # @raise [ConnectionError] a 401 too: the app's Websocket.Client connects again 6 s later with the token
+          #   GetAuthorizationHeaderAsync gives, renewed only when due (TryGetValidAccessTokenAsync(false))
+          def check(socket, key)
             status = socket.gets("\r\n").to_s
             accepted = response_headers(socket)['sec-websocket-accept'] == [Digest::SHA1.digest(key + GUID)].pack('m0')
             return if status.include?(' 101 ') && accepted
 
-            @session.renew(token) if status.include?(' 401 ')
             raise ConnectionError, "the cloud websocket answered #{status.strip}"
           end
 

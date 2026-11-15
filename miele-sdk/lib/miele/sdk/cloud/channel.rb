@@ -36,22 +36,23 @@ module Miele
         # @param kind [Symbol] +:json+ or +:dop2+, the type of the body
         # @param host [String, nil] the module's mDNS name, which the cloud routes a Dop1 request by
         # @return [Connection::Response]
-        # @raise [NotFoundError, RemoteControlDisabledError, ResponseError] on an error status
+        # @raise [NotFoundError, RemoteControlDisabledError, ResponseError] on an error status, a 401 too: the token
+        #   is kept and the request not sent again, as by the app's appliance client (MieleHttpClientHandler)
         # @raise [ConnectionError] if the cloud cannot be reached
         # @api public
         def request(method, path, body: nil, kind: :json, host: nil)
           headers = { 'Content-Type' => (TYPES.fetch(kind) if body), 'Host' => host&.delete_suffix('.') }.compact
-          used = @session.current
-          answer = exchange(used, method, path, body, headers)
-          answer = exchange(@session.renew(used), method, path, body, headers) if answer.status == 401
-          refuse(answer.status, method) unless answer.status.between?(200, 299)
-          Connection::Response.new(status: answer.status, body: answer.body)
+          exchange(@session.current, method, path, body, headers)
         end
 
         # @return [Array<Device>] the appliances paired with the account
+        # @raise [AuthenticationError] on a 401 or 403, once logged out with the token forgotten ({Session#invalidate}):
+        #   the app stops observing its appliance list and loses the session (PairedAppliancesRepository
+        #   OnObservationError, AppLifeCycleViewModel.PairedAppliancesRepository_OnAuthorizationError)
+        # @raise [ResponseError] on any other error status
         # @api public
         def devices
-          JSON.parse(request(:get, '/Devices').body).flat_map do |wifi|
+          JSON.parse(listed(@session.current).body).flat_map do |wifi|
             devices = wifi['devices'] || [] #: Array[Hash[String, untyped]]
             devices.map do |device|
               Device.new(fab: device.fetch('mac'), host: wifi.fetch('host'), ident: device['ident'],
@@ -72,11 +73,24 @@ module Miele
 
         private
 
-        # @return [Http::Response]
+        # @return [Connection::Response]
         def exchange(token, method, path, body, headers)
           headers = { 'Authorization' => "#{token.scheme} #{token.value}", 'Accept-Language' => @session.language,
                       **headers }
-          Http.request(method, "#{@session.organization.rest}/V2#{path}", headers:, body:)
+          answer = Http.request(method, "#{@session.organization.rest}/V2#{path}", headers:, body:)
+          refuse(answer.status, method) unless answer.status.between?(200, 299)
+          Connection::Response.new(status: answer.status, body: answer.body)
+        end
+
+        # @param token [Token]
+        # @return [Connection::Response]
+        def listed(token)
+          exchange(token, :get, '/Devices', nil, {})
+        rescue ResponseError => e
+          raise unless [401, 403].include?(e.status)
+
+          @session.invalidate(token)
+          raise AuthenticationError, "the Miele cloud refused the appliance list (#{e.status}): the session is lost"
         end
 
         # @param status [Integer]

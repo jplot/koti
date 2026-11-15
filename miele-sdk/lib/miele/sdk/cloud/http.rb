@@ -36,7 +36,9 @@ module Miele
           uri = URI(url) #: URI::HTTP
           request = REQUESTS.fetch(method).new(uri.request_uri)
           { 'User-Agent' => "miele-sdk/#{VERSION}", **headers }.each { |name, value| request[name] = value }
-          request.body = body if body
+          # AndroidMessageHandler.SetupRequestBody sends a POST, PUT or DELETE without content as Content-Length: 0;
+          # Net::HTTP does it for a POST or a PUT only.
+          request.body = body || '' unless method == :get
           answer = exchange(uri, request)
           Response.new(status: answer.code.to_i, body: answer.body.to_s)
         end
@@ -49,8 +51,10 @@ module Miele
         def exchange(uri, request)
           config = Sdk.config
           host = uri.host.to_s
+          # The app sends a cloud request once, whatever fails (MieleHttpClientHandler, no retry); Net::HTTP would
+          # send a GET, PUT or DELETE again after a dropped connection or a read timeout.
           options = { use_ssl: uri.scheme == 'https', open_timeout: config.open_timeout,
-                      read_timeout: config.read_timeout }
+                      read_timeout: config.read_timeout, max_retries: 0 }
           Net::HTTP.start(host, uri.port, **options) { |http| http.request(request) }
         rescue *NETWORK_ERRORS => e
           raise ConnectionError, "#{host}: #{e.message}"

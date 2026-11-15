@@ -51,6 +51,8 @@ class FakeCloud
     request = read_request(socket)
     @mutex.synchronize { @requests << request }
     status, headers, body = @handler.call(request) || answer(request)
+    return if status == :drop
+
     lines = ["HTTP/1.1 #{status} Fake", "Content-Length: #{body.bytesize}",
              *headers.map { |name, value| "#{name}: #{value}" }]
     socket.write("#{lines.join("\r\n")}\r\n\r\n#{body}")

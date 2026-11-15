@@ -129,7 +129,8 @@ module Miele
         config = Sdk.config
         timeouts = { open_timeout: config.open_timeout, read_timeout: config.read_timeout }
         # nil is the proxy: an http_proxy set for the Internet would otherwise receive every LAN request.
-        Net::HTTP.start(host, config.port, nil, **timeouts) { |http| http.request(request) }
+        # max_retries 0 as in {Cloud::Http.exchange}: the app sends these same requests through the cloud.
+        Net::HTTP.start(host, config.port, nil, **timeouts, max_retries: 0) { |http| http.request(request) }
       rescue *NETWORK_ERRORS => e
         raise ConnectionError, "#{host}:#{config&.port}: #{e.message}"
       end

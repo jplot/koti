@@ -16,7 +16,7 @@ module Miele
 
           def request: (String key, Token token) -> String
 
-          def check: (untyped socket, String key, Token token) -> void
+          def check: (untyped socket, String key) -> void
 
           def response_headers: (untyped socket) -> Hash[String, String]
         end

@@ -9,11 +9,19 @@ module Miele
     module Cloud
       # The Miele account's token, obtained and renewed the way the Miele app does it.
       class Session
+        include Logout
+        include Renewal
+
         REDIRECT = 'miele://oauth2-code/'
         private_constant :REDIRECT
 
         SCOPE = 'openid bpdata mcs shop zuora'
         private_constant :SCOPE
+
+        # Refit's SystemTextJsonContentSerializer names the charset, and the app's MCS clients accept JSON
+        # (ApiClientFactory.CreateApiClient).
+        MCS_JSON = { 'Content-Type' => 'application/json; charset=utf-8', 'Accept' => 'application/json' }.freeze
+        private_constant :MCS_JSON
 
         # @return [Token, nil] the current token, nil before a login
         attr_reader :token
@@ -75,7 +83,7 @@ module Miele
         # @api public
         def exchange(code)
           form = URI.encode_www_form(grant_type: 'authorization_code', code:, redirect_uri: REDIRECT, client_id:)
-          @token = ciam_token(post(endpoint('token'), form, 'application/x-www-form-urlencoded')).save
+          @token = ciam_token(ciam_post(form)).save
         end
 
         # @return [String] the +Authorization+ header, after a login or a renewal when one is due
@@ -89,81 +97,39 @@ module Miele
           token.due?(@clock.call) ? renew(token) : token
         end
 
-        # Renews the token unless another thread already did since +expired+ was read. A stopped event stream
-        # kills its thread: the kill waits for the renewal, which the cloud may have done already, and for its
-        # file, which it would leave empty.
-        #
-        # @param expired [Token]
-        # @return [Token]
-        # @api public
-        def renew(expired) = Thread.handle_interrupt(Object => :never) { @mutex.synchronize { replaced(expired) } }
-
         private
-
-        # @param expired [Token]
-        # @return [Token]
-        def replaced(expired)
-          @token = refreshed(expired).save if @token.equal?(expired)
-          @token or raise AuthenticationError, 'no token to renew'
-        end
-
-        # Like the app: three attempts a second apart, and a new login when the cloud refuses the renewal.
-        #
-        # @param expired [Token]
-        # @return [Token]
-        def refreshed(expired)
-          three_times { expired.scheme == 'Bearer' ? ciam_refresh(expired) : mcs_refresh(expired) }
-        rescue AuthenticationError
-          raise unless expired.scheme == 'appToken' && Sdk.config.email
-
-          login
-        end
-
-        # @yieldreturn [Token]
-        # @return [Token]
-        def three_times
-          attempts = 0
-          begin
-            yield
-          rescue ConnectionError, ResponseError
-            raise if (attempts += 1) == 3
-
-            @sleeper.call(1)
-            retry
-          end
-        end
-
-        # @param expired [Token]
-        # @return [Token]
-        def mcs_refresh(expired)
-          url = "#{@organization.rest}/V2/AppTokenRefresh"
-          mcs_token(mcs_post(url, '{}', 'Authorization' => "appToken #{expired.value}"))
-        end
-
-        # @param expired [Token]
-        # @return [Token]
-        def ciam_refresh(expired)
-          form = URI.encode_www_form(refresh_token: expired.refresh, client_id:, grant_type: 'refresh_token',
-                                     client_secret: '')
-          ciam_token(post(endpoint('token'), form, 'application/x-www-form-urlencoded'))
-        end
 
         # @return [Hash{String=>Object}]
         def mcs_post(url, body, headers = {})
-          post(url, body, 'application/json', { 'Accept-Language' => language, **headers })
+          post(url, body, MCS_JSON.fetch('Content-Type'), { **MCS_JSON, 'Accept-Language' => language, **headers })
+        end
+
+        # The app's OAuth2Authenticator.RequestAccessTokenAsync takes a 400 invalid_grant for a 401.
+        #
+        # @param form [String]
+        # @return [Hash{String=>Object}]
+        def ciam_post(form) = post(endpoint('token'), form, 'application/x-www-form-urlencoded') { invalid_grant?(it) }
+
+        # @param answer [Http::Response]
+        # @return [Boolean]
+        def invalid_grant?(answer)
+          answer.status == 400 && WebExDecoder.decode(answer.body)['error'].to_s.casecmp?('invalid_grant')
         end
 
         # @param url [String]
         # @param body [String]
         # @param type [String] the +Content-Type+
         # @param headers [Hash{String=>String}]
+        # @yieldparam answer [Http::Response]
+        # @yieldreturn [Boolean] whether the answer refuses the account too
         # @return [Hash{String=>Object}]
         # @raise [AuthenticationError] on 401
         # @raise [ResponseError] on any other error status
         def post(url, body, type, headers = {})
           headers = { 'Content-Type' => type, **headers }
           answer = Http.request(:post, url, headers:, body:)
-          raise AuthenticationError, 'the Miele cloud refused the account' if answer.status == 401
+          refused = answer.status == 401 || (block_given? && yield(answer))
+          raise AuthenticationError, 'the Miele cloud refused the account' if refused
           unless answer.status.between?(200, 299)
             raise ResponseError.new(answer.status, "cloud answered #{answer.status}")
           end

@@ -27,6 +27,7 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
       case request
       in { path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET' } then [200, {}, JSON.generate(served.fetch(path))]
+      in { verb: 'PUT' | 'POST' } if (refusal = served.fetch(:refusals, []).shift) then refusal
       else served.fetch(path) { [204, {}, ''] }
       end
     end
@@ -170,6 +171,12 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     fridge.set_mode(:party, true)
     fridge.set_mode(:holiday, true)
     expect(written.map { it[1] }).to eq(%w[Cooling/EcoMode Cooling/Party Cooling/Holiday])
+  end
+
+  it 'sets a mode once despite a 5xx, the 5 s Timeout leaving no room for the 5 s retry', :aggregate_failures do
+    resources[:refusals] = [[500, {}, '']]
+    expect { fridge.set_mode(:eco, true) }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+    expect([written.size, waits]).to eq([1, []])
   end
 
   it 'sets the ice maker, the door alarm delay and the humidifier', :aggregate_failures do
@@ -491,6 +498,15 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     it "sets a target through Oc85 in whole °C, as 16-bit two's complement" do
       fridge.set_target(fridge.zones.last, -20)
       expect(written).to eq([['POST', 'Oc85/', { 'Request' => '10000617000200FFEC' }]])
+    end
+
+    it 'posts it again 5 s after a 5xx or a lost connection, three times within the 15 s Timeout',
+       :aggregate_failures do
+      resources[:refusals] = [:drop, [502, {}, ''], [500, {}, '']]
+      expect { fridge.set_target(fridge.zones.last, -20) }
+        .to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+      expect(written).to eq([['POST', 'Oc85/', { 'Request' => '10000617000200FFEC' }]] * 3)
+      expect(waits).to eq([5, 5])
     end
 
     it 'sends nothing for the current target, as the app does' do

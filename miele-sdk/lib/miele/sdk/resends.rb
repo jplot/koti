@@ -27,21 +27,23 @@ module Miele
       # 0), goes out again 1.5^n s later, 15 s past the sixth (CalculateDelayUntilMax), with no limit but the
       # action's Timeout.
       #
+      # @param retries [Integer, Float] how many times the module's helper sends it again at most
+      # @param delay [Integer, nil] the seconds its helper waits before each, nil for those 1.5^n
       # @param within [Numeric] the seconds the action's Timeout leaves its waits
       # @yieldreturn [Object] one attempt
       # @return [Object] what the attempt that succeeds gives
       # @raise [Error] the first error the app does not send again, or the last once the next wait would end
       #   +within+
-      def resent(within: Float::INFINITY)
+      def resent(retries: Float::INFINITY, delay: nil, within: Float::INFINITY)
         waits = [] #: Array[Integer | Float]
         begin
           yield
         rescue ResponseError, ConnectionError => e
-          delay = waits.size < 6 ? 1.5**(waits.size + 1) : 15
-          raise unless resent?(e) && waits.sum + delay < within
+          pause = delay || (waits.size < 6 ? 1.5**(waits.size + 1) : 15)
+          raise unless waits.size < retries && resent?(e) && waits.sum + pause < within
 
-          @sleeper.call(delay)
-          waits << delay
+          @sleeper.call(pause)
+          waits << pause
           retry
         end
       end

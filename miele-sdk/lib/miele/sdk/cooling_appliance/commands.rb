@@ -12,20 +12,22 @@ module Miele
 
         # An Opcode appliance takes its target through +Oc85+, as 16-bit two's complement of whole °C; the Cooling
         # API in hundredths. As the app's ChangeTargetTemperatureAsync, nothing goes out for the zone's current target.
+        # SetTargetTemperatureForOpCodeAction posts again 5 s after a 5xx or a lost connection, within 15 s.
         #
         # @param zone [Zone] one of {#zones}
         # @param degrees [Numeric] in {#temperature_unit}, such as one of {#target_choices}; the Cooling API takes
         #   hundredths, rounded to the nearest
         # @return [void]
         # @raise [ArgumentError] on Opcode, for a fraction of a degree or a value out of 16 bits
+        # @raise [ResponseError, ConnectionError] on Opcode, a 4xx or a timeout at once, another refusal at the third
         # @api public
         def set_target(zone, degrees)
           whole = whole_degrees(degrees) if opcode?
           return unless new_target?(zone, degrees, state)
           return put('Cooling', "#{zone.number}/TargetTemp", Value: (degrees * 100).round) unless whole
 
-          request = "10000617000#{zone.number}00#{format('%04X', whole & 0xFFFF)}"
-          send_request(:post, "/Devices/#{fab}/Oc85/", body: JSON.generate(Request: request))
+          body = JSON.generate(Request: "10000617000#{zone.number}00#{format('%04X', whole & 0xFFFF)}")
+          resent(retries: 3, delay: 5, within: 15) { send_request(:post, "/Devices/#{fab}/Oc85/", body:) }
         end
 
         # On protocol 201 the app first sets the duration to 720, whatever that write answers, and waits 500 ms.
@@ -69,7 +71,8 @@ module Miele
           write_cooling("#{zone.rank}/VarioCool", Value: on ? 1 : 2)
         end
 
-        # The app sets a mode {#modes} lists as editable.
+        # The app sets a mode {#modes} lists as editable. It goes out once: SetApplianceModeForCoolingApiAction's 5 s
+        # Timeout leaves no room for the retry it makes 5 s after a 5xx.
         #
         # @param name [Symbol] +:eco+, +:party+, +:holiday+, +:sabbath+ or +:child_proof+
         # @param on [Boolean]

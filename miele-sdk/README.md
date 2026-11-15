@@ -294,10 +294,10 @@ only while `State` shows it off, and counts as woken only on an answer carrying 
 `Miele::Sdk::NotAcceptedError` (DefaultWakeUpAction). A DOP2 hood gets `DeviceAction` 2 once, only
 while `State` shows it asleep; `State` is then read every half second until it shows the hood awake
 (`SyncState` absent or 2, `StandbyState` 1), `Miele::Sdk::ActionFailedError` after a minute
-(WakeUpAction). While its page stays open, the app goes on watching `State` and wakes the hood
-once more the first time it shows it asleep (StartWakeUpObservation); `wake` returns once the hood
-is awake, so a client that wants the same calls `wake` again on such an event. `wake_offered?`
-tells whether the app wakes the hood at all.
+(WakeUpAction). The app also wakes the hood again while its page is open, the first time `State`
+shows it asleep (StartWakeUpObservation): that follows the page, so the client does it by calling
+`wake` on a `State` event that shows the hood asleep. `wake_offered?` tells whether the app wakes
+the hood at all.
 
 Settings (programming functions, Dop1 object 1201) go out with structure version 1 and Dop1
 sections in lower-case hex, as the app sends them. A value out of range raises `ArgumentError`

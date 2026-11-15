@@ -100,6 +100,10 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `Cloud::Http.request`, `dop2` and `write_dop2` take that `timeout:`, which `open_timeout` and
   `read_timeout` still cap. `set_parameters` and `start_delayed` read 2/1577 before 2/1574, as the
   app's SelectParametersAsync does.
+- **Breaking:** `supervise`, `connect_hob` and `disconnect_hob` read back what they wrote, as the
+  app polls it, every 3 s within its 15 s, write retries included: `SuperVision/{fab}` right after
+  the write, `services` 3 s after the read the write was made from. They raise `ActionFailedError`
+  when it does not show in time.
 - **Breaking:** a 401 from the cloud is handled as the app handles it. A request under `/V2` answered
   401 raises `ResponseError` (status 401) instead of going out again with a renewed token, which is
   kept, and the websocket no longer renews a token its handshake is refused with: it connects again

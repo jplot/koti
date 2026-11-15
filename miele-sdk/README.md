@@ -279,9 +279,12 @@ dashes above). Every other action is sent as given, even one the app hides or re
 readings give the app's rules, so the client's screen can follow them. The app hides what the hood
 does not support (`lights.ambient.exists`, `dehumidification.supported`,
 `grease_melting.supported`, `auto_refresh_supported?`, `fragrance_supported?`), and refuses the fan
-while the hood's screen is pushed in (`fan_settable?` false). A hood that is off does not say what
-it supports: those readings are nil until it is woken. The Opcode fan level goes out twice, half a
-second apart, as the app sends it. `wake` writes back the light of a Dop1 or Opcode hood, and sends
+while the hood's screen is pushed in (`fan_settable?` false). Its fan picker also sends nothing
+when `fan_level` already shows the level picked, and its light switch sends the opposite of what it
+shows, then shows the hood's light again (PowerLevelViewModel, MainLightSourceViewModel): those are
+the screen's to follow, and `fan_level=` and `main_light=` send what they are given. A hood that is
+off does not say what it supports: those readings are nil until it is woken. The Opcode fan level
+goes out twice, half a second apart, as the app sends it. `wake` writes back the light of a Dop1 or Opcode hood, and sends
 `DeviceAction` 2 to a DOP2 one; the app wakes a Dop1 or Opcode hood only while it is off
 (`wake_offered?`).
 

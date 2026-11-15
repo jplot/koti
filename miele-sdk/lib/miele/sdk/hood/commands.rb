@@ -12,7 +12,8 @@ module Miele
         WAKE_READS = 120
         private_constant :FAN_LEVELS, :RUN_ON_TIMES, :FRAGRANCE_SETTINGS, :WAKE_READS
 
-        # {Readings#fan_settable?} gives whether the app sets it: never while the hood's screen is pushed in.
+        # {Readings#fan_settable?} gives whether the app sets it: never while the hood's screen is pushed in. Its
+        # picker also sends nothing while {Readings#fan_level} shows that level already (PowerLevelViewModel).
         #
         # @param level [Integer] 0 (off) to 3, 4 (boost) or 5 (interval)
         # @return [void]
@@ -47,6 +48,9 @@ module Miele
         # @api public
         def fan_run_on_times = RUN_ON_TIMES
 
+        # The app's switch sends the opposite of what it shows, then shows {Readings#lights} again
+        # (MainLightSourceViewModel).
+        #
         # @param on [Boolean]
         # @return [void]
         # @raise [NotAcceptedError] when a Dop1 hood answers an Ack other than 1

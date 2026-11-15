@@ -25,7 +25,7 @@ module Miele
         # @raise [NotAcceptedError] when a Dop1 appliance refuses them
         # @api public
         def set_parameters(**settings)
-          require!(protocol_version == 2 || dop2?, 'an Opcode appliance has no selection object to write')
+          require_selection!
           check_settings!(settings)
           return write_dop1_selection(dop1_parameters(dop1_object(dop1_objects.fetch(:write)), settings)) unless dop2?
 
@@ -90,13 +90,14 @@ module Miele
 
         # @param extras [Data, nil]
         # @param selected [Array<Symbol>]
-        # @param names [Array<Symbol>] the extras the app writes, each only where 2/1577 carries it
+        # @param names [Array<Symbol>] the extras the app writes, off unless selected; another selected is set on,
+        #   each only where 2/1577 carries it
         # @return [Data]
         # @raise [ArgumentError] when 2/1577 carries no extras
         def chosen(extras, selected, names)
           raise ArgumentError, 'extras: 2/1577 carries none' if extras.nil?
 
-          values = names.reject { extras.public_send(it).nil? }.to_h { [it, selected.include?(it)] }
+          values = (names | selected).reject { extras.public_send(it).nil? }.to_h { [it, selected.include?(it)] }
           extras.with(**values)
         end
       end

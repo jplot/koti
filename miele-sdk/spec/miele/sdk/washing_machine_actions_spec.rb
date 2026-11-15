@@ -249,6 +249,8 @@ RSpec.describe Miele::Sdk::WashingMachine do
     it 'neither silences its end signal nor switches off, its protocol having no DOP2 leaf', :aggregate_failures do
       expect { washer.stop_end_signal }.to raise_error(Miele::Sdk::ActionUnavailableError)
       expect { washer.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { washer.stop_to_edit }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { washer.extend_anti_crease }.to raise_error(Miele::Sdk::ActionUnavailableError)
       expect([washer.stop_end_signal_offered?, washer.power_off_offered?, washer.wake_offered?])
         .to eq([false, false, false])
     end
@@ -272,7 +274,9 @@ RSpec.describe Miele::Sdk::WashingMachine do
     it 'neither selects a program nor sets its parameters, having no selection object', :aggregate_failures do
       expect { washer.select_program(28) }.to raise_error(Miele::Sdk::ActionUnavailableError)
       expect { washer.set_parameters(spin_speed: 1400) }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { washer.start_delayed(Time.new(2026, 10, 31, 21, 30)) }.to raise_error(Miele::Sdk::ActionUnavailableError)
       expect(washer.set_parameters_offered?).to be(false)
+      expect(written).to be_empty
     end
   end
 

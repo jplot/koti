@@ -19,7 +19,8 @@ module Miele
         WASHER_DRYER_COPIED = { program_mode: %i[program_mode current_value],
                                 residual_moisture: %i[residual_moisture current_value],
                                 drying_time: %i[drying_time current_value] }.freeze
-        DOP2_MEMBERS = { soiling: :soiling_degree, cap: :cap, program_mode: :program_mode }.freeze
+        DOP2_MEMBERS = { soiling: :soiling_degree, cap: :cap, master_care: :master_care,
+                         program_mode: :program_mode }.freeze
         private_constant :COPIED, :WASHER_DRYER_COPIED, :DOP2_MEMBERS
 
         private
@@ -31,12 +32,13 @@ module Miele
         def parameter_names
           return %i[temperature eco spin_speed soiling cap master_care extras stains twin_dos] unless dop2?
 
-          %i[temperature eco spin_speed soiling cap extras stains drying_level drying_time program_mode twin_dos]
+          %i[temperature eco spin_speed soiling cap master_care extras stains drying_level drying_time program_mode
+             twin_dos]
         end
 
         # @return [Hash{Symbol=>Array<Symbol>}]
         def setting_choices
-          { extras: dop2? ? DOP2_EXTRAS : DOP1_EXTRAS.keys, stains: STAINS.keys,
+          { extras: dop2? ? Objects::Laundry::GlobalPsExtrasWM::MEMBERS.keys : DOP1_EXTRAS.keys, stains: STAINS.keys,
             drying_level: Laundry::DRYING_LEVELS.keys }
         end
 

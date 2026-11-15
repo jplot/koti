@@ -66,6 +66,20 @@ RSpec.describe Miele::Sdk::TumbleDryer do
     expect(written).to be_empty
   end
 
+  def dryer_select(prog, type, fan_clocking:)
+    extras = { 6 => dop2_field(:bool, false), 9 => dop2_field(:bool, fan_clocking) }
+    fields = { 1 => dop2_field(:e16, prog), 3 => dop2_field(:e8, type), 5 => struct({ 6 => struct(extras) }) }
+    dop2_leaf(2, 1577, fields)
+  end
+
+  it 'writes an extra 2/1577 carries that the app does not write, but none GLOBAL_PS_ExtrasTD lacks',
+     :aggregate_failures do
+    leaves[1577] = dryer_select(0, 0, fan_clocking: false)
+    dryer.set_parameters(extras: [:fan_clocking])
+    expect { dryer.set_parameters(extras: [:wet]) }.to raise_error(ArgumentError)
+    expect(written.map(&:last)).to eq([dryer_select(5, 2, fan_clocking: true)])
+  end
+
   it 'writes iron dry as its flag on any other dryer' do
     dryer.set_parameters(drying_level: :iron_dry)
     expect(written.last.last).to eq(select(prog: 5, type: 2, moisture: 256, eco: true))

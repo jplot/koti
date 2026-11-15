@@ -34,6 +34,8 @@ module Miele
 
         def run_request: (Integer id) -> void
 
+        def dop2_request: (Integer id) -> void
+
         def wakeable?: () -> bool
 
         def finished?: (State state) -> bool

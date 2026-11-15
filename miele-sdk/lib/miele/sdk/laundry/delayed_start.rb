@@ -11,9 +11,11 @@ module Miele
 
         # @param at [Time] its time of day; the next one if it has passed today
         # @return [void]
+        # @raise [ActionUnavailableError] on an Opcode appliance, which has no selection object to write back
         # @raise [NotAcceptedError] when a Dop1 appliance refuses its selection written back
         # @api public
         def start_delayed(at)
+          require_selection!
           now = Time.now
           target = next_time(at, now)
           return dop1_start_delayed(target, now) unless dop2?

@@ -30,10 +30,7 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 or Opcode appliance, whose protocol has no 2/1583 to write
         # @api public
-        def stop_end_signal
-          require!(dop2?, 'only a DOP2 appliance has 2/1583 to stop its end signal')
-          dop2_user_request(28)
-        end
+        def stop_end_signal = dop2_request(28)
 
         # The app checks the requests 2/1585 lists, before its SupportedRequestsRule.
         #
@@ -42,8 +39,9 @@ module Miele
         def stop_end_signal_offered? = dop2? && raw_requests(context).include?(28)
 
         # @return [void]
+        # @raise [ActionUnavailableError] on a Dop1 or Opcode appliance, whose protocol has no 2/1583 to write
         # @api public
-        def stop_to_edit = run_request(12_102)
+        def stop_to_edit = dop2_request(12_102)
 
         # The app shows it while the program waits for its start time (Status 4).
         #
@@ -58,8 +56,9 @@ module Miele
         # {Rules#supported_requests} gives whether it offers request 12144.
         #
         # @return [void]
+        # @raise [ActionUnavailableError] on a Dop1 or Opcode appliance, whose protocol has no 2/1583 to write
         # @api public
-        def extend_anti_crease = run_request(12_144)
+        def extend_anti_crease = dop2_request(12_144)
 
         # @return [Boolean] whether the app wakes the appliance: a DOP2 one of a series it wakes, sleeping deeply
         #   (Status 4, +StandbyState+ 2)
@@ -106,6 +105,14 @@ module Miele
         # @param id [Integer]
         # @return [void]
         def run_request(id) = dop2? ? dop2_user_request(id) : command(Schema::DeviceState.new(process_action: id))
+
+        # @param id [Integer] a request +ProcessAction+ has no value for
+        # @return [void]
+        # @raise [ActionUnavailableError] on a Dop1 or Opcode appliance
+        def dop2_request(id)
+          require!(dop2?, "only a DOP2 appliance has 2/1583 to send request #{id}")
+          dop2_user_request(id)
+        end
 
         # SupportsWakeup: the series letter at +TechType+[2], from a software id up on some.
         #

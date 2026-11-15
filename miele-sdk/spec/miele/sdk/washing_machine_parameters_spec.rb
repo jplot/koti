@@ -122,10 +122,15 @@ RSpec.describe Miele::Sdk::WashingMachine do
     expect(written).to be_empty
   end
 
-  it 'refuses a parameter or an extra the app does not write on this washer', :aggregate_failures do
-    expect { washer.set_parameters(master_care: 1) }.to raise_error(ArgumentError)
+  it 'writes master care and an extra 2/1577 carries, which the app does not write on a DOP2 washer',
+     :aggregate_failures do
+    leaves[1577] = wm_select(0, 0, { 7 => dop2_field(:u8, 0),
+                                     14 => struct({ 14 => dop2_field(:bool, false), 16 => dop2_field(:bool, false) }) })
+    washer.set_parameters(master_care: 2, extras: [:starch_hold])
     expect { washer.set_parameters(extras: [:short]) }.to raise_error(ArgumentError)
-    expect(written).to be_empty
+    expect(written.map(&:last)).to eq([wm_select(28, 2, { 7 => dop2_field(:u8, 2),
+                                                          14 => struct({ 14 => dop2_field(:bool, false),
+                                                                         16 => dop2_field(:bool, true) }) })])
   end
 
   context 'when its program runs' do

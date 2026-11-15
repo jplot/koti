@@ -10,6 +10,8 @@ module Miele
 
         private
 
+        def require_selection!: () -> void
+
         def check_settings!: (Hash[Symbol, untyped] settings) -> void
 
         def write_dop2_selection: () { (untyped para, untyped source) -> untyped } -> void

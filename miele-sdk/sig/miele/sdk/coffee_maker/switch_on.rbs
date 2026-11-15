@@ -1,0 +1,23 @@
+module Miele
+  module Sdk
+    class CoffeeMaker < Appliance
+      module SwitchOn : Appliance
+        TIMEOUT: Integer
+
+        private
+
+        def switch_on: () -> void
+
+        def send_switch_on: (Float since) -> void
+
+        def read_combi_state: (Float since) -> Dop2::Leaf
+
+        def rouse: (Float since, ResponseError error) -> void
+
+        def paused?: (Float since, Integer | Float seconds) -> bool
+
+        def switched_on: (Dop2::Leaf leaf) -> Dop2::Leaf?
+      end
+    end
+  end
+end

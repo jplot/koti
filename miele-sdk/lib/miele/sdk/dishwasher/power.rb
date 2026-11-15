@@ -14,14 +14,16 @@ module Miele
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
-        # @raise [ResponseError] when the appliance refuses DeviceAction 2, 400 included
+        # @raise [Error] what the third attempt of the wake or of 2/1586 raises, 400 included
         # @api public
         def power_on
           require_dop2!
-          send_wake if standby(state) == 2
+          three_attempts { send_wake } if standby(state) == 2
           return unless [1, 4].include?(status(state))
 
-          modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 4) }
+          three_attempts do
+            modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 4) }
+          end
         end
 
         # @return [Boolean] whether the app offers {#power_on}: a DOP2 dishwasher off (Status 1, or 4 asleep) under
@@ -47,12 +49,20 @@ module Miele
           send_wake if status(state) == 1 || (status(state) == 4 && standby(state) != 1)
         end
 
+        # As SwitchOffForDop2Action (IsApplianceOffObservable), nothing goes out while +State+ shows Status 1.
+        #
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
+        # @raise [Error] what the third attempt raises, which SwitchOffForDop2Action logs and swallows: the SDK
+        #   raises it, as it raises every refused write
         # @api public
         def power_off
           require_dop2!
-          modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
+          return if status(state) == 1
+
+          three_attempts do
+            modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
+          end
         end
 
         # @return [Boolean] whether the app offers {#power_off}: a DOP2 dishwasher on, under remote control and not

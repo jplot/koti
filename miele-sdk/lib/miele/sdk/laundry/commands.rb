@@ -76,6 +76,9 @@ module Miele
           modify(Objects::Laundry::GlobalNtfctnAcknowledge, [2, 138, 0, 0]) { it.with(message:, ack_option: option) }
         end
 
+        # TurnOffApplianceAction stops waiting for its write after 10 s (Task.WaitAsync), while the write's retries go
+        # on; the SDK returns once they end, the wire being the same.
+        #
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 or Opcode appliance, whose protocol has no 2/1586 to write
         # @api public

@@ -150,19 +150,6 @@ module Miele
         # @api public
         def color_flow_intervals = COLOR_FLOW_INTERVALS
 
-        # Con@ctivity Plus: the hood follows one more hob. {Readings#connectivity_plus} gives whether the app offers
-        # it.
-        #
-        # @param hob [String] its fabrication number
-        # @return [void]
-        # @api public
-        def connect_hob(hob) = update_connectivity_plus { (it + [hob]).uniq }
-
-        # @param hob [String] its fabrication number
-        # @return [void]
-        # @api public
-        def disconnect_hob(hob) = update_connectivity_plus { it - [hob] }
-
         # A Dop1 or Opcode hood wakes when its State is written back, the light as it is, while +State+ shows it
         # off; only an answer carrying "Success" means woken (DefaultWakeUpAction). A DOP2 hood takes
         # +DeviceAction+ 2 once +State+ shows it asleep, then +State+ is read until it shows it awake (WakeUpAction).
@@ -206,18 +193,6 @@ module Miele
         # @return [Boolean] synchronized (+SyncState+ absent or 2) and out of standby (+StandbyState+ 1), as
         #   WakeUpAction.IsApplianceAwoken reads it
         def awake?(state) = [nil, 2].include?(state['SyncState']) && state['StandbyState'] == 1
-
-        # The app changes one hob in the list +services+ shows and derives +activated+ from what is left
-        # (UpdateConactivityPlusSettingsHelper).
-        #
-        # @yieldparam sources [Array<String>] the hobs followed
-        # @yieldreturn [Array<String>] those to follow
-        # @return [void]
-        def update_connectivity_plus
-          sources = yield Array(connectivity_plus&.sources)
-          body = JSON.generate('activated' => sources.any?, 'sourceDeviceIds' => sources)
-          send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
-        end
 
         # @param pf_id [Integer] its Dop1 setting
         # @param request [Integer] its DOP2 user request

@@ -78,6 +78,35 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Breaking:** every request, to an appliance or to the Miele cloud, is sent once, as the app sends
   it: a GET, PUT or DELETE whose connection drops before the answer, or whose answer outlasts
   `read_timeout`, raises `ConnectionError` instead of going out a second time.
+- **Breaking:** what the app's actions send again on purpose goes out again. After a 5xx or a lost
+  connection, never a 4xx nor a request that outlasts `read_timeout`, a laundry appliance's DOP2
+  actions send each read and write again 1.5^n s later, 15 s from the seventh time, with no limit,
+  as the app's BaseApiAction`1 does: an action the appliance keeps answering 500 no longer raises.
+  `name=` does the same within 15 s; an Opcode `set_target` posts again 5 s apart, three attempts
+  within 15 s; `supervise`, `connect_hob` and `disconnect_hob` write again 2 s apart, four attempts
+  at most, the last two reading `services` again once its last answer is 3 s old, as the app's
+  poll keeps it until then. A dishwasher's `power_on` (its wake,
+  then 2/1586) and `power_off`, and a DOP2 coffee maker's `power_off`, send each step up to three
+  times back to back, whatever fails, a 400 included. A DOP2 coffee maker's `power_on` starts again
+  5 s after any failure, three attempts in all, and wakes one that answers 500 every 5 s within
+  45 s, a wake's own time counting in its 5 s; an oven's `power_on` wakes it every 3 s until 45 s are
+  up instead of giving up after three attempts. These bounds, and those of an oven's waits, run on
+  the wall clock, request times included, as the app's Timeouts do: an appliance takes `clock:`, a
+  monotonic clock by default.
+- **Breaking:** a dishwasher's `power_off`, and a DOP2 coffee maker's `power_off` and `power_on`,
+  read `State` first, as the app's ExecuteSequentiallyUntilTrue does, and send nothing while it shows
+  the appliance off already (Status 1) or, for the coffee maker's `power_on`, on already (a Status
+  other than 1, 8 and 255, or none).
+- A laundry action's DOP2 requests wait 8 s at most for their connection and for their answer, and
+  the 2/1574 read of `set_parameters` and `start_delayed` 10 s, as the app's tokens bound them; a
+  request that runs out of time is not sent again. `Connection.request`, `Cloud::Channel#request`,
+  `Cloud::Http.request`, `dop2` and `write_dop2` take that `timeout:`, which `open_timeout` and
+  `read_timeout` still cap and which bounds the write too. `set_parameters` and `start_delayed` read
+  2/1577 before 2/1574, as the app's SelectParametersAsync does.
+- **Breaking:** `supervise`, `connect_hob` and `disconnect_hob` read back what they wrote, as the
+  app polls it, every 3 s within its 15 s, write retries included: `SuperVision/{fab}` right after
+  the write, `services` 3 s after the answer the write was made from, unless that answer already
+  shows it. They raise `ActionFailedError` when it does not show in time.
 - **Breaking:** a 401 from the cloud is handled as the app handles it. A request under `/V2` answered
   401 raises `ResponseError` (status 401) instead of going out again with a renewed token, which is
   kept, and the websocket no longer renews a token its handshake is refused with: it connects again

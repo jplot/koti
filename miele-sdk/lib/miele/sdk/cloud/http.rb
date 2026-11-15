@@ -29,32 +29,33 @@ module Miele
         # @param url [String] absolute address, query included
         # @param headers [Hash{String=>String}]
         # @param body [String, nil]
+        # @param timeout [Numeric, nil] as {Connection.request} takes it
         # @return [Response]
         # @raise [ConnectionError] if the cloud cannot be reached
         # @api public
-        def request(method, url, headers: {}, body: nil)
+        def request(method, url, headers: {}, body: nil, timeout: nil)
           uri = URI(url) #: URI::HTTP
           request = REQUESTS.fetch(method).new(uri.request_uri)
           { 'User-Agent' => "miele-sdk/#{VERSION}", **headers }.each { |name, value| request[name] = value }
           # AndroidMessageHandler.SetupRequestBody sends a POST, PUT or DELETE without content as Content-Length: 0;
           # Net::HTTP does it for a POST or a PUT only.
           request.body = body || '' unless method == :get
-          answer = exchange(uri, request)
+          answer = exchange(uri, request, timeout)
           Response.new(status: answer.code.to_i, body: answer.body.to_s)
         end
 
         # @param uri [URI::Generic]
         # @param request [Net::HTTPRequest]
+        # @param timeout [Numeric, nil]
         # @return [Net::HTTPResponse]
         # @raise [ConnectionError]
         # @api private
-        def exchange(uri, request)
+        def exchange(uri, request, timeout = nil)
           config = Sdk.config
           host = uri.host.to_s
           # The app sends a cloud request once, whatever fails (MieleHttpClientHandler, no retry); Net::HTTP would
           # send a GET, PUT or DELETE again after a dropped connection or a read timeout.
-          options = { use_ssl: uri.scheme == 'https', open_timeout: config.open_timeout,
-                      read_timeout: config.read_timeout, max_retries: 0 }
+          options = { use_ssl: uri.scheme == 'https', **config.timeouts(timeout), max_retries: 0 }
           Net::HTTP.start(host, uri.port, **options) { |http| http.request(request) }
         rescue *NETWORK_ERRORS => e
           raise ConnectionError, "#{host}: #{e.message}"

@@ -14,4 +14,10 @@ RSpec.describe Miele::Sdk::Configuration::Settings do
     Miele::Sdk.configure { |config| config.group_id = '0123456789ABCDEF' }
     expect(Miele::Sdk.config.group_id).to eq('0123456789ABCDEF')
   end
+
+  it 'caps the connection, the answer and the write of a request by the time the app gives it', :aggregate_failures do
+    Miele::Sdk.config.open_timeout = 30
+    expect(Miele::Sdk.config.timeouts(8)).to eq(open_timeout: 8, read_timeout: 8, write_timeout: 8)
+    expect(Miele::Sdk.config.timeouts).to eq(open_timeout: 30, read_timeout: 10)
+  end
 end

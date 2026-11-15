@@ -69,6 +69,22 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     expect(seen("/V2/Devices/#{fab}/State").map(&:verb)).to eq(%w[PUT])
   end
 
+  context 'when the cloud answers late' do
+    let(:cloud) do
+      FakeCloud.start(threaded: true) do |request|
+        next unless request.path.start_with?('/V2/')
+
+        sleep 0.4
+        FakeCloud.json({})
+      end
+    end
+
+    it 'gives up after the timeout a request is given, below the settings' do
+      expect { channel.request(:get, "/Devices/#{fab}/DOP2/2/1583", timeout: 0.1) }
+        .to raise_error(Miele::Sdk::ConnectionError, /Net::ReadTimeout/)
+    end
+  end
+
   it "sends a DELETE without content as the app's AndroidMessageHandler does" do
     channel.request(:delete, "/Devices/#{fab}/services/AutoStart/1")
     expect(seen("/V2/Devices/#{fab}/services/AutoStart/1").first.headers.values_at('content-length', 'content-type'))

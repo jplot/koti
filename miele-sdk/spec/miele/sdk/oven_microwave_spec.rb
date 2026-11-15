@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::Oven do
-  subject(:oven) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { naps << seconds }) }
+  subject(:oven) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { naps << seconds }, clock:) }
 
   let(:fab) { '000123456789' }
   let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 13, 'ProtocolVersion' => 4) }
@@ -27,6 +27,10 @@ RSpec.describe Miele::Sdk::Oven do
   before { connect_to(fake) }
 
   after { fake.stop }
+
+  def clock = -> { naps.sum + (fake.requests.size * round_trip) }
+
+  def round_trip = 0
 
   def answer(bodies)
     body = bodies.size > 1 ? bodies.shift : bodies.first

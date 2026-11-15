@@ -13,9 +13,10 @@ module Miele
           def self.new: (status: Integer, body: String) -> Response
         end
 
-        def self?.request: (Symbol method, String url, ?headers: Hash[String, String], ?body: String?) -> Response
+        def self?.request: (Symbol method, String url, ?headers: Hash[String, String], ?body: String?,
+                            ?timeout: (Integer | Float)?) -> Response
 
-        def self?.exchange: (URI::HTTP uri, Net::HTTPRequest request) -> Net::HTTPResponse
+        def self?.exchange: (URI::HTTP uri, Net::HTTPRequest request, ?(Integer | Float)? timeout) -> Net::HTTPResponse
       end
     end
   end

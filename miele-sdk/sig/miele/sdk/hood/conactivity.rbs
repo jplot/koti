@@ -1,0 +1,23 @@
+module Miele
+  module Sdk
+    class Hood < Appliance
+      module Conactivity : Appliance
+        def connect_hob: (String hob) -> void
+
+        def disconnect_hob: (String hob) -> void
+
+        private
+
+        def update_connectivity_plus: (String hob, bool connect) -> void
+
+        def plus_read: ([Array[String]?, Float]? last) -> [Array[String]?, Float]
+
+        def plus_shown: ([Array[String]?, Float] read, Float since, String hob, bool connect) -> void
+
+        def followed: (Array[String] sources, String hob, bool connect) -> Array[String]
+
+        def connectivity_plus: () -> ConnectivityPlus?
+      end
+    end
+  end
+end

@@ -11,6 +11,7 @@ module Miele
     #   oven.device_type # => :oven_microwave
     class Appliance
       include ObjectAccess
+      include Resends
 
       # @return [String] address or +.local+ name of the appliance; through a cloud, the name its Dop1 requests give
       attr_reader :host
@@ -28,17 +29,19 @@ module Miele
       # @param host [String] address or +.local+ name of the appliance; given +cloud:+, the name of its module as
       #   the cloud lists it for its Dop1 requests to reach it
       # @param sleeper [#call] waits the given number of seconds
+      # @param clock [#call] seconds, monotonic
       # @param fab [String, nil] its fabrication number, when already known
       # @param ident [Schema::DeviceIdentification, nil] its identity, which gives its type and protocol without a read
       # @param cloud [Cloud::Channel, nil] the account's cloud to reach it through, as the app does once it is paired;
       #   without one, every request goes to the appliance itself
       # @raise [ArgumentError] with a cloud but no fab, which the cloud names appliances by
-      def initialize(host, sleeper: method(:sleep), fab: nil, ident: nil, cloud: nil)
+      def initialize(host, sleeper: method(:sleep), clock: MONOTONIC, fab: nil, ident: nil, cloud: nil) # rubocop:disable Metrics/ParameterLists -- the appliance, how it is reached, and the two time sources a spec replaces
         raise ArgumentError, 'an appliance reached through the cloud needs its fab' if cloud && !fab
 
         @host = host
         @identity = ident
         @sleeper = sleeper
+        @clock = clock
         @fab = fab
         @cloud = cloud
         @local = Connection.local(host)
@@ -75,14 +78,21 @@ module Miele
       # @api public
       def supervision = Schema::SuperVision.from(device('SuperVision'))
 
-      # Con@ctivity One: the app writes +Show+ alone and leaves +Signal+ out (UpdateConactivityOneSettingsHelper).
+      # Con@ctivity One: the app writes +Show+ alone and leaves +Signal+ out (UpdateConactivityOneSettingsHelper),
+      # again 2 s after a 5xx or a lost connection, three more times at most, then reads it back until +Show+ is as
+      # written (WaitForConnectionToBeSet), all within the 15 s of UpdateConactivitySettingsAction.
       #
       # @param device [String] the fabrication number of the appliance this one shows
       # @param show [Boolean]
       # @return [void]
+      # @raise [ResponseError, ConnectionError] a 4xx or a timeout at once, another refusal at the fourth attempt
+      # @raise [ActionFailedError] when +Show+ is not as written within those 15 s
       # @api public
       def supervise(device, show:)
-        send_request(:put, "/Devices/#{fab}/SuperVision/#{device}", body: JSON.generate('Show' => show))
+        path = "/Devices/#{fab}/SuperVision/#{device}"
+        since = @clock.call
+        resent(retries: 3, delay: 2, since:) { send_request(:put, path, body: JSON.generate('Show' => show)) }
+        poll_until_shown(since:, within: 15) { get(path)['Show'] == show }
       end
 
       # @return [Hash{String=>Object}] the communication module's +/Info+
@@ -117,10 +127,14 @@ module Miele
       # @api public
       def state = State.new(device('State'), device_type, protocol_version:, tech_type:)
 
+      # ChangeApplianceNameAction sends it again after a 5xx or a lost connection, within the 15 s of its
+      # ActionExecutionTimeout.
+      #
       # @param name [String] the name the Miele app shows
+      # @raise [ResponseError, ConnectionError] a 4xx or a timeout at once, another refusal once the 15 s are up
       # @api public
       def name=(name)
-        send_request(:put, "/Devices/#{fab}/Ident", body: JSON.generate(DeviceName: name))
+        resent(within: 15) { send_request(:put, "/Devices/#{fab}/Ident", body: JSON.generate(DeviceName: name)) }
       end
 
       # Wakes the appliance from standby with +DeviceAction+ 2, sent once as the app's laundry module sends it
@@ -138,24 +152,26 @@ module Miele
       # @param attribute [Integer]
       # @param idx1 [Integer, nil]
       # @param idx2 [Integer, nil]
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [Dop2::Leaf]
       # @raise [Dop2::DecodeError]
       # @api public
-      def dop2(unit, attribute, idx1: nil, idx2: nil)
+      def dop2(unit, attribute, idx1: nil, idx2: nil, timeout: nil)
         path = dop2_path(unit, attribute)
         path += "?idx1=#{idx1.to_i}&idx2=#{idx2.to_i}" unless idx1.nil? && idx2.nil?
-        Dop2.decode(send_request(:get, path).body)
+        Dop2.decode(send_request(:get, path, timeout:).body)
       end
 
       # @param leaf [Dop2::Leaf]
       # @param with_index [Boolean] whether its indexes also go in the path, as the app's hood and coffee
       #   modules write; its oven, dishwasher and laundry modules leave them in the body only
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [void]
       # @api public
-      def write_dop2(leaf, with_index: false)
+      def write_dop2(leaf, with_index: false, timeout: nil)
         path = dop2_path(leaf.unit, leaf.attribute)
         path += "?idx1=#{leaf.idx1}&idx2=#{leaf.idx2}" if with_index
-        send_request(:put, path, body: Dop2.encode(leaf), kind: :dop2)
+        send_request(:put, path, body: Dop2.encode(leaf), kind: :dop2, timeout:)
       end
 
       # Sends a Dop1 request, which hoods in +ProtocolVersion+ 2 answer instead of DOP2.
@@ -194,12 +210,13 @@ module Miele
       # @param path [String]
       # @param body [String, nil]
       # @param kind [Symbol] +:json+ or +:dop2+
+      # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [Connection::Response]
-      def send_request(method, path, body: nil, kind: :json)
+      def send_request(method, path, body: nil, kind: :json, timeout: nil)
         cloud = @cloud if path.start_with?('/Devices/')
-        return @local.request(method, path, body:, kind:) unless cloud
+        return @local.request(method, path, body:, kind:, timeout:) unless cloud
 
-        cloud.request(method, path, body:, kind:, host: (host if path.match?(%r{\A/Devices/\d+/DOP/})))
+        cloud.request(method, path, body:, kind:, host: (host if path.match?(%r{\A/Devices/\d+/DOP/})), timeout:)
       end
 
       # @return [Schema::DeviceIdentification]
@@ -225,9 +242,9 @@ module Miele
       # @param id [Integer]
       # @return [void]
       def dop2_user_request(id)
-        leaf = dop2(2, 1583, idx1: 0, idx2: 0)
+        leaf = action_request { |timeout| dop2(2, 1583, idx1: 0, idx2: 0, timeout:) }
         request = Dop2::Field.new(type: leaf.fields[1]&.type || :e16, value: id)
-        write_dop2(leaf.with(fields: leaf.fields.merge(1 => request)))
+        action_request { |timeout| write_dop2(leaf.with(fields: leaf.fields.merge(1 => request)), timeout:) }
       end
 
       # @param at [Time] a time of day

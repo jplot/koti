@@ -97,6 +97,11 @@ RSpec.describe Miele::Sdk::Connection do
         .to raise_error(Miele::Sdk::ConnectionError)
       expect(appliance.requests.map(&:verb)).to eq(%w[PUT])
     end
+
+    it 'gives up after the timeout the request is given, below the settings' do
+      expect { described_class.request('127.0.0.1', :get, '/Devices/', timeout: 0.1) }
+        .to raise_error(Miele::Sdk::ConnectionError, /Net::ReadTimeout/)
+    end
   end
 
   context 'when the environment names a proxy' do

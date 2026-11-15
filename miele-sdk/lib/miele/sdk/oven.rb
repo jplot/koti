@@ -17,23 +17,27 @@ module Miele
 
       NOTIFICATION_IDS = { info: Objects::Oven::GlobalEnumNtfctnInfoId, message: Objects::Oven::GlobalEnumNtfctnMessageId,
                            query: Objects::Oven::GlobalEnumNtfctnQueryId }.freeze
-      private_constant :NOTIFICATION_IDS
+      # SwitchOnAction's ActionExecutionTimeout (SwitchOnLoadingConfiguration), in seconds.
+      SWITCH_ON_TIMEOUT = 45
+      private_constant :NOTIFICATION_IDS, :SWITCH_ON_TIMEOUT
 
       # Switches the appliance on as the app's oven module does, waking it first when it sleeps. The app's
       # other families switch on in their own way.
       #
       # @return [void]
       # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1586 to write
-      # @raise [ResponseError] if the appliance still refuses after three attempts, or refuses DeviceAction 2
+      # @raise [ResponseError] if the appliance still answers 500 after 45 s, refuses otherwise, or refuses
+      #   DeviceAction 2
       # @api public
       def power_on
         require_dop2!
-        3.times do |attempt|
+        since = @clock.call
+        loop do
           return write_dop2(power_leaf(4))
         rescue ResponseError => e
-          raise unless e.status == 500 && attempt < 2
+          raise unless e.status == 500
 
-          rouse
+          rouse(since, e)
         end
       end
 
@@ -189,12 +193,16 @@ module Miele
       end
 
       # A sleeping appliance answers 500 to the state write; the app then sends DeviceAction 2, waits 3 s and
-      # tries again, with no limit: three attempts here. A refused DeviceAction 2 ends it (SwitchOnHelper).
+      # tries again, with no limit but the switch-on's 45 s. A refused DeviceAction 2 ends it (SwitchOnHelper).
       #
+      # @param since [Numeric] when the switch-on began, on the appliance's monotonic clock
+      # @param error [ResponseError] the 500, raised once the 45 s are up
       # @return [void]
       # @raise [ResponseError] when the appliance refuses DeviceAction 2
-      def rouse
+      def rouse(since, error)
         wake
+        raise error if @clock.call - since + 3 >= SWITCH_ON_TIMEOUT
+
         @sleeper.call(3)
       end
     end

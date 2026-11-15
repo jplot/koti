@@ -26,7 +26,8 @@ module Miele
 
       def self?.local: (String host) -> Local
 
-      def self?.request: (String host, Symbol method, String path, ?body: String?) -> Response
+      def self?.request: (String host, Symbol method, String path, ?body: String?, ?timeout: (Integer | Float)?)
+                       -> Response
 
       def self?.credentials: () -> [String, String]
 
@@ -35,7 +36,7 @@ module Miele
       def self?.encrypt: (Net::HTTPRequest request, String content_type, String key, String signature,
                           String plaintext) -> Net::HTTPRequest
 
-      def self?.exchange: (String host, Net::HTTPRequest request) -> Net::HTTPResponse
+      def self?.exchange: (String host, Net::HTTPRequest request, ?(Integer | Float)? timeout) -> Net::HTTPResponse
 
       def self?.answer: (Net::HTTPResponse response, Symbol method, String key) -> Response
 

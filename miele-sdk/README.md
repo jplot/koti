@@ -42,7 +42,7 @@ end
 | `group_id` | — | household GroupID |
 | `group_key` | — | household GroupKey, which signs and encrypts every exchange |
 | `port` | `80` | HTTP port of the appliances |
-| `open_timeout` / `read_timeout` | `5` / `10` s | requests to the appliances |
+| `open_timeout` / `read_timeout` | `5` / `10` s | requests to the appliances, and less where the app gives a request less |
 | `listener_port` | `18082` | port the event listener binds |
 | `listener_fab` | `000999` and six digits from the host name | identity of this host as a household peer |
 | `advertise_address` | the local address that routes to the appliances | address announced for pushed events |
@@ -108,7 +108,8 @@ by device type and protocol version as the Miele app's family modules claim them
 
 Any other appliance is a plain `Miele::Sdk::Appliance`. Each class reads and writes what
 `Appliance` does; ovens and hoods add what their app modules send, and the other families will get
-theirs. Every appliance takes a new name, written to `Ident` as the app writes it:
+theirs. Every appliance takes a new name, written to `Ident` as the app writes it, and again
+1.5^n seconds after a 5xx or a lost connection while the app's 15 seconds leave room:
 
 ```ruby
 oven.name = 'Cuisine'
@@ -195,10 +196,23 @@ A write the appliance refuses raises, 400 included (`Miele::Sdk::ResponseError`,
 laundry module does; hoods and dishwashers read `State` first, as theirs do (see [Hoods](#hoods) and
 [Dishwashers](#dishwashers)).
 
+A request goes out once, as the app sends it, but where one of its actions sends it again on
+purpose: a laundry action, a rename, an Opcode cooling target, Con@ctivity, and the switch-on or
+switch-off of an oven, a dishwasher or a coffee maker, each as its section tells. A switch step of a
+dishwasher or a coffee maker goes out again whatever fails; the others never after a 4xx, nor after
+a request that outlasts the time the app gives it: 8 seconds for each attempt of a laundry action,
+`open_timeout` and `read_timeout` otherwise. The app's token bounds the whole request, where the SDK
+bounds its connection, its write and its answer each. The app's timeout around each action runs on
+the wall clock, request times included, and so do the SDK's waits, on the clock an appliance takes
+(`clock:`, monotonic by default). Within that timeout the app then waits for the change to show:
+for a switch step and a rename, in the `State` or `Ident` its websocket pushes, for which the SDK
+sends nothing (the events stream gives them, see [Events](#events)); for Con@ctivity, by polling,
+which the SDK does too.
+
 `power_on` writes 4 to DOP2 leaf 2/1586, as the Miele app's oven module does; its other families
 switch on in their own way, which will come with them. An appliance asleep answers 500:
-like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, giving up
-after three attempts where the app sets no limit; a `DeviceAction` 2 that fails ends it, as in the
+like the app, the SDK then sends `DeviceAction` 2, waits 3 seconds and writes again, until the
+45 seconds the app gives the switch-on are up; a `DeviceAction` 2 that fails ends it, as in the
 app. `power_off` writes 1 to the same leaf and takes a
 500 as done, as the app does. Both belong to `Miele::Sdk::Oven` and raise
 `Miele::Sdk::ActionUnavailableError` on a Dop1 oven, whose protocol has no such leaf. They send in
@@ -331,8 +345,14 @@ reads a 404 through the cloud, and a 500 on a DOP2 hood, as none, and an interva
 know as 10 seconds; `configure_color_flow` sends any interval to any hood, where the app sets one
 of its three on a hood whose `color_flow` is not nil, and a 404 raises `NotFoundError`.
 `supervise` writes `SuperVision/{fab}` of the appliance that shows another one, with `Show` alone:
-the app leaves `Signal` out. ColorFlow and Con@ctivity Plus have been read from a real hood through
-the cloud.
+the app leaves `Signal` out. As the app's Con@ctivity helpers, `supervise`, `connect_hob` and
+`disconnect_hob` write again 2 seconds after a 5xx or a lost connection, four attempts at most, the
+last two reading `services` again once their last answer is 3 seconds old, as the app's poll keeps
+it until then. Then, as the app polls them, `supervise` reads `SuperVision/{fab}` back at once, and
+`connect_hob` and `disconnect_hob` check the answer they wrote from, then read `services` 3 seconds
+after it, every 3 seconds until it shows what was written: past the app's 15 seconds, write
+retries included, they raise `ActionFailedError`, and a read that fails ends them.
+ColorFlow and Con@ctivity Plus have been read from a real hood through the cloud.
 
 ## Hobs
 
@@ -512,14 +532,16 @@ on 8909. Delays are counted on the wall clock, as the app counts them, so on the
 change they follow the clock.
 
 Not traced, so left to the dishwasher: where a Dop1 dishwasher shows info 700, and the units of the
-Dop1 consumption. The app sends the steps of `power_on` and `power_off` again while it watches
-`State` for 15 s; the SDK sends each once. As the app's SwitchOnForDop2Action, `power_on` writes
-2/1586 only while `State` shows Status 1 or 4, which it reads again after waking the dishwasher, and
-writes nothing otherwise. `wake` does what the app's WakeUpForDop2Action does: `DeviceAction` 2
+Dop1 consumption. As the app's ExecuteSequentiallyUntilTrue, `power_on` and `power_off` send each
+step (the wake, then 2/1586 read and written) up to three times back to back, whatever fails; the
+app then watches `State` for 15 s, which the SDK leaves out. As the app's SwitchOnForDop2Action,
+`power_on` writes 2/1586 only while `State` shows Status 1 or 4, which it reads again after waking
+the dishwasher, and writes nothing otherwise; as its SwitchOffForDop2Action, `power_off` sends nothing
+while `State` shows Status 1. `wake` does what the app's WakeUpForDop2Action does: `DeviceAction` 2
 only while `State` shows the dishwasher off (Status 1) or waiting to start out of `StandbyState` 1,
 nothing otherwise. The app has no wake request for a Dop1 dishwasher: `wake` raises
 `ActionUnavailableError` on it. A `DeviceAction` 2 the dishwasher refuses, 400 included, raises from
-`wake` and ends `power_on` before 2/1586.
+`wake` at once, and from `power_on` at the third refusal, before 2/1586.
 
 ## Laundry
 
@@ -586,6 +608,13 @@ TwinDos containers only when given both), and `NotAcceptedError` reports an Ack 
 before now, or local seconds since 1970, both on the wall clock, then request 8; a Dop1 appliance
 takes `StartTime`, its selection written back, then `ProcessAction` 1.
 
+As the app's BaseApiAction`1, a DOP2 action sends each of its reads and writes again 1.5^n seconds
+after a 5xx or a lost connection, 15 seconds from the seventh time, with no limit: an appliance that
+keeps answering 500 keeps the call waiting. Each attempt waits 8 seconds at most. The 2/1574 read of
+`set_parameters` and `start_delayed` goes out once, after 2/1577 is read and within 10 seconds, as
+the app reads it, and so do Dop1 requests and the readers. The app stops waiting for a switch-off
+after 10 seconds while its retries go on; `power_off` returns once they end, the wire being the same.
+
 Left out: requests 12106 (add laundry) and 12116 (TwinDos care), which the app declares and never
 sends; its limit of three anti-crease extensions; its start time kept until start. The SDK sends
 an Opcode appliance no parameters, which the app would send it as DOP2. A tumble dryer of
@@ -644,9 +673,14 @@ can offer what the app's dashboard would:
 | `delete_profile_offered?(id)` | a custom profile, coffee profiles listed in 2/348 |
 | `drink_name_allowed?(id, name)` | a CVA, a drink outside the standard profile, a name not blank |
 
-As the app's SwitchOnHelper, `power_on` writes nothing, and does not wait, once 2/1586 shows
-ApplianceState 4. A DOP2 coffee maker that answers 500 to 2/1586 is woken with `DeviceAction` 2: one
-it refuses, 400 included, raises from `power_on`. An action raises `Miele::Sdk::ActionUnavailableError` only where nothing can be
+As the app's SwitchOnHelper, a DOP2 coffee maker's `power_on` sends nothing while `State` shows it
+on (a Status other than 1, 8 and 255, or none), and writes nothing, nor waits, once 2/1586 shows
+ApplianceState 4. A DOP2 coffee maker that answers 500 to 2/1586 is woken with `DeviceAction` 2 and
+read again 5 seconds later, while the app's 45 seconds last. An attempt that fails, a refused
+`DeviceAction` 2 or a 400 included, starts again 5 seconds later, three attempts in all, as
+SwitchOnHelper`1 does. `power_off` sends nothing while `State` shows Status 1, and otherwise its read
+and write up to three times back to back, whatever fails (SwitchOffAction under
+ExecuteSequentiallyUntilTrue). An action raises `Miele::Sdk::ActionUnavailableError` only where nothing can be
 written: `brew`, `start_barista` and `acknowledge` on a CVA6000, which has no DOP2 leaf for them;
 `light=` on a DOP2 coffee maker, for which the app has no light request (its DOP2 light action sends
 nothing); `power_on` and `power_off` on a coffee maker neither DOP2 nor Dop1; the profile and drink
@@ -734,7 +768,11 @@ Liebherr one's 1 to 7; `presentation_light_intensity_choices` 0 (off) and 1 to 7
 | `presentation_light_offered?` | the presenter light section or the same quick action, with a light state |
 | `ambient_light_offered?` | a BSH wine unit, or a protocol 203 one neither KWTUS nor Rioja, where the zones show, with the light on and its setting listed |
 
-Left out: the app's retries of an Opcode target and its waits after some writes, and typed reads of
+As the app does, `set_target` posts an Opcode target again 5 seconds after a 5xx or a lost
+connection, three attempts within its 15 seconds; `set_mode` goes out once, the app's 5-second
+timeout ending its retry before the first.
+
+Left out: the app's waits after some writes, and typed reads of
 zone alarms, target ranges and the ambient and presentation light state, which `cooling` gives
 raw. Not traced: whether an appliance serves `Cooling`, `Oc85` and the `State`
 members locally, what `10000617000` and the duration of 720 mean, and how a °F appliance reports

@@ -7,6 +7,8 @@ module Miele
       include Parameters
       include DelayedStart
 
+      ATTEMPT_TIMEOUT: Integer
+
       class Reading < Data
         attr_reader load: Integer?
         attr_reader soiling: Integer?
@@ -48,6 +50,8 @@ module Miele
       def dop2?: () -> bool
 
       def dryer?: () -> bool
+
+      def action_request: [T] () { ((Integer | Float)? timeout) -> T } -> T
 
       def program_para: (Objects::Laundry::GlobalPsContext context) -> untyped
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::CoffeeMaker do
-  subject(:coffee) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }) }
+  subject(:coffee) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }, clock:) }
 
   let(:fab) { '000123456789' }
   let(:ident) { identity('CVA 7440', 4) }
@@ -18,7 +18,9 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     FakeAppliance.start do |request|
       case request
       in { path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
-      in { verb: 'GET', path: %r{/DOP2/} } if answers.delete(:asleep) then [500, {}, '']
+      in { verb: 'GET', path: %r{/DOP2/} } if answers[:asleep].to_i.positive?
+        answers[:asleep] -= 1
+        [500, {}, '']
       in { verb: 'GET', path: %r{/DOP2/(\d+)/(\d+)\?idx1=(\d+)&idx2=(\d+)\z} }
         key = Regexp.last_match.captures.map(&:to_i)
         [200, {}, answers.fetch(key) { dop2_leaf(key[0], key[1], {}, idx1: key[2], idx2: key[3]) }]
@@ -26,6 +28,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       in { verb: 'PUT', path: %r{/State\z} } if answers.delete(:refused) then [400, {}, '']
       in { verb: 'PUT', path: %r{/State\z} } then [200, {}, answers['PUT State']]
       in { verb: 'POST' } then [200, {}, answers['DOP']]
+      in { verb: 'PUT', path: %r{/DOP2/} } if answers.fetch(:refusals, []).any? then answers[:refusals].shift
       else [204, {}, '']
       end
     end
@@ -41,6 +44,10 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
   end
 
   def struct(fields) = dop2_field(:struct, fields)
+
+  def clock = -> { waits.sum + (fake.requests.size * round_trip) }
+
+  def round_trip = 0
 
   def ps_context(prog, phase, unit: 1, missing: [], sub: 0)
     attributes = { 1 => dop2_field(:e16, phase), 2 => dop2_field(:e16, sub), 3 => struct({}), 10 => dop2_field(:e8, 0),
@@ -222,7 +229,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     before { served['State'] = { 'Status' => 1, 'RemoteEnable' => [15, 0, 1] } }
 
     it 'wakes a coffee maker that answers 500 to its first DOP2 read, with DeviceAction 2', :aggregate_failures do
-      served[:asleep] = true
+      served[:asleep] = 1
       served[[2, 1586, 0, 0]] = combi(1, 0)
       coffee.power_on
       expect(written.map(&:first)).to eq(%w[State DOP2/2/1586])
@@ -230,11 +237,48 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(waits).to eq([5, 1.5])
     end
 
-    it 'raises a refused DeviceAction 2 without reading 2/1586 again', :aggregate_failures do
-      served.merge!(asleep: true, refused: true)
+    it 'starts the switch-on again 5 s after the 5 s a refused DeviceAction 2 still waits', :aggregate_failures do
+      served.merge!(asleep: 1, refused: true)
+      coffee.power_on
+      expect(written.map(&:first)).to eq(%w[State DOP2/2/1586])
+      expect(fake.requests.count { it.path.include?('/DOP2/2/1586?') }).to eq(2)
+      expect(waits).to eq([5, 5, 1.5])
+    end
+
+    it 'gives up after three attempts, 5 s apart, as SwitchOnHelper under ExecuteSequentiallyUntilTrue',
+       :aggregate_failures do
+      served[:refusals] = [[400, {}, '']] * 3
       expect { coffee.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
-      expect(written.map(&:first)).to eq(%w[State])
-      expect(fake.requests.count { it.path.include?('/DOP2/2/1586') }).to eq(1)
+      expect(written.map(&:first)).to eq(%w[DOP2/2/1586] * 3)
+      expect(waits).to eq([1.5, 5, 1.5, 5, 1.5])
+    end
+
+    it 'wakes it every 5 s while 2/1586 answers 500, until the 45 s of SwitchOnActionTimeout run out',
+       :aggregate_failures do
+      served[:asleep] = 20
+      expect { coffee.power_on }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+      expect(written.map(&:first)).to eq(%w[State] * 9)
+      expect(waits).to eq([5] * 8)
+    end
+
+    context 'when each round trip takes a second' do
+      def round_trip = 1
+
+      it 'waits only the 4 s a 1 s wake leaves of its 5, as Task.WhenAll does' do
+        served[:asleep] = 1
+        coffee.power_on
+        expect(waits).to eq([4, 1.5])
+      end
+    end
+
+    context 'when each round trip takes 5 s' do
+      def round_trip = 5
+
+      it 'raises ActionFailedError without writing when the 45 s end within SwitchOnDelay', :aggregate_failures do
+        served[:asleep] = 4
+        expect { coffee.power_on }.to raise_error(Miele::Sdk::ActionFailedError)
+        expect(written.map(&:first)).to eq(%w[State] * 4)
+      end
     end
 
     it 'switches on with the header 2/1586 answered, as the app writes it back', :aggregate_failures do
@@ -251,10 +295,10 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect([written, waits]).to eq([[], []])
     end
 
-    it 'switches off a coffee maker that is off, which the app does not offer', :aggregate_failures do
+    it 'sends no switch-off while State shows it off, as SwitchOffAction checks State first', :aggregate_failures do
       expect(coffee.power_off_offered?).to be(false)
       coffee.power_off
-      expect(written).to eq([['DOP2/2/1586', combi(1, 0)]])
+      expect(fake.requests.map(&:path).grep(/DOP2/)).to be_empty
     end
   end
 
@@ -269,10 +313,13 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(written.size).to eq(2)
   end
 
-  it 'switches on a coffee maker that is on, which the app switches off then', :aggregate_failures do
+  it "sends no switch-on while State shows it on, or no Status, as SwitchOnHelper`1's IsApplianceOn reads it",
+     :aggregate_failures do
     expect(coffee.power_on_offered?).to be(false)
     coffee.power_on
-    expect(written).to eq([['DOP2/2/1586', combi(4, 0)]])
+    served['State'] = { 'RemoteEnable' => [15, 0, 1] }
+    coffee.power_on
+    expect(fake.requests.map(&:path).grep(/DOP2/)).to be_empty
   end
 
   it 'switches no light on a DOP2 coffee maker, for which the app has no light request', :aggregate_failures do
@@ -291,10 +338,26 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     end
   end
 
+  it 'switches on at Status 8 and 255, which IsApplianceOn takes for off' do
+    [8, 255].each do |status|
+      served['State'] = { 'Status' => status, 'RemoteEnable' => [15, 0, 1] }
+      coffee.power_on
+    end
+    expect(written.map(&:first)).to eq(%w[DOP2/2/1586] * 2)
+  end
+
   it 'switches off with ApplianceState 1, written as read without an index', :aggregate_failures do
     expect(coffee.power_off_offered?).to be(true)
     coffee.power_off
     expect(written).to eq([['DOP2/2/1586', combi(1, 0)]])
+  end
+
+  it 'reads and writes 2/1586 three times back to back, whatever refuses it, then raises', :aggregate_failures do
+    served[:refusals] = [[400, {}, ''], :drop, [500, {}, '']]
+    expect { coffee.power_off }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
+    expect(fake.requests.map { [it.verb, it.path[/DOP2.*/]] }.select(&:last))
+      .to eq([['GET', 'DOP2/2/1586?idx1=0&idx2=0'], ['PUT', 'DOP2/2/1586']] * 3)
+    expect(waits).to be_empty
   end
 
   context 'with a CM7' do
@@ -347,6 +410,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     end
 
     it 'switches it on, which the app does not offer', :aggregate_failures do
+      served['State'] = { 'Status' => 1, 'RemoteEnable' => [15, 0, 1] }
       expect(coffee.power_on_offered?).to be(false)
       coffee.power_on
       expect(written).to eq([['DOP2/2/1586', combi(4, 0)]])

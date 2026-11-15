@@ -2,6 +2,7 @@ module Miele
   module Sdk
     class Appliance
       include ObjectAccess
+      include Resends
 
       interface _Sleeper
         def call: (Integer | Float seconds) -> untyped
@@ -23,11 +24,13 @@ module Miele
 
       @sleeper: _Sleeper
 
+      @clock: ^() -> Float
+
       attr_reader host: String
 
       def self.for: (String host, ?ident: Schema::DeviceIdentification?, **untyped) -> Appliance
 
-      def initialize: (String host, ?sleeper: _Sleeper, ?fab: String?, ?ident: Schema::DeviceIdentification?,
+      def initialize: (String host, ?sleeper: _Sleeper, ?clock: ^() -> Float, ?fab: String?, ?ident: Schema::DeviceIdentification?,
                        ?cloud: Cloud::Channel?) -> void
 
       def fab: () -> String
@@ -66,9 +69,9 @@ module Miele
 
       def wake: () -> void
 
-      def dop2: (Integer unit, Integer attribute, ?idx1: Integer?, ?idx2: Integer?) -> Dop2::Leaf
+      def dop2: (Integer unit, Integer attribute, ?idx1: Integer?, ?idx2: Integer?, ?timeout: (Integer | Float)?) -> Dop2::Leaf
 
-      def write_dop2: (Dop2::Leaf leaf, ?with_index: bool) -> void
+      def write_dop2: (Dop2::Leaf leaf, ?with_index: bool, ?timeout: (Integer | Float)?) -> void
 
       def dop1: (String request) -> String
 
@@ -78,7 +81,8 @@ module Miele
 
       private
 
-      def send_request: (Symbol method, String path, ?body: String?, ?kind: Symbol) -> Connection::Response
+      def send_request: (Symbol method, String path, ?body: String?, ?kind: Symbol, ?timeout: (Integer | Float)?)
+                        -> Connection::Response
 
       def identity: () -> Schema::DeviceIdentification
 

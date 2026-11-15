@@ -15,28 +15,20 @@ module Miele
 
         private
 
-        # @param timeout [Integer] the seconds the app waits
+        # @param timeout [Integer] the seconds the app waits, on the wall clock as its Timeout
+        # @param since [Float] when the wait began, on the appliance's monotonic clock
         # @yieldreturn [Object, nil] what a read shows, nil or false to read again
         # @return [Object, nil] the first value the block gives, nil once the timeout is up
         # @raise [ResponseError] for a read refused with a 4xx
-        def poll(timeout, &) = timed_poll(timeout, &).first
-
-        # @param timeout [Numeric] the seconds the app waits
-        # @yieldreturn [Object, nil] what a read shows, nil or false to read again
-        # @return [Array(Object, Float)] the first value the block gives, nil once the timeout is up, and the seconds
-        #   waited for it
-        # @raise [ResponseError] for a read refused with a 4xx
-        def timed_poll(timeout, &)
-          waited = 0.0
+        def poll(timeout, since: @clock.call, &)
           failures = 0
-          while waited < timeout
+          while @clock.call - since < timeout
             answered, found = polled(&)
-            return [found, waited] if found
+            return found if found
 
             failures = answered ? 0 : failures + 1
-            waited += pause(failures, waited, timeout)
+            break unless paused?(failures, since, timeout)
           end
-          [nil, waited]
         end
 
         # RetryOnRestException ends the app's poll on a 4xx alone.
@@ -52,13 +44,15 @@ module Miele
         end
 
         # @param failures [Integer] the reads refused in a row
-        # @param waited [Float] seconds since the wait began
+        # @param since [Float] when the wait began
         # @param timeout [Numeric]
-        # @return [Integer, Float] the seconds before the next read, slept unless past the timeout
-        def pause(failures, waited, timeout)
+        # @return [Boolean] whether the delay before the next read ends within the timeout, slept then
+        def paused?(failures, since, timeout)
           delay = failures.zero? ? POLLING_DELAY : RETRY_BASE**failures
-          @sleeper.call(delay) if waited + delay < timeout
-          delay
+          return false if @clock.call - since + delay >= timeout
+
+          @sleeper.call(delay)
+          true
         end
       end
     end

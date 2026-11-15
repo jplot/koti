@@ -51,13 +51,15 @@ module Miele
           raise ArgumentError, "#{unknown.join(', ')}: not written on this appliance" unless unknown.empty?
         end
 
+        # SelectParametersAsync reads 2/1577, then 2/1574 once under a 10 s token of its own, then writes 2/1577.
+        #
         # @yieldparam para [Data] the +selection_para+ with the appliance's current values
         # @yieldparam source [Data] its counterpart in 2/1574
         # @yieldreturn [Data] the one to write
         # @return [void]
         def write_dop2_selection
-          context = object(Objects::Laundry::GlobalPsContext, [2, 1574, 0, 1])
           modify(Objects::Laundry::GlobalPsSelect, [2, 1577, 0, 0]) do |select|
+            context = Objects::Laundry::GlobalPsContext.from(dop2(2, 1574, idx1: 0, idx2: 1, timeout: 10).fields)
             select = with_appliance_values(select, context)
             select.with(para_member => yield(select.public_send(para_member), program_para(context)))
           end

@@ -44,10 +44,13 @@ module Miele
         # @param path [String] absolute path, query included
         # @param body [String, nil]
         # @param kind [Symbol] +:json+ or +:dop2+
+        # @param options [Hash{Symbol=>Object}] +timeout:+ as {Connection.request} takes it; +host:+, which only the
+        #   cloud takes, is left out
         # @return [Response]
         # @raise [Error] see {Connection.request}
-        def request(method, path, body: nil, kind: :json, **)
-          Connection.request(host, method, path, body: kind == :dop2 ? body&.ljust(32, ' ') : body)
+        def request(method, path, body: nil, kind: :json, **options)
+          Connection.request(host, method, path, body: kind == :dop2 ? body&.ljust(32, ' ') : body,
+                                                 timeout: options[:timeout])
         end
       end
 
@@ -64,16 +67,18 @@ module Miele
       # @param method [Symbol] +:get+, +:put+, +:post+ or +:delete+
       # @param path [String] absolute path, query included
       # @param body [String, nil] plaintext body, sent encrypted
+      # @param timeout [Numeric, nil] the seconds the app gives this request (its CancellationToken), which the
+      #   connection and the answer each wait at most, as at most the settings' timeouts
       # @return [Response]
       # @raise [ConfigurationError] if the household key is missing or malformed
       # @raise [ConnectionError] if the appliance cannot be reached
       # @raise [SignatureError] if the response is not signed by the household key
       # @raise [AuthenticationError, ResponseError] if the appliance answers with an error status
       # @api public
-      def request(host, method, path, body: nil)
+      def request(host, method, path, body: nil, timeout: nil)
         group_id, key = credentials
         message = sign(REQUESTS.fetch(method).new(path), host, body ? Crypto.pad(body) : '', group_id, key)
-        answer(exchange(host, message), method, key)
+        answer(exchange(host, message, timeout), method, key)
       end
 
       # @return [Array(String, String)] GroupID and GroupKey of the settings, as bytes
@@ -122,12 +127,13 @@ module Miele
 
       # @param host [String]
       # @param request [Net::HTTPRequest]
+      # @param timeout [Numeric, nil]
       # @return [Net::HTTPResponse]
       # @raise [ConnectionError]
       # @api private
-      def exchange(host, request)
+      def exchange(host, request, timeout = nil)
         config = Sdk.config
-        timeouts = { open_timeout: config.open_timeout, read_timeout: config.read_timeout }
+        timeouts = config.timeouts(timeout)
         # nil is the proxy: an http_proxy set for the Internet would otherwise receive every LAN request.
         # max_retries 0 as in {Cloud::Http.exchange}: the app sends these same requests through the cloud.
         Net::HTTP.start(host, config.port, nil, **timeouts, max_retries: 0) { |http| http.request(request) }

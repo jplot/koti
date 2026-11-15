@@ -24,7 +24,7 @@ module Miele
 
         def shown_phase: (Array[Integer] phases) -> Integer?
 
-        def raise_cooking_level: (Integer | Float budget) -> Float
+        def cooking_level_raised?: (Float since) -> bool
 
         def required_cooking_level: (Objects::Oven::GlobalPsContext context) -> [Integer, Integer]?
 
@@ -42,7 +42,7 @@ module Miele
 
         def option_running?: () -> bool
 
-        def timed_poll: (Integer | Float timeout) { () -> untyped } -> [untyped, Float]
+        def poll: (Integer | Float timeout, ?since: Float) { () -> untyped } -> untyped
 
         def phase: (Objects::Oven::GlobalPsAttributesCCA? attributes) -> Integer?
 

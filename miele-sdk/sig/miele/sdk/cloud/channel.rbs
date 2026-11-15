@@ -19,7 +19,8 @@ module Miele
 
         def initialize: (Session session) -> void
 
-        def request: (Symbol method, String path, ?body: String?, ?kind: Symbol, ?host: String?) -> Connection::Response
+        def request: (Symbol method, String path, ?body: String?, ?kind: Symbol, ?host: String?,
+                      ?timeout: (Integer | Float)?) -> Connection::Response
 
         def devices: () -> Array[Device]
 
@@ -27,7 +28,8 @@ module Miele
 
         private
 
-        def exchange: (Token token, Symbol method, String path, String? body, Hash[String, String] headers) -> Connection::Response
+        def exchange: (Token token, Symbol method, String path, String? body, Hash[String, String] headers,
+                       ?timeout: (Integer | Float)?) -> Connection::Response
 
         def listed: (Token token) -> Connection::Response
 

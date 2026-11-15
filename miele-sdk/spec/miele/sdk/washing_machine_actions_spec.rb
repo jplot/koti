@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::WashingMachine do
-  subject(:washer) { described_class.new('127.0.0.1', ident:) }
+  subject(:washer) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { waits << seconds }) }
 
   let(:fab) { '000123456789' }
   let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 1, 'ProtocolVersion' => 4) }
@@ -10,10 +10,14 @@ RSpec.describe Miele::Sdk::WashingMachine do
   let(:fake) do
     served = leaves
     current = state
-    FakeAppliance.start do |request|
+    FakeAppliance.start(threaded: true) do |request|
       case request
       in { verb: 'GET', path: '/Devices/' } then [200, {}, JSON.generate(fab => { 'href' => "#{fab}/" })]
       in { verb: 'GET', path: %r{/State\z} } then [200, {}, JSON.generate(current)]
+      in { path: %r{/DOP2/} } if (refusal = served.fetch(:refusals, []).shift) then refusal
+      in { verb: 'GET', path: %r{/DOP2/} } if served.delete(:slow)
+        sleep 0.4
+        [204, {}, '']
       in { verb: 'GET', path: %r{/DOP2/(.+)\z} } then [200, {}, served.fetch(Regexp.last_match(1))]
       in { verb: 'POST', path: %r{/DOP/\z} } then [200, {}, served.fetch('DOP')]
       else [204, {}, '']
@@ -37,6 +41,8 @@ RSpec.describe Miele::Sdk::WashingMachine do
 
   def user_request(id) = ['PUT', 'DOP2/2/1583', dop2_leaf(2, 1583, { 1 => dop2_field(:e16, id) })]
 
+  def waits = @waits ||= []
+
   def ps_context(mode:)
     para = { 1 => dop2_field(:struct, { 4 => dop2_field(:u64, 0) }) }
     para[2] = dop2_field(:struct, { 3 => dop2_field(:u8, mode) }) if mode
@@ -57,6 +63,41 @@ RSpec.describe Miele::Sdk::WashingMachine do
     it 'starts with request 1 written back on the leaf it read' do
       washer.start
       expect(written).to eq([user_request(1)])
+    end
+
+    it 'sends a read or write again 1.5^n s after a 5xx or a dropped connection, each on its own',
+       :aggregate_failures do
+      leaves[:refusals] = [[500, {}, ''], [503, {}, ''], nil, :drop]
+      washer.start
+      expect(fake.requests.map { [it.verb, it.path[/DOP2.*/]] }.select(&:last))
+        .to eq(([['GET', 'DOP2/2/1583?idx1=0&idx2=0']] * 3) + ([['PUT', 'DOP2/2/1583']] * 2))
+      expect(waits).to eq([1.5, 2.25, 1.5])
+    end
+
+    it 'raises a 4xx at once, as RetryOnRestException sends it no more', :aggregate_failures do
+      leaves[:refusals] = [[400, {}, '']]
+      expect { washer.start }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
+      expect([written, waits]).to eq([[], []])
+    end
+
+    it 'raises a 499 at once too, the last of the 4xx', :aggregate_failures do
+      leaves[:refusals] = [[499, {}, '']]
+      expect { washer.start }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 499')
+      expect([written, waits]).to eq([[], []])
+    end
+
+    it 'waits 1.5^n s up to the sixth time, then 15 s' do
+      leaves[:refusals] = [[500, {}, '']] * 7
+      washer.start
+      expect(waits).to eq([1.5, 2.25, 3.375, 5.0625, 7.59375, 11.390625, 15])
+    end
+
+    it 'raises a read that outlasts read_timeout, as the app never sends a cancelled one again',
+       :aggregate_failures do
+      Miele::Sdk.config.read_timeout = 0.1
+      leaves[:slow] = true
+      expect { washer.start }.to raise_error(Miele::Sdk::ConnectionError)
+      expect(fake.requests.count { it.path.include?('/DOP2/') }).to eq(1)
     end
 
     it 'stops, which the app does not offer', :aggregate_failures do

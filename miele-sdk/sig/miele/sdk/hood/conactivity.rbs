@@ -10,6 +10,8 @@ module Miele
 
         def update_connectivity_plus: (String hob, bool connect) -> void
 
+        def write_connectivity_plus: (String hob, bool connect, Float since) -> void
+
         def plus_read: ([Array[String]?, Float]? last) -> [Array[String]?, Float]
 
         def plus_shown: ([Array[String]?, Float] read, Float since, String hob, bool connect) -> void

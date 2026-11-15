@@ -9,6 +9,32 @@ module Miele
 
       private
 
+      # The app sends these requests with the action's token, which it cancels when the action's Timeout ends.
+      #
+      # @param seconds [Numeric]
+      # @yieldparam since [Float] when the action began, on the appliance's monotonic clock
+      # @return [Object] what the block gives
+      def within(seconds)
+        since = @clock.call
+        @deadline = since + seconds
+        yield since
+      ensure
+        @deadline = nil
+      end
+
+      # @param timeout [Numeric, nil] the seconds the app gives the request itself
+      # @return [Numeric, nil] those, or the time the action has left when less
+      # @raise [ActionFailedError] without sending, when the action has no time left: its token is cancelled
+      def request_timeout(timeout)
+        deadline = @deadline
+        return timeout unless deadline
+
+        left = deadline - @clock.call
+        raise ActionFailedError, "the action ran out of the app's time for it" unless left.positive?
+
+        [timeout, left].compact.min
+      end
+
       # ExecuteSequentiallyUntilTrue sends a switch step through Rx's Retry(3): three attempts back to back,
       # whatever fails, a 400 included.
       #

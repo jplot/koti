@@ -32,8 +32,14 @@ module Miele
         # @param connect [Boolean] whether the hood follows it
         # @return [void]
         # @raise [ActionFailedError]
-        def update_connectivity_plus(hob, connect)
-          since = @clock.call
+        def update_connectivity_plus(hob, connect) = within(15) { |since| write_connectivity_plus(hob, connect, since) }
+
+        # @param hob [String]
+        # @param connect [Boolean]
+        # @param since [Float] when the action began
+        # @return [void]
+        # @raise [ActionFailedError]
+        def write_connectivity_plus(hob, connect, since)
           read = nil #: [Array[String]?, Float]?
           last = resent(retries: 3, delay: 2, since:) do
             current = read = plus_read(read)

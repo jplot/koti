@@ -91,9 +91,10 @@ module Miele
       # @api public
       def supervise(device, show:)
         path = "/Devices/#{fab}/SuperVision/#{device}"
-        since = @clock.call
-        resent(retries: 3, delay: 2, since:) { send_request(:put, path, body: JSON.generate('Show' => show)) }
-        poll_until_shown(since:, within: 15) { get(path)['Show'] == show }
+        within(15) do |since|
+          resent(retries: 3, delay: 2, since:) { send_request(:put, path, body: JSON.generate('Show' => show)) }
+          poll_until_shown(since:, within: 15) { get(path)['Show'] == show }
+        end
       end
 
       # @return [Hash{String=>Object}] the communication module's +/Info+
@@ -135,7 +136,9 @@ module Miele
       # @raise [ResponseError, ConnectionError] a 4xx or a timeout at once, another refusal once the 15 s are up
       # @api public
       def name=(name)
-        resent(within: 15) { send_request(:put, "/Devices/#{fab}/Ident", body: JSON.generate(DeviceName: name)) }
+        within(15) do
+          resent(within: 15) { send_request(:put, "/Devices/#{fab}/Ident", body: JSON.generate(DeviceName: name)) }
+        end
       end
 
       # Wakes the appliance from standby with +DeviceAction+ 2, sent once as the app's laundry module sends it
@@ -205,6 +208,7 @@ module Miele
       # @param timeout [Numeric, nil] as {Connection.request} takes it
       # @return [Connection::Response]
       def send_request(method, path, body: nil, kind: :json, timeout: nil)
+        timeout = request_timeout(timeout)
         cloud = @cloud if path.start_with?('/Devices/')
         return @local.request(method, path, body:, kind:, timeout:) unless cloud
 

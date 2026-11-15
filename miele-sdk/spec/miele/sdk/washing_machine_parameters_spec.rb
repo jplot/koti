@@ -55,15 +55,6 @@ RSpec.describe Miele::Sdk::WashingMachine do
 
   def written = fake.requests.reject { it.verb == 'GET' }.map { [it.path.delete_prefix("/Devices/#{fab}/"), it.body] }
 
-  def read_timeouts
-    [].tap do |timeouts|
-      allow(Net::HTTP).to receive(:start).and_wrap_original do |start, *args, **options, &block|
-        timeouts << options[:read_timeout]
-        start.call(*args, **options, &block)
-      end
-    end
-  end
-
   it 'writes 2/1577 with the current values 2/1574 shows, then the parameters given, as the app does',
      :aggregate_failures do
     expect(washer.set_parameters_offered?).to be(true)

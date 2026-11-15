@@ -46,6 +46,14 @@ RSpec.describe Miele::Sdk::Appliance do
       expect(sent).to eq([%w[PUT Ident]] * 4)
       expect(waits).to eq([1.5, 2.25, 3.375])
     end
+
+    it 'gives each attempt only what the 15 s have left, as the app cancels its token then', :aggregate_failures do
+      Miele::Sdk.config.read_timeout = 30
+      timeouts = read_timeouts
+      answers.concat([[503, {}, '']] * 9)
+      expect { appliance.name = 'Cuisine' }.to raise_error(Miele::Sdk::ResponseError)
+      expect(timeouts).to eq([15, 12.5, 9.25, 4.875])
+    end
   end
 
   it 'raises a 4xx to a rename at once', :aggregate_failures do

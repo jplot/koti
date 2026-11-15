@@ -7,7 +7,13 @@ module Miele
 
       @clock: ^() -> Float
 
+      @deadline: Float?
+
       private
+
+      def within: [T] (Integer | Float seconds) { (Float since) -> T } -> T
+
+      def request_timeout: ((Integer | Float)? timeout) -> (Integer | Float)?
 
       def three_attempts: [T] () { () -> T } -> T
 

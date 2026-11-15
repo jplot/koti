@@ -18,6 +18,15 @@ module SdkHelpers
                                 [FakeAppliance::GROUP_ID].pack('H*'), [group_key].pack('H*'))
     Net::HTTP.start('127.0.0.1', port, read_timeout: 5) { it.request(request) }
   end
+
+  def read_timeouts
+    [].tap do |timeouts|
+      allow(Net::HTTP).to receive(:start).and_wrap_original do |start, *args, **options, &block|
+        timeouts << options[:read_timeout]
+        start.call(*args, **options, &block)
+      end
+    end
+  end
 end
 
 RSpec.configure { |config| config.include SdkHelpers }

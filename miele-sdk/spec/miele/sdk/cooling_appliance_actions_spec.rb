@@ -181,6 +181,13 @@ RSpec.describe Miele::Sdk::CoolingAppliance do
     expect([written.size, waits]).to eq([1, []])
   end
 
+  it 'gives the mode write the 5 s of its Timeout, which cancels its token then' do
+    Miele::Sdk.config.read_timeout = 30
+    timeouts = read_timeouts
+    fridge.set_mode(:eco, true)
+    expect(timeouts.last).to eq(5)
+  end
+
   it 'sets the ice maker, the door alarm delay and the humidifier', :aggregate_failures do
     expect(%i[ice_maker_offered? door_alarm_delay_offered? humidifier_offered?].map { fridge.public_send(it) })
       .to eq([true, true, true])

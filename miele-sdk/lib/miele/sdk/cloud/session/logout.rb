@@ -5,7 +5,7 @@ module Miele
     module Cloud
       class Session
         # The app's session loss (AccessTokenService.InvalidateAccessTokenAsync): it asks the cloud to end the token,
-        # then forgets it, refresh token included.
+        # then forgets it, refresh token included, apart from the request that found it (SafeFireAndForgetAsync).
         module Logout
           # Logs out and forgets the token unless another thread already replaced +refused+: the next request logs
           # in again.
@@ -29,36 +29,25 @@ module Miele
             logout(token)
             @token = nil
             Token.forget
-          end
-
-          # The app only logs a failed logout (McsModule and GigyaModule InvalidateTokenAsync).
-          #
-          # @param token [Token]
-          # @return [void]
-          def logout(token)
-            token.scheme == 'Bearer' ? ciam_logout(token) : mcs_logout(token)
-          rescue ConnectionError
+          rescue Error
             nil
           end
 
+          # The app keeps the token on any MCS failure but a refused logout (McsModule takes only Refit.ApiException).
+          #
+          # @param token [Token]
+          # @return [void]
+          def logout(token) = token.scheme == 'Bearer' ? ciam_logout(token) : mcs_logout(token)
+
           # The app's AuthenticationHandler sends a refused logout once more with the token TokenService.GetTokenAsync
-          # gives: renewed when due, none when that renewal fails.
+          # gives: renewed when due; without one, the logout fails.
           #
           # @param token [Token]
           # @return [void]
           def mcs_logout(token)
             return unless logout_post(token).status == 401
 
-            resent = valid(token)
-            logout_post(resent) if resent
-          end
-
-          # @param token [Token]
-          # @return [Token, nil]
-          def valid(token)
-            token.due?(@clock.call) ? refresh(token) : token
-          rescue Error
-            nil
+            logout_post(token.due?(@clock.call) ? refresh(token) : token)
           end
 
           # @param token [Token]
@@ -73,6 +62,8 @@ module Miele
           def ciam_logout(token)
             url = @organization.ciam_endpoints['logout']
             Http.request(:post, url, headers: { 'Authorization' => "Bearer #{token.value}" }) if url
+          rescue ConnectionError
+            nil
           end
         end
       end

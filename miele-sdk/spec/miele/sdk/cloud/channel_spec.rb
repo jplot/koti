@@ -119,6 +119,12 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
       expect(seen('/V2/Devices').map { it.headers['authorization'] }).to eq(['appToken saved', 'appToken token-1'])
     end
 
+    it 'keeps the token when the MCS logout cannot reach the cloud, as the app does', :aggregate_failures do
+      answers.push([401, {}, ''], :drop)
+      expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect([channel.session.token&.value, File.exist?(file)]).to eq(['saved', true])
+    end
+
     it "sends the MCS logout as JSON, as the app's ContentTypeDelegatingHandler does", :aggregate_failures do
       answers << [401, {}, '']
       expect { channel.devices }.to raise_error(Miele::Sdk::AuthenticationError)
@@ -135,10 +141,16 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
   end
 
   context 'when the cloud refuses the renewal of a token past half its life' do
+    let(:file) { File.join(Dir.mktmpdir, 'token.json') }
+
     before do
       token = Miele::Sdk::Cloud::Token.new(value: 'saved', refresh: 'saved', scheme: 'appToken',
                                            created_at: Time.now - 3600, expires_at: Time.now + 60)
-      Miele::Sdk.configure { it.cloud_token = token.to_json }
+      File.write(file, '{}')
+      Miele::Sdk.configure do |config|
+        config.cloud_token = token.to_json
+        config.token_file = file
+      end
     end
 
     it "resends a refused logout with the token renewed, as the app's TokenService gives it", :aggregate_failures do
@@ -152,6 +164,12 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
       answers.push(*Array.new(5) { [401, {}, ''] })
       expect { channel.request(:get, "/Devices/#{fab}/State") }.to raise_error(Miele::Sdk::AuthenticationError)
       expect([seen('/V2/AppTokenRefresh').size, seen('/V2/Logout').size]).to eq([4, 1])
+    end
+
+    it 'keeps the token when the refused logout finds no token to resend with, as the app does', :aggregate_failures do
+      answers.push(*Array.new(5) { [401, {}, ''] })
+      expect { channel.request(:get, "/Devices/#{fab}/State") }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect([channel.session.token&.value, File.exist?(file)]).to eq(['saved', true])
     end
   end
 

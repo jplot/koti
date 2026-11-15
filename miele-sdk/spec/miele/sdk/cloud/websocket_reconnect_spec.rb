@@ -52,10 +52,11 @@ RSpec.describe Miele::Sdk::Cloud::Websocket do
   context 'when the cloud refuses the token' do
     let(:fake) { FakeWebsocket.start(refuse: 1, &script) }
 
-    it 'renews it and tries again 6 s later with the new one', :aggregate_failures do
+    it 'tries again 6 s later with the current token, renewing nothing, as the app does', :aggregate_failures do
+      allow(session).to receive(:current).and_return(token('one'))
       first_messages(2)
-      expect(session).to have_received(:renew).with(token('one'))
-      expect(fake.connections.map { it.request[:headers]['authorization'] }).to eq(['Bearer one', 'Bearer two'])
+      expect(session).not_to have_received(:renew)
+      expect(fake.connections.map { it.request[:headers]['authorization'] }).to eq(['Bearer one', 'Bearer one'])
       expect(waits).to eq([6])
     end
   end

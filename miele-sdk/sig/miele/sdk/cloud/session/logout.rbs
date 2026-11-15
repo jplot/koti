@@ -17,6 +17,8 @@ module Miele
 
           private
 
+          def lose: (Token token) -> void
+
           def logout: (Token token) -> void
 
           def mcs_logout: (Token token) -> void

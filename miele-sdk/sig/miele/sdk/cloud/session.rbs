@@ -45,7 +45,11 @@ module Miele
 
         def mcs_post: (String url, String body, ?Hash[String, String] headers) -> Hash[String, untyped]
 
-        def post: (String url, String body, String type, ?Hash[String, String] headers) -> Hash[String, untyped]
+        def ciam_post: (String form) -> Hash[String, untyped]
+
+        def invalid_grant?: (Http::Response answer) -> bool
+
+        def post: (String url, String body, String type, ?Hash[String, String] headers) ?{ (Http::Response answer) -> boolish } -> Hash[String, untyped]
 
         def mcs_token: (Hash[String, untyped] answer) -> Token
 

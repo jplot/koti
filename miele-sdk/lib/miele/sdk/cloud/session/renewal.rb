@@ -24,16 +24,24 @@ module Miele
             @token or raise AuthenticationError, 'no token to renew'
           end
 
-          # Like the app: three attempts a second apart, and a new login when the cloud refuses the renewal.
+          # A refused renewal loses the session, as in the app's AccessTokenService.TryGetValidAccessTokenAsync: no
+          # new login before the next request.
           #
           # @param expired [Token]
           # @return [Token]
           def refreshed(expired)
-            three_times { expired.scheme == 'Bearer' ? ciam_refresh(expired) : mcs_refresh(expired) }
+            refresh(expired)
           rescue AuthenticationError
-            raise unless expired.scheme == 'appToken' && Sdk.config.email
+            lose(expired)
+            raise
+          end
 
-            login
+          # Like the app: three attempts a second apart.
+          #
+          # @param expired [Token]
+          # @return [Token]
+          def refresh(expired)
+            three_times { expired.scheme == 'Bearer' ? ciam_refresh(expired) : mcs_refresh(expired) }
           end
 
           # @yieldreturn [Token]
@@ -50,11 +58,20 @@ module Miele
             end
           end
 
+          # The app's AuthenticationHandler sends a refused renewal once more, with the same persisted token
+          # (TokenService.GetPersistantTokenAsync).
+          #
           # @param expired [Token]
           # @return [Token]
           def mcs_refresh(expired)
             url = "#{@organization.rest}/V2/AppTokenRefresh"
-            mcs_token(mcs_post(url, '{}', 'Authorization' => "appToken #{expired.value}"))
+            headers = { 'Authorization' => "appToken #{expired.value}" }
+            answer = begin
+              mcs_post(url, '{}', headers)
+            rescue AuthenticationError
+              mcs_post(url, '{}', headers)
+            end
+            mcs_token(answer)
           end
 
           # @param expired [Token]
@@ -62,7 +79,7 @@ module Miele
           def ciam_refresh(expired)
             form = URI.encode_www_form(refresh_token: expired.refresh, client_id:, grant_type: 'refresh_token',
                                        client_secret: '')
-            ciam_token(post(endpoint('token'), form, 'application/x-www-form-urlencoded'))
+            ciam_token(ciam_post(form))
           end
         end
       end

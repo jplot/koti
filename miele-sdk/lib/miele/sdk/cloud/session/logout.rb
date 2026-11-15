@@ -17,13 +17,19 @@ module Miele
             @mutex.synchronize do
               next unless @token.equal?(refused)
 
-              logout(refused)
-              @token = nil
-              Token.forget
+              lose(refused)
             end
           end
 
           private
+
+          # @param token [Token]
+          # @return [void]
+          def lose(token)
+            logout(token)
+            @token = nil
+            Token.forget
+          end
 
           # The app only logs a failed logout (McsModule and GigyaModule InvalidateTokenAsync).
           #

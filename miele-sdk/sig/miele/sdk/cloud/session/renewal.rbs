@@ -2,11 +2,7 @@ module Miele
   module Sdk
     module Cloud
       class Session
-        interface _Login
-          def login: () -> Token
-        end
-
-        module Renewal : _Login
+        module Renewal
           @mutex: Thread::Mutex
 
           @token: Token?
@@ -23,6 +19,8 @@ module Miele
 
           def refreshed: (Token expired) -> Token
 
+          def refresh: (Token expired) -> Token
+
           def three_times: () { () -> Token } -> Token
 
           def mcs_refresh: (Token expired) -> Token
@@ -31,7 +29,9 @@ module Miele
 
           def mcs_post: (String url, String body, ?Hash[String, String] headers) -> Hash[String, untyped]
 
-          def post: (String url, String body, String type, ?Hash[String, String] headers) -> Hash[String, untyped]
+          def ciam_post: (String form) -> Hash[String, untyped]
+
+          def lose: (Token token) -> void
 
           def mcs_token: (Hash[String, untyped] answer) -> Token
 
@@ -39,7 +39,6 @@ module Miele
 
           def client_id: () -> String
 
-          def endpoint: (String type) -> String
         end
       end
     end

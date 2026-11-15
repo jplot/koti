@@ -83,7 +83,7 @@ module Miele
         # @api public
         def exchange(code)
           form = URI.encode_www_form(grant_type: 'authorization_code', code:, redirect_uri: REDIRECT, client_id:)
-          @token = ciam_token(post(endpoint('token'), form, 'application/x-www-form-urlencoded')).save
+          @token = ciam_token(ciam_post(form)).save
         end
 
         # @return [String] the +Authorization+ header, after a login or a renewal when one is due
@@ -104,17 +104,38 @@ module Miele
           post(url, body, MCS_JSON.fetch('Content-Type'), { **MCS_JSON, 'Accept-Language' => language, **headers })
         end
 
+        # The app's OAuth2Authenticator.RequestAccessTokenAsync takes a 400 invalid_grant for a 401.
+        #
+        # @param form [String]
+        # @return [Hash{String=>Object}]
+        def ciam_post(form) = post(endpoint('token'), form, 'application/x-www-form-urlencoded') { invalid_grant?(it) }
+
+        # @param answer [Http::Response]
+        # @return [Boolean]
+        def invalid_grant?(answer)
+          return false unless answer.status == 400
+
+          body = answer.body
+          fields = body.include?('{') ? JSON.parse(body) : URI.decode_www_form(body).to_h
+          fields.is_a?(Hash) && fields['error'].to_s.casecmp?('invalid_grant')
+        rescue JSON::ParserError, ArgumentError
+          false
+        end
+
         # @param url [String]
         # @param body [String]
         # @param type [String] the +Content-Type+
         # @param headers [Hash{String=>String}]
+        # @yieldparam answer [Http::Response]
+        # @yieldreturn [Boolean] whether the answer refuses the account too
         # @return [Hash{String=>Object}]
         # @raise [AuthenticationError] on 401
         # @raise [ResponseError] on any other error status
         def post(url, body, type, headers = {})
           headers = { 'Content-Type' => type, **headers }
           answer = Http.request(:post, url, headers:, body:)
-          raise AuthenticationError, 'the Miele cloud refused the account' if answer.status == 401
+          refused = answer.status == 401 || (block_given? && yield(answer))
+          raise AuthenticationError, 'the Miele cloud refused the account' if refused
           unless answer.status.between?(200, 299)
             raise ResponseError.new(answer.status, "cloud answered #{answer.status}")
           end

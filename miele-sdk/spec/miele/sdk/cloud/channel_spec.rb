@@ -133,6 +133,27 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     end
   end
 
+  context 'when the cloud refuses the renewal of a token past half its life' do
+    before do
+      token = Miele::Sdk::Cloud::Token.new(value: 'saved', refresh: 'saved', scheme: 'appToken',
+                                           created_at: Time.now - 3600, expires_at: Time.now + 60)
+      Miele::Sdk.configure { it.cloud_token = token.to_json }
+    end
+
+    it "resends a refused logout with the token renewed, as the app's TokenService gives it", :aggregate_failures do
+      renewed = FakeCloud.json(appToken: 'renewed', appTokenValidity: Time.now.to_i + 3600)
+      answers.push([401, {}, ''], [401, {}, ''], [401, {}, ''], renewed)
+      expect { channel.request(:get, "/Devices/#{fab}/State") }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect(seen('/V2/Logout').map { it.headers['authorization'] }).to eq(['appToken saved', 'appToken renewed'])
+    end
+
+    it 'sends no second logout when that renewal is refused too, as the app then has no token', :aggregate_failures do
+      answers.push(*Array.new(5) { [401, {}, ''] })
+      expect { channel.request(:get, "/Devices/#{fab}/State") }.to raise_error(Miele::Sdk::AuthenticationError)
+      expect([seen('/V2/AppTokenRefresh').size, seen('/V2/Logout').size]).to eq([4, 1])
+    end
+  end
+
   context 'when two list reads in flight are refused with the same token' do
     let(:cloud) do
       FakeCloud.start(threaded: true) do |request|

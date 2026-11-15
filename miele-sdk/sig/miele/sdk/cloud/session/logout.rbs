@@ -13,6 +13,8 @@ module Miele
 
           @organization: Locales::Organization
 
+          @clock: ^() -> Time
+
           def invalidate: (Token refused) -> void
 
           private
@@ -23,7 +25,11 @@ module Miele
 
           def mcs_logout: (Token token) -> void
 
+          def valid: (Token token) -> Token?
+
           def logout_post: (Token token) -> Http::Response
+
+          def refresh: (Token expired) -> Token
 
           def ciam_logout: (Token token) -> void
         end

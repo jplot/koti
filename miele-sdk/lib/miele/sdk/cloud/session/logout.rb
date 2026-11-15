@@ -41,12 +41,24 @@ module Miele
             nil
           end
 
-          # The app's MCS clients send a request once more after a 401 (Miele.Libraries.Session AuthenticationHandler).
+          # The app's AuthenticationHandler sends a refused logout once more with the token TokenService.GetTokenAsync
+          # gives: renewed when due, none when that renewal fails.
           #
           # @param token [Token]
           # @return [void]
           def mcs_logout(token)
-            logout_post(token) if logout_post(token).status == 401
+            return unless logout_post(token).status == 401
+
+            resent = valid(token)
+            logout_post(resent) if resent
+          end
+
+          # @param token [Token]
+          # @return [Token, nil]
+          def valid(token)
+            token.due?(@clock.call) ? refresh(token) : token
+          rescue Error
+            nil
           end
 
           # @param token [Token]

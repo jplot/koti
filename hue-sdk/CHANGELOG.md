@@ -9,6 +9,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** `Settings#remote_access` is now `portal_services`, named after the bridge's `portalservices`, which the
+  app writes at onboarding from its extended analytics question; `update(portal_services:)` writes it.
 - After a 429, the next request to the same bridge resource waits as the app's rate limiter does: up to 30 s,
   whatever its method. `RateLimitError#retry_after` gives the seconds a CLIP request's Retry-After named.
 - **Breaking:** every bridge request is sent once, as the app sends it: a GET, PUT or DELETE whose connection

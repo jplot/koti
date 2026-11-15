@@ -13,18 +13,20 @@ module Miele
         private_constant :MICROWAVE_BITS, :MICROWAVE_TIMEOUT
 
         # @param bit [Integer] one bit of the oven's supported microwave powers, such as 0x10 for 600 W
-        # @raise [ActionUnavailableError] see {#set_parameter}, or when the oven shows no microwave power
-        # @raise [ArgumentError] for any other value
+        # @raise [ActionUnavailableError] see {#set_parameter}
+        # @raise [ArgumentError] for a value a byte does not hold
         # @raise [ResponseError] if the oven refuses it, but for a 500 followed by info 14 on 1/131 within 6 s
         # @api public
         def microwave_power=(bit)
-          context = editable_parameters(:microwave_power)
-          supported = context.context_para_ca&.mw_power&.supported_bits.to_i
-          unless MICROWAVE_BITS.include?(bit) && supported.anybits?(bit)
-            raise ArgumentError, "#{bit} is not one of the microwave power bits the oven supports (#{supported})"
-          end
+          write_microwave_power(selected_prog_id, bit)
+        end
 
-          write_microwave_power(selected_program(context), bit)
+        # @return [Array<Integer>] the bits the app's picker offers, those of MwPower's SupportedBits on 1/1574
+        #   among the seven it knows
+        # @api public
+        def microwave_powers
+          supported = program_context.context_para_ca&.mw_power&.supported_bits.to_i
+          MICROWAVE_BITS.select { supported.anybits?(it) }
         end
 
         private

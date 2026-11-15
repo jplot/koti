@@ -56,13 +56,12 @@ RSpec.describe Miele::Sdk::Oven do
   end
 
   shared_examples 'parameters the app hides' do
-    it 'refuses those the app hides with ShouldHideProgramParameters, and writes the others', :aggregate_failures do
-      hidden_parameters.each do |name, value|
-        expect { oven.public_send(:"#{name}=", value) }.to raise_error(Miele::Sdk::ActionUnavailableError, /hides/)
-      end
-      expect { oven.set_options(keep_warm: true) }.to raise_error(Miele::Sdk::ActionUnavailableError, /hides/)
-      oven.browning = 2
-      expect(written.map(&:last)).to eq([parameter(30, :u8, 2)])
+    it 'writes those the app hides with ShouldHideProgramParameters, and tells it hides them', :aggregate_failures do
+      expect(hidden_parameters.keys.map { oven.parameter_shown?(it) }.uniq).to eq([false])
+      expect([oven.option_shown?(:keep_warm), oven.parameter_shown?(:browning)]).to eq([false, true])
+      hidden_parameters.each { |name, value| oven.public_send(:"#{name}=", value) }
+      oven.set_options(keep_warm: true)
+      expect(written.size).to eq(hidden_parameters.size + 1)
     end
   end
 
@@ -105,18 +104,23 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([parameter(15, :u8, 16)])
   end
 
-  it 'refuses a microwave power that is not a single bit', :aggregate_failures do
-    expect { oven.microwave_power = 3 }.to raise_error(ArgumentError)
+  it 'writes a microwave power the picker does not offer, but none that its byte cannot hold', :aggregate_failures do
+    oven.microwave_power = 3
     expect { oven.microwave_power = 600 }.to raise_error(ArgumentError)
-    expect(written).to be_empty
+    expect(written.map(&:last)).to eq([parameter(15, :u8, 3)])
+  end
+
+  it 'gives the microwave powers the picker offers, the supported bits among the seven it knows' do
+    expect(oven.microwave_powers).to eq([0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40])
   end
 
   context 'with an oven supporting the four lowest microwave powers' do
     def microwave_bits = 0x0F
 
-    it 'refuses a power bit the oven does not support', :aggregate_failures do
-      expect { oven.microwave_power = 0x10 }.to raise_error(ArgumentError)
-      expect(written).to be_empty
+    it 'writes a power bit the oven does not support, which the picker does not offer', :aggregate_failures do
+      expect(oven.microwave_powers).to eq([0x01, 0x02, 0x04, 0x08])
+      oven.microwave_power = 0x10
+      expect(written.map(&:last)).to eq([parameter(15, :u8, 16)])
     end
   end
 
@@ -147,22 +151,21 @@ RSpec.describe Miele::Sdk::Oven do
   context 'without remote control' do
     let(:state) { { 'Status' => 3, 'RemoteEnable' => [0, 0, 0] } }
 
-    it 'refuses a parameter without remote control', :aggregate_failures do
-      expect { oven.target_temperature = 180 }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written).to be_empty
-    end
-
-    it 'refuses a microwave power without remote control before looking at its bit' do
-      expect { oven.microwave_power = 3 }.to raise_error(Miele::Sdk::ActionUnavailableError, /remote control/)
+    it 'writes a parameter without remote control, which the app does not let change', :aggregate_failures do
+      expect([oven.parameter_shown?(:target_temperature), oven.parameter_editable?(:target_temperature)])
+        .to eq([true, false])
+      oven.target_temperature = 180
+      expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000)])
     end
   end
 
   context 'with a microwave power the oven does not make readable' do
     def microwave_mask = 1
 
-    it 'refuses it, as the app then shows no microwave section', :aggregate_failures do
-      expect { oven.microwave_power = 0x10 }.to raise_error(Miele::Sdk::ActionUnavailableError, /microwave/)
-      expect(written).to be_empty
+    it 'writes it, while the app shows no microwave section', :aggregate_failures do
+      expect(oven.parameter_shown?(:microwave_power)).to be(false)
+      oven.microwave_power = 0x10
+      expect(written.map(&:last)).to eq([parameter(15, :u8, 16)])
     end
   end
 
@@ -178,33 +181,40 @@ RSpec.describe Miele::Sdk::Oven do
   context 'without mobile start while the oven runs' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 0] } }
 
-    it 'refuses a parameter while the oven runs without mobile start', :aggregate_failures do
-      expect { oven.grill_level = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError, /mobile start/)
-      expect(written).to be_empty
+    it 'writes a parameter while the oven runs without mobile start, which the app does not let change',
+       :aggregate_failures do
+      expect(oven.parameter_editable?(:grill_level)).to be(false)
+      oven.grill_level = 2
+      expect(written.map(&:last)).to eq([parameter(1, :u8, 2)])
     end
   end
 
   context 'with mobile start but no remote control' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [0, 0, 1] } }
 
-    it 'refuses a parameter without remote control, mobile start or not' do
-      expect { oven.grill_level = 2 }.to raise_error(Miele::Sdk::ActionUnavailableError, /remote control/)
+    it 'tells the app lets no parameter change without remote control, mobile start or not' do
+      expect(oven.parameter_editable?(:grill_level)).to be(false)
     end
   end
 
   context 'with no program on the oven' do
     def device_prog_id = 0
 
-    it 'refuses a parameter when the oven shows ProgId 0' do
-      expect { oven.target_temperature = 180 }.to raise_error(Miele::Sdk::ActionUnavailableError, /program/)
+    it 'writes a parameter when the oven shows ProgId 0, which the app neither shows nor lets change',
+       :aggregate_failures do
+      expect([oven.parameter_shown?(:target_temperature), oven.parameter_editable?(:target_temperature)])
+        .to eq([false, false])
+      oven.target_temperature = 180
+      expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000)])
     end
   end
 
   context 'with a Dop1 oven' do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 12, 'ProtocolVersion' => 2) }
 
-    it 'refuses an oven that speaks Dop1' do
+    it 'selects nothing on an oven that speaks Dop1, which has no 2/1577 to write', :aggregate_failures do
       expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionUnavailableError, /Dop1/)
+      expect([oven.select_program_offered?, oven.parameter_shown?(:target_temperature)]).to eq([false, false])
     end
 
     it 'refuses a microwave power on a Dop1 oven before looking at its bit' do
@@ -241,9 +251,8 @@ RSpec.describe Miele::Sdk::Oven do
       oven.target_temperature = 180
       expect(fake.requests).to be_empty
       device = "/V2/Devices/#{fab}/DOP2"
-      expect(cloud.requests.map { [it.verb, it.path] }.last(3))
-        .to eq([['GET', "#{device}/1/1574?idx1=0&idx2=1"], ['GET', "#{device}/1/131?idx1=0&idx2=1"],
-                ['PUT', "#{device}/2/1577"]])
+      expect(cloud.requests.map { [it.verb, it.path] }.last(2))
+        .to eq([['GET', "#{device}/1/1574?idx1=0&idx2=1"], ['PUT', "#{device}/2/1577"]])
     end
   end
 end

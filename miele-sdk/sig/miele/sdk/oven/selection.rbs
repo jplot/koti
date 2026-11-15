@@ -8,6 +8,8 @@ module Miele
 
         def select_program: (Integer | Symbol prog_id) -> void
 
+        def select_program_offered?: () -> bool
+
         def context: () -> Objects::Oven::GlobalDeviceContext
 
         def program_context: () -> Objects::Oven::GlobalPsContext
@@ -15,8 +17,6 @@ module Miele
         private
 
         def write_selected_parameters: (Integer id, Objects::Oven::GlobalPsContext context) -> void
-
-        def require_program_writable!: () -> void
 
         def program_writeable?: (Objects::Oven::GlobalDeviceContext device) -> bool
 
@@ -27,6 +27,8 @@ module Miele
         def poll: (Integer timeout) { () -> untyped } -> untyped
 
         def require_dop2!: () -> void
+
+        def dop2?: () -> bool
 
         def under_remote_control?: (?State state) -> bool?
 

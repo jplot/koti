@@ -124,15 +124,24 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to be_empty
   end
 
-  it 'refuses to start a program whose duration is required but not set', :aggregate_failures do
+  it 'starts a program whose duration is required but not set, which the app does not offer', :aggregate_failures do
     serve([1], parameters: { 12 => value(:u32, 2, 0xFFFF_FFFF) })
-    expect { oven.start }.to raise_error(Miele::Sdk::ActionUnavailableError, /duration/)
-    expect(written).to be_empty
+    expect(oven.start_offered?).to be(false)
+    oven.start
+    expect(written.map(&:last)).to eq([user_request(1)])
   end
 
-  it 'stops a running program with the first close request it offers' do
+  it 'tells the app offers a start once a required duration is set, or for an automatic program', :aggregate_failures do
+    serve([1], parameters: { 12 => value(:u32, 2, 1_800) })
+    expect(oven.start_offered?).to be(true)
+    serve([1], type: 3, parameters: { 12 => value(:u32, 2, 0) })
+    expect(oven.start_offered?).to be(true)
+  end
+
+  it 'stops a running program with the first close request it offers', :aggregate_failures do
     state(5)
     serve([2, 56, 57])
+    expect(oven.stop_offered?).to be(true)
     oven.stop
     expect(written.map(&:last)).to eq([user_request(56)])
   end
@@ -171,37 +180,43 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([user_request(2)])
   end
 
-  it 'refuses a stop the oven does not offer, or during a pyrolysis abort', :aggregate_failures do
+  it 'stops where the oven offers no stop, or during a pyrolysis abort, which the app does not offer',
+     :aggregate_failures do
     state(5)
     serve([1])
-    expect { oven.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(oven.stop_offered?).to be(false)
+    oven.stop
     serve([2, 55], prog_id: 324)
-    expect { oven.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
-    expect(written).to be_empty
+    expect(oven.stop_offered?).to be(false)
+    oven.stop
+    expect(written.map(&:last)).to eq([user_request(2), user_request(55)])
   end
 
-  it 'refuses to stop under local control', :aggregate_failures do
+  it 'stops under local control, which the app does not offer', :aggregate_failures do
     state(5, 7)
     serve([2, 55])
-    expect { oven.stop }.to raise_error(Miele::Sdk::ActionUnavailableError, /remote control/)
-    expect(written).to be_empty
+    expect(oven.stop_offered?).to be(false)
+    oven.stop
+    expect(written.map(&:last)).to eq([user_request(55)])
   end
 
-  it 'sends the end of keeping warm while 1/131 shows message 20' do
+  it 'sends the end of keeping warm while 1/131 shows message 20', :aggregate_failures do
     serve([59])
     resources['DOP2/1/131?idx1=0&idx2=1'] =
       dop2_leaf(1, 131, { 2 => dop2_field(:struct_array, [{ 1 => dop2_field(:e16, 20) }]) }, idx2: 1)
+    expect(oven.stop_keeping_warm_offered?).to be(true)
     oven.stop_keeping_warm
     expect(written.map(&:last)).to eq([user_request(68)])
   end
 
-  it 'refuses the requests the oven does not offer', :aggregate_failures do
+  it 'sends the requests the oven does not offer, while telling the app offers none of them', :aggregate_failures do
     serve([1, 2])
     resources['DOP2/1/131?idx1=0&idx2=1'] = dop2_leaf(1, 131, {}, idx2: 1)
-    %i[continue_cooking steam_burst stop_keeping_warm].each do |request|
-      expect { oven.public_send(request) }.to raise_error(Miele::Sdk::ActionUnavailableError)
-    end
-    expect(written).to be_empty
+    expect(%i[continue_cooking_offered? steam_burst_offered? stop_keeping_warm_offered?].map { oven.public_send(it) })
+      .to eq([false, false, false])
+    oven.steam_burst
+    oven.stop_keeping_warm
+    expect(written.map(&:last)).to eq([user_request(59), user_request(68)])
   end
 
   context 'with a manual steam burst in a running function' do
@@ -210,64 +225,70 @@ RSpec.describe Miele::Sdk::Oven do
       serve_burst
     end
 
-    it 'sends a steam burst on unit 2' do
+    it 'sends a steam burst on unit 2', :aggregate_failures do
+      expect(oven.steam_burst_offered?).to be(true)
       oven.steam_burst
       expect(written).to eq([['DOP2/2/1583', '000f0002062f000000000001000107003b']])
     end
 
-    it 'sends the last steam burst while it is under way, BitField 16 as the app compares it' do
+    it 'sends the last steam burst while it is under way, BitField 16 as the app compares it', :aggregate_failures do
       serve_burst(remaining: 0, bit_field: 16)
+      expect(oven.steam_burst_offered?).to be(true)
       oven.steam_burst
       expect(written.map(&:last)).to eq([user_request(59)])
     end
 
-    it 'refuses a burst the app shows no button for', :aggregate_failures do
+    it 'sends a burst the app shows no button for', :aggregate_failures do
       [{ count: 4 }, { mask: 1 }, { selected: 14 }, { remaining: 0 }, { type: 1 }].each do |change|
         serve_burst(**change)
-        expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+        expect(oven.steam_burst_offered?).to be(false)
+        oven.steam_burst
       end
-      expect(written).to be_empty
+      expect(written.map(&:last)).to eq([user_request(59)] * 5)
     end
 
-    it 'refuses a burst without a steam burst time on 1/1574 or a BitField on 1/1585', :aggregate_failures do
+    it 'tells the app shows no button without a steam burst time on 1/1574 or a BitField on 1/1585',
+       :aggregate_failures do
       serve_burst(times: [8, 9])
-      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      expect(oven.steam_burst_offered?).to be(false)
       serve_burst
       serve_burst_device(burst_attributes.except(19))
-      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
-      expect(written).to be_empty
+      expect(oven.steam_burst_offered?).to be(false)
     end
 
-    it 'refuses a burst to a programmed oven, or without a REST ProgramID', :aggregate_failures do
+    it 'tells the app shows no button to a programmed oven, or without a REST ProgramID', :aggregate_failures do
       state(3)
-      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
+      expect(oven.steam_burst_offered?).to be(false)
       state(5, program_id: 0)
-      expect { oven.steam_burst }.to raise_error(Miele::Sdk::ActionUnavailableError, /steam burst/)
-      expect(written).to be_empty
+      expect(oven.steam_burst_offered?).to be(false)
     end
   end
 
   context 'with a Dop1 oven' do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 12, 'ProtocolVersion' => 2) }
 
-    it 'stops a Dop1 oven through State' do
+    it 'stops a Dop1 oven through State', :aggregate_failures do
       resources['State'] = JSON.generate('Status' => 5, 'ProgramID' => 13, 'ProgramType' => 0)
+      expect(oven.stop_offered?).to be(true)
       oven.stop
       request = fake.requests.last
       expect([request.verb, request.path, JSON.parse(request.body)])
         .to eq(['PUT', "/Devices/#{fab}/State", { 'ProcessAction' => 2 }])
     end
 
-    it 'refuses to stop a Dop1 oven running no program, or a cleaning', :aggregate_failures do
+    it 'stops a Dop1 oven running no program, or a cleaning, which the app does not offer', :aggregate_failures do
       resources['State'] = JSON.generate('Status' => 2, 'ProgramID' => 0, 'ProgramType' => 0)
-      expect { oven.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(oven.stop_offered?).to be(false)
+      oven.stop
       resources['State'] = JSON.generate('Status' => 5, 'ProgramID' => 13, 'ProgramType' => 3)
-      expect { oven.stop }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written).to be_empty
+      expect(oven.stop_offered?).to be(false)
+      oven.stop
+      expect(written.map(&:first)).to eq(%w[State State])
     end
 
-    it 'refuses to start a Dop1 oven' do
+    it 'does not start a Dop1 oven, its protocol having no 2/1583 to write', :aggregate_failures do
       expect { oven.start }.to raise_error(Miele::Sdk::ActionUnavailableError, /Dop1/)
+      expect(oven.start_offered?).to be(false)
     end
   end
 end

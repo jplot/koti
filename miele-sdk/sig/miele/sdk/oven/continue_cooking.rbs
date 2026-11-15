@@ -10,13 +10,13 @@ module Miele
 
         def continue_cooking: () -> void
 
+        def continue_cooking_offered?: () -> bool
+
         def context: () -> Objects::Oven::GlobalDeviceContext
 
         def program_context: () -> Objects::Oven::GlobalPsContext
 
         private
-
-        def require_continue_offered!: () -> void
 
         def continue_cooking?: (Objects::Oven::GlobalDeviceContext device) -> bool
 
@@ -29,6 +29,8 @@ module Miele
         def required_cooking_level: (Objects::Oven::GlobalPsContext context) -> [Integer, Integer]?
 
         def require_dop2!: () -> void
+
+        def dop2?: () -> bool
 
         def under_remote_control?: (?State state) -> bool?
 

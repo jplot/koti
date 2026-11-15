@@ -82,9 +82,10 @@ RSpec.describe Miele::Sdk::Oven do
   context 'with a Dop1 oven' do
     let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 13, 'ProtocolVersion' => 2) }
 
-    it 'neither switches on nor off, as the app has no switch action for it', :aggregate_failures do
+    it 'neither switches on nor off, its protocol having no 2/1586 to write', :aggregate_failures do
       expect { appliance.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
       expect { appliance.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect([appliance.power_on_offered?, appliance.power_off_offered?]).to eq([false, false])
       expect(puts_sent).to be_empty
     end
   end
@@ -92,30 +93,33 @@ RSpec.describe Miele::Sdk::Oven do
   context 'with an H2 oven' do
     def tech_type = 'H2861BP'
 
-    it 'switches off but never on, as the app does', :aggregate_failures do
-      expect { appliance.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'switches on and off, while the app offers the switch-off alone', :aggregate_failures do
+      appliance.power_on
       appliance.power_off
-      expect(power_written).to eq(['000e0002063200000000000100010401'])
+      expect(power_written).to eq(%w[000e0002063200000000000100010404 000e0002063200000000000100010401])
+      expect([appliance.power_on_offered?, appliance.power_off_offered?]).to eq([false, true])
     end
   end
 
   context 'without remote control or mobile start' do
     def remote_enable = [0, 0, 0]
 
-    it 'neither switches on nor off', :aggregate_failures do
-      expect { appliance.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect { appliance.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(puts_sent).to be_empty
+    it 'switches on and off, while the app offers neither', :aggregate_failures do
+      appliance.power_on
+      appliance.power_off
+      expect(power_written).to eq(%w[000e0002063200000000000100010404 000e0002063200000000000100010401])
+      expect([appliance.power_on_offered?, appliance.power_off_offered?]).to eq([false, false])
     end
   end
 
   context 'with local control' do
     def remote_enable = [7, 0, 0]
 
-    it 'switches on but not off', :aggregate_failures do
+    it 'switches on and off, while the app offers the switch-on alone', :aggregate_failures do
       appliance.power_on
-      expect { appliance.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(power_written).to eq(['000e0002063200000000000100010404'])
+      appliance.power_off
+      expect(power_written).to eq(%w[000e0002063200000000000100010404 000e0002063200000000000100010401])
+      expect([appliance.power_on_offered?, appliance.power_off_offered?]).to eq([true, false])
     end
   end
 
@@ -126,24 +130,28 @@ RSpec.describe Miele::Sdk::Oven do
       appliance.power_on
       appliance.power_off
       expect(power_written).to eq(%w[000e0002063200000000000100010404 000e0002063200000000000100010401])
+      expect([appliance.power_on_offered?, appliance.power_off_offered?]).to eq([true, true])
     end
   end
 
   context 'when the oven is not connected' do
     def state_answer = [200, {}, JSON.generate('Status' => 255, 'RemoteEnable' => [15, 0, 0])]
 
-    it 'does not switch off, as the app disables its settings switch', :aggregate_failures do
-      expect { appliance.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError, /not connected/)
-      expect(puts_sent).to be_empty
+    it 'switches off, while the app disables its settings switch', :aggregate_failures do
+      appliance.power_off
+      expect(power_written).to eq(['000e0002063200000000000100010401'])
+      expect(appliance.power_off_offered?).to be(false)
     end
   end
 
   context 'when State answers 500' do
     def state_answer = [500, {}, '']
 
-    it 'raises without switching off, the app swallowing a 500 on the write alone', :aggregate_failures do
-      expect { appliance.power_off }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
-      expect(puts_sent).to be_empty
+    it 'switches off without reading it, and raises the 500 when asked whether the app offers it',
+       :aggregate_failures do
+      appliance.power_off
+      expect(puts_sent).to eq(['DOP2/2/1586'])
+      expect { appliance.power_off_offered? }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 500')
     end
   end
 

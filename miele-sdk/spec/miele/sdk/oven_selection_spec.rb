@@ -63,9 +63,17 @@ RSpec.describe Miele::Sdk::Oven do
                          7 => dop2_field(:struct, { id => dop2_field(type, value) }) }).unpack1('H*')
   end
 
-  it 'selects a program with selection type 0' do
+  def selected = '001300020629000000000002000107000d00030400'
+
+  def expect_selected_unoffered
+    expect(oven.select_program_offered?).to be(false)
     oven.select_program(13)
-    expect(written).to eq(['001300020629000000000002000107000d00030400'])
+  end
+
+  it 'selects a program with selection type 0', :aggregate_failures do
+    expect(oven.select_program_offered?).to be(true)
+    oven.select_program(13)
+    expect(written).to eq([selected])
   end
 
   it 'selects while the oven asks a question the app supports' do
@@ -74,39 +82,41 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to eq(['001300020629000000000002000107000d00030400'])
   end
 
-  it 'refuses while the oven shows a program on 1/1585, as the app does', :aggregate_failures do
+  it 'selects while the oven shows a program on 1/1585, which the app does not offer', :aggregate_failures do
     device(prog_id: 13)
-    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionUnavailableError, /shows a program/)
-    expect(written).to be_empty
+    expect_selected_unoffered
+    expect(written).to eq([selected])
   end
 
-  it 'refuses while 1/1585 shows no ProgId, the app then having no selection to offer' do
+  it 'selects while 1/1585 shows no ProgId, the app then having no selection to offer', :aggregate_failures do
     resources['DOP2/1/1585'] = [dop2_leaf(1, 1585, {})]
-    expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionUnavailableError, /shows a program/)
+    expect_selected_unoffered
+    expect(written).to eq([selected])
   end
 
-  it 'refuses while the oven asks query 16011 or 16013', :aggregate_failures do
+  it 'selects while the oven asks query 16011 or 16013, which the app does not offer', :aggregate_failures do
     [16_011, 16_013].each do |id|
       queries(id)
-      expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionUnavailableError, /question/)
+      expect_selected_unoffered
     end
-    expect(written).to be_empty
+    expect(written).to eq([selected] * 2)
   end
 
-  it 'refuses an oven off, not connected, running or waiting to start', :aggregate_failures do
+  it 'selects on an oven off, not connected, running or waiting to start, which the app does not offer',
+     :aggregate_failures do
     [1, 255, 5, 4].each do |status|
       state(status:)
-      expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionUnavailableError, /off|runs/)
+      expect_selected_unoffered
     end
-    expect(written).to be_empty
+    expect(written).to eq([selected] * 4)
   end
 
-  it 'refuses without remote control, or under local control', :aggregate_failures do
+  it 'selects without remote control, or under local control, which the app does not offer', :aggregate_failures do
     [[0, 0, 1], [7, 0, 0]].each do |remote|
       state(remote:)
-      expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionUnavailableError, /remote control/)
+      expect_selected_unoffered
     end
-    expect(written).to be_empty
+    expect(written).to eq([selected] * 2)
   end
 
   it 'polls 1/1574 every 3 s until it shows the program, then writes the required parameters', :aggregate_failures do

@@ -13,17 +13,32 @@ module Miele
 
         # @param prog_id [Integer, Symbol] a value of +GLOBAL_EnumPrgId+
         # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 oven, or when the app's program selection is disabled
+        # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1577 to write
         # @raise [ActionFailedError] when 1/1574 does not show the program within 15 s, or shows it without one of the
         #   eight parameters; the program stays selected
         # @raise [Error] the first refusal of a required parameter, once every one is sent; the program stays selected
         # @api public
         def select_program(prog_id)
           require_dop2!
-          require_program_writable!
           id = Objects::Oven::GlobalEnumPrgId.to_i(prog_id)
           write_dop2(Messages.ps_select(id, 0))
           write_selected_parameters(id, shown_program_context(id))
+        end
+
+        # DetermineIsProgramWriteable, which enables the app's program selection.
+        #
+        # @return [Boolean] whether the app offers {#select_program}: a DOP2 oven under remote control without local
+        #   control, neither off nor running nor waiting to start, showing ProgId 0 on 1/1585, and asking neither
+        #   query 16011 nor 16013
+        # @api public
+        def select_program_offered?
+          return false unless dop2?
+
+          state = self.state
+          device = context
+          writable = !UNWRITABLE_STATES.include?(oven_state(state, device, offered(device)))
+          under_remote_control?(state) == true && writable && program_writeable?(device) &&
+            !shows?(:query, *UNSUPPORTED_QUERIES)
         end
 
         private
@@ -37,20 +52,6 @@ module Miele
           write_required_parameters(id, context)
         rescue ActionUnavailableError => e
           raise ActionFailedError, e.message
-        end
-
-        # DetermineIsProgramWriteable, which enables the app's program selection.
-        #
-        # @return [void]
-        # @raise [ActionUnavailableError]
-        def require_program_writable!
-          state = self.state
-          device = context
-          require!(under_remote_control?(state), 'the oven selects a program only under remote control')
-          require!(!UNWRITABLE_STATES.include?(oven_state(state, device, offered(device))),
-                   'the oven is off, runs a program or waits to start one')
-          require!(program_writeable?(device), 'the oven already shows a program')
-          require!(!shows?(:query, *UNSUPPORTED_QUERIES), 'the oven asks a question the app cannot answer')
         end
 
         # IsProgramWriteable. Without a ProgId the app's entity fails, and its selection stays disabled.

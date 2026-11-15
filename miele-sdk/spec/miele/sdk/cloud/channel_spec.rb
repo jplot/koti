@@ -8,7 +8,6 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
   let(:cloud) do
     FakeCloud.start do |request|
       case request.path
-      when '/V2/AppTokenRefresh' then FakeCloud.json(appToken: 'renewed', appTokenValidity: Time.now.to_i + 3600)
       when %r{\A/V2/} then answers.shift || FakeCloud.json({})
       end
     end
@@ -52,11 +51,13 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     expect(seen("/V2/Devices/#{fab}/DOP/").first.headers['host']).to eq('Miele-0000000000000000.local')
   end
 
-  it 'renews and retries once on 401', :aggregate_failures do
-    answers.push([401, {}, ''], FakeCloud.json({}))
+  it 'raises a 401 and keeps the token, as the app does', :aggregate_failures do
+    answers << [401, {}, '']
+    expect { channel.request(:put, "/Devices/#{fab}/State", body: '{"DeviceAction":2}') }
+      .to raise_error(Miele::Sdk::ResponseError) { expect(it.status).to eq(401) }
     channel.request(:get, "/Devices/#{fab}/State")
-    expect(seen("/V2/Devices/#{fab}/State").map { it.headers['authorization'] })
-      .to eq(['appToken saved', 'appToken renewed'])
+    expect(seen("/V2/Devices/#{fab}/State").map { [it.verb, it.headers['authorization']] })
+      .to eq([['PUT', 'appToken saved'], ['GET', 'appToken saved']])
   end
 
   it 'sends a request once when the cloud drops the connection, as the app does', :aggregate_failures do
@@ -64,26 +65,6 @@ RSpec.describe Miele::Sdk::Cloud::Channel do
     expect { channel.request(:put, "/Devices/#{fab}/State", body: '{"DeviceAction":2}') }
       .to raise_error(Miele::Sdk::ConnectionError)
     expect(seen("/V2/Devices/#{fab}/State").map(&:verb)).to eq(%w[PUT])
-  end
-
-  context 'when two requests in flight get 401 with the same token' do
-    let(:cloud) do
-      FakeCloud.start(threaded: true) do |request|
-        case request.path
-        when '/V2/AppTokenRefresh' then FakeCloud.json(appToken: 'renewed', appTokenValidity: Time.now.to_i + 3600)
-        when %r{/V2/Devices/(\d+)/State}
-          next FakeCloud.json({}) unless request.headers['authorization'] == 'appToken saved'
-
-          sleep 0.5 if Regexp.last_match(1) == '2'
-          [401, {}, '']
-        end
-      end
-    end
-
-    it 'renews the token once' do
-      %w[1 2].map { |id| Thread.new { channel.request(:get, "/Devices/#{id}/State") } }.each(&:join)
-      expect(seen('/V2/AppTokenRefresh').size).to eq(1)
-    end
   end
 
   it 'raises NotFoundError for a resource the cloud does not serve' do

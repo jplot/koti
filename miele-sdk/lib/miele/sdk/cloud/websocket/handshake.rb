@@ -56,8 +56,6 @@ module Miele
              ''].join("\r\n")
           end
 
-          # A refused token is renewed for the next attempt, as {Channel#request} renews it.
-          #
           # @param socket [IO]
           # @param key [String]
           # @param token [Token] the token sent

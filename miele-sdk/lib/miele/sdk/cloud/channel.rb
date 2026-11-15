@@ -36,14 +36,13 @@ module Miele
         # @param kind [Symbol] +:json+ or +:dop2+, the type of the body
         # @param host [String, nil] the module's mDNS name, which the cloud routes a Dop1 request by
         # @return [Connection::Response]
-        # @raise [NotFoundError, RemoteControlDisabledError, ResponseError] on an error status
+        # @raise [NotFoundError, RemoteControlDisabledError, ResponseError] on an error status, a 401 too: the token
+        #   is kept and the request not sent again, as by the app's appliance client (MieleHttpClientHandler)
         # @raise [ConnectionError] if the cloud cannot be reached
         # @api public
         def request(method, path, body: nil, kind: :json, host: nil)
           headers = { 'Content-Type' => (TYPES.fetch(kind) if body), 'Host' => host&.delete_suffix('.') }.compact
-          used = @session.current
-          answer = exchange(used, method, path, body, headers)
-          answer = exchange(@session.renew(used), method, path, body, headers) if answer.status == 401
+          answer = exchange(@session.current, method, path, body, headers)
           refuse(answer.status, method) unless answer.status.between?(200, 299)
           Connection::Response.new(status: answer.status, body: answer.body)
         end

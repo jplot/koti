@@ -234,10 +234,11 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect(written.last).to eq(['DOP2/2/1586', combi(4, 0, idx2: 1)])
     end
 
-    it 'writes ApplianceState 4 though 2/1586 shows it already' do
+    it "writes nothing, nor waits, once 2/1586 shows it on, as the app's SwitchOnHelper returns",
+       :aggregate_failures do
       served[[2, 1586, 0, 0]] = combi(4, 0)
       coffee.power_on
-      expect(written).to eq([['DOP2/2/1586', combi(4, 0)]])
+      expect([written, waits]).to eq([[], []])
     end
 
     it 'switches off a coffee maker that is off, which the app does not offer', :aggregate_failures do
@@ -264,11 +265,20 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(written).to eq([['DOP2/2/1586', combi(4, 0)]])
   end
 
-  it 'switches the light of a DOP2 coffee maker by its State, which the app switches on a CVA6000 alone',
-     :aggregate_failures do
+  it 'switches no light on a DOP2 coffee maker, for which the app has no light request', :aggregate_failures do
+    expect { coffee.light = true }.to raise_error(Miele::Sdk::ActionUnavailableError)
     expect(coffee.light_offered?).to be(false)
-    coffee.light = true
-    expect(written.map(&:first)).to eq(['State'])
+    expect(written).to be_empty
+  end
+
+  context 'with a coffee maker of neither DOP2 nor Dop1' do
+    let(:ident) { identity('CVA 7440', 1) }
+
+    it 'switches it neither on nor off, its protocol having no 2/1586', :aggregate_failures do
+      expect { coffee.power_on }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect { coffee.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(written).to be_empty
+    end
   end
 
   it 'switches off with ApplianceState 1, written as read without an index', :aggregate_failures do

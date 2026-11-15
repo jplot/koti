@@ -79,7 +79,7 @@ module Miele
 
         # @return [void]
         # @raise [ActionUnavailableError] on a CVA6000
-        def require_dop2! = require!(dop2?, 'a CVA6000 has no 2/1577 to write')
+        def require_dop2! = require!(dop2?, 'only a DOP2 coffee maker has DOP2 leaves to write')
 
         # The app writes both flags every time.
         #

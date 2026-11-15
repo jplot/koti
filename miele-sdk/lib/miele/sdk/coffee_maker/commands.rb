@@ -18,11 +18,15 @@ module Miele
         # 2/1586 again, then waits 1.5 s before it writes it.
         #
         # @return [void]
+        # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
         # @api public
         def power_on
           return write_device_action(2) if protocol_version == 2
 
+          require_dop2!
           leaf = switched_on(read_combi_state)
+          return unless leaf
+
           @sleeper.call(1.5)
           write_dop2(leaf)
         end
@@ -38,10 +42,12 @@ module Miele
         end
 
         # @return [void]
+        # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
         # @api public
         def power_off
           return write_device_action(3) if protocol_version == 2
 
+          require_dop2!
           modify(family::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) }
         end
 
@@ -60,8 +66,11 @@ module Miele
         #
         # @param on [Boolean]
         # @return [void]
+        # @raise [ActionUnavailableError] but on a CVA6000: the app's DOP2 light action sends nothing
+        #   (SwitchLightOnAction, Task.CompletedTask)
         # @api public
         def light=(on)
+          require!(protocol_version == 2, 'only a CVA6000 has a light request')
           command(Schema::DeviceState.from(state.raw).with(light: on ? 1 : 2))
         end
 
@@ -130,10 +139,16 @@ module Miele
           raise ArgumentError, "no acknowledge option #{option}"
         end
 
+        # SwitchOnHelper.ModifyStateOrReturnIfStateIsNormalState: SendSwitchOnAsync leaves at IL_00d9, before the
+        # SwitchOnDelay, when 2/1586 shows ApplianceState 4 already.
+        #
         # @param leaf [Dop2::Leaf] 2/1586 as read
-        # @return [Dop2::Leaf] it with ApplianceState 4
+        # @return [Dop2::Leaf, nil] it with ApplianceState 4, nil when it shows that already
         def switched_on(leaf)
-          leaf.with(fields: family::GlobalDeviceCombiState.from(leaf.fields).with(appliance_state: 4).to_fields)
+          combi = family::GlobalDeviceCombiState.from(leaf.fields)
+          return if family::GlobalEnumApplianceState.to_i(combi.appliance_state) == 4
+
+          leaf.with(fields: combi.with(appliance_state: 4).to_fields)
         end
 
         # @return [Dop2::Leaf] 2/1586 at 0/0, which SwitchOnHelper writes back as read

@@ -9,6 +9,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- After a 429, the next request to the same bridge resource waits as the app's rate limiter does: up to 30 s,
+  whatever its method. `RateLimitError#retry_after` gives the seconds a CLIP request's Retry-After named.
 - **Breaking:** every bridge request is sent once, as the app sends it: a GET, PUT or DELETE whose connection
   drops before the answer, or whose answer outlasts `read_timeout`, raises `ConnectionError` instead of going out a
   second time. A keep-alive connection the bridge closed while idle is reopened before the request is written.
@@ -31,8 +33,6 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
-- After a 429, the next request to the same bridge resource waits as the app's rate limiter does, and
-  `RateLimitError#retry_after` gives the seconds the bridge's Retry-After named.
 - Configuration of the bridge address, identity, keys and timeouts through `Hue::Sdk.configure`.
 - HTTPS connections pinned to the Signify root CA and to the configured bridge id, one
   keep-alive connection per thread and per fiber.

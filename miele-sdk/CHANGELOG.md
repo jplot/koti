@@ -94,6 +94,12 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   read `State` first, as the app's ExecuteSequentiallyUntilTrue does, and send nothing while it shows
   the appliance off already (Status 1) or, for the coffee maker's `power_on`, on already (a Status
   other than 1, 8 and 255, or none).
+- A laundry action's DOP2 requests wait 8 s at most for their connection and for their answer, and
+  the 2/1574 read of `set_parameters` and `start_delayed` 10 s, as the app's tokens bound them; a
+  request that runs out of time is not sent again. `Connection.request`, `Cloud::Channel#request`,
+  `Cloud::Http.request`, `dop2` and `write_dop2` take that `timeout:`, which `open_timeout` and
+  `read_timeout` still cap. `set_parameters` and `start_delayed` read 2/1577 before 2/1574, as the
+  app's SelectParametersAsync does.
 - **Breaking:** a 401 from the cloud is handled as the app handles it. A request under `/V2` answered
   401 raises `ResponseError` (status 401) instead of going out again with a renewed token, which is
   kept, and the websocket no longer renews a token its handshake is refused with: it connects again

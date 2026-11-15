@@ -12,23 +12,39 @@ module Miele
 
         def start: () -> void
 
+        def start_offered?: () -> bool
+
         def pause: () -> void
+
+        def pause_offered?: () -> bool
 
         def resume: () -> void
 
+        def resume_offered?: () -> bool
+
         def stop: () -> void
 
+        def stop_offered?: () -> bool
+
         def cancel: () -> void
+
+        def cancel_offered?: () -> bool
 
         def select_program: (Integer | Symbol prog_id) -> void
 
         def set_extras: (*Symbol selected) -> void
 
+        def offered_extras: () -> Array[Symbol]
+
         def auto_dos=: (bool on) -> void
 
         def write_setting: (Integer id, Integer value) -> void
 
+        def offered_settings: () -> Array[Integer]
+
         def leave_abort: () -> void
+
+        def leave_abort_offered?: () -> bool
 
         def acknowledge: (info: Integer | Symbol, option: Integer | Symbol) -> void
 
@@ -41,15 +57,13 @@ module Miele
         def settable?: (Integer id) -> bool
 
 
-        def run: (State state, Symbol name) -> void
+        def run: (Symbol name) -> void
 
         def dop1_process_action: (State state, Integer action) -> void
 
         def dop1_select: (Integer | Symbol prog_id) -> void
 
         def dop1_extras: (Array[Symbol] selected) -> void
-
-        def checked_state: () -> State
 
         def with_extras: (untyped select, untyped context, Hash[Symbol, bool] extras) -> untyped
 
@@ -67,19 +81,19 @@ module Miele
 
         def mobile?: (State state) -> bool
 
-        def ready?: (State state) -> bool
+        def ready?: (?State state) -> bool
 
         def offered?: (Symbol request) -> bool
 
         def supported_requests: () -> Array[Symbol]
 
-        def details_bar?: (State state) -> bool
+        def details_bar?: (?State state) -> bool
 
         def second_button: (Array[Symbol] requests) -> Symbol?
 
         def second_button_on?: (State state) -> bool
 
-        def require_no_info700!: () -> void
+        def info700?: () -> bool
       end
     end
   end

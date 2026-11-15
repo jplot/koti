@@ -66,35 +66,38 @@ RSpec.describe Miele::Sdk::Dishwasher do
 
   def user_request(id) = ['PUT', 'DOP2/2/1583', dop2_leaf(2, 1583, { 1 => dop2_field(:e16, id) })]
 
-  it 'starts with request 1 written back on the leaf it read' do
+  it 'starts with request 1 written back on the leaf it read', :aggregate_failures do
+    expect([dishwasher.start_offered?, dishwasher.ready?]).to eq([true, true])
     dishwasher.start
     expect(written).to eq([user_request(1)])
   end
 
-  it 'refuses to start while info 700 is shown', :aggregate_failures do
+  it 'starts while info 700 is shown, which the app does not offer', :aggregate_failures do
     leaves['2/131?idx1=0&idx2=1'] =
       dop2_leaf(2, 131, { 1 => dop2_field(:struct_array, [{ 1 => dop2_field(:e16, 700) }]) }, idx2: 1)
-    expect { dishwasher.start }.to raise_error(Miele::Sdk::ActionUnavailableError)
-    expect(written).to be_empty
+    expect(dishwasher.start_offered?).to be(false)
+    dishwasher.start
+    expect(written).to eq([user_request(1)])
   end
 
   context 'with the door open' do
     let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 1, 'SignalDoor' => true } }
 
-    it 'refuses to start' do
-      expect { dishwasher.start }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'starts, which the app does not offer', :aggregate_failures do
+      expect(dishwasher.start_offered?).to be(false)
+      dishwasher.start
+      expect(written).to eq([user_request(1)])
     end
   end
 
   context 'when it runs without mobile start' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 0], 'StandbyState' => 1 } }
 
-    it 'stops without mobile start, but neither pauses nor cancels while its details bar shows pause',
-       :aggregate_failures do
-      dishwasher.stop
-      expect { dishwasher.pause }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect { dishwasher.cancel }.to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written.map(&:last)).to eq([user_request(2).last])
+    it 'stops, pauses and cancels, while the app offers to stop alone', :aggregate_failures do
+      expect(%i[stop_offered? pause_offered? cancel_offered?].map { dishwasher.public_send(it) })
+        .to eq([true, false, false])
+      %i[stop pause cancel].each { dishwasher.public_send(it) }
+      expect(written.map(&:last)).to eq([user_request(2).last, user_request(3).last, user_request(52).last])
     end
   end
 
@@ -103,12 +106,14 @@ RSpec.describe Miele::Sdk::Dishwasher do
 
     before { leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1) }
 
-    it "stops all the same, as the app's Stop quick action does" do
+    it "stops all the same, as the app's Stop quick action does", :aggregate_failures do
+      expect(dishwasher.stop_offered?).to be(true)
       dishwasher.stop
       expect(written.map(&:last)).to eq([user_request(2).last])
     end
 
-    it 'cancels from its details bar' do
+    it 'cancels from its details bar', :aggregate_failures do
+      expect([dishwasher.details_bar?, dishwasher.cancel_offered?]).to eq([true, true])
       dishwasher.cancel
       expect(written.map(&:last)).to eq([user_request(52).last])
     end
@@ -117,8 +122,9 @@ RSpec.describe Miele::Sdk::Dishwasher do
   context 'when its program is selected under mobile start and offers only to cancel' do
     let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 1 } }
 
-    it 'cancels, as its details bar allows from Status 3' do
+    it 'cancels, as its details bar allows from Status 3', :aggregate_failures do
       leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1)
+      expect(dishwasher.cancel_offered?).to be(true)
       dishwasher.cancel
       expect(written.map(&:last)).to eq([user_request(52).last])
     end
@@ -127,17 +133,20 @@ RSpec.describe Miele::Sdk::Dishwasher do
   context 'when it waits for its start time without remote control or mobile start' do
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [14, 0, 0], 'StandbyState' => 1 } }
 
-    it 'refuses to cancel, as its details bar does' do
+    it 'cancels, while its details bar does not offer it', :aggregate_failures do
       leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1)
-      expect { dishwasher.cancel }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect(dishwasher.cancel_offered?).to be(false)
+      dishwasher.cancel
+      expect(written.map(&:last)).to eq([user_request(52).last])
     end
   end
 
   context 'when it waits for its start time under remote control, without mobile start' do
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 0], 'StandbyState' => 1 } }
 
-    it 'cancels, as its details bar allows' do
+    it 'cancels, as its details bar allows', :aggregate_failures do
       leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1)
+      expect(dishwasher.cancel_offered?).to be(true)
       dishwasher.cancel
       expect(written.map(&:last)).to eq([user_request(52).last])
     end
@@ -146,51 +155,57 @@ RSpec.describe Miele::Sdk::Dishwasher do
   context 'when it is locked or asleep waiting to start' do
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [7, 0, 1], 'StandbyState' => 1 } }
 
-    it 'refuses to cancel, as its details bar hides itself', :aggregate_failures do
+    it 'cancels, while its details bar hides itself', :aggregate_failures do
       leaves['2/1585?idx1=0&idx2=1'] = dop2_leaf(2, 1585, { 9 => dop2_field(:e16_array, [52]) }, idx2: 1)
-      expect { dishwasher.cancel }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect([dishwasher.details_bar?, dishwasher.cancel_offered?]).to eq([false, false])
       state.merge!('RemoteEnable' => [15, 0, 1], 'StandbyState' => 2)
-      expect { dishwasher.cancel }.to raise_error(Miele::Sdk::ActionUnavailableError)
+      expect([dishwasher.details_bar?, dishwasher.cancel_offered?]).to eq([false, false])
+      dishwasher.cancel
+      expect(written.map(&:last)).to eq([user_request(52).last])
     end
   end
 
   context 'when it runs under mobile start' do
     let(:state) { { 'Status' => 5, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 1 } }
 
-    it 'pauses with request 3' do
+    it 'pauses with request 3', :aggregate_failures do
+      expect(dishwasher.pause_offered?).to be(true)
       dishwasher.pause
       expect(written.map(&:last)).to eq([user_request(3).last])
     end
 
-    it 'refuses a delayed start, as the app does', :aggregate_failures do
-      expect { dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30)) }
-        .to raise_error(Miele::Sdk::ActionUnavailableError)
-      expect(written).to be_empty
+    it 'delays the start, which the app does not offer', :aggregate_failures do
+      leaves['2/1577?idx1=1&idx2=2'] = select(1, 2)
+      leaves['2/1574?idx1=0&idx2=1'] = context(1, bits: 33)
+      expect(dishwasher.start_delayed_offered?).to be(false)
+      dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
+      expect(written.last).to eq(user_request(8))
     end
   end
 
   context 'when its program is selected without mobile start' do
     let(:state) { { 'Status' => 3, 'RemoteEnable' => [15, 0, 0], 'StandbyState' => 1 } }
 
-    it 'refuses a delayed start, as the app does' do
-      expect { dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30)) }
-        .to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'tells the app offers no delayed start' do
+      expect(dishwasher.start_delayed_offered?).to be(false)
     end
   end
 
   context 'when paused under mobile start' do
     let(:state) { { 'Status' => 6, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 1 } }
 
-    it 'resumes with request 1, as the app does' do
+    it 'resumes with request 1, as the app does', :aggregate_failures do
+      expect(dishwasher.resume_offered?).to be(true)
       dishwasher.resume
       expect(written.map(&:last)).to eq([user_request(1).last])
     end
   end
 
-  it 'sets a delayed start in minutes when the dishwasher counts down, then sends request 8' do
+  it 'sets a delayed start in minutes when the dishwasher counts down, then sends request 8', :aggregate_failures do
     allow(Time).to receive(:now).and_return(Time.new(2026, 10, 31, 20, 0, 30))
     leaves['2/1577?idx1=1&idx2=2'] = select(1, 2)
     leaves['2/1574?idx1=0&idx2=1'] = context(1, bits: 33)
+    expect(dishwasher.start_delayed_offered?).to be(true)
     dishwasher.start_delayed(Time.new(2026, 10, 31, 21, 30))
     expect(written.map(&:last)).to eq([select(1, 2, type: 2, mode: 1, start: 90), user_request(8).last])
   end
@@ -242,9 +257,17 @@ RSpec.describe Miele::Sdk::Dishwasher do
     leaves['2/1577?idx1=0&idx2=0'] = select(0, 0, extras: extras(5 => true))
     leaves['2/1574?idx1=0&idx2=0'] = context(0, mode: 1)
     dishwasher.set_extras(:express, :dry)
-    expect { dishwasher.set_extras(:quick) }.to raise_error(ArgumentError)
     expect(written.map(&:last))
       .to eq([select(0, 0, prog: 13, type: 2, mode: 1, extras: extras(1 => true, 4 => true, 5 => true))])
+  end
+
+  it 'sets an extra the app does not write on this model, but none GLOBAL_PS_ExtrasDW lacks', :aggregate_failures do
+    leaves['2/1577?idx1=0&idx2=0'] = select(0, 0)
+    leaves['2/1574?idx1=0&idx2=0'] = context(0)
+    expect(dishwasher.offered_extras).to eq(%i[express hot_zone clean dry])
+    dishwasher.set_extras(:quick)
+    expect { dishwasher.set_extras(:short) }.to raise_error(ArgumentError)
+    expect(written.map(&:last)).to eq([select(0, 0, prog: 13, type: 2, mode: 2, extras: extras(9 => true))])
   end
 
   it 'refuses extras when 2/1577 carries none, sending nothing', :aggregate_failures do
@@ -263,18 +286,25 @@ RSpec.describe Miele::Sdk::Dishwasher do
     expect(written).to eq([['PUT', 'DOP2/2/105', dop2_leaf(2, 105, fields, idx1: 20_052, idx2: 1)]])
   end
 
-  it 'writes a setting at its SF id on a G7, refusing one the app writes on a PFD10 only', :aggregate_failures do
-    leaves['2/105?idx1=20002&idx2=1'] =
-      dop2_leaf(2, 105, { 1 => dop2_field(:e16, 20_002), 4 => dop2_field(:i16, 0) }, idx1: 20_002, idx2: 1)
-    dishwasher.write_setting(20_002, 12)
-    expect { dishwasher.write_setting(20_064, 1) }.to raise_error(Miele::Sdk::ActionUnavailableError)
-    fields = { 1 => dop2_field(:e16, 20_002), 4 => dop2_field(:i16, 12) }
-    expect(written).to eq([['PUT', 'DOP2/2/105', dop2_leaf(2, 105, fields, idx1: 20_002, idx2: 1)]])
+  it 'writes a setting at its SF id on a G7, one the app writes on a PFD10 only too', :aggregate_failures do
+    [20_002, 20_064].each do |id|
+      leaves["2/105?idx1=#{id}&idx2=1"] =
+        dop2_leaf(2, 105, { 1 => dop2_field(:e16, id), 4 => dop2_field(:i16, 0) }, idx1: id, idx2: 1)
+      dishwasher.write_setting(id, 1)
+    end
+    expect(written.map { Miele::Sdk::Dop2.decode(it.last).idx1 }).to eq([20_002, 20_064])
+    expect(dishwasher.offered_settings).to eq([20_078, 20_002, 20_010, 20_028, 20_022, 20_027])
   end
 
-  it 'leaves the abort state as the app does' do
+  it 'leaves the abort state as the app does', :aggregate_failures do
+    expect(dishwasher.leave_abort_offered?).to be(true)
     dishwasher.leave_abort
     expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(1, 4, 5, 1)]])
+  end
+
+  it 'opens no door, a DOP2 dishwasher having no Dop1 object 1404', :aggregate_failures do
+    expect { dishwasher.open_door }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(dishwasher.open_door_offered?).to be(false)
   end
 
   it 'acknowledges an info on 2/138' do
@@ -287,7 +317,8 @@ RSpec.describe Miele::Sdk::Dishwasher do
   context 'when it sleeps deeply' do
     let(:state) { { 'Status' => 4, 'RemoteEnable' => [15, 0, 1], 'StandbyState' => 2 } }
 
-    it 'powers on as the app does: DeviceAction 2, then ApplianceState 4' do
+    it 'powers on as the app does: DeviceAction 2, then ApplianceState 4', :aggregate_failures do
+      expect(dishwasher.power_on_offered?).to be(true)
       dishwasher.power_on
       expect(written.map { it[0..1] }).to eq([%w[PUT State], %w[PUT DOP2/2/1586]])
     end
@@ -296,17 +327,27 @@ RSpec.describe Miele::Sdk::Dishwasher do
   context 'when it is on' do
     let(:state) { { 'Status' => 2, 'RemoteEnable' => [15, 0, 0], 'StandbyState' => 1 } }
 
-    it 'powers off with ApplianceState 1' do
+    it 'powers off with ApplianceState 1', :aggregate_failures do
+      expect(dishwasher.power_off_offered?).to be(true)
       dishwasher.power_off
       expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 1, 0, 0)]])
+    end
+
+    it 'powers on, which the app does not offer', :aggregate_failures do
+      expect(dishwasher.power_on_offered?).to be(false)
+      dishwasher.power_on
+      expect(written).to eq([['PUT', 'DOP2/2/1586', combi_state(0, 4, 0, 0)]])
     end
   end
 
   context 'without remote control' do
     let(:state) { { 'Status' => 2, 'RemoteEnable' => [0, 0, 0], 'StandbyState' => 1 } }
 
-    it 'refuses to power off, as the app does' do
-      expect { dishwasher.power_off }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    it 'powers off and leaves the abort state, which the app does not offer', :aggregate_failures do
+      expect([dishwasher.power_off_offered?, dishwasher.leave_abort_offered?]).to eq([false, false])
+      dishwasher.power_off
+      dishwasher.leave_abort
+      expect(written.map { it[1] }).to eq(%w[DOP2/2/1586 DOP2/2/1586])
     end
   end
 end

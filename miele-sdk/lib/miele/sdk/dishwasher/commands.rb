@@ -19,63 +19,83 @@ module Miele
         private_constant :REDESIGNED, :EXTRAS, :SETTINGS, :ACTIONS
 
         # @return [void]
-        # @raise [ActionUnavailableError] unless the app's start rule allows it: no info 700, mobile start, the door
-        #   closed, request 1 offered, and the dishwasher ready (Status 3, or 4 awake)
         # @api public
-        def start
-          state = checked_state
-          require!(mobile?(state) && !state.door_open? && offered?(:start) && ready?(state),
-                   'the dishwasher cannot start now')
-          run(state, :start)
+        def start = run(:start)
+
+        # @return [Boolean] whether the app's start rule allows {#start}: no info 700, mobile start, the door
+        #   closed, request 1 offered, and the dishwasher {Rules#ready? ready}
+        # @api public
+        def start_offered?
+          return false if info700?
+
+          state = self.state
+          mobile?(state) && !state.door_open? && offered?(:start) && ready?(state)
         end
 
         # @return [void]
-        # @raise [ActionUnavailableError] unless it runs (Status 5) under mobile start and offers pause
         # @api public
-        def pause
-          state = checked_state
-          require!(mobile?(state) && offered?(:pause) && status(state) == 5, 'the dishwasher cannot pause now')
-          run(state, :pause)
+        def pause = run(:pause)
+
+        # @return [Boolean] whether the app offers {#pause}: no info 700, a program running (Status 5) under mobile
+        #   start, and pause offered
+        # @api public
+        def pause_offered?
+          return false if info700?
+
+          state = self.state
+          mobile?(state) && offered?(:pause) && status(state) == 5
         end
 
         # The app resumes with request 1.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] unless it is paused (Status 6) under mobile start and offers start
         # @api public
-        def resume
-          state = checked_state
-          require!(mobile?(state) && offered?(:start) && status(state) == 6, 'the dishwasher cannot resume now')
-          run(state, :resume)
+        def resume = run(:resume)
+
+        # @return [Boolean] whether the app offers {#resume}: no info 700, a program paused (Status 6) under mobile
+        #   start, and start offered
+        # @api public
+        def resume_offered?
+          return false if info700?
+
+          state = self.state
+          mobile?(state) && offered?(:start) && status(state) == 6
         end
 
         # The app's Stop quick action is on while either Stop or Cancel is offered, and sends Stop.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] unless it runs, pauses or waits awake, offers stop or cancel, is not locked
-        #   and shows no info 700
         # @api public
-        def stop
-          state = checked_state
+        def stop = run(:stop)
+
+        # @return [Boolean] whether the app's Stop quick action is on: no info 700, a program running, paused or
+        #   waiting awake, stop or cancel offered, and the dishwasher not locked
+        # @api public
+        def stop_offered?
+          return false if info700?
+
+          state = self.state
           running = [5, 6].include?(status(state)) || (status(state) == 4 && [1, 255].include?(standby(state)))
           offered = offered?(:stop) || offered?(:cancel)
-          require!(!locked_in?(state) && offered && running, 'the dishwasher cannot stop now')
-          run(state, :stop)
+          !locked_in?(state) && offered && running
         end
 
         # The app sends Cancel as the second button of its details bar (ActionBarComponentsRule). Its other Cancel,
         # the button that reverts the selected extras when no action is offered, is left out.
         #
         # @return [void]
-        # @raise [ActionUnavailableError] unless the bar shows (Status 3 to 6, not asleep waiting to start, not
-        #   locked, no info 700), offers neither pause nor stop ahead of cancel, and has mobile start, a program
-        #   running or paused, or one waiting under remote control
         # @api public
-        def cancel
-          state = checked_state
-          require!(details_bar?(state) && second_button(supported_requests) == :cancel && second_button_on?(state),
-                   'the dishwasher cannot cancel now')
-          run(state, :cancel)
+        def cancel = run(:cancel)
+
+        # @return [Boolean] whether the app's details bar offers {#cancel}: no info 700, the bar
+        #   {Rules#details_bar? shown}, neither pause nor stop ahead of cancel, and mobile start, a program running
+        #   or paused, or one waiting under remote control
+        # @api public
+        def cancel_offered?
+          return false if info700?
+
+          state = self.state
+          details_bar?(state) && second_button(supported_requests) == :cancel && second_button_on?(state)
         end
 
         # @param prog_id [Integer, Symbol]
@@ -87,24 +107,27 @@ module Miele
           modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 0, 0]) { it.with(prog_id:, selection_type: 0) }
         end
 
-        # Each extra this model writes is set on when named, off otherwise; the others stay as read.
+        # Each extra the app writes on this model is set on when named, off otherwise; another one named is set on,
+        # and the others stay as read.
         #
-        # @param selected [Array<Symbol>] among +:quick+, +:express+, +:hot_zone+, +:clean+, +:dry+, +:bottle_clean+
-        #   and +:special_dry+ on DOP2, +:short+, +:eco+, +:dry+, +:intensive_low+, +:soak+, +:prerinse+ and
-        #   +:additional_drying+ on Dop1, as the model takes them
+        # @param selected [Array<Symbol>] members of +GLOBAL_PS_ExtrasDW+ on DOP2 (+:quick+, +:express+,
+        #   +:hot_zone+, +:clean+, +:dry+, +:special_dry+, +:dry_plus+, +:auto_open+, +:bottle_clean+); +:short+,
+        #   +:eco+, +:dry+, +:intensive_low+, +:soak+, +:prerinse+ or +:additional_drying+ on Dop1
         # @return [void]
-        # @raise [ArgumentError] for an extra the app does not write on this model, or when 2/1577 carries none
+        # @raise [ArgumentError] for an extra the dishwasher's object has no place for, or when 2/1577 carries none
         # @api public
         def set_extras(*selected)
-          handled = EXTRAS.fetch(extras_kind)
-          raise ArgumentError, "no #{(selected - handled).join(', ')} extra here" unless (selected - handled).empty?
           return dop1_extras(selected) if extras_kind == :dop1
 
           context = object(Objects::Dishwasher::GlobalPsContext, [2, 1574, 0, 0])
           modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 0, 0]) do |select|
-            with_extras(select, context, handled.to_h { [it, selected.include?(it)] })
+            with_extras(select, context, offered_extras.to_h { [it, false] }.merge(selected.to_h { [it, true] }))
           end
         end
+
+        # @return [Array<Symbol>] the extras the app writes on this model, as {#set_extras} names them
+        # @api public
+        def offered_extras = EXTRAS.fetch(extras_kind)
 
         # @param on [Boolean]
         # @return [void]
@@ -113,26 +136,32 @@ module Miele
           modify(Objects::Dishwasher::GlobalSfValue, [2, 105, 20_052, 1]) { it.with(current_value: on ? 1 : 0) }
         end
 
-        # @param id [Integer] 20078, 20002, 20010, 20028, 20022 or 20027 on a G38, G58 or G7; 20064 on a PFD10
+        # @param id [Integer] a +GLOBAL_EnumSfId+ value, such as one of {#offered_settings}
         # @param value [Integer]
         # @return [void]
-        # @raise [ActionUnavailableError] for a setting the app does not write on this model
         # @api public
         def write_setting(id, value)
-          require!(settable?(id), "the app writes no setting #{id} on this dishwasher")
           modify(Objects::Dishwasher::GlobalSfValue, [2, 105, id, 1]) { it.with(current_value: value) }
         end
 
+        # @return [Array<Integer>] the settings the app writes on this model: 20078, 20002, 20010, 20028, 20022 and
+        #   20027 on a DOP2 G38, G58 or G7; 20064 on a PFD10
+        # @api public
+        def offered_settings = [*SETTINGS, 20_064].select { settable?(it) }
+
         # @return [void]
-        # @raise [ActionUnavailableError] without remote control
+        # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
         # @api public
         def leave_abort
           require_dop2!
-          require!(state.remote_control?, 'the dishwasher takes it only under remote control')
           modify(Objects::Dishwasher::GlobalDeviceCombiState, [2, 1586, 0, 1]) do |combi|
             combi.with(appliance_state: 4, operation_state: 5, process_state: 1)
           end
         end
+
+        # @return [Boolean] whether the app offers {#leave_abort}: a DOP2 dishwasher under remote control
+        # @api public
+        def leave_abort_offered? = dop2? && state.remote_control? == true
 
         # @param info [Integer, Symbol] the info shown
         # @param option [Integer, Symbol] one of its options
@@ -164,21 +193,11 @@ module Miele
           dop2? && SETTINGS.include?(id) && %w[G38 G58 G7].any? { tech_type.to_s.start_with?(it) }
         end
 
-        # @param state [State]
         # @param name [Symbol] a key of {ACTIONS}
         # @return [void]
-        def run(state, name)
+        def run(name)
           request, process_action = ACTIONS.fetch(name)
           dop2? ? dop2_user_request(request) : dop1_process_action(state, process_action)
-        end
-
-        # The app reads info 700 from 2/131, on DOP2 only.
-        #
-        # @return [State]
-        # @raise [ActionUnavailableError] while a DOP2 dishwasher shows info 700
-        def checked_state
-          require_no_info700! if dop2?
-          state
         end
 
         # @param select [Data] 2/1577
@@ -203,8 +222,8 @@ module Miele
         def read_extras(para) = para.prog_extras || raise(ArgumentError, 'this dishwasher carries no extras in 2/1577')
 
         # @return [void]
-        # @raise [ActionUnavailableError] on a Dop1 dishwasher
-        def require_dop2! = require!(dop2?, 'only a DOP2 dishwasher takes this, as in the app')
+        # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no DOP2 leaf to write
+        def require_dop2! = require!(dop2?, 'a Dop1 dishwasher has no DOP2 leaf to write')
       end
     end
   end

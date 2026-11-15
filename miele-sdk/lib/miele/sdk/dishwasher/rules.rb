@@ -9,6 +9,19 @@ module Miele
         STANDBY_STATES = [1, 2, 3].freeze
         private_constant :STANDBY_STATES
 
+        # @param state [State] read when not given
+        # @return [Boolean] whether the app takes the dishwasher as ready to start: Status 3, or 4 awake
+        # @api public
+        def ready?(state = self.state) = status(state) == 3 || (status(state) == 4 && [1, 255].include?(standby(state)))
+
+        # IsActionBarVisibleCheck.
+        #
+        # @param state [State] read when not given
+        # @return [Boolean] whether the app shows the details bar: Status 3 to 6, not asleep waiting to start, not
+        #   locked
+        # @api public
+        def details_bar?(state = self.state) = (3..6).cover?(status(state)) && !off?(state) && !locked_in?(state)
+
         private
 
         # @param state [State]
@@ -28,20 +41,12 @@ module Miele
         def mobile?(state) = mobile_control? && state.mobile_start? == true && !locked_in?(state)
 
         # @param state [State]
-        # @return [Boolean] Status 3, or 4 awake
-        def ready?(state) = status(state) == 3 || (status(state) == 4 && [1, 255].include?(standby(state)))
-
-        # @param state [State]
         # @return [Boolean] Status 1, or 4 asleep
         def off?(state) = status(state) == 1 || (status(state) == 4 && [2, 3].include?(standby(state)))
 
         # @param request [Symbol]
         # @return [Boolean]
         def offered?(request) = supported_requests.include?(request)
-
-        # @param state [State]
-        # @return [Boolean] IsActionBarVisibleCheck: Status 3 to 6, not asleep waiting to start, not locked
-        def details_bar?(state) = (3..6).cover?(status(state)) && !off?(state) && !locked_in?(state)
 
         # @param requests [Array<Symbol>] those offered
         # @return [Symbol, nil] the first of pause, stop and cancel offered, unless the first button shows it
@@ -57,14 +62,14 @@ module Miele
             (status(state) == 4 && mobile_control? && state.remote_control? == true)
         end
 
-        # The app looks at the first info only.
+        # The app reads info 700 from 2/131, on DOP2 only, and looks at the first info only.
         #
-        # @return [void]
-        # @raise [ActionUnavailableError] while it is info 700
-        def require_no_info700!
+        # @return [Boolean]
+        def info700?
+          return false unless dop2?
+
           first = Array(notifications.infos).first&.id
-          require!(first.nil? || Objects::Dishwasher::GlobalEnumNtfctnInfoId.to_i(first) != 700,
-                   'the dishwasher shows info 700')
+          !first.nil? && Objects::Dishwasher::GlobalEnumNtfctnInfoId.to_i(first) == 700
         end
       end
     end

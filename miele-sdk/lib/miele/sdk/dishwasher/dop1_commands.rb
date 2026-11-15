@@ -9,15 +9,23 @@ module Miele
         private_constant :EXTRA_BITS
 
         # @return [void]
-        # @raise [ActionUnavailableError] on a DOP2 dishwasher, or unless it waits for its program (Status 2 or 3)
-        #   under mobile start with the door closed (CanOpenDoorRule)
+        # @raise [ActionUnavailableError] on a DOP2 dishwasher, whose protocol has no Dop1 object 1404
         # @api public
         def open_door
-          require!(!dop2?, 'only a Dop1 dishwasher opens its door from the app')
-          state = self.state
-          require!(state.mobile_start? == true && [2, 3].include?(status(state)) && !state.door_open?,
-                   'the dishwasher cannot open its door now')
+          require!(!dop2?, 'a DOP2 dishwasher has no Dop1 object 1404 to open its door')
           dop1(Dop1.request(object_id: '1404', type: Dop1::WRITE, section: [1, 2].pack('C2')))
+        end
+
+        # CanOpenDoorRule.
+        #
+        # @return [Boolean] whether the app offers {#open_door}: a Dop1 dishwasher waiting for its program (Status 2
+        #   or 3) under mobile start with the door closed
+        # @api public
+        def open_door_offered?
+          return false if dop2?
+
+          state = self.state
+          state.mobile_start? == true && [2, 3].include?(status(state)) && !state.door_open?
         end
 
         private
@@ -45,8 +53,10 @@ module Miele
         #
         # @param selected [Array<Symbol>] keys of {EXTRA_BITS}
         # @return [void]
+        # @raise [ArgumentError] for another name
         def dop1_extras(selected)
-          write_selection(state.raw['ProgramID'] || 3, selected.sum { 1 << EXTRA_BITS.fetch(it) })
+          bits = selected.sum { 1 << EXTRA_BITS.fetch(it) { raise ArgumentError, "8906 has no #{it} extra" } }
+          write_selection(state.raw['ProgramID'] || 3, bits)
         end
 
         # The app sends 8906 with the read request type.

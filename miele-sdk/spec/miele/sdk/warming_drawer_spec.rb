@@ -93,11 +93,12 @@ RSpec.describe Miele::Sdk::WarmingDrawer do
     expect(requests).to eq(['110102000103'])
   end
 
-  it 'selects a program on 9781, but none the drawer does not run', :aggregate_failures do
+  it 'selects a program on 9781, Aus (0) too, but none Betriebsart does not define', :aggregate_failures do
     expect(drawer.select_program_offered?).to be(true)
     drawer.select_program(1)
+    drawer.select_program(0)
     expect { drawer.select_program(5) }.to raise_error(ArgumentError)
-    expect(requests).to eq(['97810200010100000000'])
+    expect(requests).to eq(%w[97810200010100000000 97810200010000000000])
   end
 
   it 'changes the program under local control, or once one is chosen, which the app does not offer',
@@ -141,19 +142,27 @@ RSpec.describe Miele::Sdk::WarmingDrawer do
     expect(requests.grep(/\A9781/)).to eq(%w[97810200010200000041])
   end
 
-  it 'sets a temperature without a program or mobile start, which the app does not offer', :aggregate_failures do
-    state(5, [15, 0, 0], 'ProgramID' => 0)
+  it 'sets a temperature without mobile start, which the app does not offer', :aggregate_failures do
+    state(5, [15, 0, 0], 'ProgramID' => 2)
     expect(drawer.target_temperature_offered?).to be(false)
     drawer.target_temperature = 60
-    expect(requests.last).to eq('9781020001000000003c')
+    expect(requests.last).to eq('9781020001020000003c')
   end
 
-  it "sets the remaining time, re-sending the target and keeping to the program's maximum", :aggregate_failures do
+  it 'writes no temperature or remaining time while State shows no program, Betriebsart 0 being Aus',
+     :aggregate_failures do
+    state(5, [15, 0, 1], 'ProgramID' => 0, 'TargetTemperature' => [6500])
+    expect { drawer.target_temperature = 60 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect { drawer.remaining_time = 90 }.to raise_error(Miele::Sdk::ActionUnavailableError)
+    expect(requests).to be_empty
+  end
+
+  it "sets the remaining time, re-sending the target, past the program's maximum too", :aggregate_failures do
     state(5, [15, 0, 1], 'ProgramID' => 3, 'TargetTemperature' => [6500])
-    expect(drawer.remaining_time_offered?).to be(true)
+    expect([drawer.remaining_time_offered?, drawer.programs[2].max_hours]).to eq([true, 3])
     drawer.remaining_time = 135
     drawer.remaining_time = 300
-    expect(requests).to eq(%w[97880100 9781020001030f000241 97880100 97810200010300000341])
+    expect(requests.grep(/\A9781/)).to eq(%w[9781020001030f000241 97810200010300000541])
   end
 
   it "sets a remaining time below the program's minimum, which the app's picker does not offer, but none negative",
@@ -164,12 +173,6 @@ RSpec.describe Miele::Sdk::WarmingDrawer do
     drawer.remaining_time = 30
     drawer.remaining_time = 0
     expect(requests.grep(/\A9781/)).to eq(%w[9781020001031e000041 97810200010300000041])
-  end
-
-  it 'sends only 0 without a program, as the app keeps the time to a maximum of 0' do
-    state(5, [15, 0, 1], 'ProgramID' => 0, 'TargetTemperature' => [6500])
-    drawer.remaining_time = 90
-    expect(requests.last).to eq('97810200010000000041')
   end
 
   it 'sends 255 as the target when State shows none, as the app does' do

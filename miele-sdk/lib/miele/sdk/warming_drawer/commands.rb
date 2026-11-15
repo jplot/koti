@@ -34,12 +34,14 @@ module Miele
           switchable?(state) && !%i[off off_and_door_open finished not_connected].include?(drawer_state(state))
         end
 
-        # @param id [Integer] 1 cups, 2 plates, 3 food, 4 low-temperature cooking
+        # The app's picker offers programs 1 to 4.
+        #
+        # @param id [Integer] 1 cups, 2 plates, 3 food, 4 low-temperature cooking; 0 (Aus) too
         # @return [void]
-        # @raise [ArgumentError] for another program, which +Betriebsart+ does not define
+        # @raise [ArgumentError] for a program +Betriebsart+ does not define
         # @api public
         def select_program(id)
-          raise ArgumentError, 'the drawer runs programs 1 to 4' unless (1..4).cover?(id)
+          raise ArgumentError, "Betriebsart defines no #{id}" unless Objects::Drawer::Betriebsart.from(id).is_a?(Symbol)
 
           write_process_data(id, 0, 0)
         end
@@ -57,12 +59,13 @@ module Miele
         # @param celsius [Integer] such as one of the program's temperatures, which {#programs} gives
         # @return [void]
         # @raise [ArgumentError] for degrees a byte does not hold
+        # @raise [ActionUnavailableError] while +State+ shows no program 1 to 4 to write it for
         # @api public
         def target_temperature=(celsius)
           raise ArgumentError, "#{celsius} °C does not fit the temperature's byte" unless (0..255).cover?(celsius)
 
           state = self.state
-          write_process_data(state.raw['ProgramID'].to_i, remaining_minutes(state), celsius)
+          write_process_data(running_program(state), remaining_minutes(state), celsius)
         end
 
         # @return [Boolean] whether the app sets the temperature: {#switchable?}, with a program
@@ -72,19 +75,19 @@ module Miele
           switchable?(state) && !program(state).nil?
         end
 
-        # The app keeps the time to the program's maximum hours, 0 without a program, and re-sends the target
-        # temperature +State+ shows; 0 resets it. {#programs} gives the minimum hours its picker offers past 0.
+        # The app re-sends the target temperature +State+ shows; 0 resets the time. {#programs} gives the minimum and
+        # maximum hours its picker offers.
         #
         # @param minutes [Integer]
         # @return [void]
         # @raise [ArgumentError] for a negative time
+        # @raise [ActionUnavailableError] while +State+ shows no program 1 to 4 to write it for
         # @api public
         def remaining_time=(minutes)
           raise ArgumentError, "a remaining time of #{minutes} min is negative" if minutes.negative?
 
           state = self.state
-          minutes = [minutes, program(state)&.max_hours.to_i * 60].min
-          write_process_data(state.raw['ProgramID'].to_i, minutes, target_celsius(state))
+          write_process_data(running_program(state), minutes, target_celsius(state))
         end
 
         # @return [Boolean] whether the app sets the remaining time: under remote control and mobile start without
@@ -137,6 +140,17 @@ module Miele
                     .with(struktur_version: 1, betriebsart: program, restzeit_minuten: minutes % 60,
                           restzeit_stunden: minutes / 60 % 24, prozess_temperatur: celsius)
           write_dop1_object(Objects::Drawer::ServiceExtEswProcessData, section, type: Dop1::WRITE)
+        end
+
+        # Betriebsart 0 is Aus: the process data of no program.
+        #
+        # @param state [State]
+        # @return [Integer] the program +State+ shows, 1 to 4
+        # @raise [ActionUnavailableError] for another
+        def running_program(state)
+          id = state.raw['ProgramID'].to_i
+          require!((1..4).cover?(id), 'State shows no program to write the process data of')
+          id
         end
 
         # @param state [State]

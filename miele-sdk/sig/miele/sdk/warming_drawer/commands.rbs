@@ -36,6 +36,8 @@ module Miele
 
         def write_process_data: (Integer program, Integer minutes, Integer celsius) -> void
 
+        def running_program: (State state) -> Integer
+
         def program: (State state) -> Program?
 
         def remaining_minutes: (State state) -> Integer

@@ -14,6 +14,33 @@ module Hue
       REQUESTS = { get: Net::HTTP::Get, post: Net::HTTP::Post, put: Net::HTTP::Put, delete: Net::HTTP::Delete }.freeze
       private_constant :REQUESTS
 
+      # Net::HTTP checks a reused connection for an end of stream before writing the next request, and OpenSSL
+      # raises there when the bridge closed it without close_notify: nothing was sent yet, so it reconnects.
+      class KeepAlive < Net::HTTP
+        private
+
+        # @param request [Net::HTTPRequest]
+        # @return [void]
+        # @api private
+        def begin_transport(request)
+          if closed_abruptly?
+            @socket.close
+            connect
+          end
+          super
+        end
+
+        # @return [Boolean]
+        # @api private
+        def closed_abruptly?
+          @socket.eof? if !@socket.closed? && @socket.io.to_io.wait_readable(0)
+          false
+        rescue OpenSSL::SSL::SSLError, SystemCallError, IOError
+          true
+        end
+      end
+      private_constant :KeepAlive
+
       module_function
 
       # Sends one request to the bridge.
@@ -46,9 +73,6 @@ module Hue
       def stream(path, headers: {}, &)
         transport do
           http = establish(Sdk.config.event_read_timeout)
-          # Net::HTTP sends a GET again once when the connection fails before an answer; following the bridge again
-          # is the caller's.
-          http.max_retries = 0
           http.request(Net::HTTP::Get.new(path, headers)) do |response|
             response.read_body(&) if response.is_a?(Net::HTTPOK)
           end
@@ -95,10 +119,13 @@ module Hue
         host = config.host or raise ConnectionError, 'host is not configured'
         config.bridge_id or raise TLSError, 'bridge_id is not configured'
         # nil is the proxy: an http_proxy set for the Internet would otherwise tunnel every bridge request.
-        http = Net::HTTP.new(host, config.port, nil)
+        http = KeepAlive.new(host, config.port, nil)
         pin(http, config)
         http.open_timeout = config.open_timeout
         http.read_timeout = read_timeout
+        # The app sends a bridge request once, whatever fails; Net::HTTP would send a GET, PUT or DELETE again
+        # after a dropped connection or a read timeout.
+        http.max_retries = 0
         http.start
       end
 

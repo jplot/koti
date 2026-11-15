@@ -9,6 +9,9 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** every bridge request is sent once, as the app sends it: a GET, PUT or DELETE whose connection
+  drops before the answer, or whose answer outlasts `read_timeout`, raises `ConnectionError` instead of going out a
+  second time. A keep-alive connection the bridge closed while idle is reopened before the request is written.
 - **Breaking:** entertainment `stream` no longer reads the lights of the area before streaming nor puts them
   back after it: the bridge leaves them on the last frame.
 - **Breaking:** `events` no longer reconnects, nor sends its request a second time as Net::HTTP would: it reads

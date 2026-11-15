@@ -5,6 +5,18 @@ module Hue
 
       REQUESTS: Hash[Symbol, singleton(Net::HTTPRequest)]
 
+      class KeepAlive < Net::HTTP
+        @socket: untyped
+
+        private
+
+        def begin_transport: (Net::HTTPRequest request) -> void
+
+        def closed_abruptly?: () -> bool
+
+        def connect: () -> void
+      end
+
       def self?.request: (Symbol method, String path, ?body: String?, ?headers: Hash[String, String]) -> Net::HTTPResponse
 
       def self?.stream: (String path, ?headers: Hash[String, String]) { (String chunk) -> void } -> Net::HTTPResponse

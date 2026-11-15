@@ -86,6 +86,43 @@ RSpec.describe Hue::Sdk::Connection do
     end
   end
 
+  context 'when the bridge drops the connection before answering' do
+    let(:bridge) { FakeBridge.start { :drop } }
+
+    it 'sends each request once, as the app does', :aggregate_failures do
+      %i[get put delete].each do |method|
+        expect { described_class.request(method, '/clip/v2/resource/light') }.to raise_error(Hue::Sdk::ConnectionError)
+      end
+      expect(bridge.requests.map(&:verb)).to eq(%w[GET PUT DELETE])
+    end
+  end
+
+  context 'when the bridge answers after the read timeout' do
+    let(:bridge) do
+      FakeBridge.start do
+        sleep 0.4
+        [200, {}, 'late']
+      end
+    end
+
+    it 'sends the request once, as the app does', :aggregate_failures do
+      Hue::Sdk.configure { it.read_timeout = 0.1 }
+      expect { described_class.request(:put, '/clip/v2/resource/light') }.to raise_error(Hue::Sdk::ConnectionError)
+      expect(bridge.requests.map(&:verb)).to eq(%w[PUT])
+    end
+  end
+
+  context 'when the bridge closes an idle connection without close_notify' do
+    let(:bridge) { FakeBridge.start { [200, {}, 'ok', :close] } }
+
+    it 'opens a new one and sends the next request once', :aggregate_failures do
+      described_class.request(:get, '/one')
+      sleep 0.1
+      expect(described_class.request(:put, '/two').body).to eq('ok')
+      expect(bridge.requests.map(&:verb)).to eq(%w[GET PUT])
+    end
+  end
+
   it 'reopens a keep-alive connection after the bridge was unreachable', :aggregate_failures do
     described_class.request(:get, '/')
     bridge.down!

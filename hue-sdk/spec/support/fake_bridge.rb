@@ -87,13 +87,14 @@ class FakeBridge
   end
 
   # A handler answering [status, headers, body, :cut] announces one byte more than it sends, then
-  # drops TCP without TLS close_notify; one answering :drop drops it before answering.
+  # drops TCP without TLS close_notify; [status, headers, body, :close] answers whole, then drops it;
+  # :drop drops it before answering.
   def respond(socket, request)
     answer = @handler.call(request)
     return socket.io.close if answer == :drop
 
     status, headers, body, cut = answer
-    write_response(socket, status, headers, body, extra: cut ? 1 : 0)
+    write_response(socket, status, headers, body, extra: cut == :cut ? 1 : 0)
     socket.io.close if cut
   end
 

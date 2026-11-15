@@ -56,6 +56,15 @@ RSpec.describe Hue::Sdk::Client do
     end
   end
 
+  context 'when the bridge answers 429 with Retry-After' do
+    let(:bridge) { FakeBridge.start { [429, { 'Retry-After' => '3' }, '{"errors":[]}'] } }
+
+    it 'gives the seconds it asked on RateLimitError' do
+      expect { described_class.get('/resource/light') }
+        .to raise_error(an_instance_of(Hue::Sdk::RateLimitError).and(having_attributes(retry_after: 3)))
+    end
+  end
+
   context 'when the bridge answers with a body that is not JSON' do
     let(:bridge) { FakeBridge.start { [503, { 'Content-Type' => 'text/html' }, '<html>busy</html>'] } }
 

@@ -25,7 +25,7 @@ module Hue
 
       def delete: (String path) -> data
 
-      def refuse: (Integer status, Array[String] errors) -> bot
+      def refuse: (Integer status, Array[String] errors, ?Net::HTTPResponse? response) -> bot
 
       private
 

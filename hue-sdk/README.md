@@ -671,10 +671,16 @@ and checks every live view anyway, and so does the gem.
 | `Hue::Sdk::LinkButtonNotPressedError` | pairing without pressing the link button |
 | `Hue::Sdk::ResponseError` | the bridge, the Hue cloud, a clip's host or Kinesis Video answers with an error status, partial success (207) included; carries `status` and `errors` |
 | `Hue::Sdk::NotFoundError` | the resource does not exist (a `ResponseError`) |
-| `Hue::Sdk::RateLimitError` | the bridge asks to slow down (a `ResponseError`) |
+| `Hue::Sdk::RateLimitError` | the bridge asks to slow down (a `ResponseError`); for a CLIP request, `retry_after` gives the seconds its Retry-After named |
 | `Hue::Sdk::Secure::E2eeError` | a passphrase does not open the home, or Hue Secure media does not decrypt or verify |
 
 All of them inherit from `Hue::Sdk::Error`.
+
+After a 429, the next request to the same bridge resource, whatever its method, waits as the app's
+rate limiter does: what Retry-After asked, less the time since, at most 30 s; without it, a random
+draw over 2 s × (2^n − 1) for n 429s in a row, n at most 4. The refused request is never sent
+again: that is the caller's choice. Any other outcome, a failure included, clears the wait. The
+event stream does not wait.
 
 ## Sources
 

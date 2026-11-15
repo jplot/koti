@@ -26,6 +26,9 @@ module Hue
     end
 
     class RateLimitError < ResponseError
+      attr_reader retry_after: Float?
+
+      def initialize: (Integer status, Array[String] errors, ?retry_after: Float?, ?source: String) -> void
     end
   end
 end

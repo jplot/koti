@@ -38,4 +38,11 @@ RSpec.describe Miele::Sdk::Appliance do
     expect { appliance.name = 'Cuisine' }.to raise_error(Miele::Sdk::ResponseError, 'appliance answered 400')
     expect([sent.size, waits]).to eq([1, []])
   end
+
+  it 'reads Con@ctivity One back on an oven too, whose own polling is another' do
+    answers.push([204, {}, ''], [200, {}, '{"Show":true}'])
+    ident = Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 12, 'ProtocolVersion' => 4)
+    Miele::Sdk::Oven.new('127.0.0.1', fab:, ident:).supervise('000111222333', show: true)
+    expect(sent).to eq([%w[PUT SuperVision/000111222333], %w[GET SuperVision/000111222333]])
+  end
 end

@@ -10,7 +10,7 @@ module Miele
       def resent: [T] (?retries: Integer | Float, ?delay: Integer?, ?within: Integer | Float,
                        ?waits: Array[Integer | Float]) { () -> T } -> T
 
-      def polled: (Array[Integer | Float] waits, within: Integer | Float, ?first: Integer | Float) { () -> bool } -> void
+      def poll_until_shown: (Array[Integer | Float] waits, within: Integer | Float, ?first: Integer | Float) { () -> bool } -> void
 
       def sleep_counted: (Array[Integer | Float] waits, Integer | Float seconds) -> void
 

@@ -89,7 +89,7 @@ module Miele
         path = "/Devices/#{fab}/SuperVision/#{device}"
         waits = [] #: Array[Integer | Float]
         resent(retries: 3, delay: 2, waits:) { send_request(:put, path, body: JSON.generate('Show' => show)) }
-        polled(waits, within: 15) { get(path)['Show'] == show }
+        poll_until_shown(waits, within: 15) { get(path)['Show'] == show }
       end
 
       # @return [Hash{String=>Object}] the communication module's +/Info+

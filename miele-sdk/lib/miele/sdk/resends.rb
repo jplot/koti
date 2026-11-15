@@ -55,7 +55,7 @@ module Miele
       # @yieldreturn [Boolean] whether a read shows the action done
       # @return [void]
       # @raise [ActionFailedError] once the next read would come after +within+
-      def polled(waits, within:, first: 0)
+      def poll_until_shown(waits, within:, first: 0)
         delay = first
         while waits.sum + delay < within
           sleep_counted(waits, delay)

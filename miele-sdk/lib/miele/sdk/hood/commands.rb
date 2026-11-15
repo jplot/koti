@@ -226,7 +226,7 @@ module Miele
             body = JSON.generate('activated' => sources.any?, 'sourceDeviceIds' => sources)
             send_request(:put, "/Devices/#{fab}/services/ConnectivityPlus", body:)
           end
-          polled(waits, within: 15, first: 3) { connectivity_plus&.sources&.include?(hob) == connect }
+          poll_until_shown(waits, within: 15, first: 3) { connectivity_plus&.sources&.include?(hob) == connect }
         end
 
         # @param pf_id [Integer] its Dop1 setting

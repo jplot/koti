@@ -132,4 +132,22 @@ RSpec.describe Miele::Sdk::Oven do
   it 'has no setter for the times, whose return the client could not read' do
     expect(%i[start_at= end_at=].select { oven.respond_to?(it) }).to be_empty
   end
+
+  def device(type: 3, prog_id: 13)
+    shown = { 10 => dop2_field(:e8, type), 28 => dop2_field(:e16, prog_id) }
+    Miele::Sdk::Objects::Oven::GlobalDeviceContext.from({ 7 => dop2_field(:struct, shown) })
+  end
+
+  it 'tells the app shows the kept times while 1/1585 shows their automatic program, sending nothing',
+     :aggregate_failures do
+    shown = times(at, at + 3_600)
+    expect(oven.kept_times_shown?(shown, device)).to be(true)
+    expect([oven.kept_times_shown?(shown, device(prog_id: 14)), oven.kept_times_shown?(shown, device(type: 5)),
+            oven.kept_times_shown?(nil, device)]).to eq([false] * 3)
+    expect(fake.requests).to be_empty
+  end
+
+  it 'tells the app shows no times while 1/1585 shows ProgId 0, kept for it though they are' do
+    expect(oven.kept_times_shown?(times(at, at, prog_id: 0), device(prog_id: 0))).to be(false)
+  end
 end

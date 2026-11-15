@@ -552,8 +552,10 @@ off as named, and another one named on.
 `start_offered?`, `pause_offered?`, `resume_offered?`, `stop_offered?` and `cancel_offered?` are
 false while a DOP2 dishwasher shows info 700. A Dop1 dishwasher takes `ProcessAction` on its
 `State`, as the app's DeviceStateDto keeps it, its program and extras on 8906 and its delayed start
-on 8909. Delays are counted on the wall clock, as the app counts them, so on the day the clocks
-change they follow the clock.
+on 8909, each read first as the app reads it; the extras go back with 8906's reserve bits as read.
+On DOP2 the extras and the delayed start read 2/1577, then 2/1574, in the app's order. Delays are
+counted on the wall clock from when those reads are answered, as the app counts them, so on the day
+the clocks change they follow the clock.
 
 Not traced, so left to the dishwasher: where a Dop1 dishwasher shows info 700, and the units of the
 Dop1 consumption. As the app's ExecuteSequentiallyUntilTrue, `power_on` and `power_off` send each

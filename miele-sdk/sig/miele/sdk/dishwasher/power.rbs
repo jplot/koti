@@ -42,7 +42,7 @@ module Miele
 
         def dop2?: () -> bool
 
-        def dop1_start_delayed: (Integer minutes) -> void
+        def dop1_start_delayed: (Time at) -> void
       end
     end
   end

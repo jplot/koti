@@ -46,10 +46,14 @@ module Miele
       # @param klass [Class] a generated Dop1 object
       # @param timeout [Numeric, nil]
       # @return [Data] read with an empty section, as the app reads its laundry and dishwasher objects
+      # @raise [NotAcceptedError] for an answer without a +Response+ that carries the object
       def dop1_object(klass, timeout: nil)
         request = Dop1.request(object_id: klass::ID, type: Dop1::READ, section: '')
-        answer = JSON.parse(dop1(request, timeout:)).fetch('Response')
-        klass.from([answer[8..]].pack('H*'))
+        answer = dop1(request, timeout:)
+        response = Dop1.response(answer).to_s
+        raise NotAcceptedError, "the appliance answered #{answer.inspect}" if response.size < 8
+
+        klass.from([response[8..]].pack('H*'))
       end
     end
   end

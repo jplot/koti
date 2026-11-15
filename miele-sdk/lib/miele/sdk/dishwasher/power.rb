@@ -83,18 +83,20 @@ module Miele
 
         # A DOP2 dishwasher that counts down (supported bits 1, 32 or 33) takes the minutes left, rounded up;
         # another takes the time as local seconds since 1970, as the app sends it, then request 8. A Dop1 one takes
-        # the minutes on 8909, without a request.
+        # the minutes on 8909, without a request. Each counts from when its reads are answered, as the app does.
         #
         # @param at [Time] its time of day; the next one if it has passed today
         # @return [void]
         # @api public
         def start_delayed(at)
-          now = Time.now
-          return dop1_start_delayed(minutes_until(next_time(at, now), now)) unless dop2?
+          return dop1_start_delayed(at) unless dop2?
 
-          context = object(Objects::Dishwasher::GlobalPsContext, timeout: 5)
-          bits = context.context_para_dw&.delayed_start_mode&.supported_bits.to_i
-          modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 1, 2]) { delayed(it, bits, next_time(at, now), now) }
+          modify(Objects::Dishwasher::GlobalPsSelect, [2, 1577, 1, 2]) do |select|
+            context = object(Objects::Dishwasher::GlobalPsContext, timeout: 5)
+            bits = context.context_para_dw&.delayed_start_mode&.supported_bits.to_i
+            now = Time.now
+            delayed(select, bits, next_time(at, now), now)
+          end
           dop2_user_request(8)
         end
 

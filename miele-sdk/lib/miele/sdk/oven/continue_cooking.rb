@@ -22,9 +22,10 @@ module Miele
         def continue_cooking
           require_dop2!
           write_dop2(Messages.user_request(72))
-          phase, waited = timed_poll(Polling::ACTION_TIMEOUT) { shown_phase([PARA_CONSTRAINT, *CONTINUED_PHASES]) }
-          waited += raise_cooking_level(Polling::ACTION_TIMEOUT - waited) if phase == PARA_CONSTRAINT
-          continued, = timed_poll(Polling::ACTION_TIMEOUT - waited) { shown_phase(CONTINUED_PHASES) }
+          since = @clock.call
+          phase = poll(Polling::ACTION_TIMEOUT, since:) { shown_phase([PARA_CONSTRAINT, *CONTINUED_PHASES]) }
+          phase = nil if phase == PARA_CONSTRAINT && !cooking_level_raised?(since)
+          continued = phase && poll(Polling::ACTION_TIMEOUT, since:) { shown_phase(CONTINUED_PHASES) }
           raise ActionFailedError, "the oven did not cook on within #{Polling::ACTION_TIMEOUT} s" unless continued
         end
 
@@ -76,16 +77,18 @@ module Miele
 
         # SetRequiredCookingLevelAsync: it reads 1/1574 until it shows a level, then writes it one step higher.
         #
-        # @param budget [Numeric] the seconds left of the app's wait
-        # @return [Float] the seconds waited
-        def raise_cooking_level(budget)
-          found, waited = timed_poll(budget) do
+        # @param since [Float] when the app's wait began, on the appliance's monotonic clock
+        # @return [Boolean] whether 1/1574 showed a level within the wait, written then
+        def cooking_level_raised?(since)
+          found = poll(Polling::ACTION_TIMEOUT, since:) do
             context = program_context
             required_cooking_level(context)&.then { [written_program(context), *it] }
           end
+          return false unless found
+
           prog_id, id, level = found
-          write_parameter(prog_id, id, :u8, level) if found
-          waited
+          write_parameter(prog_id, id, :u8, level)
+          true
         end
 
         # Dop2WriteHelper.RetrieveProgramIdAsync reads the ProgId with LeftOrThrow, so a missing one fails the action.

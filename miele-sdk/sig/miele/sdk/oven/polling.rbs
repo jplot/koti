@@ -10,13 +10,11 @@ module Miele
 
         private
 
-        def poll: (Integer timeout) { () -> untyped } -> untyped
-
-        def timed_poll: (Integer | Float timeout) { () -> untyped } -> [untyped, Float]
+        def poll: (Integer | Float timeout, ?since: Float) { () -> untyped } -> untyped
 
         def polled: () { () -> untyped } -> [bool, untyped]
 
-        def pause: (Integer failures, Float waited, Integer | Float timeout) -> (Integer | Float)
+        def paused?: (Integer failures, Float since, Integer | Float timeout) -> bool
       end
     end
   end

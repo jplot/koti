@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Miele::Sdk::Oven do
-  subject(:oven) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { naps << seconds }) }
+  subject(:oven) { described_class.new('127.0.0.1', ident:, sleeper: ->(seconds) { naps << seconds }, clock:) }
 
   let(:fab) { '000123456789' }
   let(:ident) { Miele::Sdk::Schema::DeviceIdentification.from('DeviceType' => 13, 'ProtocolVersion' => 4) }
@@ -27,6 +27,10 @@ RSpec.describe Miele::Sdk::Oven do
   end
 
   after { fake.stop }
+
+  def clock = -> { naps.sum + (fake.requests.size * round_trip) }
+
+  def round_trip = 0
 
   def answer(bodies)
     body = bodies.size > 1 ? bodies.shift : bodies.first
@@ -150,6 +154,16 @@ RSpec.describe Miele::Sdk::Oven do
     expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionFailedError)
     expect(naps).to eq([3, 3, 3, 3])
     expect(written).to eq(['001300020629000000000002000107000d00030400'])
+  end
+
+  context 'when each round trip takes a second' do
+    def round_trip = 1
+
+    it 'counts them in the 15 s, which then leave room for four reads of 1/1574', :aggregate_failures do
+      program_context(0, parameters: { 6 => required(:u16, 18_000) })
+      expect { oven.select_program(13) }.to raise_error(Miele::Sdk::ActionFailedError)
+      expect(naps).to eq([3, 3, 3])
+    end
   end
 
   it 'writes every required parameter though one is refused, keeps the selection and raises it',

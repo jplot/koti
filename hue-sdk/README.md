@@ -431,6 +431,7 @@ as it is given, and `Plan` computes what those screens decide, for the client's 
 | `Plan.gated?(request, free_clips:)` | camera settings | whether the app checks the plan before a camera change, the request holding only what changes: clip recording turned on, unless `free_clips`; activity, package or lighting zones; sound detection |
 | `Plan.camera_action(plans, camera_id)` | camera settings | what it then does: `:run`, `:inform_then_run` (in the trial, after a dialog), `:suggest_plan`, `:nothing` (before the trial) or `:refetch` |
 | `Plan.covers?(plans, home, motion_areas:)` | alarm devices | whether a camera offers people, pets and vehicles, or common objects only |
+| `camera.detections` | alarm devices | which of `people`, `pet`, `vehicle` and `common_object` the camera's activity zones detect, and so which the screen offers; nil when the app shows the camera no row |
 
 Every call but `gated?` takes the plans as `subscription` reads them. `motion_area_selectable?` and
 `camera_action` take nil when the last read failed, as the app's "not fetched"; `status`,

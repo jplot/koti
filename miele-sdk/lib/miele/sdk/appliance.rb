@@ -125,7 +125,8 @@ module Miele
       def state = State.new(device('State'), device_type, protocol_version:, tech_type:)
 
       # ChangeApplianceNameAction sends it again after a 5xx or a lost connection, within the 15 s of its
-      # ActionExecutionTimeout.
+      # ActionExecutionTimeout, in which it waits for the +Ident+ its websocket pushes to show the name; the SDK
+      # sends nothing for that wait.
       #
       # @param name [String] the name the Miele app shows
       # @raise [ResponseError, ConnectionError] a 4xx or a timeout at once, another refusal once the 15 s are up

@@ -10,7 +10,8 @@ module Miele
 
         # The app wakes a deep sleep first (+DeviceAction+ 2), then writes 2/1586 only while +State+ shows Status 1
         # or 4 (SwitchOnForDop2Action, IsApplianceStateDifferentThanOff under ExecuteSequentiallyUntilTrue); the SDK
-        # reads +State+ again after the wake instead of waiting.
+        # reads +State+ again after the wake instead of waiting. The app waits up to 15 s for each step's effect in
+        # the +State+ its websocket pushes (ObserveDeviceState); the SDK sends nothing for it.
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
@@ -49,10 +50,13 @@ module Miele
           send_wake if status(state) == 1 || (status(state) == 4 && standby(state) != 1)
         end
 
-        # As SwitchOffForDop2Action (IsApplianceOffObservable), nothing goes out while +State+ shows Status 1.
+        # As SwitchOffForDop2Action (IsApplianceOffObservable), nothing goes out while +State+ shows Status 1. The app
+        # waits up to 15 s for Status 1 in the +State+ its websocket pushes; the SDK sends nothing for it.
         #
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 dishwasher, whose protocol has no 2/1586 to write
+        # @raise [Error] what the third attempt raises, which SwitchOffForDop2Action logs and swallows: the SDK
+        #   raises it, as it raises every refused write
         # @api public
         def power_off
           require_dop2!

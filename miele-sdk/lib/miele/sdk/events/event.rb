@@ -17,9 +17,11 @@ module Miele
       #     nil for the list of devices
       # @!attribute [r] resource
       #   @return [String] what changed: +/State/+, +/State/Light/+, +/State/Status/+ or +/Ident/+; through the
-      #     cloud also +/DOP2/{unit}/{attribute}/+ and +/Devices/+
+      #     cloud also +/DOP2/{unit}/{attribute}/+, +/Devices/+, any other resource of an appliance, and a push
+      #     outside any appliance under its own path
       # @!attribute [r] content
-      #   @return [Hash{String=>Object}, Dop2::Leaf, Array<Hash{String=>Object}>] the new content of that resource
+      #   @return [Hash{String=>Object}, Dop2::Leaf, Array<Hash{String=>Object}>, String] the new content of that
+      #     resource, as pushed where it is not JSON
       # @!attribute [r] source
       #   @return [Symbol] +:local+ for an appliance's push, +:cloud+ for the websocket's
       class Event

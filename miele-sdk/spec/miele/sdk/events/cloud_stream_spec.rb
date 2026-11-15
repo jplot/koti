@@ -60,9 +60,15 @@ RSpec.describe Miele::Sdk::Events::CloudStream do
     expect(first_events(1)).to eq([event('000123456789', '/DOP2/2/1586/', leaf)])
   end
 
-  it 'skips a resource the app does not read from the websocket' do
-    pushes << push('/V2/Devices/000123456789/Statistics', '{}') << push('/V2/Devices/000123456789/State', '{}')
-    expect(first_events(1).map(&:resource)).to eq(['/State/'])
+  it 'streams a resource the app does not read from the websocket, its body as pushed unless JSON' do
+    pushes << push('/V2/Devices/000123456789/Statistics', '{"Runs":3}') << push('/V2/Devices/000123456789/Note', 'hi')
+    expect(first_events(2)).to eq([event('000123456789', '/Statistics/', { 'Runs' => 3 }),
+                                   event('000123456789', '/Note/', 'hi')])
+  end
+
+  it 'streams a push outside any appliance under its own path' do
+    pushes << push('/V2/Announcements', '{"Text":"maintenance"}')
+    expect(first_events(1)).to eq([event(nil, '/V2/Announcements', { 'Text' => 'maintenance' })])
   end
 
   it 'streams the list of devices' do

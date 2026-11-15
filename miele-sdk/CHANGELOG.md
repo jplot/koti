@@ -9,6 +9,25 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** where the Miele app sends an action's requests with the action's token, which its
+  Timeout cancels, each request gets only what that Timeout has left, and none goes out once it has
+  run out: `ActionFailedError` is raised instead. That holds for a rename and Con@ctivity One and
+  Plus (15 s), a cooling appliance's `set_mode` (5 s), each of a DOP2 dishwasher's wake, switch-on
+  and switch-off sequences (15 s each, `State` read and three attempts included), a DOP2 coffee
+  maker's `power_on` (45 s) and `power_off` (15 s), and an oven's actions (15 s, 45 s for
+  `power_on`). A coffee maker's `power_on` counts its 45 s from before its `State` read, and an
+  oven's `select_program` and `continue_cooking` their 15 s from before their write, as the app's
+  Timeouts do; an oven's `select_program` writes the required parameters after them, with no bound
+  of their own. A 500 on the 1/1574 read of an oven's `microwave_power=` is taken as one on its
+  write, which the app sends under the same action.
+- Requests the app sends under a token of their own wait no longer than it gives them: a DOP2
+  dishwasher's reads and writes 15 s, its 2/1574 read 5 s before a delayed start or ProfiLine
+  extras and 15 s before other extras, and its wake's `State` read and `DeviceAction` 2 15 s each;
+  a Dop1 dishwasher's `State` read and write 1 s each to start, pause, resume, stop or cancel, and
+  its 8906 read, its extras' `State` read and its door opening 5 s; a laundry appliance's Dop1
+  selection read and write 8 s; a CVA6000's 1101 and 1100 15 s; a warming drawer's 1101 and 9781
+  5 s. A Dop1 dishwasher's 8906 and 8909 writes keep `read_timeout`: the app sends them with no
+  token, under HttpClient's 100 s. `get`, `state`, `dop1` and `object` take that `timeout:`.
 - **Breaking:** a write the appliance refuses raises, 400 included, as the Miele app never takes a
   refusal as done: `wake` and a hood's Dop1 writes no longer take a 400 as done, and a hood's Dop1
   writes raise `NotAcceptedError` for an Ack other than 1, but for the ProcessAction of the

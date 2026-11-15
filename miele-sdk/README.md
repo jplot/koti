@@ -201,10 +201,16 @@ purpose: a laundry action, a rename, an Opcode cooling target, Con@ctivity, and 
 switch-off of an oven, a dishwasher or a coffee maker, each as its section tells. A switch step of a
 dishwasher or a coffee maker goes out again whatever fails; the others never after a 4xx, nor after
 a request that outlasts the time the app gives it: 8 seconds for each attempt of a laundry action,
-`open_timeout` and `read_timeout` otherwise. The app's token bounds the whole request, where the SDK
-bounds its connection, its write and its answer each. The app's timeout around each action runs on
-the wall clock, request times included, and so do the SDK's waits, on the clock an appliance takes
-(`clock:`, monotonic by default). Within that timeout the app then waits for the change to show:
+`open_timeout` and `read_timeout` otherwise. Other requests get the token of their own the app gives
+them too: 1 to 15 seconds on a dishwasher, 8 on a laundry appliance's Dop1 selection, 15 on a
+CVA6000's Dop1 writes, 5 on a warming drawer's. The app's token bounds the whole request, where the
+SDK bounds its connection, its write and its answer each. The app's timeout around each action runs
+on the wall clock, request times included, and so do the SDK's waits, on the clock an appliance
+takes (`clock:`, monotonic by default). Where the app's requests carry the action's token, which
+that timeout cancels, each gets only what is left of it, and none goes out once it has run out
+(`Miele::Sdk::ActionFailedError`): a rename, Con@ctivity, a cooling mode, the switch sequences of a
+dishwasher or a coffee maker, and an oven's actions. Within that timeout the app then waits for the
+change to show:
 for a switch step and a rename, in the `State` or `Ident` its websocket pushes, for which the SDK
 sends nothing (the events stream gives them, see [Events](#events)); for Con@ctivity, by polling,
 which the SDK does too.

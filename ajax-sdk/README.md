@@ -207,15 +207,15 @@ method (its service, for an `…/execute` path), which ends its Ruby name, start
 
 | Shortcut | What it sends |
 |---|---|
-| `turn_on(device, channel: 1)`, `turn_off` | `device_command_device_on` / `_off`, with the family type the app sends: `light_switch`, `socket_base` or `water_stop_base` by the device's channels; `relay` with no channel, `relay_fibra_base` or `transmitter_fibra_base` by its kind |
-| `set_brightness(device, percent)` | `device_command_brightness`: 1 to 100, relative, on the first channel |
-| `open_shutter`, `close_shutter`, `stop_shutter(device)`, `move_shutter(device, percent)` | `device_command_roller_shutter_control`: the opening, 100 open and 0 closed, or stop |
+| `turn_on(device, channel: 1)`, `turn_off` | `device_command_device_on` / `_off`, with the family type the app sends: `light_switch`, `socket_base` or `water_stop_base` by the device's channels; `relay` with no channel, `relay_fibra_base` or `transmitter_fibra_base` by its kind; any other device by its exact type, as the app's relay channel tile sends it |
+| `set_brightness(device, percent)` | `device_command_brightness`: the percentage as given (the app's sliders give 1 to 100), relative, on the first channel, the device named a `light_switch_dimmer` whatever it is |
+| `open_shutter`, `close_shutter`, `stop_shutter(device)`, `move_shutter(device, percent)` | `device_command_roller_shutter_control` with the device's exact type: the opening as given, 100 open and 0 closed (the app's control gives multiples of 5), or stop |
 | `bypass(device, tamper_only: false, once: false)`, `unbypass(device, once: false)` | `device_command_device_bypass` |
 | `arm_group(space_id, group_id, ignore_alarms: false)`, `disarm_group` | `space_security_arm_group`, `space_security_disarm_group` |
 | `set_security_mode(space_id, mode)` | `space_security_set_security_mode`: `:regular` or `:group` |
 | `panic(space_id, location: nil)` | `space_press_panic_button`: **a real alarm** |
-| `lock(device)`, `unlock`, `unlatch` | a lock of the hub: `device_command_device_off` / `_on`; a cloud lock: `switch_smart_lock`, the only one that unlatches |
-| `mute(device)` | `device_command_sound_off`: the detector's own alarm, and external ones when its `mute_command` says so |
+| `lock(device)`, `unlock`, `unlatch` | a device of the hub: `device_command_device_off` / `_on` as a `smart_lock` on channel 1, and `_off` again to unlatch, as the app does; any other device: `switch_smart_lock` |
+| `mute(device)` | `device_command_sound_off`: the detector's own alarm, and external ones when its `mute_command` says so; no source when its mute button names no command |
 | `mute_fire_detectors(hub_id, except_triggered: false)` | `device_command_mute_all_fire_detectors` (`_except_triggered`) |
 | `reset_fire_alarm(hub_id)` | `hub_command_en54_hub_action` |
 | `device_details(device)`, `hub_details(space_id, hub_id)` | the first message of `stream_hub_device`, `stream_device_info`; a device whose type the app does not open this way (a hub, for example) raises `ReadError` `:refused` |
@@ -223,16 +223,32 @@ method (its service, for an `…/execute` path), which ends its Ruby name, start
 | `scenarios(space_id)`, `enable_scenario` / `disable_scenario(space_id, scenario_id)` | `stream_light_scenarios`, `set_scenario_state` |
 | `rooms(space_id)`, `groups(space_id)`, `current_member(space_id)` | the first message of `space_stream` |
 | `life_quality_history(device, from:, to:, step: :hour, time_zone: 'UTC')` | `life_quality_data_get_life_quality_data`, as a `LifeQualityHistory`: each measure by the start of its bucket |
-| `take_photo(device)` | `photo_on_demand_capture_photo`, with the camera's family as the app names it: `:cam`, `:cam_outdoor` or `:cam_fibra_base` |
+| `take_photo(device)` | `photo_on_demand_capture_photo`, with the camera's family as the app names it: `:cam`, `:cam_outdoor` or `:cam_fibra_base`, and `:no_device_type_info` for any other device |
 | `notification_media(space_id, notification_id)` | `notification_log_stream_notification_media`: each state of the notification's media, as an `Enumerator::Lazy` |
 
 Each shortcut calls a named method (below), so Steep checks its request and read-only mode refuses its
-commands. A device the shortcut does not fit raises `ArgumentError` before anything is sent; commands return
-nil. They send what the app 3.59 sends, which differs from what one would guess in three places:
+commands. Each sends what it is given, encoded as the app's request builders encode it, and the gateway
+answers it: a value, a channel or a device the app's screens would not offer goes as given. `ArgumentError`
+comes before anything is sent only where the app's builder has nothing to send (a hub command for a device
+outside the hub, a mute without a mute button), and `TypeError` for a value its field cannot carry. Commands
+return nil. The app's screens offer each action from the device's properties:
+
+| Action | The app offers it for a device with |
+|---|---|
+| `turn_on`, `turn_off` | a `channel`, `light_switch_channel`, `socket_base_channel` or `water_stop_channel` property (`device.channels`); a relay channel's tile only while its `is_channel_enabled` is set and its `output_mode` is not `:blocking_element` |
+| `set_brightness` | the kind `:light_switch_dimmer` and a `light_switch_channel` |
+| the shutter shortcuts | a `roller_position` (`device.shutter`); its control does not open while the position's `malfunction` is `:shutter_calibration_required` |
+| `lock`, `unlock`, `unlatch` | a `smart_lock_control` (`device.lock`); unlatch most likely when it carries `unlatch_info` (inferred, not traced) |
+| `mute` | a `fire_device_action_button.mute_button` (`device.mute_command`) |
+| `take_photo` | a `photo_on_demand` property, whatever the kind: `photo_on_demand?(device)`; its `estimated_arming_state` tells whether the device is armed |
+
+[Permissions](#permissions) lists what the app checks on top. The shortcuts send what the app 3.59 sends,
+which differs from what one would guess in three places:
 
 - The app never sends a slat command and never reads `SlatPosition`, so there is no slat shortcut.
-- To turn a device on or off, it sends the type of its family, not the device's exact type. It always turns
-  a legacy relay in impulse mode on; `turn_off` sends off to it anyway.
+- To turn a device on or off, it sends the type of its family, not the device's exact type, but for the
+  relay channel tile of a device of no family. It always turns a legacy relay in impulse mode on; `turn_off`
+  sends off to it anyway.
 - `stream_hub_device` and `update_hub_device` do not cover relays, sockets, light switches or valves: their
   settings have no known path. A fire alarm resets through the cloud only on an EN54 hub.
 

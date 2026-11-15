@@ -25,8 +25,10 @@ module Ajax
       end
 
       # Everyday device and space actions, mixed into {Client}. Each one calls a method of {Methods}, so Steep
-      # checks its request and read-only mode refuses its commands. A device the action does not fit raises
-      # ArgumentError before anything is sent. Commands return nil, reads typed values.
+      # checks its request and read-only mode refuses its commands. Each sends what it is given, encoded as the
+      # app's request builders encode it; ArgumentError comes only where the app's builder has nothing to send (a
+      # hub command for a device outside the hub, a mute without a mute button). Commands return nil, reads typed
+      # values.
       module Shortcuts
         SERVICE = Messages::Api::Ecosystem::V3::Mobilegwsvc::Service
         LOCATOR = Messages::Api::Ecosystem::V3::Mobilegwsvc::Commonmodels::Device::Locator
@@ -70,9 +72,10 @@ module Ajax
           private_constant :ROLLER, :FAMILIES
 
           # @param device [Device] a relay, light switch, socket or valve
-          # @param channel [Integer] its channel or gang, from 1
+          # @param channel [Integer] its channel or gang, from 1, sent as given but to a legacy relay, which gets
+          #   none; the app offers those in +channels+
           # @return [nil]
-          # @raise [ArgumentError] for a device with nothing to switch, or without that channel
+          # @raise [ArgumentError] for a device with nothing to switch
           def turn_on(device, channel: 1) = device_command_device_on(**switched(device, channel)).then { nil }
 
           # @param (see #turn_on)
@@ -82,22 +85,22 @@ module Ajax
 
           # Sends the percentage as the app does: on the first channel, as a relative brightness.
           #
-          # @param device [Device] a dimmer
-          # @param percent [Integer] from 1 to 100
+          # @param device [Device] a dimmer, as the request names any device
+          # @param percent [Integer] sent as given; the app's sliders give 1 to 100
           # @return [nil]
-          # @raise [ArgumentError] for another device or a percentage outside 1..100
+          # @raise [ArgumentError] for a device outside the hub
+          # @raise [TypeError] for a percentage that is not an Integer
           def set_brightness(device, percent)
-            raise ArgumentError, "#{device.kind} is not a dimmer" unless device.kind == :light_switch_dimmer
-            raise ArgumentError, "brightness #{percent} is outside 1..100" unless (1..100).cover?(percent)
+            raise TypeError, "brightness #{percent.inspect} is not an Integer" unless percent.is_a?(Integer)
 
             device_command_brightness(device_type: family_type(:light_switch_dimmer), brightness_in_percentage: percent,
                                       channels: [1], brightness_type: :relative, **hub_target(device))
             nil
           end
 
-          # @param device [Device] a roller shutter
+          # @param device [Device] a roller shutter, as the request names any device by its exact type
           # @return [nil]
-          # @raise [ArgumentError] for another device
+          # @raise [ArgumentError] for a device outside the hub
           def open_shutter(device) = move_shutter(device, 100)
 
           # @param (see #open_shutter)
@@ -105,12 +108,14 @@ module Ajax
           # @raise (see #open_shutter)
           def close_shutter(device) = move_shutter(device, 0)
 
-          # @param device [Device] a roller shutter
-          # @param percent [Integer] the opening, from 0 (closed) to 100 (open)
+          # @param device (see #open_shutter)
+          # @param percent [Integer] the opening, 0 closed and 100 open, sent as given; the app's control gives
+          #   multiples of 5
           # @return [nil]
-          # @raise [ArgumentError] for another device or an opening outside 0..100
+          # @raise (see #open_shutter)
+          # @raise [TypeError] for an opening that is not an Integer
           def move_shutter(device, percent)
-            raise ArgumentError, "opening #{percent} is outside 0..100" unless (0..100).cover?(percent)
+            raise TypeError, "opening #{percent.inspect} is not an Integer" unless percent.is_a?(Integer)
 
             goal = ROLLER::DeviceCommandRollerShutterControlRequest::TargetPosition
                    .new(shutter_target_position: percent)
@@ -127,9 +132,11 @@ module Ajax
             nil
           end
 
+          # Sends a device of the hub +device_off+ as a smart lock on channel 1, and any other device the cloud's
+          # lock action, as the app does.
+          #
           # @param device [Device] a lock of the hub or a cloud lock
           # @return [nil]
-          # @raise [ArgumentError] for another device, such as a Yale lock of the hub
           def lock(device)
             return cloud_lock(device, :lock) unless hub_lock?(device)
 
@@ -139,7 +146,6 @@ module Ajax
 
           # @param (see #lock)
           # @return [nil]
-          # @raise (see #lock)
           def unlock(device)
             return cloud_lock(device, :unlock) unless hub_lock?(device)
 
@@ -147,21 +153,25 @@ module Ajax
             nil
           end
 
-          # @param device [Device] a cloud lock
+          # A lock of the hub gets the same +device_off+ as {#lock}: the app sends it that to unlatch.
+          #
+          # @param (see #lock)
           # @return [nil]
-          # @raise [ArgumentError] for another device: a lock of the hub cannot unlatch
-          def unlatch(device) = cloud_lock(device, :unlatch)
+          def unlatch(device)
+            return cloud_lock(device, :unlatch) unless hub_lock?(device)
+
+            device_command_device_off(**hub_lock(device))
+            nil
+          end
 
           private
 
+          # A device of no family goes by its exact type, as the app's relay channel tile sends it.
           def switched(device, channel)
-            family = switch_family(device) or raise ArgumentError, "#{device.kind} has nothing to switch"
-            unless family == :relay || device.channels.any? { it.number == channel }
-              raise ArgumentError, "#{device.kind} has no channel #{channel}"
-            end
-
+            family = switch_family(device)
             channels = family == :relay ? [] : [channel] #: Array[Integer]
-            { hub_id: hub_id_of(device), device_id: device.id, device_type: family_type(family), channels: }
+            device_type = family ? family_type(family) : exact_type(device)
+            { hub_id: hub_id_of(device), device_id: device.id, device_type:, channels: }
           end
 
           # Relays go by their kind, as the app's z221 dispatches them: a legacy relay sends no channel.
@@ -177,24 +187,15 @@ module Ajax
             end
           end
 
-          def shutter(device)
-            unless device.kind.start_with?('roller_shutter')
-              raise ArgumentError, "#{device.kind} is not a roller shutter"
-            end
+          def shutter(device) = { hub_id: hub_id_of(device), device_id: device.id, device_type: exact_type(device) }
 
-            { hub_id: hub_id_of(device), device_id: device.id, device_type: exact_type(device) }
-          end
-
-          def hub_lock?(device) = device.kind == :smart_lock && !device.hub_id.nil?
+          def hub_lock?(device) = !device.hub_id.nil?
 
           def hub_lock(device)
             { hub_id: hub_id_of(device), device_id: device.id, device_type: family_type(:smart_lock), channels: [1] }
           end
 
           def cloud_lock(device, action)
-            raise ArgumentError, "#{device.kind} cannot #{action} through the cloud" unless device.kind == :smart_lock
-            raise ArgumentError, "a lock of the hub cannot #{action}" unless device.hub_id.nil?
-
             switch_smart_lock(space_id: device.space_id, smart_lock_id: device.id, action:)
             nil
           end
@@ -261,19 +262,20 @@ module Ajax
             nil
           end
 
-          # @param device [Device] a fire detector with a mute command
+          # Silences what the mute button's command names, and no source when it names none, as the app does.
+          #
+          # @param device [Device] a fire detector with a mute button
           # @return [nil]
           # @raise [ArgumentError] for a device without one
           def mute(device)
-            external = case device.mute_command
-                       when :own then false
-                       when :own_plus_external then true
-                       else raise ArgumentError, "#{device.kind} has no mute command"
-                       end
-            device_command_sound_off(
-              object_type: exact_type(device), mute_source_alarm: external ? %i[mute_own mute_external] : %i[mute_own],
-              **hub_target(device)
-            )
+            # @type var sources: Array[mute_source]
+            sources = case device.mute_command
+                      when :own then %i[mute_own]
+                      when :own_plus_external then %i[mute_own mute_external]
+                      when nil then raise ArgumentError, "#{device.kind} has no mute button"
+                      else []
+                      end
+            device_command_sound_off(object_type: exact_type(device), mute_source_alarm: sources, **hub_target(device))
             nil
           end
 
@@ -389,16 +391,14 @@ module Ajax
           # @raise [ReadError] when the gateway refuses the read
           def current_member(space_id) = space_snapshot(space_id)&.current_member
 
-          # @param device [Device] a device with LifeQuality measures
+          # @param device [Device] the app asks for one whose +life_quality+ is set
           # @param from [Time]
           # @param to [Time]
           # @param step [Symbol] the width of a bucket: +:minute+, +:hour+, +:day+ or +:month+
           # @param time_zone [String] the IANA zone that sets where days and months start
           # @return [LifeQualityHistory]
-          # @raise [ArgumentError] for a device without LifeQuality measures
+          # @raise [ArgumentError] for a device outside the hub
           def life_quality_history(device, from:, to:, step: :hour, time_zone: 'UTC')
-            raise ArgumentError, "#{device.kind} has no LifeQuality measures" unless device.life_quality
-
             zone = Messages::Google::Type::TimeZone.new(id: time_zone)
             LifeQualityHistory.from(
               life_quality_data_get_life_quality_data(hub_hex_id: hub_id_of(device), device_hex_id: device.id,
@@ -416,8 +416,8 @@ module Ajax
         module Media
           include Targets
 
-          # The app 3.59 names a MotionCam by its family in a photo request, the Fibra ones without a family; it
-          # names no other device there.
+          # The app 3.59 names a MotionCam by its family in a photo request, the Fibra ones and any other device
+          # without a family.
           PHOTO_FAMILIES = {
             cam: %i[motion_cam motion_cam_phod motion_cam_s_phod motion_cam_superior_phod motion_cam_s_phod_am
                     motion_cam_g3],
@@ -429,15 +429,21 @@ module Ajax
           }.flat_map { |family, kinds| kinds.map { [it, family] } }.to_h.freeze
           private_constant :PHOTO_FAMILIES
 
+          # @param device [Device]
+          # @return [Boolean] whether the app shows a photo on demand button for the device: the gateway sends it a
+          #   +photo_on_demand+ property, whatever its kind
+          def photo_on_demand?(device)
+            (device.raw.dig(:hub_device, :spread_properties) || []).any? { it.key?(:photo_on_demand) }
+          end
+
           # Asks a MotionCam for photos, as the app's photo on demand button does. They arrive as a
           # +PHOTO_ON_DEMAND+ notification, whose {#notification_media} gives their addresses.
           #
           # @param device [Device] a MotionCam
           # @return [nil]
-          # @raise [ArgumentError] for another device
+          # @raise [ArgumentError] for a device outside the hub
           def take_photo(device)
-            family = PHOTO_FAMILIES[device.kind] or raise ArgumentError, "#{device.kind} takes no photo on demand"
-
+            family = PHOTO_FAMILIES.fetch(device.kind, :no_device_type_info) #: photo_family
             photo_on_demand_capture_photo(**hub_target(device), device_type: family)
             nil
           end

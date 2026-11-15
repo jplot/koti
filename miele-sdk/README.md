@@ -648,50 +648,54 @@ fridge.ice_maker         # light, perfect_fresh, humidity, door_alarm_delay (sec
 
 ```ruby
 zone = fridge.zones.first
-fridge.set_target(zone, 4)        # whole degrees in the appliance's unit, as the app's picker offers
+fridge.target_choices(zone)       # => [2, 3, 4, 5, 6], the whole degrees the app's picker offers
+fridge.set_target(zone, 4)        # degrees in the appliance's unit
+fridge.zones_shown?               # => true where the app shows the zone controls
 fridge.set_super_mode(zone, true) # set_fan, set_vario_cool
 fridge.set_mode(:eco, true)       # :party, :holiday, :sabbath, :child_proof
 fridge.ice_maker = false          # light=, ambient_light_mode=, presentation_light=, humidity=,
                                   # perfect_fresh=, humidifier=, door_alarm_delay=
+fridge.ice_maker_offered?         # each setting has its _offered? predicate, and its picker its _choices
 ```
 
 The app reads no zone while the appliance is off and shows no zone temperature on protocol 200.
 It addresses a zone's target and super mode by its number, its fan by its position and VarioCool
 and presentation light by its rank. On protocol 201 the super mode first gets a duration of 720,
 whatever that write answers, then waits 500 ms. An Opcode appliance takes its target through
-`Oc85`, in whole °C, and its super mode as `ProcessAction` on `State/ProcessAction`. The app reads
-no `RemoteEnable` and checks nothing before these writes; the SDK refuses what the app shows no
-control for, such as an ice maker the appliance lacks or a mode it lists no values for.
+`Oc85`, in whole °C as 16-bit two's complement, and its super mode as `ProcessAction` on
+`State/ProcessAction`; the Cooling API takes a target in hundredths. As the app, the SDK sends
+nothing for a zone's current target.
 
-The SDK sends only what the app's pickers offer, and raises `ArgumentError` for anything else. A
-zone's target is one of its `TargetTemp` `AllValues`, else `Min` to `Max` by `Step`, else its
-current value, each in whole degrees rounded half away from zero as the app shows them. An Opcode
-zone keeps to the app's fixed ranges: 2 to 9 °C for a fridge, -28 to -14 °C for a freezer and 5 to
-20 °C for a wine zone; 3 to 9 and -26 to -15 °C on a KFN 37692 iDE or K 3.473 iD; any zone
--28 to -15 °C on an FN 30402 i or FN 35402 i; and only its current target in a zone of no known
-kind. As the app, the SDK sends nothing for a zone's current target. PerfectFresh, the
-humidifier, the door alarm delay and the humidity level keep to `Min` to `Max` by `Step`. A BSH
-ambient light mode is numbered from 1 in its picker's `Min` to `Max` by `Step` order and a Liebherr
-one goes from 1 to 7, as the app sends them; a zone's presentation light intensity is 0 (off) or 1
-to 7.
+The app reads no `RemoteEnable` and checks nothing before these writes but the controls its
+screens show; the SDK sends what it is given, and the predicates and pickers below give the app's
+rules. An Opcode target that is not whole degrees in 16 bits raises `ArgumentError`, an
+`ambient_light_mode=` on a protocol but 200 and 203, which has no such setting, raises
+`ActionUnavailableError`, and an unknown mode or humidity name raises `KeyError`.
 
-The SDK also refuses, with `ActionUnavailableError`, a control the app's screens hide. The zone
-controls (target, fan and VarioCool) are refused while off (Status 1, 10 or 255); while on,
-running or super freezing without a door signal, in Holiday or Sabbath mode; and in a failure
-without a door alarm, unless Holiday or Sabbath is on. A failure alarm shows the zones in both
-cases: the ice maker's alarm, a zone's power failure, or a temperature alarm in a freezer zone or a
-wine zone the app counts as one. The super mode is refused only while off, as the app's dashboard
-still offers it in those modes. PerfectFresh, the humidifier, the door alarm delay and the ice
-maker are refused at Status 1 or 255; PerfectFresh also on protocol 201 and without a `Step`, the
-humidifier and the door alarm delay without their setting or at a `Value` of -1, and the ice maker
-unless `IceMaker` is 1, 2 or 3. The humidity level and the presentation light's zone intensities
-are refused at Status 1 or 255, in a failure without a door signal, and in Holiday or Sabbath mode;
-the humidity level also needs a `HumidityControl` value other than -1, the intensities a light
-state (`PresentationLight` at 1 or 2). A wine unit's light needs a light state too
-(`AmbientLightState`, or `Light` in `State`, at 1 or 2, or no `Light` in `State`) and is switched
-where the zones show; its ambient light only there, with the light on and its setting listed. The
-app's dashboard also switches the light and the presentation light at any Status but 1, 10 or 255,
-in Holiday or Sabbath mode only under a failure, filter or door alarm, or with Party or Eco mode on.
+`target_choices(zone)` gives what the app's target picker offers: the zone's `TargetTemp`
+`AllValues`, else `Min` to `Max` by `Step`, else its current value, each in whole degrees rounded
+half away from zero as the app shows them. An Opcode zone offers the app's fixed ranges: 2 to 9 °C
+for a fridge, -28 to -14 °C for a freezer and 5 to 20 °C for a wine zone; 3 to 9 and -26 to -15 °C
+on a KFN 37692 iDE or K 3.473 iD; any zone -28 to -15 °C on an FN 30402 i or FN 35402 i; and only
+its current target in a zone of no known kind. `perfect_fresh_choices`, `humidifier_choices`,
+`door_alarm_delay_choices` and `humidity_choices` give `Min` to `Max` by `Step`;
+`ambient_light_choices` the BSH ambient light modes numbered from 1 in their picker's order, or a
+Liebherr one's 1 to 7; `presentation_light_intensity_choices` 0 (off) and 1 to 7.
+
+| Predicate | The app's rule |
+|---|---|
+| `zones_shown?` | the zone controls (target, fan for a zone with one, VarioCool for a zone with it): hidden while off (Status 1, 10 or 255); while on, running or super freezing without a door signal, in Holiday or Sabbath mode; and in a failure without a door alarm, unless Holiday or Sabbath is on. A failure alarm shows the zones in both cases: the ice maker's alarm, a zone's power failure, or a temperature alarm in a freezer zone or a wine zone the app counts as one |
+| `super_mode_offered?(zone)` | a zone with a super mode, the appliance not shown off: the dashboard still offers it in those modes |
+| `modes[name].editable` | a mode the appliance lists values for |
+| `ice_maker_offered?` | an appliance with an ice maker, not at Status 1 or 255, `IceMaker` 1, 2 or 3 |
+| `perfect_fresh_offered?` | not at Status 1 or 255, not on protocol 201, with a `Step` |
+| `humidifier_offered?`, `door_alarm_delay_offered?` | not at Status 1 or 255, the setting listed at a `Value` but -1 |
+| `settings_shown?` | not at Status 1 or 255, not in a failure without a door signal, not in Holiday or Sabbath mode |
+| `humidity_offered?` | a KWTUS or Rioja wine unit, `settings_shown?`, a `HumidityControl` value other than -1 |
+| `presentation_light_intensity_offered?` | a KWTUS or Rioja wine unit with a presentation light, `settings_shown?`, a light state (`PresentationLight` at 1 or 2) |
+| `light_shown?`, `light_offered?` | a wine unit the app lights (no Rioja), with a light state (`AmbientLightState`, or `Light` in `State`, at 1 or 2, or no `Light` in `State`), where the zones show or the dashboard's quick action does: at any Status but 1, 10 or 255, in Holiday or Sabbath mode only under a failure, filter or door alarm, or with Party or Eco mode on |
+| `presentation_light_offered?` | the presenter light section or the same quick action, with a light state |
+| `ambient_light_offered?` | a BSH wine unit, or a protocol 203 one neither KWTUS nor Rioja, where the zones show, with the light on and its setting listed |
 
 Left out: the app's retries of an Opcode target and its waits after some writes, and typed reads of
 zone alarms, target ranges and the ambient and presentation light state, which `cooling` gives

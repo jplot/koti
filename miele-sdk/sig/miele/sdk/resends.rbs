@@ -7,7 +7,7 @@ module Miele
 
       def three_attempts: [T] () { () -> T } -> T
 
-      def resent: [T] () { () -> T } -> T
+      def resent: [T] (?within: Integer | Float) { () -> T } -> T
 
       def resent?: (ResponseError | ConnectionError error) -> bool
     end

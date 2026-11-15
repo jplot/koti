@@ -24,20 +24,24 @@ module Miele
       end
 
       # RetryOnRestException: a refusal other than a 4xx, or a connection lost (the app's RestException of status
-      # 0), goes out again 1.5^n s later, 15 s past the sixth (CalculateDelayUntilMax), with no limit.
+      # 0), goes out again 1.5^n s later, 15 s past the sixth (CalculateDelayUntilMax), with no limit but the
+      # action's Timeout.
       #
+      # @param within [Numeric] the seconds the action's Timeout leaves its waits
       # @yieldreturn [Object] one attempt
       # @return [Object] what the attempt that succeeds gives
-      # @raise [Error] the first error the app does not send again
-      def resent
-        retries = 0
+      # @raise [Error] the first error the app does not send again, or the last once the next wait would end
+      #   +within+
+      def resent(within: Float::INFINITY)
+        waits = [] #: Array[Integer | Float]
         begin
           yield
         rescue ResponseError, ConnectionError => e
-          raise unless resent?(e)
+          delay = waits.size < 6 ? 1.5**(waits.size + 1) : 15
+          raise unless resent?(e) && waits.sum + delay < within
 
-          retries += 1
-          @sleeper.call(retries > 6 ? 15 : 1.5**retries)
+          @sleeper.call(delay)
+          waits << delay
           retry
         end
       end

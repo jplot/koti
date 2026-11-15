@@ -18,9 +18,11 @@ are computed with [`rotp`](https://github.com/mdp/rotp), and the SIA checksums w
 
 Use a **dedicated account** added to your space, not your personal one, with **two-factor
 authentication** turned on. koti answers the 2FA challenge itself from the TOTP secret the app shows
-when you enable it: it sends the current code once, as the app sends the one typed, and a refused code
-raises `AuthenticationError` `:invalid_totp`; the next call logs in again. The password is never stored:
-pass its lowercase SHA-256 hash, which is what the app sends over the wire.
+when you enable it: it sends the current code once, as the app sends the one typed. A refused code raises
+`AuthenticationError` `:invalid_totp`, and the next call answers the same two-factor request with the code
+of that time, as the app's next try does; `cloud.session.restart_login` starts over from the password, as
+the app's back button does. The password is never stored: pass its lowercase SHA-256 hash, which is what
+the app sends over the wire.
 
 ```ruby
 require "ajax/sdk"
@@ -525,7 +527,8 @@ and that return is dropped. An exchange runs once; without a block, `each` retur
 ## Errors
 
 - `Cloud::AuthenticationError(reason)` — the login was refused (`:invalid_credentials`,
-  `:account_locked`, `:invalid_totp`, …).
+  `:account_locked`, `:invalid_totp`, …, or `:unknown` when the gateway names no reason). The calls that
+  waited on that login raise the same error.
 - `Cloud::CommandError(reason)` — the hub refused a command.
 - `Cloud::ReadError(reason)` — the gateway refused a read.
   Both are `Cloud::RefusedError`s, with the `failure` the gateway answered and its `details`.

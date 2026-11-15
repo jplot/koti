@@ -9,6 +9,18 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** an oven's `start_at=` and `end_at=` are replaced by `set_start_at(time, kept:)` and
+  `set_end_at(time, kept:)`. On an automatic program outside phase 28002 they no longer write, as
+  the Miele app does not: writing its start started it. They return what the app keeps instead, an
+  `Oven::AutomaticTimes` (ProgId, start, end), or nil for a start now; for another program they
+  write the time and return `kept` as given. Their 1/1574 read comes before the 15 s of the write.
+  They raise `ActionUnavailableError` when 1/1574 gives no program type, no phase for an automatic
+  program, or no minimum start or end.
+- **Breaking:** an oven's `start` takes `kept:` instead of `at:`: an automatic program starts at the
+  kept start when those times are its own (the ProgId on 1/1574), and now otherwise; another
+  program starts with its request whatever it is given, instead of raising `ArgumentError`. A kept
+  start that a 64-bit field cannot hold raises `ArgumentError` before anything is sent.
+
 - **Breaking:** where the Miele app sends an action's requests with the action's token, which its
   Timeout cancels, each request gets only what that Timeout has left, and none goes out once it has
   run out: `ActionFailedError` is raised instead, as it is, with the `ConnectionError` as cause, by
@@ -166,6 +178,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- `Oven#kept_times_shown?(kept, device)`: whether the app's start and end cells show the times the
+  client keeps, over a 1/1585 it has read: an automatic program whose ProgId is theirs.
 - The rules of the app's screens and pickers as public predicates and readers, read as the app reads
   them. Ovens: `power_on_offered?`, `power_off_offered?`, `start_offered?`, `stop_offered?`,
   `stop_keeping_warm_offered?`, `steam_burst_offered?`, `continue_cooking_offered?`,

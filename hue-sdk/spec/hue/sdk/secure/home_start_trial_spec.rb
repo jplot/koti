@@ -10,6 +10,12 @@ RSpec.describe Hue::Sdk::Secure::Home, '#start_trial' do
                         '{"device":"ECB5FAFFFE000001","model_id":"BSB002"}'])
   end
 
+  it 'sends the bridge id upper-cased, as the app holds it' do
+    answer_empty
+    home.start_trial('ecb5fafffe000001', model_id: 'BSB002')
+    expect(cloud.requests.last.body).to eq('{"device":"ECB5FAFFFE000001","model_id":"BSB002"}')
+  end
+
   it 'raises ResponseError when the cloud refuses it' do
     answer({}, 409)
     expect { home.start_trial('ECB5FAFFFE000001', model_id: 'BSB002') }

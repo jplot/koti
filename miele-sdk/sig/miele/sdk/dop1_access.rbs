@@ -1,0 +1,22 @@
+module Miele
+  module Sdk
+    module Dop1Access
+      def dop1: (String request) -> String
+
+      def fab: () -> String
+
+      private
+
+      def blank: (untyped klass) -> untyped
+
+      def write_dop1_object: (untyped klass, untyped section, type: String) -> void
+
+      def write_dop1: (String request) -> void
+
+      def dop1_object: (untyped klass) -> untyped
+
+      def send_request: (Symbol method, String path, ?body: String?, ?kind: Symbol, ?timeout: (Integer | Float)?)
+                      -> Connection::Response
+    end
+  end
+end

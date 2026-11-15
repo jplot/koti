@@ -93,15 +93,18 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                            { **target, device_type: { relay_fibra_base: {} }, channels: [3] }]])
     end
 
-    it 'refuses a channelled device whose on and off flow the app does not show' do
-      expect { client.turn_on(device(:wall_switch, { channel: { channel_id: 1 } })) }
-        .to raise_error(ArgumentError, /wall_switch/)
+    it 'switches a device the app has no family for by its exact type, as its relay channel tile does' do
+      client.turn_on(device(:wall_switch, { channel: { channel_id: 1 } }), channel: 2)
+      client.turn_off(device(:door_protect))
+
+      expect(sent.map(&:last)).to eq([{ **target, device_type: { wall_switch: {} }, channels: [2] },
+                                      { **target, device_type: { door_protect: {} }, channels: [1] }])
     end
 
-    it 'refuses to switch a device with no switchable channel, or a channel it does not have', :aggregate_failures do
-      expect { client.turn_on(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
-      expect { client.turn_on(device(:light_switch_one_gang, gang(1)), channel: 2) }.to raise_error(ArgumentError, /2/)
-      expect(client).not_to have_received(:call)
+    it 'switches a channel the device does not list, as given' do
+      client.turn_on(device(:light_switch_one_gang, gang(1)), channel: 2)
+
+      expect(sent.last.last[:channels]).to eq([2])
     end
 
     it 'sets a dimmer brightness the way the app does' do
@@ -111,12 +114,23 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                                                channels: [1], brightness_type: :BRIGHTNESS_TYPE_RELATIVE })
     end
 
-    it 'refuses a brightness outside 1 to 100, or a device that is not a dimmer', :aggregate_failures do
+    it 'sends a brightness outside 1 to 100 as given' do
       dimmer = device(:light_switch_dimmer, gang(1))
+      [0, 101].each { client.set_brightness(dimmer, it) }
 
-      expect([0, 101].map { |percent| error_of { client.set_brightness(dimmer, percent) } }).to eq([ArgumentError] * 2)
-      expect { client.set_brightness(device(:relay), 50) }.to raise_error(ArgumentError, /relay/)
+      expect(sent.map { it.last[:brightness_in_percentage] }).to eq([0, 101])
+    end
+
+    it 'refuses a brightness or an opening that is not an integer, sending nothing', :aggregate_failures do
+      expect { client.set_brightness(device(:light_switch_dimmer, gang(1)), nil) }.to raise_error(TypeError)
+      expect { client.move_shutter(device(:roller_shutter_ws), nil) }.to raise_error(TypeError)
       expect(client).not_to have_received(:call)
+    end
+
+    it 'sets the brightness of any device as a dimmer, as the app does' do
+      client.set_brightness(device(:relay), 50)
+
+      expect(sent.last.last[:device_type]).to eq({ light_switch_dimmer: {} })
     end
 
     it 'opens a shutter to 100 and stops it' do
@@ -137,10 +151,26 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         .to eq([{ shutter_target_position: 0 }, { shutter_target_position: 30 }])
     end
 
-    it 'refuses a shutter opening outside 0 to 100, or a device that is not a shutter', :aggregate_failures do
-      expect { client.move_shutter(device(:roller_shutter_ws), 101) }.to raise_error(ArgumentError, /101/)
-      expect { client.close_shutter(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
-      expect(client).not_to have_received(:call)
+    it 'sends a shutter opening outside 0 to 100 as given' do
+      [-1, 101].each { client.move_shutter(device(:roller_shutter_ws), it) }
+
+      expect(sent.map { it.last[:target_position] })
+        .to eq([{ shutter_target_position: -1 }, { shutter_target_position: 101 }])
+    end
+
+    it 'presses a shutter like the tile of the app, sending no command and its exact type' do
+      client.press_shutter(device(:roller_shutter_ls))
+      client.press_shutter(device(:door_protect))
+
+      expect(sent.map(&:last)).to eq([{ **target, device_type: { roller_shutter_ls: {} } },
+                                      { **target, device_type: { door_protect: {} } }])
+    end
+
+    it 'moves any device as a shutter of its exact type, as the app does' do
+      client.close_shutter(device(:door_protect))
+
+      expect(sent.last.last).to eq({ **target, device_type: { door_protect: {} },
+                                               target_position: { shutter_target_position: 0 } })
     end
 
     it 'bypasses the lid only, once, then lifts a permanent bypass' do
@@ -209,10 +239,19 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                            { space_id: 'space-1', smart_lock_id: '0000BEEF', action: :ACTION_UNLATCH }]])
     end
 
-    it 'refuses to unlatch a jeweller lock, and any Yale lock', :aggregate_failures do
-      expect { client.unlatch(device(:smart_lock)) }.to raise_error(ArgumentError, /unlatch/)
-      expect { client.lock(device(:smart_lock_yale)) }.to raise_error(ArgumentError, /smart_lock_yale/)
-      expect(client).not_to have_received(:call)
+    it 'unlatches a lock of the hub with device_off and locks a Yale one as a smart lock, as the app does' do
+      client.unlatch(device(:smart_lock))
+      client.lock(device(:smart_lock_yale))
+
+      expect(sent).to eq([['DeviceCommandDeviceOffService/execute',
+                           { **target, device_type: { smart_lock: {} }, channels: [1] }]] * 2)
+    end
+
+    it 'sends a lock action through the cloud for any device outside the hub' do
+      client.unlock(device(:chime, hub: false))
+
+      expect(sent).to eq([['SwitchSmartLockService/execute',
+                           { space_id: 'space-1', smart_lock_id: '0000BEEF', action: :ACTION_UNLOCK }]])
     end
 
     it 'mutes own and external alarms' do
@@ -231,7 +270,13 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                           ['DeviceCommandMuteAllFireDetectorsService/execute', { hub_id: '0000ABCD' }]])
     end
 
-    it 'refuses to mute a device without a mute command' do
+    it 'mutes no alarm source when the mute button names no command, as the app does' do
+      client.mute(device(:fire_protect_two, mute_button(:MUTE_COMMAND_UNSPECIFIED)))
+
+      expect(sent.last.last[:mute_source_alarm]).to eq([])
+    end
+
+    it 'refuses to mute a device without a mute button, as the app does' do
       expect { client.mute(device(:door_protect)) }.to raise_error(ArgumentError, /mute/)
     end
 
@@ -345,10 +390,15 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
       expect(sent.map { it.last.except(:device_type) }).to all(eq(target))
     end
 
-    it 'refuses a photo from a device the app has no family for, sending nothing', :aggregate_failures do
-      expect { client.take_photo(device(:motion_cam_video_base)) }.to raise_error(ArgumentError, /video_base/)
-      expect { client.take_photo(device(:door_protect)) }.to raise_error(ArgumentError, /door_protect/)
-      expect(sent).to be_empty
+    it 'tells which devices the app shows a photo on demand button for', :aggregate_failures do
+      expect(client.photo_on_demand?(device(:door_protect, { photo_on_demand: {} }))).to be(true)
+      expect(client.photo_on_demand?(device(:motion_cam_phod))).to be(false)
+    end
+
+    it 'asks any other device for photos with no family, as the app does' do
+      client.take_photo(device(:door_protect))
+
+      expect(sent.last.last[:device_type]).to eq(:NO_DEVICE_TYPE_INFO)
     end
 
     it 'reads the media of a notification, each state as the cloud sends it', :aggregate_failures do
@@ -463,6 +513,13 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
                                      end_timestamp: 7200, discreteness: :LIFE_QUALITY_DATA_DISCRETENESS_HOUR,
                                      time_zone: { id: 'Europe/Brussels', version: '' } })
     end
+
+    it 'asks the life quality history of a device that reports no measures' do
+      replying(quality_answer)
+      client.life_quality_history(device(:door_protect), from: Time.at(0), to: Time.at(7200))
+
+      expect(sent.last.last).to include(hub_hex_id: '0000ABCD', device_hex_id: '0000BEEF')
+    end
   end
 
   context 'when read-only' do
@@ -500,6 +557,10 @@ RSpec.describe Ajax::Sdk::Cloud::Shortcuts do
         relay.call(answer(path, { success: { snapshot: {} } }))
       end
       allow(grpc).to receive(:request_response) { |path, *| answer(path, {}) }
+    end
+
+    it 'refuses a shutter press' do
+      expect { client.press_shutter(device(:roller_shutter_ls)) }.to raise_error(Ajax::Sdk::Cloud::ReadOnlyError)
     end
 
     it 'refuses an archive export' do

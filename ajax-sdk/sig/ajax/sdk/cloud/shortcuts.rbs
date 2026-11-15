@@ -32,6 +32,7 @@ module Ajax
         type location = ::Ajax::Sdk::Cloud::Messages::Api::Mobile::V2::Space::PressPanicButtonRequest::Location
         type step = ::Ajax::Sdk::Cloud::Messages::Mobilegw::Grpc::V1::Homeautomation::Lifequality::LifeQualityDataDiscreteness::value
         type update = HUBSVC::Device::Update
+        type mute_source = SERVICE::DeviceCommandSoundOff::DeviceCommandSoundOffRequest::MuteSourceAlarm::value
 
         module Targets : Methods
           private
@@ -58,6 +59,7 @@ module Ajax
           def close_shutter: (Device device) -> nil
           def move_shutter: (Device device, Integer percent) -> nil
           def stop_shutter: (Device device) -> nil
+          def press_shutter: (Device device) -> nil
           def lock: (Device device) -> nil
           def unlock: (Device device) -> nil
           def unlatch: (Device device) -> nil
@@ -114,8 +116,11 @@ module Ajax
         module Media : Methods
           include Targets
 
-          PHOTO_FAMILIES: Hash[Symbol, :cam | :cam_outdoor | :cam_fibra_base | :no_device_type_info]
+          type photo_family = :cam | :cam_outdoor | :cam_fibra_base | :no_device_type_info
 
+          PHOTO_FAMILIES: Hash[Symbol, photo_family]
+
+          def photo_on_demand?: (Device device) -> bool
           def take_photo: (Device device) -> nil
           def notification_media: (String space_id, String notification_id) -> Enumerator::Lazy[NOTIFICATION::NotificationMedia, untyped]
         end

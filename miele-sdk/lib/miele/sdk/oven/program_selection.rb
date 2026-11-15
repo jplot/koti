@@ -57,8 +57,8 @@ module Miele
         #
         # @param time [Time, :now]
         # @param kept [AutomaticTimes, nil] the times the client keeps for this oven
-        # @return [AutomaticTimes, nil] the times to keep from now on: +kept+ once the start is written, none for an
-        #   automatic program to start now
+        # @return [AutomaticTimes, nil] the times to keep from now on (see {AutomaticTimes}): +kept+ once the start is
+        #   written, none for an automatic program to start now
         # @raise [ActionUnavailableError] on a Dop1 oven, or when 1/1574 lacks a value the app reads: nothing is sent
         # @api public
         def set_start_at(time, kept:)

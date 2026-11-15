@@ -11,6 +11,8 @@ module Miele
         UNWRITABLE_STATES = %i[off not_connected running waiting_for_start].freeze
         private_constant :UNSUPPORTED_QUERIES, :UNWRITABLE_STATES
 
+        # Once the program is selected, the client drops the times it keeps as {AutomaticTimes} says.
+        #
         # @param prog_id [Integer, Symbol] a value of +GLOBAL_EnumPrgId+
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, whose protocol has no 2/1577 to write

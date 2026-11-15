@@ -16,7 +16,12 @@ module Miele
       include OvenState
 
       # The app keeps them (AutomaticProgramTimes) in memory, one per oven, until its start writes them; the client
-      # keeps them instead.
+      # keeps them instead, as {ProgramSelection#set_start_at} and {ProgramSelection#set_end_at} return them, and
+      # drops them where the app does (CleanData): when {ProgramSelection#set_start_at} returns nil for a start now;
+      # once {Selection#select_program} has selected a program, returning or raising {RequiredParametersError}, any
+      # other error leaving them kept; and once {OvenState#program_running?} holds within 15 s of {Requests#start},
+      # read from what follows the start, events included: the app waits that long for it and keeps them otherwise,
+      # where the SDK returns once the oven takes the write.
       #
       # @!attribute [r] prog_id
       #   @return [Integer] the automatic program they were set for, a value of +GLOBAL_EnumPrgId+

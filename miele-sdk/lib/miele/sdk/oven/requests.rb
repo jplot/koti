@@ -17,7 +17,8 @@ module Miele
         PYROLYSIS_ABORTS = [324, 325].freeze
         private_constant :REQUIRED_PARAMETERS, :TEMPERATURES, :PYROLYSIS_ABORTS
 
-        # An automatic program starts when its start time is written; the app sends no request for it.
+        # An automatic program starts when its start time is written; the app sends no request for it. The client
+        # then drops what it keeps as {AutomaticTimes} says.
         #
         # @param kept [AutomaticTimes, nil] the times the client keeps for this oven: an automatic program starts at
         #   their start when they are its own (GetStoredTime), now otherwise; another program ignores them

@@ -31,12 +31,12 @@ module Miele
       # once the action's time is up raises as the action does.
       #
       # @param timeout [Numeric, nil] the seconds the app gives the request itself
-      # @yieldparam limit [Numeric, nil] the seconds to send it with
+      # @yieldparam limit [Proc] gives the seconds to send it with, to be called just before it goes out
       # @return [Object] what the block gives
       # @raise [ActionFailedError] when the request times out once the action's time is up, its ConnectionError as
       #   cause
       def capped(timeout)
-        yield request_timeout(timeout)
+        yield -> { request_timeout(timeout) }
       rescue ConnectionError => e
         deadline = Thread.current[DEADLINE] #: Float?
         raise unless deadline && @clock.call >= deadline && e.cause.is_a?(Timeout::Error)

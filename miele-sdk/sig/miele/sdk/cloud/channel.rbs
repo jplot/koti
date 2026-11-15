@@ -20,7 +20,7 @@ module Miele
         def initialize: (Session session) -> void
 
         def request: (Symbol method, String path, ?body: String?, ?kind: Symbol, ?host: String?,
-                      ?timeout: (Integer | Float)?) -> Connection::Response
+                      ?timeout: (Integer | Float)?) ?{ () -> (Integer | Float)? } -> Connection::Response
 
         def devices: () -> Array[Device]
 

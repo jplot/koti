@@ -13,7 +13,7 @@ module Miele
 
       def within: [T] (Integer | Float seconds) { (Float since) -> T } -> T
 
-      def capped: [T] ((Integer | Float)? timeout) { ((Integer | Float)? limit) -> T } -> T
+      def capped: [T] ((Integer | Float)? timeout) { (^() -> (Integer | Float)? limit) -> T } -> T
 
       def request_timeout: ((Integer | Float)? timeout) -> (Integer | Float)?
 

@@ -213,9 +213,9 @@ module Miele
         cloud = @cloud if path.start_with?('/Devices/')
         dop1_host = host if path.match?(%r{\A/Devices/\d+/DOP/})
         capped(timeout) do |limit|
-          next @local.request(method, path, body:, kind:, timeout: limit) unless cloud
+          next @local.request(method, path, body:, kind:, timeout: limit.call) unless cloud
 
-          cloud.request(method, path, body:, kind:, host: dop1_host, timeout: limit)
+          cloud.request(method, path, body:, kind:, host: dop1_host, timeout:, &limit)
         end
       end
 

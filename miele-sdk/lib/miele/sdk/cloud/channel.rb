@@ -36,6 +36,8 @@ module Miele
         # @param kind [Symbol] +:json+ or +:dop2+, the type of the body
         # @param host [String, nil] the module's mDNS name, which the cloud routes a Dop1 request by
         # @param timeout [Numeric, nil] as {Connection.request} takes it
+        # @yieldreturn [Numeric, nil] that timeout instead, asked for once the token is in hand: a login or a renewal
+        #   then counts in the time an action has left
         # @return [Connection::Response]
         # @raise [NotFoundError, RemoteControlDisabledError, ResponseError] on an error status, a 401 too: the token
         #   is kept and the request not sent again, as by the app's appliance client (MieleHttpClientHandler)
@@ -43,7 +45,8 @@ module Miele
         # @api public
         def request(method, path, body: nil, kind: :json, host: nil, timeout: nil) # rubocop:disable Metrics/ParameterLists -- one request's body, its type, its Dop1 host and the time the app gives it
           headers = { 'Content-Type' => (TYPES.fetch(kind) if body), 'Host' => host&.delete_suffix('.') }.compact
-          exchange(@session.current, method, path, body, headers, timeout:)
+          token = @session.current
+          exchange(token, method, path, body, headers, timeout: block_given? ? yield : timeout)
         end
 
         # @return [Array<Device>] the appliances paired with the account

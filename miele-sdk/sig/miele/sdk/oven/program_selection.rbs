@@ -57,6 +57,8 @@ module Miele
         def hundredths: (Integer | Float celsius) -> Integer
 
         def unix_time: (Time | :now time) -> Integer
+
+        def unix_seconds: (Time time) -> Integer
       end
     end
   end

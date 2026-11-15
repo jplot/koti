@@ -108,10 +108,10 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written.map(&:last)).to eq([parameter(13, :u64, 0xFFFF_FFFF_FFFF_FFFF)] * 2)
   end
 
-  it 'writes nothing for a kept start that a 64-bit field cannot hold', :aggregate_failures do
+  it 'writes a kept start before 1970 wrapped into 64 bits, after the required parameters, as the app does' do
     serve([1], type: 3, parameters: { 6 => value(:u16, 2, 18_000) })
-    expect { oven.start(kept: kept(start_at: Time.utc(1))) }.to raise_error(ArgumentError, /does not fit/)
-    expect(written).to be_empty
+    oven.start(kept: kept(start_at: Time.utc(1)))
+    expect(written.map(&:last)).to eq([parameter(6, :u16, 18_000), parameter(13, :u64, 0xFFFF_FFF1_886E_0900)])
   end
 
   it 'writes the required parameters not yet confirmed before starting' do

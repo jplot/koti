@@ -76,13 +76,13 @@ module Miele
         # @param time [Time]
         # @param kept [AutomaticTimes, nil] the times the client keeps for this oven
         # @return [AutomaticTimes, nil] the times to keep from now on: +kept+ once the end is written; a minimum of 0
-        #   or all ones counts from 0001-01-01, as the app reads it, which can give a start {Requests#start} refuses
+        #   or all ones counts from 0001-01-01, as the app reads it, which can give a start before 1970
         # @raise [ActionUnavailableError] on a Dop1 oven, or when 1/1574 lacks a value the app reads: nothing is sent
         # @api public
         def set_end_at(time, kept:)
           require_dop2!
           context = program_context
-          return write_time(context, 14, time.to_i, kept) unless keeps_times?(context)
+          return write_time(context, 14, unix_seconds(time), kept) unless keeps_times?(context)
 
           AutomaticTimes.new(prog_id: selected_program(context), start_at: time - span(context), end_at: time)
         end
@@ -215,9 +215,15 @@ module Miele
         def unix_time(time)
           case time
           in :now then NOW
-          in Time then time.to_i
+          in Time then unix_seconds(time)
           end
         end
+
+        # RawDataForDateTime stores ToUnixTimeSeconds' int64 in a uint64 (IL_000e): a time before 1970 wraps.
+        #
+        # @param time [Time]
+        # @return [Integer]
+        def unix_seconds(time) = time.to_i & NOW
       end
     end
   end

@@ -24,7 +24,6 @@ module Miele
         # @return [void]
         # @raise [ActionUnavailableError] on a Dop1 oven, with no program selected, or when 1/1574 lacks a parameter
         #   the app reads before writing any
-        # @raise [ArgumentError] when a 64-bit field cannot hold the kept start: nothing is sent
         # @api public
         def start(kept: nil)
           require_dop2!
@@ -102,18 +101,14 @@ module Miele
           !mask(duration).anybits?(2) || (1...0xFFFF_FFFF).cover?(duration&.current_value.to_i)
         end
 
-        # StartProgramAction builds the start (IL_0136) before it writes the required parameters (IL_0163).
-        #
         # @param prog_id [Integer]
         # @param context [Objects::Oven::GlobalPsContext]
         # @param kept [AutomaticTimes, nil]
         # @return [void]
         def start_automatic(prog_id, context, kept)
           at = kept && kept.prog_id == prog_id ? kept.start_at : :now #: Time | :now
-          start = Messages.ps_select(prog_id, 2, [13, :u64, unix_time(at)])
-          Dop2.encode(start)
           write_required_parameters(prog_id, context)
-          write_dop2(start)
+          write_parameter(prog_id, 13, :u64, unix_time(at))
         end
 
         # @param context [Objects::Oven::GlobalPsContext]

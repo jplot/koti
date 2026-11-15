@@ -85,6 +85,18 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to eq([parameter(13, at.to_i), parameter(14, at.to_i)])
   end
 
+  it 'writes a start before 1970 wrapped into 64 bits, as the app does' do
+    serve(type: 5)
+    oven.set_start_at(Time.utc(1), kept: nil)
+    expect(written).to eq([parameter(13, 0xFFFF_FFF1_886E_0900)])
+  end
+
+  it 'writes an end before 1970 wrapped into 64 bits, as the app does' do
+    serve(type: 5)
+    oven.set_end_at(Time.utc(1969, 12, 31), kept: nil)
+    expect(written).to eq([parameter(14, 0xFFFF_FFFF_FFFE_AE80)])
+  end
+
   it 'reads 1/1574 once before the write, as the app answers its second read from the same poll' do
     serve(type: 5)
     oven.set_start_at(at, kept: nil)

@@ -37,17 +37,20 @@ module Hue
         end
 
         # What the app's alarm devices screen lets the alarm pick for this camera (_isSelectionOfDetectionTypeAllowed),
-        # from its activity zones as the app converts them: none, or an empty list, allow all four; a single zone over
-        # the entire area allows its own; several zones allow what any of them detects.
+        # from its activity zones as the app converts a camera read over HTTP and not yet held: none, or an empty list,
+        # allow all four; a single zone over the entire area, which a zone that does not say it is, allows its own;
+        # otherwise what any zone detects. A body the app cannot decode lists the camera with none.
         #
         # @return [Array<String>, nil] among +people+, +pet+, +vehicle+ and +common_object+, in the app's order; nil
-        #   when the app cannot convert the zones (a type it does not know, a zone without its area) and shows the
-        #   camera no row
+        #   when the app adds no row for the camera: zones it cannot convert (a type it does not know, a custom zone
+        #   without its area), or a body without its id, metadata or model
         # @api public
         def detections
-          camera = attributes or return
-          service = camera.service&.camera&.[]('0')
-          allowed(Array(service&.activity_zones))
+          zones = decoded_zones
+          return allowed(zones) if zones
+          return unless listed?
+
+          []
         end
 
         # @param request [Schema::CameraConfigUpdate]
@@ -150,6 +153,33 @@ module Hue
 
         private
 
+        # What CameraResponse.fromJson keeps of them: a service, zones that are objects, types that are strings.
+        #
+        # @return [Array<Schema::ActivityZoneResponse>, nil] nil when the app cannot decode the camera
+        # @api private
+        def decoded_zones
+          service = attributes&.service or return
+          zones = service.camera&.[]('0')&.activity_zones.to_a
+          zones if zones.all? { decodable?(it) }
+        end
+
+        # @param zone [Schema::ActivityZoneResponse, nil]
+        # @return [Boolean]
+        # @api private
+        def decodable?(zone)
+          types = zone&.detection_type
+          !zone.nil? && (types.nil? || (types.is_a?(Array) && types.all?(String)))
+        end
+
+        # The app's fallback for a camera it cannot decode (_convertCameraJsonToResponse) still needs these.
+        #
+        # @return [Boolean]
+        # @api private
+        def listed?
+          product = @data['product_data']
+          [@data['id'], product.is_a?(Hash) && product['model_id']].all?(String) && @data['metadata'].is_a?(Hash)
+        end
+
         # convertResponseActivityZones.
         #
         # @param zones [Array<Schema::ActivityZoneResponse>]
@@ -166,9 +196,10 @@ module Hue
         end
 
         # @param zones [Array<Schema::ActivityZoneResponse>]
-        # @return [Boolean] whether the zones are the app's entire video: one zone over the entire area
+        # @return [Boolean] whether the zones are the app's entire video: one zone over the entire area, which
+        #   +entire_area+ left out means
         # @api private
-        def entire_area?(zones) = zones.one? && zones.first&.entire_area == true
+        def entire_area?(zones) = zones.one? && zones.first&.entire_area != false
       end
     end
   end

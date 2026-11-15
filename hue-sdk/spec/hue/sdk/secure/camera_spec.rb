@@ -78,8 +78,9 @@ RSpec.describe Hue::Sdk::Secure::Camera do
   describe '#detections' do
     let(:four) { %w[people pet vehicle common_object] }
 
-    def detections(zones, service: { 'camera' => { '0' => { 'activity_zones' => zones } } })
-      described_class.new('home-1', 'cam-1', 'id' => 'cam-1', 'service' => service).detections
+    def detections(zones, service: { 'camera' => { '0' => { 'activity_zones' => zones } } }, **body)
+      data = { 'id' => 'cam-1', 'metadata' => {}, 'product_data' => { 'model_id' => 'CMB001' }, 'service' => service }
+      described_class.new('home-1', 'cam-1', data.merge(body)).detections
     end
 
     def zone(types, entire_area: false, area: [{ 'x' => 0.1, 'y' => 0.2 }])
@@ -87,22 +88,39 @@ RSpec.describe Hue::Sdk::Secure::Camera do
     end
 
     it 'offers all four without activity zones, as the app reads a camera over HTTP', :aggregate_failures do
-      expect([detections(nil), detections([]), detections(nil, service: nil)]).to all(eq(four))
+      expect([detections(nil), detections([]), detections(nil, service: {})]).to all(eq(four))
     end
 
-    it 'offers what a single zone over the entire area detects', :aggregate_failures do
+    it 'offers what a single zone over the entire area detects, one that says nothing too', :aggregate_failures do
       expect(detections([zone(%w[pet], entire_area: true, area: nil)])).to eq(%w[pet])
       expect(detections([zone(nil, entire_area: true, area: nil)])).to eq([])
+      expect(detections([{ 'detection_type' => %w[vehicle] }])).to eq(%w[vehicle])
     end
 
-    it "offers what any of several zones detects, in the order of the app's rows" do
+    it "offers what any custom zone detects, in the order of the app's rows", :aggregate_failures do
       expect(detections([zone(%w[vehicle]), zone(%w[vehicle people]), zone(nil)])).to eq(%w[people vehicle])
+      expect(detections([zone(%w[pet])])).to eq(%w[pet])
     end
 
-    it 'gives nil where the app cannot read the zones, and shows no row for the camera', :aggregate_failures do
+    it 'gives nil where the app cannot convert the zones, and adds no row for the camera', :aggregate_failures do
       expect(detections([zone(%w[dog])])).to be_nil
+      expect(detections([zone(%w[dog], entire_area: true, area: nil)])).to be_nil
+      expect(detections([zone(%w[people]), zone(%w[dog])])).to be_nil
       expect(detections([zone(%w[people], area: nil)])).to be_nil
-      expect(described_class.new('home-1', 'cam-1', 'id' => 'cam-1', 'metadata' => 'x').detections).to be_nil
+      expect(detections([zone(%w[people]), zone(%w[pet], area: nil)])).to be_nil
+      expect(detections([zone(%w[people], entire_area: true, area: nil), zone(%w[pet], area: nil)])).to be_nil
+    end
+
+    it 'offers nothing where the app cannot decode the camera but still lists it', :aggregate_failures do
+      broken = { 'camera' => { '0' => { 'activity_zones' => {} } } }
+      [nil, 'x', broken].each { expect(detections(nil, 'service' => it)).to eq([]) }
+      [[nil], [{ 'detection_type' => 'people' }], [{ 'detection_type' => [1] }]]
+        .each { expect(detections(it)).to eq([]) }
+    end
+
+    it 'gives nil for a camera the app cannot list at all', :aggregate_failures do
+      expect(detections(nil, 'service' => nil, 'metadata' => 'x')).to be_nil
+      expect(detections(nil, 'service' => nil, 'product_data' => {})).to be_nil
     end
   end
 

@@ -44,6 +44,12 @@ module Hue
 
         private
 
+        def decoded_zones: () -> Array[Schema::ActivityZoneResponse]?
+
+        def decodable?: (Schema::ActivityZoneResponse? zone) -> bool
+
+        def listed?: () -> bool
+
         def allowed: (Array[Schema::ActivityZoneResponse] zones) -> Array[String]?
 
         def entire_area?: (Array[Schema::ActivityZoneResponse] zones) -> bool

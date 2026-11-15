@@ -93,21 +93,11 @@ module Ajax
           answer.failure
         end
 
-        def login_with_totp(request_id, sent = nil)
-          code = totp_code(sent)
+        def login_with_totp(request_id)
+          code = ROTP::TOTP.new(@settings.totp_secret.to_s).now
           failure = sign_in(TOTP, totp_request(request_id, code)) or return
-          return login_with_totp(request_id, code) if failure.invalid_totp && sent.nil?
 
           raise AuthenticationError.new(reason(failure), 'two-factor login refused')
-        end
-
-        # A refused code that has since expired gives way to the current one; one still current gives
-        # way to the next window's, for a gateway whose clock runs ahead.
-        def totp_code(sent)
-          totp = ROTP::TOTP.new(@settings.totp_secret.to_s)
-          now = Time.now
-          code = totp.at(now)
-          code == sent ? totp.at(now + 30) : code
         end
 
         def accept(success)

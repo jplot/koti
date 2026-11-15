@@ -25,8 +25,7 @@ module Ajax
         def require_credentials: () -> void
         def two_factor: (untyped request_id) -> void
         def sign_in: (String path, untyped request) -> untyped
-        def login_with_totp: (untyped request_id, ?String? sent) -> void
-        def totp_code: (String? sent) -> String
+        def login_with_totp: (untyped request_id) -> void
         def accept: (untyped success) -> nil
         def password_request: () -> LOGIN::LoginByPassword::LoginByPasswordRequest
         def totp_request: (untyped request_id, String totp) -> LOGIN::LoginByTotp::LoginByTotpRequest

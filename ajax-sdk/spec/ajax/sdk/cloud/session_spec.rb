@@ -29,8 +29,6 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
 
   def totp_success = success(method(:totp))
 
-  def retried = [two_factor, invalid_totp, totp_success]
-
   it 'logs in with the password hash and keeps the session', :aggregate_failures do
     allow(client).to receive(:authenticate).and_return(success)
 
@@ -51,12 +49,13 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     expect(session.metadata).to include('client-session-token' => 'ABCD')
   end
 
-  it 'retries once with the next window on invalid_totp' do
+  it 'raises invalid_totp after one code, as the app sends one per try', :aggregate_failures do
     allow(client).to receive(:authenticate).and_return(two_factor, invalid_totp, totp_success)
 
-    session.ensure_login
-
-    expect(client).to have_received(:authenticate).exactly(3).times
+    expect { session.ensure_login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
+      expect(error.reason).to eq(:invalid_totp)
+    end
+    expect(client).to have_received(:authenticate).twice
   end
 
   it 'raises AuthenticationError naming the reason and attempts left', :aggregate_failures do
@@ -144,32 +143,13 @@ RSpec.describe Ajax::Sdk::Cloud::Session do
     expect(session.inspect).to eq('#<Ajax::Sdk::Cloud::Session logged_in=true>')
   end
 
-  def totp_codes_sent(first, retry_at)
-    answers = retried
+  it 'sends the code of the current window' do
     requests = []
+    answers = [two_factor, totp_success]
     allow(client).to receive(:authenticate) { |_path, request, _metadata| (requests << request) && answers.shift }
-    allow(Time).to receive(:now).and_return(first, retry_at)
+    allow(Time).to receive(:now).and_return(Time.at(1_700_000_010))
     session.ensure_login
-    requests.filter_map { it.to_h[:totp] }
-  end
 
-  it 'retries with the current code when the first one expired in transit' do
-    sent = totp_codes_sent(Time.at(1_700_000_010), Time.at(1_700_000_040))
-
-    expect(sent.last).to eq(ROTP::TOTP.new('JBSWY3DPEHPK3PXP').at(Time.at(1_700_000_040)))
-  end
-
-  it 'retries with the next window when the first code is still current' do
-    sent = totp_codes_sent(Time.at(1_700_000_010), Time.at(1_700_000_015))
-
-    expect(sent.last).to eq(ROTP::TOTP.new('JBSWY3DPEHPK3PXP').at(Time.at(1_700_000_045)))
-  end
-
-  it 'gives up after a second invalid_totp', :aggregate_failures do
-    allow(client).to receive(:authenticate).and_return(two_factor, invalid_totp, invalid_totp)
-
-    expect { session.ensure_login }.to raise_error(Ajax::Sdk::Cloud::AuthenticationError) do |error|
-      expect(error.reason).to eq(:invalid_totp)
-    end
+    expect(requests.last.to_h[:totp]).to eq(ROTP::TOTP.new('JBSWY3DPEHPK3PXP').at(Time.at(1_700_000_010)))
   end
 end

@@ -5,7 +5,7 @@ require 'json'
 module Hue
   module Sdk
     Settings = Data.define(:name, :bridge_id, :model_id, :software_version, :api_version, :time_zone, :utc,
-                           :remote_access, :analytics_consent, :http_blocked)
+                           :portal_services, :analytics_consent, :http_blocked)
 
     # The settings of the bridge the Hue app reads and writes over CLIP v1. CLIP v2 only reports the time zone, and the
     # app reads it there.
@@ -24,15 +24,16 @@ module Hue
     #   @return [String, nil] such as +Europe/Paris+, one of {.time_zones}
     # @!attribute [r] utc
     #   @return [String, nil] the clock of the bridge, such as +2026-11-03T10:00:00+
-    # @!attribute [r] remote_access
-    #   @return [Boolean, nil] whether the bridge may reach the Hue cloud; the app sets it when pairing only
+    # @!attribute [r] portal_services
+    #   @return [Boolean, nil] +portalservices+, which the app writes once, at onboarding, from its question whether to
+    #     share extended analytics
     # @!attribute [r] analytics_consent
     #   @return [Boolean, nil] whether the bridge may share statistics
     # @!attribute [r] http_blocked
     #   @return [Boolean, nil] whether the bridge refuses plain HTTP; not every bridge reports it
     class Settings
       WRITE = { time_zone: 'timezone', utc: 'UTC', http_blocked: 'blockhttp',
-                analytics_consent: 'analyticsconsent' }.freeze
+                analytics_consent: 'analyticsconsent', portal_services: 'portalservices' }.freeze
       private_constant :WRITE
 
       # Reads the settings of the bridge.
@@ -48,8 +49,8 @@ module Hue
         new(name: config['name'], bridge_id: config['bridgeid'], model_id: config['modelid'],
             software_version: config['swversion'], api_version: config['apiversion'],
             time_zone: Client.get('/resource/bridge').first&.dig('time_zone', 'time_zone'),
-            utc: config['UTC'], remote_access: config['portalservices'], analytics_consent: config['analyticsconsent'],
-            http_blocked: config['httpblocked'])
+            utc: config['UTC'], portal_services: config['portalservices'],
+            analytics_consent: config['analyticsconsent'], http_blocked: config['httpblocked'])
       end
 
       # @return [Array<String>] the time zones the bridge accepts
@@ -66,12 +67,13 @@ module Hue
       # @param utc [String, nil] the clock of the bridge
       # @param http_blocked [Boolean, nil] whether the bridge refuses plain HTTP
       # @param analytics_consent [Boolean, nil] whether the bridge may share statistics
+      # @param portal_services [Boolean, nil] +portalservices+, as the app's onboarding writes it
       # @return [Settings] these settings with the values written, as the app keeps them; it reads only +http_blocked+
       #   back from the bridge, which is nil on a bridge that does not report it
       # @raise (see .read)
       # @api public
-      def update(time_zone: nil, utc: nil, http_blocked: nil, analytics_consent: nil)
-        written = { time_zone:, utc:, http_blocked:, analytics_consent: }.compact
+      def update(time_zone: nil, utc: nil, http_blocked: nil, analytics_consent: nil, portal_services: nil)
+        written = { time_zone:, utc:, http_blocked:, analytics_consent:, portal_services: }.compact
         written.each { |name, value| ClipV1.request(:put, 'config', { WRITE.fetch(name) => value }) }
         written[:http_blocked] = http_blocked_read_back if written.key?(:http_blocked)
         with(**written)

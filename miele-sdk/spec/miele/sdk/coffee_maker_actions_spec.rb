@@ -271,10 +271,10 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
       expect([written, waits]).to eq([[], []])
     end
 
-    it 'switches off a coffee maker that is off, which the app does not offer', :aggregate_failures do
+    it 'sends no switch-off while State shows it off, as SwitchOffAction checks State first', :aggregate_failures do
       expect(coffee.power_off_offered?).to be(false)
       coffee.power_off
-      expect(written).to eq([['DOP2/2/1586', combi(1, 0)]])
+      expect(fake.requests.map(&:path).grep(/DOP2/)).to be_empty
     end
   end
 
@@ -289,10 +289,13 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     expect(written.size).to eq(2)
   end
 
-  it 'switches on a coffee maker that is on, which the app switches off then', :aggregate_failures do
+  it "sends no switch-on while State shows it on, or no Status, as SwitchOnHelper`1's IsApplianceOn reads it",
+     :aggregate_failures do
     expect(coffee.power_on_offered?).to be(false)
     coffee.power_on
-    expect(written).to eq([['DOP2/2/1586', combi(4, 0)]])
+    served['State'] = { 'RemoteEnable' => [15, 0, 1] }
+    coffee.power_on
+    expect(fake.requests.map(&:path).grep(/DOP2/)).to be_empty
   end
 
   it 'switches no light on a DOP2 coffee maker, for which the app has no light request', :aggregate_failures do
@@ -375,6 +378,7 @@ RSpec.describe Miele::Sdk::CoffeeMaker do
     end
 
     it 'switches it on, which the app does not offer', :aggregate_failures do
+      served['State'] = { 'Status' => 1, 'RemoteEnable' => [15, 0, 1] }
       expect(coffee.power_on_offered?).to be(false)
       coffee.power_on
       expect(written).to eq([['DOP2/2/1586', combi(4, 0)]])

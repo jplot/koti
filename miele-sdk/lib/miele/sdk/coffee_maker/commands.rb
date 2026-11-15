@@ -38,6 +38,8 @@ module Miele
           variant != :unknown && switchable?(state, [1])
         end
 
+        # SwitchOffAction sends nothing to a DOP2 coffee maker while +State+ shows Status 1 (IsApplianceOffObservable).
+        #
         # @return [void]
         # @raise [ActionUnavailableError] on a coffee maker of another protocol, which has no 2/1586 to write
         # @api public
@@ -45,6 +47,8 @@ module Miele
           return write_device_action(3) if protocol_version == 2
 
           require_dop2!
+          return if status(state) == 1
+
           three_attempts { modify(family::GlobalDeviceCombiState, [2, 1586, 0, 0]) { it.with(appliance_state: 1) } }
         end
 

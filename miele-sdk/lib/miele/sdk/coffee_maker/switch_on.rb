@@ -12,9 +12,13 @@ module Miele
 
         private
 
+        # Nothing goes out while +State+ shows it on, a Status other than 1, 8 and 255 or none (IsApplianceOn).
+        #
         # @return [void]
         # @raise [Error] what fails the third attempt, or the 500 still answered once the 45 s are up
         def switch_on
+          return unless [1, 8, 255].include?(state.raw['Status'])
+
           waits = [] #: Array[Integer | Float]
           3.times do |attempt|
             return send_switch_on(waits)

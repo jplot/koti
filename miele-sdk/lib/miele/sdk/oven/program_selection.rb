@@ -63,8 +63,9 @@ module Miele
         # @api public
         def set_start_at(time, kept:)
           require_dop2!
+          seconds = unix_time(time)
           context = program_context
-          return write_time(context, 13, unix_time(time), kept) unless keeps_times?(context)
+          return write_time(context, 13, seconds, kept) unless keeps_times?(context)
           return unless time.is_a?(Time)
 
           AutomaticTimes.new(prog_id: selected_program(context), start_at: time, end_at: time + span(context))

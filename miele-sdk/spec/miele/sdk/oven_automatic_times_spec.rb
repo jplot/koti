@@ -64,6 +64,14 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to be_empty
   end
 
+  it 'raises for a start neither a Time nor :now on an automatic program, as on another', :aggregate_failures do
+    [3, 5].each do |type|
+      serve(type:)
+      expect { oven.set_start_at(1_700_007_200, kept:) }.to raise_error(NoMatchingPatternError)
+    end
+    expect(written).to be_empty
+  end
+
   it 'reads a minimum of 0 or all ones as year 1, as the app does', :aggregate_failures do
     year_one = Time.utc(1).to_i
     serve(starts: 0)

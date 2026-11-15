@@ -3,11 +3,11 @@ module Miele
     module Resends
       MONOTONIC: ^() -> Float
 
+      DEADLINE: Symbol
+
       @sleeper: Appliance::_Sleeper
 
       @clock: ^() -> Float
-
-      @deadline: Float?
 
       private
 

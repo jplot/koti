@@ -6,6 +6,10 @@ module Miele
     module Resends
       # The clock an appliance measures the app's timeouts on unless given one: seconds, monotonic.
       MONOTONIC = -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
+      # The app gives each action a token of its own: its deadline lives with the fiber that runs it, never on an
+      # appliance that several threads share.
+      DEADLINE = :miele_sdk_action_deadline
+      private_constant :DEADLINE
 
       private
 
@@ -16,17 +20,18 @@ module Miele
       # @return [Object] what the block gives
       def within(seconds)
         since = @clock.call
-        @deadline = since + seconds
+        outer = Thread.current[DEADLINE]
+        Thread.current[DEADLINE] = since + seconds
         yield since
       ensure
-        @deadline = nil
+        Thread.current[DEADLINE] = outer
       end
 
       # @param timeout [Numeric, nil] the seconds the app gives the request itself
       # @return [Numeric, nil] those, or the time the action has left when less
       # @raise [ActionFailedError] without sending, when the action has no time left: its token is cancelled
       def request_timeout(timeout)
-        deadline = @deadline
+        deadline = Thread.current[DEADLINE] #: Float?
         return timeout unless deadline
 
         left = deadline - @clock.call
@@ -40,11 +45,11 @@ module Miele
       #
       # @return [Object] what the block gives
       def uncapped
-        deadline = @deadline
-        @deadline = nil
+        outer = Thread.current[DEADLINE]
+        Thread.current[DEADLINE] = nil
         yield
       ensure
-        @deadline = deadline
+        Thread.current[DEADLINE] = outer
       end
 
       # ExecuteSequentiallyUntilTrue sends a switch step through Rx's Retry(3): three attempts back to back,

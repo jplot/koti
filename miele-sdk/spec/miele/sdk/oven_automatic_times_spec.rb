@@ -144,6 +144,16 @@ RSpec.describe Miele::Sdk::Oven do
     expect(written).to be_empty
   end
 
+  it 'keeps nothing without the minimum start the app reads' do
+    serve(parameters: { 13 => dop2_field(:struct, { 1 => dop2_field(:u8, 9), 4 => dop2_field(:u64, 0) }) })
+    expect { oven.set_end_at(at, kept: nil) }.to raise_error(Miele::Sdk::ActionUnavailableError, /minimum start/)
+  end
+
+  it 'clears for a start now without reading the minimums, as the app clears before it reads them' do
+    serve(parameters: { 13 => nil, 14 => nil })
+    expect(oven.set_start_at(:now, kept:)).to be_nil
+  end
+
   it 'keeps nothing without the minimum end the app reads' do
     serve(parameters: { 14 => dop2_field(:struct, { 1 => dop2_field(:u8, 9), 4 => dop2_field(:u64, 0) }) })
     expect { oven.set_start_at(at, kept: nil) }.to raise_error(Miele::Sdk::ActionUnavailableError, /minimum/)

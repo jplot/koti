@@ -8,7 +8,9 @@ module Miele
         FAN_LEVELS = (0..5)
         RUN_ON_TIMES = [0, 5, 15].freeze
         FRAGRANCE_SETTINGS = { stop: 0, start: 1, miele_program: 2 }.freeze
-        private_constant :FAN_LEVELS, :RUN_ON_TIMES, :FRAGRANCE_SETTINGS
+        # WakeUpAction reads State every 500 ms for a minute: MaxTimeToWakeUp / _delayBetweenChecks.
+        WAKE_READS = 120
+        private_constant :FAN_LEVELS, :RUN_ON_TIMES, :FRAGRANCE_SETTINGS, :WAKE_READS
 
         # {Readings#fan_settable?} gives whether the app sets it: never while the hood's screen is pushed in.
         #
@@ -158,14 +160,16 @@ module Miele
         def disconnect_hob(hob) = update_connectivity_plus { it - [hob] }
 
         # A Dop1 or Opcode hood wakes when its State is written back, the light as it is, while +State+ shows it
-        # off; only an answer carrying "Success" means woken (DefaultWakeUpAction). DOP2 takes +DeviceAction+ 2.
+        # off; only an answer carrying "Success" means woken (DefaultWakeUpAction). A DOP2 hood takes
+        # +DeviceAction+ 2 once +State+ shows it asleep, then +State+ is read until it shows it awake (WakeUpAction).
         #
         # @return [void]
         # @raise [ResponseError] when the hood refuses the write, 400 included
         # @raise [NotAcceptedError] when a Dop1 or Opcode hood answers without "Success"
+        # @raise [ActionFailedError] when a DOP2 hood's +State+ does not show it awake within a minute
         # @api public
         def wake
-          return super if [3, 4].include?(protocol_version)
+          return wake_dop2 if [3, 4].include?(protocol_version)
 
           state = self.state
           return unless state.status == :off
@@ -180,6 +184,24 @@ module Miele
         def wake_offered? = [3, 4].include?(protocol_version) || state.status == :off
 
         private
+
+        # @return [void]
+        # @raise [ActionFailedError]
+        def wake_dop2
+          woken = WAKE_READS.times.any? do |read|
+            next true if awake?(state.raw)
+
+            send_wake if read.zero?
+            @sleeper.call(0.5)
+            false
+          end
+          raise ActionFailedError, 'the hood did not show itself awake within a minute' unless woken
+        end
+
+        # @param state [Hash{String=>Object}] +State+ as served
+        # @return [Boolean] synchronized (+SyncState+ absent or 2) and out of standby (+StandbyState+ 1), as
+        #   WakeUpAction.IsApplianceAwoken reads it
+        def awake?(state) = [nil, 2].include?(state['SyncState']) && state['StandbyState'] == 1
 
         # The app changes one hob in the list +services+ shows and derives +activated+ from what is left
         # (UpdateConactivityPlusSettingsHelper).

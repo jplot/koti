@@ -62,9 +62,9 @@ module Miele
     # it reports as settings not accepted, or a hood's wake answered without "Success".
     class NotAcceptedError < Error; end
 
-    # The appliance took an action's write but did not show its effect within the 15 s the Miele app waits for it
-    # (ActionExecutionTimeout), or showed a state without a value the app reads on the way; the app reports
-    # either as a failed action.
+    # The appliance took an action's write but did not show its effect within the time the Miele app waits for it
+    # (15 s, ActionExecutionTimeout; a minute for a DOP2 hood's wake), or showed a state without a value the app
+    # reads on the way; the app reports either as a failed action.
     class ActionFailedError < Error; end
   end
 end

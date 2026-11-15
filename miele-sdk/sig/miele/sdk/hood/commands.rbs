@@ -8,6 +8,8 @@ module Miele
 
         FRAGRANCE_SETTINGS: Hash[Symbol, Integer]
 
+        WAKE_READS: Integer
+
         def fan_level=: (Integer level) -> void
 
         def fan_run_on_time=: (Integer minutes) -> void
@@ -57,6 +59,10 @@ module Miele
         def write_setting: (Integer pf_id, Integer value) -> void
 
         private
+
+        def wake_dop2: () -> void
+
+        def awake?: (Hash[String, untyped] state) -> bool
 
         def reset_filter: (Integer pf_id, Integer request, String opcode_request) -> void
 

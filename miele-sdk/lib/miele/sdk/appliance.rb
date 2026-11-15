@@ -129,7 +129,7 @@ module Miele
       # @return [void]
       # @raise [ResponseError] when the appliance refuses it, 400 included
       # @api public
-      def wake = command(Schema::DeviceState.new(device_action: 2))
+      def wake = send_wake
 
       # Without an index, the read is the one the app's live observation sends; its one-shot reads give
       # +idx1: 0, idx2: 0+ and its polls +idx1: 0, idx2: 1+.
@@ -213,6 +213,9 @@ module Miele
       # @return [Connection::Response]
       # @raise [RemoteControlDisabledError] if the appliance refuses commands
       def command(request) = send_request(:put, "/Devices/#{fab}/State", body: request.to_json)
+
+      # @return [void]
+      def send_wake = command(Schema::DeviceState.new(device_action: 2))
 
       # @return [String]
       def dop2_path(unit, attribute) = "/Devices/#{fab}/DOP2/#{unit}/#{attribute}"

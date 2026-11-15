@@ -86,6 +86,8 @@ module Miele
 
       def command: (Schema::DeviceState request) -> Connection::Response
 
+      def send_wake: () -> void
+
       def dop2_path: (Integer unit, Integer attribute) -> String
 
       def dop2_user_request: (Integer id) -> void

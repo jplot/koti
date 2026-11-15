@@ -711,24 +711,32 @@ tested on an appliance: every read and write follows the app's code.
 ```ruby
 drawer.drawer_state          # => :programmed; an open door shows over off, on, running and paused
 drawer.programs              # Dop1 9788: #<data Program id=1, min_hours=1, max_hours=4, temperatures=[30, …]>
-drawer.power_on              # from off, off with its door open, finished or idle: Dop1 1101
-drawer.power_off             # from any other state, idle included, but not connected
+drawer.power_on              # Dop1 1101; power_off too
 drawer.select_program(1)     # 1 cups, 2 plates, 3 food, 4 low-temperature cooking: Dop1 9781
 drawer.target_temperature = 70
-drawer.remaining_time = 135  # minutes, from the program's minimum, kept to its maximum; 0 resets it
-drawer.cups_warm_up_source = '000111111111'   # a coffee maker the drawer lists; nil to stop
+drawer.remaining_time = 135  # minutes, kept to the program's maximum; 0 resets it
+drawer.cups_warm_up_source = '000111111111'   # a coffee maker's fab; nil to stop
 ```
 
-Each action makes the check of the app's rule for it. Switching on needs mobile start without local
-control and the drawer off, off with its door open, finished or idle, where the app's switch shows
-off; switching off the same control and the drawer in any state but off, off with its door open,
-finished or not connected, idle included; a program needs remote control and mobile start without
-local control, the drawer on, running or off; a temperature mobile start without local control and
-one of the program's five steps; a remaining time remote control and mobile start without local
-control while the program is set or runs (Status 3 to 6), and 0 or at least the program's minimum
-hours, as the app's picker offers. Without a program the app keeps the time to 0, and so does the
-SDK. A temperature re-sends the remaining time, and a remaining time the target, as the app writes
-them. `NotAcceptedError` reports an Ack other than 1.
+Each action sends what it is given; the predicates give the rule the app enables it by, and
+`programs` its pickers (the five temperature steps and the minimum and maximum hours of each
+program), `cups_warm_up` the coffee makers it lists.
+
+| Predicate | The app's rule |
+|---|---|
+| `switchable?` | mobile start without local control, which every rule below needs |
+| `power_on_offered?` | the drawer off, off with its door open, finished or idle, where the app's switch shows off |
+| `power_off_offered?` | the drawer in any state but off, off with its door open, finished or not connected, idle included |
+| `select_program_offered?` | remote control too, the drawer on, running or off |
+| `target_temperature_offered?` | a program |
+| `remaining_time_offered?` | remote control too, the program set or running (Status 3 to 6); the picker offers 0 or at least the program's minimum hours |
+| `cups_warm_up_offered?` | the drawer connected and `cups_warm_up` available |
+
+`select_program` raises `ArgumentError` for a program `Betriebsart` does not define, a temperature
+for degrees its byte does not hold, and a remaining time when negative. The app keeps a remaining
+time to the program's maximum hours, 0 without a program, and so does the SDK. A temperature
+re-sends the remaining time, and a remaining time the target, as the app writes them.
+`NotAcceptedError` reports an Ack other than 1.
 
 Left out: the cup warm-up's check that its source is a coffee maker by its ident, Con@ctivity One
 machines, and typed reads of the drawer's temperatures and times, which `State` gives raw.

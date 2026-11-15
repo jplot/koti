@@ -23,7 +23,7 @@ module Miele
 
         def initialize: () -> void
 
-        def timeouts: (?(Integer | Float)? limit) -> { open_timeout: (Integer | Float)?, read_timeout: (Integer | Float)? }
+        def timeouts: (?(Integer | Float)? limit) -> Hash[Symbol, Integer | Float]
       end
 
       def config: () -> Settings

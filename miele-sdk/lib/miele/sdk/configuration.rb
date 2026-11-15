@@ -81,10 +81,12 @@ module Miele
         end
 
         # @param limit [Numeric, nil] the seconds the app gives one request, nil when it gives none
-        # @return [Hash{Symbol=>Numeric}] +open_timeout+ and +read_timeout+, neither above +limit+
+        # @return [Hash{Symbol=>Numeric}] +open_timeout+ and +read_timeout+, neither above +limit+, and the
+        #   +write_timeout+ +limit+ gives
         # @api private
         def timeouts(limit = nil)
-          { open_timeout: [open_timeout, limit].compact.min, read_timeout: [read_timeout, limit].compact.min }
+          { open_timeout: [open_timeout, limit].compact.min, read_timeout: [read_timeout, limit].compact.min,
+            write_timeout: limit }.compact
         end
       end
 

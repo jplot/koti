@@ -5,9 +5,9 @@ module KotiPlan
   class FromModel
     # A door's head when the model has none: the common 204 cm frame, to correct in the produced JSON.
     DOOR_HEAD = 204
-    # A window's sill when the model has none, to correct in the produced JSON.
-    WINDOW_SILL = 90
-    # A window's head when the model has none, to correct in the produced JSON.
+    # A window's sill: the 50 cm the architect-plan page assumes until it is measured.
+    WINDOW_SILL = 50
+    # A window's head when the model gives neither head nor height, to correct in the produced JSON.
     WINDOW_HEAD = 215
     # The level height when no room has a ceiling height.
     DEFAULT_HEIGHT = 250
@@ -48,10 +48,16 @@ module KotiPlan
       {
         'id' => source.fetch('id'), 'kind' => kind, 'name' => source['label'],
         **ends(source, (low + high) / 2.0), 'depth' => high - low,
-        'sill' => kind == 'window' ? WINDOW_SILL : 0,
-        'head' => source['head'] || (kind == 'window' ? WINDOW_HEAD : DOOR_HEAD),
+        'sill' => kind == 'window' ? WINDOW_SILL : 0, 'head' => head(source, kind),
         **(kind == 'door' ? leaf(source) : {})
       }.compact
+    end
+
+    def head(source, kind)
+      return source['head'] if source['head']
+      return DOOR_HEAD unless kind == 'window'
+
+      source['height'] ? WINDOW_SILL + source['height'] : WINDOW_HEAD
     end
 
     def ends(source, middle)

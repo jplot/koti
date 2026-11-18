@@ -18,6 +18,7 @@ module KotiPlan
     def height: () -> Numeric
     def walls: () -> Array[Hash[String, untyped]]
     def opening: (Hash[String, untyped] source) -> Hash[String, untyped]
+    def head: (Hash[String, untyped] source, String kind) -> Numeric
     def ends: (Hash[String, untyped] source, Float middle) -> Hash[String, untyped]
     def leaf: (Hash[String, untyped] source) -> Hash[String, untyped]
     def room: (Hash[String, untyped] source) -> Hash[String, untyped]

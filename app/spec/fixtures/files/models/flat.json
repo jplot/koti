@@ -9,7 +9,9 @@
     { "id": "fenetre-a", "kind": "fenetre", "label": "Fenêtre", "axis": "y", "from": 80, "to": 160,
       "at": [0, 20], "head": null },
     { "id": "baie-a", "kind": "coulissante", "label": "Baie", "axis": "x", "from": 30, "to": 90,
-      "at": [200, 210], "head": null }
+      "at": [200, 210], "head": null },
+    { "id": "fenetre-b", "kind": "fenetre", "label": "Fenêtre mesurée", "axis": "x", "from": 200, "to": 260,
+      "at": [0, 20], "outside": 1, "height": 160 }
   ],
   "rooms": [
     { "id": "salon", "name": "Salon", "seed": [100, 100], "hsp": 240, "finish": "parquet",

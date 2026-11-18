@@ -29,7 +29,11 @@ RSpec.describe KotiPlan::FromModel do
   it 'gives a window its default sill and head, and no hinge' do
     expect(level['openings'][2]).to eq('id' => 'fenetre-a', 'kind' => 'window', 'name' => 'Fenêtre',
                                        'from' => [10, 80], 'to' => [10, 160], 'depth' => 20,
-                                       'sill' => 90, 'head' => 215)
+                                       'sill' => 50, 'head' => 215)
+  end
+
+  it 'puts a measured window height above the default sill' do
+    expect(level['openings'][4]).to include('sill' => 50, 'head' => 210)
   end
 
   it 'gives a sliding bay the door head' do

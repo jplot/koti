@@ -24,3 +24,15 @@ bin/rails runner 'User.create!(email_address: "ana@example.com", password: "…"
 ```
 
 The front signs in with `POST /api/session` and keeps the signed `session_id` cookie.
+
+## Plans
+
+koti reads a home plan in the koti-plan format (`../catalog/koti-plan.schema.json`, example in `../catalog/examples/studio.json`). `PUT /api/plan` imports one, and `GET /api/plan` serves the latest.
+
+To start from the `model.json` of the architect-plan scripts:
+
+```sh
+bin/rails 'koti:plan:from_model[path/to/model.json,Appartement]' > plan.json
+```
+
+Then import `plan.json` from the front. When the model has no height for an opening, doors get a 204 cm head and windows a 90 cm sill and a 215 cm head: correct them in `plan.json` first. A real home's plan stays out of this repository.

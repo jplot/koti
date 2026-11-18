@@ -35,7 +35,7 @@ async function guarded(action: () => Promise<void>) {
     await action()
   } catch (error) {
     if (error instanceof Unauthorized) await router.push('/login')
-    else throw error
+    else failure.value = { title: 'koti ne répond pas.', details: [(error as Error).message] }
   }
 }
 

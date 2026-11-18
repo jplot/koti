@@ -50,4 +50,10 @@ describe('LoginPage', () => {
     const { wrapper } = await signIn()
     expect(wrapper.text()).toContain('Trop d’essais. Réessayer dans quelques minutes.')
   })
+
+  it('says koti does not answer on a server error', async () => {
+    answer(500, {})
+    const { wrapper } = await signIn()
+    expect(wrapper.text()).toContain('koti ne répond pas. Réessayer dans un instant.')
+  })
 })

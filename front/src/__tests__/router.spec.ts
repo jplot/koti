@@ -22,4 +22,11 @@ describe('the router', () => {
     await router.push('/')
     expect(router.currentRoute.value.path).toBe('/')
   })
+
+  it('lets the page load, and show the failure, when the session check fails', async () => {
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>(async () => Promise.reject(new TypeError('Failed to fetch'))))
+    const router = createAppRouter(createMemoryHistory())
+    await router.push('/')
+    expect(router.currentRoute.value.path).toBe('/')
+  })
 })

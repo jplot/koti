@@ -11,6 +11,8 @@ class FrontController < ApplicationController
     index = Rails.public_path.join('index.html')
     return head(:not_found) unless index.exist?
 
+    # The entry page names the hashed assets of the current build: a browser must ask again after an upgrade.
+    response.headers['Cache-Control'] = 'no-cache'
     send_file index, type: 'text/html', disposition: 'inline'
   end
 end

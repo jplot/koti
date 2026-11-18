@@ -46,5 +46,8 @@ module Koti
 
     # Accounts sign in with a signed cookie, which API mode leaves out.
     config.middleware.use ActionDispatch::Cookies
+
+    # The static server would answer / with public/index.html and a year of cache; FrontController serves it instead.
+    config.public_file_server.index_name = 'none'
   end
 end

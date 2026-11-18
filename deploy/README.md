@@ -13,14 +13,14 @@ koti runs in Docker: `web` (the Rails app, which also serves the front) and `db`
    docker compose -f deploy/compose.yml up -d --build
    ```
 
-3. Create the first account from the Rails console, so the password stays out of the shell history:
+3. Create the first account from the Rails console. `getpass` asks for the password without echoing it, so it stays out of both the shell and the console histories:
 
    ```sh
    docker compose -f deploy/compose.yml exec web bin/rails console
    ```
 
    ```ruby
-   User.create!(email_address: "ana@example.com", password: "…")
+   User.create!(email_address: "ana@example.com", password: IO.console.getpass("Mot de passe : "))
    ```
 
 4. Open `http://<nas>:3000`, sign in, and import the plan.
@@ -32,7 +32,11 @@ git pull
 docker compose -f deploy/compose.yml up -d --build
 ```
 
-The image migrates the database before the server starts. The data lives in the `koti-db` volume.
+The image migrates the database before the server starts. The data lives in the `koti_koti-db` volume (compose prefixes the project name). To back it up:
+
+```sh
+docker compose -f deploy/compose.yml exec db pg_dump -U postgres koti > koti.sql
+```
 
 ## Notes
 

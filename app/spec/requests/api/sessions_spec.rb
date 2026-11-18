@@ -27,6 +27,22 @@ RSpec.describe 'Api::Sessions' do
     expect(response.parsed_body).to eq('error' => 'rate_limited')
   end
 
+  it 'still answers 429 when X-Forwarded-For changes on each attempt' do
+    11.times do |index|
+      post '/api/session', params: { email_address: user.email_address, password: 'wrong' },
+                           headers: { 'X-Forwarded-For' => "10.0.0.#{index}" }, as: :json
+    end
+    expect(response).to have_http_status(:too_many_requests)
+  end
+
+  it 'answers 429 after 10 attempts on one address from many machines' do
+    11.times do |index|
+      post '/api/session', params: { email_address: user.email_address, password: 'wrong' },
+                           env: { 'REMOTE_ADDR' => "192.168.0.#{index + 10}" }, as: :json
+    end
+    expect(response).to have_http_status(:too_many_requests)
+  end
+
   it 'tells who is signed in', :aggregate_failures do
     sign_in
     get '/api/session'

@@ -5,7 +5,11 @@ module Api
   # Opens, reads and closes the session of an account.
   class SessionsController < ApplicationController
     allow_unauthenticated_access only: :create
-    rate_limit to: 10, within: 3.minutes, only: :create,
+    # By socket address, not remote_ip: any LAN client can set X-Forwarded-For, and private ranges are trusted.
+    rate_limit to: 10, within: 3.minutes, only: :create, by: -> { request.remote_addr },
+               with: -> { render json: { error: 'rate_limited' }, status: :too_many_requests }
+    rate_limit to: 10, within: 3.minutes, only: :create, name: 'address',
+               by: -> { params[:email_address].to_s.strip.downcase },
                with: -> { render json: { error: 'rate_limited' }, status: :too_many_requests }
 
     # The signed-in account.

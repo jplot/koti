@@ -20,11 +20,9 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  config.assume_ssl = true
-
-  # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # koti answers plain HTTP on the LAN, where a browser drops a Secure cookie: TLS only behind a TLS proxy.
+  config.assume_ssl = ENV['KOTI_TLS'] == '1'
+  config.force_ssl = ENV['KOTI_TLS'] == '1'
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }

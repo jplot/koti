@@ -14,6 +14,8 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Breaking:** ajax-sdk requires Ruby 4.0 or later, like the rest of koti. `grpc` and `google-protobuf` have
+  shipped Ruby 4.0 binaries since 1.78.1 and 4.34.0 (February 2026); the cap at `< 4.0` was never needed.
 - **Breaking:** a refused TOTP code is no longer followed by the next window's: the login sends the current
   code once, as the app sends the one typed, and raises `AuthenticationError` `:invalid_totp`. The next call
   answers the same two-factor request with the code of that time, as the app's next try does, and the calls

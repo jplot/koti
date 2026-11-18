@@ -13,8 +13,7 @@ Gem::Specification.new do |spec|
                      'used by the official app: devices with battery and signal, arming, history, live streams.'
   spec.homepage = 'https://github.com/jplot/koti/tree/main/ajax-sdk'
   spec.license = 'MPL-2.0'
-  # grpc and google-protobuf ship precompiled binaries only up to Ruby 3.4; the rest of koti stays on 4.0.
-  spec.required_ruby_version = ['>= 3.4', '< 4.0']
+  spec.required_ruby_version = '>= 4.0'
 
   spec.add_dependency 'digest-crc', '~> 0.7'
   spec.add_dependency 'google-protobuf', '~> 4.36'

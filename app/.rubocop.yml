@@ -9,3 +9,12 @@ AllCops:
     - 'bin/*'
     - 'db/schema.rb'
     - 'vendor/**/*'
+
+# A migration's class name says what it does, and Rails generates it.
+Style/Documentation:
+  Exclude:
+    - 'db/migrate/*'
+
+# Steep 2.1.0 raises a RuntimeError in type_hash on an anonymous `**` forwarded to a call.
+Style/ArgumentsForwarding:
+  UseAnonymousForwarding: false

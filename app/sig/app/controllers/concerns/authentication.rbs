@@ -1,0 +1,15 @@
+module Authentication
+  extend ActiveSupport::Concern
+
+  module ClassMethods
+    def allow_unauthenticated_access: (**untyped options) -> void
+  end
+
+  private
+
+  def require_authentication: () -> untyped
+  def resume_session: () -> Session?
+  def find_session_by_cookie: () -> Session?
+  def start_new_session_for: (User user) -> Session
+  def terminate_session: () -> void
+end

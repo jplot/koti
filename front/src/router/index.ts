@@ -11,7 +11,15 @@ export function createAppRouter(history: RouterHistory) {
       { path: '/login', component: LoginPage, meta: { public: true } },
     ],
   })
-  router.beforeEach(async (to) => (to.meta.public || (await getSession()) ? true : '/login'))
+  router.beforeEach(async (to) => {
+    if (to.meta.public) return true
+    try {
+      return (await getSession()) ? true : '/login'
+    } catch {
+      // koti does not answer: the page loads anyway and shows its own failure instead of a blank screen.
+      return true
+    }
+  })
   return router
 }
 

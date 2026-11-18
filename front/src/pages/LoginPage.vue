@@ -23,7 +23,7 @@ async function submit() {
   } catch (refusal) {
     if (refusal instanceof LoginRefused) error.value = 'Adresse ou mot de passe incorrect.'
     else if (refusal instanceof TooManyAttempts) error.value = 'Trop d’essais. Réessayer dans quelques minutes.'
-    else throw refusal
+    else error.value = 'koti ne répond pas. Réessayer dans un instant.'
   } finally {
     busy.value = false
   }

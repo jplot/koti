@@ -35,7 +35,7 @@ async function guarded(action: () => Promise<void>) {
     await action()
   } catch (error) {
     if (error instanceof Unauthorized) await router.push('/login')
-    else throw error
+    else failure.value = { title: 'koti ne répond pas.', details: [(error as Error).message] }
   }
 }
 
@@ -46,6 +46,11 @@ onMounted(() =>
     loaded.value = true
   }),
 )
+
+// reka-ui clears a single toggle group when its active item is clicked again: the view must stay set.
+function chooseView(next: unknown) {
+  if (next === '2d' || next === '3d') view.value = next
+}
 
 function chooseLevel(id: string) {
   levelId.value = id
@@ -106,7 +111,14 @@ const signOut = () =>
       >
         <option v-for="candidate in plan.levels" :key="candidate.id" :value="candidate.id">{{ candidate.name }}</option>
       </select>
-      <ToggleGroup v-if="level" v-model="view" type="single" variant="outline" aria-label="Vue">
+      <ToggleGroup
+        v-if="level"
+        :model-value="view"
+        type="single"
+        variant="outline"
+        aria-label="Vue"
+        @update:model-value="chooseView"
+      >
         <ToggleGroupItem value="2d" data-view="2d">2D</ToggleGroupItem>
         <ToggleGroupItem value="3d" data-view="3d">3D</ToggleGroupItem>
       </ToggleGroup>
@@ -126,7 +138,7 @@ const signOut = () =>
     </Alert>
 
     <main v-if="level" class="grid flex-1 grid-cols-1 md:grid-cols-[1fr_18rem]">
-      <section class="min-h-[60svh] overflow-hidden">
+      <section class="relative min-h-[60svh] overflow-hidden">
         <PlanView2D v-if="view === '2d'" :level="level" :selected="selected" @select="selected = $event" />
         <PlanView3D v-else :level="level" :selected="selected" @select="selected = $event" />
       </section>

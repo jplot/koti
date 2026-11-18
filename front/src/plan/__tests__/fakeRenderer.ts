@@ -13,7 +13,7 @@ export class FakeRenderer {
   }
 
   setPixelRatio() {}
-  setSize() {}
+  setSize = vi.fn<(width: number, height: number, style?: boolean) => void>()
   // As WebGLRenderer.render does before drawing; picking reads these matrices.
   render(scene: Scene, camera: Camera) {
     scene.updateMatrixWorld()
@@ -33,4 +33,19 @@ export function sizeCanvas(canvas: HTMLCanvasElement) {
 export function click(canvas: HTMLCanvasElement, at: [number, number], to: [number, number] = at) {
   canvas.dispatchEvent(new PointerEvent('pointerdown', { clientX: at[0], clientY: at[1], pointerId: 1, button: 0 }))
   canvas.dispatchEvent(new PointerEvent('pointerup', { clientX: to[0], clientY: to[1], pointerId: 1, button: 0 }))
+}
+
+// jsdom has no ResizeObserver: this one lets a test report a new size.
+export class FakeResizeObserver {
+  static last: FakeResizeObserver | null = null
+  observed: Element[] = []
+  disconnect = vi.fn<() => void>()
+
+  constructor(readonly callback: () => void) {
+    FakeResizeObserver.last = this
+  }
+
+  observe(element: Element) {
+    this.observed.push(element)
+  }
 }

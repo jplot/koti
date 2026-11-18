@@ -65,6 +65,34 @@ describe('PlanPage', () => {
     expect(wrapper.findComponent({ name: 'PlanView3D' }).props('selected')).toBe('cuisine')
   })
 
+  it('stays in 2D when the active 2D button is clicked again', async () => {
+    serve({ 'GET /api/plan': json(200, plan) })
+    const { wrapper } = await open()
+    await wrapper.get('[data-view="2d"]').trigger('click')
+    expect(wrapper.find('svg.plan-2d').exists()).toBe(true)
+  })
+
+  it('says koti does not answer when the plan load fails', async () => {
+    serve({ 'GET /api/plan': json(500) })
+    const { wrapper } = await open()
+    expect(wrapper.text()).toContain('koti ne répond pas.')
+    expect(wrapper.text()).toContain('HTTP 500')
+  })
+
+  it('says koti does not answer when the network is down', async () => {
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>(async () => Promise.reject(new TypeError('Failed to fetch'))))
+    const { wrapper } = await open()
+    expect(wrapper.text()).toContain('koti ne répond pas.')
+  })
+
+  it('keeps the plan and says so when an import fails on the server', async () => {
+    serve({ 'GET /api/plan': json(200, plan), 'PUT /api/plan': json(500) })
+    const { wrapper } = await open()
+    await upload(wrapper, JSON.stringify(plan))
+    expect(wrapper.text()).toContain('koti ne répond pas.')
+    expect(wrapper.findAll('path.room')).toHaveLength(2)
+  })
+
   it('switches level and clears the selection', async () => {
     serve({ 'GET /api/plan': json(200, twoLevels) })
     const { wrapper } = await open()

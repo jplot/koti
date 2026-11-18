@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import PlanView3D from '@/plan/PlanView3D.vue'
-import { click, FakeRenderer, sizeCanvas } from './fakeRenderer'
+import { click, FakeRenderer, FakeResizeObserver, sizeCanvas } from './fakeRenderer'
 import { level } from './studio'
 
 vi.mock('three', async (original) => ({
@@ -9,7 +9,10 @@ vi.mock('three', async (original) => ({
   WebGLRenderer: (await import('./fakeRenderer')).FakeRenderer,
 }))
 
-beforeAll(() => sizeCanvas(HTMLCanvasElement.prototype as HTMLCanvasElement))
+beforeAll(() => {
+  sizeCanvas(HTMLCanvasElement.prototype as HTMLCanvasElement)
+  vi.stubGlobal('ResizeObserver', FakeResizeObserver)
+})
 
 const mountView = () => mount(PlanView3D, { props: { level, selected: null }, attachTo: document.body })
 

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jplot/koti/blob/main/catalog/koti-plan.schema.json",
+  "title": "koti-plan",
+  "description": "A home plan for koti: levels of walls, openings and rooms, in centimetres, x to the right and y downwards.",
+  "type": "object",
+  "required": ["format", "version", "unit", "levels"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "koti-plan" },
+    "version": { "const": 1 },
+    "unit": { "const": "cm" },
+    "name": { "type": "string" },
+    "levels": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/level" } }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "length": { "type": "number", "exclusiveMinimum": 0 },
+    "point": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 },
+    "ring": { "type": "array", "minItems": 3, "items": { "$ref": "#/$defs/point" } },
+    "level": {
+      "type": "object",
+      "required": ["id", "name", "elevation", "height", "walls", "openings", "rooms"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string" },
+        "elevation": { "type": "number" },
+        "height": { "$ref": "#/$defs/length" },
+        "walls": { "type": "array", "items": { "$ref": "#/$defs/wall" } },
+        "openings": { "type": "array", "items": { "$ref": "#/$defs/opening" } },
+        "rooms": { "type": "array", "items": { "$ref": "#/$defs/room" } }
+      }
+    },
+    "wall": {
+      "type": "object",
+      "required": ["id", "footprint"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "footprint": { "$ref": "#/$defs/ring" },
+        "height": { "$ref": "#/$defs/length" }
+      }
+    },
+    "opening": {
+      "type": "object",
+      "required": ["id", "kind", "from", "to", "depth", "sill", "head"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["door", "window", "sliding"] },
+        "name": { "type": "string" },
+        "from": { "$ref": "#/$defs/point" },
+        "to": { "$ref": "#/$defs/point" },
+        "depth": { "$ref": "#/$defs/length" },
+        "sill": { "type": "number", "minimum": 0 },
+        "head": { "$ref": "#/$defs/length" },
+        "hinge": { "enum": ["from", "to"] },
+        "swing": { "enum": [1, -1] }
+      },
+      "if": { "properties": { "kind": { "const": "door" } } },
+      "then": { "required": ["hinge", "swing"] }
+    },
+    "room": {
+      "type": "object",
+      "required": ["id", "name", "outline"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string" },
+        "outline": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/ring" } },
+        "ceiling": { "$ref": "#/$defs/length" },
+        "finish": { "type": "string" },
+        "label": { "$ref": "#/$defs/point" }
+      }
+    }
+  }
+}

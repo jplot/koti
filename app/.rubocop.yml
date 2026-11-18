@@ -1,0 +1,11 @@
+inherit_from: ../.rubocop.yml
+
+plugins:
+  - rubocop-rails
+  - rubocop-rspec_rails
+
+AllCops:
+  Exclude:
+    - 'bin/*'
+    - 'db/schema.rb'
+    - 'vendor/**/*'

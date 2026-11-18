@@ -1,0 +1,35 @@
+# frozen_string_literal: true
+
+require_relative 'config/application'
+
+Rails.application.load_tasks
+
+# The production image runs db:prepare through this Rakefile without the development gems.
+if Rails.env.local?
+  require 'rubocop/rake_task'
+  RuboCop::RakeTask.new
+
+  namespace :yard do
+    desc 'Fail unless every public object is documented'
+    task undocumented: :environment do
+      output = `yard stats --list-undoc`
+      puts output
+      abort 'YARD: undocumented objects found' unless output.include?('100.00% documented')
+    end
+  end
+
+  namespace :rbs do
+    desc 'Validate the RBS signatures in sig/ against the gem collection'
+    task validate: :environment do
+      sh 'rbs -I sig validate'
+    end
+  end
+
+  desc 'Type-check app/ and lib/ against sig/'
+  task steep: :environment do
+    sh 'steep check'
+  end
+
+  Rake::Task[:default].clear if Rake::Task.task_defined?(:default)
+  task default: %i[rubocop spec yard:undocumented rbs:validate steep]
+end

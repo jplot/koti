@@ -78,7 +78,8 @@ export function createViewer(canvas: HTMLCanvasElement, onPick: (roomId: string 
 
   canvas.addEventListener('pointerdown', down)
   canvas.addEventListener('pointerup', up)
-  window.addEventListener('resize', resize)
+  const sizing = new ResizeObserver(resize)
+  sizing.observe(canvas)
   controls.addEventListener('change', render)
   resize()
 
@@ -99,7 +100,7 @@ export function createViewer(canvas: HTMLCanvasElement, onPick: (roomId: string 
     dispose() {
       canvas.removeEventListener('pointerdown', down)
       canvas.removeEventListener('pointerup', up)
-      window.removeEventListener('resize', resize)
+      sizing.disconnect()
       controls.dispose()
       renderer.dispose()
     },

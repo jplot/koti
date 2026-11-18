@@ -26,5 +26,5 @@ onBeforeUnmount(() => viewer?.dispose())
 </script>
 
 <template>
-  <canvas ref="canvas" class="block h-full w-full touch-none" :aria-label="`Plan en 3D du niveau ${level.name}`" />
+  <canvas ref="canvas" class="absolute inset-0 block h-full w-full touch-none" :aria-label="`Plan en 3D du niveau ${level.name}`" />
 </template>

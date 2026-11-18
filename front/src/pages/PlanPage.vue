@@ -126,7 +126,7 @@ const signOut = () =>
     </Alert>
 
     <main v-if="level" class="grid flex-1 grid-cols-1 md:grid-cols-[1fr_18rem]">
-      <section class="min-h-[60svh] overflow-hidden">
+      <section class="relative min-h-[60svh] overflow-hidden">
         <PlanView2D v-if="view === '2d'" :level="level" :selected="selected" @select="selected = $event" />
         <PlanView3D v-else :level="level" :selected="selected" @select="selected = $event" />
       </section>

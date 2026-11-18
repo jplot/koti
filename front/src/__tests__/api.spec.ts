@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { getSession, login, LoginRefused, logout, TooManyAttempts, Unauthorized } from '@/api'
+import { getPlan, getSession, login, LoginRefused, logout, PlanRefused, putPlan, TooManyAttempts, Unauthorized } from '@/api'
 
 function answer(status: number, body?: unknown) {
   const fetchMock = vi.fn<typeof fetch>(async () => new Response(body === undefined ? null : JSON.stringify(body), { status }))
@@ -58,5 +58,37 @@ describe('logout', () => {
   it('raises on a server error', async () => {
     answer(500)
     await expect(logout()).rejects.toThrow('HTTP 500')
+  })
+})
+
+describe('getPlan', () => {
+  it('returns null when no plan was imported', async () => {
+    answer(404)
+    expect(await getPlan()).toBeNull()
+  })
+
+  it('returns the plan', async () => {
+    answer(200, { format: 'koti-plan' })
+    expect(await getPlan()).toEqual({ format: 'koti-plan' })
+  })
+
+  it('raises Unauthorized on 401', async () => {
+    answer(401)
+    await expect(getPlan()).rejects.toBeInstanceOf(Unauthorized)
+  })
+})
+
+describe('putPlan', () => {
+  it('sends the document and returns the stored plan', async () => {
+    const fetchMock = answer(200, { format: 'koti-plan' })
+    expect(await putPlan({ format: 'koti-plan' })).toEqual({ format: 'koti-plan' })
+    expect(fetchMock).toHaveBeenCalledWith('/api/plan', expect.objectContaining({ method: 'PUT', body: '{"format":"koti-plan"}' }))
+  })
+
+  it('raises PlanRefused with the messages on 422', async () => {
+    answer(422, { errors: ['value at `/format` does not match const: "koti-plan"'] })
+    const refusal = await putPlan({}).catch((error: unknown) => error)
+    expect(refusal).toBeInstanceOf(PlanRefused)
+    expect((refusal as PlanRefused).errors).toEqual(['value at `/format` does not match const: "koti-plan"'])
   })
 })

@@ -1,0 +1,23 @@
+{
+  "unit": "cm",
+  "walls": [[0, 0, 300, 20], [0, 20, 20, 200], [280, 20, 20, 200]],
+  "openings": [
+    { "id": "porte-a", "kind": "porte", "label": "Porte d'exemple", "axis": "x", "from": 100, "to": 180,
+      "at": [40, 60], "head": null, "hinge": "from", "opens": 1 },
+    { "id": "porte-b", "kind": "porte", "label": "Porte de côté", "axis": "y", "from": 60, "to": 140,
+      "at": [280, 300], "head": 200, "hinge": "to", "opens": 1 },
+    { "id": "fenetre-a", "kind": "fenetre", "label": "Fenêtre", "axis": "y", "from": 80, "to": 160,
+      "at": [0, 20], "head": null },
+    { "id": "baie-a", "kind": "coulissante", "label": "Baie", "axis": "x", "from": 30, "to": 90,
+      "at": [200, 210], "head": null }
+  ],
+  "rooms": [
+    { "id": "salon", "name": "Salon", "seed": [100, 100], "hsp": 240, "finish": "parquet",
+      "plan_area": 4.7, "area": 4.7, "label": [150, 120], "dims": [],
+      "outline": [[[20, 20], [280, 20], [280, 200], [20, 200]]] },
+    { "id": "bain", "name": "Bain", "seed": [100, 250], "hsp": null, "finish": "carrelage",
+      "plan_area": 2.3, "area": 2.3, "label": [150, 255], "dims": [],
+      "outline": [[[20, 210], [280, 210], [280, 300], [20, 300]]] }
+  ],
+  "closures": []
+}

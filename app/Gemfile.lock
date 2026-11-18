@@ -105,6 +105,7 @@ GEM
     fileutils (1.8.1)
     globalid (1.4.0)
       activesupport (>= 6.1)
+    hana (1.3.7)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     io-console (0.9.5)
@@ -114,6 +115,11 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json (3.1.0)
+    json_schemer (2.5.0)
+      bigdecimal
+      hana (~> 1.3)
+      regexp_parser (~> 2.0)
+      simpleidn (~> 0.2)
     language_server-protocol (3.17.0.6)
     lint_roller (1.1.0)
     listen (3.10.1)
@@ -299,6 +305,7 @@ GEM
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     simplecov (1.3.2)
+    simpleidn (0.3.0)
     steep (2.1.0)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
@@ -351,6 +358,7 @@ DEPENDENCIES
   bcrypt (~> 3.1.7)
   bootsnap
   debug
+  json_schemer (~> 2.5)
   pg (~> 1.1)
   puma (>= 5.0)
   rails (~> 8.1.4, >= 8.1.4.1)
@@ -406,10 +414,12 @@ CHECKSUMS
   ffi (1.17.4-x86_64-linux-musl) sha256=3fdf9888483de005f8ef8d1cf2d3b20d86626af206cbf780f6a6a12439a9c49e
   fileutils (1.8.1) sha256=2d541a1ee34a9ed5c4f054be8fb819a26b5d654488a31dc8806917cf448b9cc3
   globalid (1.4.0) sha256=037f12fbf1d9d7a014d501c2d5c77356fd4ddd96d7a7991d6700bba96706f427
+  hana (1.3.7) sha256=5425db42d651fea08859811c29d20446f16af196308162894db208cac5ce9b0d
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   io-console (0.9.5) sha256=83dd9bbf4c4680416629245b39cd4212eb5f4d9a4ea91804870c1f6b846414d5
   irb (1.19.0) sha256=55ee56acbdd6c9fe06a2e6909f46a24e5c41f45f16906bab04e8049cf46f1d27
   json (3.1.0) sha256=3ce7ccf8fde58960177a3a756c31f292a4c1e1dedee884547096a5b0604e3bd8
+  json_schemer (2.5.0) sha256=2f01fb4cce721a4e08dd068fc2030cffd0702a7f333f1ea2be6e8991f00ae396
   language_server-protocol (3.17.0.6) sha256=5ef2c0c138f8267e1bc631d3328347d354f96724b0af22f2c79516120443b7f0
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   listen (3.10.1) sha256=4c3f32855657f348747da4dd2372ff3790d90a6b1d3e4f21a3706adb2d04783c
@@ -485,6 +495,7 @@ CHECKSUMS
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
   simplecov (1.3.2) sha256=2a22ec1759f1b8db60881a2e038758956fc69ef93ed669be0bde0678de6d0e85
+  simpleidn (0.3.0) sha256=12ca730bed2f3db04d11e9bfd1bca3e11fb37f55b21eb2e9793fb5814bf54d03
   steep (2.1.0) sha256=1daf53573283b0e6d404a7273cca41fe5c15b14ece05167934f5ffc179e171d9
   strscan (3.1.8) sha256=aae2db611a225559f21ffbb71765c9a4e60fd262534a9ea84f4f11c7f32f679e
   terminal-table (4.0.0) sha256=f504793203f8251b2ea7c7068333053f0beeea26093ec9962e62ea79f94301d2

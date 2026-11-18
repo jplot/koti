@@ -1,0 +1,26 @@
+module KotiPlan
+  class FromModel
+    DOOR_HEAD: Integer
+    WINDOW_SILL: Integer
+    WINDOW_HEAD: Integer
+    DEFAULT_HEIGHT: Integer
+    KINDS: Hash[String, String]
+
+    @model: Hash[String, untyped]
+    @level_name: String
+
+    def initialize: (Hash[String, untyped] model, String level_name) -> void
+    def document: () -> Hash[String, untyped]
+
+    private
+
+    def level: () -> Hash[String, untyped]
+    def height: () -> Numeric
+    def walls: () -> Array[Hash[String, untyped]]
+    def opening: (Hash[String, untyped] source) -> Hash[String, untyped]
+    def head: (Hash[String, untyped] source, String kind) -> Numeric
+    def ends: (Hash[String, untyped] source, Float middle) -> Hash[String, untyped]
+    def leaf: (Hash[String, untyped] source) -> Hash[String, untyped]
+    def room: (Hash[String, untyped] source) -> Hash[String, untyped]
+  end
+end

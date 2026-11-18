@@ -1,0 +1,37 @@
+{
+  "format": "koti-plan",
+  "version": 1,
+  "unit": "cm",
+  "name": "Studio d'exemple",
+  "levels": [
+    {
+      "id": "studio",
+      "name": "Studio",
+      "elevation": 0,
+      "height": 250,
+      "walls": [
+        { "id": "w1", "footprint": [[0, 0], [250, 0], [250, 20], [0, 20]] },
+        { "id": "w2", "footprint": [[350, 0], [600, 0], [600, 20], [350, 20]] },
+        { "id": "w3", "footprint": [[580, 20], [600, 20], [600, 400], [100, 400], [100, 380], [580, 380]] },
+        { "id": "w4", "footprint": [[0, 20], [20, 20], [20, 400], [0, 400]] },
+        { "id": "w5", "footprint": [[300, 20], [310, 20], [310, 200], [300, 200]] },
+        { "id": "w6", "footprint": [[300, 280], [310, 280], [310, 380], [300, 380]], "height": 220 }
+      ],
+      "openings": [
+        { "id": "entree", "kind": "door", "name": "Porte d'entrée", "from": [20, 390], "to": [100, 390],
+          "depth": 20, "sill": 0, "head": 204, "hinge": "from", "swing": -1 },
+        { "id": "fenetre", "kind": "window", "from": [250, 10], "to": [350, 10],
+          "depth": 20, "sill": 90, "head": 215 },
+        { "id": "baie", "kind": "sliding", "from": [305, 200], "to": [305, 280],
+          "depth": 10, "sill": 0, "head": 204 }
+      ],
+      "rooms": [
+        { "id": "piece", "name": "Pièce", "finish": "parquet",
+          "outline": [[[20, 20], [300, 20], [300, 380], [20, 380]],
+                      [[120, 150], [170, 150], [170, 200], [120, 200]]] },
+        { "id": "cuisine", "name": "Cuisine", "ceiling": 240, "finish": "carrelage", "label": [445, 200],
+          "outline": [[[310, 20], [580, 20], [580, 380], [310, 380]]] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+module Api
+  class PlansController < ApplicationController
+    def show: () -> void
+    def update: () -> void
+  end
+end

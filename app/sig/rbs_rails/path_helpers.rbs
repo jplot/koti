@@ -6,12 +6,14 @@ interface ::_RbsRailsPathHelpers
   def rails_info_notes_path: (*untyped) -> ::String
   def rails_info_path: (*untyped) -> ::String
   def api_session_path: (*untyped) -> ::String
+  def api_plan_path: (*untyped) -> ::String
   def rails_health_check_path: (*untyped) -> ::String
   def rails_info_properties_url: (*untyped) -> ::String
   def rails_info_routes_url: (*untyped) -> ::String
   def rails_info_notes_url: (*untyped) -> ::String
   def rails_info_url: (*untyped) -> ::String
   def api_session_url: (*untyped) -> ::String
+  def api_plan_url: (*untyped) -> ::String
   def rails_health_check_url: (*untyped) -> ::String
 end
 

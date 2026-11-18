@@ -44,13 +44,25 @@ export function labelPoint(room: Room): Point {
   return [round(sum[0] / (6 * area)), round(sum[1] / (6 * area))]
 }
 
+const lengthOf = ({ from, to }: Opening) => Math.hypot(to[0] - from[0], to[1] - from[1])
+
+// The unit normal (-dy, dx) of from→to: the side a door with swing 1 opens to.
+function normal(opening: Opening): Point {
+  const length = lengthOf(opening)
+  return [(opening.from[1] - opening.to[1]) / length, (opening.to[0] - opening.from[0]) / length]
+}
+
+const shift = ([x, y]: Point, [nx, ny]: Point, by: number): Point => [round(x + nx * by), round(y + ny * by)]
+
+export function windowLines(opening: Opening): [Point, Point][] {
+  const n = normal(opening)
+  return [opening.depth / 4, -opening.depth / 4].map((by) => [shift(opening.from, n, by), shift(opening.to, n, by)])
+}
+
 export function doorLeaf(opening: Opening): { hinge: Point; closed: Point; open: Point } {
-  const [fromX, fromY] = opening.from
-  const [toX, toY] = opening.to
-  const length = Math.hypot(toX - fromX, toY - fromY)
+  const length = lengthOf(opening)
   const swing = opening.swing ?? 1
-  // The normal (-dy, dx) of from→to: the side a door with swing 1 opens to.
-  const [nx, ny] = [(fromY - toY) / length, (toX - fromX) / length]
+  const [nx, ny] = normal(opening)
   const offset = (swing * opening.depth) / 2
   const [hingeEnd, otherEnd] = opening.hinge === 'to' ? [opening.to, opening.from] : [opening.from, opening.to]
   const hinge: Point = [round(hingeEnd[0] + nx * offset), round(hingeEnd[1] + ny * offset)]

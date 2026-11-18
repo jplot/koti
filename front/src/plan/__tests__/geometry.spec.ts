@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { doorArcPath, doorLeaf, labelPoint, levelBounds, ringsPath, roomArea, toWorld } from '@/plan/geometry'
+import { doorArcPath, doorLeaf, labelPoint, levelBounds, ringsPath, roomArea, toWorld, windowLines } from '@/plan/geometry'
 import type { Level, Opening, Room } from '@/plan/types'
 import { level } from './studio'
 
@@ -70,5 +70,12 @@ describe('doors', () => {
 describe('toWorld', () => {
   it('maps plan y to world z', () => {
     expect(toWorld([100, 200], 50)).toEqual([100, 50, 200])
+  })
+})
+
+describe('windowLines', () => {
+  it('draws a window as two lines a quarter of its depth either side of its axis', () => {
+    const window: Opening = { id: 'w', kind: 'window', from: [250, 10], to: [350, 10], depth: 20, sill: 90, head: 215 }
+    expect(windowLines(window)).toEqual([[[250, 15], [350, 15]], [[250, 5], [350, 5]]])
   })
 })

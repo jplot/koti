@@ -3,6 +3,7 @@
 Rails.application.routes.draw do
   namespace :api do
     resource :session, only: %i[show create destroy]
+    resource :plan, only: %i[show update]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

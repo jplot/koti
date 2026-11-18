@@ -1,4 +1,8 @@
 class ApplicationController < ActionController::API
   include ActionController::Cookies
   include Authentication
+
+  private
+
+  def not_found: () -> void
 end

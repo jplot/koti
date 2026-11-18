@@ -35,4 +35,4 @@ To start from the `model.json` of the architect-plan scripts:
 bin/rails 'koti:plan:from_model[path/to/model.json,Appartement]' > plan.json
 ```
 
-Then import `plan.json` from the front. When the model has no height for an opening, doors get a 204 cm head and windows a 90 cm sill and a 215 cm head: correct them in `plan.json` first. A real home's plan stays out of this repository.
+Then import `plan.json` with `PUT /api/plan`. Windows get a 50 cm sill, the hypothesis of the architect-plan page until it is measured, and their head is the sill plus the model's height. When the model gives no head, doors get 204 cm and windows without a height 215 cm. Correct them in `plan.json` first. A real home's plan stays out of this repository.

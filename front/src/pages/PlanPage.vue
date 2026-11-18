@@ -47,6 +47,11 @@ onMounted(() =>
   }),
 )
 
+// reka-ui clears a single toggle group when its active item is clicked again: the view must stay set.
+function chooseView(next: unknown) {
+  if (next === '2d' || next === '3d') view.value = next
+}
+
 function chooseLevel(id: string) {
   levelId.value = id
   selected.value = null
@@ -106,7 +111,14 @@ const signOut = () =>
       >
         <option v-for="candidate in plan.levels" :key="candidate.id" :value="candidate.id">{{ candidate.name }}</option>
       </select>
-      <ToggleGroup v-if="level" v-model="view" type="single" variant="outline" aria-label="Vue">
+      <ToggleGroup
+        v-if="level"
+        :model-value="view"
+        type="single"
+        variant="outline"
+        aria-label="Vue"
+        @update:model-value="chooseView"
+      >
         <ToggleGroupItem value="2d" data-view="2d">2D</ToggleGroupItem>
         <ToggleGroupItem value="3d" data-view="3d">3D</ToggleGroupItem>
       </ToggleGroup>

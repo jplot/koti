@@ -65,6 +65,13 @@ describe('PlanPage', () => {
     expect(wrapper.findComponent({ name: 'PlanView3D' }).props('selected')).toBe('cuisine')
   })
 
+  it('stays in 2D when the active 2D button is clicked again', async () => {
+    serve({ 'GET /api/plan': json(200, plan) })
+    const { wrapper } = await open()
+    await wrapper.get('[data-view="2d"]').trigger('click')
+    expect(wrapper.find('svg.plan-2d').exists()).toBe(true)
+  })
+
   it('switches level and clears the selection', async () => {
     serve({ 'GET /api/plan': json(200, twoLevels) })
     const { wrapper } = await open()

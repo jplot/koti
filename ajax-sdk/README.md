@@ -9,8 +9,7 @@ uses to read your spaces, devices and history, and to arm or disarm a space.
 
 ## Requirements
 
-ajax-sdk talks gRPC, so it depends on the `grpc` and `google-protobuf` gems, which ship precompiled
-binaries up to **Ruby 3.4** — this gem targets Ruby 3.4 (the rest of koti stays on 4.0). TOTP codes
+Ruby 4.0 or later. ajax-sdk talks gRPC, so it depends on the `grpc` and `google-protobuf` gems. TOTP codes
 are computed with [`rotp`](https://github.com/mdp/rotp), and the SIA checksums with
 [`digest-crc`](https://github.com/postmodern/digest-crc).
 

@@ -5,8 +5,7 @@ own gem. The rules below apply to every folder.
 
 ## Setup
 
-Each gem is developed from its own folder, with Ruby 4.0 or later, except `ajax-sdk`, which runs on
-Ruby 3.4 because the `grpc` and `google-protobuf` gems ship precompiled binaries only up to 3.4:
+Each gem is developed from its own folder, with Ruby 4.0 or later:
 
 ```sh
 cd hue-sdk

@@ -1,0 +1,13 @@
+module KotiPlan
+  type document = Hash[String, untyped]
+
+  SCHEMA_PATH: Pathname
+  SCHEMER: JSONSchemer::Schema
+
+  def self.errors: (untyped document) -> Array[String]
+
+  def self.level_errors: (Array[document] levels) -> Array[String]
+  def self.errors_in: (document level, String path) -> Array[String]
+  def self.repeated_ids: (Array[document] items, String path) -> Array[String]
+  def self.opening_errors: (document opening, Numeric height, String path) -> Array[String]
+end

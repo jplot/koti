@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+D = Steep::Diagnostic
+
+target :lib do
+  signature 'sig'
+  check 'lib'
+end
+
+# Rails' DSL (callbacks, params, rate_limit) is only partly typed in gem_rbs_collection.
+target :app do
+  signature 'sig'
+  check 'app'
+  configure_code_diagnostics(D::Ruby.lenient)
+end

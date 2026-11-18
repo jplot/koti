@@ -1,0 +1,15 @@
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/tmp/pids/*
+!/tmp/pids/
+!/tmp/pids/.keep
+/public/*
+!/public/robots.txt
+/.env
+/.gem_rbs_collection/
+/.steep/
+/.yardoc/
+/coverage/
+/doc/

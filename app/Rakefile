@@ -6,6 +6,7 @@ Rails.application.load_tasks
 
 # The production image runs db:prepare through this Rakefile without the development gems.
 if Rails.env.local?
+  require 'open3'
   require 'rubocop/rake_task'
   RuboCop::RakeTask.new
 
@@ -21,13 +22,17 @@ if Rails.env.local?
   namespace :rbs do
     desc 'Validate the RBS signatures in sig/ against the gem collection'
     task validate: :environment do
+      sh 'rbs collection install --frozen'
       sh 'rbs -I sig validate'
     end
   end
 
   desc 'Type-check app/ and lib/ against sig/'
   task steep: :environment do
-    sh 'steep check'
+    output, status = Open3.capture2e('steep', 'check')
+    puts output
+    # Steep 2.1.0 logs FATAL and still exits 0 when it crashes on a file, which it then leaves unchecked.
+    abort 'Steep: type errors, or a crash on a file' unless status.success? && output.exclude?('FATAL')
   end
 
   Rake::Task[:default].clear if Rake::Task.task_defined?(:default)
